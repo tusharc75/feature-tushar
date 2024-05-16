@@ -1,33 +1,34 @@
-import { useRef, useState, useEffect, Fragment, useContext } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
-import { Box, Tooltip, Grid, Button, InputAdornment, Collapse } from '@material-ui/core';
+import { Box, Button, Collapse, Grid, InputAdornment } from '@material-ui/core';
+import Dialog from '@material-ui/core/Dialog';
+import IconButton from '@material-ui/core/IconButton';
 import AddIcon from '@material-ui/icons/AddCircle';
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import ExpandLess from '@material-ui/icons/ExpandLess';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import InfoIcon from '@material-ui/icons/Info';
-import { Formik, Form } from 'formik';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import { Form, Formik } from 'formik';
+import { isEqual, map, orderBy, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
-import FormTypes from '../Helpers/FormTypes';
-import axiosInstance from '../../axios/axiosInstance';
-import { uniq, map, orderBy, isEqual } from 'lodash';
-import { getObjKeys, getUniqueCurrencies, yupSchema, getObjKeysWithValues } from '../../constants/helpers';
-import CustomButton from '../Helpers/CustomButton';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import IconButton from '@material-ui/core/IconButton';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
-import { AddField } from '../FormBuilder/AddField';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from './../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import CreateProductCategory from '../../pages/ProductCategory/CreateProductCategory';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../constants/formulaUtility';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLess from '@material-ui/icons/ExpandLess';
-import { FaDiceOne } from 'react-icons/fa';
+import { getObjKeys, getObjKeysWithValues, getUniqueCurrencies, yupSchema } from '../../constants/helpers';
+import CreateProductCategory from '../../pages/ProductCategory/CreateProductCategory';
+import HtmlTooltip from '../CustomTooltipTitle';
+import { AddField } from '../FormBuilder/AddField';
+import CustomButton from '../Helpers/CustomButton';
+import FormTypes from '../Helpers/FormTypes';
+import { CustomDialogTransition } from './../../constants/helpers';
 
 const ignoreField = ['priceTemplate'];
 
@@ -597,9 +598,9 @@ const CreateProduct = (props) => {
                                         <Grid container spacing={1}>
                                           <Grid
                                             item
-                                            xs={permissions.productCategory.isCreate ? 11 : 11}
-                                            sm={permissions.productCategory.isCreate ? 11 : 11}
-                                            md={permissions.productCategory.isCreate ? 11 : 11}
+                                            xs={permissions.productCategory?.isCreate ? 11 : 11}
+                                            sm={permissions.productCategory?.isCreate ? 11 : 11}
+                                            md={permissions.productCategory?.isCreate ? 11 : 11}
                                           >
                                             <FormTypes
                                               disabled={(Boolean(productId) && field.disableOnEdit) || productCategoryID}
@@ -651,9 +652,9 @@ const CreateProduct = (props) => {
                                               doNotShowInfoTooltip={true}
                                             />
                                           </Grid>
-                                          {permissions.productCategory.isCreate && (
+                                          {permissions.productCategory?.isCreate && (
                                             <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title="Add Product Category" className="mt-1">
+                                              <HtmlTooltip title="Add Product Category" className="mt-1">
                                                 <IconButton
                                                   onClick={() => {
                                                     setShowAddProductCategoryDialog(true);
@@ -665,14 +666,14 @@ const CreateProduct = (props) => {
                                                     color={(Boolean(productId) && field.disableOnEdit) || productCategoryID ? 'disabled' : 'primary'}
                                                   />
                                                 </IconButton>
-                                              </Tooltip>
+                                              </HtmlTooltip>
                                             </Grid>
                                           )}
                                           {field?.tooltipMessage ? (
                                             <Grid item xs={1} sm={1} md={1}>
-                                              <Tooltip title={field?.tooltipMessage ?? ''}>
+                                              <HtmlTooltip title={field?.tooltipMessage ?? ''}>
                                                 <InfoIcon color="disabled" />
-                                              </Tooltip>
+                                              </HtmlTooltip>
                                             </Grid>
                                           ) : null}
                                         </Grid>
@@ -884,11 +885,11 @@ const CreateProduct = (props) => {
                                           </Box>
                                           {field.leval === 'product-custom' && (
                                             <Box>
-                                              <Tooltip title="Remove" className="mt-1">
+                                              <HtmlTooltip title="Remove" className="mt-1">
                                                 <IconButton onClick={() => handleRemoveField(field)} color="primary" size="small">
                                                   <HighlightOffIcon color="error" />
                                                 </IconButton>
-                                              </Tooltip>
+                                              </HtmlTooltip>
                                             </Box>
                                           )}
                                         </Box>

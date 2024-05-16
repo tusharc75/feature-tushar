@@ -1,10 +1,8 @@
 import { Button, ButtonProps, Menu, useMediaQuery } from '@material-ui/core';
-import React, { ReactNode, useState } from 'react';
-import type { PreviewDownloadProps } from './PreviewDownload';
-import { Add, ExpandMore, TouchApp } from '@material-ui/icons';
-import PreviewDownload from './PreviewDownload';
+import { Add, ExpandMore } from '@material-ui/icons';
+import { ReactNode, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import SendEmail, { SendEmailProps } from './sendEmail';
+import PreviewDownload from 'src/components/PreviewDownload';
 // import { MdExpandCircleDown } from 'react-icons/md';
 import { FaCircleChevronDown } from 'react-icons/fa6';
 
@@ -20,11 +18,10 @@ type DetailsPageHeaderProps = {
   isActionButtonVisible: boolean;
   actionButtonMenuItems?: ReactNode;
   actionButtonProps?: Omit<ButtonPropsWithTooltip, 'placement'>;
-  previewDownloadProps?: PreviewDownloadProps | undefined | null;
+  previewDownloadProps?: any;
   leftSideContents?: ReactNode;
   rightSideContents?: ReactNode;
   hasXpadding?: boolean;
-  sendEmailProps?: SendEmailProps;
 };
 
 const DetailsPageHeader = ({
@@ -37,7 +34,6 @@ const DetailsPageHeader = ({
   previewDownloadProps,
   leftSideContents,
   rightSideContents,
-  sendEmailProps,
   hasXpadding = true
 }: DetailsPageHeaderProps) => {
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
@@ -134,7 +130,6 @@ const DetailsPageHeader = ({
           </>
         ) : null}
         {previewDownloadProps ? <PreviewDownload {...previewDownloadProps} /> : null}
-        {sendEmailProps ? <SendEmail {...sendEmailProps} /> : null}
         {rightSideContents}
         {isActionButtonVisible ? (
           <>
@@ -149,7 +144,9 @@ const DetailsPageHeader = ({
                   className="new-dropdown-v1 min-h-[30px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important] max-[600px]:min-h-[32px]"
                   {...restOfActionButtonProps}
                 >
-                  <FaCircleChevronDown size={20} className="max-[600px]:not-sr-only sr-only" />
+                  <span className="max-[600px]:!w-[20px] max-[600px]:!h-[16px] max-[600px]:not-sr-only sr-only">
+                    <FaCircleChevronDown size={16} className="" />
+                  </span>
                   <span className="max-[600px]:sr-only not-sr-only flex">
                     Actions <ExpandMore fontSize="small" />
                   </span>

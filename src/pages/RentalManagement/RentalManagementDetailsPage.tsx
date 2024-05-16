@@ -1,16 +1,14 @@
-import { Box, Button, CircularProgress, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { IoMdDownload } from 'react-icons/io';
-import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Steps, { getIndex } from 'src/components/Steps';
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
@@ -23,20 +21,22 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
 import {
   ACTIVITY_RESOURCE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
+  RENTAL_STEPS,
+  checkIsAllowedToEdit,
   deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
-  serializedAsset
+  serializedAsset,
+  sidebarResource
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
-import AdditionalCost from './AdditionalCost';
+import Step from '../DynamicForm/Step';
 import Invoice from './Invoice';
 import LoadingTicket from './LoadingTicket';
 import ManageRentalManagementDialog from './ManageRental';
@@ -97,6 +97,8 @@ const RentalManagementDetailsPage = () => {
   const [versionNotClonned, setVersionNotClonned] = useState(false);
   const [reOpening, setReOpening] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
+  const [assets, setAssets] = useState(null);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -126,18 +128,12 @@ const RentalManagementDetailsPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   useEffect(() => {
     if (id) {
       getRentalManagementFields();
       fetchRentalManagementData();
       fetchQuotationData();
+      fetchPolicy();
     }
     if (!isOffline) {
       fetchAssetStatusRights();
@@ -234,6 +230,9 @@ const RentalManagementDetailsPage = () => {
       if (!user?.user?.brandPolicy?.rentalService) {
         steps = steps?.filter((e) => !['Add Services'].includes(e.name));
       }
+      if (!user?.user?.brandPolicy?.rentalOnFieldStep) {
+        steps = steps?.filter((e) => !['On Field'].includes(e.name));
+      }
       setRentalSteps(steps);
       if (data?.status === RENTAL_STATUS.closed) {
         setCurrentStep(steps?.length - 1);
@@ -241,17 +240,29 @@ const RentalManagementDetailsPage = () => {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
       setLoadingDetails(false);
-      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, data));
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
+      if (data?.productInventory?.length) {
+        setAssets(data?.productInventory?.map((e) => e?.inventory));
+      }
     } catch (error) {
       setLoadingDetails(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
@@ -268,7 +279,7 @@ const RentalManagementDetailsPage = () => {
         });
         setRentalManagementFields(response?.data?.data);
       } else {
-        const response: any = await findOne(objectStore.resource, objectStore.rentalManagement);
+        const response: any = await findOne(objectStore.resource, sidebarResource.rentalManagement);
         setRentalManagementFields(response);
       }
     } catch (error) {
@@ -419,6 +430,19 @@ const RentalManagementDetailsPage = () => {
             <Box className="control-buttons-v1">
               <>
                 <Fragment>
+                  {permissions?.iotChart?.isRead && (
+                    <Button
+                      className="btn-outline-v1"
+                      variant="outlined"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        history.push(`${routes.iotChart.path}?referenceData=${rentalManagementData?.shippingAddress?.optionValue}`);
+                      }}
+                    >
+                      {`View ${routes.iotChart.title}`}
+                    </Button>
+                  )}
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     className="btn-outline-v1"
@@ -518,59 +542,13 @@ const RentalManagementDetailsPage = () => {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-          <Tabs
-            className="new-tab-container-v1"
-            value={tabValue}
-            onChange={handleMainTabChange}
-            textColor="primary"
-            TabIndicatorProps={{
-              style: {
-                display: 'none'
-              }
-            }}
-          >
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <FaWpforms className="mr-1" fontSize="inherit" /> Header
-                </div>
-              }
-              {...a11yProps(0)}
-            />
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                </div>
-              }
-              {...a11yProps(1)}
-            />
-            {displayProgressiveBillingTab && (
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <RiFlowChart className="mr-1" fontSize="inherit" /> Progressive Billing
-                  </div>
-                }
-                {...a11yProps(2)}
-              />
-            )}
-            {!isOffline && !(isMobile && !isTablet) && (
-              <Tab
-                className={'tabLayout'}
-                label={
-                  <div className="d-flex align-items-center tab-font">
-                    <RiFlowChart className="mr-1" fontSize="inherit" />
-                    Views
-                  </div>
-                }
-                {...a11yProps(3)}
-              />
-            )}
-          </Tabs>
+          <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+            <CustomTab value={0}>Header</CustomTab>
+            <CustomTab value={1}>Details</CustomTab>
+            {resourceData && resourceData?.steps?.length > 0 && <CustomTab value={2}>Associations</CustomTab>}
+            {displayProgressiveBillingTab && <CustomTab value={3}>Progressive Billing</CustomTab>}
+            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={4}>Views</CustomTab>}
+          </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             <Box>
               {!loadingDetails && rentalManagementData && rentalManagementFields.length > 0 ? (
@@ -646,26 +624,6 @@ const RentalManagementDetailsPage = () => {
                   }
                 />
               )}
-              {rentalSteps[currentStep]?.name === 'Add-on' && rentalManagementData && (
-                <AdditionalCost
-                  rentalManagementData={rentalManagementData}
-                  setNextStep={setNextStep}
-                  renderedFrom={`${renderedFrom}_grid-2`}
-                  stepFullScreen={stepFullScreen}
-                  allowedToEdit={allowedToEdit}
-                  quotationApproved={
-                    quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
-                      ? true
-                      : false
-                  }
-                />
-              )}
 
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
                 <Quotation
@@ -704,11 +662,11 @@ const RentalManagementDetailsPage = () => {
                   checkProgressiveBilling={checkProgressiveBilling}
                 />
               )}
-              {rentalSteps[currentStep]?.name === 'Receiving Ticket' && rentalManagementData && (
+              {['On Field', 'Receiving Ticket']?.includes(rentalSteps[currentStep]?.name) && rentalManagementData && (
                 <ReceivingTicket
                   fetchRentalData={fetchRentalManagementData}
                   rentalManagementData={rentalManagementData}
-                  currentStep={currentStep}
+                  currentStep={rentalSteps[currentStep]?.name === 'On Field' ? RENTAL_STEPS.onField : RENTAL_STEPS.receiving}
                   setNextStep={setNextStep}
                   setNextStepToolTip={setNextStepToolTip}
                   renderedFrom={`${renderedFrom}_grid-4`}
@@ -716,6 +674,7 @@ const RentalManagementDetailsPage = () => {
                   isProcessor={isProcessor}
                   stepFullScreen={stepFullScreen}
                   allowUpdateStatus={allowUpdateStatus}
+                  checkProgressiveBilling={checkProgressiveBilling}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
@@ -731,21 +690,30 @@ const RentalManagementDetailsPage = () => {
             </ContentFullScreen>
           </TabPanel>
           <TabPanel value={tabValue} index={2}>
+            <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.rentalManagement}
+              data={rentalManagementData}
+              allowedToEdit={allowedToEdit}
+              referenceData={assets ? { assets: assets } : null}
+            />
+          </TabPanel>
+          <TabPanel value={tabValue} index={3}>
             <Box>
               {displayProgressiveBillingTab ? (
-                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={true} />
+                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={allowedToEdit} />
               ) : (
                 <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
               )}
             </Box>
           </TabPanel>
-          <TabPanel value={tabValue} index={3}>
+          <TabPanel value={tabValue} index={4}>
             <Box>
               <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
             </Box>
           </TabPanel>
         </Box>
-
         {showConfirmBox && (
           <ConfirmationDialog
             open={showConfirmBox}

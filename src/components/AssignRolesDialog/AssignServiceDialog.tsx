@@ -1,4 +1,5 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@material-ui/core';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -6,15 +7,14 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
-import styles from 'src/pages/Leads/Header.module.scss';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab } from '../CustomTabs';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
-
-let searchTimeout;
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findOne, objectStore } from 'src/constants/indexdbhelper';
 
 const AssignServiceDialog = ({
   onSuccess,
@@ -39,6 +39,7 @@ const AssignServiceDialog = ({
 
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const defaultColumns = [
     {
@@ -58,59 +59,69 @@ const AssignServiceDialog = ({
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Service Master&view=true')
-      .then(({ data: { data } }) => {
-        let columns = [];
-        let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
-        columns = [...newColumns, ...getStaticFields()];
-        if (hideQty) {
-          setColumns([...columns]);
-        } else {
-          setColumns([...defaultColumns, ...columns]);
-        }
-      });
+  const fetchGridColumns = async () => {
+    try {
+      let data;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, sidebarResource.serviceMaster);
+      } else {
+        const response = await axiosInstance().get('/field?resource=Service Master&view=true');
+        data = response?.data?.data;
+      }
+      let columns = [];
+      let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
+      columns = [...newColumns, ...getStaticFields()];
+      if (hideQty) {
+        setColumns([...columns]);
+      } else {
+        setColumns([...defaultColumns, ...columns]);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
-  const fetchData = () => {
-    dispatch({ type: 'loading', loading: true });
-
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${serviceMaster.api}${queryString}`)
-      .then(({ data }) => {
-        let rows = data.data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['qty'] = 1;
-          finalObject['unitMain'] = u?.unit;
-          finalObject['pricingMethodMain'] = u?.pricingMethod;
-          const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
-          if (qtyAdded.length) {
-            finalObject['qty'] = qtyAdded[0].qty;
-          }
-          return {
-            ...finalObject
-          };
-        });
-        dispatch({ type: 'initialize', data: rows, count: data.count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
+    try {
+      dispatch({ type: 'loading', loading: true });
+      let data, count;
+      if (isOffline) {
+        data = await findOne(objectStore.resourceData, sidebarResource.serviceMaster);
+        data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
+        count = data?.length;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${serviceMaster.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data?.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+        finalObject['qty'] = 1;
+        finalObject['unitMain'] = u?.unit;
+        finalObject['pricingMethodMain'] = u?.pricingMethod;
+        const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
+        if (qtyAdded.length) {
+          finalObject['qty'] = qtyAdded[0].qty;
+        }
+        return {
+          ...finalObject
+        };
       });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+      dispatch({ type: 'loading', loading: false });
+    }
   };
 
   const getQueryString = () => {
@@ -129,28 +140,33 @@ const AssignServiceDialog = ({
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    const updatedFilters = [...deepFilters];
+    const updatedDeepFilters = [...deepFilters];
+    const updatedFilterByIds = [...filterByIds];
+
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
         if (e?.field === 'preWork') {
           if (user?.user?.brandPolicy?.servicePrePost) {
-            updatedFilters.push(e);
+            updatedDeepFilters.push(e);
           }
         } else {
-          updatedFilters.push(e);
+          updatedDeepFilters.push(e);
         }
       });
     }
     if (extraFilterById && extraFilterById?.length) {
       extraFilterById?.forEach((e) => {
-        filterByIds.push(e);
+        updatedFilterByIds.push(e);
       });
     }
-    if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    if (updatedFilterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
-    if (updatedFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    if (updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
+    }
+    if (updatedDeepFilters?.length || updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
@@ -191,13 +207,6 @@ const AssignServiceDialog = ({
     dispatch({ type: 'update', data: rows });
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -212,7 +221,7 @@ const AssignServiceDialog = ({
         showRequiredLabel={false}
         onClose={handleClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
@@ -229,11 +238,11 @@ const AssignServiceDialog = ({
           isAddButtonVisible={true}
           setQueryString={false}
         />
-        {pricingCondition && (
+        {pricingCondition && !isOffline && (
           <Box>
             <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Services`} {...a11yProps(0)} />
-              <CustomTab className={'tabLayout'} value={1} index={1} label={'All Services'} {...a11yProps(1)} />
+              <CustomTab value={0} label={`${routes.pricingCondition.title} Services`} />
+              <CustomTab value={1} className={'tabLayout'} label={'All Services'} />
             </CustomTabs>
           </Box>
         )}
@@ -247,8 +256,9 @@ const AssignServiceDialog = ({
             onSaveEdit={onSaveEdit}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
+            showFilters={!isOffline}
             resource={sidebarResource.serviceMaster}
+            isClientSideGrid={isOffline}
           />
         ) : (
           <Box p={2} height={500}>

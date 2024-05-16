@@ -1,18 +1,19 @@
-import { Box, Dialog, IconButton, Tab, Tabs } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@material-ui/core';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { camelCase, orderBy } from 'lodash';
+import startCase from 'lodash/startCase';
 import { useEffect, useState } from 'react';
+import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import startCase from 'lodash/startCase';
-import { isMobile } from 'react-device-detect';
-import { camelCase, orderBy } from 'lodash';
 import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 
@@ -41,16 +42,12 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   const fetchFields = async () => {
     let columns = [];
 
-    let response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderProduct}`);
-    let childFields = response?.data?.data || [];
-    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    let childFields = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderProduct, workOrderData?.currency, true);
     let newColumns = generateColumns(null, childFields, null, false, workOrderData?.currency || 'USD');
 
     columns = [...columns, ...newColumns];
 
-    response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.workOrderService}`);
-    childFields = response?.data?.data || [];
-    childFields = CURReplaceByCurrencySingle(childFields, workOrderData?.currency || 'USD');
+    childFields = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, workOrderData?.currency, true);
     newColumns = generateColumns(null, childFields, null, false, workOrderData?.currency || 'USD');
 
     columns = [...columns, ...newColumns];
@@ -218,18 +215,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent?.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent?.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageName
-              : '';
+          ? parent?.productDetail?.productName
+          : parent?.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageName
+          : '';
       parent.description =
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productDescription
-            : parent?.type === MATERIAL_TYPE.package
-              ? parent?.packageDetail?.packageDescription
-              : '';
+          ? parent?.productDetail?.productDescription
+          : parent?.type === MATERIAL_TYPE.package
+          ? parent?.packageDetail?.packageDescription
+          : '';
       parent.subRows = generateNestedData(data?.data, parent);
     });
 
@@ -246,18 +243,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow?.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productName
-            : _subRow?.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageName
-              : '';
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageName
+          : '';
       _subRow.description =
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow?.type === MATERIAL_TYPE.product
-            ? _subRow?.productDetail?.productDescription
-            : _subRow?.type === MATERIAL_TYPE.package
-              ? _subRow?.packageDetail?.packageDescription
-              : '';
+          ? _subRow?.productDetail?.productDescription
+          : _subRow?.type === MATERIAL_TYPE.package
+          ? _subRow?.packageDetail?.packageDescription
+          : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -281,7 +278,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         }}
       >
         <CustomDialogHeader title={`Versions - ${workOrderData?.workOrderNumber}`} onClose={handleClose} showRequiredLabel={false} />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Box width={'100%'} display="flex" flexWrap="wrap">
             {workOrderData?.versions &&
               workOrderData?.versions?.map((v: any, i) => (
@@ -305,41 +302,13 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
           </Box>
           <Box mb={2} />
           <Box className="detail-container-v1">
-            <Tabs
-              className="new-tab-container-v1"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  height: 0
-                }
-              }}
-            >
-              <Tab
-                label={<div className="tab-font">Services</div>}
-                value={0}
-                aria-controls="a11y-tabpanel-0"
-                id="a11y-tab-0"
-                className={'tabLayout'}
-              />
-              <Tab
-                label={<div className="tab-font">Steps Data</div>}
-                value={1}
-                aria-controls="a11y-tabpanel-1"
-                id="a11y-tab-1"
-                className={'tabLayout'}
-              />
-              <Tab
-                label={<div className="tab-font">Drawings</div>}
-                value={2}
-                aria-controls="a11y-tabpanel-0"
-                id="a11y-tab-0"
-                className={'tabLayout'}
-              />
-            </Tabs>
-            {tabValue === 0 && (
-              columns ? (
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+              <CustomTab label={'Services'} value={0} />
+              <CustomTab label={'Steps Data'} value={1} />
+              <CustomTab label={'Drawings'} value={2} />
+            </CustomTabs>
+            <TabPanel value={tabValue} index={0}>
+              {columns ? (
                 <Box zIndex={5} width={'100%'}>
                   <CustomReactTable
                     height={'calc(100vh - 300px)'}
@@ -358,19 +327,20 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                 <Box p={2} height={500}>
                   <CommonSkeleton lenArray={[...Array(10).keys()]} />
                 </Box>
-              )
-            )}
-            {tabValue === 1 && (
-              <ServiceStepsData stepsData={stepData} servicesData={servicesData}/>
-            )}
-            {tabValue === 2 && (
+              )}
+            </TabPanel>
+            <TabPanel value={tabValue} index={1}>
+              <ServiceStepsData stepsData={stepData} servicesData={servicesData?.filter((s) => s.type === MATERIAL_TYPE.service)} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={2}>
               <Diagram
                 resource={ACTIVITY_RESOURCE.workOrder}
                 referenceId={workOrderId}
                 currentVersion={selectedVersionNumber}
                 fromVersions={true}
+                workOrderData={workOrderData}
               />
-            )}
+            </TabPanel>
           </Box>
         </CustomDialogContent>
       </Dialog>

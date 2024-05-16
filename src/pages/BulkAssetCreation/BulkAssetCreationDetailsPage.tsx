@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -18,11 +18,18 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, bulkAssetCreation, bulkAssetCreationSteps, getObjKeysWithValues } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  bulkAssetCreation,
+  bulkAssetCreationSteps,
+  checkIsAllowedToEdit,
+  getObjKeysWithValues,
+  sidebarResource
+} from '../../constants/helpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
@@ -39,8 +46,6 @@ const BulkAssetCreationDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [bulkAssetCreationFields, setBulkAssetCreationFields] = useState([]);
-  const [statusOptions, setStatusOptions] = useState([]);
-  const [bulkAssetCreationProduct, setBulkAssetCreationProduct] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
 
@@ -51,13 +56,6 @@ const BulkAssetCreationDetailsPage = () => {
   const bulkAssetCreationStepsNames = React.useMemo(() => {
     return bulkAssetCreationSteps.map((item) => item.name);
   }, [bulkAssetCreationSteps]);
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -96,11 +94,8 @@ const BulkAssetCreationDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
-      var isAllowedToEdit = [...(data?.collaborator ?? []), data?.owner, data?.processor].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+      
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.bulkAssetCreation, data));
       setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
       setBulkAssetCreationData(data);
       setLoadingBulkAssetCreation(false);
@@ -114,14 +109,6 @@ const BulkAssetCreationDetailsPage = () => {
       .get('/field?resource=Bulk Asset Creation')
       .then(({ data }) => {
         setBulkAssetCreationFields(data.data);
-        if (data.data && data.data.length) {
-          data.data.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              setStatusOptions([...o.fieldData.option]);
-              return true;
-            }
-          });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -192,36 +179,14 @@ const BulkAssetCreationDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loadingBulkAssetCreation || !bulkAssetCreationFields.length ? (
@@ -255,7 +220,6 @@ const BulkAssetCreationDetailsPage = () => {
                     <Product
                       bulkAssetCreationData={bulkAssetCreationData}
                       setNextStep={setNextStep}
-                      setBulkAssetCreationProduct={setBulkAssetCreationProduct}
                       renderedFrom={`${renderedFrom}_grid-1`}
                       handleUpdateData={handleUpdateData}
                       fetchData={fetchData}

@@ -1,14 +1,14 @@
 import queryString from 'query-string';
 import { Fragment, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { useData } from '../../StateProvider/Provider';
-import { GetReferenceName } from '../../axios/activity';
 import Board from '../../components/Activity/Report/Board';
 import Roadmap from '../../components/Activity/Report/Roadmap';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomContainer from '../../components/CustomContainer';
-import CustomTabs from '../../components/Helpers/CustomTabs';
+import CustomAntTabs from '../../components/Helpers/CustomAntTabs';
 import routes from '../../components/Helpers/Routes';
 import { SearchFilter } from '../../components/SearchFilter';
 import './style.scss';
@@ -29,8 +29,9 @@ const Activity = ({ type }) => {
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {});
@@ -56,7 +57,7 @@ const Activity = ({ type }) => {
         {filter && (
           <Fragment>
             <ListingPageHeader
-              leftSideContents={<CustomTabs value={viewType} setValue={setViewType} tabs={tabs} />}
+              leftSideContents={<CustomAntTabs value={viewType} setValue={setViewType} tabs={tabs} />}
               rightSideContents={<SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} activityName={type} />}
               isActionButtonVisible={false}
               isAddButtonVisible={false}

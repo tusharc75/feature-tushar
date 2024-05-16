@@ -24,7 +24,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import { ASSET_STATUS, MATERIAL_TYPE, TRANSFER_ASSET_STATUS, rentalManagement, sidebarResource, treeToFlatArray } from '../../../constants/helpers';
+import { ASSET_STATUS, INVENTORY_OWNER_TYPE, MATERIAL_TYPE, TRANSFER_ASSET_STATUS, rentalManagement, sidebarResource, treeToFlatArray } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import ManageBulkAssetCreation from '../../BulkAssetCreation/ManageBulkAssetCreation';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -32,6 +32,7 @@ import ManageSublease from '../../Sublease/ManageSublease';
 import { removeAssetsInRental } from '../rentalOfflineHelper';
 import AddNonSerializeAssets from './AddNonSerializeAssets';
 import AddSerializedAsset from './AddSerializedAsset';
+import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,6 +53,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [subleaseCount, setSubleaseCount] = useState(0);
   const [transferAssetCount, setTransferAssetCount] = useState(0);
   const [bulkAssetCreationCount, setbulkAssetCreationCount] = useState(0);
+  const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState(false)
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [productSerialNumbers, setProductSerialNumbers] = useState([]);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -127,7 +131,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               {row.original.detail}
             </p>
 
-            {row.original?.type === 'asset' && row.original?.isNonSerializeAsset ? null : (
+            {((row.original?.type === 'asset' && row.original?.isNonSerializeAsset) || row?.original?.type === 'serialNumber') ? null : (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -213,7 +217,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                             assetId: row.original.inventory,
                             assetNumber: row.original.detail,
                             isNonSerializeAsset: row.original.isNonSerializeAsset,
-                            isTransferAsset: isTransferAsset
+                            isTransferAsset: isTransferAsset,
+                            isProductSerialNumbers: false
                           }
                         ]);
                       }}
@@ -237,6 +242,28 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   </HtmlTooltip>
                 )}
               </span>
+            )}
+            {row?.original?.type === 'serialNumber' && (
+              allowedToEdit && row?.original?.canRemove && (
+                <HtmlTooltip title={`Remove`}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setShowConfirmBox(true);
+                      setDeleteData([
+                        {
+                          _id: row.original.uniqueId,
+                          assetId: row.original.serialNumber,
+                          isNonSerializeAsset: false,
+                          isProductSerialNumbers: true
+                        }
+                      ]);
+                    }}
+                  >
+                    <Delete fontSize="small" color={'error'} />
+                  </IconButton>
+                </HtmlTooltip>
+              )
             )}
           </div>
         ),
@@ -270,17 +297,14 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     if (item?.type === 'product') {
       return true;
     }
-    const child = material?.filter((e) => e.parentId === item?._id);
+    const child = material?.filter((e) => e.parentId === item?._id)
     if (child?.some((e) => e?.type === 'product')) {
       return true;
     }
-    if (child?.length) {
-      for (var ele in child) {
-        return checkProductInside(child[ele], material);
-      }
-    } else {
-      return false;
+    if (child?.filter(e => e?.type === 'package')?.some(ele => checkProductInside(ele, material))) {
+      return true
     }
+    return false
   };
 
   const fetchData = async () => {
@@ -317,6 +341,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         data.inventory = data.inventory?.filter((e) => !e.isReplaced);
         offlineAssetErrorLog = data?.offlineAssetErrorLog;
 
+        setProductSerialNumbers(data.productSerialNumbers)
+
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
         const transactionData = result?.data?.data;
 
@@ -344,10 +370,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail = `${parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.type === 'product'
-              ? parent?.productDetail?.productName
-              : parent?.packageDetail?.packageName
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === 'product'
+            ? parent?.productDetail?.productName
+            : parent?.packageDetail?.packageName
           }`;
         parent.description =
           parent.type === 'service'
@@ -360,7 +386,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
-          ? data.inventory?.filter((e) => e._id === parent._id).length
+          ? (data.inventory?.filter((e) => e._id === parent._id).length + data?.productSerialNumbers?.filter(e => e._id === parent._id)?.length)
           : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
@@ -375,6 +401,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         parent.subRows = generateNestedData(
           data.material,
           data.inventory,
+          data.productSerialNumbers,
           data?.nonSerializeAsset,
           parent,
           transferAssets,
@@ -384,15 +411,15 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           offlineAssetErrorLog
         );
         parent.assetQty =
-          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+          parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
             ? parent.assetQty
-            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
+            : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => row.assetQty || 0 + sum, 0) +
             (parent.type === 'product' ? parent.assetQty : 0);
         parent.assetAssignedQty =
-          parent.subRows.filter((d) => d.type !== 'asset').length === 0
+          parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
             ? parent.assetAssignedQty
-            : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
-            (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
+            : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => row.assetAssignedQty || 0 + sum, 0) +
+            (parent.type === 'product' ? parent?.subRows.filter((d) => ['asset', 'serialNumber']?.includes(d.type))?.length : 0);
         parent.isValid =
           parent.serializedProduct && !parent.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
             ? parent.assetAssignedQty === parent.assetQty
@@ -400,7 +427,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               : false
             : parent.subRows.length !== 0
               ? parent.assetAssignedQty ===
-              parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+              parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct).reduce((sum, row) => row.assetQty || 0 + sum, 0) ||
               parent.subRows.every((d) => d.isValid)
               : true;
 
@@ -411,7 +438,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             parent.isValid = false;
           }
         }
-       
+
       });
 
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 && !user?.user?.brandPolicy?.rentalStopAssetNextStepValidation) {
@@ -421,6 +448,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         setNextStep(true);
         setNextStepToolTip(null);
       }
+
+
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -431,6 +460,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const generateNestedData = (
     material,
     inventory,
+    productSerialNumbers,
     nonSerializeAsset,
     parent,
     transferAssets,
@@ -450,7 +480,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         transferData = transferFilter[0];
       }
       var canRemove = false;
-      if (user?.user?.brandPolicy?.rentalPlanning) {
+      if (user?.user?.brandPolicy?.rentalPlanning || user?.user?.brandPolicy?.rentalAllStatusAssetsAdd) {
         if (_inventory?.status === ASSET_STATUS.reserved) {
           canRemove = true;
         }
@@ -458,11 +488,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         if (
           [ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.reserved].includes(_inventory?.inventoryDetail?.status) &&
           (!_inventory?.status || _inventory?.status === ASSET_STATUS.reserved)
+          && _inventory?.inventoryDetail?.currentOwnerType === INVENTORY_OWNER_TYPE.brand
         ) {
           canRemove = true;
         }
       }
-      
+
       subRows.push({
         ..._inventory,
         index: `${parent.index}.${subRows?.length + 1}`,
@@ -502,8 +533,25 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       });
     });
 
+    const productSerialNumbers_result = productSerialNumbers?.filter(e => e?._id === parent?._id)
+    productSerialNumbers_result?.forEach((e) => {
+      subRows.push({
+        _id: e?.productSerialNumberDetail?._id,
+        serialNumber: e.serialNumber,
+        uniqueId: e._id,
+        index: `${parent.index}.${subRows?.length + 1}`,
+        detail: e?.productSerialNumberDetail?.serialNumber,
+        description: parent?.description,
+        type: 'serialNumber',
+        status: e?.status,
+        warehouse: rentalManagementData?.warehouse?.optionValue,
+        isValid: true,
+        canRemove: true
+      });
+    });
+
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
-  
+
     var assetQtySUM = 0;
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
@@ -531,7 +579,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             : _subRow.qty * parent.qty
           : 0;
       _subRow.assetAssignedQty = _subRow.serializedProduct
-        ? inventory?.filter((e) => e._id === _subRow._id).length
+        ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter(e => e?._id === _subRow._id)?.length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.realAssetQty =
         _subRow.type === 'product' || _subRow.type === 'package' || _subRow.type === 'service' ? _subRow.qty * parent.realAssetQty : 0;
@@ -544,10 +592,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       if (_subRow.isOfflineError) {
         _subRow.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === _subRow._id).map((e) => e.assetNumber);
       }
-      
+
       let tempSubRows = generateNestedData(
         material,
         inventory,
+        productSerialNumbers,
         nonSerializeAsset,
         _subRow,
         transferAssets,
@@ -556,22 +605,22 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         bulkAssetCreationProduct,
         offlineAssetErrorLog
       );
-      
+
       _subRow.subRows = tempSubRows;
       _subRow.assetQty =
-        tempSubRows.filter((d) => d.type !== 'asset').length === 0
+        tempSubRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
           ? _subRow.assetQty
-          : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
+          : tempSubRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => row.assetQty + sum, 0) +
           (_subRow.type === 'product' ? _subRow.assetQty : 0);
       _subRow.isValid =
         _subRow.serializedProduct && !_subRow.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
           ? _subRow.assetAssignedQty === _subRow.assetQty
             ? true
             : false
-          : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
+          : tempSubRows?.filter((e) => ['asset', 'serialNumber']?.includes(e.type))?.length === tempSubRows?.length
             ? true
             : _subRow.assetAssignedQty ===
-              tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+              tempSubRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
               ? true
               : _subRow.serializedProduct && _subRow.subRows?.every((e) => (e.type === MATERIAL_TYPE.product && !e.serializedProduct) || e.type === 'asset') ? true : false;
 
@@ -587,17 +636,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     });
     parent.assetAssignedQty += assetAssignedQtySUM;
     parent.isValid = parent.serializedProduct || parent.type === 'package' ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
-
     return subRows;
   };
 
   const getAssetAssignedValues = (row) => {
-    if (row?.original?.type === 'asset' || row?.original?.assetQty === 0) {
+    if (row?.original?.type === 'asset' || row?.original?.type === 'serialNumber' || row?.original?.assetQty === 0) {
       return <div>N/A</div>;
     }
-    // if (!row?.original?.serializedProduct && row?.original?.assetAssignedQty === 0) {
-    //   return <p>---</p>;
-    // }
     return (
       <p>
         {row?.original?.assetAssignedQty} / {row?.original?.assetQty}
@@ -694,7 +739,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         _id: m.materialId,
         unit: m.unit,
         serialized: m.serializedProduct,
-        assetsCount: m.serializedProduct ? m.realAssetQty - m.realAssetAssignedQty : m.assetQty
+        assetsCount: m.realAssetQty - m.realAssetAssignedQty
       };
     });
 
@@ -707,10 +752,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         uniqProduct.push(element);
       }
     });
+
     setOrderDialog((prevState) => {
       return {
         ...prevState,
-        products: uniqProduct
+        products: uniqProduct?.filter((e) => e.assetsCount)
       };
     });
 
@@ -732,6 +778,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       }
     });
     setAssetAssignedProduct([...assetProduct]);
+
 
     const nonSerializeAssetProduct = [];
     let flatArrayNonSerializeAsset = treeToFlatArray(selectedRecords, 'subRows').filter(
@@ -758,6 +805,22 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     );
     return flatArray.length === 0;
   };
+
+  const handleAssignSerialNumbers = (rows) => {
+    const data = rows?.map(e => ({ _id: e?._id, materialId: e?.materialId, serialNumber: e?.serialNumber }))
+    setIsAssigning(true)
+    axiosInstance()
+      .post(`${rentalManagement.api}/${rentalManagementData._id}/add-serial-numbers`, data)
+      .then(() => {
+        setIsAssigning(false)
+        setAssignSerialNumbersDialog(false)
+        fetchData();
+      })
+      .catch((error) => {
+        setIsAssigning(false)
+        toastConfig.setToastConfig(error);
+      });
+  }
 
   const openLinkActions = (event) => {
     setAnchorLinkActionEl(event.currentTarget);
@@ -840,18 +903,27 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             {`Create ${routes.sublease.title}`}
           </MenuItem>
         )}
+        {selectedRecords.length && assetAssignedProduct?.length ?
+          <MenuItem
+            onClick={() => {
+              setAssignSerialNumbersDialog(true)
+            }}
+          >
+            {`Assign Serial Numbers`}
+          </MenuItem> :
+          selectedRecords.length && nonSerializedAssetProduct?.length ?
+            <MenuItem
+              onClick={() => {
+                setAddNonSerializedAssetDialog(true);
+              }}
+            >
+              {`Assign Serial Numbers`}
+            </MenuItem> : null}
         <MenuItem
-          disabled={selectedRecords.length === 0 || nonSerializedAssetProduct?.length === 0}
-          onClick={() => {
-            setAddNonSerializedAssetDialog(true);
-          }}
-        >
-          {`Assign Serial Number`}
-        </MenuItem>
-        <MenuItem
-          disabled={flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove)?.length === 0}
+          disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
           onClick={() => {
             const assets = flattenArray(selectedRecords)?.filter((d) => d.type === 'asset' && d.canRemove);
+            const serialNumbers = flattenArray(selectedRecords)?.filter((d) => d.type === 'serialNumber' && d.canRemove);
             const dataTodelete = [];
             assets?.forEach((element) => {
               let isTransferAsset = false;
@@ -863,7 +935,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 assetId: element.inventory,
                 assetNumber: element?.detail,
                 isNonSerializeAsset: element?.isNonSerializeAsset,
-                isTransferAsset: isTransferAsset
+                isTransferAsset: isTransferAsset,
+                isProductSerialNumbers: false
+              });
+            });
+            serialNumbers?.forEach((element) => {
+              dataTodelete.push({
+                _id: element.uniqueId,
+                assetId: element.serialNumber,
+                isNonSerializeAsset: false,
+                isProductSerialNumbers: true
               });
             });
             setDeleteData(dataTodelete);
@@ -1063,11 +1144,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               message: `${sidebarResource.purchaseOrder} has been created successfully`
             });
           }}
-          products={showOrderDialog?.products
-            ?.filter((e) => e.serialized === false)
-            ?.map((e) => {
-              return { product: e._id, unit: e.unit, qty: e.assetsCount };
-            })}
+          products={
+            user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct ?
+              showOrderDialog?.products.map((e) => { return { product: e._id, unit: e.unit, qty: e.assetsCount } }) :
+              showOrderDialog?.products?.filter((e) => e.serialized === false)?.map((e) => {
+                return { product: e._id, unit: e.unit, qty: e.assetsCount };
+              })}
           currency={rentalManagementData.currency}
           refrenceData={{
             wellName: rentalManagementData?.wellName?.optionValue,
@@ -1097,6 +1179,22 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           referenceType="rentalJob"
           referenceId={rentalManagementData._id}
           referenceData={{ ...rentalManagementData, material: [...showOrderDialog?.products?.filter((e) => e.serialized === true && e.assetsCount)] }}
+        />
+      )}
+      {assignSerialNumbersDialog && (
+        <AssignSerialNumbersDialog
+          selectedProducts={assetAssignedProduct}
+          handleClose={() => {
+            setAssignSerialNumbersDialog(false)
+          }}
+          handleSucess={(rows) => {
+            handleAssignSerialNumbers(rows)
+          }}
+          referenceType={'Rental Job'}
+          isAssigning={isAssigning}
+          filterByPlant={rentalManagementData?.warehouse}
+          ids={productSerialNumbers?.map(e => e?.serialNumber)}
+          showWarehouseFilter={true}
         />
       )}
     </Fragment>

@@ -17,7 +17,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 
-const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
+const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Technicians`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -198,6 +198,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
       element.uniqueId = selectedService?._id;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
       element.status = 'Assigned';
+      element.warehouse = fieldTicketData?.warehouse?.optionValue;
       element.startDate = fieldTicketData?.estimateStartDate || new Date();
       element.endDate = fieldTicketData?.estimateEndDate || new Date();
       technician.push(element);
@@ -260,7 +261,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
           <Grid item xs={12} md={12} sm={12}>
             {columns ? (
               <CustomReactTable
-                height={'300px'}
+                height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
                 columns={columns}
                 state={state}
                 dispatch={dispatch}
@@ -288,8 +289,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService }) => {
           handleClose={() => {
             setTechnicianDialog(false);
           }}
-          defaultCompetency={[]}
-          ids={[]}
+          warehouse={fieldTicketData?.warehouse?.optionValue}
         />
       )}
 

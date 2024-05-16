@@ -26,33 +26,37 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   const fetchFields = () => {
+    setLoading(true)
     if (id) {
-      axiosInstance()
-        .get(`/dynamic-form/step/detail/${resourceId}/${stepId}/${id}`, {
-          headers: {
-            Resource: resource
-          }
-        })
-        .then(({ data: { data } }) => {
-          setInitialData({
-            fields: fields,
-            values: getObjKeysWithValues(data, fields)
-          });
-        })
+      axiosInstance().get(`/dynamic-form/step/detail/${resourceId}/${stepId}/${id}`, {
+        headers: {
+          Resource: resource
+        }
+      }).then(({ data: { data } }) => {
+        setInitialData({
+          fields: fields,
+          values: getObjKeysWithValues(data, fields)
+        });
+        setLoading(false)
+      })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
     } else {
+      const tempInitialData = getObjKeys('', fields);
       setInitialData({
         fields: fields,
-        values: getObjKeys('', fields)
+        values: tempInitialData
       });
+      setLoading(false)
     }
   };
 
@@ -63,55 +67,43 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
   const handleSubmit = async (values) => {
     setSubmitting(true);
     if (id) {
-      axiosInstance()
-        .put(
-          `/dynamic-form/step/${resourceId}`,
-
-          { ...values, _id: id, stepId },
-          {
-            headers: {
-              Resource: resource
-            }
+      axiosInstance().put(`/dynamic-form/step/${resourceId}`, { ...values, _id: id, stepId },
+        {
+          headers: {
+            Resource: resource
           }
-        )
-        .then(({ data }) => {
-          onSuccess();
-          setSubmitting(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
+        }
+      ).then(({ data }) => {
+        onSuccess();
+        setSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     } else {
-      axiosInstance()
-        .post(
-          `/dynamic-form/step/${resourceId}`,
-
-          { ...values, stepId },
-          {
-            headers: {
-              Resource: resource
-            }
+      axiosInstance().post(`/dynamic-form/step/${resourceId}`, [{ ...values, stepId }],
+        {
+          headers: {
+            Resource: resource
           }
-        )
-        .then(({ data }) => {
-          onSuccess();
-          setSubmitting(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
+        }
+      ).then(({ data }) => {
+        onSuccess();
+        setSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 
@@ -173,6 +165,13 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                                       setFieldValue={(name, value) => {
                                         setFieldValue(name, value);
                                       }}
+                                      imageOrFileUploadCompletePercentage={
+                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                          ? (completePercentage) => {
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          }
+                                          : null
+                                      }
                                       required={field.required}
                                       fullWidth
                                       isTooltip={field?.isTooltip || false}
@@ -203,7 +202,7 @@ const ManageStep = ({ onClose, onSuccess, resource, resourceId, stepId, id = nul
                   Cancel
                 </Button>
                 <Button
-                  disabled={submitting}
+                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
                   variant="contained"
                   color="primary"
                   size="small"

@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -7,6 +7,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
@@ -118,38 +119,22 @@ const WorkStationsDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          <Tab
-            label={<div className="tab-font">Active Services</div>}
-            value={1}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-            className={'tabLayout'}
-          />
-        </Tabs>
-        {tabValue === 0 && (
-          <Box>
-            {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={workStationsData} fields={fields} />
-            )}
-          </Box>
-        )}
-        {tabValue === 1 && <CurrentStatus id={id} />}
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab label={'Details'} value={0} />
+          <CustomTab label={'Active Services'} value={1} />
+        </CustomTabs>
+        <TabPanel value={tabValue} index={0}>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={workStationsData} fields={fields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <CurrentStatus id={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

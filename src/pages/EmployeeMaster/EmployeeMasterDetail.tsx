@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, Grid, Tab, Tabs, Tooltip } from '@material-ui/core';
+import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -10,9 +10,10 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import AssignEntityDialog from 'src/components/AssignRolesDialog/AssignEntityDialog';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import TabPanel from 'src/components/TabPanel';
 import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -103,13 +104,6 @@ const EmployeeMasterDetail = () => {
     setOpenUpdateDialog(false);
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
@@ -160,7 +154,7 @@ const EmployeeMasterDetail = () => {
                 </Button>
               ) : (
                 permissions?.employeeMaster?.isUpdate && (
-                  <Tooltip title="Give Portal Access" arrow placement="top">
+                  <HtmlTooltip title="Give Portal Access" arrow placement="top">
                     <Button
                       size="small"
                       variant={'outlined'}
@@ -172,7 +166,7 @@ const EmployeeMasterDetail = () => {
                     >
                       Give Portal Access
                     </Button>
-                  </Tooltip>
+                  </HtmlTooltip>
                 )
               )}
               {permissions?.employeeMaster?.isUpdate && (
@@ -197,20 +191,10 @@ const EmployeeMasterDetail = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
-          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">History</div>} {...a11yProps(1)} />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0} label={'Details'} />
+          <CustomTab value={1} label={'History'} />
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>

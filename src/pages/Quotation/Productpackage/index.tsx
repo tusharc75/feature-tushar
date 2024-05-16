@@ -1,11 +1,10 @@
 import { Box, Button, IconButton, Menu, MenuItem, MenuList, Popover } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
 import Add from '@material-ui/icons/Add';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { capitalize, isArray, uniqBy } from 'lodash';
+import { isArray, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -14,7 +13,6 @@ import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/Assign
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import { calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -27,6 +25,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import {
+  CHILD_RESOURCE,
   MATERIAL_TYPE,
   PRICING_SETUP_TYPE,
   QUOTATION_TYPE,
@@ -39,6 +38,8 @@ import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import LeadTimeDialog from './LeadTimeDialog';
 import PriceRequestDialog from './PriceRequestDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
+import AdditionalCostDialog from './AdditionalCostDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -76,22 +77,24 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [products, setProducts] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
+  const [costFields, setCostFields] = useState([]);
   const versionId = quotationData?.versions[version]?._id || null;
 
   useEffect(() => {
     fetchFields();
+  }, [version]);
+
+  useEffect(() => {
     if (version) {
       fetchData();
     }
-  }, [version]);
+  }, [version, columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_quotation_product_fields(quotationData?.currency);
-    if (!allowedToEdit) {
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
-    }
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, allowedToEdit);
+    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.quotationCost, quotationData?.currency, allowedToEdit);
+    setCostFields(c_fields);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns: any = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
     let column: any = [
@@ -113,16 +116,16 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         Cell: ({ row }) =>
           <div>
             <p className="text-truncate">
-              {row.original.type === 'serializedAsset' ? 'Asset' : `${capitalize(row.original.type)} `}
-              {row.original['type'] === 'product'
+              {row.original.type === MATERIAL_TYPE.serializedAsset ? 'Asset' : `${startCase(row.original.type)} `}
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
+                : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail.packageType === 'Product'
                     ? '(Product)'
                     : '(Service)'
-                  : row.original.type === 'service'
+                  : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
             </p>
@@ -137,7 +140,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original.type === MATERIAL_TYPE.serializedAsset ? (
+            {row.original.type === MATERIAL_TYPE.serializedAsset || !allowedToEdit ? (
               <p>{row.original?.detail}</p>
             ) : (
               <p
@@ -155,46 +158,50 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 <span>({row.original?.subRows?.length})</span>
               </Box>
             ) : null}
-            {row.original.type !== MATERIAL_TYPE.serializedAsset && (
+            {allowedToEdit && ![MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
+              quotationData?.type === QUOTATION_TYPE.fieldJob &&
+                row.original.type === MATERIAL_TYPE.product ? null :
+                <Box ml={1}>
+                  <HtmlTooltip title="Add ">
+                    <IconButton
+                      onClick={(event) =>
+                        setAddchildDialog({
+                          open: true,
+                          parentId: row.original?._id,
+                          parentType: row.original.type,
+                          serializedProduct: row.original?.serializedProduct,
+                          top: event.clientY,
+                          bottom: event.clientX
+                        })
+                      }
+                      size="small"
+                    >
+                      <Add color="disabled" fontSize="small" />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+            )}
+            {row.original.type !== MATERIAL_TYPE.manualEntry && (
               <Box ml={1}>
-                <HtmlTooltip title="Add ">
-                  <IconButton
-                    onClick={(event) =>
-                      setAddchildDialog({
-                        open: true,
-                        parentId: row.original?._id,
-                        parentType: row.original.type,
-                        serializedProduct: row.original?.serializedProduct,
-                        top: event.clientY,
-                        bottom: event.clientX
-                      })
-                    }
-                    size="small"
-                  >
-                    <Add color="disabled" fontSize="small" />
-                  </IconButton>
-                </HtmlTooltip>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(
+                      `${row.original.type === MATERIAL_TYPE.serializedAsset
+                        ? routes.serializedAssetDetail.path
+                        : row.original.type === MATERIAL_TYPE.product
+                          ? routes.productDetail.path
+                          : row.original.type === MATERIAL_TYPE.package
+                            ? routes.packagesDetail.path
+                            : routes.serviceMasterDetail.path
+                      }/${row.original.materialId}`
+                    );
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
               </Box>
             )}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(
-                    `${row.original.type === 'serializedAsset'
-                      ? routes.serializedAssetDetail.path
-                      : row.original.type === 'product'
-                        ? routes.productDetail.path
-                        : row.original.type === 'package'
-                          ? routes.packagesDetail.path
-                          : routes.serviceMasterDetail.path
-                    }/${row.original.materialId}`
-                  );
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
           </div>
         )
       },
@@ -203,7 +210,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           {
             accessor: 'leadTime',
             Header: 'Lead Time (Days)',
-            Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
+            Cell: ({ row }) => <div> {(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)} </div>,
             Footer: (info) => {
               let rows = info.table.getExpandedRowModel().rows;
               const total = rows
@@ -291,28 +298,38 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
     const response = await axiosInstance().get(`${quotation.api}/productpackage/${quotationData._id}/${versionId}`);
+    const additionalCost = await axiosInstance().get(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}`);
+    const additionalData = additionalCost?.data?.data || [];
+    const updatedAdditionalData = additionalData?.map((e: any) => {
+      return { ...e, type: MATERIAL_TYPE.manualEntry };
+    })
+
     data = response?.data?.data;
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    const rows = data.material.filter((e) => e.parentId === null);
+    let rows = data.material.filter((e) => e.parentId === null);
+    rows = [...rows, ...updatedAdditionalData]
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
         ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'service'
+          : parent.type === MATERIAL_TYPE.service
             ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
-              : '';
+              : parent.description;
       parent.serializedProduct = parent?.productDetail?.serializedProduct || false;
+      parent.qtyDisplay = parent.qty;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -332,23 +349,24 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
         ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+        : _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
+          : _subRow.type === MATERIAL_TYPE.service
             ? _subRow.serviceDetail?.serviceName
             : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct || false;
+      _subRow.qtyDisplay = _subRow.qty * parent.qty;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -358,10 +376,10 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       }
       _subRow.subRows = generateNestedData(material, _subRow);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
@@ -374,7 +392,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       const element: any = {};
       element.materialId = d._id;
       element.type = addDialog.type;
-      if (addDialog.type !== 'serializedAsset') {
+      if (addDialog.type !== MATERIAL_TYPE.serializedAsset) {
         element.unit = d?.unit && d?.unitMain?.length ? d?.unitMain[0] : '';
         if (quotationData?.estimateStartDate && quotationData?.estimateEndDate) {
           element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
@@ -427,6 +445,26 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       });
   };
 
+  const handleAddCost = (rows) => {
+    setUpdating(true);
+    axiosInstance()
+      .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/add`, { additionalCost: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        fetchData();
+        setShowCostDialog({ open: false, showSaveAndNext: false });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
@@ -439,13 +477,34 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          setRecordToUpdate(dataRows[rowIndex + 1]);
-          setIsProductEdit({
-            open: true,
-            isBulkedit: false,
-            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-          });
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if (!row?.parentId) {
+            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+            setRecordToUpdate(dataRows[rowIndex + 1]);
+            if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+              setIsProductEdit({
+                open: false,
+                isBulkedit: false,
+                showSaveAndNext: false
+              });
+              setShowCostDialog({ open: true, showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else {
+              setIsProductEdit({
+                open: true,
+                isBulkedit: false,
+                showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+              });
+            }
+          } else {
+            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+            });
+          }
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
@@ -457,29 +516,99 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       });
   };
 
-  const handleDelete = (rows) => {
-    setDeleting(true);
+  const handleSaveCostData = async (rows: any, saveAndNext = false) => {
+    setUpdating(true);
     axiosInstance()
-      .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: rows })
-      .then(() => {
-        setDeleting(false);
+      .put(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/update`, { additionalCost: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+
+        if (saveAndNext) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(dataRows[rowIndex + 1]);
+          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+            setShowCostDialog({ open: true, showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          } else {
+            setShowCostDialog({ open: false, showSaveAndNext: false });
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+          }
+        } else {
+          setShowCostDialog({ open: false, showSaveAndNext: false });
+        }
         fetchData();
-        fetchQuotationData(version);
-        setDeleteData(null);
       })
       .catch((error) => {
-        setDeleting(false);
+        setUpdating(false);
         toastConfig.setToastConfig(error);
-        setDeleteData(null);
       });
   };
 
+  const handleDelete = (rows) => {
+    setDeleting(true);
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id)
+    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry)
+
+    if (products?.length) {
+      axiosInstance()
+        .put(`${quotation.api}/productpackage/${quotationData?._id}/${versionId}/delete`, { ids: products })
+        .then(() => {
+          setDeleting(false);
+          fetchData();
+          fetchQuotationData(version);
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
+    }
+
+    if (cost?.length) {
+      axiosInstance()
+        .post(`${quotation.api}/additionalcost/${quotationData._id}/${versionId}/delete`, { ids: cost })
+        .then(({ data }) => {
+          setDeleting(false);
+          fetchData();
+          fetchQuotationData(version);
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
+    }
+
+  };
+
   const openMaterial = (row, rows) => {
-    setIsProductEdit({
-      open: true,
-      isBulkedit: false,
-      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-    });
+    let showSaveAndNext;
+    if (row.depth != 0) {
+      const allRows = rows.filter((ele) => ele.parentId === row.parentId);
+      showSaveAndNext = row?.index < allRows.length - 1 ? true : false;
+    } else {
+      showSaveAndNext = row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false;
+    }
+    if (row?.original?.type === MATERIAL_TYPE.manualEntry) {
+      setShowCostDialog({ open: true, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
+    } else {
+      setIsProductEdit({
+        open: true,
+        isBulkedit: false,
+        showSaveAndNext: showSaveAndNext
+      });
+    }
+
     setRecordToUpdate(row.original);
   };
 
@@ -521,7 +650,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     }
   };
 
-  const handelAskPriceToSupplier = (content, contactId, selectedFields = [], displayColumns = []) => {
+  const handelAskPriceToSupplier = (content, contactId, selectedFields = [], otherAttachments = []) => {
     let data: any = {
       material: selectedRecords?.map((d) => {
         return {
@@ -536,7 +665,8 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       body: content ? content : '',
       supplierContact: contactId,
       requiredFields: selectedFields,
-      versionId: versionId
+      versionId: versionId,
+      attachment: otherAttachments
     };
 
     axiosInstance()
@@ -557,8 +687,14 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
-    rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
-    handleSaveData(rows);
+
+    if (rowData?.type === MATERIAL_TYPE.manualEntry) {
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+      handleSaveCostData(rows);
+    } else {
+      rows = await calculateRowsField(flattenArray(dataRows), inputField, allFields, updatedData);
+      handleSaveData(rows);
+    }
   };
 
   useEffect(() => {
@@ -571,7 +707,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         parentId: m._id,
         product: m.materialId,
         productName: m?.detail,
-        qty: m.qty - (alreadyAssets?.length || 0)
+        qty: m.qtyDisplay - (alreadyAssets?.length || 0)
       };
     });
     setProducts([...products?.filter((e) => e.qty > 0)]);
@@ -605,6 +741,15 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             Add Existing Services
           </MenuItem>
         )}
+        {costFields?.length > 0 &&
+          <MenuItem
+            onClick={() => {
+              setShowCostDialog({ open: true, showSaveAndNext: false });
+            }}
+          >
+            Add Manual Entry
+          </MenuItem>
+        }
       </>
     );
   };
@@ -616,14 +761,14 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           <MenuItem
             disabled={products.length ? false : true}
             onClick={() => {
-              setAddDialog({ open: true, type: 'serializedAsset', parentId: null });
+              setAddDialog({ open: true, type: MATERIAL_TYPE.serializedAsset, parentId: null });
             }}
           >
             Assign Assets
           </MenuItem>
         )}
         <MenuItem
-          disabled={selectedRecords.length === 0}
+          disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
           onClick={() => {
             let tempSupplierAccountId = [];
             selectedRecords?.forEach((element) => {
@@ -667,7 +812,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 View Customer Price
               </MenuItem> */}
         <MenuItem
-          disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length)}
+          disabled={!Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length && !selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry))}
           onClick={() => {
             setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
           }}
@@ -700,14 +845,13 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   return (
     <Fragment>
       <DetailsPageHeader
-        isAddButtonVisible={true}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: dataRows?.length > 0 ? false : true }}
         hasXpadding
       />
-
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -721,6 +865,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
             hideSelection={!allowedToEdit}
+            hideAction={!allowedToEdit}
             expander={true}
           />
         </Box>
@@ -753,6 +898,20 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           material={material}
           selectedProducts={selectedRecords}
           showSaveAndNext={isProductEdit?.showSaveAndNext}
+        />
+      )}
+      {showCostDialog.open && (
+        <AdditionalCostDialog
+          onClose={() => {
+            setShowCostDialog({ open: false, showSaveAndNext: false });
+            setRecordToUpdate(null);
+          }}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleSaveCostData}
+          currency={quotationData?.currency}
+          costData={recordToUpdate}
+          loadingEdit={isUpdating}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
         />
       )}
       {addDialog.open && addDialog.type === 'product' && (
@@ -877,16 +1036,17 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
                 Add Existing Packages
               </MenuItem>
             )}
-            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null : (
-              <MenuItem
-                onClick={() => {
-                  setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
-                  setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
-                }}
-              >
-                Add Existing Services
-              </MenuItem>
-            )}
+            {quotationData?.type === QUOTATION_TYPE.rentalJob && !user?.user?.brandPolicy?.rentalService ? null :
+              quotationData?.type === QUOTATION_TYPE.fieldJob ? null : (
+                <MenuItem
+                  onClick={() => {
+                    setAddDialog({ open: true, type: 'service', parentId: addchildDialog.parentId });
+                    setAddchildDialog({ open: false, parentId: null, parentType: null, serializedProduct: false, top: null, bottom: null });
+                  }}
+                >
+                  Add Existing Services
+                </MenuItem>
+              )}
           </MenuList>
         </Popover>
       )}

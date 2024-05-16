@@ -1,32 +1,26 @@
-import { useEffect, useState, useContext } from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { Box, Button, Dialog, IconButton, Typography, useMediaQuery } from '@material-ui/core';
 import ThumbDownIcon from '@material-ui/icons/ThumbDown';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Button, Dialog, Grid, IconButton, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import ThumbUpIcon from '@material-ui/icons/ThumbUp';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { GiVintageRobot } from 'react-icons/gi';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
-import {
-  CustomDialogTransition,
-  formatAmountWithCurrency,
-  defaultActivityShow,
-  quoteBuilder,
-  sidebarResource
-} from '../../constants/helpers';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
+import PerformanceTuningImg from '../../assets/PerformanceTuning.png';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import { isMobile, isTablet } from 'react-device-detect';
-import DOAReasonDialog from './DOAReasonDialog';
 import ProductBuilder from '../../components/productBuilder';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import PreviewDownload from 'src/components/PreviewDownload';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomDialogTransition, defaultActivityShow, formatAmountWithCurrency, quoteBuilder, sidebarResource } from '../../constants/helpers';
+import DOAReasonDialog from './DOAReasonDialog';
 
 const DOAApproval = () => {
-
   const {
     state: {
       user: { user: currentUser }
@@ -62,7 +56,6 @@ const DOAApproval = () => {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [columns, setColumnData] = useState([]);
 
-
   useEffect(() => {
     if (id) {
       fetchQuote();
@@ -80,7 +73,7 @@ const DOAApproval = () => {
       .get('/quote-builder/getQuotefromDOAId/' + id)
       .then(({ data }) => {
         setQuoteData(data.quote);
-        setVersionData(data?.version)
+        setVersionData(data?.version);
         setProductBuilderId(data?.version?.productBuilderId);
         setQData(data);
         if (data?.version?.status !== 'Sent for DOA') {
@@ -91,7 +84,6 @@ const DOAApproval = () => {
         setToastConfig(err);
       });
   };
-
 
   const QuoteStatusChange = (accepted, signature, comment) => {
     if (accepted !== 'Rejected') {
@@ -144,7 +136,7 @@ const DOAApproval = () => {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -188,7 +180,12 @@ const DOAApproval = () => {
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: 'DOA Requests', path: '/doa-request' }, { title: QData ? `${QData?.quoteName} (V-${versionData?.versionNumber})` : '' }]} />
+          <CustomBreadCrumbs
+            routes={[
+              { title: 'DOA Requests', path: '/doa-request' },
+              { title: QData ? `${QData?.quoteName} (V-${versionData?.versionNumber})` : '' }
+            ]}
+          />
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
@@ -199,13 +196,15 @@ const DOAApproval = () => {
               columns={columns}
               hideDetailButton={true}
               extraQueryParams={{ uniqueId: versionData?._id }}
-              defaultColumns={['productName',
+              defaultColumns={[
+                'productName',
                 'unit',
                 'qty',
                 `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-                `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`]}
+                `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+              ]}
             />
-            <Tooltip title="AI Suggestion" arrow placement="top">
+            <HtmlTooltip title="AI Suggestion" arrow placement="top">
               <IconButton
                 size="small"
                 className="btn-outline-v1"
@@ -215,10 +214,10 @@ const DOAApproval = () => {
               >
                 <GiVintageRobot />
               </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
             {QData && QStatus && QData?.DOA.requestTo.find((u) => u === currentUser._id) ? (
               <>
-                <Tooltip title={'Accept'} arrow placement="top">
+                <HtmlTooltip title={'Accept'} arrow placement="top">
                   <Button
                     onClick={() => {
                       QuoteStatusChange('Accepted', '', '');
@@ -231,8 +230,8 @@ const DOAApproval = () => {
                   >
                     {isMobile && !isTablet ? <ThumbUpIcon /> : 'Accept'}
                   </Button>
-                </Tooltip>
-                <Tooltip title={'Reject'} arrow placement="top">
+                </HtmlTooltip>
+                <HtmlTooltip title={'Reject'} arrow placement="top">
                   <Button
                     onClick={() => {
                       setQuoteStatusChangeData('Rejected');
@@ -246,7 +245,7 @@ const DOAApproval = () => {
                   >
                     {isMobile && !isTablet ? <ThumbDownIcon /> : 'Reject'}
                   </Button>
-                </Tooltip>
+                </HtmlTooltip>
               </>
             ) : null}
             <ActivityButton referenceId={QData?.quoteBuilderId} resource="DOA" resourceLabel={QData?.quoteName} />
@@ -327,10 +326,10 @@ const DOAApproval = () => {
             }}
             showManimizeMaximize={true}
           />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <div className="text-align-center">
               <Typography variant="h4">Under Construction </Typography>
-              <img src={`${PerformanceTuningImg}`} style={{ height: '300px' }} />
+              <img src={`${PerformanceTuningImg}`} alt="" style={{ height: '300px' }} />
             </div>
           </CustomDialogContent>
         </Dialog>

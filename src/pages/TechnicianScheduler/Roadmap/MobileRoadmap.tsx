@@ -1,15 +1,16 @@
-import React, { Fragment, useCallback, useState } from 'react';
-import type { TActivity } from './types';
+import { Avatar, Box, Collapse, IconButton, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Box, Avatar, IconButton, Collapse, Tooltip } from '@material-ui/core';
-import { TreeView, TreeItem } from '@material-ui/lab';
+import { Close, DateRange, ExpandLess, ExpandMore, Image, Map } from '@material-ui/icons';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { Close, Map, ExpandMore, ExpandLess, DateRange, Image } from '@material-ui/icons';
+import { TreeItem, TreeView } from '@material-ui/lab';
+import moment from 'moment';
+import React, { Fragment, useCallback, useState } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { dateTimeFormat } from 'src/constants/helpers';
 import MapView from '../Map';
 import { getColorFromPriority, getPriority } from './helperFunctions';
 import styles from './roadmap.module.scss';
-import moment from 'moment';
-import { dateTimeFormat } from 'src/constants/helpers';
+import type { TActivity } from './types';
 
 type TProps = {
   activity: TActivity[];
@@ -214,8 +215,8 @@ const CalendarData: React.FC<TCalendarProps> = ({ activity }) => {
               <DateRange className="max-w-[16px] max-h-[16px]" />
               <span className="text-[#6B6B6B] dark:text-gray-200">{moment(service.startDate).format(dateTimeFormat)}</span>
             </span>
-            <Tooltip title={<p>{service?.fieldTicket[0]?.fieldTicketNumber}</p>} placement="top">
-              <div className=" rounded-md px-3 py-2 min-h-[20px] flex flex-wrap" style={{ ...bgColor }}>
+            <HtmlTooltip title={<p>{service?.fieldTicket[0]?.fieldTicketNumber}</p>} placement="top">
+              <div className={`rounded-md px-3 py-2 min-h-[20px] flex flex-wrap ${bgColor}`}>
                 <h6 className={`${styles.servicesText} truncate text-sm`} title={service?.serviceDetail?.serviceName}>
                   {service?.serviceDetail?.serviceName}
                 </h6>
@@ -223,7 +224,7 @@ const CalendarData: React.FC<TCalendarProps> = ({ activity }) => {
                   <Typography component={'span'}>{service.status}</Typography>
                 </span>
               </div>
-            </Tooltip>
+            </HtmlTooltip>
           </div>
         );
       })}

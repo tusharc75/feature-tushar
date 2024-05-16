@@ -25,7 +25,8 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
   submitInput,
   cellValue,
   setCellValue,
-  isClientSideGrid
+  isClientSideGrid,
+  onRowClick
 }) => {
   const { error } = state;
   const [expanded, setExpanded] = React.useState<string | false>(false);
@@ -44,7 +45,10 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
     () => allColumns?.find((item) => item.primaryField || item.lockPosition) || allColumns[2],
     [allColumns]
   );
-  const actionField: any | null = React.useMemo(() => allColumns?.find((item) => item.id === 'action') || null, [allColumns]);
+  const actionField: any | null = React.useMemo(
+    () => allColumns?.find((item) => item.id === 'action' && item.isVisible !== false) || null,
+    [allColumns]
+  );
 
   const otherFields: any[] | null = React.useMemo(
     () =>
@@ -75,7 +79,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
       <div className="relative rounded-lg bg-[white] dark:bg-[var(--dark-primary)]">
         {/* Loader */}
         {loading || error ? (
-          <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px]">
+          <div className=" absolute inset-0 z-10 [backdrop-filter:blur(var(--table-loader-bg-blur,_2px))_!important] flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] ">
             <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
               {error ? (
                 <>
@@ -95,12 +99,8 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
         ) : null}
 
         {/* Table  */}
-        <div
-          style={{ overflowY: 'auto', maxHeight: 'max(calc(100vh - 250px), 646px)', minHeight: '200px' }}
-          id={`scrollableDiv_${renderedFrom}`}
-          className=""
-        >
-          <div className="grid gap-2">
+        <div style={{ overflowY: 'auto', maxHeight: 'max(calc(100vh - 250px), 646px)', minHeight: '200px' }} id={`scrollableDiv_${renderedFrom}`}>
+          <div className={`grid gap-2 `}>
             {dataRows.length
               ? dataRows?.map((row, index) => {
                   if (row.depth !== 0) return null;
@@ -113,11 +113,31 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                     <div
                       className={`shadow-[0px_3px_26px_0px_rgba(0,0,0,0.06)] rounded-md px-3 py-2 [--left-gutter:20px] dark:bg-[var(--dark-secondary)] ${
                         backgroundColorClass && backgroundColorClass(row.original) + ' td-color'
-                      }`}
+                      } ${typeof onRowClick === 'function' ? 'focus:[box-shadow:inset_0px_0px_0px_1px_var(--primary-text)] focus:outline-0' : ''}`}
                       key={row.original._id}
                       style={{
                         border: '1px solid var(--common-border-color)',
                         cursor: otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE ? 'pointer' : 'auto'
+                      }}
+                      onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
+                      tabIndex={typeof onRowClick === 'function' ? 0 : -1}
+                      role={typeof onRowClick === 'function' ? 'button' : 'none'}
+                      onKeyDown={(e) => {
+                        if (typeof onRowClick !== 'function') return;
+                        const target = e.target as HTMLDivElement;
+
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          onRowClick(row.original);
+                        }
+                        if (e.key === 'ArrowDown') {
+                          const next = target?.nextSibling as HTMLDivElement;
+                          next?.focus();
+                        }
+                        if (e.key === 'ArrowUp') {
+                          const previous = target?.previousSibling as HTMLDivElement;
+                          previous?.focus();
+                        }
                       }}
                     >
                       <div className={`flex gap-2 items-center`}>
@@ -136,13 +156,18 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                         <div className="flex-grow">
                           <div className="flex gap-2 justify-between items-center">
                             {primaryField && (
-                              <h4 className="quote-name line-clamp-1 [&_*]:line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:[white-space:unset_!important]">
-                                {primaryField.cell({ row })}
-                              </h4>
+                              <div className="line-clamp-1">
+                                <h6 className="text-[var(--dark-secondary-text,#8b8b8b)] text-[8px] font-medium line-clamp-1">
+                                  {primaryField.header}:
+                                </h6>
+                                <h4 className="quote-name line-clamp-1 [&_*]:[font-size:12px_!important] [&_*]:line-clamp-1 [&>*]:[font-weight:700_!important] [&_*]:[white-space:unset_!important]">
+                                  {primaryField.cell({ row, table })}
+                                </h4>
+                              </div>
                             )}
                             <div className="icon-layout  d-flex align-items-center gap-2">
                               {actionField && actionField?.cell?.({ row, table })}
-                              {otherFieldsLength > DEFAULT_DATA_ROWS_VISIBLE && (
+                              {collapsibleFields.length > 0 && (
                                 <IconButton
                                   size="small"
                                   onClick={(e) => {
@@ -157,7 +182,10 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                           </div>
                         </div>
                       </div>
-                      <div className="px-2 mt-2 pt-2 grid gap-2" style={{ borderTop: '1px dashed var(--common-border-color)' }}>
+                      <div
+                        className="px-2 mt-2 pt-2 grid gap-2"
+                        style={{ borderTop: collapsibleFields.length > 0 ? '1px dashed var(--common-border-color)' : '0px' }}
+                      >
                         <div className="grid gap-2 w-full">
                           {defaultDisplay.map((field) => {
                             return (
@@ -223,6 +251,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                                   cellValue={cellValue}
                                   setCellValue={setCellValue}
                                   state={state}
+                                  onRowClick={onRowClick}
                                 />
                               );
                             })}
@@ -234,7 +263,7 @@ const SwipableListForMobile: FC<TSwipableListInputProps> = ({
                 })
               : !loading &&
                 !error && (
-                  <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] backdrop-blur-[10px] rounded-lg">
+                  <div className=" absolute inset-0 flex items-center justify-center bg-[rgba(255,255,255,0.54)] dark:bg-[rgba(5,9,19,0.54)] [backdrop-filter:blur(var(--table-loader-bg-blur,_2px))_!important] rounded-lg">
                     <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg">
                       <p>No Data Found.</p>
                     </div>

@@ -11,8 +11,7 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, ids = [], extraDeepFilter = [], extraFilterById = [] }) => {
   const renderedFrom = camelCase(`${routes[resource]?.title || resource}`);
@@ -34,13 +33,9 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
@@ -52,21 +47,22 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (cencelToken) => {
     if (ids?.length > 25) {
       fetchDataPost();
     } else {
-      fetchDataGet();
+      fetchDataGet(cencelToken);
     }
   };
 
-  const fetchDataGet = () => {
+  const fetchDataGet = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
       .get(`dynamic-form/${queryString}`, {
         headers: {
-          Resource: resource
+          Resource: resource,
+          cancelToken: cancelTokenSource?.token
         }
       })
       .then(({ data: { data, count } }) => {
@@ -217,7 +213,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
         showRequiredLabel={false}
         onClose={handleClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}

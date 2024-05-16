@@ -41,7 +41,9 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
   const [columns, setColumns] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
 
-  const renderedFrom = camelCase(tabValue === 0 ? routes?.productCategory.title : tabValue === 1 ? routes?.product.title : routes?.serializedAsset.title);
+  const renderedFrom = camelCase(
+    tabValue === 0 ? routes?.productCategory.title : tabValue === 1 ? routes?.product.title : routes?.serializedAsset.title
+  );
 
   useEffect(() => {
     setColumns(null);
@@ -59,7 +61,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
     const path = tabValue === 0 ? routes.productCategoryDetail.path : tabValue === 1 ? routes.productDetail.path : routes.serializedAssetDetail.path;
     const response = await axiosInstance().get(`/field?resource=${selectedResourceData}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, path)
+    const newColumns = generateColumns(renderedFrom, data, path);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -189,9 +191,9 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
         />
       </Box>
       <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-        <CustomTab index={0} label={'Product Category'} value={0} primaryColor={true} />
-        <CustomTab index={1} label={'Products'} value={1} primaryColor={true} />
-        <CustomTab index={2} label={'Assets'} value={2} primaryColor={true} />
+        <CustomTab value={0} label={'Product Category'} primaryColor={true} />
+        <CustomTab value={1} label={'Products'} primaryColor={true} />
+        <CustomTab value={2} label={'Assets'} primaryColor={true} />
       </CustomTabs>
       <Box display="flex" justifyContent={'space-between'}>
         {allowedToEdit && (
@@ -269,6 +271,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           ids={assignDialog?.data?.map((item) => item._id) || []}
           handleCloseDialog={() => setAssignDialog({ open: false, type: null, data: null })}
           onSuccess={(data) => {
+            setAssignDialog({ open: false, type: null, data: null });
             assignItems({ products: data?.map((item) => item._id) || [] });
           }}
           serialized={true}
@@ -285,6 +288,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           handleSucess={(data) => {
             const assignData = data?.map((item) => item.id);
             assignItems({ serializedAssets: assignData || [] });
+            setAssignDialog({ open: false, type: null, data: null });
           }}
         />
       )}

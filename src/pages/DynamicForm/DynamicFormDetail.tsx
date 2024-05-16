@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -7,18 +7,17 @@ import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
+import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { checkIsAllowedToEdit, getResourceLabel } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import ManageDynamicForm from './ManageDynamicForm';
-import { FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
-import TabPanel from 'src/components/TabPanel';
 import Step from './Step';
-import { getResourceLabel } from 'src/constants/helpers';
-import PreviewDownload from 'src/components/PreviewDownload';
 
 const DynamicFormDetail = () => {
   const { route, id } = useParams();
@@ -41,10 +40,10 @@ const DynamicFormDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [resourceData, setResourceData] = useState(null);
-
   const [primaryFieldName, setPrimaryFieldName] = useState(null);
-
   const [tabValue, setTabValue] = useState(0);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -78,6 +77,14 @@ const DynamicFormDetail = () => {
           Resource: resource
         }
       });
+      let isAllowedToEdit = true;
+      let isAllowedToDelete = true;
+      if (data.hasOwnProperty('collaborator') || data.hasOwnProperty('owner')) {
+        isAllowedToEdit = checkIsAllowedToEdit(user, resource, data)
+        isAllowedToDelete = data.owner.optionValue === user?.user?._id;
+      }
+      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToDelete(isAllowedToDelete);
       setDetailData(data);
       setLoading(false);
     } catch (error) {
@@ -91,7 +98,9 @@ const DynamicFormDetail = () => {
 
   const fetchPolicy = async () => {
     try {
-      const { data: { data } } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${resource}`);
       if (data) {
         setResourceData(data);
       }
@@ -147,8 +156,10 @@ const DynamicFormDetail = () => {
       <Box className="headerbox-v1">
         <Box className="nav-v1">
           <CustomBreadCrumbs
-            routes={[{ title: resourceLabel, path: `/${route}` },
-            { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel }]}
+            routes={[
+              { title: resourceLabel, path: `/${route}` },
+              { title: primaryFieldName && detailData && detailData[primaryFieldName] ? detailData[primaryFieldName] : resourceLabel }
+            ]}
           />
         </Box>
         <Box className="controls-v1">
@@ -156,52 +167,27 @@ const DynamicFormDetail = () => {
             {detailData?.pdfTemplate && (
               <PreviewDownload fileName={`${resource}`} resource={resource} referenceId={id} columns={[]} hideDetailButton={true} hideDialog={true} />
             )}
-            {permissions[renderedFrom]?.isUpdate && (
+            {permissions[renderedFrom]?.isUpdate && allowedToEdit && (
               <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
-            {permissions[renderedFrom]?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {permissions[renderedFrom]?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {resourceData?.collaborateTools && detailData && (
+              <ActivityButton
+                referenceId={detailData?._id}
+                resource={camelCase(resource)}
+                resourceLabel={detailData[resourceData?.collaborateToolsField]}
+              />
+            )}
           </Box>
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-          {resourceData && resourceData?.steps?.length ? (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-                </div>
-              }
-              value={1}
-              aria-controls="a11y-tabpanel-1"
-              id="a11y-tab-1"
-            />
-          ) : null}
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>Header</CustomTab>
+          {resourceData && resourceData?.steps?.length > 0 && <CustomTab value={1}>Associations</CustomTab>}
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -217,7 +203,8 @@ const DynamicFormDetail = () => {
             resourceId={id}
             resource={resource}
             data={detailData}
-            allowedToEdit={permissions[renderedFrom]?.isUpdate} />
+            allowedToEdit={permissions[renderedFrom]?.isUpdate ? allowedToEdit : false}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

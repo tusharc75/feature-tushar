@@ -1,23 +1,48 @@
 import { Button, IconButton, useMediaQuery } from '@material-ui/core';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { BiFilterAlt } from 'react-icons/bi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import xlsx from 'xlsx-js-style';
 import ArrangeView from '../ArrangeView';
 import DisplayFilters from '../DisplayFilters';
 import GridFilter from '../GridFilter';
 import ShowFilteredRecordsOnly from '../ShowFilteredRecordsOnly';
 import { IndeterminateCheckbox } from '../TableComponents/TableHelperComponents';
 import { TInitialState } from '../hooks/useTableReducer';
-import { camelCaseToWords, createJsonDataForTableExport, getExcelColumnNameFromRange } from '../utils';
+import { sidebarResource } from 'src/constants/helpers';
 
-import moment from 'moment';
+import { Table } from '@tanstack/react-table';
 import { ExportIcon } from 'src/assets/svg/svgIcons';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { createFilterModel, fetchFieldOptions, filtermodelToFormValue } from '../utils';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import { isEmpty } from 'lodash';
+
+type GridHeaderProps = {
+  resource: any;
+  isClientSideGrid: any;
+  dispatch: any;
+  renderedFrom: any;
+  showOnlyShowFilteredRecordSwitch: any;
+  hideSelection: any;
+  showFilters: any;
+  table: Table<any>;
+  showArrangeView: any;
+  newColumns: any;
+  refreshGrid: any;
+  reportSave: any;
+  setSelectedReportView: any;
+  selectedReportView: any;
+  expander: any;
+  state: any;
+  handleTableExport: () => void;
+  hideExportTable: boolean;
+};
 
 const GridHeader = ({
   resource,
+  isClientSideGrid,
   dispatch,
   renderedFrom,
   showOnlyShowFilteredRecordSwitch,
@@ -32,14 +57,27 @@ const GridHeader = ({
   selectedReportView,
   expander,
   state,
-  exportTable = false
-}) => {
-  const { selectedRecords, loading, filters: customFilters, dataRows, page }: TInitialState = state;
+  handleTableExport,
+  hideExportTable = false
+}: GridHeaderProps) => {
+  const toastConfig = useContext(CustomToastContext);
+  const { selectedRecords, loading, filters: customFilters, dataRows }: TInitialState = state;
   const isMobileView = useMediaQuery('(max-width:768px)');
 
   const [selectedFilter, setSelectedFilter] = useState(null);
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [currentFomValue, setCurrentFomValue] = useState({});
+
+  const { savedFilters } = useContext(FiltersContext);
+
+  useEffect(() => {
+    if (customFilters && !selectedFilter) {
+      const newformValues = filtermodelToFormValue(customFilters);
+      if (newformValues) {
+        setCurrentFomValue(newformValues);
+      }
+    }
+  }, [customFilters, selectedFilter]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -49,26 +87,38 @@ const GridHeader = ({
     setIsFilterOpen(false);
   };
 
-  const handleTableExport = () => {
-    const data = createJsonDataForTableExport(newColumns, dataRows);
-    if (!data) return;
-    const wb = xlsx.utils.book_new();
-    const ws = xlsx.utils.json_to_sheet(data);
-
-    // for table head style
-    for (const col of getExcelColumnNameFromRange(ws['!ref'])) {
-      ws[`${col}1`].s = {
-        font: {
-          name: 'Calibri',
-          bold: true
+  useEffect(() => {
+    if (!resource || !showFilters) return;
+    const applyDefaultFilter = async () => {
+      try {
+        const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`)
+        const defaultFilter = responce?.data?.data.find((d) => d.default);
+        if (defaultFilter) {
+          const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
+          if (columns.length === 0) return;
+          setSelectedFilter(defaultFilter);
+          let deepFilter;
+          if (defaultFilter?.filterValue) deepFilter = createFilterModel(defaultFilter?.filterValue, columns);
+          if (defaultFilter && deepFilter) {
+            dispatch({ type: 'filter', filters: deepFilter });
+            if (defaultFilter.sortBy) {
+              dispatch({
+                type: 'sort',
+                sorting: [{ colId: defaultFilter.sortBy, sort: defaultFilter.orderBy ?? 'asc' }],
+                loading: isClientSideGrid ? false : true
+              });
+            }
+          }
+        } else if (!isEmpty(savedFilters[resource]) && !isClientSideGrid) {
+          dispatch({ type: 'filter', filters: savedFilters[resource] });
         }
-      };
-    }
-    const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
-
-    xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
-    xlsx.writeFile(wb, `${name}.xlsx`);
-  };
+      } catch (error) {
+        toastConfig.setToastConfig(error);
+      }
+    };
+    applyDefaultFilter();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [resource]);
 
   return (
     <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap`}>
@@ -89,6 +139,7 @@ const GridHeader = ({
             setSelectedFilter={setSelectedFilter}
             currentFomValue={currentFomValue}
             setCurrentFomValue={setCurrentFomValue}
+            resource={resource}
           />
         </div>
         {isFilterOpen && (
@@ -137,19 +188,21 @@ const GridHeader = ({
               </Button>
             </HtmlTooltip>
           )}
-          {exportTable ? (
-            <HtmlTooltip title="Export table to excel" placement="top" arrow>
-              <IconButton
-                className={`refresh-arrange-button`}
-                color="primary"
-                disabled={loading}
-                size="small"
-                onClick={() => {
-                  handleTableExport();
-                }}
-              >
-                <ExportIcon />
-              </IconButton>
+          {!hideExportTable && isClientSideGrid ? (
+            <HtmlTooltip title={dataRows.length === 0 ? 'No Data to Export' : 'Export to Excel'} placement="top" arrow>
+              <span>
+                <IconButton
+                  className={`refresh-arrange-button`}
+                  color="primary"
+                  disabled={loading || dataRows.length === 0}
+                  size="small"
+                  onClick={() => {
+                    handleTableExport();
+                  }}
+                >
+                  <ExportIcon fontSize="small" />
+                </IconButton>
+              </span>
             </HtmlTooltip>
           ) : null}
           {showArrangeView && (

@@ -242,7 +242,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
           showRequiredLabel={false}
           showManimizeMaximize={true}
         />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           {columns ? (
             <Box p={2}>
               <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>

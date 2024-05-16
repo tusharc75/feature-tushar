@@ -14,8 +14,11 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../StateProvider/Provider';
 
 const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selectedEntity, isClone = false, roleId = null }) => {
-
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
 
   const history = useHistory();
   const [isSubmitting, setSubmitting] = useState(false);
@@ -189,7 +192,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
         <>
           <CustomDialogContent>
             <Box paddingX={1} paddingY={2}>
-              <Box display="flex" marginBottom={2} gridGap={10}>
+              <Box className="grid gap-2 grid-cols-1 md:grid-cols-3 mb-3">
                 <TextField
                   required
                   variant="outlined"
@@ -233,11 +236,15 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                   field.length &&
                   resource.length && (
                     <RoleEngine
+                      style={{
+                        height: fullScreen || isMobile || isTablet ? `calc(100vh - 200px)` : '500px'
+                      }}
                       field={field}
                       resource={resource}
                       setField={setField}
                       setResource={setResource}
-                      tier={values?.tier} />
+                      tier={values?.tier}
+                    />
                   )
                 )}
               </Paper>

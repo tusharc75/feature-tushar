@@ -60,6 +60,7 @@ const ProductBuilder = () => {
         row.original?.createdByDate ? (
           <h5 className="createBy" title={`${row.original?.createdByDate} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
             {row.original?.createdByDate}
+            <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
           </h5>
         ) : (

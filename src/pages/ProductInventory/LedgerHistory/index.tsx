@@ -65,6 +65,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         Header: 'Qty',
         width: 200,
         disabled: true,
+        type: 'number',
         Cell: ({ row }) => {
           return row.original?.qty ? (
             <div
@@ -75,8 +76,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                       ? 'hsl(1 100% 65% / 1)'
                       : '#FFCCCB'
                     : isDarkTheme
-                      ? 'hsl(120 73% 40% / 1)'
-                      : '#90ee90'
+                    ? 'hsl(120 73% 40% / 1)'
+                    : '#90ee90'
               }}
             >
               {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}
@@ -89,6 +90,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       {
         accessor: 'price',
         Header: 'Cost',
+        type: 'number',
         width: 200,
         Cell: ({ row }) => {
           return row.original?.price ? <p className="text-truncate">{row.original.price}</p> : <NoDataCell />;
@@ -108,8 +110,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                       ? 'hsl(1 100% 65% / 1)'
                       : '#FFCCCB'
                     : isDarkTheme
-                      ? 'hsl(120 73% 40% / 1)'
-                      : '#90ee90'
+                    ? 'hsl(120 73% 40% / 1)'
+                    : '#90ee90'
               }}
             >
               {row?.original?.type === 'Debit' ? `-${row?.original?.totalPrice}` : row?.original?.totalPrice}{' '}
@@ -126,11 +128,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         disabled: true,
         Cell: ({ row }) => {
           return row.original?.warehouse ? (
-            <Link
-              className="link text-truncate"
-              title={row.original?.warehouse}
-              to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}
-            >
+            <Link className="link text-truncate" title={row.original?.warehouse} to={`${routes.warehouseDetail.path}/${row.original?.warehouseId}`}>
               {row.original?.warehouse}
             </Link>
           ) : (
@@ -140,25 +138,25 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            width: 200,
-            Cell: ({ row }) => {
-              return row?.original?.storageLocation ? (
-                <Link
-                  className="link"
-                  title={row?.original?.storageLocation}
-                  to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
-                >
-                  {row?.original?.storageLocation}
-                </Link>
-              ) : (
-                <NoDataCell />
-              );
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original?.storageLocation ? (
+                  <Link
+                    className="link"
+                    title={row?.original?.storageLocation}
+                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                  >
+                    {row?.original?.storageLocation}
+                  </Link>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'supplierPartNumber',
@@ -182,11 +180,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         width: 200,
         Cell: ({ row }) => {
           return row?.original?.user ? (
-            <Link
-              className="link text-truncate"
-              title={row?.original?.user}
-              to={`${routes.userDetail.path}/${row?.original?.userId}`}
-            >
+            <Link className="link text-truncate" title={row?.original?.user} to={`${routes.userDetail.path}/${row?.original?.userId}`}>
               {row?.original?.user}
             </Link>
           ) : (
@@ -209,7 +203,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         }
       }
     ];
-    setColumns(columns)
+    setColumns(columns);
   };
 
   const fetchRecords = async () => {
@@ -237,7 +231,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
     <>
       <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
         <CustomDialogHeader title={`History - ${productName}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Grid item xs={12} md={12} sm={12} className="mt-3">
             {columns ? (
               <CustomReactTable

@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -8,11 +8,12 @@ import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Steps from 'src/components/Steps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -21,16 +22,22 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, SERVICE_ORDER_STATUS, fieldServiceOrder, serviceOrderSteps, sidebarResource } from '../../constants/helpers';
+
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import {
+  ACTIVITY_RESOURCE,
+  SERVICE_ORDER_STATUS,
+  checkIsAllowedToEdit,
+  fieldServiceOrder,
+  serviceOrderSteps,
+  sidebarResource
+} from '../../constants/helpers';
+import { findOne, objectStore } from '../../constants/indexdbhelper';
+import Step from '../DynamicForm/Step';
 import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
-import Products from './Products';
 import ServiceOrderViews from './RoadMapViews';
-import Services from './Services';
-import Technician from './Technician';
-import TechnicianDispatch from './TechnicianDispatch';
 
 const ServiceOrderDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -63,6 +70,18 @@ const ServiceOrderDetailsPage = () => {
 
   const [steps, setSteps] = useState(serviceOrderSteps);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
+
+  const { isOffline } = useContext(CustomOfflineContext);
+
+  useEffect(() => {
+    if (isOffline) {
+      let newServiceOrderSteps = serviceOrderSteps.filter((s) => s.name !== 'Field Ticket Invoice');
+      setSteps(newServiceOrderSteps);
+    } else {
+      setSteps(serviceOrderSteps);
+    }
+  }, [isOffline]);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -95,36 +114,31 @@ const ServiceOrderDetailsPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   useEffect(() => {
     if (id) {
       getServiceOrderFields();
       fetchServiceOrderData();
+      fetchPolicy();
     }
   }, [id]);
 
   const fetchServiceOrderData = async () => {
     try {
       let data;
-      const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/${id}`);
-      data = response?.data?.data;
-      setLoadingDetails(false);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
+      if (isOffline) {
+        data = await findOne(objectStore.fieldServiceOrder, id);
+      } else {
+        const response: any = await axiosInstance().get(`${fieldServiceOrder.api}/${id}`);
+        data = response?.data?.data;
       }
-      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
+      setLoadingDetails(false);
+
+      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          data.owner.optionValue === user?.user?._id &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        data.owner.optionValue === user?.user?._id &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setServiceOrderData(data);
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
@@ -138,25 +152,47 @@ const ServiceOrderDetailsPage = () => {
     }
   };
 
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const updateProcessStatus = async (processStatus) => {
+    if (isOffline) return;
     axiosInstance()
       .put(`${fieldServiceOrder.api}/${id}/process-status`, { processStatus: processStatus })
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
     try {
-      const response: any = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.fieldServiceOrder}`);
-      response?.data?.data?.field.some((o) => {
+      let data: any;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
+      } else {
+        const response = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.fieldServiceOrder}`);
+        data = response?.data?.data?.field;
+      }
+      data?.some((o) => {
         if (o?.fieldData?.fieldName === 'status') {
           setStatusOptions([...o.fieldData.option]);
           return true;
         }
       });
-      setServiceOrderFields(response?.data?.data.field);
+      setServiceOrderFields(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -180,6 +216,7 @@ const ServiceOrderDetailsPage = () => {
   };
 
   const handleChangeStatus = (status) => {
+    if (isOffline) return;
     axiosInstance()
       .patch(`${routes.fieldServiceOrder.path}/status/${serviceOrderData._id}`, { status: status })
       .then(({ data: { data } }) => {
@@ -203,77 +240,57 @@ const ServiceOrderDetailsPage = () => {
           <CustomBreadCrumbs routes={[routes.fieldServiceOrder, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
-            {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
-              <ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={() => {
-                  setShowClosedConfirmBox(true);
-                }}
-                className={'btn-outline-v1'}
-              >
-                Close
-              </ButtonWithPulse>
-            )}
-            <Fragment>
-              <ThemeButton iconForMobile={<Edit />} disabled={!allowedToEdit} onClick={handleOpenUpdateDialog}>
-                Edit
-              </ThemeButton>
-            </Fragment>
-            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
-            <ActivityButton
-              referenceId={serviceOrderData?._id}
-              resource={ACTIVITY_RESOURCE.fieldServiceOrder}
-              resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
-            />
-          </Box>
+          {!isOffline &&
+            <Box className="control-buttons-v1">
+              {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
+                <ButtonWithPulse
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={() => {
+                    setShowClosedConfirmBox(true);
+                  }}
+                  className={'btn-outline-v1'}
+                >
+                  Close
+                </ButtonWithPulse>
+              )}
+              <Fragment>
+                <ThemeButton iconForMobile={<Edit />} disabled={!allowedToEdit} onClick={handleOpenUpdateDialog}>
+                  Edit
+                </ThemeButton>
+              </Fragment>
+              <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
+              <ActivityButton
+                referenceId={serviceOrderData?._id}
+                resource={ACTIVITY_RESOURCE.fieldServiceOrder}
+                resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
+              />
+            </Box>
+          }
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-          {!(isMobile && !isTablet) && (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <RiFlowChart className="mr-1" fontSize="inherit" />
-                  Views
-                </div>
-              }
-              {...a11yProps(2)}
-            />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+          {!(isMobile && !isTablet) && !isOffline && (
+            <CustomTab value={2}>
+              <RiFlowChart className="mr-1" fontSize="inherit" />
+              Views
+            </CustomTab>
           )}
-        </Tabs>
+          {resourceData && resourceData?.steps?.length && (
+            <CustomTab value={3}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" />
+              Associations
+            </CustomTab>
+          )}
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {!loadingDetails && serviceOrderData && serviceOrderFields.length > 0 ? (
@@ -300,9 +317,9 @@ const ServiceOrderDetailsPage = () => {
               <FieldTicket
                 serviceOrderData={serviceOrderData}
                 setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-0`}
                 allowedToEdit={allowedToEdit}
                 handleChangeStatus={handleChangeStatus}
+                resource={sidebarResource.fieldServiceOrder}
               />
             )}
             {/* {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
@@ -354,12 +371,28 @@ const ServiceOrderDetailsPage = () => {
               />
             )} */}
             {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
-              <Invoices resourceId={serviceOrderData?._id} resource={sidebarResource.fieldTicket} invoiceFieldName="fieldServiceOrder" />
+              <Invoices
+                resourceId={serviceOrderData?._id}
+                resource={sidebarResource.fieldTicket}
+                invoiceFieldName="fieldServiceOrder"
+                fetchParentData={fetchServiceOrderData}
+              />
             )}
           </ContentFullScreen>
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
           <Box>{serviceOrderData && <ServiceOrderViews serviceData={serviceOrderData} />}</Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Box>
+            <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.fieldServiceOrder}
+              data={serviceOrderData}
+              allowedToEdit={permissions?.fieldServiceOrder?.isUpdate}
+            />
+          </Box>
         </TabPanel>
       </Box>
       {showConfirmBox && (
@@ -389,7 +422,6 @@ const ServiceOrderDetailsPage = () => {
           isClone={false}
           open={openUpdateDialog}
           serviceOrderId={id}
-          serviceOrderData={serviceOrderData}
           onClose={() => setOpenUpdateDialog(false)}
           onSuccess={() => {
             setOpenUpdateDialog(false);

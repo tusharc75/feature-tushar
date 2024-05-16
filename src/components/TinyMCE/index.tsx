@@ -167,8 +167,7 @@ export default function TinyMCE(props) {
               if (isValidHeight()) {
                 editorRef.current.execCommand('mceInsertContent', false, data);
               }
-            }
-            else editorRef.current.execCommand('mceInsertContent', false, data);
+            } else editorRef.current.execCommand('mceInsertContent', false, data);
           }
         }
         //data.fileUrl data.fileName
@@ -240,7 +239,7 @@ export default function TinyMCE(props) {
       setUploadError(true);
       return;
     }
-    let imgTag = `<img src='${imageUrl}'`;
+    let imgTag = `<img style="max-width:100%;" src='${imageUrl}'`;
     if (imageDetails && imageDetails.width) {
       imgTag = `${imgTag} width='${imageDetails.width}'`;
     }

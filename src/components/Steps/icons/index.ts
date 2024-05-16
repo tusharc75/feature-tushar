@@ -32,7 +32,8 @@ import {
   ProspectingIcon,
   UnqualifiedIcon,
   QualifiedIcon,
-  ClosedIcon
+  ClosedIcon,
+  OnField
 } from './svgIcon';
 import StepCompleteIcon from './StepCompleteIcon';
 export type StepIconType =
@@ -66,7 +67,8 @@ export type StepIconType =
   | 'prospecting'
   | 'unqualified'
   | 'qualified'
-  | 'closed';
+  | 'closed'
+  | 'onField';
 
 export interface stepIconInterface {
   icon: StepIconType;
@@ -136,6 +138,8 @@ export const getIcon = (name: string) => {
       return QualifiedIcon;
     case name === 'closed':
       return ClosedIcon;
+    case name === 'onField':
+      return OnField;
     default:
       return SerializedAsset;
   }

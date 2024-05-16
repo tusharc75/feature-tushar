@@ -14,6 +14,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import {
+  ASSET_STATUS,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
@@ -143,37 +144,37 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
       },
       ...(ticketType === DELIVERY_TICKET_TYPE.receiving
         ? [
-            {
-              accessor: `ReceivingTicket`,
-              Header: `Receiving Ticket`,
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original[`ReceivingTicket`] ? (
-                  <div style={{ display: 'flex' }}>
-                    <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
-                    <Box ml={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
-                        }}
-                      >
-                        <OpenInNewIcon fontSize="small" color="primary" />
-                      </IconButton>
-                    </Box>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                )
-            },
-            {
-              accessor: `ReceivingTicketStatus`,
-              Header: `Receiving Ticket Status`,
-              width: 200,
-              Cell: ({ row }) =>
-                row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
-            }
-          ]
+          {
+            accessor: `ReceivingTicket`,
+            Header: `Receiving Ticket`,
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original[`ReceivingTicket`] ? (
+                <div style={{ display: 'flex' }}>
+                  <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
+                  <Box ml={1}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
+                      }}
+                    >
+                      <OpenInNewIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </Box>
+                </div>
+              ) : (
+                <NoDataCell />
+              )
+          },
+          {
+            accessor: `ReceivingTicketStatus`,
+            Header: `Receiving Ticket Status`,
+            width: 200,
+            Cell: ({ row }) =>
+              row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
+          }
+        ]
         : [])
     ];
     coloum = [...coloum];
@@ -268,8 +269,8 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         data['deliveryToAddress'] = subleaseData?.toWarehouse?.optionValue;
       } else {
         data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-        data['pickupFrom'] = subleaseData?.toWarehouse?.optionValue;
-        data['pickupFromAddress'] = subleaseData?.toWarehouse?.optionValue;
+        data['pickupFrom'] = selectedRecords[0]?.warehouse?.optionValue;
+        data['pickupFromAddress'] = selectedRecords[0]?.warehouse?.optionValue;
         data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.plant;
         data['deliveryTo'] = subleaseData?.fromWarehouse?.optionValue;
         data['deliveryToAddress'] = subleaseData?.fromWarehouse?.optionValue;
@@ -277,7 +278,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
       if (subleaseData?.processor?.optionValue) {
         data['processor'] = subleaseData?.processor?.optionValue;
       }
-      data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+      data['status'] = DELIVERY_TICKET_STATUS.inTransit;
       setShowTicketDialog({ open: true, data: data });
     }
   };
@@ -313,17 +314,26 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         if (e.hasOwnProperty('LoadingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
         }
-      } else if (action === subleaseActions.createReceivingTicket) {
+      }
+      else if (action === subleaseActions.createReceivingTicket) {
         if (e.hasOwnProperty('ReceivingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
+        } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
+          errorMessages.push({ index: e.index, message: subleaseMessage.receivingStatus });
+        } else if (!checkUniqueWarehouse()) {
+          errorMessages.push({ index: e.index, message: subleaseMessage.sameWarehouse });
+        } else if (e?.warehouse?.optionValue === subleaseData?.fromWarehouse?.optionValue) {
+          errorMessages.push({ index: e.index, message: subleaseMessage.pickupDeliveryDifferent });
         }
-      } else if (action === subleaseActions.deliveredToWarehouse) {
+      }
+      else if (action === subleaseActions.deliveredToWarehouse) {
         if (!e.hasOwnProperty('LoadingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingNotCreated });
         } else if (e?.LoadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyDelivered });
         }
-      } else if (action === subleaseActions.receivedToWarehouse) {
+      }
+      else if (action === subleaseActions.receivedToWarehouse) {
         if (!e.hasOwnProperty('ReceivingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingNotCreated });
         } else if (e?.ReceivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
@@ -337,6 +347,10 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
     }
     return false;
   };
+
+  const checkUniqueWarehouse = (): Boolean => {
+    return new Set(selectedRecords.map((e) => e?.warehouse?.optionValue))?.size === 1;
+  }
 
   const actionButtonMenuItems = () => {
     return (

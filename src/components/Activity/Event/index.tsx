@@ -1,20 +1,21 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
 import Box from '@material-ui/core/Box';
+import Dialog from '@material-ui/core/Dialog';
 import Grid from '@material-ui/core/Grid';
-import { CreateEvent } from './CreateEvent';
-import { GetEvent, DeleteEvent } from '../../../axios/activity';
-import Typography from '@material-ui/core/Typography';
+import IconButton from '@material-ui/core/IconButton';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
-import IconButton from '@material-ui/core/IconButton';
+import Typography from '@material-ui/core/Typography';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import Dialog from '@material-ui/core/Dialog';
+import axios, { CancelTokenSource } from 'axios';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
+import ActivityLoader from '../../Helpers/ActivityLoader';
 import { ListRelatedTo } from '../Helpers/ListRelatedTo';
 import { ViewAll } from '../Helpers/ViewAll';
-import ActivityLoader from '../../Helpers/ActivityLoader';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { CreateEvent } from './CreateEvent';
 
 export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const [open, setOpen] = useState(false);
@@ -26,13 +27,17 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    fetchEvent();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchEvent(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchEvent = async () => {
+  const fetchEvent = async (cancelTokenSource?: CancelTokenSource) => {
     setLoading(true);
-    await GetEvent(JSON.stringify(relatedTo))
-      .then(({ data }) => {
+    axiosInstance()
+      .get(`/event?relatedTo=${JSON.stringify(relatedTo)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setEvents(data);
         onSetCount('Event', data.length);
         setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
@@ -62,8 +67,9 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
 
   const handleDelete = (event) => {
     event.stopPropagation();
-    DeleteEvent(eventId)
-      .then((data) => {
+    axiosInstance()
+      .delete(`/event/${eventId}`)
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -118,7 +124,6 @@ export const Event = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
                 <Grid container>
                   <Grid item xs={6}>
                     <ListRelatedTo relatedTo={_event.relatedTo} originRelatedTo={relatedTo} />
-                    {/* <Chip label={_event.status} size="small" color="primary" /> */}
                   </Grid>
                 </Grid>
               </Box>

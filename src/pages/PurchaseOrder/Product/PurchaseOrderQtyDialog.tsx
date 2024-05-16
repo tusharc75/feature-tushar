@@ -1,7 +1,7 @@
 import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment } from 'react';
 import { Button, Dialog, TextField, Grid, Box } from '@material-ui/core';
 import moment from 'moment';
-import { arrayToDropwdownOption } from '../../../constants/helpers';
+import { CHILD_RESOURCE, arrayToDropwdownOption } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -15,8 +15,8 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { fetch_po_product_fields } from '../../../components/PurchaseOrder/helper';
 import { fetchTaxRate } from './helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purchaseOrderData, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -31,7 +31,7 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
 
   const fetchField = async () => {
     setInitialData({ fields: [], values: {} });
-    var poFields = await fetch_po_product_fields(purchaseOrderData?.currency);
+    var poFields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderProduct, purchaseOrderData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(poFields)));
     if (bulkEdit) {
       let unitArray: any = [];
@@ -233,7 +233,8 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
                                             type={field.type}
                                             options={field.option}
                                             setFieldValue={(name, value) => {
-                                                setFieldValue(name, value);
+                                              setFieldValue(name, value);
+                                              if (name === 'taxCode') {
                                                 const taxCode = field.option?.find((d) => d.optionValue === value);
                                                 setFieldValue('taxPercentage', taxCode?.taxRate || 0);
                                                 const result = autoCalculateSpecificFields(
@@ -245,7 +246,8 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
                                                   for (var x in result) {
                                                     setFieldValue(x, result[x]);
                                                   }
-                                                } 
+                                                }
+                                              }
                                             }}
                                             required={field.required}
                                             fullWidth

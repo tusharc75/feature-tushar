@@ -1,4 +1,4 @@
-import React, { Fragment, useContext, useEffect, useRef } from 'react';
+import DateUtils from '@date-io/date-fns';
 import {
   Avatar,
   Box,
@@ -6,63 +6,72 @@ import {
   Checkbox,
   Chip,
   CircularProgress,
+  Dialog,
   FormControl,
   FormControlLabel,
+  FormHelperText,
   FormLabel,
   Grid,
   IconButton,
+  ImageList,
+  ImageListItem,
+  ImageListItemBar,
   Radio,
   RadioGroup,
   Switch,
   TextField,
   Typography,
-  useTheme,
-  Dialog,
-  ImageList,
-  ImageListItem,
-  ImageListItemBar,
-  Tooltip,
-  makeStyles
+  makeStyles,
+  useTheme
 } from '@material-ui/core';
-import { result, find, throttle } from 'lodash';
-import DateUtils from '@date-io/date-fns';
-import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
-import InfoIcon from '@material-ui/icons/Info';
-import DeleteIcon from '@material-ui/icons/Delete';
-import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
-import MuiPhoneInput from 'material-ui-phone-number';
-import parse from 'autosuggest-highlight/parse';
-import { withStyles } from '@material-ui/core/styles';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import { green, red } from '@material-ui/core/colors';
+import { withStyles } from '@material-ui/core/styles';
+import { Image } from '@material-ui/icons';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
-import { handleAutoCalculation, optionConverter } from '../../constants/formulaUtility';
+import CreditCardIcon from '@material-ui/icons/CreditCard';
+import DeleteIcon from '@material-ui/icons/Delete';
+import HighlightOffIcon from '@material-ui/icons/HighlightOff';
+import InfoIcon from '@material-ui/icons/Info';
+import LocationOnIcon from '@material-ui/icons/LocationOn';
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
+import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import parse from 'autosuggest-highlight/parse';
+import { find, result, throttle } from 'lodash';
+import MuiPhoneInput from 'material-ui-phone-number';
+import React, { Fragment, useContext, useEffect, useRef } from 'react';
 import NumberFormat from 'react-number-format';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import { handleAutoCalculation, optionConverter } from '../../constants/formulaUtility';
 import {
-  imageUploadMaxSize,
-  documentUploadMaxSize,
   dateFormatForInputControl,
-  getUniqueCurrencies,
+  documentUploadMaxSize,
   documentUploadSupportExtensions,
   formatAmountWithCurrency,
-  sidebarResource
+  getUniqueCurrencies,
+  imageUploadMaxSize
 } from '../../constants/helpers';
-import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
-import HighlightOffIcon from '@material-ui/icons/HighlightOff';
-import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
-import CreditCardIcon from '@material-ui/icons/CreditCard';
-import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../CustomTooltipTitle';
 import ImageCropTool from '../ImageCropTool';
-import RichTextEditor from './FormTypes/RichTextEditor';
+import AddDisplayTypeDialog from '../productBuilder/AddDisplayTypeDialog';
+import Counter from './FormTypes/Counter';
+import DataList from './FormTypes/DataList';
 import Dropdown from './FormTypes/Dropdown';
+import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
-import { Image } from '@material-ui/icons';
+import { LOGIC } from '../FormBuilder/helper';
+import Description from './FormTypes/Description';
+
+type MultiFileType = {
+  fileName: string;
+  size: string | number;
+};
+type ReturnMultiFileType = string | void | MultiFileType;
 
 const filter = createFilterOptions();
 
@@ -388,10 +397,11 @@ const FormTypes = (props) => {
     return label ? (label.length > 35 ? label.substr(0, 35) + '...' : label) : '';
   };
 
-  const handleUploadFile = (ev, isMultiple = false) => {
+  const handleUploadFile = async (ev, isMultiple = false) => {
     if (ev.target.files && ev.target.files.length) {
       let files = ev.target.files;
-      // const file = ev.target.files[0];
+
+      let urls: any = values[name] ? values[name] : [];
 
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
@@ -403,8 +413,24 @@ const FormTypes = (props) => {
           });
           break;
         }
-        getFileUrl(file, isMultiple);
+        let url: ReturnMultiFileType;
+        try {
+          url = await getFileUrl(file, isMultiple);
+        } catch (error) {
+          setToastConfig({
+            open: true,
+            type: 'error',
+            message: error.message
+          });
+        }
+        if (!url) return;
+        if (isMultiple) {
+          urls.push(url);
+        } else {
+          urls = url;
+        }
       }
+      setFieldValue(name, urls);
       ev.target.value = '';
     }
   };
@@ -468,8 +494,62 @@ const FormTypes = (props) => {
       });
   };
 
+  // const getFileUrl = (file, isMultiple = false) => {
+  //   setFileUploadProgress(0);
+  //   let formData = new FormData();
+  //   formData.append('file', file);
+  //   setFileUploading(true);
+  //   let uploadUrl = usePublicUrlforFileUpload ? '/user/upload-public' : uploadFileUrl ? uploadFileUrl : '/user/upload';
+  //   if (imageOrFileUploadCompletePercentage) {
+  //     imageOrFileUploadCompletePercentage(1);
+  //   }
+  //   axiosInstance()
+  //     .post(uploadUrl, formData, {
+  //       headers: { 'Content-Type': 'multipart/form-data' },
+  //       onUploadProgress: (pE) => {
+  //         const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
+  //         setFileUploadProgress(completedPercent);
+
+  //         if (completedPercent === 100) {
+  //           setTimeout(() => {
+  //             setFileUploadProgress(0);
+  //           }, 4000);
+  //         }
+  //       }
+  //     })
+  //     .then(({ data }) => {
+  //       if (imageOrFileUploadCompletePercentage) {
+  //         imageOrFileUploadCompletePercentage(0);
+  //       }
+  //       if (uploadFileUrl) {
+  //         onAppendData(data);
+  //       } else {
+  //         // if (isMultiple) {
+  //         //   let currentData = values[name] ? values[name] : [];
+  //         //   setFieldValue(name, [...currentData, { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size }]);
+  //         // } else {
+  //         //   setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
+  //         // }
+  //         if (isMultiple) {
+  //           return { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size };
+  //         } else {
+  //           return usePublicUrlforFileUpload ? data.fileUrl : data.fileName;
+  //         }
+  //       }
+  //       setFileUploading(false);
+  //     })
+  //     .catch((err) => {
+  //       setFileUploading(false);
+  //       setToastConfig(err);
+  //       setFileUploadProgress(0);
+  //       if (imageOrFileUploadCompletePercentage) {
+  //         imageOrFileUploadCompletePercentage(0);
+  //       }
+  //     });
+  // };
+
   // for private upload
-  const getFileUrl = (file, isMultiple = false) => {
+  const getFileUrl = async (file, isMultiple = false): Promise<ReturnMultiFileType> => {
     setFileUploadProgress(0);
     let formData = new FormData();
     formData.append('file', file);
@@ -478,8 +558,8 @@ const FormTypes = (props) => {
     if (imageOrFileUploadCompletePercentage) {
       imageOrFileUploadCompletePercentage(1);
     }
-    axiosInstance()
-      .post(uploadUrl, formData, {
+    try {
+      const { data } = await axiosInstance().post(uploadUrl, formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
         onUploadProgress: (pE) => {
           const completedPercent = Math.floor((pE.loaded * 100) / pE.total);
@@ -491,31 +571,28 @@ const FormTypes = (props) => {
             }, 4000);
           }
         }
-      })
-      .then(({ data }) => {
-        if (imageOrFileUploadCompletePercentage) {
-          imageOrFileUploadCompletePercentage(0);
-        }
-        if (uploadFileUrl) {
-          onAppendData(data);
-        } else {
-          if (isMultiple) {
-            let currentData = values[name] ? values[name] : [];
-            setFieldValue(name, [...currentData, { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size }]);
-          } else {
-            setFieldValue(name, usePublicUrlforFileUpload ? data.fileUrl : data.fileName);
-          }
-        }
-        setFileUploading(false);
-      })
-      .catch((err) => {
-        setFileUploading(false);
-        setToastConfig(err);
-        setFileUploadProgress(0);
-        if (imageOrFileUploadCompletePercentage) {
-          imageOrFileUploadCompletePercentage(0);
-        }
       });
+      if (imageOrFileUploadCompletePercentage) {
+        imageOrFileUploadCompletePercentage(0);
+      }
+      if (uploadFileUrl) {
+        onAppendData(data);
+      } else {
+        if (isMultiple) {
+          return { fileName: usePublicUrlforFileUpload ? data.fileUrl : data.fileName, size: file.size };
+        } else {
+          return usePublicUrlforFileUpload ? data.fileUrl : data.fileName;
+        }
+      }
+    } catch (error) {
+      setToastConfig(error);
+    } finally {
+      setFileUploadProgress(0);
+      if (imageOrFileUploadCompletePercentage) {
+        imageOrFileUploadCompletePercentage(0);
+      }
+      setFileUploading(false);
+    }
   };
 
   const addFieldOption = (optionData) => {
@@ -711,9 +788,85 @@ const FormTypes = (props) => {
     return label;
   };
 
-  return fieldData?.hiddenField ? null : !fieldData ||
-    !fieldData?.isShowFieldDependentOn ||
-    (fieldData?.isShowFieldDependentOn && fieldData?.showFieldDependentOn && values[fieldData?.showFieldDependentOn]) ? (
+  const checkCondition = (fieldName, value, values) => {
+    const _field = fields?.filter((f) => f?.fieldName === fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === fieldName)[0] : null;
+    if (_field) {
+      if (_field?.type === 'checkBox') {
+        if (value === 'yes') {
+          return values[fieldName];
+        } else {
+          return !values[fieldName];
+        }
+      } else if (_field?.type === 'dropDown') {
+        if (value?.split(',')?.includes(values[fieldName])) {
+          return true;
+        } else {
+          return false;
+        }
+      } else if (_field?.type === 'multiSelect') {
+        if (value?.split(',').some((v) => values[fieldName]?.includes(v))) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        if (values[fieldName] === value) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    }
+  };
+
+  const isVisible = () => {
+    if (fieldData?.visibilityCondition?.length > 0) {
+      let visible = false;
+      let show = true;
+      fieldData?.visibilityCondition.forEach((condition, i) => {
+        if (condition?.logic === LOGIC[0]) {
+          condition?.fields?.forEach((field) => {
+            if (field?.fieldName && field?.value) {
+              if (!checkCondition(field?.fieldName, field?.value, values)) {
+                show = false;
+                return;
+              }
+            }
+          });
+        } else if (condition?.logic === LOGIC[1]) {
+          let count = 0;
+          condition?.fields?.forEach((field) => {
+            if (field?.fieldName && field?.value) {
+              if (checkCondition(field?.fieldName, field?.value, values)) {
+                return;
+              } else {
+                count = count + 1;
+              }
+            }
+          });
+
+          if (count === condition?.fields?.length) {
+            show = false;
+          }
+        }
+
+        if (!show) {
+          visible = false;
+          return;
+        }
+
+        if (i === fieldData?.visibilityCondition?.length - 1) {
+          visible = show;
+        }
+      });
+      return visible;
+    }
+    return true;
+  };
+
+  return fieldData?.hiddenField ? null : !fieldData || isVisible() ? (
     type === 'singleLine' || (type === 'lookUpDisplay' && fromFilter) ? (
       <InfoLabel
         info={tooltipMessage}
@@ -830,6 +983,46 @@ const FormTypes = (props) => {
               selectedCurrencyCode: selectedCurrencyCode
             },
             startAdornment: startAdornment
+          }}
+        />
+      </InfoLabel>
+    ) : type === 'currencyNumber' ? (
+      <InfoLabel
+        info={tooltipMessage}
+        isTooltip={isTooltip}
+        warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
+        warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
+      >
+        <TextField
+          {...rest}
+          variant="outlined"
+          label={getLabel(label)}
+          name={name}
+          required={required}
+          value={values[name]}
+          error={touched[name] && Boolean(errors[name])}
+          helperText={touched[name] && errors[name]}
+          ref={inputNumberRef}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
+          InputProps={{
+            inputComponent: CustomFormat as any,
+            inputProps: {
+              allowNegative: false,
+              onValueChange: (values) => {
+                handleChange(name, values.value);
+              },
+              selectedCurrencyCode: selectedCurrencyCode
+            },
+            startAdornment: (
+              <InputAdornment position="start">
+                {result(
+                  find(getUniqueCurrencies(), function (obj) {
+                    return obj.currencyCode === 'USD';
+                  }),
+                  'symbolNative'
+                )}
+              </InputAdornment>
+            )
           }}
         />
       </InfoLabel>
@@ -1001,6 +1194,24 @@ const FormTypes = (props) => {
           }}
         />
       </InfoLabel>
+    ) : (type === 'dropDown' || type === 'multiSelect') && fieldData?.dataList ? (
+      <>
+        <DataList
+          InfoLabel={InfoLabel}
+          fieldData={fieldData}
+          rest={rest}
+          values={values}
+          type={type}
+          label={label}
+          name={name}
+          getLabel={getLabel}
+          touched={touched}
+          errors={errors}
+          required={required}
+          setFieldValue={setFieldValue}
+          fields={allFields}
+        />
+      </>
     ) : (type === 'dropDown' || type === 'multiSelect') && (lookup || fieldData?.lookup) ? (
       <>
         <Dropdown
@@ -1167,11 +1378,11 @@ const FormTypes = (props) => {
 
             {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
               <div style={{ marginTop: '7px' }}>
-                <Tooltip title={`Add ${fieldData.fieldLabel}`}>
+                <HtmlTooltip title={`Add ${fieldData.fieldLabel}`}>
                   <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                     <AddCircleIcon />
                   </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
 
                 {optionSaveDialog && (
                   <AddOptionDialog
@@ -1985,6 +2196,7 @@ const FormTypes = (props) => {
               <FormControlLabel key={opt.order} value={opt.optionLabel} disabled={rest?.disabled} control={<Radio />} label={opt.optionLabel} />
             ))}
           </RadioGroup>
+          {touched[name] && errors[name] && <FormHelperText error={true}>{errors[name]}</FormHelperText>}
         </FormControl>
       </InfoLabel>
     ) : type === 'location' ? (
@@ -2135,7 +2347,8 @@ const FormTypes = (props) => {
       </Fragment>
     ) : type === 'fileUpload' ? (
       <Fragment>
-        <Box display="flex" alignItems="center">
+        <Box display="flex" alignItems="center" pb={(isTooltip && Boolean(tooltipMessage)) || label !== '' ? 1 : 0}>
+          <Typography color="textSecondary">{label}</Typography>
           {isTooltip && Boolean(tooltipMessage) && (
             <Fragment>
               <IconButton size="small">
@@ -2143,9 +2356,11 @@ const FormTypes = (props) => {
                   <InfoIcon color="disabled" />
                 </HtmlTooltip>
               </IconButton>
-              <Box mr={1} />
+              <Box mr={2} />
             </Fragment>
           )}
+        </Box>
+        <Box display="flex" alignItems="center">
           <input
             disabled={isFileUploading || !canEdit}
             id={name}
@@ -2167,7 +2382,7 @@ const FormTypes = (props) => {
               className="normal-case"
               startIcon={isFileUploading && <CircularProgress size={15} />}
             >
-              {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
+              {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
             </Button>
           </label>
           {showErrorMessage ? (
@@ -2183,7 +2398,6 @@ const FormTypes = (props) => {
           {doNotShowUploadedFile ? null : (
             <>
               <Box ml={1} />
-
               <Box flex="1" className="text-truncate">
                 <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
                   {isFileUploading
@@ -2213,18 +2427,22 @@ const FormTypes = (props) => {
       </Fragment>
     ) : type === 'multiFileUpload' ? (
       <Fragment>
+        <Box display="flex" alignItems="center" pb={(isTooltip && Boolean(tooltipMessage)) || label !== '' ? 1 : 0}>
+          <Typography color="textSecondary">{label}</Typography>
+          {isTooltip && Boolean(tooltipMessage) && (
+            <Fragment>
+              <IconButton size="small">
+                <HtmlTooltip title={tooltipMessage}>
+                  <InfoIcon color="disabled" />
+                </HtmlTooltip>
+              </IconButton>
+              <Box mr={2} />
+            </Fragment>
+          )}
+        </Box>
         <Box display="flex" alignItems="center">
           <Grid container spacing={1} alignItems="center">
             <Grid item xs={12} sm={12} md={12}>
-              {/* <Typography color="textSecondary">{label}</Typography> */}
-              {isTooltip && Boolean(tooltipMessage) && (
-                <IconButton size="small">
-                  <HtmlTooltip title={tooltipMessage}>
-                    <InfoIcon color="disabled" />
-                  </HtmlTooltip>
-                </IconButton>
-              )}
-              <Box mr={1} />
               <input
                 disabled={isFileUploading || !canEdit}
                 id={name}
@@ -2470,9 +2688,9 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <Typography color="textSecondary">{label}</Typography>
-        <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple type="file" onChange={readImageFile} />
+        <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
         <label htmlFor="multiple-images-button">
-          <Button disabled={readingImage} variant="contained" color="primary" component="span">
+          <Button disabled={readingImage} variant="contained" color="primary" component="span" size={'small'}>
             Upload
           </Button>
         </label>
@@ -2517,7 +2735,7 @@ const FormTypes = (props) => {
             }}
             title="Edit Image"
           />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <ImageCropTool
               image={image}
               setImage={setImage}
@@ -2542,6 +2760,10 @@ const FormTypes = (props) => {
         tooltipMessage={tooltipMessage}
         setFieldValue={setFieldValue}
       />
+    ) : type === 'counter' ? (
+      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
+    ) : type === 'description' ? (
+      <Description label={label} fieldData={fieldData}/>
     ) : null
   ) : null;
 };

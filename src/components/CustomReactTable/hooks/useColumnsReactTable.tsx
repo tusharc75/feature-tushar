@@ -11,9 +11,10 @@ import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { isArray, isObject } from 'lodash';
+import { find, isArray, isObject, result } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
 import { getGridMetaDataFromLocalStorage } from '../utils';
+import DataListCell from '../Cells/DataListCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -52,6 +53,7 @@ export const getStaticFields = () => {
         row?.original?.createdBy ? (
           <h5 className="createBy" title={`${row?.original?.createdBy} • ${moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}`}>
             {row?.original?.createdBy}
+            <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{moment(row?.original?.createdByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         ) : (
@@ -71,13 +73,13 @@ export const getStaticFields = () => {
       cell: ({ row }) =>
         row?.original?.updatedBy ? (
           <h5 className="updateBy" title={`${row?.original?.updatedBy} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`}>
-            {row?.original?.updatedBy}
+            {row?.original?.updatedBy}&nbsp;
             <span className="updatedAtTime badge-date">{moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         ) : (
           <NoDataCell />
         )
-    },
+    }
   ];
 };
 
@@ -95,8 +97,12 @@ export const getCompletedByField = () => {
       disableFilters: true,
       cell: ({ row }) =>
         row?.original?.completedBy ? (
-          <h5 className="createBy" title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}>
+          <h5
+            className="createBy"
+            title={`${row?.original?.completedBy} • ${moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}`}
+          >
             {row?.original?.completedBy}
+            <span className="hidden">&nbsp;-&nbsp;</span>
             <span className="createdAtTime badge-date">{moment(row?.original?.completedByDate?.slice(0, 10)).format(dateFormat)}</span>
           </h5>
         ) : (
@@ -194,14 +200,15 @@ export default function useColumns() {
             let fieldName = field.fieldName + '_' + _unit.toLowerCase();
             let fieldLabel = field.fieldLabel + ' ' + _unit;
             column.push({
+              ...commonFieldData,
+              id: fieldName,
+              accessorKey: fieldName,
               accessor: fieldName,
               Header: fieldLabel,
               cell: ({ row }) => {
                 return row?.original[fieldName] ? <p>{row?.original[fieldName]}</p> : <NoDataCell />;
               },
-              editable: Boolean(field?.isColumnEditable),
-              decimalPlaces: field?.decimalPlaces,
-              primaryField: field?.primaryField ?? false
+              editable: Boolean(field?.isColumnEditable)
             });
           });
         } else if (field.type === 'currencyAmount' && (field.type === 'converter' || field.isConverter === true)) {
@@ -210,11 +217,12 @@ export default function useColumns() {
               let fieldName = field.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
               let fieldLabel = field.fieldLabel + ' ' + _unit + '/' + _currency;
               column.push({
+                ...commonFieldData,
+                id: fieldName,
+                accessorKey: fieldName,
                 accessor: fieldName,
                 Header: fieldLabel,
                 editable: Boolean(field?.isColumnEditable),
-                decimalPlaces: field?.decimalPlaces,
-                primaryField: field?.primaryField ?? false,
                 cell: ({ row }) => {
                   return row?.original[fieldName] ? (
                     <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -230,11 +238,12 @@ export default function useColumns() {
             let fieldName = field.fieldName + '_' + _currency.toLowerCase();
             let fieldLabel = field.fieldLabel + ' ' + _currency;
             column.push({
+              ...commonFieldData,
+              id: fieldName,
+              accessorKey: fieldName,
               accessor: fieldName,
               Header: fieldLabel,
               editable: Boolean(field?.isColumnEditable),
-              decimalPlaces: field?.decimalPlaces,
-              primaryField: field?.primaryField ?? false,
               cell: ({ row }) => {
                 return row?.original[fieldName] ? (
                   <p>{formatAmountWithCurrency(currency, row?.original[fieldName])?.amountWithouCurrencyCode}</p>
@@ -302,9 +311,23 @@ export default function useColumns() {
               <p className="text-truncate">{row?.original?.[fieldName] ? <p>{row?.original?.[fieldName]}</p> : <NoDataCell />}</p>
             )
         });
+      } else if (field?.dataList) {
+        column.push({
+          ...commonFieldData,
+          accessorFn: (original) => {
+            return isArray(original?.[field?.fieldName])
+              ? original?.[field?.fieldName][0]?.optionLabel
+              : isObject(original?.[field?.fieldName])
+              ? original?.[field?.fieldName]?.optionLabel
+              : original?.[field?.fieldName];
+          },
+          cell: ({ row }) => <DataListCell field={field} original={row?.original} />
+        });
       } else if (field?.lookup) {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          ...(Boolean(field?.isColumnEditable) ? {option: field?.option} : {}),
           accessorFn: (original) => {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
@@ -337,7 +360,7 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (
             <div>
-              <Avatar className="grid-avatar ml-auto min-[769px]:mx-auto" src={row?.original?.[field?.fieldName]}>
+              <Avatar className="grid-avatar min-[769px]:mx-auto" src={row?.original?.[field?.fieldName]}>
                 <Image style={{ fontSize: 18 }} />
               </Avatar>
             </div>
@@ -346,6 +369,7 @@ export default function useColumns() {
       } else if (field?.type === 'date') {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (
             <div>
               {row?.original?.[field?.fieldName] ? (
@@ -357,8 +381,7 @@ export default function useColumns() {
               )}
             </div>
           ),
-          disableFilters: true,
-          disableSortBy: true
+          disableFilters: true
         });
       } else if (field?.type === 'dateTime') {
         column.push({
@@ -374,8 +397,7 @@ export default function useColumns() {
               )}
             </div>
           ),
-          disableFilters: true,
-          disableSortBy: true
+          disableFilters: true
         });
       } else if (field?.type === 'checkBox') {
         column.push({
@@ -416,6 +438,23 @@ export default function useColumns() {
             </div>
           )
         });
+      } else if (field?.type === 'currencyNumber') {
+        const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
+        column.push({
+          ...commonFieldData,
+          editable: false,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => (
+            <div>
+              <h5 className="text-truncate">
+                {currencySymbol}
+                {formatAmountWithCurrency(currency, row.original[field?.fieldName] || 0)?.amountWithouCurrencyCode ??
+                  (row.original[field?.fieldName] || 0)}
+              </h5>
+            </div>
+          )
+        });
       } else if (field.type === 'decimal') {
         column.push({
           ...commonFieldData,
@@ -441,6 +480,7 @@ export default function useColumns() {
       } else {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (
             <div>
               {row?.original?.[field?.fieldName] ? (

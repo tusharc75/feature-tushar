@@ -89,7 +89,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
   const fetchData = () => {
     setLoadingData(true);
     axiosInstance()
-      .get(`${productInventory.api}/serial-number/${product[0]._id}?warehouse=${warehouse}`)
+      .get(`${productInventory.api}/serial-number?products=${product[0]._id}&warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         if (data?.length) {
           setSerialNumbers(data);
@@ -138,11 +138,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           product.length > 1
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
             : product?.map((e) => ({
-                product: e._id,
-                qty: parseInt(values.qty),
-                price: parseFloat(values.price),
-                serialNumber: values['serialNumbers']
-              })),
+              product: e._id,
+              qty: parseInt(values.qty),
+              price: parseFloat(values.price),
+              serialNumber: values['serialNumbers']
+            })),
         warehouse: warehouse,
         storageLocation: values.storageLocation,
         receiveDate: values.customDate,
@@ -224,16 +224,23 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     if (user?.user?.brandPolicy?.storageLocation && !values['storageLocation']) {
       errors['storageLocation'] = 'Please select Storage Location';
     }
-    // find duplicates serial numbers
-    const serialNumbersList = values['serialNumbers'];
-    const duplicates = serialNumbersList.filter((item, index) => serialNumbersList.indexOf(item) != index);
 
-    if (serialNumbersList.length > Number(values['qty'])) {
-      errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
-    } else if (duplicates.length > 0) {
-      errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
+    if (product[0]?.serializedProduct) {
+      // find duplicates serial numbers
+      const serialNumbersList = values['serialNumbers'];
+      const duplicates = serialNumbersList.filter((item, index) => serialNumbersList.indexOf(item) != index);
+
+      if (serialNumbersList.length > Number(values['qty'])) {
+        errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
+      }
+      else if (duplicates.length > 0) {
+        errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
+      }
+      if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && serialNumbersList.length !== Number(values['qty'])) {
+        errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
+      }
     }
-
+    
     if (lockDate) {
       if (!moment(values['customDate']).isSameOrAfter(moment(lockDate))) {
         errors['customDate'] = `Date entered prior to the locked date`;
@@ -544,6 +551,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                                 label={type === 'add' ? 'Serial Numbers' : 'Select Serial Numbers'}
                                 error={touched['serialNumbers'] && Boolean(errors['serialNumbers'])}
                                 helperText={touched['serialNumbers'] && errors['serialNumbers']}
+                                required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
                               />
                             )}
                           />

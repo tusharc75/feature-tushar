@@ -1,18 +1,18 @@
-import React, { useState, useEffect, useCallback, useContext, Fragment } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
+import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';
-import { useHistory } from 'react-router-dom';
 import queryString from 'query-string';
-import { useData } from '../../../StateProvider/Provider';
-import MyCalendar from '../Calendar/MyCalendar';
-import { GetBoard, GetReferenceName } from '../../../axios/activity';
-import Layout from '../../../components/Layout';
-import CustomContainer from '../../../components/CustomContainer';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import { SearchFilter } from '../../../components/SearchFilter';
-import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
+import { Fragment, useCallback, useContext, useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
+import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import { CreateEvent } from '../../../components/Activity/Event/CreateEvent';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import CustomContainer from '../../../components/CustomContainer';
+import { SearchFilter } from '../../../components/SearchFilter';
+import MyCalendar from '../Calendar/MyCalendar';
 
 const Event = () => {
   const history = useHistory();
@@ -27,37 +27,44 @@ const Event = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [events, setEvents] = useState([]);
   const parsed = queryString.parse(history.location.search);
-  const { referenceType, referenceId, activityType, activityId } = parsed;
+  const { referenceType, referenceId } = parsed;
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {});
     }
   }, [referenceId]);
 
-  const fetchBoard = useCallback(() => {
-    GetBoard('event', JSON.stringify(filter))
-      .then(({ data }) => {
-        const newData = data.map((d) => ({
-          ...d,
-          title: d.name,
-          start: d.startDate ? new Date(d.startDate) : moment().toDate(),
-          end: d.dueDate ? new Date(d.dueDate) : moment().add(20, 'days').toDate()
-        }));
+  const fetchBoard = useCallback(
+    (cancelTokenSource?: CancelTokenSource) => {
+      axiosInstance()
+        .get(`/activity/board?type=event&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
+          const newData = data.map((d) => ({
+            ...d,
+            title: d.name,
+            start: d.startDate ? new Date(d.startDate) : moment().toDate(),
+            end: d.dueDate ? new Date(d.dueDate) : moment().add(20, 'days').toDate()
+          }));
 
-        setEvents(newData);
-      })
-      .catch((err) => {
-        setToastConfig(err);
-      });
-  }, [filter]);
+          setEvents(newData);
+        })
+        .catch((err) => {
+          setToastConfig(err);
+        });
+    },
+    [filter]
+  );
 
   useEffect(() => {
-    fetchBoard();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchBoard(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [fetchBoard]);
 
   const handleChangeFilter = (value) => {

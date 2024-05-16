@@ -17,7 +17,8 @@ import {
   yupSchema,
   repairOrder,
   REPAIR_ORDER_TYPE,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -71,7 +72,7 @@ const ManageRepairOrder = ({
       const response: any = await axiosInstance().get('/field?resource=Repair Order');
       fieldData = response?.data?.data;
 
-      fieldData = fieldData?.filter((e) => !['rentalJob', 'quotation', 'invoice']?.includes(e.fieldData.fieldName));
+      fieldData = fieldData?.filter((e) => !['quotation', 'invoice']?.includes(e.fieldData.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -94,7 +95,7 @@ const ManageRepairOrder = ({
           } else {
             if (isAnyMaterial) {
               fieldsDataForUpdate?.forEach((e) => {
-                if (e.fieldName === 'customerAccount') {
+                if (['customerAccount', 'warehouse']?.includes(e.fieldName)) {
                   e.disableOnEdit = true;
                 }
               })
@@ -127,6 +128,21 @@ const ManageRepairOrder = ({
           }
           if (fieldsDataForCreate?.some((e) => e?.fieldName === 'type')) {
             initialData['type'] = REPAIR_ORDER_TYPE.internal;
+          }
+        }
+        if (referenceType === sidebarResource.workOrderPlanning) {
+          if (referenceData) {
+            for (const key in referenceData) {
+              if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+                initialData[key] = referenceData[key];
+              }
+            }
+            fieldsDataForCreate?.forEach((e) => {
+              if (e.fieldName === 'warehouse') {
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
           }
         }
         setInitialData({

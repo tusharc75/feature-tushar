@@ -14,7 +14,6 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
-import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -23,9 +22,12 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
 import LeadTimeDialog from './LeadTimeDialog';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
+import { flattenArray } from 'src/constants/columns';
+import AdditionalCostDialog from './AdditionalCostDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
@@ -46,6 +48,8 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
+  const [costFields,setCostFields] = useState(null);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -62,7 +66,9 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderProduct, salesOrderData?.currency, true);
+    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderCost, salesOrderData?.currency, true);
+    setCostFields(c_fields);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, salesOrderData?.currency);
     const isPriceRequired = data.filter((el) => el.fieldName === 'price' && el.required).length > 0;
@@ -100,6 +106,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {
+              (row.original?.detail ?
               <p
                 onClick={() => {
                   handleOpen(row, table.getRowModel().rows);
@@ -107,10 +114,11 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
                 className="link text-truncate"
                 title={row.original?.detail}
               >
-                {row.original?.detail}
+                { row.original?.detail }
               </p>
+               : <NoDataCell />)
             }
-            {row?.original?.type !== MATERIAL_TYPE.service && (
+            {![MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(row?.original?.type) && (
               <Box ml={1} className="d-flex align-items-center">
                 {row.original?.subRows?.length > 0 && (
                   <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
@@ -127,6 +135,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
                 </Box>
               </Box>
             )}
+            {row.original.type !== MATERIAL_TYPE.manualEntry && (
             <Box ml={1}>
               <IconButton
                 size="small"
@@ -142,7 +151,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               >
                 <OpenInNewIcon fontSize="small" color="primary" />
               </IconButton>
-            </Box>
+            </Box>)}
           </div>
         )
       },
@@ -194,7 +203,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               <EditIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          {permissions?.leadTimeMaster && (
+          {permissions?.leadTimeMaster && row.original.type !== MATERIAL_TYPE.manualEntry && (
             <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
               <IconButton
                 size="small"
@@ -233,9 +242,16 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     setNextStep(false);
     var data: any = [];
     const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
+    const additionalData = await axiosInstance().get(`${salesOrder.api}/additionalcost/${salesOrderData._id}`);
     data = response?.data?.data;
+    let additionalCost = additionalData?.data?.data;
+    additionalCost = additionalCost?.map((e: any) => {
+      return { ...e, type: MATERIAL_TYPE.manualEntry };
+    })
+
     setMaterial(JSON.parse(JSON.stringify(data.material)));
-    const rows = data.material.filter((e) => e.parentId === null);
+    let rows = data.material.filter((e) => e.parentId === null);
+    rows = [...rows,...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${
@@ -243,14 +259,19 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail || ''
       }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
+          ? parent?.productDetail?.productDescription || ''
           : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+          ? parent?.packageDetail?.packageDescription || ''
+          : parent.type === MATERIAL_TYPE.service
+            ? parent?.serviceDetail?.serviceDescription || ''
+            : parent.description || '';
+
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.isValid = parent['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : !isRateRequired;
@@ -344,6 +365,26 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       });
   };
 
+  const handleAddCost = (rows) => {
+    setUpdating(true);
+    axiosInstance()
+      .post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/add`, { additionalCost: rows })
+      .then(({ data }) => {
+        fetchData();
+        setShowCostDialog({ open: false, showSaveAndNext: false });
+        setUpdating(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
@@ -356,13 +397,34 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           message: data.message
         });
         if (saveAndNext) {
-          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
-          setRecordToUpdate(dataRows[rowIndex + 1]);
-          setIsProductEdit({
-            open: true,
-            isBulkedit: false,
-            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
-          });
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if(!row?.parentId){
+            const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+            setRecordToUpdate(dataRows[rowIndex + 1]);
+            if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+              setIsProductEdit({
+                open: false,
+                isBulkedit: false,
+                showSaveAndNext: false
+              });
+              setShowCostDialog({ open: true, showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else {
+              setIsProductEdit({
+                open: true,
+                isBulkedit: false,
+                showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+              });
+            }
+          }else{
+            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
+            const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
+            setRecordToUpdate(allSubRowData[subRowIdx + 1]);
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+            });
+          }
         } else {
           setIsProductEdit({ open: false, isBulkedit: false, showSaveAndNext: false });
         }
@@ -375,29 +437,99 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       });
   };
 
+  const handleUpdateCost = (rows: any, saveAndNext = false) => {
+    setUpdating(true);
+    axiosInstance()
+      .put(`${salesOrder.api}/additionalcost/${salesOrderData._id}/update`, { additionalCost: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        if (saveAndNext) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          setRecordToUpdate(dataRows[rowIndex + 1]);
+          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+            setShowCostDialog({ open: true, showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          } else {
+            setShowCostDialog({ open: false, showSaveAndNext: false });
+            setIsProductEdit({
+              open: true,
+              isBulkedit: false,
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+          }
+        } else {
+          setShowCostDialog({ open: false, showSaveAndNext: false });
+        }
+        fetchData();
+      })
+      .catch((error) => {
+        setUpdating(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleDelete = (rows) => {
     setDeleting(true);
-    axiosInstance()
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id)
+    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry)
+    if(products?.length){
+      axiosInstance()
       .put(`${salesOrder.api}/material/${salesOrderData?._id}/delete`, { ids: rows })
       .then(() => {
         setDeleting(false);
         fetchData();
         fetchSalesOrderData();
         setDeleteData(null);
+        fetchSalesOrderData();
       })
       .catch((error) => {
         setDeleting(false);
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
+    }
+    if(cost?.length){
+      axiosInstance()
+      .post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/delete`, { ids: cost })
+      .then(({ data }) => {
+        setDeleting(false);
+        fetchData();
+        fetchSalesOrderData();
+        setDeleteData(null);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    } 
   };
 
   const handleOpen = (row, rows) => {
-    setIsProductEdit({
-      open: true,
-      isBulkedit: false,
-      showSaveAndNext: row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false
-    });
+    let showSaveAndNext;
+    if (row.depth != 0) {
+        const allRows = rows.filter((ele) => ele.parentId === row.parentId);
+        showSaveAndNext = row?.index < allRows.length - 1 ? true : false;
+    } else {
+      showSaveAndNext = row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false;
+    }
+
+    if (row?.original?.type === MATERIAL_TYPE.manualEntry) {
+      setShowCostDialog({ open: true, showSaveAndNext: row?.index < rows?.length - 1 ? true : false });
+    } else {
+      setIsProductEdit({
+        open: true,
+        isBulkedit: false,
+        showSaveAndNext: showSaveAndNext
+      });
+    }
     setRecordToUpdate(row.original);
   };
 
@@ -473,6 +605,15 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             {`Add Existing Services`}
           </MenuItem>
         )}
+        {costFields?.length > 0 &&
+          <MenuItem
+            onClick={() => {
+              setShowCostDialog({ open: true, showSaveAndNext: false });
+            }}
+          >
+            Add Manual Entry
+          </MenuItem>
+        }
       </>
     );
   };
@@ -481,6 +622,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     return (
       <>
         <MenuItem
+          disabled={selectedRecords.length === 0 || selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
           onClick={() => {
             setIsProductEdit({ open: true, isBulkedit: true, showSaveAndNext: false });
           }}
@@ -658,6 +800,20 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             handleAdd(rows);
           }}
           isSubmitting={isSubmitting}
+        />
+      )}
+      {showCostDialog.open && (
+        <AdditionalCostDialog
+          onClose={() => {
+            setShowCostDialog({ open: false, showSaveAndNext: false });
+            setRecordToUpdate(null);
+          }}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleUpdateCost}
+          currency={salesOrderData?.currency}
+          costData={recordToUpdate}
+          loadingEdit={isUpdating}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
         />
       )}
     </Fragment>

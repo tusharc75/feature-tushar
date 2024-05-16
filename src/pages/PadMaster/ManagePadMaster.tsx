@@ -1,6 +1,6 @@
 import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
-import { isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -19,121 +19,134 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 
 
 const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
-    const history = useHistory();
-    const {
-        state: { user }
-    }: any = useData();
-    const toastConfig = useContext(CustomToastContext);
-    const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
-    const [loading, setLoading] = useState(false);
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-    const [submitting, setSubmitting] = useState(false);
-    const [cloneHeading, setCloneHeading] = useState('');
-    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const history = useHistory();
+  const {
+    state: { user }
+  }: any = useData();
+  const toastConfig = useContext(CustomToastContext);
+  const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
+  const [loading, setLoading] = useState(false);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [submitting, setSubmitting] = useState(false);
+  const [cloneHeading, setCloneHeading] = useState('');
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-    useEffect(() => {
-        fetchFields();
-    }, []);
+  useEffect(() => {
+    fetchFields();
+  }, []);
 
-    const fetchFields = async () => {
-        try {
-          let data;
-          const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.padMaster}`);
-          data = response?.data?.data;
-          let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-          const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-    
-          if (id) {
-            axiosInstance()
-              .get(`${routes?.padMaster?.path}/${id}`)
-              .then(({ data: { data } }: any) => {
-                let fields = fieldsDataForUpdate;
-                let tempData = data;
-                if (isClone) {
-                  fields = fieldsDataForCreate;
-                  const { padName, ...rest } = data;
-                  setCloneHeading(padName);
-                  tempData = rest;
-                } 
-                setInitialData({
-                  fields: fields,
-                  values: getObjKeysWithValues(tempData, fields)
-                });
-              })
-              .catch((error) => {
-                toastConfig.setToastConfig(error);
-              });
-          } else {
-            const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+  const fetchFields = async () => {
+    try {
+      let data;
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.padMaster}`);
+      data = response?.data?.data;
+      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
+      if (id) {
+        axiosInstance()
+          .get(`${routes?.padMaster?.path}/${id}`)
+          .then(({ data: { data } }: any) => {
+            let fields = fieldsDataForUpdate;
+            let tempData = data;
+            if (isClone) {
+              fields = fieldsDataForCreate;
+              const { padName, ...rest } = data;
+              setCloneHeading(padName);
+              tempData = rest;
+            }
             setInitialData({
-              fields: fieldsDataForCreate,
-              values: tempInitialData
+              fields: fields,
+              values: getObjKeysWithValues(tempData, fields)
             });
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      } else {
+        const tempInitialData: any = getObjKeys('', fieldsDataForCreate);
+        for (const key in referenceData) {
+          if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+            const field: any = fieldsDataForCreate?.find((e) => e.fieldName === key);
+            if (field.type === 'multiSelect' && !isArray(referenceData[key])) {
+              tempInitialData[key] = [referenceData[key]];
+            }
+            else {
+              tempInitialData[key] = referenceData[key];
+            }
+            field.disableOnEdit = true;
+            field.isUneditable = true;
           }
-        } catch (error) {
-          toastConfig.setToastConfig(error);
         }
-      };
-    
-      const handleSubmit = (values) => {
-        setSubmitting(true);
-        if (id && !isClone) {
-          values._id = id;
-          axiosInstance()
-            .put(`${routes.padMaster?.path}`, values)
-            .then(({ data }: any) => {
-              setSubmitting(false);
-              onSuccess();
-              toastConfig.setToastConfig({
-                open: true,
-                type: 'success',
-                message: data.message
-              });
-            })
-            .catch((error) => {
-              setSubmitting(false);
-              toastConfig.setToastConfig(error);
-            });
-        } else {
-          axiosInstance()
-            .post(`${routes.padMaster?.path}`, values)
-            .then(({ data: { data, message } }: any) => {
-              setLoading(false);
-              if (referenceData) {
-                onSuccess(data);
-              } else {
-                history.push(`${routes.padMasterDetail.path}/${data._id}`);
-                onSuccess(data);
-              }
-              setSubmitting(true);
-              toastConfig.setToastConfig({
-                open: true,
-                type: 'success',
-                message: message
-              });
-            })
-            .catch((error) => {
-              setLoading(false);
-              setSubmitting(false);
-              toastConfig.setToastConfig(error);
-            });
-        }
-      };
+        setInitialData({
+          fields: fieldsDataForCreate,
+          values: tempInitialData
+        });
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
-    return (
-        <Dialog
-        maxWidth="md"
-        fullScreen={fullScreen || isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        open={true}
-        fullWidth
-        onClose={(e, reason) => {
-          if (reason !== 'backdropClick') {
-            setShowConfirmDialog(true);
+  const handleSubmit = (values) => {
+    setSubmitting(true);
+    if (id && !isClone) {
+      values._id = id;
+      axiosInstance()
+        .put(`${routes.padMaster?.path}`, values)
+        .then(({ data }: any) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      axiosInstance()
+        .post(`${routes.padMaster?.path}`, values)
+        .then(({ data: { data, message } }: any) => {
+          setLoading(false);
+          if (referenceData) {
+            onSuccess(data);
+          } else {
+            history.push(`${routes.padMasterDetail.path}/${data._id}`);
+            onSuccess(data);
           }
-        }}
-      > 
+          setSubmitting(true);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+        })
+        .catch((error) => {
+          setLoading(false);
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  return (
+    <Dialog
+      maxWidth="md"
+      fullScreen={fullScreen || isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      open={true}
+      fullWidth
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
+    >
       {initialData.fields.length ? (
         <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
@@ -143,13 +156,12 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${
-                  id
-                    ? isClone
-                      ? `Clone - ${cloneHeading}`
-                      : `Update ${initialData.values?.padName ? `(${initialData.values?.padName})` : ''}`
-                    : `Create ${routes?.padMaster?.title}`
-                }`}
+                title={`${id
+                  ? isClone
+                    ? `Clone - ${cloneHeading}`
+                    : `Update ${initialData.values?.padName ? `(${initialData.values?.padName})` : ''}`
+                  : `Create ${routes?.padMaster?.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -216,8 +228,8 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-      </Dialog>
-    )
+    </Dialog>
+  )
 }
 
 export default ManagePadMaster

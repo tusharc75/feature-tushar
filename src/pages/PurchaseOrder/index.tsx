@@ -19,7 +19,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -40,8 +40,11 @@ const PurchaseOrder = () => {
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const {
+    state: { user, permissions, selectedEntity }
+  }: any = useData();
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.purchaseOrder));
   const [showManagePurchaseOrderDialog, setShowManagePurchaseOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -51,9 +54,6 @@ const PurchaseOrder = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [warehouse, setWarehouse] = useState(null);
 
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -175,11 +175,11 @@ const PurchaseOrder = () => {
 
   const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-    if (selectedType === 1) {
-      deepFilter = deepFilter + `&myRecords=1`;
-    }
     if (isExport) {
       deepFilter = `?`;
+    }
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
@@ -359,7 +359,6 @@ const PurchaseOrder = () => {
             setShowManagePurchaseOrderDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.purchaseOrder?.isCreate}
-          // synchronizeType
           setQueryString={false}
         />
 

@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -16,9 +16,9 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { ContactlessOutlined } from '@material-ui/icons';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -64,7 +64,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
   }, [rowData]);
 
   const fetchFields = async () => {
-    var data = await fetch_invoice_product_fields(invoiceData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];
@@ -95,6 +95,9 @@ const MaterialDialog: FC<EditDialogProps> = ({
         }
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
+        }
+        if (element.fieldName === 'pricingCondition') {
+          element.option = [];
         }
         element.required = false;
         element.isFormula = false;

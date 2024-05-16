@@ -5,14 +5,14 @@ import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { MATERIAL_TYPE, SUBLEASE_STATUS, sidebarResource, sublease } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SUBLEASE_STATUS, sidebarResource, sublease } from 'src/constants/helpers';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import PreviewDownload from 'src/components/PreviewDownload';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateStatus }) {
   const toastConfig = useContext(CustomToastContext);
@@ -36,10 +36,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_sublease_product_fields(subleaseData?.currency);
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, false);
     const newColumns = generateColumns(renderedFrom, data, null, false, subleaseData?.currency);
     let coloum: any = [
       {

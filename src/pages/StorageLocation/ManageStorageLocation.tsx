@@ -10,16 +10,15 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, setFieldsInAscendingOrder, storageLocation } from '../../constants/helpers';
+import { CustomDialogTransition, storageLocation } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
-import FormTypes from '../../components/Helpers/FormTypes';
+import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
 import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onClose, onSuccess, referenceData = null }) => {
   const history = useHistory();
@@ -32,7 +31,6 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const [storageLocationData, setStorageLocationData] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -93,10 +91,6 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
         toastConfig.setToastConfig(error);
       });
   }, [storageLocationId]);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   const handleSubmit = (values) => {
     setLoading(true);
@@ -168,7 +162,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
       }}
       fullWidth
     >
-      {formsData && formsData.length ? (
+      {initialData && initialData.fields.length ? (
         <Formik
           innerRef={ref}
           initialValues={initialData.values}
@@ -201,43 +195,15 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData.length > 0 &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6} md={6}>
-                                <FormTypes
-                                  {...field}
-                                  fieldData={field}
-                                  disabled={Boolean(storageLocationId) && field.disableOnEdit && !isClone}
-                                  values={values}
-                                  errors={errors}
-                                  touched={touched}
-                                  label={field.fieldLabel}
-                                  name={field.fieldName}
-                                  type={field.type}
-                                  options={field.option}
-                                  setFieldValue={(name, value) => {
-                                    setFieldValue(name, value);
-                                  }}
-                                  required={field.required}
-                                  fullWidth
-                                  isTooltip={field?.isTooltip || false}
-                                  tooltipMessage={field?.tooltipMessage}
-                                  size="small"
-                                />
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

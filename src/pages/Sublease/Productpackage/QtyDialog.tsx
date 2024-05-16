@@ -5,7 +5,7 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { groupBy, unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, SUBLEASE_TYPE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, SUBLEASE_TYPE, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -17,8 +17,8 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import { fetch_sublease_product_fields } from '../../../components/Sublease/helper';
 import { calculateRowsField, resetValueZero, sumOnParent } from 'src/components/RentalManagment/helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -62,7 +62,7 @@ const QtyDialog: FC<EditDialogProps> = ({
   }, []);
 
   const fetchData = async () => {
-    var data = await fetch_sublease_product_fields(subleaseData.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];
@@ -93,6 +93,9 @@ const QtyDialog: FC<EditDialogProps> = ({
         }
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
+        }
+        if (element.fieldName === 'pricingCondition') {
+          element.option = [];
         }
         element.required = false;
         element.isFormula = false;

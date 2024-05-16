@@ -23,7 +23,7 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from '../../constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from '../../constants/helpers';
 import WarhouseList from '../Account/Warehouse/WarhouseList';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -31,11 +31,11 @@ import ManageContactDialog from './ManageContact';
 
 const types = [
   {
-    key: 'All Contacts',
+    key: 'My Contacts',
     value: 1
   },
   {
-    key: 'My Contacts',
+    key: 'All Contacts',
     value: 2
   }
 ];
@@ -51,7 +51,7 @@ export default function Contact(props) {
     contact: { contactApi, contactResource, contactPermission, contactRoute },
     account
   } = props;
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource[contactResource]));
   const [contactId, setContactId] = useState('');
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState({ show: false, isDelete: false });
@@ -289,7 +289,7 @@ export default function Contact(props) {
       deepFilter = `?`;
     }
 
-    if (selectedType === 2) {
+    if (selectedType === 1) {
       deepFilter = deepFilter + `&myRecords=1`;
     }
 
@@ -488,7 +488,6 @@ export default function Contact(props) {
           addButtonProps={{ disabled: !contactPermissions?.isCreate }}
           addButtonOnclick={clickCreateNew}
           isAddButtonVisible={true}
-          synchronizeType
         />
 
         {columns ? (

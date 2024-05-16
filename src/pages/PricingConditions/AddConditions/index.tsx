@@ -62,7 +62,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               ? element.productDetail?.productName
               : element.materialType === MATERIAL_TYPE.service
               ? element.serviceDetail?.serviceName
-              : element.packageDetail?.packageName
+              : element.materialType === MATERIAL_TYPE.package
+                ? element.packageDetail?.packageName
+                : element.competencyDetail.competencyName
           }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
@@ -193,8 +195,10 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                       row?.original?.materialType === 'Product'
                         ? routes.productDetail.path
                         : row?.original?.materialType === 'Service'
-                        ? routes.serviceMasterDetail.path
-                        : routes.packagesDetail.path
+                          ? routes.serviceMasterDetail.path
+                          : row?.original?.materialType === 'Package'
+                            ? routes.packagesDetail.path
+                            : routes?.competenciesDetail.path  
                     }/${row?.original?.materialId}`
                   );
                 }}
@@ -327,6 +331,14 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               }}
             >
               Add Existing Services
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                closeAddActions();
+                setAddMaterialDialog({ open: true, materialType: 'competency' });
+              }}
+            >
+              Add Existing Competencies
             </MenuItem>
           </Menu>
         </Box>
@@ -487,6 +499,19 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {addMaterialDialog.open && addMaterialDialog.materialType === MATERIAL_TYPE.service && (
         <AssignDynamicDialog
           resource={sidebarResource?.serviceMaster}
+          onSuccess={(data) => {
+            handleAdd(data);
+          }}
+          handleClose={() => {
+            setAddMaterialDialog({ open: false, materialType: '' });
+          }}
+          ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
+          isSubmitting={isSubmitting}
+        />
+      )}
+      {addMaterialDialog.open && addMaterialDialog.materialType === 'competency' && (
+        <AssignDynamicDialog
+          resource={sidebarResource?.competencies}
           onSuccess={(data) => {
             handleAdd(data);
           }}

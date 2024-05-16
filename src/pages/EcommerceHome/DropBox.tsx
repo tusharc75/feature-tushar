@@ -1,28 +1,38 @@
-import { Grid } from '@material-ui/core';
-import { useDrop } from 'react-dnd';
+import { Draggable, Droppable } from '@hello-pangea/dnd';
 import ItemView from './ItemView';
 
 const DropBox = ({ formData, handleRemove, findCard, moveCard, setFormData }) => {
-  
-  const [{ }, drop] = useDrop(() => ({
-    accept: 'field'
-  }), []);
-
   return (
-    <Grid ref={drop} style={{ height: '80vh', alignContent: "start" }} container spacing={1} >
-      {formData && formData?.map((i: any, index) => (
-        <ItemView
-          key={index}
-          label={i?.label}
-          handleRemove={handleRemove}
-          id={i?._id}
-          findCard={findCard}
-          moveCard={moveCard}
-          itemData={i}
-          setFormData={setFormData}
-        />
-      ))}
-    </Grid>
+    <>
+      <Droppable droppableId="pageSection">
+        {(provided) => (
+          <ul className="list-none grid gap-2" {...provided.droppableProps} ref={provided.innerRef}>
+            {formData?.map((col, index) => (
+              <Draggable key={col._id} draggableId={`${col._id}`} index={index}>
+                {(provided, snapshot) => (
+                  <li
+                    {...provided.draggableProps}
+                    ref={provided.innerRef}
+                    className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
+                  >
+                    <ItemView
+                      key={index}
+                      label={col?.label}
+                      handleRemove={handleRemove}
+                      id={col?._id}
+                      dragHandleProps={provided.dragHandleProps}
+                      itemData={col}
+                      setFormData={setFormData}
+                    />
+                  </li>
+                )}
+              </Draggable>
+            ))}
+            {provided.placeholder}
+          </ul>
+        )}
+      </Droppable>
+    </>
   );
 };
 

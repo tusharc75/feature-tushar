@@ -3,7 +3,6 @@ import { Formik, Form } from 'formik';
 import { Box, Button, Grid } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -26,6 +25,7 @@ import routes from '../../../components/Helpers/Routes';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
@@ -33,16 +33,11 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const [packageName, setPackageName] = useState('');
   const {
     state: { user }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   useEffect(() => {
     fetchFields();
@@ -189,7 +184,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
       }}
       open={open}
     >
-      {formsData && formsData?.length ? (
+      {initialData?.fields?.length ? (
         <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Fragment>
@@ -207,42 +202,15 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData.map((form, i) => (
-                    <div key={i}>
-                      <div className={'detail-box-content'}>
-                        <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                        <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                      </div>
-                      <Box marginY={2}>
-                        <Grid spacing={3} container>
-                          {form.sectionFields.map((field, index2) => (
-                            <Grid key={index2} item xs={12} sm={6} md={6}>
-                              <FormTypes
-                                {...field}
-                                fieldData={field}
-                                disabled={Boolean(packageId) && field.disableOnEdit && !isClone}
-                                values={values}
-                                errors={errors}
-                                touched={touched}
-                                label={field.fieldLabel}
-                                name={field.fieldName}
-                                type={field.type}
-                                options={field.option}
-                                setFieldValue={(name, value) => {
-                                  setFieldValue(name, value);
-                                }}
-                                required={field.required}
-                                fullWidth
-                                isTooltip={field?.isTooltip || false}
-                                tooltipMessage={field?.tooltipMessage}
-                                size="small"
-                              />
-                            </Grid>
-                          ))}
-                        </Grid>
-                      </Box>
-                    </div>
-                  ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

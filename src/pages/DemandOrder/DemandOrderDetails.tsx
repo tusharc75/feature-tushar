@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
@@ -18,8 +18,9 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, demandOrder } from '../../constants/helpers';
+
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, demandOrder, sidebarResource } from '../../constants/helpers';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Material from './Material';
 
@@ -48,13 +49,6 @@ const DemandOrderDetails = () => {
     history.push(`?tab=${newValue}`);
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   useEffect(() => {
     if (id) {
       fetchFields();
@@ -77,11 +71,8 @@ const DemandOrderDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+     
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data));
       setDemandOrderData(data);
       setLoading(false);
     } catch (error) {
@@ -142,36 +133,14 @@ const DemandOrderDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields.length ? (

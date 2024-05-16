@@ -21,6 +21,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
+  getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
   // getLocalStorageArrayData,
@@ -51,7 +52,6 @@ const Job = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const history = useHistory();
-  let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { dataRows, rowCount, page, loading, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
@@ -59,7 +59,7 @@ const Job = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.job));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageJobDialog, setShowManageJobDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -279,26 +279,24 @@ const Job = () => {
     return (
       <>
         {permissions?.fleetDispatch?.isRead && (
-          <ToggleButtonGroup size="small">
-            <ToggleButton
-              onClick={() => {
-                history.push(`${routes.fleetDispatch.path}`);
-              }}
-            >
-              <span>{routes.fleetDispatch.title}</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push(`${routes.fleetDispatch.path}`);
+            }}
+          >
+            <span>{routes.fleetDispatch.title}</span>
+          </Button>
         )}
         {permissions?.fleetReceiver?.isRead && (
-          <ToggleButtonGroup size="small">
-            <ToggleButton
-              onClick={() => {
-                history.push(`${routes.fleetReceiver.path}`);
-              }}
-            >
-              <span>{routes.fleetReceiver.title}</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
+          <Button
+            className={'toggleButton-v1'}
+            onClick={() => {
+              history.push(`${routes.fleetReceiver.path}`);
+            }}
+          >
+            <span>{routes.fleetReceiver.title}</span>
+          </Button>
         )}
 
         <IconButton

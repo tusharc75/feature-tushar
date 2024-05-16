@@ -1,12 +1,12 @@
-import React, { Dispatch, memo, useEffect, useMemo } from 'react';
 import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
-import { CellRenderer, DraggableHeader, TColType } from './TableHelperComponents';
 import MaUTable from '@material-ui/core/Table';
-import { TActios, TInitialState } from '../hooks/useTableReducer';
+import { Error } from '@material-ui/icons';
 import { Row, Table, flexRender } from '@tanstack/react-table';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Error } from '@material-ui/icons';
+import React, { Dispatch, ForwardedRef, forwardRef, memo, useEffect, useImperativeHandle, useMemo, useRef } from 'react';
+import { TActios, TInitialState } from '../hooks/useTableReducer';
 import { getStickyPosition } from '../utils';
+import { CellRenderer, DraggableHeader, TColType } from './TableHelperComponents';
 
 const MemoizedCellRenderer = memo(CellRenderer);
 
@@ -24,34 +24,57 @@ type TTableProps = {
   loading: boolean;
   error: boolean;
   height?: any;
+  exportTableView?: boolean;
   virtualization: boolean;
+  onRowClick: (row: Row<any>) => void;
+  resource: string;
 };
 
-const TableComponent = ({
-  state,
-  setWholeRowsCellColor,
-  table,
-  dispatch,
-  setCellValue,
-  submitInput,
-  cellValue,
-  resetField,
-  isClientSideGrid,
-  reorder,
-  loading,
-  error,
-  height,
-  virtualization = false
-}: TTableProps) => {
+const TableComponent = forwardRef(function (
+  {
+    state,
+    setWholeRowsCellColor,
+    table,
+    dispatch,
+    setCellValue,
+    submitInput,
+    cellValue,
+    resetField,
+    isClientSideGrid,
+    reorder,
+    loading,
+    error,
+    height,
+    exportTableView = false,
+    virtualization = false,
+    onRowClick,
+    resource
+  }: TTableProps,
+  ref: ForwardedRef<HTMLTableElement>
+) {
   const { filters: customFilters, initialDataLoaded }: TInitialState = state;
   const columns = table.getAllColumns();
   const { columnVisibility } = table.getState();
+  const tableRef = useRef<HTMLTableElement | null>(null);
+
+  useImperativeHandle(
+    ref,
+    function () {
+      return tableRef.current;
+    },
+    []
+  );
 
   const visibleColumns = useMemo(() => {
     return columns.filter((column) => columnVisibility[column.id]);
   }, [columnVisibility, columns]);
 
-  const { rows } = table.getRowModel();
+  let rows: Row<any>[];
+  if (exportTableView) {
+    rows = table.getExpandedRowModel().flatRows;
+  } else {
+    rows = table.getRowModel().rows;
+  }
 
   // virtualization
   const parentRef = React.useRef();
@@ -97,6 +120,7 @@ const TableComponent = ({
                 left: 0,
                 transform: `translateY(${virtualRow.start}px)`
               }}
+              onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}
             >
               {columnVirtualizer.getVirtualItems().map((virtualCell, index) => {
                 const cell = row.getVisibleCells()[virtualCell.index];
@@ -135,13 +159,16 @@ const TableComponent = ({
     );
   };
 
+  const excludedColumns = ['action', 'selection', 'expander'];
+
   const NormalTable = () => {
     return (
       <>
         {rows.map((row) => {
           return (
-            <TableRow key={row.id} className={`tr`}>
+            <TableRow key={row.id} className={`tr`} onClick={() => (typeof onRowClick === 'function' ? onRowClick(row.original) : null)}>
               {row.getVisibleCells().map((cell, index) => {
+                if (exportTableView && excludedColumns.includes(cell.column.columnDef.id)) return null;
                 return (
                   <MemoizedCellRenderer
                     key={cell.id}
@@ -188,10 +215,9 @@ const TableComponent = ({
         style={{
           display: 'block',
           overflow: loading ? 'hidden' : 'auto',
-          height: height ?? '100%',
-          minHeight: 500
+          height: height ?? '100%'
         }}
-        className="border z-10 bg-[var(--dark-primary,_white)] isolate"
+        className="border z-10 bg-[var(--dark-primary,_white)] isolate max-[900px]:min-h-[500px]"
         ref={virtualization ? parentRef : undefined}
       >
         {!loading && !error && rows.length === 0 && initialDataLoaded && (
@@ -221,7 +247,7 @@ const TableComponent = ({
           </Box>
         )}
 
-        <MaUTable size="small" className="tableWrap table sticky" style={styles}>
+        <MaUTable ref={tableRef} size="small" className="tableWrap table sticky" style={styles}>
           <TableHead
             style={{
               overflowY: 'auto',
@@ -232,6 +258,7 @@ const TableComponent = ({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="tr sticky top-0 bg-[var(--dark-primary,_white)] z-[11] " key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
                   return (
                     <DraggableHeader
                       virtualization={virtualization}
@@ -242,6 +269,7 @@ const TableComponent = ({
                       reorder={reorder}
                       header={header}
                       key={header.id}
+                      resource={resource}
                     />
                   );
                 })}
@@ -263,6 +291,7 @@ const TableComponent = ({
                   return (
                     <tr key={footerGroup.id}>
                       {footerGroup.headers.map((header, index) => {
+                        if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
                         const columnDef = header.column.columnDef as TColType;
                         const { style } = getStickyPosition(columnDef, index, table);
                         const colSize = header.getSize();
@@ -292,6 +321,6 @@ const TableComponent = ({
       </div>
     </>
   );
-};
+});
 
 export default TableComponent;

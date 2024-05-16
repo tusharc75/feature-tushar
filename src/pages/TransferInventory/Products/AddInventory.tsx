@@ -33,7 +33,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   const fetchFields = async () => {
     const productResult = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
     const data = productResult?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
+    const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
     newColumns.unshift(
       {
         accessor: 'qty',
@@ -205,7 +205,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   return (
     <Dialog open fullScreen fullWidth onClose={close}>
       <CustomDialogHeader title="Add Product" onClose={close} showRequiredLabel={false} />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
@@ -220,7 +220,6 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             text: selectedRecords?.filter((e) => !e?.hideSelection).length > 0 ? `(${selectedRecords?.filter((e) => !e?.hideSelection).length})` : ''
           }}
           setQueryString={false}
-          synchronizeType={false}
         />
 
         {columns ? (

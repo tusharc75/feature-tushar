@@ -1,7 +1,7 @@
 
 import { objectStore, insertUpdate, findOne, findAll } from '../../constants/indexdbhelper';
 import { updateRentalAssetStatus, updateRentalProductStatus } from '../RentalManagement/rentalOfflineHelper';
-import { getObjKeysWithValues, ASSET_STATUS, RENTAL_INTERNAL_ASSET_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE } from "../../constants/helpers";
+import { getObjKeysWithValues, ASSET_STATUS, RENTAL_INTERNAL_ASSET_STATUS, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, sidebarResource } from "../../constants/helpers";
 
 export const createDeliveryTicketOffline = async (data, values) => {
     try {
@@ -61,11 +61,11 @@ export const updateSignatureOffline = async (id, signatures) => {
         });
         if (deliveryTicket.signatures) {
             if (deliveryTicket.signatures.length === 0) {
-                deliveryTicket.status = DELIVERY_TICKET_STATUS.indTransit
+                deliveryTicket.status = DELIVERY_TICKET_STATUS.inTransit
                 deliveryTicket.signatures = signatures
-                await updateofflineDataSync(id, { status: DELIVERY_TICKET_STATUS.indTransit, signatures: signatures })
+                await updateofflineDataSync(id, { status: DELIVERY_TICKET_STATUS.inTransit, signatures: signatures })
                 await updateRentalAssetStatus(deliveryTicket?.rentalJob?.optionValue,
-                    ASSET_STATUS.indTransit,
+                    ASSET_STATUS.inTransit,
                     deliveryTicket?.productInventory?.map((e) => e.optionValue))
             }
             else {
@@ -94,7 +94,7 @@ export const updateofflineDataSync = async (id, data) => {
             await insertUpdate(objectStore.offlineDataSync, id, offlineDataSync);
         }
         else {
-            let fields = await findOne(objectStore.resource, objectStore.deliveryTicket)
+            let fields = await findOne(objectStore.resource, sidebarResource.deliveryTicket)
             fields = fields.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
             const deliveryTicket = await findOne(objectStore.deliveryTicket, id)
             const newData: any = getObjKeysWithValues(deliveryTicket, fields)

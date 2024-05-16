@@ -6,6 +6,7 @@ import { FcApproval } from 'react-icons/fc';
 import { Block, KeyboardArrowUp, WatchLater } from '@material-ui/icons';
 
 import { DOAApproved, DOARejected, DOAPending } from 'src/assets/svg/svgIcons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const DEFAULT_DATA_COUNT = 3; // this value will change how many users will be displayed by default;
 
@@ -141,9 +142,9 @@ const RenderUser = ({ userData, index }: TRenderUserProps) => {
         className={`status-icon w-[24px] h-[24px] rounded-full dark:border-[var(--common-border-color)] border-[var(--primary)] relative transition-colors ${icon.colorClasses} `}
       >
         <div className={`${lineClassName} -top-[var(--line-height)]`} />
-        <Tooltip title={<span className=" capitalize">{icon.text}</span>} placement="top" arrow>
+        <HtmlTooltip title={<span className=" capitalize">{icon.text}</span>} placement="top" arrow>
           <span className="block absolute inset-0 m-auto max-w-[16px] max-h-[16px] cursor-pointer ">{icon.icon}</span>
-        </Tooltip>
+        </HtmlTooltip>
         <div className={`${lineClassName} -bottom-[var(--line-height)]`} />
       </div>
       <Link

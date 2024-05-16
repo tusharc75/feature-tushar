@@ -18,7 +18,9 @@ export default function FilterModel({ dateFilters, setDateFilters }) {
     const difference = (dateFilters?.to?.getTime() - dateFilters?.from?.getTime()) / (1000 * 60 * 60);
     const interval = intervals?.map((d) => {
       let disabled = true;
-      if (difference <= 2 && ['1second'].includes(d?.optionValue)) {
+      if (d?.optionValue === 'perCycle') {
+        disabled = false;
+      } else if (difference <= 2 && ['1second'].includes(d?.optionValue)) {
         disabled = false;
       } else if (difference <= 4 && ['5seconds'].includes(d?.optionValue)) {
         disabled = false;

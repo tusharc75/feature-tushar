@@ -11,7 +11,6 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  gridLoadingTimeout,
   deliveryTicket,
   TRANSFER_INVENTORY_STATUS,
   sidebarResource
@@ -20,14 +19,12 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import ReceiveDialog from './ReceiveDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
-import PreviewDownload from 'src/components/PreviewDownload';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { ExpandMore } from '@material-ui/icons';
-import { Menu, MenuItem } from '@material-ui/core';
+import { MenuItem } from '@material-ui/core';
 import { map, uniq } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, canLoad, canReceive, stepFullScreen }) => {
+const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, canLoad, canReceive, stepFullScreen, fetchTransferInventoryData }) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -244,7 +241,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
     if (transferInventoryData?.processor?.optionValue) {
       data['processor'] = transferInventoryData?.processor?.optionValue;
     }
-    data['status'] = DELIVERY_TICKET_STATUS.indTransit;
+    data['status'] = DELIVERY_TICKET_STATUS.inTransit;
 
     if (user?.user?.brandPolicy?.storageLocation) {
       if (transferInventoryData?.transferFromStorageLocation?.optionValue) {
@@ -277,6 +274,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
         });
         setShowConfirmInterPlantTransfer(false);
         setLoadingInterPlantTransfer(false);
+        fetchTransferInventoryData()
       })
       .catch((error) => {
         setLoadingInterPlantTransfer(false);
@@ -286,17 +284,11 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
 
   const handelCancelDeliveredTicket = () => {
     setOkBtnLoading(true);
-    const loadingTicketId = uniq(
-      map(
-        selectedRecords?.filter((e) => e?.loadingTicketId),
-        'loadingTicketId'
-      )
-    );
+    const loadingTicketId = uniq(map(selectedRecords?.filter((e) => e?.loadingTicketId), 'loadingTicketId'));
     if (loadingTicketId.length) {
       let data = {};
       data['_ids'] = loadingTicketId;
-      axiosInstance()
-        .post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
+      axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, data)
         .then(({ data }) => {
           setOkBtnLoading(false);
           setShowConformationCancleTicket(false);
@@ -306,6 +298,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
             message: `Cancelled Successfully`
           });
           fetchData();
+          fetchTransferInventoryData()
         })
         .catch((error) => {
           setOkBtnLoading(false);
@@ -348,7 +341,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                   }}
                   disabled={
                     selectedRecords.length === 0 ||
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.indTransit).length !== selectedRecords.length
+                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
                   }
                 >
                   {`Receive`}
@@ -359,7 +352,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
                   }}
                   disabled={
                     selectedRecords.length &&
-                    selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
+                      selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length === selectedRecords.length
                       ? false
                       : true
                   }
@@ -417,14 +410,16 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           referenceData={showTicketDialog.data}
           onClose={() => setShowTicketDialog({ open: false, data: {} })}
           assets={selectedRecords?.filter((e) => e.type === 'Asset')}
-          products={selectedRecords?.filter((e) => e.type === 'Product')}
-          serialNumber={selectedRecords
-            ?.filter((e) => e.type === 'Product')
-            ?.map((e) => e?.serialNumber?.map((e) => e._id))
-            ?.flat()}
+          products={selectedRecords?.filter((e) => e.type === 'Product')?.map((e) => {
+            return {
+              ...e,
+              productSerialNumbers: e?.serialNumber?.map((e) => { return { serialNumber: e._id } })
+            }
+          })}
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchData();
+            fetchTransferInventoryData()
           }}
         />
       )}
@@ -436,6 +431,7 @@ const LoadingTicket = ({ allowedToEdit, transferInventoryData, renderedFrom, can
           handleSucess={() => {
             setShowConfirmBoxReceive(false);
             fetchData();
+            fetchTransferInventoryData()
           }}
           selectedRecords={selectedRecords}
           transferInventoryData={transferInventoryData}

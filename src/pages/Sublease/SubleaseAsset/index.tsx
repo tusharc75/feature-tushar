@@ -1,4 +1,4 @@
-import { Button, Tooltip } from '@material-ui/core';
+import { Button, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import { map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -7,7 +7,6 @@ import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from '
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fetch_sublease_product_fields } from 'src/components/Sublease/helper';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
@@ -16,8 +15,10 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import {
   ASSET_STATUS,
+  CHILD_RESOURCE,
   DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
   SUBLEASE_STATUS,
@@ -27,6 +28,9 @@ import {
   sublease
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
+import CustomMessageDialog from 'src/components/MessageDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const SerializedAsset = ({
   subleaseData,
@@ -42,7 +46,7 @@ const SerializedAsset = ({
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, rowCount, selectedRecords } = state;
+  const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const {
@@ -52,6 +56,7 @@ const SerializedAsset = ({
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [isCompleteing, setIsCompleteing] = useState(false);
   const [isCompleteEnable, setIsCompleteEnable] = useState(false);
+  const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
 
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -66,7 +71,7 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
-    var data = await fetch_sublease_product_fields(subleaseData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit);
     const newColumns = generateColumns(null, data, null, false, subleaseData?.currency);
     let coloum: any = [
       {
@@ -143,7 +148,20 @@ const SerializedAsset = ({
             Cell: ({ row }) => <div>{row.original?.remainingJobDays ? row.original?.remainingJobDays : <NoDataCell />}</div>
           }
         ];
-        setColumns([...newColumns.slice(0, 1), ...extraColoums, ...newColumns.slice(1), ...getStaticFields()]);
+        setColumns([
+          {
+            accessor: 'index',
+            Header: 'Index',
+            minWidth: 100,
+            width: 100,
+            disabled: true,
+            Cell: ({ row }) => (row?.original?.index ? <h5 className="text-truncate">{row?.original?.index}</h5> : <NoDataCell />)
+          },
+          ...newColumns.slice(0, 1),
+          ...extraColoums,
+          ...newColumns.slice(1),
+          ...getStaticFields()
+        ]);
         fetchRecords();
       });
   };
@@ -153,7 +171,7 @@ const SerializedAsset = ({
     dispatch({ type: 'selection', selectedRecords: [] });
     const response = await axiosInstance().get(`${sublease.api}/asset/${subleaseData._id}`);
     var isComplate = true;
-    let rows = response?.data?.data.map((u) => {
+    let rows = response?.data?.data.map((u, i) => {
       if (
         u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue ||
         [ASSET_STATUS.reserved, ASSET_STATUS.inUse, ASSET_STATUS.repair].includes(u.status)
@@ -163,6 +181,7 @@ const SerializedAsset = ({
       let res = {
         ...prepareDataForGrid(u, user)
       };
+      res['index'] = i + 1;
       res['isChecked'] = false;
       return res;
     });
@@ -226,97 +245,112 @@ const SerializedAsset = ({
   const previewDownloadProps =
     columns && pdfColumns
       ? {
-          fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
-          resource: sidebarResource.sublease,
-          referenceId: subleaseData?._id,
-          columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
-          defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
-        }
+        fileName: `${routes.sublease.title}-${subleaseData?.subleaseName}`,
+        resource: sidebarResource.sublease,
+        referenceId: subleaseData?._id,
+        columns: [...pdfColumns, ...columns?.filter((e) => ['serialNumber', 'supplierSerialNumber']?.includes(e.field))],
+        defaultColumns: ['index', 'type', 'detail', 'description', 'qty']
+      }
       : null;
 
   const rightSideContents = () => {
     return (
       <>
         {allowedToEdit && (
-          <ImportExportLinks
-            permissions={permissions?.packages}
+          <ImportExportMenu
+            permissions={permissions?.serializedAsset}
             module={routes.serializedAsset.title}
             api={`${serializedAsset.api}/custom-template`}
             afterImportCompleted={() => {
               fetchRecords();
             }}
             isExportAllOrSomeFeature={true}
-            total={rowCount}
-            recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows.length}
-            ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
             isDownloadExcel={false}
-            isBackgroundWhite={true}
-            small
+            recordsToExport={selectedRecords.length ? selectedRecords.length : dataRows?.length}
+            ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
           />
         )}
-        {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && (
-          <>
-            {selectedRecords.length > 0 &&
-            selectedRecords.filter((e) => e.currentOwnerType === INVENTORY_OWNER_TYPE.brand).length === selectedRecords.length &&
-            checkUniqWarehouse() &&
-            currentStep === 1 ? (
-              <Tooltip title="Send to Supplier">
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  onClick={() => {
-                    const data = {};
-                    data['ticketName'] = subleaseData.subleaseName;
-                    data['referenceId'] = subleaseData._id;
-                    data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
-                    data['pickupFrom'] = selectedRecords[0]?.warehouseId;
-                    data['pickupFromAddress'] = selectedRecords[0]?.currentLocationId;
-                    data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.supplier;
-                    data['deliveryTo'] = subleaseData?.supplierAccount?.optionValue;
-                    data['deliveryToAddress'] = subleaseData?.shippingAddress?.optionValue;
-                    data['isPickupFromDisable'] = true;
-                    data['isDeliveryToDisable'] = true;
-                    if (subleaseData?.wellName?.optionValue) {
-                      data['wellName'] = subleaseData?.wellName?.optionValue;
-                    }
-                    if (subleaseData?.wellNumber) {
-                      if (subleaseData?.wellNumber?.optionValue) {
-                        data['wellNumber'] = subleaseData?.wellNumber?.optionValue;
-                      } else {
-                        data['wellNumber'] = subleaseData?.wellNumber?.map((e) => e?.optionValue);
-                      }
-                    }
-                    if (subleaseData?.afeNumber) {
-                      data['afeNumber'] = subleaseData?.afeNumber;
-                    }
-                    if (subleaseData?.processor?.optionValue) {
-                      data['processor'] = subleaseData?.processor?.optionValue;
-                    }
-                    setShowTicketDialog({ open: true, data: data });
-                  }}
-                >
-                  Send to Supplier
-                </Button>
-              </Tooltip>
-            ) : null}
-            {currentStep === 2 && allowedToEdit && (
-              <Fragment>
-                <Button
-                  variant={'contained'}
-                  color="primary"
-                  size="small"
-                  disabled={!isCompleteEnable || isCompleteing}
-                  onClick={() => {
-                    completeSublease();
-                  }}
-                >
-                  End Sublease
-                </Button>
-              </Fragment>
-            )}
-          </>
+        {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && currentStep === 2 && allowedToEdit && (
+          <Fragment>
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              disabled={!isCompleteEnable || isCompleteing}
+              onClick={() => {
+                completeSublease();
+              }}
+            >
+              End Sublease
+            </Button>
+          </Fragment>
         )}
+      </>
+    );
+  };
+
+  const validateAction = () => {
+    const errorMessages = [];
+    selectedRecords?.forEach((e, i) => {
+      if (e.currentOwnerType === INVENTORY_OWNER_TYPE.supplierAccount) {
+        errorMessages.push({ index: e.index, message: subleaseMessage.assetsAlradyReturned });
+      }
+      else if (e.currentOwnerType === INVENTORY_OWNER_TYPE.customerAccount) {
+        errorMessages.push({ index: e.index, message: subleaseMessage.assetsIsWithCustomer });
+      }
+      else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
+        errorMessages.push({ index: e.index, message: subleaseMessage.assetStatusSendSupplier });
+      }
+    });
+    if (errorMessages?.length) {
+      setOpenMessageDialog({ open: true, errorMessages: errorMessages });
+      return true;
+    }
+    return false;
+  };
+
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          disabled={SUBLEASE_STATUS.completed != subleaseData?.status &&
+            checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
+          onClick={() => {
+            if (!validateAction()) {
+              const data = {};
+              data['ticketName'] = subleaseData.subleaseName;
+              data['referenceId'] = subleaseData._id;
+              data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.plant;
+              data['pickupFrom'] = selectedRecords[0]?.warehouseId;
+              data['pickupFromAddress'] = selectedRecords[0]?.currentLocationId;
+              data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.supplier;
+              data['deliveryTo'] = subleaseData?.supplierAccount?.optionValue;
+              data['deliveryToAddress'] = subleaseData?.shippingAddress?.optionValue;
+              data['isPickupFromDisable'] = true;
+              data['isDeliveryToDisable'] = true;
+              if (subleaseData?.wellName?.optionValue) {
+                data['wellName'] = subleaseData?.wellName?.optionValue;
+              }
+              if (subleaseData?.wellNumber) {
+                if (subleaseData?.wellNumber?.optionValue) {
+                  data['wellNumber'] = subleaseData?.wellNumber?.optionValue;
+                } else {
+                  data['wellNumber'] = subleaseData?.wellNumber?.map((e) => e?.optionValue);
+                }
+              }
+              if (subleaseData?.afeNumber) {
+                data['afeNumber'] = subleaseData?.afeNumber;
+              }
+              if (subleaseData?.processor?.optionValue) {
+                data['processor'] = subleaseData?.processor?.optionValue;
+              }
+              data['status'] = DELIVERY_TICKET_STATUS.delivered;
+              setShowTicketDialog({ open: true, data: data });
+            }
+          }}
+        >
+          Send to Supplier
+        </MenuItem>
       </>
     );
   };
@@ -325,12 +359,13 @@ const SerializedAsset = ({
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={false}
+        isActionButtonVisible={currentStep === 1 ? true : false}
+        actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+        actionButtonMenuItems={actionButtonMenuItems()}
         previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <CustomReactTable
           height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
@@ -340,6 +375,7 @@ const SerializedAsset = ({
           renderedFrom={renderedFrom}
           refreshGrid={fetchRecords}
           isClientSideGrid={true}
+          hideExportTable={true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -356,6 +392,15 @@ const SerializedAsset = ({
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchRecords();
+          }}
+        />
+      )}
+      {openMessageDialog.open && (
+        <CustomMessageDialog
+          open={openMessageDialog.open}
+          errorMessages={openMessageDialog.errorMessages}
+          onClose={() => {
+            setOpenMessageDialog({ open: false, errorMessages: [] });
           }}
         />
       )}

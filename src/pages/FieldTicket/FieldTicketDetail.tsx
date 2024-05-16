@@ -1,6 +1,6 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
-import { camelCase } from 'lodash';
+import { camelCase, isNumber } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -15,17 +15,25 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
 import Versions from 'src/components/Versions';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, FIELD_TICKET_STATUS, fieldTicket, fieldTicketSteps, sidebarResource } from 'src/constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  CHILD_RESOURCE,
+  FIELD_TICKET_STATUS,
+  checkIsAllowedToEdit,
+  fieldTicket,
+  fieldTicketSteps,
+  sidebarResource
+} from 'src/constants/helpers';
 import { findOne, objectStore } from 'src/constants/indexdbhelper';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import AddCost from './AddCost';
+import Step from '../DynamicForm/Step';
 import ManageFieldTicket from './ManageFieldTicket';
 import Submit from './Submit';
 import Material from './material';
@@ -45,7 +53,7 @@ const FieldTicketDetail = () => {
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(1);
   const { isOffline } = useContext(CustomOfflineContext);
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -56,19 +64,29 @@ const FieldTicketDetail = () => {
   const [versionDialog, setVersionDialog] = useState(false);
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id, isOffline]);
+
+  useEffect(() => {
+    if (!isOffline) {
+      if (!isNaN(id)) {
+        history.push(`${routes.fieldTicket.path}`);
+      }
+    }
+  }, [isOffline]);
 
   const fetchFields = async () => {
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.fieldTicket);
+        data = await findOne(objectStore.resource, sidebarResource?.fieldTicket);
       } else {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
         data = response?.data?.data;
@@ -85,23 +103,34 @@ const FieldTicketDetail = () => {
       let data;
       if (isOffline) {
         data = await findOne(objectStore.fieldTicket, id);
-      } else {
+      } else if (/^[0-9a-fA-F]{24}$/.test(id)) {
         const response = await axiosInstance().get(`${routes.fieldTicket.path}/${id}`);
         data = response?.data?.data;
       }
-      setFieldTicketData(data);
       if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(fieldTicketSteps?.length - 1);
       } else {
         setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
       }
-      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit);
+
+      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, data));
       setAllowedToDelete(permissions?.fieldTicket?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
+      setFieldTicketData(data);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    if (isOffline) return;
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldTicket}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -147,10 +176,10 @@ const FieldTicketDetail = () => {
   }, [currentStep]);
 
   const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+    if (!isOffline) {
+      axiosInstance().put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+        .catch((error) => { toastConfig.setToastConfig(error); });
+    }
   };
 
   const handleChangeStatus = async (status) => {
@@ -225,40 +254,19 @@ const FieldTicketDetail = () => {
         </Box>
       </Box>
       <Box className="detail-container-v1">
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+          {resourceData && resourceData?.steps?.length && (
+            <CustomTab value={2}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+            </CustomTab>
+          )}
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
             <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -273,7 +281,7 @@ const FieldTicketDetail = () => {
             isNextStep={false}
             nextStep={nextStep}
             isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={fieldTicketSteps}
+            steps={isOffline ? fieldTicketSteps.filter(s => s.name === 'Add') : fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
@@ -286,15 +294,30 @@ const FieldTicketDetail = () => {
                 allowedToEdit={allowedToEdit}
                 setNextStep={setNextStep}
                 handleChangeStatus={handleChangeStatus}
+                resourcePolicy={resourceData?.policy}
+                stepFullScreen={stepFullScreen}
+
               />
             )}
             {currentStep === 1 && fieldTicketData && (
-              <AddCost fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} setNextStep={setNextStep} />
-            )}
-            {currentStep === 2 && fieldTicketData && (
-              <Submit stepFullScreen={stepFullScreen} fieldTicketData={fieldTicketData} allowedToEdit={allowedToEdit} fetchData={fetchData} />
+              <Submit
+                stepFullScreen={stepFullScreen}
+                fieldTicketData={fieldTicketData}
+                allowedToEdit={allowedToEdit}
+                fetchData={fetchData}
+                resourcePolicy={resourceData?.policy}
+              />
             )}
           </ContentFullScreen>
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.fieldTicket}
+            data={fieldTicketData}
+            allowedToEdit={permissions?.fieldTicket?.isUpdate}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

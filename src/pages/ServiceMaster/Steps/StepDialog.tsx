@@ -16,7 +16,7 @@ import { Autocomplete } from '@material-ui/lab';
 import Grid from '@material-ui/core/Grid';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { useData } from 'src/StateProvider/Provider';
-import FieldDialog from 'src/pages/ServiceMaster/Steps/FieldDialog';
+import FieldDialog from './FieldDialog';
 
 export default function StepDialog({
   handleClose, // function to close the dialog
@@ -1097,9 +1097,8 @@ export default function StepDialog({
       {openFieldDialog && (
         <FieldDialog
           reference={'workOrder'}
-          serviceId={serviceId}
+          serviceIds={[serviceId]}
           stepIds={[stepId]}
-          steps={[]}
           fields={fields}
           notEditable={notEditable}
           handleClose={() => {

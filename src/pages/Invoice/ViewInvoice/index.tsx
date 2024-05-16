@@ -1,31 +1,30 @@
-import { Box, Dialog, IconButton, Tab, Tabs } from '@material-ui/core';
+import { Box, Dialog, IconButton } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FaFileInvoice } from 'react-icons/fa';
+import { FaFileZipper } from 'react-icons/fa6';
 import { IoMdDownload } from 'react-icons/io';
 import { useData } from 'src/StateProvider/Provider';
 import { CancelInvoiceIcon } from 'src/assets/svg/svgIcons';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CommentDialog from 'src/components/CommentDialog';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
-import PreviewDownload from 'src/components/PreviewDownload';
-import TabPanel from 'src/components/TabPanel';
-import { CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from 'src/constants/helpers';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { CHILD_RESOURCE, CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, checkIsAllowedToEdit, invoice, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { FaFileZipper } from 'react-icons/fa6';
-import { FaFileInvoice } from 'react-icons/fa';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,9 +43,10 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   const {
-    state: { permissions }
+    state: { user, permissions }
   }: any = useData();
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
@@ -58,6 +58,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       .get(`${invoice.api}/${invoiceId}`)
       .then(({ data: { data } }) => {
         setInvoiceData(data);
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -73,10 +74,8 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
 
   const fetchFields = async () => {
     try {
-      let data = await fetch_invoice_product_fields(invoiceData?.currency);
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
+      let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
+
       const newColumns = generateColumns(renderedFrom, data, null, false, invoiceData.currency ? invoiceData.currency : 'USD');
       var column: any = [
         {
@@ -165,25 +164,24 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const rows = data.material.filter((e) => !e.parentId);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.package
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.package
           ? parent.packageDetail?.packageName
           : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.serviceDetail?.serviceName
-      }`;
+            ? parent.serializedAssetDetail?.assetNumber
+            : parent.serviceDetail?.serviceName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === MATERIAL_TYPE.serializedAsset
-          ? parent.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent.type === MATERIAL_TYPE.serializedAsset
+                ? parent.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       parent.subRows = generateNestedData(data.material, parent);
     });
     if (additionalCostData?.length > 0) {
@@ -205,25 +203,24 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.package
+      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
+        ? _subRow?.productDetail?.productName
+        : _subRow?.type === MATERIAL_TYPE.package
           ? _subRow?.packageDetail?.packageName
           : _subRow?.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow?.serviceDetail?.serviceName
-      }`;
+            ? _subRow?.serializedAssetDetail?.assetNumber
+            : _subRow?.serviceDetail?.serviceName
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow.serializedAssetDetail?.product?.productDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.type === MATERIAL_TYPE.serializedAsset
+                ? _subRow.serializedAssetDetail?.product?.productDescription || ''
+                : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -356,7 +353,9 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
       <>
         {dataRows &&
           dataRows?.length > 0 &&
-          [sidebarResource.fieldTicket, sidebarResource.repairOrder]?.includes(resource) &&
+          permissions?.invoice?.isDelete
+          && invoiceData?.owner?.optionValue === user?.user?._id &&
+          [sidebarResource.fieldTicket, sidebarResource.repairOrder, sidebarResource.salesOrder]?.includes(resource) &&
           ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) && (
             <ThemeButton
               iconForMobile={<CancelInvoiceIcon />}
@@ -390,32 +389,10 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
             <Box pt={1}>
               {resource === sidebarResource.fieldTicket && permissions?.creditMemo?.isRead ? (
                 <>
-                  <Tabs
-                    className="new-tab-container-v1"
-                    value={tabValue}
-                    onChange={handleMainTabChange}
-                    textColor="primary"
-                    TabIndicatorProps={{
-                      style: {
-                        height: 0
-                      }
-                    }}
-                  >
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">Details</div>}
-                      value={0}
-                      aria-controls="a11y-tabpanel-0"
-                      id="a11y-tab-0"
-                    />
-                    <Tab
-                      className={'tabLayout'}
-                      label={<div className="d-flex align-items-center tab-font">{routes.creditMemo.title}</div>}
-                      value={1}
-                      aria-controls="a11y-tabpanel-1"
-                      id="a11y-tab-1"
-                    />
-                  </Tabs>
+                  <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                    <CustomTab value={0} label={'Details'} />
+                    <CustomTab value={1} label={routes.creditMemo.title} />
+                  </CustomTabs>
                   <TabPanel value={tabValue} index={0}>
                     <Fragment>
                       {columns ? (
@@ -443,7 +420,7 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
                   <TabPanel value={tabValue} index={1}>
                     <CreditMemo
                       invoiceData={invoiceData}
-                      allowedToEdit={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) ? false : true}
+                      allowedToEdit={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled]?.includes(invoiceData?.status) ? false : allowedToEdit}
                     />
                   </TabPanel>
                 </>

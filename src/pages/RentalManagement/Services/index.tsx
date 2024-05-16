@@ -123,12 +123,12 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -295,7 +295,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       rows = rows.filter((e) => e.type === 'service' || (e.type === 'package' && e.packageDetail?.packageType === 'Service'));
 
       const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-      setIsRateRequired(isPriceRequired)
+      setIsRateRequired(isPriceRequired);
 
       rows.forEach((parent, i) => {
         parent.index = i + 1;
@@ -303,16 +303,16 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           parent.type === 'product'
             ? parent?.productDetail?.productName
             : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent?.packageDetail?.packageName;
+              ? parent?.serviceDetail?.serviceName
+              : parent?.packageDetail?.packageName;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
             : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.productDetail?.productDescription || ''
+              : parent.type === 'package'
+                ? parent?.packageDetail?.packageDescription || ''
+                : '';
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.qtyDisplay = parent.qty;
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
@@ -368,20 +368,18 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.pricingConditionDisplay = _subRow.pricingCondition?.optionLabel;
-      _subRow.pricingCondition = _subRow.pricingCondition?.optionValue;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
@@ -643,8 +641,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
         </Box>
       )}
-
-      {user?.user?.brandPolicy?.rentalProgressiveBilling && (
+      {permissions?.employeeMaster?.isRead && (
         <div>
           <Box style={{ maxWidth: '400px' }} mb={2} mt={2}>
             <Autocomplete
@@ -668,7 +665,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           </Box>
           <Box mt={3}>
             <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-              <CustomTab index={0} label={'Technicians'} value={0} primaryColor={true} />
+              <CustomTab value={0} label={'Technicians'} primaryColor={true} />
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Technicians
@@ -681,7 +678,6 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
           </Box>
         </div>
       )}
-
       {deleteData && (
         <ConfirmationDialog
           open={true}

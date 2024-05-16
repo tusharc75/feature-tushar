@@ -1,7 +1,5 @@
 import { Box, Button, Card, CardContent, Grid, IconButton, List, ListItemIcon, ListItemText, Typography, useMediaQuery } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem/ListItem';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import { Edit } from '@material-ui/icons';
 import AddIcon from '@material-ui/icons/Add';
 import { Skeleton } from '@material-ui/lab';
@@ -13,7 +11,9 @@ import { FcApproval, FcDisapprove } from 'react-icons/fc';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { AccountHierarchyIcon, AccountsTeamsIcon, ContactsIcon, OpportunityIcon, ProjectsIcon, QuoteIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -22,7 +22,6 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import CustomNodalStructure from '../../components/CustomNodalStructure/CustomNodalStructure';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import ProcessFlow from '../../components/ProcessFlow';
@@ -33,6 +32,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import { customerAccount, getObjKeysWithValues, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
 import { accountPage } from '../../routes/Accounts';
 import ManageContactDialog from '../Contact/ManageContact';
+import Step from '../DynamicForm/Step';
 import ManageOpportunityDialog from '../Opportunities/ManageOpportunityDialog';
 import axiosInstance from './../../axios/axiosInstance';
 import routes from './../../components/Helpers/Routes';
@@ -133,6 +133,7 @@ export default function AccountDetailPage(props) {
     colorPalette: null
   });
   const [formValues, setFormValues] = useState({});
+  const [resourceData, setResourceData] = useState(null);
 
   let filteredAccountFields = accountFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
   let { id } = useParams();
@@ -160,27 +161,13 @@ export default function AccountDetailPage(props) {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
-  interface TabPanelProps {
-    children?: React.ReactNode;
-    index: any;
-    value: any;
-  }
-
-  function TabPanel(props: TabPanelProps) {
-    const { children, value, index, ...other } = props;
-
-    return (
-      <div role="tabpanel" hidden={value !== index} id={`main-tabpanel-${index}`} aria-labelledby={`main-tab-${index}`} {...other}>
-        {children}
-      </div>
-    );
-  }
 
   useEffect(() => {
     setShowAccountHierarchyInFullScreenDialog(false);
     setTabValue(0);
     fetchAccountData();
     fetchRelatedData();
+    fetchPolicy();
   }, [id]);
 
   useEffect(() => {
@@ -310,21 +297,21 @@ export default function AccountDetailPage(props) {
       let accounts = [
         ...data.parentHierarchy,
         {
-          _id: data._id,
-          accountName: data.accountName,
-          typeOfAccount: data.typeOfAccount,
-          industry: data.industry,
-          typeOfBusiness: data.typeOfBusiness,
-          phone: data.phone,
-
+          // _id: data._id,
+          // accountName: data.accountName,
+          // typeOfAccount: data.typeOfAccount,
+          // industry: data.industry,
+          // typeOfBusiness: data.typeOfBusiness,
+          // phone: data.phone,
+          ...data,
           type: 'child',
           current: true,
-          parentAccount: data.parentAccount
-            ? {
-                _id: data.parentAccount.optionValue,
-                accountName: data.parentAccount.optionLabel
-              }
-            : null,
+          // parentAccount: data.parentAccount
+          //   ? {
+          //       _id: data.parentAccount.optionValue,
+          //       accountName: data.parentAccount.optionLabel
+          //     }
+          //   : null,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
       ];
@@ -333,24 +320,25 @@ export default function AccountDetailPage(props) {
         if (isObjectEmpty(account)) return true;
 
         const updatedAccount = {
-          _id: account._id,
-          accountName: account.accountName,
-          typeOfAccount: account.typeOfAccount,
-          industry: account.industry,
-          parentId: null,
-          typeOfBusiness: account.typeOfBusiness,
-          phone: account.phone,
+          // _id: account._id,
+          // accountName: account.accountName,
+          // typeOfAccount: account.typeOfAccount,
+          // industry: account.industry,
+          // parentId: null,
+          // typeOfBusiness: account.typeOfBusiness,
+          // phone: account.phone,
+          ...account,
           type: 'child',
-          current: account.current,
+          // current: account.current,
           canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         };
 
-        if (account.parentAccount) {
-          updatedAccount['parentAccountText'] = account.parentAccount.accountName;
-          updatedAccount['parentId'] = account.parentAccount._id;
-        } else {
-          updatedAccount['type'] = 'parent';
-        }
+        // if (account.parentAccount) {
+        //   updatedAccount['parentAccountText'] = account.parentAccount.accountName;
+        //   updatedAccount['parentId'] = account.parentAccount._id;
+        // } else {
+        //   updatedAccount['type'] = 'parent';
+        // }
         newData.push(updatedAccount);
       });
 
@@ -358,12 +346,13 @@ export default function AccountDetailPage(props) {
     } else {
       setAccountHierarchyData([
         {
-          _id: data._id,
-          accountName: data.accountName,
-          typeOfAccount: data.typeOfAccount,
-          industry: data.industry,
-          typeOfBusiness: data.typeOfBusiness,
-          phone: data.phone,
+          // _id: data._id,
+          // accountName: data.accountName,
+          // typeOfAccount: data.typeOfAccount,
+          // industry: data.industry,
+          // typeOfBusiness: data.typeOfBusiness,
+          // phone: data.phone,
+          ...data,
           current: true,
           canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
@@ -378,6 +367,19 @@ export default function AccountDetailPage(props) {
     getAccountFields(data);
     setLoading(false);
     initializeGraphData();
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource[accountResource]}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleMainPonts = (data) => {
@@ -788,32 +790,16 @@ export default function AccountDetailPage(props) {
           </Grid>
         ) : (
           <>
-            <Tabs
-              className="new-tab-container-v1"
-              value={tabValue}
-              onChange={handleMainTabChange}
-              textColor="primary"
-              TabIndicatorProps={{
-                style: {
-                  display: 'none'
-                }
-              }}
-            >
-              <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
-              <Tab label={<div className="tab-font">Account Hierarchy</div>} id="a11y-tab-1" className="tabLayout" />
-              <Tab label={<div className="tab-font">OM-Neurons</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
+            <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+              <CustomTab value={0} label={'Details'} />
+              <CustomTab value={1} label={'Account Hierarchy'} id="a11y-tab-1" className="tabLayout" />
+              <CustomTab value={2} label={'OM-Neurons'} />
               {accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification && (
-                <Tab label={<div className="tab-font">Supplier View</div>} aria-controls="a11y-tabpanel-3" id="a11y-tab-3" className="tabLayout" />
+                <CustomTab value={3} label={'Supplier View'} />
               )}
-              {accountResource === 'customerAccount' && permissions?.productInventory && (
-                <Tab
-                  label={<div className="tab-font">{routes.warehouse.title}</div>}
-                  aria-controls="a11y-tabpanel-2"
-                  id="a11y-tab-2"
-                  className="tabLayout"
-                />
-              )}
-            </Tabs>
+              {accountResource === 'customerAccount' && permissions?.productInventory && <CustomTab value={4} label={routes.warehouse.title} />}
+              {resourceData && resourceData?.steps?.length && <CustomTab value={5} label={'Associations'} />}
+            </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
                 {showAtLast ? (
@@ -995,6 +981,7 @@ export default function AccountDetailPage(props) {
                   handleDelete={(data) => {
                     setDeleteAccountId(data);
                   }}
+                  accountResource={accountResource}
                 />
               </Box>
             </TabPanel>
@@ -1014,21 +1001,26 @@ export default function AccountDetailPage(props) {
                 />
               </Box>
             </TabPanel>
-            {accountResource === 'supplierAccount' && tabValue === 3 && (
-              <TabPanel value={tabValue} index={3}>
-                <SupplierItems
-                  api={accountApi}
-                  id={id}
-                  allowedToEdit={permissions[accountResource].isUpdate}
-                  permission={permissions[accountResource]}
-                />
-              </TabPanel>
-            )}
-            {accountResource === 'customerAccount' && permissions?.productInventory && tabValue === 3 && (
-              <TabPanel value={tabValue} index={3}>
-                <Warehouse reference={accountResource} api={accountApi} id={id} />
-              </TabPanel>
-            )}
+            <TabPanel value={tabValue} index={3}>
+              <SupplierItems
+                api={accountApi}
+                id={id}
+                allowedToEdit={permissions[accountResource].isUpdate}
+                permission={permissions[accountResource]}
+              />
+            </TabPanel>
+            <TabPanel value={tabValue} index={4}>
+              <Warehouse reference={accountResource} api={accountApi} id={id} />
+            </TabPanel>
+            <TabPanel value={tabValue} index={5}>
+              <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource[accountResource]}
+                data={accountData}
+                allowedToEdit={permissions[accountResource]?.isUpdate}
+              />
+            </TabPanel>
           </>
         )}
       </Box>
@@ -1136,7 +1128,7 @@ export default function AccountDetailPage(props) {
             setShowAccountHierarchyInFullScreenDialog(false);
           }}
         >
-          <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} />
+          <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} accountResource={accountResource} />
         </FullScreenDialog>
       )}
       {showCreateAccountDialog ? (

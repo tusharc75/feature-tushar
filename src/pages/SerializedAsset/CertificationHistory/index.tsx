@@ -87,7 +87,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
                 permissions?.supplierAccount?.isRead ? (
                   <Link
                     className="link"
-                    target="_blanck"
+                    target="_blank"
                     title={row.original?.supplierAccount}
                     to={`${routes.supplierAccountDetail.path}/${row.original?.supplierAccountId}`}
                   >
@@ -111,6 +111,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
             row.original?.createdBy ? (
               <h5 className="createBy" title={`${row.original?.createdBy} • ${moment(row.original?.createdByDate).format(dateFormat)}`}>
                 {row.original?.createdBy}
+                <span className="hidden">&nbsp;-&nbsp;</span>
                 <span className="createdAtTime badge-date">{moment(row.original?.createdByDate)?.format(dateFormat)}</span>
               </h5>
             ) : (

@@ -175,7 +175,7 @@ const Products = ({ packageId, packageData }) => {
         accessor: 'qty',
         Header: 'Qty',
         width: 150,
-        editable: true,
+        editable: permissions?.packages?.isCreate || permissions?.packages?.isUpdate,
         Cell: ({ row }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
         }
@@ -378,17 +378,19 @@ const Products = ({ packageId, packageData }) => {
   const rightSideContents = () => {
     return (
       <>
-        <ImportExportMenu
-          permissions={permissions?.packages}
-          module="products"
-          api={`${packages.api}/${packageId}/products`}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          ids={[]}
-          additionalParams={`refrenceId=${packageId}`}
-        />
+        {permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="products"
+            api={`${packages.api}/${packageId}/products`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            ids={[]}
+            additionalParams={`refrenceId=${packageId}`}
+          />
+        }
       </>
     );
   };
@@ -396,15 +398,14 @@ const Products = ({ packageId, packageData }) => {
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isUpdate}
+        isAddButtonVisible={permissions?.packages?.isCreate || permissions?.packages?.isUpdate}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={true}
+        isActionButtonVisible={permissions?.packages?.isCreate || permissions?.packages?.isUpdate}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
         rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <CustomReactTable
           height={'calc(100vh - 393px)'}
@@ -416,6 +417,8 @@ const Products = ({ packageId, packageData }) => {
           isClientSideGrid={true}
           onSaveEdit={onSaveInlineEdit}
           expander={true}
+          hideAction={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
+          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
         />
       ) : (
         <Box p={2} height={500}>

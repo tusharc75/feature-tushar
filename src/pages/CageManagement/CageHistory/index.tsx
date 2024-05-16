@@ -41,16 +41,12 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
         }}
         showManimizeMaximize={true}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab value={0} index={0}>
-            History
-          </CustomTab>
-          <CustomTab value={1} index={1}>
-            Logs
-          </CustomTab>
+          <CustomTab value={0}>History</CustomTab>
+          <CustomTab value={1}>Logs</CustomTab>
         </CustomTabs>
-        <TabPanel index={0} value={0}>
+        <TabPanel index={tabValue} value={0}>
           {tabValue === 0 &&
             (products?.filter((d) => d?.status === true)?.length ? (
               <List style={{ padding: 0 }}>
@@ -101,7 +97,7 @@ const CageHistory = ({ handleCloseDialog, fetchHistory, products, handleDrop }) 
               </Box>
             ))}
         </TabPanel>
-        <TabPanel index={1} value={1}>
+        <TabPanel index={tabValue} value={1}>
           {tabValue === 1 &&
             (products?.filter((d) => d?.status === false)?.length ? (
               <List style={{ padding: 0 }}>

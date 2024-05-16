@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import BuildIcon from '@material-ui/icons/Build';
@@ -13,7 +13,7 @@ import { MdEdit } from 'react-icons/md';
 import { RiExchangeBoxFill } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import TabPanel from 'src/components/TabPanel';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -23,14 +23,29 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, ASSET_STATUS, INVENTORY_HISTORY_TYPE, INVENTORY_OWNER_TYPE, repairJob, serializedAsset, sidebarResource } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  ASSET_STATUS,
+  INVENTORY_HISTORY_TYPE,
+  INVENTORY_OWNER_TYPE,
+  repairJob,
+  serializedAsset,
+  sidebarResource
+} from '../../constants/helpers';
+import Step from '../DynamicForm/Step';
+import Alarms from '../IotChart/Alarms';
+import Current from '../IotChart/Current';
+import PerformanceAnalysis from '../IotChart/PerformanceAnalysis';
+import Status from '../IotChart/Status';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
+import ManageSendOutboundMessage from '../SendOutboundMessage/manageSendOutboundMessage';
 import AssetHistory from './AssetHistory';
 import CertificationHistory from './CertificationHistory';
 import DepreciationHistory from './DepreciationHistory';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
-import ManageSendOutboundMessage from '../SendOutboundMessage/manageSendOutboundMessage';
+import StatusChangeFieldDialog from './StatusChangeFieldDialog';
+// import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -54,7 +69,7 @@ const SerializedAssetDetailsPage = () => {
   const [manualStatus, setManualStatus] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [status, setStatus] = useState('');
-  const [statusOptions, setStatusOptions] = useState([]);
+  const [statusOptions, setStatusOptions] = useState(null);
   const [showReasonDialog, setShowReasonDialog] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);
   const [customField, setCustomField] = useState(null);
@@ -63,6 +78,11 @@ const SerializedAssetDetailsPage = () => {
   const parsed = queryString.parse(history.location.search);
   const { tab }: any = parsed;
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
+  const [resourceData, setResourceData] = useState(null);
+  const [deviceTemplate, setDeviceTemplate] = useState(null);
+  const [dataPoints, setDataPoints] = useState([]);
+  // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
+  const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({open:false, fields: []});
 
   useEffect(() => {
     if (id) {
@@ -73,6 +93,7 @@ const SerializedAssetDetailsPage = () => {
   const fetchAllData = () => {
     fetchFields();
     fetchData();
+    fetchPolicy();
     fetchAssetStates();
   };
 
@@ -88,12 +109,16 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().post(`${serializedAsset.api}/inventory-stats`, { ids: [id] });
       if (data.totalUtilization) {
-        data[`totalUtilizationHours`] = `${round(moment.duration(data?.totalUtilization).asHours())}:${Math.floor(moment.duration(data?.totalUtilization).asMinutes() % 60)}`;
-        delete data?.totalUtilization
+        data[`totalUtilizationHours`] = `${round(moment.duration(data?.totalUtilization).asHours())}:${Math.floor(
+          moment.duration(data?.totalUtilization).asMinutes() % 60
+        )}`;
+        delete data?.totalUtilization;
       }
       if (data.totalInUseTimeAfterLastRepair) {
-        data[`totalInUseTimeAfterLastRepairHours`] = `${round(moment.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(moment.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60)}`;
-        delete data?.totalInUseTimeAfterLastRepair
+        data[`totalInUseTimeAfterLastRepairHours`] = `${round(moment.duration(data?.totalInUseTimeAfterLastRepair).asHours())}:${Math.floor(
+          moment.duration(data?.totalInUseTimeAfterLastRepair).asMinutes() % 60
+        )}`;
+        delete data?.totalInUseTimeAfterLastRepair;
       }
       handleMainPoints(data);
     } catch (error) {
@@ -101,12 +126,24 @@ const SerializedAssetDetailsPage = () => {
     }
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
+  useEffect(() => {
+    if (deviceTemplate) {
+      const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
+      const deepFilter = [
+        { field: 'active', term: 'yes' },
+        { field: 'alarm', term: 'no' }
+      ];
+      axiosInstance()
+        .get(
+          `${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&deepFilter=${JSON.stringify(
+            deepFilter
+          )}&sortBy=order&orderBy=asc&filterType=and`
+        )
+        .then(({ data: { data } }) => {
+          setDataPoints(data?.data);
+        });
+    }
+  }, [deviceTemplate]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -115,14 +152,23 @@ const SerializedAssetDetailsPage = () => {
         data: { data }
       } = await axiosInstance().get(`${serializedAsset.api}/${id}`);
       setHeadingLbl(`${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}`);
-      setCustomizedRoutes([
-        routes.serializedAsset,
-        { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
-      ]);
+      if (history.location.pathname.includes(routes.serializedAssetDetail.path)) {
+        setCustomizedRoutes([
+          routes.serializedAsset,
+          { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
+        ]);
+      } else if (history.location.pathname.includes(routes.iotChartDetail.path)) {
+        setCustomizedRoutes([
+          routes.iotChart,
+          { title: `${data?.assetNumber ?? ''} ${data?.product?.optionLabel ? '-' + data?.product?.optionLabel : ''}` }
+        ]);
+      }
+
       if (data.certificateExpiryDate && new Date(data.certificateExpiryDate) > new Date()) {
         data.certificateAttached = true;
       }
       setAssetDetails({ ...data, currentOwner: data?.currentOwner?.optionLabel });
+      setDeviceTemplate(data?.product?.deviceTemplate);
       if (data.status === ASSET_STATUS.scrap) {
         setCustomField({
           fieldData: {
@@ -143,6 +189,19 @@ const SerializedAssetDetailsPage = () => {
         });
       }
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -182,7 +241,7 @@ const SerializedAssetDetailsPage = () => {
       .put(`${serializedAsset.api}/remove`, { ids: [] })
       .then(() => {
         setShowConfirmBox(false);
-        history.push(`${routes.serializedAsset.path}`)
+        history.push(`${routes.serializedAsset.path}`);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -199,12 +258,25 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    if ((o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap)
-      || o.optionValue === ASSET_STATUS.scrap || o.optionValue === ASSET_STATUS.lost) {
-      setStatus(o.optionValue);
-      setShowReasonDialog(true);
+    const {policy} = resourceData;
+    const matchedStatus = policy?.statusChangeFields?.find((ele)=> ele.status===o.optionValue);
+    setStatus(o.optionValue);
+    if (
+      (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
+      o.optionValue === ASSET_STATUS.scrap ||
+      o.optionValue === ASSET_STATUS.lost
+    ) {
+      if(matchedStatus){
+        setOpenStatusChangeFieldDialog({open:true,fields: matchedStatus?.fields})
+      }else{
+        setShowReasonDialog(true);
+      }
     } else {
-      handleStatusUpdate({ status: o.optionValue });
+      if(matchedStatus){
+        setOpenStatusChangeFieldDialog({open:true,fields: matchedStatus?.fields})
+      }else{
+        handleStatusUpdate({ status: o.optionValue });
+      }
     }
   };
 
@@ -237,15 +309,16 @@ const SerializedAssetDetailsPage = () => {
         ],
         status: obj?.status,
         comment: obj?.reason ? obj?.reason : '',
-        reference: { _id: assetDetails._id, type: INVENTORY_HISTORY_TYPE.serializedAssets }
+        reference: { _id: assetDetails._id, type: INVENTORY_HISTORY_TYPE.serializedAssets },
+        assetData: obj?.assetData
       })
-      .then(() => {
+      .then(({ data }) => {
         setUpdateLoading(false);
         fetchData();
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${obj?.status}`
+          message: data?.message
         });
       })
       .catch((error) => {
@@ -255,21 +328,43 @@ const SerializedAssetDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (assetDetails) {
-      let tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]
-      if (assetDetails.status === ASSET_STATUS.underReview) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
-      } else if (assetDetails.status === ASSET_STATUS.scrap) {
-        tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
-        if (assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
-          tempStatus.push(ASSET_STATUS.available)
+    if (assetDetails && statusOptions) {
+      const otherStatus = [];
+      statusOptions?.forEach((o: any) => {
+        if (!Object.values(ASSET_STATUS).includes(o.optionLabel)) {
+          otherStatus.push(o.optionLabel);
         }
-      } else if (assetDetails.status === ASSET_STATUS.lost) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ASSET_STATUS.scrap];
+      })
+
+      const systemStatus = [ASSET_STATUS.reserved, ASSET_STATUS.readyToShip, ASSET_STATUS.inTransit, ASSET_STATUS.inUse
+        , ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered, ASSET_STATUS.customer, ASSET_STATUS.supplier
+        , ASSET_STATUS.returned, ASSET_STATUS.repair, ASSET_STATUS.inRepair, ASSET_STATUS.customerPossession
+      ]
+
+      let tempStatus = [];
+      if (systemStatus?.includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
+      }
+      else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview,
+        ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
+      }
+      else if ([ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ...otherStatus];
+      }
+      else if (assetDetails.status === ASSET_STATUS.scrap) {
+        tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
+        if (assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand) {
+          tempStatus.push(ASSET_STATUS.available);
+        }
+      }
+      else if (otherStatus?.includes(assetDetails.status)) {
+        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.underReview,
+        ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
       }
       setManualStatus(tempStatus);
     }
-  }, [assetDetails]);
+  }, [assetDetails, statusOptions]);
 
   return (
     <Box className="main-container-v1">
@@ -281,36 +376,34 @@ const SerializedAssetDetailsPage = () => {
           <Box className="control-buttons-v1">
             {assetDetails ? (
               <>
-                {permissions?.iotChart?.isRead && (
-                  <Button
-                    variant="outlined"
-                    className={'btn-outline-v1'}
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.iotChart.path}/${assetDetails?._id}`);
-                    }}
-                  >
-                    View Data
-                  </Button>
-                )}
                 {permissions?.sendOutboundMessage?.isCreate && (
                   <Button
                     variant="outlined"
                     className={'btn-outline-v1'}
                     size="small"
                     onClick={() => {
-                      setManageSendOutBoundMessageDialog(true)
+                      setManageSendOutBoundMessageDialog(true);
                     }}
                   >
                     Send Outbound Message
                   </Button>
                 )}
+                {/* <Button
+                  onClick={() => {
+                    setOpenDataSimulationDialog(!openDataSimulationDialog);
+                  }}
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                >
+                  Data Simulation
+                </Button> */}
                 {permissions?.serializedAsset?.isUpdate && assetDetails.active && (
                   <>
                     {permissions?.repairJob?.isCreate &&
                       assetDetails?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
                       [ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(
-                        assetDetails.status
+                        assetDetails?.status
                       ) && (
                         <Button
                           variant={isMobile && !isTablet ? 'text' : 'outlined'}
@@ -323,7 +416,7 @@ const SerializedAssetDetailsPage = () => {
                         </Button>
                       )}
                     {allowUpdateStatus ? (
-                      assetDetails.status === ASSET_STATUS.lost ? (
+                      assetDetails?.status === ASSET_STATUS.lost ? (
                         <Button
                           variant="outlined"
                           color="default"
@@ -371,7 +464,7 @@ const SerializedAssetDetailsPage = () => {
                       open={Boolean(anchorEl)}
                       onClose={closeActions}
                     >
-                      {statusOptions.map((o) => {
+                      {statusOptions?.map((o) => {
                         return (
                           <MenuItem
                             key={o?.optionValue}
@@ -405,26 +498,17 @@ const SerializedAssetDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
-          <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Asset History</div>} {...a11yProps(1)} />
-          {user?.user?.brandPolicy?.serializedAssetCertification && (
-            <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Certification History</div>} {...a11yProps(2)} />
-          )}
-          {user?.user?.brandPolicy?.serializedAssetDepreciation && (
-            <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Depreciation History</div>} {...a11yProps(3)} />
-          )}
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>Details</CustomTab>
+          {deviceTemplate && <CustomTab value={1}>Current</CustomTab>}
+          {deviceTemplate && <CustomTab value={2}>Performance Analysis</CustomTab>}
+          {deviceTemplate && <CustomTab value={3}>Alarms</CustomTab>}
+          {deviceTemplate && <CustomTab value={4}>Status</CustomTab>}
+          {resourceData && resourceData?.steps?.length && <CustomTab value={5}>Associations</CustomTab>}
+          <CustomTab value={6}>History</CustomTab>
+          {user?.user?.brandPolicy?.serializedAssetCertification && <CustomTab value={7}>Certification History</CustomTab>}
+          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={8}>Depreciation History</CustomTab>}
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
           <Box>
@@ -447,9 +531,30 @@ const SerializedAssetDetailsPage = () => {
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
-          <AssetHistory id={id} />
+          <Current deviceTemplate={deviceTemplate} assetId={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={2}>
+          <PerformanceAnalysis deviceTemplate={deviceTemplate} assetId={id} dataPoints={dataPoints} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Alarms deviceTemplate={deviceTemplate} assetId={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={4}>
+          <Status assetId={id} dataPoints={dataPoints} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={5}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.serializedAsset}
+            data={assetDetails}
+            allowedToEdit={permissions?.serializedAsset?.isUpdate}
+          />
+        </TabPanel>
+        <TabPanel value={tabValue} index={6}>
+          <AssetHistory id={id} status={assetDetails?.status} resourceData={resourceData} fields={fields} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={7}>
           <CertificationHistory
             id={id}
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
@@ -457,10 +562,8 @@ const SerializedAssetDetailsPage = () => {
             assetDetails={assetDetails}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={3}>
-          <DepreciationHistory
-            id={id}
-          />
+        <TabPanel value={tabValue} index={8}>
+          <DepreciationHistory id={id} />
         </TabPanel>
       </Box>
       {showConfirmBox && (
@@ -506,7 +609,6 @@ const SerializedAssetDetailsPage = () => {
           }}
         />
       )}
-
       {manageSendOutBoundMessageDialog && (
         <ManageSendOutboundMessage
           assetId={assetDetails?._id || null}
@@ -518,6 +620,20 @@ const SerializedAssetDetailsPage = () => {
           }}
         />
       )}
+      {openStatusChangeFieldDialog.open && (
+        <StatusChangeFieldDialog 
+           fields={fields} 
+           statusFields={openStatusChangeFieldDialog.fields} 
+           serializedAssetData={assetDetails} 
+           productInventoryId={id}
+           onClose={()=> setOpenStatusChangeFieldDialog({open:false,fields:[]})} 
+           onSuccess={(values)=>{ 
+            handleStatusUpdate({ status: status, assetData: values });
+            setOpenStatusChangeFieldDialog({open:false,fields:[]})
+          }}  
+        />
+      )}
+      {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}
     </Box>
   );
 };

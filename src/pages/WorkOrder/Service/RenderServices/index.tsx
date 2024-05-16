@@ -28,8 +28,8 @@ type RenderServiceProps = {
   setShowConfirmBox: (data: boolean) => void;
   servicesButtons: ServicesButtons[];
   isMobile: boolean;
-
   initialTabIndex: number;
+  completed: boolean;
 };
 
 const RenderService = ({
@@ -48,8 +48,8 @@ const RenderService = ({
   setShowConfirmBox,
   servicesButtons,
   isMobile,
-
-  initialTabIndex = 0
+  initialTabIndex = 0,
+  completed
 }: RenderServiceProps) => {
   const [isMobileSlideOpen, setIsMobileSlideOpen] = useState(false);
 
@@ -134,7 +134,8 @@ const RenderService = ({
                         getFieldsWithOtherDetails,
                         data,
                         index,
-                        isMobile
+                        isMobile,
+                        completed
                       }}
                     />
                   );
@@ -147,7 +148,8 @@ const RenderService = ({
           </>
         ) : (
           <>
-            <div className={`mb-1 gap-2 flex flex-wrap ${isColapsed ? 'justify-around' : 'justify-end'} mb-3`}>
+            <div className={`mb-1 gap-2 flex flex-wrap ${isColapsed ? 'justify-around' : 'justify-end'} mb-3 items-center`}>
+              {isColapsed ? null : <h6 className="mr-auto text-[16px]">Services</h6>}
               {servicesButtons.map(({ id, children, visible, ...rest }) => {
                 if (!visible) return null;
                 return (
@@ -180,7 +182,8 @@ const RenderService = ({
                       getFieldsWithOtherDetails,
                       data,
                       index,
-                      isMobile
+                      isMobile,
+                      completed
                     }}
                   />
                 );
@@ -210,7 +213,8 @@ const RenderSingleService = ({
   getFieldsWithOtherDetails,
   data,
   index,
-  isMobile
+  isMobile,
+  completed
 }) => {
   const style = stylesForEveryTab(selectedService, data, index);
   const stepTimes = getFieldsWithOtherDetails(data, stepSubmitedData);
@@ -311,7 +315,7 @@ const RenderSingleService = ({
                       color="inherit"
                       style={{ color: 'red', marginTop: '3px' }}
                       aria-label="delete"
-                      disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending ? false : true}
+                      disabled={allowedToEdit && data?.status === WORKORDER_SERVICE_STATUS.pending && !completed ? false : true}
                       onClick={() => {
                         setShowConfirmBox(true);
                       }}

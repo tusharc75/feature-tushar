@@ -97,6 +97,13 @@ const ManageRentalManagementDialog = ({
             setLoading(false);
           } else {
             setRentalDetails(data);
+            if (data?.canEdit === false) {
+              fieldsDataForUpdate?.forEach((e) => {
+                if (['customerAccount']?.includes(e?.fieldName)) {
+                  e.isUneditable = true;
+                }
+              });
+            }
             if (data?.actualStartDate === '') {
               fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualStartDate'].includes(obj.fieldName));
             }
@@ -433,7 +440,6 @@ const ManageRentalManagementDialog = ({
                   onSave={() => {
                     setShowConfirmDialog(false);
                     handleScroll(errors);
-
                     submitForm();
                   }}
                   close={() => setShowConfirmDialog(false)}

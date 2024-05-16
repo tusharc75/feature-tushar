@@ -1,15 +1,14 @@
-import { Box, Chip, Grid, IconButton, makeStyles, Tooltip, Typography } from '@material-ui/core';
-import { Fragment, useEffect, useState, useReducer, ReactNode } from 'react';
-import { useHistory } from 'react-router-dom';
+import { Box, Grid, IconButton, makeStyles, Typography } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useData } from 'src/StateProvider/Provider';
-import routes from 'src/components/Helpers/Routes';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import Gauges from 'src/components/Gauges';
-import { SEARCH, useStore } from 'src/StateProvider/fastContext';
-import MetricsWithIcon from 'src/components/MetricsWithIcon';
+import { ReactNode, useEffect } from 'react';
 import { FaSuitcase, FaTruck } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import { SEARCH, useStore } from 'src/StateProvider/fastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 const useStyles = makeStyles((theme) => ({
   cardBox: {
@@ -121,7 +120,7 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                           />
                         </Box>
                         <Box className={''}>
-                          <Tooltip title={`${permissions?.job?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}`}>
+                          <HtmlTooltip title={`${permissions?.job?.isCreate ? 'Clone' : 'You do not have permission to clone/create'}`}>
                             <span>
                               <IconButton
                                 style={{ border: '1px solid var(--common-border-color)' }}
@@ -137,9 +136,9 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                                 <FileCopyIcon fontSize="small" color="primary" />
                               </IconButton>
                             </span>
-                          </Tooltip>
+                          </HtmlTooltip>
 
-                          <Tooltip title={`${job?.canDelete ? 'Delete' : 'You do not have permission to delete'}`}>
+                          <HtmlTooltip title={`${job?.canDelete ? 'Delete' : 'You do not have permission to delete'}`}>
                             <span>
                               <IconButton
                                 aria-label={`Delete`}
@@ -158,7 +157,7 @@ const CardView = ({ jobs, setShowManageJobDialog, setSingleJobDelete, dispatch, 
                                 <DeleteIcon fontSize="small" />
                               </IconButton>
                             </span>
-                          </Tooltip>
+                          </HtmlTooltip>
                         </Box>
                       </div>
                     </Box>

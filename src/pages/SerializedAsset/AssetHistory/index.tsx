@@ -6,22 +6,24 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Link } from 'react-router-dom';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
-import { dateTimeFormat, isObjectEmpty, sidebarResource } from 'src/constants/helpers';
+import { dateTimeFormat, isObjectEmpty, serializedAsset, sidebarResource } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import { camelCase } from 'lodash';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase, uniq } from 'lodash';
 
-const AssetHistory = ({ id }) => {
+const AssetHistory = ({ id, status, resourceData, fields }) => {
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
 
   const toastConfig = useContext(CustomToastContext);
+  const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const [duration, setDuration] = useState({
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
   });
+  const [column,setColumn] = useState([])
 
   const {
     state: { permissions }
@@ -285,11 +287,19 @@ const AssetHistory = ({ id }) => {
     }
   ];
 
+  useEffect(()=>{
+    let statusChangeFieldColumns = []
+    statusChangeFieldColumns  = uniq(resourceData?.policy?.statusChangeFields?.flatMap(ele => ele.fields))
+    let statusChangeFields = fields?.filter((ele)=>[...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName))
+    let extraColumns = generateColumns(renderedFrom, statusChangeFields, routes.serializedAssetDetail.path, true);
+    setColumn([...columns,...extraColumns])
+  },[])
+
   useEffect(() => {
     if (id) {
       fetchData();
     }
-  }, [id, page, limit, filters, sorting, duration]);
+  }, [id, status, page, limit, filters, sorting, duration]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -328,7 +338,8 @@ const AssetHistory = ({ id }) => {
       .get(`/history/inventory/${id}${queryString}`)
       .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
-          ...u,
+          ...((({ assetData, ...rest }) => rest)(u)), 
+          ...u?.assetData,
           _id: index + 1,
           id: index + 1,
           reference: u?.reference?.optionLabel,
@@ -350,10 +361,10 @@ const AssetHistory = ({ id }) => {
       <Box className="max-w-[800px]">
         <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
       </Box>
-      {columns ? (
+      {column ? (
         <CustomReactTable
           height={'calc(100vh - 250px)'}
-          columns={columns}
+          columns={column}
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
@@ -371,3 +382,5 @@ const AssetHistory = ({ id }) => {
 };
 
 export default AssetHistory;
+
+

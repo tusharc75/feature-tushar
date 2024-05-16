@@ -5,7 +5,7 @@ import { backendApi } from '../../config';
 import { Box, Button, Divider, makeStyles } from '@material-ui/core';
 import { MATERIAL_TYPE, downloadExcel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { sortBy } from 'lodash';
+import { sortBy, startCase } from 'lodash';
 import DetailsPage from 'src/components/Shared/DetailsPage';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -156,18 +156,18 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             item?.type === MATERIAL_TYPE.product
               ? item?.productDetail?.productName
               : item?.type === MATERIAL_TYPE.service
-              ? item?.serviceDetail?.serviceName
-              : item?.type === MATERIAL_TYPE.package
-              ? item?.packageDetail?.packageName
-              : '';
+                ? item?.serviceDetail?.serviceName
+                : item?.type === MATERIAL_TYPE.package
+                  ? item?.packageDetail?.packageName
+                  : '';
           res.description =
             item?.type === MATERIAL_TYPE.product
               ? item?.productDetail?.productDescription
               : item?.type === MATERIAL_TYPE.service
-              ? item?.serviceDetail?.serviceDescription
-              : item?.type === MATERIAL_TYPE.package
-              ? item?.packageDetail?.packageDescription
-              : '';
+                ? item?.serviceDetail?.serviceDescription
+                : item?.type === MATERIAL_TYPE.package
+                  ? item?.packageDetail?.packageDescription
+                  : '';
           res.subRows = generateNestedData(data?.materials, res);
           return res;
         });
@@ -184,6 +184,14 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
             Footer: () => {
               return <>Total</>;
             }
+          },
+          {
+            accessor: 'type',
+            Header: 'Type',
+            width: 150,
+            show: true,
+            disabled: true,
+            Cell: ({ row }) => <p className="text-truncate">{startCase(row?.original?.type)}</p>
           },
           {
             accessor: 'detail',
@@ -231,18 +239,18 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow?.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.type === 'package'
-          ? _subRow?.packageDetail?.packageName
-          : '';
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === 'package'
+              ? _subRow?.packageDetail?.packageName
+              : '';
       _subRow.description =
         _subRow?.type === 'product'
           ? _subRow?.productDetail?.productDescription
           : _subRow?.type === 'service'
-          ? _subRow?.serviceDetail?.serviceDescription
-          : _subRow?.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : '';
+            ? _subRow?.serviceDetail?.serviceDescription
+            : _subRow?.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription
+              : '';
 
       _subRow.subRows = generateNestedData(material, _subRow);
     });
@@ -375,6 +383,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       onClick={(e: any) => (e.target.value = null)}
       id="importFromExcel"
       name="importFromExcel"
+      className="sr-only"
       onChange={uploadData}
       accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
       style={{
@@ -387,8 +396,8 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
   );
 
   return (
-    <>
-      <Box display="flex" pt={1} justifyContent="flex-end">
+    <div className="p-2">
+      <Box display="flex" className="pb-2" justifyContent="flex-end">
         <Box mx={1} />
         {!isSubmited && (
           <Button
@@ -447,6 +456,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                   hideAction={true}
                   hideSelection={true}
                   expander={true}
+                  hideExportTable={true}
                 />
               ) : (
                 <Box p={2} height={500}>
@@ -457,7 +467,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           </Box>
         </>
       )}
-    </>
+    </div>
   );
 };
 

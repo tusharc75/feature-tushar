@@ -1,12 +1,20 @@
 import { useAccount, useMsal } from '@azure/msal-react';
-import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Tooltip, Typography, useMediaQuery } from '@material-ui/core';
+import { AppBar, Box, ButtonBase, Chip, IconButton, Menu, MenuItem, Toolbar, Typography, useMediaQuery } from '@material-ui/core';
 import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@material-ui/icons';
+import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import SyncIcon from '@material-ui/icons/Sync';
 import { isEmpty } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { FiExternalLink } from 'react-icons/fi';
+import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import { useHistory, useLocation } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
+import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
+import { SVG } from 'src/assets';
+import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { useScrollDirection } from 'src/hooks/useScroll';
+import { userManual } from 'src/pages/Home';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
@@ -14,22 +22,14 @@ import { useData } from '../../StateProvider/Provider';
 import { SET_CHATTER, SET_SELECTED_ENTITY, SET_USER } from '../../StateProvider/actionTypes';
 import axiosInstance from '../../axios/axiosInstance';
 import { backendApi } from '../../config';
+import HtmlTooltip from '../CustomTooltipTitle';
+import DashboardModal, { ModalHead } from '../DashboardModal';
 import routes from '../Helpers/Routes';
 import UserProfile from './../UserProfile';
-import { useScrollDirection } from 'src/hooks/useScroll';
-import { HiOutlineMenuAlt1 } from 'react-icons/hi';
-import styles from './Header.module.scss';
-import { FiExternalLink } from 'react-icons/fi';
-import { SVG } from 'src/assets';
-import { userManual } from 'src/pages/Home';
-import DashboardModal, { ModalHead } from '../DashboardModal';
-import { SearchBar } from './SearchBar';
-import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
-import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
-import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
 import ChatNotification from './ChatNotifications';
+import styles from './Header.module.scss';
 import Notification from './Notification';
-import HtmlTooltip from '../CustomTooltipTitle';
+import { SearchBar } from './SearchBar';
 
 const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
@@ -95,22 +95,24 @@ const Header = () => {
   }, [selectedEntity]);
 
   const saveEntity = () => {
-    axiosInstance()
-      .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
-      .then(({ data }) => {
-        axiosInstance()
-          .get('/user/me')
-          .then(({ data: response }) => {
-            const { data } = response;
-            dispatch({ type: SET_USER, payload: data });
-          })
-          .catch((err) => {
-            localStorage.setItem('token', '');
-          });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    if (!isOffline) {
+      axiosInstance()
+        .put(`/user/save-selected-entity?selectedEntity=${selectedEntity}`)
+        .then(({ data }) => {
+          axiosInstance()
+            .get('/user/me')
+            .then(({ data: response }) => {
+              const { data } = response;
+              dispatch({ type: SET_USER, payload: data });
+            })
+            .catch((err) => {
+              localStorage.setItem('token', '');
+            });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const [loadingChatNotifications, setLoadingChatNotifications] = useState(false);
@@ -433,23 +435,6 @@ const Header = () => {
     }
   }
 
-  // const startTour = () => {
-  //   const paths = pathname.split('/').filter((x: string) => x);
-  //   let path: string;
-  //   if (paths.includes('detail')) {
-  //     paths.splice(paths.length - 1, 1);
-  //     path = paths.join('/');
-  //   }
-  //   dispatch({
-  //     type: SET_START_TOUR,
-  //     payload: {
-  //       path: paths.includes('detail') ? `/${path}` : pathname,
-  //       start: true,
-  //       stepIndex: 0
-  //     }
-  //   });
-  // };
-
   return (
     <div className="poppins">
       <div className={styles.filler}></div>
@@ -495,7 +480,14 @@ const Header = () => {
                       onClick={openEntitiesMenu}
                       className={`${styles.flexAlignCenter} poppins max-w-[200px]`}
                     >
-                      <span className={'poppins line-clamp-1'}>{curEntity && curEntity.entityName}</span>
+                      {curEntity?.entityLogo ? (
+                        <>
+                          <img src={curEntity.entityLogo} alt={curEntity ? curEntity.entityName : ''} className="max-h-[44px]" />
+                        </>
+                      ) : (
+                        <span className={'poppins line-clamp-1'}>{curEntity && curEntity.entityName}</span>
+                      )}
+
                       <Box component="span" mr={1} />
                       <ExpandMore />
                     </Box>
@@ -510,19 +502,19 @@ const Header = () => {
               <div>
                 {isOffline && (
                   <IconButton>
-                    <Tooltip title="You are working offline right now">
+                    <HtmlTooltip title="You are working offline right now">
                       <Brightness1 color="error" className="blink" />
-                    </Tooltip>
+                    </HtmlTooltip>
                   </IconButton>
                 )}
                 {isSynch && (
                   <IconButton color="inherit">
-                    <Tooltip title="Synchronizing offline data">
+                    <HtmlTooltip title="Synchronizing offline data">
                       <SyncIcon className="rotate" />
-                    </Tooltip>
+                    </HtmlTooltip>
                   </IconButton>
                 )}
-                <Tooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
+                <HtmlTooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
                   <IconButton
                     onClick={() => {
                       toggleThemeColor();
@@ -534,7 +526,7 @@ const Header = () => {
                   >
                     {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
                   </IconButton>
-                </Tooltip>
+                </HtmlTooltip>
 
                 <Notification />
               </div>
@@ -588,7 +580,7 @@ const Header = () => {
             </div>
           )}
           {isMobile && (
-            <Tooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
+            <HtmlTooltip title={themeColor === 'light' ? 'Turn off the light' : 'Turn on the light'}>
               <IconButton
                 onClick={() => {
                   toggleThemeColor();
@@ -600,7 +592,7 @@ const Header = () => {
               >
                 {themeColor === 'light' ? <MoonIcon /> : <SunIcon />}
               </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
           )}
           <Box className={styles.profile}>
             <UserProfile anchorRef={anchorRef} open={open} onToggle={handleToggle} onClose={handleClose} onListKeyDown={handleListKeyDown} />
@@ -627,7 +619,14 @@ const Header = () => {
         handleClose={handleCloseHelperModal}
         style={{ position: 'relative', width: 'min(468px, calc(100vw - 64px))' }}
       >
-        <a title="open equipt documentation" href={userManual.link} target="_blank" className={styles.viewAll} onClick={handleCloseHelperModal}>
+        <a
+          title="open equipt documentation"
+          rel="noreferrer"
+          href={userManual.link}
+          target="_blank"
+          className={styles.viewAll}
+          onClick={handleCloseHelperModal}
+        >
           <Typography component="span">Equipt - User Manual</Typography>
           <FiExternalLink size={20} style={{ marginBottom: 4 }} />
         </a>

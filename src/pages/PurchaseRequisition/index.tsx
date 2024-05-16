@@ -19,8 +19,7 @@ import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const PurchaseRequisition = () => {
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
@@ -45,18 +44,10 @@ const PurchaseRequisition = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -169,12 +160,12 @@ const PurchaseRequisition = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes.purchaseRequisition.path}${queryString}`)
+      .get(`${routes.purchaseRequisition.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
@@ -341,7 +332,6 @@ const PurchaseRequisition = () => {
           }}
         />
       )}
-
       {showOrderDialog.open && (
         <ManagePurchaseOrder
           isClone={false}

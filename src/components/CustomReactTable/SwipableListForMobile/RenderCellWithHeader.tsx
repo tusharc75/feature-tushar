@@ -19,8 +19,8 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
 
   const CellShell = ({ children }) => {
     return (
-      <h6 className=" text-[12px] grid grid-cols-[5fr_6fr] justify-between gap-2 max-w-full">
-        <span className="">{field.header}: </span>
+      <h6 className=" text-[12px] grid max-w-full">
+        <span className="text-[var(--dark-secondary-text,#8b8b8b)] text-[8px] font-medium">{field.header}: </span>
         <span
           onKeyDown={(e) => {
             handleKeyDown({ e, currentEditingCellPosition, submitInput });
@@ -28,7 +28,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
           onClick={() => {
             handleCellClick({ cell, dispatch, row, setCellValue });
           }}
-          className={`text-[12px_!important] text-right [&>*]:text-right [&>*]:justify-end line-clamp-1 break-all [&>*]:[flex-wrap:wrap] [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&>*]:line-clamp-1 [&>*]:[white-space:unset_!important] [&>div]:[flex-wrap:wrap_!important]`}
+          className={`text-[12px_!important]  [&>*]:[font-weight:500_!important] [&>*]:[font-size:12px_!important] [&_h5]:[font-size:12px_!important] [&_*]:[white-space:unset_!important] [&>div]:[flex-wrap:wrap_!important]`}
         >
           {children}
         </span>
@@ -57,7 +57,7 @@ const RenderCellWithHeader = ({ field, row, submitInput, cellValue, setCellValue
     case columnDef?.editable:
       return (
         <CellShell>
-          <div className="w-full">
+          <div className="w-fit">
             <div className=" [border-bottom:1px_dashed_#8a8a8a] [display:flex_!important] gap-[20px] justify-end ml-auto cursor-pointer max-w-[max-content]">
               <p>{flexRender(cell.column.columnDef.cell, cell?.getContext())}</p>
               <span>

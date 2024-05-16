@@ -26,7 +26,6 @@ import CustomAssetDialog from 'src/pages/ConvertInventory/InventoryToAsset/Custo
 import { isEqual, startCase } from 'lodash';
 
 const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData }) => {
-
   const [fullScreen, setFullScreen] = useState(true);
 
   const {
@@ -87,10 +86,9 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
     });
     if (data?.length) {
       if (data?.find((e) => e?.assetQuantity)) {
-        setAssetNumberDialog({ open: true, material: data, receiveDate: values?.receiveDate })
-      }
-      else {
-        handleReceive(data, values?.receiveDate)
+        setAssetNumberDialog({ open: true, material: data, receiveDate: values?.receiveDate });
+      } else {
+        handleReceive(data, values?.receiveDate);
       }
     } else {
       onSuccess();
@@ -108,14 +106,14 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
           type: 'success',
           message: data.message
         });
-        setAssetNumberDialog({ open: false, material: [], receiveDate: null })
+        setAssetNumberDialog({ open: false, material: [], receiveDate: null });
         onSuccess();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
-  }
+  };
 
   const getStorageLocation = () => {
     axiosInstance()
@@ -150,15 +148,20 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
           errors.inventoryQuantity = 'should be greater';
           errors.assetQuantity = 'should be greater';
         }
-        if (tempProduct && parseInt(d.inventoryQuantity) < d.serialNumber?.length) {
-          errors.serialNumber = 'should be greater';
-        }
         if (tempProduct && !d.warehouse) {
           errors.warehouse = 'Plant is required';
         }
         if (user?.user?.brandPolicy?.storageLocation) {
           if (tempProduct && !d.storageLocation) {
             errors.storageLocation = 'Storage Location is required';
+          }
+        }
+        if (parseInt(d.inventoryQuantity) && tempProduct?.serializedProduct && user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) {
+          if (d.serialNumber?.length > parseInt(d.inventoryQuantity)) {
+            errors['serialNumber'] = `Please enter serial numbers same as quantity`;
+          }
+          if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && parseInt(d.inventoryQuantity) !== d.serialNumber?.length) {
+            errors['serialNumber'] = `Please enter serial numbers same as quantity`;
           }
         }
       });
@@ -188,7 +191,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
   const handleExportField = (data: any) => {
     const qty = parseInt(data?.inventoryQuantity) || 0;
     let json_data = [...Array(qty).keys()].map((item) => ({
-      Product: data?.product || '',
+      Product: data?.detail || '',
       'Serial Number': ''
     }));
     const header = ['Product', 'Serial Number'];
@@ -293,7 +296,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                   <div>
                                     <div
                                       style={{ borderBottom: '1px solid var(--common-border-color)' }}
-                                      className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+                                      className="flex flex-wrap border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
                                     >
                                       <span>
                                         <span className="text-[var(--primary-text)] font-semibold">Type: </span>
@@ -318,7 +321,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                         name={`${data?.type}_${data?._id}`}
                                         label={startCase(data?.type)}
                                         value={data?.detail}
-                                        size='small'
+                                        size="small"
                                         disabled
                                       />
                                       <Autocomplete
@@ -370,8 +373,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                           )}
                                         />
                                       )}
-                                      {(data?.serializedProduct && !user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) ?
-                                        null :
+                                      {data?.serializedProduct && !user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory ? null : (
                                         <TextField
                                           fullWidth
                                           label="Quantity"
@@ -391,7 +393,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                           }}
                                           error={validate([data])?.inventoryQuantity}
                                           helperText={validate([data]).inventoryQuantity ? 'Receiving quantity is more than actual quantity' : ''}
-                                        />}
+                                        />
+                                      )}
                                       {data?.serializedProduct && (
                                         <TextField
                                           fullWidth
@@ -414,7 +417,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                           helperText={validate([data]).assetQuantity ? 'Receiving quantity is more than actual quantity' : ''}
                                         />
                                       )}
-                                      {data?.type === MATERIAL_TYPE.product &&
+                                      {data?.type === MATERIAL_TYPE.product && (
                                         <TextField
                                           fullWidth
                                           label="Supplier Part Number"
@@ -431,7 +434,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                             });
                                           }}
                                         />
-                                      }
+                                      )}
                                       <TextField
                                         fullWidth
                                         label="Comment"
@@ -474,9 +477,8 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                                 name="serialNumber"
                                                 label={'Serial Numbers'}
                                                 error={validate([data])?.serialNumber}
-                                                helperText={
-                                                  validate([data]).serialNumber ? 'Serial numbers should be less then inventory quantity' : ''
-                                                }
+                                                helperText={validate([data]).serialNumber}
+                                                required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
                                               />
                                             )}
                                           />
@@ -578,14 +580,17 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
       {assetNumberDialog.open && (
         <CustomAssetDialog
           handleClose={() => setAssetNumberDialog({ open: false, material: [], receiveDate: null })}
-          products={assetNumberDialog.material?.filter((e) => e.serializedProduct
-            && e.type === MATERIAL_TYPE.product)?.map((e) => { return { id: e._id, productName: material.find((u) => u._id === e._id)?.detail, qty: e.assetQuantity } })}
+          products={assetNumberDialog.material
+            ?.filter((e) => e.serializedProduct && e.type === MATERIAL_TYPE.product)
+            ?.map((e) => {
+              return { id: e._id, productName: material.find((u) => u._id === e._id)?.detail, qty: e.assetQuantity };
+            })}
           handleSuccess={(rows) => {
             const material = assetNumberDialog.material;
             material?.forEach((e) => {
-              e.assetNumbers = rows?.find((ele) => isEqual(ele.id, e._id))?.assetNumbers || []
-            })
-            handleReceive(material, assetNumberDialog.receiveDate)
+              e.assetNumbers = rows?.find((ele) => isEqual(ele.id, e._id))?.assetNumbers || [];
+            });
+            handleReceive(material, assetNumberDialog.receiveDate);
           }}
           loading={isSubmitting}
           resource={sidebarResource.purchaseOrder}

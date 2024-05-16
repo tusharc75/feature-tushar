@@ -14,7 +14,7 @@ import { GlobalFiltersType } from './GlobalFilter';
 import Loader from 'src/components/Loader';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import MapView from './MapView';
 import { IFormDataType } from '../DashboardBuilder/builderHelpers';
 import getStaticData from './getStaticData';
@@ -22,6 +22,7 @@ import StaticCards from './StaticCards';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
 import RefreshIcon from '@material-ui/icons/Refresh';
+import { formatAmountWithCurrency } from 'src/constants/helpers';
 
 export interface ChartDataType extends IFormDataType {
   _id: any;
@@ -37,9 +38,21 @@ interface Props {
   setSelectedChart?: (Chart: ChartDataType) => void;
   selectedDashboardId?: String;
   fetchDashboards: any;
+  kpiFilters: any[];
+  fetchKpiFilters: any;
 }
 
-const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards }: Props) => {
+const ChartTypes = ({
+  chart,
+  filterData,
+  globalFilters,
+  setSelectedChart,
+  fullScreen,
+  selectedDashboardId,
+  fetchDashboards,
+  kpiFilters,
+  fetchKpiFilters
+}: Props) => {
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -48,11 +61,16 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
     state: { selectedEntity, user }
   } = useData();
 
+  const getDefaultFilter = (filters) => {
+    const defaultFilters = filters?.filter((f) => f.default);
+    return defaultFilters?.length ? defaultFilters[0] : {};
+  };
+
   const currency = user?.user?.currency || 'USD';
   const [chartData, setChartData] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
   const [tableView, setTableView] = React.useState(false);
-  const [filterValues, setFilterValues] = React.useState(null);
+  const [filterValues, setFilterValues] = React.useState(getDefaultFilter(kpiFilters));
   const [anchorElFilter, setAnchorElFilter] = React.useState(null);
   const [anchorElExport, setAnchorElExport] = React.useState(null);
   const [invisible, setInvisible] = React.useState(false);
@@ -236,8 +254,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
           sx={{ border: '1px solid var(--common-border-color)', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
         >
           <Box style={{ padding: '15px 10px' }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Box display="flex">
+            <div className="flex justify-between items-center">
+              <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
                     <Button
@@ -252,8 +270,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     </Button>
                   </Badge>
                 )}
-              </Box>
-              <Box display="flex">
+              </div>
+              <div className="flex items-center">
                 {chart.hasExport && (
                   <Button
                     disabled={loading}
@@ -292,7 +310,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                         color="primary"
                         size="small"
                       >
-                        <BsFillPinFill fontSize="16px" />
+                        <BsFillPinFill fontSize="18px" />
                       </IconButton>
                     </HtmlTooltip>
                   ) : (
@@ -306,17 +324,17 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                         color="primary"
                         size="small"
                       >
-                        <TbPinnedOff fontSize="16px" />
+                        <TbPinnedOff fontSize="18px" />
                       </IconButton>
                     </HtmlTooltip>
                   )
                 ) : null}
-                <HtmlTooltip title='Refresh'>
+                <HtmlTooltip title="Refresh">
                   <IconButton
                     color="primary"
                     size="small"
                     onClick={() => {
-                      fetchData()
+                      fetchData();
                     }}
                     style={{ marginRight: 10 }}
                   >
@@ -324,12 +342,14 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   </IconButton>
                 </HtmlTooltip>
                 {setSelectedChart && (
-                  <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
-                    <FiMaximize2 fontSize="16px" />
-                  </IconButton>
+                  <HtmlTooltip title="Full Screen">
+                    <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
+                      <FiMaximize2 fontSize="18px" />
+                    </IconButton>
+                  </HtmlTooltip>
                 )}
-              </Box>
-            </Box>
+              </div>
+            </div>
 
             {chart.chartTitle && (
               <Typography component="div" align="center" color="textPrimary">
@@ -375,6 +395,25 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                       })
                     }}
                     options={{
+                      plugins: {
+                        ...(chart?.currency &&
+                        {
+                          tooltip: {
+                            callbacks: {
+                              label: function (context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                  label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                  label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
+                                }
+                                return label;
+                              }
+                            }
+                          }
+                        }),
+                      },
                       maintainAspectRatio: false,
                       indexAxis: chart?.kpi?.horizontalBar ? 'y' : 'x',
                       scales: {
@@ -386,10 +425,16 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                         y: {
                           grid: {
                             color: themeColor === 'light' ? '#dee2e6' : '#3d3d5c'
-                          }
+                          },
+                          ticks: {
+                            callback: function (value) {
+                              return chart?.currency ?
+                                formatAmountWithCurrency((globalFilters.currency || currency), Number(value) ? value : '00').fullFormatAmountWithoutSpace
+                                : value;
+                            }
+                          },
                         },
-                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') &&
-                        {
+                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') && {
                           y1: {
                             position: 'right',
                             grid: {
@@ -400,7 +445,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                             ticks: {
                               callback: function (value) {
                                 return value + '%';
-                              },
+                              }
                             }
                           }
                         })
@@ -440,7 +485,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
         </Box>
       )}
 
-      {chart.hasFilters && filterData && (
+      {chart.hasFilters && !isEmpty(filterData) && (
         <FiltersDropdown
           closeAnchor={() => setAnchorElFilter(null)}
           anchorEl={anchorElFilter}
@@ -452,6 +497,9 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
             ...filterData,
             status: chart.statusOptions
           }}
+          kpi={camelCase(chart.kpi.name)}
+          kpiFilters={kpiFilters}
+          fetchKpiFilters={fetchKpiFilters}
         />
       )}
       {chart.hasExport && (

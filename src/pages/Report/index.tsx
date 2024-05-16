@@ -23,16 +23,15 @@ import Dialog from '@material-ui/core/Dialog';
 import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 let cancelTokenSource = null;
 
 const Report = () => {
-  const history = useHistory();
-  const theme = useTheme();
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { selectedEntity }
+    state: { permissions, selectedEntity }
   } = useData();
   let { resource } = useParams();
 
@@ -119,6 +118,19 @@ const Report = () => {
       data,
       routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
     );
+    if (resourceStartCase === 'Quotation') {
+      newColumns.push({
+        accessor: 'versionComment',
+        Header: 'Version Comment',
+        show: true,
+        disabled: false,
+        Cell: ({ row }) => (
+          <>
+            <h5 className="text-truncate">{row.original['versionComment'] ? row.original['versionComment'] : <NoDataCell />}</h5>
+          </>
+        )
+      });
+    }
     columns = [...newColumns, ...getStaticFields()];
     if (resourceStartCase === 'Purchase Order') {
       columns.splice(1, 0, {
@@ -156,8 +168,8 @@ const Report = () => {
             </>
           )
         }
-      ]
-      columns = [...columns, ...extraColumns]
+      ];
+      columns = [...columns, ...extraColumns];
     }
     if (resourceStartCase === 'Work Order') {
       columns.push({
@@ -242,7 +254,7 @@ const Report = () => {
 
     axiosInstance()
       .get(api, {
-        cancelToken: cancelTokenSource.token
+        cancelToken: cancelTokenSource?.token
       })
       .then(({ data: { data, count } }) => {
         data = data.map((u: any) => {
@@ -302,10 +314,17 @@ const Report = () => {
               term: selectedData[key].value ? 'Yes' : 'No'
             });
           } else {
-            deepFilter.push({
-              field: key,
-              term: selectedData[key].value?.map((d: any) => d.optionValue)
-            });
+            if (Array.isArray(selectedData[key].value)) {
+              deepFilter.push({
+                field: key,
+                term: selectedData[key].value?.map((d: any) => d.optionValue)
+              });
+            } else {
+              deepFilter.push({
+                field: key,
+                term: selectedData[key].value
+              });
+            }
           }
         });
 
@@ -351,18 +370,51 @@ const Report = () => {
     return `?${filterQuery}`;
   };
 
-  const exportData = () => {
-    if (isExporting) return;
-    toastConfig.setToastConfig({
-      open: true,
-      message: 'Please wait exporting data',
-      type: 'info'
-    });
+  // const exportData = () => {
+  //   if (isExporting) return;
+  //   toastConfig.setToastConfig({
+  //     open: true,
+  //     message: 'Please wait exporting data',
+  //     type: 'info'
+  //   });
+  //   let newColumns = columns.map((col) => col.accessor);
+  //   if (colState.length) {
+  //     newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor);
+  //   }
+  //   setExporting(true);
+  //   let filterQuery = getFilter(true);
+  //   let api = null;
+  //   if (resourceCamelCase === 'quotes') {
+  //     api = `/report/quote-builder/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
+  //   } else {
+  //     api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
+  //   }
+
+  //   axiosInstance()
+  //     .get(api, {
+  //       responseType: 'arraybuffer'
+  //     })
+  //     .then((res) => {
+  //       const fileName = res.headers['content-disposition'].split('filename=')[1];
+  //       downloadExcel(res.data, fileName);
+  //       setExporting(false);
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         message: 'Successfully Exported',
+  //         type: 'success'
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       setExporting(false);
+  //       toastConfig.setToastConfig(err);
+  //     });
+  // };
+
+  const getApi = () => {
     let newColumns = columns.map((col) => col.accessor);
     if (colState.length) {
       newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor);
     }
-    setExporting(true);
     let filterQuery = getFilter(true);
     let api = null;
     if (resourceCamelCase === 'quotes') {
@@ -371,24 +423,7 @@ const Report = () => {
       api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
     }
 
-    axiosInstance()
-      .get(api, {
-        responseType: 'arraybuffer'
-      })
-      .then((res) => {
-        const fileName = res.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(res.data, fileName);
-        setExporting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Successfully Exported',
-          type: 'success'
-        });
-      })
-      .catch((err) => {
-        setExporting(false);
-        toastConfig.setToastConfig(err);
-      });
+    return api
   };
 
   return (
@@ -408,18 +443,16 @@ const Report = () => {
               <Grid container direction="row">
                 <Grid item xs={12} sm={12}>
                   <Grid container justifyContent="flex-end">
-                    {showGrid && (
-                      <Button
-                        size="small"
-                        className="btn-outline-v1"
-                        variant="outlined"
-                        id="importExportLinks"
-                        style={{ minWidth: 80 }}
-                        disabled={isExporting}
-                        onClick={exportData}
-                      >
-                        Export All
-                      </Button>
+                    {showGrid && (                        
+                        <AsynImportExportMenu
+                          resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+                          subResource={'report'}
+                          permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+                          module={''}
+                          api={getApi()}
+                          afterImportCompleted={() => {}}
+                          onlyExport={true}
+                        />
                     )}
                   </Grid>
                 </Grid>
@@ -526,9 +559,11 @@ const Report = () => {
                   setSelectedReportView={setSelectedReportView}
                   selectedReportView={selectedReportView}
                 />
-              ) : <Box p={2} height={500}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>}
+              ) : (
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+              )}
             </div>
           </>
         </CustomContainer>

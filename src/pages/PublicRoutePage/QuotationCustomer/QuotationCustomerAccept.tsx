@@ -1,19 +1,20 @@
-import { useState, useEffect, useContext } from 'react';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { Box, Grid, Tooltip, Typography } from '@material-ui/core';
-import { dateFormat, formatAmountWithCurrency, getUniqueCurrencies, quotation } from '../../../constants/helpers';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { Box, Grid, Typography } from '@material-ui/core';
+import { Skeleton } from '@material-ui/lab';
+import { orderBy, startCase } from 'lodash';
+import moment from 'moment';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { FaDiceOne } from 'react-icons/fa';
 import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Skeleton } from '@material-ui/lab';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import { CHILD_RESOURCE, dateFormat, formatAmountWithCurrency, getUniqueCurrencies, quotation } from '../../../constants/helpers';
 import QCcomment from './QCcomment';
-import { orderBy, startCase } from 'lodash';
 
 const QuotationCustomerAccept = ({ openAuthId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,7 +32,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   }, [openAuthId]);
 
   const fetchFields = async (quotationData) => {
-    var data = await fetch_quotation_product_fields(quotationData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
     const coloum: any = [
       {
         accessor: 'index',
@@ -59,12 +60,12 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                    : ''}
+                ? row.original?.packageDetail.packageType === 'Product'
+                  ? '(Product)'
+                  : '(Service)'
+                : row.original.type === 'service'
+                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -218,22 +219,23 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
+      parent.detail = `${
+        parent.type === 'serializedAsset'
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === 'product'
-            ? parent.productDetail?.productName
-            : parent.type === 'service'
-              ? parent.serviceDetail?.serviceName
-              : parent.packageDetail?.packageName
-        }`;
+          ? parent.productDetail?.productName
+          : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
-              ? parent?.packageDetail?.packageDescription || ''
-              : '';
+          ? parent?.productDetail?.productDescription || ''
+          : parent.type === 'package'
+          ? parent?.packageDetail?.packageDescription || ''
+          : '';
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       // parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       // parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -255,22 +257,23 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === 'product'
-            ? _subRow.productDetail?.productName
-            : _subRow.type === 'service'
-              ? _subRow.serviceDetail?.serviceName
-              : _subRow.packageDetail?.packageName
-        }`;
+          ? _subRow.productDetail?.productName
+          : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-            ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
-              ? _subRow?.packageDetail?.packageDescription || ''
-              : '';
+          ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === 'package'
+          ? _subRow?.packageDetail?.packageDescription || ''
+          : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       // _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       // _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -347,7 +350,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                 </>
               ) : (
                 <>
-                  <Tooltip title="Accept">
+                  <HtmlTooltip title="Accept">
                     <CustomButton
                       loading={isSubmitting.accept}
                       variant="contained"
@@ -360,8 +363,8 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                     >
                       Accept
                     </CustomButton>
-                  </Tooltip>
-                  <Tooltip title="Reject">
+                  </HtmlTooltip>
+                  <HtmlTooltip title="Reject">
                     <CustomButton
                       loading={isSubmitting.reject}
                       variant="contained"
@@ -374,7 +377,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                     >
                       Reject
                     </CustomButton>
-                  </Tooltip>
+                  </HtmlTooltip>
                 </>
               )}
             </Grid>

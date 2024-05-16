@@ -188,8 +188,17 @@ const CustomReport = () => {
     }${queryString}`;
 
     axiosInstance()
-      .get(api, { cancelToken: cancelTokenSource.token })
-      .then(({ data: { data, count } }) => {
+      .get(api, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data, count, columns } }) => {
+        if(camelCase(resource) == 'numberOfAssetsByStatus') {
+          setLoadingColumns(true);
+          setResourceColumns(columns);
+          let col = [];
+          let newColumns = generateColumns(renderedFrom, columns, null, true);
+          col = [...newColumns, ...getStaticFields()];
+          setColumns([...col]);
+          setLoadingColumns(false);
+        }
         data = data.map((u: any) => {
           let finalObject = prepareDataForGrid(u);
           return finalObject;
@@ -259,13 +268,13 @@ const CustomReport = () => {
     let queryString = getQueryString(true);
     axiosInstance()
       .get(
-        `${
+        `/report/${
           camelCase(resource) === 'quotes'
             ? 'quote-builder'
             : routes[camelCase(resource)]
             ? routes[camelCase(resource)]?.path
             : `${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
-        }/report/export?exportColumn=${JSON.stringify(exportColumns)}&export=1&${queryString}`,
+        }/export?exportColumn=${JSON.stringify(exportColumns)}&export=1&${queryString}`,
         {
           responseType: 'arraybuffer'
         }

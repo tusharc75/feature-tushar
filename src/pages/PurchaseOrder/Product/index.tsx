@@ -19,13 +19,14 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { purchaseOrder, sidebarResource } from 'src/constants/helpers';
-import { fetch_po_cost_fields, fetch_po_product_fields, fetch_po_service_fields } from '../../../components/PurchaseOrder/helper';
+import { CHILD_RESOURCE, purchaseOrder, sidebarResource } from 'src/constants/helpers';
 import CostDialog from './CostDialog';
 import InventoryStatesDialog from './InventoryStatesDialog';
 import PurchaseOrderQtyDialog from './PurchaseOrderQtyDialog';
 import ServiceDialog from './ServiceDialog';
 import { fetchTaxRate } from './helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import DeleteIcon from '@material-ui/icons/Delete';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -71,7 +72,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     let columns: any = [];
     const productResult = await axiosInstance().get('/field?resource=Product&view=true');
     const productFields = productResult?.data?.data?.filter((e) =>
-      ['productCategory', 'productNumber', 'serializedProduct'].includes(e?.fieldData?.fieldName)
+      ['productCategory', 'productNumber', 'serializedProduct', 'chartOfAccount'].includes(e?.fieldData?.fieldName)
     );
     columns.push({
       accessor: 'index',
@@ -149,43 +150,16 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
       }
     });
-    productFields?.forEach((e) => {
-      if (e?.fieldData?.fieldName === 'productNumber') {
-        columns.push({
-          accessor: 'productNumber',
-          Header: e?.fieldData?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
-          }
-        });
-      }
-      if (e?.fieldData?.fieldName === 'productCategory') {
-        columns.push({
-          accessor: 'productCategory',
-          Header: e?.fieldData?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row.original['productCategory'] ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
-          }
-        });
-      }
-      if (e?.fieldData?.fieldName === 'serializedProduct') {
-        columns.push({
-          accessor: 'serializedProductView',
-          Header: e?.fieldData?.fieldLabel,
-          width: 200,
-          Cell: ({ row }) => {
-            return row.original['serializedProductView'] ? <p className="text-truncate">{row.original.serializedProductView}</p> : <NoDataCell />;
-          }
-        });
-      }
-    });
 
-    const p_fields = await fetch_po_product_fields(purchaseOrderData?.currency);
-    const s_fields = await fetch_po_service_fields(purchaseOrderData?.currency);
+    const productFieldsColumns = generateColumns(renderedFrom, productFields);
+    productFieldsColumns?.forEach((e) => {
+      columns.push(e)
+    })
+
+    const p_fields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderProduct, purchaseOrderData?.currency, allowedToEdit);
+    const s_fields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderService, purchaseOrderData?.currency, allowedToEdit);
     setServiceFields(s_fields);
-    const c_fields = await fetch_po_cost_fields(purchaseOrderData?.currency);
+    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderCost, purchaseOrderData?.currency, allowedToEdit);
     setCostFields(c_fields);
 
     p_fields.forEach((element) => {
@@ -207,7 +181,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       canDrag: false,
       Cell: ({ row, table }) => {
         return allowedToEdit ? (
-          <>
+          <div>
             <HtmlTooltip title="Edit">
               <IconButton
                 color="primary"
@@ -217,7 +191,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                   openMaterial(row.original, table.getRowModel().rows);
                 }}
               >
-                <EditIcon color="primary" />
+                <EditIcon color="primary" fontSize="small" />
               </IconButton>
             </HtmlTooltip>
             {permissions?.irtTicket?.isCreate && row.original?.type === 'Product' && (
@@ -234,23 +208,26 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                     });
                   }}
                 >
-                  <VisibilityIcon color="primary" />
+                  <VisibilityIcon color="primary" fontSize="small" />
                 </IconButton>
               </HtmlTooltip>
             )}
             {(row.original?.actualReceived === undefined || row.original?.actualReceived === 0) && (
-              <GridDeleteIcon
-                hasDeletePermission={permissions?.purchaseOrder?.isUpdate}
-                ownerId={user?.user?._id}
-                userId={user?.user?._id}
-                onDelete={() => {
-                  setShowDeleteConfirmBox(true);
-                  setDeletePurchaseOrderItem([row.original]);
-                }}
-                entity=""
-              />
+              <HtmlTooltip title="Delete">
+                <IconButton
+                  color="primary"
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setShowDeleteConfirmBox(true);
+                    setDeletePurchaseOrderItem([row.original]);
+                  }}
+                >
+                  <DeleteIcon color="error" fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
             )}
-          </>
+          </div>
         ) : null;
       }
     });
@@ -317,13 +294,13 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         item.type === 'Product'
           ? item?.productDetail?.productDescription
           : item.type === 'Service'
-          ? item?.serviceDetail?.serviceDescription
-          : item?.description;
+            ? item?.serviceDetail?.serviceDescription
+            : item?.description;
       res.materialId = item.type === 'Product' ? item?.productDetail?._id : item.type === 'Service' ? item?.serviceDetail?._id : item?._id;
       res.productNumber = item.productDetail?.productNumber;
       res.serializedProduct = item.productDetail?.serializedProduct;
-      res.serializedProductView = item.productDetail?.serializedProduct ? 'Yes' : 'No';
-      res.productCategory = item.productDetail?.productCategory?.optionLabel;
+      res.productCategory = item.productDetail?.productCategory;
+      res.chartOfAccount = item.productDetail?.chartOfAccount;
       res.parentId = null;
       res.qty = item?.qty;
       res.productDetail = item?.productDetail;
@@ -344,7 +321,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       } else {
         res.isValid = true;
       }
-      res.hideSelection = item.actualReceived || item.rejectQuantity ? true : false;
+      res.hideSelection = item.actualReceived ? true : false;
       return res;
     });
     if (rows.length === 0) {
@@ -619,12 +596,12 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
         <MenuItem
           disabled={
             selectedRecords?.filter((e) => !e.hideSelection).length > 0 &&
-            uniq(
-              map(
-                selectedRecords?.filter((e) => !e.hideSelection),
-                'type'
-              )
-            )?.length === 1
+              uniq(
+                map(
+                  selectedRecords?.filter((e) => !e.hideSelection),
+                  'type'
+                )
+              )?.length === 1
               ? false
               : true
           }
@@ -665,9 +642,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
     fileName: `${routes.purchaseOrder.title}-${purchaseOrderData?.purchaseOrderNumber}`,
     resource: sidebarResource.purchaseOrder,
     referenceId: purchaseOrderData?._id,
-    columns: columns?.map((e) => {
-      return { ...e, accessor: e.accessor === 'serializedProductView' ? 'serializedProduct' : e.accessor };
-    }),
+    columns: columns,
     isSendEmail: true,
     button1Title: 'Ordered',
     button2Title: 'Received',
@@ -728,21 +703,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           extraDeepFilter={
             purchaseOrderData?.expenseItem === true || purchaseOrderData?.expenseItem === false
               ? [
-                  {
-                    field: 'expenseItem',
-                    term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
-                  }
-                ]
+                {
+                  field: 'expenseItem',
+                  term: purchaseOrderData?.expenseItem ? 'Yes' : 'No'
+                }
+              ]
               : []
           }
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
           isSubmitting={isAddingProducts}
@@ -803,11 +778,11 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           extraFilterById={
             purchaseOrderData?.chartOfAccount && !isEmpty(purchaseOrderData?.chartOfAccount)
               ? [
-                  {
-                    field: 'chartOfAccount',
-                    term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
-                  }
-                ]
+                {
+                  field: 'chartOfAccount',
+                  term: { $in: purchaseOrderData?.chartOfAccount?.map((e) => e?.optionValue) }
+                }
+              ]
               : []
           }
         />

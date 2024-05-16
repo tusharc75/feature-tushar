@@ -71,7 +71,9 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
             const obj: any = {};
             obj['Index'] = data['index'];
             obj['Product Name'] = data['productName'];
-            obj['Create Assets'] = data['createAsset'] ? 'TRUE' : 'FALSE';
+            if (resource === sidebarResource.purchaseOrder) {
+                obj['Create Assets'] = data['createAsset'] ? 'TRUE' : 'FALSE';
+            }
             if (assetNumberTypeField) {
                 obj['Asset Number Type'] = data['assetNumberType'];
             }
@@ -81,7 +83,9 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
         let header = [];
         header.push('Index')
         header.push('Product Name')
-        header.push('Create Assets')
+        if (resource === sidebarResource.purchaseOrder) {
+            header.push('Create Assets')
+        }
         if (assetNumberTypeField) {
             header.push('Asset Number Type')
         }
@@ -92,7 +96,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
         }
         const wb = utils.book_new();
         utils.book_append_sheet(wb, ws, 'Sheet1');
-        writeFile(wb, sidebarResource.purchaseOrder ? 'Purchase Order Assets.xlsx' : 'Inventory to Assets.xlsx');
+        writeFile(wb, resource === sidebarResource.purchaseOrder ? 'Purchase Order Assets.xlsx' : 'Inventory to Assets.xlsx');
     };
 
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>, setValues, values) => {
@@ -112,13 +116,25 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                     let rowInsert = {};
                     rowInsert['index'] = row[0]?.toString();
                     rowInsert['productName'] = row[1]?.toString();
-                    rowInsert['createAsset'] = row[2]?.toString()?.trim() === 'TRUE' ? true : false;
-                    if (assetNumberTypeField) {
-                        rowInsert['assetNumberType'] = rowInsert['createAsset'] ? row[3]?.toString() : ASSET_NUMBER_TYPE.manual;
-                        rowInsert['assetNumber'] = row[4]?.toString();
+                    if (resource === sidebarResource.purchaseOrder) {
+                        rowInsert['createAsset'] = row[2]?.toString()?.trim() === 'TRUE' ? true : false;
+                        if (assetNumberTypeField) {
+                            rowInsert['assetNumberType'] = rowInsert['createAsset'] ? row[3]?.toString() : ASSET_NUMBER_TYPE.manual;
+                            rowInsert['assetNumber'] = row[4]?.toString();
+                        }
+                        else {
+                            rowInsert['assetNumber'] = row[3]?.toString();
+                        }
                     }
                     else {
-                        rowInsert['assetNumber'] = row[3]?.toString();
+                        rowInsert['createAsset'] = true;
+                        if (assetNumberTypeField) {
+                            rowInsert['assetNumberType'] = row[2]?.toString();
+                            rowInsert['assetNumber'] = row[3]?.toString();
+                        }
+                        else {
+                            rowInsert['assetNumber'] = row[2]?.toString();
+                        }
                     }
                     option.push(rowInsert);
                 });
@@ -221,7 +237,8 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                                                     <TableRow>
                                                         <TableCell>Index</TableCell>
                                                         <TableCell align="left">Product</TableCell>
-                                                        <TableCell align="left">Create Assets</TableCell>
+                                                        {resource === sidebarResource.purchaseOrder ?
+                                                            <TableCell align="left">Create Assets</TableCell> : null}
                                                         {assetNumberTypeField ? (<TableCell>Asset Number Type *</TableCell>) : null}
                                                         <TableCell align="left">Asset Number *</TableCell>
                                                     </TableRow>
@@ -236,19 +253,20 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                                                                         {data.index}
                                                                     </TableCell>
                                                                     <TableCell align="left">{data.productName}</TableCell>
-                                                                    <TableCell align="left">
-                                                                        <Checkbox
-                                                                            checked={data?.createAsset}
-                                                                            onChange={(event) => {
-                                                                                arrayHelpers.replace(index, {
-                                                                                    ...values.products[index],
-                                                                                    createAsset: event.target.checked,
-                                                                                    assetNumberType: ASSET_NUMBER_TYPE.manual,
-                                                                                })
-                                                                            }}
-                                                                            inputProps={{ 'aria-label': 'primary checkbox' }}
-                                                                        />
-                                                                    </TableCell>
+                                                                    {resource === sidebarResource.purchaseOrder ?
+                                                                        <TableCell align="left">
+                                                                            <Checkbox
+                                                                                checked={data?.createAsset}
+                                                                                onChange={(event) => {
+                                                                                    arrayHelpers.replace(index, {
+                                                                                        ...values.products[index],
+                                                                                        createAsset: event.target.checked,
+                                                                                        assetNumberType: ASSET_NUMBER_TYPE.manual,
+                                                                                    })
+                                                                                }}
+                                                                                inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                                            />
+                                                                        </TableCell> : null}
                                                                     {assetNumberTypeField &&
                                                                         <TableCell align="left">
                                                                             <Autocomplete

@@ -18,6 +18,8 @@ import {
     downloadExcel,
     isObjectEmpty,
     sidebarResource,
+    dateFormat,
+    REPORT_LIST,
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -33,6 +35,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
+import WarningIcon from '@material-ui/icons/Warning';
 
 
 let cancelTokenSource = null;
@@ -52,6 +55,7 @@ const Report = () => {
     const resourceCamelCase = camelCase(type);
     const resourceStartCase = startCase(type);
     const renderedFrom = `${type}_report_new`;
+    const reportConfig = REPORT_LIST?.find((e) => e.type === resourceCamelCase);
 
     const [showGrid, setShowGrid] = React.useState(false);
     const [selectedData, setSelectedData] = React.useState(null);
@@ -68,6 +72,7 @@ const Report = () => {
     const [reportList, setReportList] = React.useState([]);
     const [selectedReportView, setSelectedReportView] = React.useState(null);
     const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+    const [defaultColumns, setDefaultColumns] = React.useState([]);
 
     // Grid Configs
     const { generateColumns } = useColumns();
@@ -83,26 +88,25 @@ const Report = () => {
             setLoadingColumns(true);
             let columns = [];
             let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
-            const customRendererTypes = ['reference', 'creditDebit', 'date', 'creditDebitType'];
             let newColumns = generateColumns(type, columnFields);
             newColumns?.forEach(o => {
-                const fieldType = columnFields?.find(c => c?.fieldData?.fieldName === o?.accessor)?.type;
-                if (customRendererTypes?.includes(fieldType)) {
-                    switch (fieldType) {
-                        case 'reference':
-                            o.cell = ({ row }) => ReferenceRenderer(row);
-                            o.disableFilters = true;
-                            o.disableSortBy = true;
-                            break;
-                        case 'creditDebit':
-                            o.cell = ({ row }) => CreditDebitRenderer(row)
-                            o.disableFilters = true;
-                            o.disableSortBy = true;
-                            break;
-                        case 'creditDebitType':
-                            o.cell = ({ row }) => CreditDebitTypeRenderer(row);
-                            break;
+                if (type === "inventory-history") {
+                    if (o?.accessor === 'type') {
+                        o.cell = ({ row }) => CreditDebitTypeRenderer(row)
                     }
+                    if (o?.accessor === 'qty') {
+                        o.cell = ({ row }) => CreditDebitRenderer(row)
+                    }
+                }
+                if (type === "fleet-report") {
+                    if (o?.accessor === 'unitNumber') {
+                        o.cell = ({ row }) => UnitNameRenderer(row)
+                    }
+                }
+                if (o?.accessor === 'reference') {
+                    o.cell = ({ row }) => ReferenceRenderer(row);
+                    o.disableFilters = true;
+                    o.disableSortBy = true;
                 }
                 if (o?.accessor === 'serialNumber') {
                     o.cell = ({ row }) => SerialNumberRenderer(row)
@@ -151,6 +155,10 @@ const Report = () => {
                 columns = [...newColumns]
             }
             setResourceColumns(filterFields);
+            if (reportConfig?.defaultColumn) {
+                setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+                setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
+            }
             setColumns(columns);
             setLoadingColumns(false);
         } catch (error) {
@@ -345,6 +353,27 @@ const Report = () => {
         )
     }
 
+    const UnitNameRenderer = (row) => {
+        return <div>
+            <Link
+                className="link text-truncate"
+                title={row?.original?.unitNumber}
+                to={`${routes.unitDetail.path}/${row?.original?._id}`}
+                target="_blank">
+                {row?.original?.unitNumber}
+            </Link>
+            {row?.original?.unitInOtherDeal &&
+                <Box ml={1} >
+                    <HtmlTooltip title={"Unit is assigned to multiple active contracts"} placement="top" arrow>
+                        <WarningIcon
+                            style={{ fontSize: '16px' }}
+                            fontSize="small" color="error" />
+                    </HtmlTooltip>
+                </Box>
+            }
+        </div>
+    }
+
     const CreditDebitTypeRenderer = (row) => {
         return <div>
             {row?.original?.type ? (
@@ -401,7 +430,7 @@ const Report = () => {
 
         var api = `/report/${type}`;
         axiosInstance().get(`${api}${filterQuery}`, {
-            cancelToken: cancelTokenSource.token
+            cancelToken: cancelTokenSource?.token
         })
             .then(({ data: { data, count, columns } }) => {
                 if (resourceCamelCase === 'userSession') {
@@ -440,6 +469,12 @@ const Report = () => {
                     setColumns(columns);
                     setLoadingColumns(false);
                 }
+                if (resourceCamelCase === 'iotDataPoints') {
+                    setLoadingColumns(true);
+                    let newColumns = generateColumns(type, columns);
+                    setColumns(newColumns);
+                    setLoadingColumns(false);
+                }
                 data = data.map((u: any) => {
                     let finalObject: any = prepareDataForGrid(u);
                     return finalObject;
@@ -470,6 +505,9 @@ const Report = () => {
         if (!isExport) {
             filterQuery = `page=${page}&limit=${limit}&`;
         }
+        if (type === 'iot-data-points') {
+            filterQuery += `column=true&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}&`;
+        }
         if (sorting.length > 0) {
             filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
         }
@@ -485,14 +523,19 @@ const Report = () => {
                 let filterById = idFilter.map((key) => {
                     if (key === 'warehouse') {
                         if (!isExport) {
-                            setShowPricefilter((prevState) => ({ ...prevState, warehouse: options.map((d: any) => d.optionValue) }));
+                            setShowPricefilter((prevState) => ({
+                                ...prevState,
+                                warehouse: selectedData[key]?.value?.map((d: any) => d.optionValue)
+                            }));
                         }
                     }
-                    const options = selectedData[key].value;
+                    if (!Array.isArray(selectedData[key].value)) {
+                        return { field: key, term: selectedData[key].value }
+                    }
                     return {
                         field: key,
                         term: {
-                            $in: options.map((d: any) => d.optionValue)
+                            $in: selectedData[key]?.value?.map((d: any) => d.optionValue)
                         }
                     };
                 });
@@ -507,6 +550,11 @@ const Report = () => {
                         deepFilter.push({
                             field: key,
                             term: selectedData[key].value
+                        });
+                    } else if (!Array.isArray(selectedData[key].value)) {
+                        deepFilter.push({
+                            field: key,
+                            term: selectedData[key]?.value
                         });
                     } else {
                         deepFilter.push({
@@ -619,7 +667,7 @@ const Report = () => {
                     <CustomBreadCrumbs
                         routes={[
                             { title: 'Reports', path: '/reports' },
-                            { title: resourceStartCase, path: '' }
+                            { title: reportConfig?.title }
                         ]}
                     />
                     {showGrid && (
@@ -687,18 +735,26 @@ const Report = () => {
                             fullWidth
                             onClose={(e, reason) => {
                                 if (reason !== 'backdropClick') {
-                                    // history.push(routes.reports.path);
-                                    setShowGrid(true);
-                                    dispatch({ type: 'onlyFilter', filters: {} });
+                                    if (defaultColumns?.length) {
+                                        history.push(routes.reports.path);
+                                    }
+                                    else {
+                                        setShowGrid(true);
+                                        dispatch({ type: 'onlyFilter', filters: {} });
+                                    }
                                 }
                             }}
                         >
                             <CustomDialogHeader
                                 title={`Set Filters`}
                                 onClose={() => {
-                                    // history.push(routes.reports.path);
-                                    setShowGrid(true);
-                                    dispatch({ type: 'onlyFilter', filters: {} });
+                                    if (defaultColumns?.length) {
+                                        history.push(routes.reports.path);
+                                    }
+                                    else {
+                                        setShowGrid(true);
+                                        dispatch({ type: 'onlyFilter', filters: {} });
+                                    }
                                 }}
                             />
                             <div className="p-4 min-h-[600px]">
@@ -707,7 +763,7 @@ const Report = () => {
                                         resourceColumns={resourceColumns}
                                         betweenDate={betweenDate}
                                         setBetweenDate={setBetweenDate}
-                                        resource={'Purchase Order Type'}
+                                        resource={resourceStartCase}
                                         setSelectedData={setSelectedData}
                                         loading={loading}
                                         fetchReportData={fetchResourceData}
@@ -731,6 +787,8 @@ const Report = () => {
                                         statusTimeFrame={statusTimeFrame}
                                         setStatusTimeFrame={setStatusTimeFrame}
                                         selectedData={selectedData}
+                                        defaultResource={defaultColumns}
+                                        reportConfig={reportConfig}
                                     />
                                 </DialogContent>
                             </div>

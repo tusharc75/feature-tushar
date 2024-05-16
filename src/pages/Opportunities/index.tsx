@@ -20,7 +20,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { customerAccount, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import { customerAccount, getDefaultMyRecordType, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
@@ -47,7 +47,7 @@ const Opportunities = () => {
   }: any = useData();
   const { generateColumns } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.opportunity));
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
@@ -330,7 +330,6 @@ const Opportunities = () => {
             setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
           }}
           isAddButtonVisible={permissions?.opportunity?.isCreate}
-          synchronizeType={true}
         />
 
         {columns ? (

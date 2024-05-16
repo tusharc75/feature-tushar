@@ -1,6 +1,4 @@
 import { Box, Button, Chip, Grid, IconButton, Typography } from '@material-ui/core';
-import Tab from '@material-ui/core/Tab';
-import Tabs from '@material-ui/core/Tabs';
 import { ControlPoint, Edit, ExpandLess, ExpandMore, InfoOutlined } from '@material-ui/icons';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import { Skeleton } from '@material-ui/lab';
@@ -11,6 +9,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { MdDelete } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -40,11 +39,6 @@ import ServiceMaster from './ServiceMaster';
 import ServicePackage from './ServicePackage';
 import NonSerializedAssetProductInventory from './inventory';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: any;
-  value: any;
-}
 const minHeight = '250px';
 
 const ProductDetailsPage = () => {
@@ -229,26 +223,6 @@ const ProductDetailsPage = () => {
     }
   };
 
-  const handleConvertSerialized = () => {
-    axiosInstance()
-      .post(`${product.api}/non-serialized-to-serialized`, { products: [id] })
-      .then(() => {
-        setShowConfirmBoxConvert(false);
-        getProductFieldsAndData();
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setShowConfirmBoxConvert(false);
-      });
-  };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -275,401 +249,311 @@ const ProductDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          variant="scrollable"
-          scrollButtons="auto"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          indicatorColor="primary"
-          textColor="primary"
-          aria-label="Product Details Tab"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab className={'tabLayout'} value={0} label={<div className="d-flex align-items-center tab-font">Details</div>} {...a11yProps(0)} />
-
-          {(permissions?.serializedAsset || permissions?.productionOrder) && (
-            <Tab
-              className={'tabLayout'}
-              value={1}
-              label={<div className="d-flex align-items-center tab-font">Child Products</div>}
-              {...a11yProps(1)}
-            />
-          )}
-
-          {permissions?.serviceMaster && (
-            <Tab
-              className={'tabLayout'}
-              value={2}
-              label={<div className="d-flex align-items-center tab-font">Services/Consumables</div>}
-              {...a11yProps(2)}
-            />
-          )}
-
-          {permissions?.serviceMaster && (
-            <Tab
-              className={'tabLayout'}
-              value={3}
-              label={<div className="d-flex align-items-center tab-font">Service Packages</div>}
-              {...a11yProps(3)}
-            />
-          )}
-
-          {permissions?.repairType && (
-            <Tab className={'tabLayout'} value={4} label={<div className="d-flex align-items-center tab-font">Repair Types</div>} {...a11yProps(4)} />
-          )}
-
-          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && (
-            <Tab
-              className={'tabLayout'}
-              value={5}
-              label={<div className="d-flex align-items-center tab-font">Product Images</div>}
-              {...a11yProps(5)}
-            />
-          )}
-
-          {permissions?.packages && (
-            <Tab
-              className={'tabLayout'}
-              value={6}
-              label={<div className="d-flex align-items-center tab-font">Product Packages</div>}
-              {...a11yProps(6)}
-            />
-          )}
-
-          {(permissions?.serializedAsset || permissions?.productionOrder) && (
-            <Tab
-              className={'tabLayout'}
-              value={7}
-              label={<div className="d-flex align-items-center tab-font">Parent Products</div>}
-              {...a11yProps(7)}
-            />
-          )}
-
-          {permissions?.productInventory?.isRead && (
-            <Tab className={'tabLayout'} value={8} label={<div className="d-flex align-items-center tab-font">History</div>} {...a11yProps(8)} />
-          )}
-
-          {productData?.digitalProduct && (
-            <Tab className={'tabLayout'} value={9} label={<div className="d-flex align-items-center tab-font">Digital</div>} {...a11yProps(9)} />
-          )}
-        </Tabs>
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={12} md={12} lg={12}>
-            {tabValue === 0 && (
-              <Box>
-                {loading || !productFields.length ? (
-                  <Grid container spacing={2} style={{ padding: '8px' }}>
-                    <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                  </Grid>
-                ) : (
-                  <div className="pb-3">
-                    <DetailsPage data={productData} fields={productFields} fullHeight={false} />
-                    <Box mt={3}>
-                      <Grid item xs={12} sm={12} md={12} lg={12} className={'form-v1'}>
-                        <Grid container spacing={2}>
-                          {permissions?.productInventory?.isRead && !user?.user?.brandPolicy?.hideInventoryCount && (
-                            <Grid item xs={12} sm={6} md={4} xl={3}>
-                              <div style={{ overflow: 'hidden' }} className="single-form-v1">
-                                <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
-                                  <Box display="flex" alignItems="center">
-                                    <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
-                                      {productData?.expenseItem ? 'Expense Quantity' : routes?.productInventory?.title}
-                                    </Typography>
-                                    <Box pl={1} display="flex">
-                                      <IconButton
-                                        size="small"
-                                        onClick={() => {
-                                          history.push(`${routes.productInventory.path}`, { product: id, productName: productData?.productName });
-                                        }}
-                                      >
-                                        <InfoOutlined fontSize="small" />
-                                      </IconButton>
-                                    </Box>
-                                  </Box>
-                                  <IconButton size="small" onClick={fetchProductInventoryData}>
-                                    <RefreshIcon fontSize="small" />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange} aria-label="Product Details Tab" variant="scrollable" scrollButtons="auto">
+          <CustomTab value={0} className={'tabLayout'} label={'Details'} />
+          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={1} label={'Child Products'} />}
+          {permissions?.serviceMaster && <CustomTab value={2} label={'Services/Consumables'} />}
+          {permissions?.serviceMaster && <CustomTab value={3} label={'Service Packages'} />}
+          {permissions?.repairType && <CustomTab value={4} label={'Repair Types'} />}
+          {permissions?.eCommercePolicy?.isRead && productData?.productTemplate && <CustomTab value={5} label={'Product Images'} />}
+          {permissions?.packages && <CustomTab value={6} label={'Product Packages'} />}
+          {(permissions?.serializedAsset || permissions?.productionOrder) && <CustomTab value={7} label={'Parent Products'} />}
+          {permissions?.productInventory?.isRead && <CustomTab value={8} label={'History'} />}
+          {productData?.digitalProduct && <CustomTab value={9} label={'Digital'} />}
+        </CustomTabs>
+        <TabPanel value={tabValue} index={0}>
+          <Box>
+            {loading || !productFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
+              </Grid>
+            ) : (
+              <div className="pb-3">
+                <DetailsPage data={productData} fields={productFields} fullHeight={false} />
+                <Box mt={3}>
+                  <Grid item xs={12} sm={12} md={12} lg={12} className={'form-v1'}>
+                    <Grid container spacing={2}>
+                      {permissions?.productInventory?.isRead && !user?.user?.brandPolicy?.hideInventoryCount && (
+                        <Grid item xs={12} sm={6} md={4} xl={3}>
+                          <div style={{ overflow: 'hidden' }} className="single-form-v1">
+                            <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
+                              <Box display="flex" alignItems="center">
+                                <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
+                                  {productData?.expenseItem ? 'Expense Quantity' : routes?.productInventory?.title}
+                                </Typography>
+                                <Box pl={1} display="flex">
+                                  <IconButton
+                                    size="small"
+                                    onClick={() => {
+                                      history.push(`${routes.productInventory.path}`, { product: id, productName: productData?.productName });
+                                    }}
+                                  >
+                                    <InfoOutlined fontSize="small" />
                                   </IconButton>
                                 </Box>
+                              </Box>
+                              <IconButton size="small" onClick={fetchProductInventoryData}>
+                                <RefreshIcon fontSize="small" />
+                              </IconButton>
+                            </Box>
 
-                                {!productInventoryLoading ? (
-                                  <Box className="formdata-v1" style={{ minHeight }}>
-                                    {productInventoryData?.filter((d) => d.inventory)?.length ? (
-                                      <>
-                                        <Box display="flex" justifyContent="space-between">
-                                          <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
-                                          {user?.user?.brandPolicy?.storageLocation && (
-                                            <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>
-                                          )}
-                                          <Typography className="table-head-v1">Qty</Typography>
-                                        </Box>
-                                        {productInventoryData
-                                          ?.filter((d) => d.inventory)
-                                          .map(({ inventory, warehouse, storageLocation }) => (
-                                            <Box display="flex" justifyContent="space-between">
-                                              <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
-                                              {user?.user?.brandPolicy?.storageLocation && (
-                                                <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>
-                                              )}
-                                              <Typography className="table-data-v1 bt-0">{inventory}</Typography>
-                                            </Box>
-                                          ))}
-                                      </>
-                                    ) : (
-                                      <Box textAlign="center" padding={2} minHeight={10}>
-                                        <Typography>No Record Found</Typography>
-                                      </Box>
-                                    )}
-                                    {permissions?.product?.isUpdate &&
-                                      permissions?.serializedAsset?.isCreate &&
-                                      productData?.serializedProduct === false && (
-                                        <Box pt={1}>
-                                          <Button
-                                            variant={'outlined'}
-                                            color="primary"
-                                            onClick={() => {
-                                              setShowConfirmBoxConvert(true);
-                                            }}
-                                            size="small"
-                                          >
-                                            Convert to Serialized Product
-                                          </Button>
-                                          {showConfirmBoxConvert && (
-                                            <ConfirmationDialog
-                                              open={showConfirmBoxConvert}
-                                              message={`Are you sure you want to convert serialized product ?`}
-                                              onClose={() => {
-                                                setShowConfirmBoxConvert(false);
-                                              }}
-                                              onOk={handleConvertSerialized}
-                                            />
-                                          )}
-                                        </Box>
+                            {!productInventoryLoading ? (
+                              <Box className="formdata-v1" style={{ minHeight }}>
+                                {productInventoryData?.filter((d) => d.inventory)?.length ? (
+                                  <>
+                                    <Box display="flex" justifyContent="space-between">
+                                      <Typography className="table-head-v1">{routes.warehouse.title}</Typography>
+                                      {user?.user?.brandPolicy?.storageLocation && (
+                                        <Typography className="table-head-v1">{routes.storageLocation.title}</Typography>
                                       )}
-                                  </Box>
+                                      <Typography className="table-head-v1">Qty</Typography>
+                                    </Box>
+                                    {productInventoryData
+                                      ?.filter((d) => d.inventory)
+                                      .map(({ inventory, warehouse, storageLocation }) => (
+                                        <Box display="flex" justifyContent="space-between">
+                                          <Typography className="table-data-v1 bt-0 br-0">{warehouse?.name} </Typography>
+                                          {user?.user?.brandPolicy?.storageLocation && (
+                                            <Typography className="table-data-v1 bt-0 br-0">{storageLocation?.storageLocationName} </Typography>
+                                          )}
+                                          <Typography className="table-data-v1 bt-0">{inventory}</Typography>
+                                        </Box>
+                                      ))}
+                                  </>
                                 ) : (
-                                  [1, 2].map((i) => (
-                                    <BoxWithBorder
-                                      key={i}
-                                      style={{
-                                        margin: '8px'
-                                      }}
-                                    >
-                                      <Box padding={1}>
-                                        <Skeleton variant="text" width="100px" height="20px" />
-                                        <Box marginTop={1} />
-                                        <Skeleton variant="text" width="100%" height="15px" />
-                                      </Box>
-                                    </BoxWithBorder>
-                                  ))
-                                )}
-                              </div>
-                            </Grid>
-                          )}
-                          {permissions?.serializedAsset?.isRead && productData?.serializedProduct ? (
-                            <Grid item xs={12} sm={6} md={4} xl={3}>
-                              <Box className="single-form-v1">
-                                <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
-                                  <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
-                                  <Box>
-                                    {permissions?.serializedAsset?.isCreate && (
-                                      <IconButton
-                                        title={`Create ${routes.serializedAsset.title}`}
-                                        color="primary"
-                                        size="small"
-                                        onClick={() => {
-                                          setOpenProductInventoryDialog(true);
-                                        }}
-                                      >
-                                        <ControlPoint fontSize="small" />
-                                      </IconButton>
-                                    )}
-                                    <IconButton size="small" onClick={getWarehouses}>
-                                      <RefreshIcon fontSize="small" />
-                                    </IconButton>
+                                  <Box textAlign="center" padding={2} minHeight={10}>
+                                    <Typography>No Record Found</Typography>
                                   </Box>
-                                </Box>
+                                )}
+                              </Box>
+                            ) : (
+                              [1, 2].map((i) => (
+                                <BoxWithBorder
+                                  key={i}
+                                  style={{
+                                    margin: '8px'
+                                  }}
+                                >
+                                  <Box padding={1}>
+                                    <Skeleton variant="text" width="100px" height="20px" />
+                                    <Box marginTop={1} />
+                                    <Skeleton variant="text" width="100%" height="15px" />
+                                  </Box>
+                                </BoxWithBorder>
+                              ))
+                            )}
+                          </div>
+                        </Grid>
+                      )}
+                      {permissions?.serializedAsset?.isRead && productData?.serializedProduct ? (
+                        <Grid item xs={12} sm={6} md={4} xl={3}>
+                          <Box className="single-form-v1">
+                            <Box className="form-head-v1" display="flex" justifyContent="space-between" alignItems="center">
+                              <Typography variant="subtitle2">{routes?.serializedAsset?.title}</Typography>
+                              <Box>
+                                {permissions?.serializedAsset?.isCreate && (
+                                  <IconButton
+                                    title={`Create ${routes.serializedAsset.title}`}
+                                    color="primary"
+                                    size="small"
+                                    onClick={() => {
+                                      setOpenProductInventoryDialog(true);
+                                    }}
+                                  >
+                                    <ControlPoint fontSize="small" />
+                                  </IconButton>
+                                )}
+                                <IconButton size="small" onClick={getWarehouses}>
+                                  <RefreshIcon fontSize="small" />
+                                </IconButton>
+                              </Box>
+                            </Box>
 
-                                <Box className="formdata-v1" style={{ minHeight }}>
-                                  {loading || loadingWarehouse ? (
-                                    [1, 2].map((i) => (
-                                      <BoxWithBorder
-                                        key={i}
-                                        style={{
-                                          margin: '8px'
-                                        }}
-                                      >
-                                        <Box padding={1}>
-                                          <Skeleton variant="text" width="100px" height="20px" />
-                                          <Box marginTop={1} />
-                                          <Skeleton variant="text" width="100%" height="15px" />
-                                        </Box>
-                                      </BoxWithBorder>
-                                    ))
-                                  ) : inventoriesData?.length ? (
-                                    inventoriesData?.map(({ products, warehouse, plant, count }, i) => (
-                                      <Box key={i} pb={1}>
-                                        <Box
-                                          display="flex"
-                                          bgcolor="var(--dark-secondary, #f7f5f5)"
-                                          borderRadius="3px"
-                                          borderBottom="1px solid var(--dark-mode-border-color, #efe7e7)"
-                                        >
-                                          <Grid>
-                                            <Grid item xs={8}>
-                                              <Box display="flex" alignItems="center">
-                                                <Box>
-                                                  <IconButton
-                                                    size="small"
-                                                    onClick={() => {
-                                                      if (selectedWarehouse !== warehouse?.optionValue ?? plant?.optionValue) {
-                                                        setSelectedWarehouse(warehouse?.optionValue ?? plant?.optionValue);
-                                                      } else {
-                                                        setSelectedWarehouse(null);
-                                                      }
-                                                    }}
-                                                  >
-                                                    {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
-                                                      <ExpandLess />
-                                                    ) : (
-                                                      <ExpandMore />
-                                                    )}
-                                                  </IconButton>
-                                                </Box>
-                                                <Box ml={1} display="flex" alignItems="center">
-                                                  <Typography
-                                                    variant="subtitle2"
-                                                    color="primary"
-                                                    className="d-flex align-items-center"
-                                                    style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
-                                                  >
-                                                    {warehouse?.optionLabel} ({count || 0})
-                                                  </Typography>
-                                                  <Box mx={1} />
-                                                  <HtmlTooltip
-                                                    arrow
-                                                    interactive
-                                                    title={
-                                                      <>
-                                                        <Typography>Asset Status: </Typography>
-                                                        {products.map((s) => (
-                                                          <Typography>{`(${s?.count}) ${s?.status}`}</Typography>
-                                                        ))}
-                                                      </>
-                                                    }
-                                                  >
-                                                    <IconButton size="small">
-                                                      <InfoOutlined fontSize="small" />
-                                                    </IconButton>
-                                                  </HtmlTooltip>
-                                                </Box>
-                                              </Box>
-                                            </Grid>
-                                          </Grid>
-                                        </Box>
-                                        <Box p={1} className="flex flex-wrap gap-2">
-                                          {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
-                                            inventoriesWarehouseLoading ? (
+                            <Box className="formdata-v1" style={{ minHeight }}>
+                              {loading || loadingWarehouse ? (
+                                [1, 2].map((i) => (
+                                  <BoxWithBorder
+                                    key={i}
+                                    style={{
+                                      margin: '8px'
+                                    }}
+                                  >
+                                    <Box padding={1}>
+                                      <Skeleton variant="text" width="100px" height="20px" />
+                                      <Box marginTop={1} />
+                                      <Skeleton variant="text" width="100%" height="15px" />
+                                    </Box>
+                                  </BoxWithBorder>
+                                ))
+                              ) : inventoriesData?.length ? (
+                                inventoriesData?.map(({ products, warehouse, plant, count }, i) => (
+                                  <Box key={i} pb={1}>
+                                    <Box
+                                      display="flex"
+                                      bgcolor="var(--dark-secondary, #f7f5f5)"
+                                      borderRadius="3px"
+                                      borderBottom="1px solid var(--dark-mode-border-color, #efe7e7)"
+                                    >
+                                      <Grid>
+                                        <Grid item xs={8}>
+                                          <Box display="flex" alignItems="center">
+                                            <Box>
+                                              <IconButton
+                                                size="small"
+                                                onClick={() => {
+                                                  if (selectedWarehouse !== warehouse?.optionValue ?? plant?.optionValue) {
+                                                    setSelectedWarehouse(warehouse?.optionValue ?? plant?.optionValue);
+                                                  } else {
+                                                    setSelectedWarehouse(null);
+                                                  }
+                                                }}
+                                              >
+                                                {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? <ExpandLess /> : <ExpandMore />}
+                                              </IconButton>
+                                            </Box>
+                                            <Box ml={1} display="flex" alignItems="center">
                                               <Typography
                                                 variant="subtitle2"
                                                 color="primary"
                                                 className="d-flex align-items-center"
                                                 style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
                                               >
-                                                Loading
+                                                {warehouse?.optionLabel} ({count || 0})
                                               </Typography>
-                                            ) : (
-                                              inventoriesWarehouse.map((i, index) => (
-                                                <Fragment key={i._id}>
-                                                  {i?.assetNumber ? (
-                                                    index === 5 ? (
-                                                      <Button
-                                                        fullWidth
-                                                        className="mt-3"
-                                                        variant="outlined"
-                                                        color="primary"
-                                                        size="small"
-                                                        onClick={() => {
-                                                          history.push(`${routes.serializedAsset.path}`, {
-                                                            warehouse: productWarehouseData.find(
-                                                              (d) => d?.warehouse?.optionValue === selectedWarehouse
-                                                            ).warehouse,
-                                                            product: { id: id, name: headingLabel }
-                                                          });
-                                                        }}
-                                                      >
-                                                        View All
-                                                      </Button>
-                                                    ) : (
-                                                      <Chip
-                                                        label={i?.assetNumber}
-                                                        style={{
-                                                          background:
-                                                            ['New', 'Available'].indexOf(i?.status) >= 0
-                                                              ? `${themeColor === 'light' ? '#b9ffce' : 'rgb(70, 100, 79)'}`
-                                                              : `${themeColor === 'light' ? '#ffb4b4' : 'rgb(144, 86, 86)'}`
-                                                        }}
-                                                        onClick={() => {
-                                                          window.open(`${routes.serializedAssetDetail.path}/${i._id}`);
-                                                        }}
-                                                      />
-                                                    )
-                                                  ) : null}
-                                                </Fragment>
-                                              ))
-                                            )
-                                          ) : null}
-                                        </Box>
-                                      </Box>
-                                    ))
-                                  ) : (
-                                    <Box textAlign="center" padding={2} minHeight={100}>
-                                      <Typography>No {routes.serializedAsset.title} Found</Typography>
+                                              <Box mx={1} />
+                                              <HtmlTooltip
+                                                arrow
+                                                interactive
+                                                title={
+                                                  <>
+                                                    <Typography>Asset Status: </Typography>
+                                                    {products.map((s) => (
+                                                      <Typography>{`(${s?.count}) ${s?.status}`}</Typography>
+                                                    ))}
+                                                  </>
+                                                }
+                                              >
+                                                <IconButton size="small">
+                                                  <InfoOutlined fontSize="small" />
+                                                </IconButton>
+                                              </HtmlTooltip>
+                                            </Box>
+                                          </Box>
+                                        </Grid>
+                                      </Grid>
                                     </Box>
-                                  )}
+                                    <Box p={1} className="flex flex-wrap gap-2">
+                                      {selectedWarehouse === warehouse?.optionValue ?? plant?.optionValue ? (
+                                        inventoriesWarehouseLoading ? (
+                                          <Typography
+                                            variant="subtitle2"
+                                            color="primary"
+                                            className="d-flex align-items-center"
+                                            style={{ display: 'inline-block', whiteSpace: 'nowrap' }}
+                                          >
+                                            Loading
+                                          </Typography>
+                                        ) : (
+                                          inventoriesWarehouse.map((i, index) => (
+                                            <Fragment key={i._id}>
+                                              {i?.assetNumber ? (
+                                                index === 5 ? (
+                                                  <Button
+                                                    fullWidth
+                                                    className="mt-3"
+                                                    variant="outlined"
+                                                    color="primary"
+                                                    size="small"
+                                                    onClick={() => {
+                                                      history.push(`${routes.serializedAsset.path}`, {
+                                                        warehouse: productWarehouseData.find((d) => d?.warehouse?.optionValue === selectedWarehouse)
+                                                          .warehouse,
+                                                        product: { id: id, name: headingLabel }
+                                                      });
+                                                    }}
+                                                  >
+                                                    View All
+                                                  </Button>
+                                                ) : (
+                                                  <Chip
+                                                    label={i?.assetNumber}
+                                                    style={{
+                                                      background:
+                                                        ['New', 'Available'].indexOf(i?.status) >= 0
+                                                          ? `${themeColor === 'light' ? '#b9ffce' : 'rgb(70, 100, 79)'}`
+                                                          : `${themeColor === 'light' ? '#ffb4b4' : 'rgb(144, 86, 86)'}`
+                                                    }}
+                                                    onClick={() => {
+                                                      window.open(`${routes.serializedAssetDetail.path}/${i._id}`);
+                                                    }}
+                                                  />
+                                                )
+                                              ) : null}
+                                            </Fragment>
+                                          ))
+                                        )
+                                      ) : null}
+                                    </Box>
+                                  </Box>
+                                ))
+                              ) : (
+                                <Box textAlign="center" padding={2} minHeight={100}>
+                                  <Typography>No {routes.serializedAsset.title} Found</Typography>
                                 </Box>
-                              </Box>
-                            </Grid>
-                          ) : null}
-                          {permissions?.productInventory?.isRead && (
-                            <Grid item xs={12} sm={6} md={4} xl={3}>
-                              <CostDetails product={id} productData={productData} minHeight={minHeight} />
-                            </Grid>
-                          )}
-                          {permissions?.leadTimeMaster?.isRead && (
-                            <Grid item xs={12} sm={6} md={4} xl={3}>
-                              <LeadTimeMaster Id={id} type={'product'} minHeight={minHeight} />
-                            </Grid>
-                          )}
+                              )}
+                            </Box>
+                          </Box>
                         </Grid>
-                      </Grid>
-                    </Box>
-                  </div>
-                )}
-              </Box>
+                      ) : null}
+                      {permissions?.productInventory?.isRead && (
+                        <Grid item xs={12} sm={6} md={4} xl={3}>
+                          <CostDetails product={id} productData={productData} minHeight={minHeight} />
+                        </Grid>
+                      )}
+                      {permissions?.leadTimeMaster?.isRead && (
+                        <Grid item xs={12} sm={6} md={4} xl={3}>
+                          <LeadTimeMaster Id={id} type={'product'} minHeight={minHeight} />
+                        </Grid>
+                      )}
+                    </Grid>
+                  </Grid>
+                </Box>
+              </div>
             )}
-            {tabValue === 1 && <Parts id={id} />}
-            {tabValue === 2 && <ServiceMaster id={id} renderedFrom={`${renderedFrom}_grid-2`} />}
-            {tabValue === 3 && <ServicePackage renderedFrom={`${renderedFrom}_grid-3`} productId={id} />}
-            {tabValue === 4 && <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-4`} />}
-            {tabValue === 5 && (
-              <ProductConfiguration
-                productFields={productFields.map((_f: any) => _f.fieldData)}
-                productData={productData}
-                id={id}
-                renderedFrom={`${renderedFrom}_grid-5`}
-              />
-            )}
-            {tabValue === 6 && <Package renderedFrom={`${renderedFrom}_grid-6`} productId={id} />}
-            {tabValue === 7 && <ParentProduct renderedFrom={`${renderedFrom}_grid-7`} productId={id} />}
-            {tabValue === 8 && <InventoryHistory id={id} />}
-            {tabValue === 9 && <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />}
-          </Grid>
-        </Grid>
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Parts id={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <ServiceMaster id={id} renderedFrom={`${renderedFrom}_grid-2`} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <ServicePackage renderedFrom={`${renderedFrom}_grid-3`} productId={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={4}>
+          <ProductRepairType id={id} renderedFrom={`${renderedFrom}_grid-4`} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={5}>
+          <ProductConfiguration
+            productFields={productFields.map((_f: any) => _f.fieldData)}
+            productData={productData}
+            id={id}
+            renderedFrom={`${renderedFrom}_grid-5`}
+          />
+        </TabPanel>
+        <TabPanel value={tabValue} index={6}>
+          <Package renderedFrom={`${renderedFrom}_grid-6`} productId={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={7}>
+          <ParentProduct renderedFrom={`${renderedFrom}_grid-7`} productId={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={8}>
+          <InventoryHistory id={id} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={9}>
+          <Digital renderedFrom={`${renderedFrom}_grid-8`} productId={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

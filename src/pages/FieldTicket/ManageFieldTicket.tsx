@@ -10,7 +10,18 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, FIELD_TICKET_STATUS, GenerateResourceLineNumber, RESOURCE_LABEL, serviceMaster, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  FIELD_TICKET_STATUS,
+  GenerateResourceLineNumber,
+  RESOURCE_LABEL,
+  cloneResourceData,
+  fieldServiceOrder,
+  serviceMaster,
+  setFieldsInAscendingOrder,
+  sidebarResource,
+  restoreObjKeysWithValues
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
@@ -22,7 +33,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
 
-const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false, renderedFrom = '' }) => {
+const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
     state: { user }
   }: any = useData();
@@ -65,13 +76,15 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.fieldTicket);
+        data = await findOne(objectStore.resource, sidebarResource.fieldTicket);
       } else {
-        const response = await axiosInstance().get('/field?resource=Field Ticket');
+        const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
         data = response?.data?.data;
       }
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['invoice']?.includes(obj.fieldData.fieldName)).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !['invoice']?.includes(obj.fieldData.fieldName)).map((d: any) => d.fieldData);
+      const allFields = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+
+      const fieldsDataForCreate = data.filter((obj) => obj.isCreate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
+      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate && !['quotation', 'invoice'].includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
 
       if (id) {
         let mainData;
@@ -90,8 +103,9 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           rest.status = FIELD_TICKET_STATUS.new;
           setCloneHeading(fieldTicketNumber);
           tempData = rest;
-        } else {
-          if (referenceData && renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
+        }
+        else {
+          if (referenceData) {
             fields?.forEach((e) => {
               if (e.fieldName === 'fieldServiceOrder') {
                 e.disableOnEdit = true;
@@ -110,23 +124,17 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
         tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
-          if (renderedFrom === `${camelCase(routes?.fieldServiceOrder.title)}_grid-0`) {
-            fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === 'fieldServiceOrder') {
-                tempInitialData['fieldServiceOrder'] = referenceData?.fieldServiceOrder;
-                e.disableOnEdit = true;
-                e.isUneditable = true;
-              }
-            });
-
-            if (referenceData) {
-              for (const key in referenceData) {
-                if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
-                  tempInitialData[key] = referenceData[key];
-                }
-              }
+          for (const key in referenceData) {
+            if (referenceData[key] && allFields?.some((e) => e.fieldName === key)) {
+              tempInitialData[key] = referenceData[key];
             }
           }
+          fieldsDataForCreate?.forEach((e) => {
+            if (e.fieldName === 'fieldServiceOrder') {
+              e.disableOnEdit = true;
+              e.isUneditable = true;
+            }
+          });
         }
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           tempInitialData['currency'] = user.user?.brandCurrency;
@@ -141,52 +149,20 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     }
   };
 
-  const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
-    const obj = { ...dataObj };
-    fields.forEach((field) => {
-      if (field.type === 'dropDown' && field.lookup) {
-        let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
-        if (filter.length) {
-          obj[field.fieldName] = {
-            optionLabel: filter[0].optionLabel,
-            optionValue: filter[0].optionValue
-          };
-        }
-      } else if (field.type === 'multiSelect') {
-        if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
-          let option = [];
-          dataObj[field.fieldName].forEach((e: any) => {
-            option.push({
-              optionLabel: e,
-              optionValue: e
-            });
-          });
-          obj[field.fieldName] = option;
-        }
-      } else if (field.type === 'date') {
-        obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
-      } else {
-        obj[field.fieldName] = dataObj[field.fieldName];
-      }
-    });
-    return obj;
-  };
-
   const handleSubmit = async (values) => {
     setSubmitting(true);
     values.steps = completeSteps;
     if (isOffline) {
       setSubmitting(true);
       const _id: any = id || Math.floor(Math.random() * 1000000).toString();
-      const formattedValue: any = restoreObjKeysWithValues(values, initialData.fields);
-      formattedValue._id = _id;
-      await insertUpdate(objectStore.fieldTicket, _id, formattedValue);
+      const data: any = restoreObjKeysWithValues(values, initialData.fields);
+      data._id = _id;
+      await insertUpdate(objectStore.fieldTicket, _id, data);
       if (id) {
         await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...values, _id, offlineSyncStatus: 'update' } });
       } else {
         await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...values, _id, offlineSyncStatus: 'new' } });
       }
-
       onSuccess();
       setSubmitting(false);
     } else if (id && !isClone) {
@@ -247,6 +223,29 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
     return errors;
   }
 
+  const fetchFieldServiceOrderData = async (fieldServiceOrderId) => {
+
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
+    const fieldServiceOrderFields = response?.data?.data;
+
+    const { data: { data } } = await axiosInstance().get(`${fieldServiceOrder.api}/${fieldServiceOrderId}`);
+
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields?.map((e) => e?.fieldData), initialData?.fields, data, user.user?.brandCurrency);
+
+    const tempInitialData = getObjKeys('', initialData?.fields);
+    tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(initialData?.fields);
+    tempInitialData['fieldServiceOrder'] = fieldServiceOrderId;
+    if (initialData?.fields?.some((e) => e.fieldName === 'currency')) {
+      tempInitialData['currency'] = user.user?.brandCurrency;
+    }
+    for (const key in referenceData) {
+      tempInitialData[key] = referenceData[key];
+    }
+    setInitialData({
+      fields: initialData?.fields,
+      values: tempInitialData
+    });
+  };
 
   return (
     <Dialog
@@ -263,8 +262,14 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       }}
     >
       {initialData.fields.length ? (
-        <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
-          {({ values, errors, setFieldValue, touched, submitForm }) => (
+        <Formik
+          validate={validate}
+          initialValues={initialData.values}
+          enableReinitialize={true}
+          validationSchema={yupSchema(initialData.fields)}
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, setFieldValue, touched, submitForm, setValues }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
@@ -317,6 +322,11 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                                             } else {
                                               setFieldValue('numberOfWells', 0);
                                             }
+                                          }
+                                        }
+                                        else if (name === 'fieldServiceOrder') {
+                                          if (value) {
+                                            fetchFieldServiceOrderData(value);
                                           }
                                         }
                                       }}

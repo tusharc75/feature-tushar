@@ -13,7 +13,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Tooltip,
   Typography,
   makeStyles
 } from '@material-ui/core';
@@ -22,13 +21,13 @@ import { Skeleton } from '@material-ui/lab';
 import { startCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile } from 'react-device-detect';
 import { FcFlowChart } from 'react-icons/fc';
 import { RiSettingsFill } from 'react-icons/ri';
 import { Link, useHistory, useLocation, useParams } from 'react-router-dom';
 import { GeneratePasswordIcon, ResetPasswordIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import QuotesInAccordion from 'src/components/QuotesInAccordion/QuotesInAccordion';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -49,12 +48,14 @@ import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
+  checkSuperAdminAccess,
   customerAccount,
   customerContact,
   displayDate,
   lead,
   opportunity,
   quoteBuilder,
+  sidebarResource,
   supplierAccount,
   supplierContact,
   userType
@@ -134,13 +135,6 @@ const UserDetailsPage = () => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   useEffect(() => {
     if (id) {
@@ -496,7 +490,7 @@ const UserDetailsPage = () => {
                   onClick={handleOpenUpdateDialog}
                   disabled={
                     userData?.userType === userType.brandAdmin
-                      ? user?.role?.selectedEntity?.superAdminAccess || user?.user?._id === id
+                      ? checkSuperAdminAccess(user, sidebarResource.user) || user?.user?._id === id
                         ? false
                         : true
                       : false
@@ -530,14 +524,12 @@ const UserDetailsPage = () => {
               ) : (
                 <>
                   <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                    <CustomTab index={0} value={0} className={'tabLayout'} label={'Details'} {...a11yProps(0)} />
-                    <CustomTab index={1} value={1} className={'tabLayout'} label={'Org Chart'} {...a11yProps(1)} />
-                    {userData?.proxyDOA?.optionValue && (
-                      <CustomTab index={2} value={2} className={'tabLayout'} label={'DOA Proxy'} {...a11yProps(2)} />
-                    )}
-                    <CustomTab index={3} value={3} className={'tabLayout'} label={'User Session'} {...a11yProps(3)} />
-                    <CustomTab index={4} value={4} className={'tabLayout'} label={'Assigned Entity'} {...a11yProps(4)} />
-                    <CustomTab index={5} value={5} className={'tabLayout'} label={'Approval Process'} {...a11yProps(5)} />
+                    <CustomTab value={0} label={'Details'} />
+                    <CustomTab value={1} label={'Org Chart'} />
+                    {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
+                    <CustomTab value={3} label={'User Session'} />
+                    <CustomTab value={4} label={'Assigned Entity'} />
+                    <CustomTab value={5} label={'Approval Process'} />
                   </CustomTabs>
 
                   <TabPanel value={tabValue} index={0}>
@@ -552,8 +544,8 @@ const UserDetailsPage = () => {
                       }}
                     />
                   </TabPanel>
-                  {userData?.proxyDOA && (
-                    <TabPanel value={tabValue} index={2}>
+                  <TabPanel value={tabValue} index={2}>
+                    {userData?.proxyDOA ? (
                       <TableContainer>
                         <Table aria-label="DOA Proxy Table" size="small">
                           <TableHead>
@@ -578,31 +570,31 @@ const UserDetailsPage = () => {
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            <TableRow key={userData.proxyDOA.user}>
+                            <TableRow key={userData.proxyDOA?.user}>
                               <TableCell>
                                 <Link
                                   className="link"
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  to={`${routes.userDetail.path}/${userData.proxyDOA.user}`}
+                                  to={`${routes.userDetail.path}/${userData.proxyDOA?.user}`}
                                 >
-                                  {userData.proxyDOA.user}
+                                  {userData.proxyDOA?.user}
                                 </Link>
                               </TableCell>
                               <TableCell align="center">
-                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.startDate)}</span>
+                                <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.startDate)}</span>
                               </TableCell>
                               <TableCell align="center">
-                                <span className={classes.dataValue}>{displayDate(userData.proxyDOA.endDate)}</span>
+                                <span className={classes.dataValue}>{displayDate(userData?.proxyDOA?.endDate)}</span>
                               </TableCell>
                             </TableRow>
                           </TableBody>
                         </Table>
                       </TableContainer>
+                    ) : null}
 
-                      {/* </div> */}
-                    </TabPanel>
-                  )}
+                    {/* </div> */}
+                  </TabPanel>
                   <TabPanel value={tabValue} index={3}>
                     <UserSession id={id} />
                   </TabPanel>
@@ -679,7 +671,7 @@ const UserDetailsPage = () => {
                               ))
                             ) : userPermissions ? (
                               Object.keys(userPermissions).map((key) => (
-                                <Tooltip
+                                <HtmlTooltip
                                   title={
                                     !hasPermissionToUpdateApprovalProcess
                                       ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}`
@@ -698,7 +690,7 @@ const UserDetailsPage = () => {
                                     }
                                     label={key === 'doaSetup' ? 'DOA Setup' : startCase(key)}
                                   />
-                                </Tooltip>
+                                </HtmlTooltip>
                               ))
                             ) : (
                               <Typography>There are no permissions</Typography>

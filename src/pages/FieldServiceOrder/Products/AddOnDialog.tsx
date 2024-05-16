@@ -9,12 +9,12 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { fetch_service_order_addOn_fields } from 'src/components/ServiceOrder/helper';
-import { CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -30,7 +30,7 @@ const AddOnDialog = ({ addOnData, onClose, parentId, onSuccess, serviceOrderData
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = await fetch_service_order_addOn_fields(serviceOrderData?.currency);
+    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.fieldServiceOrderAddon, serviceOrderData?.currency, true);
     if (addOnData) {
       setInitialData({
         fields: data,

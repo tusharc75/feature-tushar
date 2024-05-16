@@ -19,9 +19,8 @@ import { Autocomplete } from '@material-ui/lab';
 import { Delete, List } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { startCase } from 'lodash';
-
 import VirtualizedList from '../../components/VirtualizedList';
-import { getObjKeys, dateFormat } from '../../constants/helpers';
+import { dateFormat } from '../../constants/helpers';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmDialog from '../../components/Helpers/ConfirmationDialog';
 import axiosInstance from '../../axios/axiosInstance';
@@ -57,6 +56,8 @@ interface FiltersProps {
   selectedData?: any;
   customReportData?: any;
   isCustomReport?: boolean;
+  defaultResource?: any[];
+  reportConfig?: any
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -89,13 +90,17 @@ const ReportFilters = (props: FiltersProps) => {
     setStatusPeriodDate,
     selectedData,
     customReportData,
-    isCustomReport
+    isCustomReport,
+    defaultResource = [],
+    reportConfig
   } = props;
+
   const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
   const [isDeleting, setDeleting] = React.useState(false);
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [dataLoading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState({});
 
   React.useEffect(() => {
     if (!customReportData) return;
@@ -170,6 +175,14 @@ const ReportFilters = (props: FiltersProps) => {
     setFilterOptions([{ fieldLabel: 'All', fieldName: 'all', _id: '0' }, ...filteredData]);
   }, [resourceColumns]);
 
+  const setDefaultResource = (val = []) => {
+    setSelectedResources([...filterOptions?.filter((f) => defaultResource.includes(f?.fieldName)), ...val?.filter((f) => !defaultResource.includes(f?.fieldName))]);
+  };
+
+  useEffect(() => {
+    if (!selectedResources?.length) setDefaultResource();
+  }, [filterOptions]);
+
   const handleSelectFilter = (type, name, value) => {
     let fieldProps: any = {};
 
@@ -179,7 +192,7 @@ const ReportFilters = (props: FiltersProps) => {
     } else if (type === 'checkBox') {
       fieldProps.type = 'checkBox';
       fieldProps.lookup = false;
-    } else if(type === 'singleLine'){
+    } else if (type === 'singleLine') {
       fieldProps.type = 'singleLine';
       fieldProps.lookup = false;
     } else {
@@ -200,6 +213,12 @@ const ReportFilters = (props: FiltersProps) => {
       setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
     }
     setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    if (error[name] && value) {
+      setError((prev) => {
+        delete prev[name];
+        return prev;
+      });
+    }
   };
 
   const handleRemoveOption = () => {
@@ -356,8 +375,35 @@ const ReportFilters = (props: FiltersProps) => {
         setStatusTimeFrame('custom');
         break;
     }
+    if (timeFrameTemp !== 'custom') {
+      setError((prev) => {
+        delete prev[`from_${field.fieldName}`];
+        delete prev[`to_${field.fieldName}`];
+        return prev;
+      });
+    }
   };
 
+  const validate = (formValues: any) => {
+    const error: any = {};
+    let resources = defaultResource;
+    if (reportConfig?.defaultColumn) {
+      if (!betweenDate?.from_date) {
+        error['from_date'] = 'From date is required';
+      }
+      if (!betweenDate?.to_date) {
+        error['to_date'] = 'To date is required';
+      }
+      resources = defaultResource.filter((field: any) => field !== 'date');
+      resources?.forEach((field: any) => {
+        if (!formValues[field]) {
+          error[field] = `${startCase(field)} is required`;
+        }
+      })
+    }
+    setError(error);
+    return error;
+  };
 
   return (
     <Container maxWidth="sm">
@@ -379,7 +425,7 @@ const ReportFilters = (props: FiltersProps) => {
             if (val.filter((f) => f.fieldName === 'all').length > 0) {
               setSelectedResources(filterOptions);
             } else {
-              setSelectedResources(val);
+              setDefaultResource(val);
             }
             if (reason === 'remove-option' && selectedData) {
               const selectedKeys = val.map((f) => f?.fieldName);
@@ -453,16 +499,18 @@ const ReportFilters = (props: FiltersProps) => {
                     <div>
                       <FormTypes
                         values={formValues}
-                        errors={{}}
-                        touched={{}}
+                        errors={error}
+                        touched={error}
                         label={field.fieldLabel}
                         name={field.fieldName}
-                        type={field.type === 'dropDown' ? 'multiSelect' : field.type}
+                        type={field.type === 'dropDown' ?
+                          reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? field.type : 'multiSelect' : 'multiSelect'
+                          : field.type}
                         options={field.option}
                         setFieldValue={(name, value) => {
-                          handleSelectFilter(field.type, name, value);
+                          handleSelectFilter(field?.type, name, value);
                         }}
-                        required={false}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
                         fullWidth
                         size="small"
                         fromFilter={true}
@@ -509,11 +557,20 @@ const ReportFilters = (props: FiltersProps) => {
                         value={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : null}
                         onChange={(date: any) => {
                           setBetweenDate((prevState) => ({ ...prevState, [`from_${field.fieldName}`]: date }));
+                          if (error[`from_${field.fieldName}`]) {
+                            setError((prev) => {
+                              delete prev[`from_${field.fieldName}`];
+                              return prev;
+                            });
+                          }
                         }}
                         format={dateFormat}
                         InputLabelProps={{
                           shrink: true
                         }}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
+                        error={error && error[`from_${field.fieldName}`] && Boolean(error[`from_${field.fieldName}`])}
+                        helperText={error && Boolean(error[`from_${field.fieldName}`]) && error[`from_${field.fieldName}`]}
                       />
                     </div>
                   )}
@@ -531,12 +588,21 @@ const ReportFilters = (props: FiltersProps) => {
                         value={betweenDate && betweenDate[`to_${field.fieldName}`] ? betweenDate[`to_${field.fieldName}`] : null}
                         onChange={(date: any) => {
                           setBetweenDate((prevState) => ({ ...prevState, [`to_${field.fieldName}`]: date }));
+                          if (error[`to_${field.fieldName}`]) {
+                            setError((prev) => {
+                              delete prev[`to_${field.fieldName}`];
+                              return prev;
+                            });
+                          }
                         }}
                         format={dateFormat}
                         InputLabelProps={{
                           shrink: true
                         }}
                         minDate={betweenDate && betweenDate[`from_${field.fieldName}`] ? betweenDate[`from_${field.fieldName}`] : new Date()}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
+                        error={error && error[`to_${field.fieldName}`] && Boolean(error[`to_${field.fieldName}`])}
+                        helperText={error && Boolean(error[`to_${field.fieldName}`]) && error[`to_${field.fieldName}`]}
                       />
                     </div>
                   )}
@@ -653,14 +719,18 @@ const ReportFilters = (props: FiltersProps) => {
             </Box>
           )}
           <Button
-            onClick={fetchReportData}
+            onClick={() => {
+              const error = validate(formValues);
+              if (Object.keys(error).length > 0) return;
+              fetchReportData();
+            }}
             startIcon={loading ? <CircularProgress color="inherit" size={18} /> : <List />}
             color="primary"
             variant="contained"
             size="small"
             disableElevation
             fullWidth
-            disabled={loading}
+            disabled={loading || loadingColumns}
           >
             Show
           </Button>

@@ -1,19 +1,20 @@
 import { Box, Dialog } from '@material-ui/core';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
+import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import CustomTabs, { CustomTab } from '../CustomTabs';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
-
-let searchTimeout;
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { findOne, objectStore } from 'src/constants/indexdbhelper';
 
 const AssignProductDialog = ({
   onSuccess,
@@ -41,6 +42,7 @@ const AssignProductDialog = ({
   const [columns, setColumns] = useState(null);
   const [isProductType, setIsProductType] = useState(false);
   const [tabValue, setTabValue] = useState(0);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const defaultColumns = [
     {
@@ -60,64 +62,71 @@ const AssignProductDialog = ({
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchProduct();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchProduct(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
-  const fetchGridColumns = () => {
-    axiosInstance()
-      .get('/field?resource=Product&view=true')
-      .then(({ data: { data } }) => {
-        const productTypes = data.find((e) => e.fieldData.fieldName === 'productType');
-        if (productTypes) {
-          setIsProductType(true);
-        } else {
-          setIsProductType(false);
-        }
-        let columns = [];
-        let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
-        columns = [...newColumns, ...getStaticFields()];
-        if (hideQty) {
-          setColumns([...columns]);
-        } else {
-          setColumns([...defaultColumns, ...columns]);
-        }
-      });
+  const fetchGridColumns = async () => {
+    try {
+      let data;
+      if (isOffline) {
+        data = await findOne(objectStore.resource, sidebarResource.product);
+      } else {
+        const response = await axiosInstance().get('/field?resource=Product&view=true');
+        data = response?.data?.data;
+      }
+      const productTypes = data.find((e) => e.fieldData.fieldName === 'productType');
+      if (productTypes) {
+        setIsProductType(true);
+      } else {
+        setIsProductType(false);
+      }
+      let columns = [];
+      let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
+      columns = [...newColumns, ...getStaticFields()];
+      if (hideQty) {
+        setColumns([...columns]);
+      } else {
+        setColumns([...defaultColumns, ...columns]);
+      }
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+    }
   };
 
-  const fetchProduct = () => {
-    dispatch({ type: 'loading', loading: true });
-    const queryString = getQueryString();
-    axiosInstance()
-      .get(`${product.api}${queryString}`)
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['qty'] = 1;
-          finalObject['unitMain'] = u?.unit;
-          finalObject['pricingMethodMain'] = u?.pricingMethod;
-          const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
-          if (qtyAdded.length) {
-            finalObject['qty'] = qtyAdded[0].qty;
-          }
-          return {
-            ...finalObject
-          };
-        });
-        dispatch({ type: 'initialize', data: rows, count: count });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+  const fetchProduct = async (cancelTokenSource?: CancelTokenSource) => {
+    try {
+      dispatch({ type: 'loading', loading: true });
+      let data, count;
+      if (isOffline) {
+        data = await findOne(objectStore.resourceData, sidebarResource.product);
+        data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
+        count = data?.length;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${product.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+        finalObject['qty'] = 1;
+        finalObject['unitMain'] = u?.unit;
+        finalObject['pricingMethodMain'] = u?.pricingMethod;
+        const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
+        if (qtyAdded.length) finalObject['qty'] = qtyAdded[0].qty;
+        return { ...finalObject };
       });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    } catch (err) {
+      dispatch({ type: 'loading', loading: false });
+      toastConfig.setToastConfig(err);
+    }
   };
 
   const getQueryString = () => {
@@ -136,54 +145,50 @@ const AssignProductDialog = ({
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
-    const deepFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    const updatedDeepFilters = [...deepFilters];
+    const updatedFilterByIds = [...filterByIds];
 
     if (extraDeepFilter?.length > 0) {
       extraDeepFilter?.map((e) => {
-        deepFilters.push(e);
+        updatedDeepFilters.push(e);
       });
     }
     if (isProductType) {
-      deepFilters.push({
+      updatedDeepFilters.push({
         field: 'productType',
         term: 'Part'
       });
     }
-
     if (reference === 'purchaseOrder') {
       if (!user?.user?.brandPolicy?.purchaseOrderShowSerializedProduct) {
-        deepFilters.push({ field: 'serializedProduct', term: 'No' });
+        updatedDeepFilters.push({ field: 'serializedProduct', term: 'No' });
       }
     } else {
       if (serialized != null) {
-        deepFilters.push({
+        updatedDeepFilters.push({
           field: 'serializedProduct',
           term: `${serialized === true ? 'Yes' : 'No'}`
         });
       }
     }
-
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        deepFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
+    if (extraFilterById && extraFilterById?.length) {
+      extraFilterById?.forEach((e) => {
+        updatedFilterByIds.push(e);
       });
     }
 
-    if (extraFilterById?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(extraFilterById)}`;
+    if (updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
+    }
+    if (updatedFilterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
 
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    }
-
-    if (extraFilterById?.length || deepFilters?.length) {
+    if (updatedDeepFilters?.length || updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -223,13 +228,6 @@ const AssignProductDialog = ({
     dispatch({ type: 'update', data: rows });
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -239,7 +237,7 @@ const AssignProductDialog = ({
   return (
     <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title={`Add ${routes.product.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
             searchValue={search}
@@ -256,14 +254,13 @@ const AssignProductDialog = ({
             }}
             isAddButtonVisible
             setQueryString={false}
-            synchronizeType={false}
           />
 
-          {pricingCondition && (
+          {pricingCondition && !isOffline && (
             <Box>
               <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                <CustomTab value={0} index={0} label={`${routes.pricingCondition.title} Products`} {...a11yProps(0)} />
-                <CustomTab className={'tabLayout'} value={1} index={1} label={'All Products'} {...a11yProps(1)} />
+                <CustomTab value={0} label={`${routes.pricingCondition.title} Products`} />
+                <CustomTab value={1} className={'tabLayout'} label={'All Products'} />
               </CustomTabs>
             </Box>
           )}
@@ -277,8 +274,9 @@ const AssignProductDialog = ({
               onSaveEdit={onSaveEdit}
               refreshGrid={fetchProduct}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
+              showFilters={!isOffline}
               resource={sidebarResource.product}
+              isClientSideGrid={isOffline}
             />
           ) : (
             <Box p={2} height={500}>

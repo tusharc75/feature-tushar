@@ -4,17 +4,18 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { employeeMaster, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
+import axios, { CancelTokenSource } from 'axios';
 
-let searchTimeout;
+const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [],
+  defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
 
-const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handleClose, ids, defaultCompetency = [], extraStaticFilter = [] }) => {
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -30,11 +31,13 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   const [disableSaveButton, setDisableSaveButton] = useState(false);
   const [columns, setColumns] = useState(null);
   const [competencyOptions, setCompetencyOptions] = useState(null);
+  const [warehouseOptions, setWarehouseOptions] = useState([]);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse);
   const [selectedCompetency, setSelectedCompetency] = useState(defaultCompetency);
 
   useEffect(() => {
     fetchGridColumns();
-    fetchCompetencyMaster();
+    fetchOptionsData();
   }, []);
 
   useEffect(() => {
@@ -42,20 +45,17 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
   }, [selectedRecords]);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedCompetency, selectedWarehouse]);
 
-  const fetchCompetencyMaster = () => {
+  const fetchOptionsData = () => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Competency Type`)
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.competencyType},${sidebarResource.warehouse}`)
       .then(({ data: { data } }) => {
-        setCompetencyOptions(data['Competency Type'] || []);
+        setWarehouseOptions(data[sidebarResource.warehouse] || []);
+        setCompetencyOptions(data[sidebarResource.competencyType] || []);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -71,16 +71,17 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
       });
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${employeeMaster.api}${queryString}`)
+      .get(`${employeeMaster.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let rows = data.data.data.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = false;
           finalObject['id'] = u._id;
+          finalObject['pricingMethodMain'] = u?.competencyDetail?.pricingMethod;
           return {
             ...finalObject
           };
@@ -109,25 +110,37 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
 
-    const updatedFilters = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    const updatedDeepFilters = [...deepFilters];
+    const updatedFilterByIds = [...filterByIds];
+
     if (selectedCompetency?.length > 0) {
-      updatedFilters.push(...selectedCompetency.map((i) => ({ field: 'competencyType', term: i?.optionLabel })));
+      updatedFilterByIds.push({
+        field: 'competencyType',
+        term: { $in: selectedCompetency?.map((e) => e?.optionValue) }
+      });
+    }
+    if (selectedWarehouse && selectedWarehouse !== '') {
+      updatedFilterByIds.push({
+        field: 'warehouse',
+        term: selectedWarehouse
+      });
     }
     if (extraStaticFilter?.length) {
       extraStaticFilter?.forEach((e) => {
-        updatedFilters.push(e);
+        updatedDeepFilters.push(e);
       });
     }
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=or`;
-    } else {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=or`;
+    if (updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
+    }
+    if (updatedFilterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
+    }
+
+    if (updatedDeepFilters?.length || updatedFilterByIds?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
@@ -189,6 +202,33 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
             <TextField {...params} margin="none" size={'small'} name="competencyType" label="Competency Type" variant="outlined" fullWidth />
           )}
         />
+        <Autocomplete
+          fullWidth
+          className="max-w-[300px]"
+          options={warehouseOptions}
+          getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+          getOptionSelected={(option: any, val) => option.optionValue === val}
+          value={
+            warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+              ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+              : ''
+          }
+          onChange={(e, val) => {
+            setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+          }}
+          renderInput={(params) => (
+            <TextField
+              {...params}
+              margin="dense"
+              name="plant"
+              placeholder={routes.warehouse.title}
+              label={routes.warehouse.title}
+              variant="outlined"
+              fullWidth
+              className="m-0"
+            />
+          )}
+        />
       </>
     );
   };
@@ -201,7 +241,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
         showRequiredLabel={false}
         onClose={handleClose}
       />
-      <CustomDialogContent>
+      <CustomDialogContent isFooterPresent={false}>
         {competencyOptions && columns ? (
           <>
             <ListingPageHeader
@@ -218,9 +258,7 @@ const AssignEmployeeDialog = ({ reference, referenceId = null, onSuccess, handle
               addButtonOnclick={handleSubmit}
               isAddButtonVisible
               setQueryString={false}
-              synchronizeType={false}
             />
-
             <CustomReactTable
               height={'calc(100vh - 200px)'}
               columns={columns}

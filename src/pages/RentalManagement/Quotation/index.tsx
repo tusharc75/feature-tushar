@@ -6,7 +6,6 @@ import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { fetch_quotation_product_fields } from 'src/components/Quotation/helper';
 import ManualReponseDialog from 'src/pages/Quotation/ManualRespondDialog';
 import QuotationSummeryDialog from 'src/pages/Quotation/QuotationSummeryDialog';
 import Versions from 'src/pages/Quotation/Versions';
@@ -15,7 +14,11 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { QUOTATION_STATUS, quotation } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
+import { GiReceiveMoney } from 'react-icons/gi';
+import { VscVersions } from 'react-icons/vsc';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Quotation = ({
   rentalManagementData,
@@ -70,10 +73,7 @@ const Quotation = ({
   }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async () => {
-    var data = await fetch_quotation_product_fields(rentalManagementData?.currency);
-    data?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
     let newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
 
     let coloum: any = [
@@ -215,11 +215,9 @@ const Quotation = ({
       `${quotation.api}/additionalcost/${quotationData._id}/${quotationData?.versions[currentVersion]?._id}`
     );
     const additionalCostData = additionalCost?.data?.data?.map((e) => {
-      const detail = e?.description;
       return {
         ...e,
-        type: e?.costType,
-        detail: detail,
+        type: MATERIAL_TYPE.manualEntry,
         parentId: null
       };
     });
@@ -294,6 +292,39 @@ const Quotation = ({
       });
   };
 
+  const leftSideContents = (
+    <>
+      {allowedToEdit && (
+        <>
+          <Button
+            onClick={() => {
+              setShowQuotationSummaryDialog(true);
+            }}
+            variant="outlined"
+            size="small"
+            startIcon={<GiReceiveMoney />}
+            color="primary"
+          >
+            Summary
+          </Button>
+          <Button
+            variant={isMobile ? 'text' : 'outlined'}
+            color="primary"
+            size="small"
+            className={'btn-outline-v1'}
+            onClick={() => {
+              setShowAllVersionStatus(true);
+            }}
+            style={isMobile ? { color: '#43aeaa' } : {}}
+            startIcon={isMobile ? null : <VscVersions />}
+          >
+            {isMobile ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+          </Button>
+        </>
+      )}
+    </>
+  );
+
   const rightSideContents = () => {
     return (
       <>
@@ -346,13 +377,26 @@ const Quotation = ({
     );
   };
 
-  const sendEmailProps = {
-    quotationData: quotationData,
-    versionId: quotationData?.versions[currentVersion]?._id,
-    currentVersion: currentVersion,
+  const previewDownloadProps = {
+    fileName: `${routes.quotation.title}-${quotationData?.quotationNumber}`,
+    resource: sidebarResource.quotation,
+    referenceId: quotationData?._id,
     columns: columns,
-    setShowAllVersionStatus: setShowAllVersionStatus,
-    setShowQuotationSummaryDialog: setShowQuotationSummaryDialog
+    isSendEmail: true,
+    isExcelDownload: true,
+    subject: `${user?.user?.brandName} Offer - ${quotationData?.quotationNumber}`,
+    extraQueryParams: { uniqueId: quotationData?.versions[currentVersion]?._id },
+    defaultColumns: [
+      'index',
+      'type',
+      'detail',
+      'description',
+      'qty',
+      `price_${quotationData?.currency?.toLowerCase()}`,
+      `totalPrice_${quotationData?.currency?.toLowerCase()}`,
+      `tax_${quotationData?.currency?.toLowerCase()}`,
+      `finalPrice_${quotationData?.currency?.toLowerCase()}`
+    ]
   };
 
   return (
@@ -361,11 +405,11 @@ const Quotation = ({
       <DetailsPageHeader
         isAddButtonVisible={false}
         isActionButtonVisible={false}
+        previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
+        leftSideContents={leftSideContents}
         hasXpadding
-        sendEmailProps={sendEmailProps}
       />
-
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable
@@ -379,6 +423,7 @@ const Quotation = ({
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={true}
+            hideExportTable={true}
           />
         </Box>
       ) : (
@@ -386,6 +431,7 @@ const Quotation = ({
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+
       {quotationData && showAllVersionStatus && (
         <Versions
           onClose={() => setShowAllVersionStatus(false)}
@@ -433,29 +479,23 @@ const RenderQuotationMessage = ({ quotationData, currentVersion, isMobile }) => 
   return (
     <>
       <Box display="flex" sx={{ flexBasis: isMobile ? '100%' : '', justifyContent: 'center' }}>
-        <div className="d-flex align-items-center justify-content-center m-1 text-center">
-          <FcClock size={25} />
-          <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
-            Quotation has been sent to customer
-          </Typography>
-        </div>
         {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
           <div className="d-flex align-items-center justify-content-center m-1 text-center">
-            <FcClock size={25} />
+            <FcClock size={25} className="text-[var(--primary)]" />
             <Typography style={{ color: '#00acc1', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
               Quotation has been sent to customer
             </Typography>
           </div>
         ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
           <div className="d-flex align-items-center justify-content-center m-1 text-center">
-            <FcOk size={25} />
+            <FcOk size={25} className="text-[var(--primary)]" />
             <Typography style={{ color: '#28a745', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
               Quotation has been accepted by customer
             </Typography>
           </div>
         ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
           <div className="d-flex align-items-center justify-content-center m-1 text-center">
-            <FcCancel size={25} />
+            <FcCancel size={25} className="text-[var(--primary)]" />
             <Typography style={{ color: '#dc3545', fontWeight: 'bold', fontSize: isMobile ? '.89rem' : '1rem' }}>
               Quotation has been rejected by customer
             </Typography>

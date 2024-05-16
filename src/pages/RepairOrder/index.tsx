@@ -18,13 +18,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const RepairOrder = () => {
   let renderedFrom = camelCase(routes.repairOrder?.title);
@@ -42,7 +41,7 @@ const RepairOrder = () => {
   ];
 
   const history = useHistory();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -52,7 +51,7 @@ const RepairOrder = () => {
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairOrder));
   const [renderCount, setRenderCount] = useState(0);
   const [showManageRepairOrderDialog, setShowManageRepairOrderDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteWarningConfirmBox, setShowDeleteWarningConfirmBox] = useState(false);
@@ -70,20 +69,12 @@ const RepairOrder = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -181,11 +172,11 @@ const RepairOrder = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${repairOrder.api}${queryString}`)
+      .get(`${repairOrder.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);

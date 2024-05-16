@@ -6,8 +6,9 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import Tooltip from 'src/components/CustomTooltipTitle';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
@@ -16,13 +17,12 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { ASSET_STATUS, CHILD_RESOURCE, REPAIR_JOB_STATUS, repairJob, sidebarResource } from 'src/constants/helpers';
+import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
 import ManageAssetDialog from './ManageAssetDialog';
-import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 
-const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen }) => {
+const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState(false);
@@ -62,10 +62,9 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
 
   const fetchFields = async () => {
     setColumns(null);
-    const fieldResponce = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.repairJobAsset}`);
-    const repairJobAssetFields = fieldResponce?.data?.data;
+    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, true);
 
-    const isPriceRequired = repairJobAssetFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    const isPriceRequired = fields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
 
     const {
@@ -83,7 +82,6 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       ]
     });
 
-    let fields = CURReplaceByCurrencySingle(repairJobAssetFields, repairJobData?.currency || 'USD');
     setAllFields(JSON.parse(JSON.stringify(fields)));
 
     const assetField = data?.find((e) => e.resource === sidebarResource.serializedAsset)?.fieldNames || [];
@@ -214,7 +212,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       Cell: ({ row }) => (
         <div className="d-flex gap-1">
           {
-            <Tooltip title={permissions?.repairJob?.isUpdate ? 'Edit' : 'You are not permitted to edit'}>
+            <HtmlTooltip title={permissions?.repairJob?.isUpdate ? 'Edit' : 'You are not permitted to edit'}>
               <IconButton
                 disabled={!permissions?.repairJob?.isUpdate}
                 color="primary"
@@ -225,7 +223,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
               >
                 <Edit />
               </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
           }
           {row?.original?.status === ASSET_STATUS.reserved && (
             <GridDeleteIcon
@@ -374,14 +372,15 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
         >
           Add Existing {routes.serializedAsset.title}
         </MenuItem>
-        {permissions?.serializedAsset?.isCreate &&
+        {permissions?.serializedAsset?.isCreate && (
           <MenuItem
             onClick={() => {
               setAddNewSerializedAssetDialog(true);
             }}
           >
             Add New {routes.serializedAsset.title}
-          </MenuItem>}
+          </MenuItem>
+        )}
       </>
     );
   };
@@ -414,7 +413,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
       {allowedToEdit && repairJobData?.status !== REPAIR_JOB_STATUS.completed && (
         <>
           <DetailsPageHeader
-            isAddButtonVisible={true}
+            isAddButtonVisible={alloweOperation}
             addButtonMenuItems={addButtonMenuItems()}
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuitems()}
@@ -459,11 +458,9 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           chartOfAccount={repairJobData?.chartOfAccount}
         />
       )}
-      {addNewSerializedAssetDialog &&
+      {addNewSerializedAssetDialog && (
         <ManageSerializedAsset
-          onClose={() =>
-            setAddNewSerializedAssetDialog(false)
-          }
+          onClose={() => setAddNewSerializedAssetDialog(false)}
           referenceType={'repairJob'}
           referenceData={{
             warehouse: repairJobData?.warehouse?.optionValue
@@ -472,7 +469,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
             handleAdd([data]);
           }}
         />
-      }
+      )}
       {showAssetRemoveConfirmationDialog.open && (
         <ConfirmationDialog
           open={true}

@@ -232,7 +232,6 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
               isActionButtonVisible={false}
               isAddButtonVisible={false}
               setQueryString={false}
-              synchronizeType={false}
             />
             <Stepper activeStep={activeStep} orientation="vertical">
               {steps.map((label, index) => (

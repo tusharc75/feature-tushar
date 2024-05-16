@@ -1,45 +1,43 @@
-import React, { useState, useContext } from 'react';
 import {
-  Grid,
-  Box,
-  Tooltip,
-  IconButton,
-  CircularProgress,
   Avatar,
-  Typography,
-  Divider,
+  Box,
   Button,
-  makeStyles,
+  CircularProgress,
+  Divider,
+  Grid,
+  IconButton,
   Table,
+  TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  TableBody
+  Typography,
+  makeStyles
 } from '@material-ui/core';
-import { useData } from '../../../StateProvider/Provider';
+import { Image } from '@material-ui/icons';
+import DeleteIcon from '@material-ui/icons/Delete';
+import { cloneDeep } from 'lodash';
+import { useContext, useState } from 'react';
+import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
+import { HiOutlinePencilAlt, HiPencil } from 'react-icons/hi';
+import { IoMdTrash } from 'react-icons/io';
+import { Link, useHistory } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import { SET_USER } from '../../../StateProvider/actionTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import UpdateDetailsDialog from '../../../components/Shared/UpdateDetailsDialog';
-import DetailsPage from '../../../components/Shared/DetailsPage';
-import { SET_USER } from '../../../StateProvider/actionTypes';
-import styles from '../profilePage.module.scss';
-import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
-import { cloneDeep } from 'lodash';
-import { useHistory, Link } from 'react-router-dom';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { HiPencil } from 'react-icons/hi';
-import { IoMdTrash } from 'react-icons/io';
-import { HiOutlinePencilAlt } from 'react-icons/hi';
-import { displayDate, imageUploadMaxSize } from '../../../constants/helpers';
-import AddProxyDialog from './AddProxyDialog';
-import DeleteIcon from '@material-ui/icons/Delete';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne, FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
-import { Image } from '@material-ui/icons';
-import WebcamDialog from './WebCamDialog';
-import FaceLiveNess from 'src/components/FacialLogin/FaceLiveNess';
+import DetailsPage from '../../../components/Shared/DetailsPage';
+import UpdateDetailsDialog from '../../../components/Shared/UpdateDetailsDialog';
+import { displayDate, imageUploadMaxSize } from '../../../constants/helpers';
+import styles from '../profilePage.module.scss';
+import AddProxyDialog from './AddProxyDialog';
+import ManageUpdateEmailPasswordDialog from './ManageUpdateEmailAndPassword';
 import SetUpMfaDialog from './SetUpMfaDialog';
 
 const useStyles = makeStyles((theme) => ({
@@ -91,7 +89,6 @@ export default function ManageProfile(props) {
   const [removeMFAConfirmBox, setRemoveMFAConfirmBox] = useState(false);
   const [removingFace, setRemovingFace] = useState(false);
   const [showAddProxyDialog, setShowAddProxyDialog] = useState(false);
-
 
   const [addFaceDialog, setAddFaceDialog] = useState(false);
   const [setUpMfaDialog, setSetUpMfaDialog] = useState(false);
@@ -224,16 +221,18 @@ export default function ManageProfile(props) {
 
   const handleRemoveFace = () => {
     setRemovingFace(true);
-    axiosInstance().delete('/user/face/remove').then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      setRemoveFaceConfirmBox(false);
-      setRemovingFace(false);
-      onFetchUserData();
-    })
+    axiosInstance()
+      .delete('/user/face/remove')
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setRemoveFaceConfirmBox(false);
+        setRemovingFace(false);
+        onFetchUserData();
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setRemovingFace(false);
@@ -242,15 +241,17 @@ export default function ManageProfile(props) {
 
   const handleRemoveMFA = () => {
     setRemovingFace(true);
-    axiosInstance().delete('/user/mfa/remove').then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-      setRemoveMFAConfirmBox(false);
-      onFetchUserData();
-    })
+    axiosInstance()
+      .delete('/user/mfa/remove')
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setRemoveMFAConfirmBox(false);
+        onFetchUserData();
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         setRemovingFace(false);
@@ -258,19 +259,22 @@ export default function ManageProfile(props) {
   };
 
   const handleAddFace = async (sessionId: string) => {
-    await axiosInstance().post('/user/face/add', { sessionId }).then(({data}) => {
-      setAddFaceDialog(false);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    await axiosInstance()
+      .post('/user/face/add', { sessionId })
+      .then(({ data }) => {
+        setAddFaceDialog(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        onFetchUserData();
+      })
+      .catch((err) => {
+        setAddFaceDialog(false);
+        toastConfig.setToastConfig(err);
       });
-      onFetchUserData();
-    }).catch((err) => {
-      setAddFaceDialog(false);
-      toastConfig.setToastConfig(err);
-    });
-  }
+  };
   return (
     <>
       {openUpdateDialog && (
@@ -380,10 +384,10 @@ export default function ManageProfile(props) {
             <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
             </Button>
-            {permissions?.payrollPolicy &&
+            {permissions?.payrollPolicy && (
               <>
                 <Divider />
-                {(userData?.faceId || userData?.faceData) ? (
+                {userData?.faceId || userData?.faceData ? (
                   <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveFaceConfirmBox(true)}>
                     Remove Face
                   </Button>
@@ -393,28 +397,30 @@ export default function ManageProfile(props) {
                   </Button>
                 )}
                 <Divider />
-              {userData?.isMFASetup ? (
-                <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveMFAConfirmBox(true)}>
-                  Remove MFA
-                </Button>
-              ) : (<Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
-                  Setup MFA
-                </Button>)}
+                {userData?.isMFASetup ? (
+                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveMFAConfirmBox(true)}>
+                    Remove MFA
+                  </Button>
+                ) : (
+                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
+                    Setup MFA
+                  </Button>
+                )}
               </>
-            }
+            )}
           </div>
         ) : null}
         <div style={{ borderRadius: 8, minWidth: '300px' }}>
           {displayUserDetails ? (
             <Box style={{ position: 'relative' }}>
-              <Tooltip title="Edit">
+              <HtmlTooltip title="Edit">
                 <IconButton
                   onClick={handleOpenUpdateDialog}
                   style={{ position: 'absolute', zIndex: 2, right: '0', padding: '4px', margin: '8px', marginRight: '22px' }}
                 >
                   <HiOutlinePencilAlt color="primary" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
               <Box mb={2}>
                 {loading || userLoading ? (
                   <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -536,17 +542,17 @@ export default function ManageProfile(props) {
                             </TableCell>
                             <TableCell align="center">
                               {isActiveProxy(obj.startDate, obj.endDate) ? (
-                                <Tooltip title="Active">
+                                <HtmlTooltip title="Active">
                                   <IconButton>
                                     <FaUserCheck className="text-success" />
                                   </IconButton>
-                                </Tooltip>
+                                </HtmlTooltip>
                               ) : (
-                                <Tooltip title="Inactive">
+                                <HtmlTooltip title="Inactive">
                                   <IconButton>
                                     <FaUserAltSlash className="text-error" />
                                   </IconButton>
-                                </Tooltip>
+                                </HtmlTooltip>
                               )}
                             </TableCell>
                           </TableRow>
@@ -591,11 +597,7 @@ export default function ManageProfile(props) {
               }}
             />
           ) : null}
-          {addFaceDialog && (
-            <FaceLiveNess
-              onClose={() => setAddFaceDialog(false)}
-              onComplete={handleAddFace} />
-          )}
+          {addFaceDialog && <FaceLiveNess onClose={() => setAddFaceDialog(false)} onComplete={handleAddFace} />}
           {setUpMfaDialog && (
             <SetUpMfaDialog
               onClose={() => {
@@ -647,17 +649,15 @@ export default function ManageProfile(props) {
               okBtnLoading={removingFace}
             />
           ) : null}
-          {
-            removeMFAConfirmBox ? (
-              <ConfirmationDialog
-                open={removeMFAConfirmBox}
-                message={`Are you sure you want to remove MFA ?`}
-                onClose={() => setRemoveMFAConfirmBox(false)}
-                onOk={handleRemoveMFA}
-                okBtnLoading={removingFace}
-              />
-            ) : null
-          }
+          {removeMFAConfirmBox ? (
+            <ConfirmationDialog
+              open={removeMFAConfirmBox}
+              message={`Are you sure you want to remove MFA ?`}
+              onClose={() => setRemoveMFAConfirmBox(false)}
+              onOk={handleRemoveMFA}
+              okBtnLoading={removingFace}
+            />
+          ) : null}
         </div>
       </>
     </>

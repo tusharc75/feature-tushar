@@ -8,7 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { dateTimeFormat24Hours } from 'src/constants/helpers';
 import TreeView from './TreeView';
 
 export default function Current({ deviceTemplate, assetId }) {
@@ -51,7 +51,7 @@ export default function Current({ deviceTemplate, assetId }) {
   const fetchData = async () => {
     setCurrentData(null);
     axiosInstance()
-      .get(`/report/iot/current-status`, {
+      .get(`/report/iot-current-status`, {
         params: {
           asset: assetId
         }
@@ -67,7 +67,7 @@ export default function Current({ deviceTemplate, assetId }) {
   const fetchErrorData = async () => {
     setErrorData(null);
     axiosInstance()
-      .get(`/report/iot/alerts?asset=${assetId}`)
+      .get(`/report/iot-alerts?asset=${assetId}`)
       .then(({ data: { data } }) => {
         setErrorData(
           data
@@ -158,7 +158,7 @@ export default function Current({ deviceTemplate, assetId }) {
                       <TableCell key={'cell ' + index + 1} align="left">
                         {data?.message}
                         <br />
-                        {moment(data?.time).format(dateTimeFormat)}
+                        {moment(data?.time).format(dateTimeFormat24Hours)}
                       </TableCell>
                     </TableRow>
                   ))}

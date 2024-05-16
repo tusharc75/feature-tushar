@@ -1,30 +1,36 @@
-import React, { useState, useEffect, useContext, Fragment } from 'react';
-import { Grid, Box, Button, Paper, Tab, Tabs, useMediaQuery } from '@material-ui/core';
-import { useParams, useHistory } from 'react-router-dom';
-import axiosInstance from 'src/axios/axiosInstance';
-import routes from 'src/components/Helpers/Routes';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
-import DetailsPage from 'src/components/Shared/DetailsPage';
-import { useData } from 'src/StateProvider/Provider';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ACTIVITY_RESOURCE, transferInventory } from 'src/constants/helpers';
-import ManageTransferInventory from './ManageTransferInventory';
+import { Box, Button, Grid } from '@material-ui/core';
+import { Edit } from '@material-ui/icons';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
-import Steps, { getIndex } from 'src/components/Steps';
-import { transferInventorySteps, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
-import TabPanel from 'src/components/TabPanel';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
-import Products from './Products';
-import LoadingTicket from './LoadingTicket';
-import { camelCase } from 'lodash';
-import ContentFullScreen from '../../components/ContentFullScreen';
+import { useHistory, useParams } from 'react-router-dom';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
-import { isMobile, isTablet } from 'react-device-detect';
-import { Edit } from '@material-ui/icons';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import routes from 'src/components/Helpers/Routes';
+import DetailsPage from 'src/components/Shared/DetailsPage';
+import Steps, { getIndex } from 'src/components/Steps';
+import {
+  ACTIVITY_RESOURCE,
+  TRANSFER_INVENTORY_STATUS,
+  checkIsAllowedToEdit,
+  sidebarResource,
+  transferInventory,
+  transferInventorySteps
+} from 'src/constants/helpers';
+import ContentFullScreen from '../../components/ContentFullScreen';
+import LoadingTicket from './LoadingTicket';
+import ManageTransferInventory from './ManageTransferInventory';
+import Products from './Products';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
@@ -83,7 +89,7 @@ const TransferInventoryDetailPage = () => {
   }, [id]);
 
   useEffect(() => {
-    fetchFields()
+    fetchFields();
   }, []);
 
   const fetchFields = () => {
@@ -100,7 +106,8 @@ const TransferInventoryDetailPage = () => {
   };
 
   const fetchTransferInventoryData = () => {
-    axiosInstance().get(`${routes.transferInventory.path}/${id}`)
+    axiosInstance()
+      .get(`${routes.transferInventory.path}/${id}`)
       .then(({ data: { data } }) => {
         const userEntity = user?.entity?.map((e) => e._id) ?? [];
         if (data?.transferFromPlant?.entity?.length) {
@@ -119,11 +126,8 @@ const TransferInventoryDetailPage = () => {
         } else {
           setCurrentStep(getIndex(data?.processStatus, transferInventorySteps));
         }
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
+        
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setTransferInventoryData(data);
       })
       .catch((err) => {
@@ -143,7 +147,7 @@ const TransferInventoryDetailPage = () => {
       .then(() => {
         setDeleting(false);
         setShowConfirmBox(false);
-        history.push(`${routes.transferInventory.path}`)
+        history.push(`${routes.transferInventory.path}`);
       })
       .catch((error) => {
         setDeleting(false);
@@ -156,13 +160,6 @@ const TransferInventoryDetailPage = () => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const updateStatus = (status: string) => {
     axiosInstance()
@@ -185,7 +182,7 @@ const TransferInventoryDetailPage = () => {
       .put(`${routes.transferInventory.path}/${id}/process-status`, {
         processStatus: stepNames[step]
       })
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -199,9 +196,9 @@ const TransferInventoryDetailPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {allowedToEdit && ![TRANSFER_INVENTORY_STATUS.delivered].includes(transferInventoryData?.status) &&
-              transferInventoryData?.canComplete &&
-              (
+            {allowedToEdit &&
+              ![TRANSFER_INVENTORY_STATUS.delivered].includes(transferInventoryData?.status) &&
+              transferInventoryData?.canComplete && (
                 <Fragment>
                   <ButtonWithPulse
                     variant={'outlined'}
@@ -233,36 +230,14 @@ const TransferInventoryDetailPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
-        </Tabs>
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !transferInventoryData ? (
@@ -302,6 +277,7 @@ const TransferInventoryDetailPage = () => {
                 {stepNames[currentStep] === 'Loading Ticket' && (
                   <LoadingTicket
                     transferInventoryData={transferInventoryData}
+                    fetchTransferInventoryData={fetchTransferInventoryData}
                     renderedFrom={`${renderedFrom}_grid-3`}
                     allowedToEdit={allowedToEdit}
                     canLoad={canLoad}

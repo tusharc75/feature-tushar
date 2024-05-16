@@ -1,14 +1,26 @@
-import { Box, Button, Grid, Menu, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, CircularProgress, Grid, Menu, MenuItem } from '@material-ui/core';
+import CachedIcon from '@material-ui/icons/Cached';
 import ExpandMore from '@material-ui/icons/ExpandMore';
 import { Skeleton } from '@material-ui/lab';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
+import { HiPencil } from 'react-icons/hi';
+import { MdAutorenew, MdDelete } from 'react-icons/md';
+import { RiFlowChart } from 'react-icons/ri';
 import { SiSemanticrelease } from 'react-icons/si';
+import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import ContentFullScreen from 'src/components/ContentFullScreen';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ShowDoaData from 'src/components/ShowDoaData';
+import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
+import Steps, { getIndex } from 'src/components/Steps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -17,29 +29,25 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, QUOTATION_STATUS, QUOTATION_TYPE, RENTAL_STATUS, quotation, quotationProcessSteps } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  QUOTATION_STATUS,
+  QUOTATION_TYPE,
+  RENTAL_STATUS,
+  checkIsAllowedToEdit,
+  quotation,
+  quotationProcessSteps,
+  sidebarResource
+} from '../../constants/helpers';
+import Step from '../DynamicForm/Step';
 import ManageQuotationDialog from './ManageQuotationDialog';
-import Productpackage from './Productpackage';
-import { CircularProgress } from '@material-ui/core';
-import CachedIcon from '@material-ui/icons/Cached';
-import { camelCase } from 'lodash';
-import { HiPencil } from 'react-icons/hi';
-import { MdAutorenew, MdDelete } from 'react-icons/md';
-import { RiFlowChart } from 'react-icons/ri';
-import { VscVersions } from 'react-icons/vsc';
-import ActivityButton from 'src/components/Activity/ActivityButton';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import ShowDoaData from 'src/components/ShowDoaData';
-import ShowQuoteStatus from 'src/components/ShowQuoteStatus';
-import Steps, { getIndex } from 'src/components/Steps';
-import AdditionalCost from './AdditionalCost';
 import ManualReponseDialog from './ManualRespondDialog';
+import Productpackage from './Productpackage';
 import QuotationSummeryDialog from './QuotationSummeryDialog';
 import QuoteBuilder from './QuoteBuilder';
 import RoadmapViews from './RoadMapViews';
 import Versions from './Versions';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const QuotationDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -75,31 +83,20 @@ const QuotationDetails = () => {
   const [currVersionId, setCurrVersionId] = useState(null);
   const [sentToCustomer, setSentToCustomer] = useState(false);
 
-  const [convertConfirmBox, setConvertConfirmBox] = useState(false);
+  const [convertConfirmBox, setConvertConfirmBox] = useState({ open: false, warning: null });
   const [renewal, setRenewal] = useState(false);
   const [releaseConfirm, setReleaseConfirm] = useState(false);
 
   const [stepList, setStepList] = useState(quotationProcessSteps);
   const [stepNames, setStepNames] = useState(quotationProcessSteps.map((item) => item.name));
   const [canConvert, setCanConvert] = useState(false);
-
-  useEffect(() => {
-    if (tabValue !== tab) {
-      setTabValue(tab ? parseInt(tab) : 0);
-    }
-  }, [tab]);
+  const [reserveAssetWarning, setReserveAssetWarning] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.push(`?tab=${newValue}`);
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const handleChangeVersion = (versionNumber) => {
     fetchQuotationData(versionNumber);
@@ -174,6 +171,7 @@ const QuotationDetails = () => {
     if (id) {
       fetchFields();
       fetchQuotationData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -193,32 +191,28 @@ const QuotationDetails = () => {
             [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
             quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
           ) {
-            var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (user?.role?.selectedEntity?.superAdminAccess) {
-              isAllowedToEdit = true;
-            }
-            setAllowedToEdit(isAllowedToEdit);
+
+            setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quotation, quotationData));
             setCanConvert(true);
-          } else if (!quotationData?.rentalJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status) && 
-          quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
+          } else if (!quotationData?.rentalJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
           }
         } else if (quotationData?.type === QUOTATION_TYPE.salesOrder) {
-          if (!quotationData?.salesOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+          if (!quotationData?.salesOrder && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
           }
         } else if (quotationData?.type === QUOTATION_TYPE.repairOrder) {
-          if (!quotationData?.repairOrder && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+          if (!quotationData?.repairOrder && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
           }
         } else if (quotationData?.type === QUOTATION_TYPE.fieldJob) {
-          if (!quotationData?.fieldJob && [QUOTATION_STATUS.acceptByCustomer]?.includes(quotationData?.status)) {
+          if (!quotationData?.fieldJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
           } else {
             setCanConvert(false);
@@ -226,7 +220,7 @@ const QuotationDetails = () => {
         }
       }
     }
-  }, [quotationData, quotationFields]);
+  }, [quotationData, quotationFields, currentVersion]);
 
   const fetchQuotationData = async (version: any = 0, loading = true) => {
     setLoading(loading);
@@ -235,17 +229,12 @@ const QuotationDetails = () => {
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
 
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.quotation, data)
       if ([QUOTATION_STATUS.converted].includes(data.status)) {
         isAllowedToEdit = false;
       }
       setAllowedToEdit(isAllowedToEdit && permissions?.quotation?.isUpdate);
-
       setQuotationData(data);
-
       var tempStepList = quotationProcessSteps;
       if (!data?.doasetup) {
         tempStepList = quotationProcessSteps?.filter((e) => e.name !== 'DOA');
@@ -280,6 +269,19 @@ const QuotationDetails = () => {
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.quotation}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
@@ -343,7 +345,7 @@ const QuotationDetails = () => {
       .post(`${quotation.api}/convert`, { quotationId: quotationData._id, versionId: currVersionId })
       .then(({ data: { data } }) => {
         fetchQuotationData();
-        setConvertConfirmBox(false);
+        setConvertConfirmBox({ open: false, warning: null });
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -507,7 +509,10 @@ const QuotationDetails = () => {
                   {allowedToEdit && canConvert && (
                     <MenuItem
                       onClick={() => {
-                        setConvertConfirmBox(true);
+                        setConvertConfirmBox({
+                          open: true,
+                          warning: reserveAssetWarning ? 'Asset(s) are not available, should we allow to convert without asset(s) ?' : null
+                        });
                         closeActionsAction();
                       }}
                     >
@@ -550,47 +555,24 @@ const QuotationDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
           {!(isMobile && !isTablet) && (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                </div>
-              }
-              {...a11yProps(2)}
-            />
+            <CustomTab value={2}>
+              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+            </CustomTab>
           )}
-        </Tabs>
+          {resourceData && resourceData?.steps?.length && (
+            <CustomTab value={3}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
+            </CustomTab>
+          )}
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !quotationFields.length ? (
@@ -619,10 +601,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-            <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
-              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-            </Box>
-          )}
+              <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
+                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+              </Box>
+            )}
           <div>
             <Steps
               isNextStep={false}
@@ -639,8 +621,10 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
+                    if (allowedToEdit) {
                       setCustomerAcceptable(true);
                     }
+                  }
                   : null
               }
             />
@@ -657,16 +641,6 @@ const QuotationDetails = () => {
                   updateDOASetup={updateDOASetup}
                 />
               )}
-              {stepNames[currentStep] === 'Manual Entry' && quotationData && (
-                <AdditionalCost
-                  quotationData={quotationData}
-                  setNextStep={setNextStep}
-                  renderedFrom={renderedFrom}
-                  version={currentVersion}
-                  allowedToEdit={allowedToEdit}
-                  stepFullScreen={stepFullScreen}
-                />
-              )}
               {stepNames[currentStep] === 'Quote Builder' && quotationData && (
                 <QuoteBuilder
                   quotationData={quotationData}
@@ -679,6 +653,7 @@ const QuotationDetails = () => {
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
+                  setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
               {stepNames[currentStep] === 'DOA' && quotationData && (
@@ -695,6 +670,7 @@ const QuotationDetails = () => {
                   renderedFrom={`${renderedFrom}_grid-3`}
                   sentToCustomer={sentToCustomer}
                   DOAData={DOAData}
+                  setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
               {stepNames[currentStep] === 'Quote Approval' && quotationData && (
@@ -710,6 +686,7 @@ const QuotationDetails = () => {
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
+                  setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
               {stepNames[currentStep] === 'End' && quotationData && (
@@ -724,6 +701,7 @@ const QuotationDetails = () => {
                   versionData={quotationData?.versions[currentVersion]}
                   allowedToEdit={allowedToEdit}
                   renderedFrom={`${renderedFrom}_grid-3`}
+                  setReserveAssetWarning={setReserveAssetWarning}
                 />
               )}
             </ContentFullScreen>
@@ -734,6 +712,17 @@ const QuotationDetails = () => {
             {quotationData && (
               <RoadmapViews quoteName={quotationData?.quotationNumber} quoteId={id} versionId={currVersionId} status={quotationData?.status || ''} />
             )}
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={3}>
+          <Box>
+            <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.quotation}
+              data={quotationData}
+              allowedToEdit={permissions?.quotation?.isUpdate}
+            />
           </Box>
         </TabPanel>
       </Box>
@@ -814,12 +803,16 @@ const QuotationDetails = () => {
           onOk={handleRelease}
         />
       )}
-      {convertConfirmBox && (
+      {convertConfirmBox.open && (
         <ConfirmationDialog
-          open={convertConfirmBox}
-          message={`Are you sure you want to convert quotation : ${quotationData?.quotationNumber} ?`}
+          open={convertConfirmBox.open}
+          message={
+            convertConfirmBox?.warning
+              ? convertConfirmBox?.warning
+              : `Are you sure you want to convert quotation : ${quotationData?.quotationNumber} ?`
+          }
           onClose={() => {
-            setConvertConfirmBox(false);
+            setConvertConfirmBox({ open: false, warning: null });
           }}
           onOk={handleConvert}
         />

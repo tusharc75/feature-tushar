@@ -19,6 +19,7 @@ import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAcc
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
+  checkIsAllowedToEdit,
   customerContact,
   formatAmountWithCurrency,
   getObjKeysWithValues,
@@ -39,6 +40,8 @@ import OpportunityContacts from './OpportunityContacts';
 
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import { stepIconInterface, StepIconType } from 'src/components/Steps/icons';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import Step from '../DynamicForm/Step';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -75,6 +78,8 @@ function OpportunityDetailsPage() {
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
+  const [resourceData, setResourceData] = useState(null);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const parsed = queryString.parse(history.location.search);
 
   const [messageDialog, setMessageDialog] = useState({
@@ -149,6 +154,7 @@ function OpportunityDetailsPage() {
     if (id) {
       fetchOpportunityData();
       fetchRelatedData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -180,11 +186,8 @@ function OpportunityDetailsPage() {
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
           setCopyOfOpportunityData(modifiedData);
-          var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-          if (user?.role?.selectedEntity?.superAdminAccess) {
-            isAllowedToEdit = true;
-          }
-          setAllowedToEdit(isAllowedToEdit);
+          
+          setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.opportunity, data));
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 
@@ -234,6 +237,19 @@ function OpportunityDetailsPage() {
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.opportunity}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
     }
   };
 
@@ -619,109 +635,129 @@ function OpportunityDetailsPage() {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-          <ProcessFlow
-            disableBackNext={allowedToEdit ? false : true}
-            steps={steps}
-            activeStep={activeStep}
-            handleMarkAsCompleted={handleMarkAsCompleted}
-          />
-          {loading ? (
-            <Grid container spacing={2}>
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
-                <Grid key={index} item sm={6} md={6}>
-                  <Skeleton variant="text" width="100px" height="16px" />
-                  <Box marginY={1} />
-                  <Skeleton width="100%" height="50px" />
-                </Grid>
-              ))}
-            </Grid>
-          ) : !opportunityFields.length ? (
-            <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-              <img src={SVG('Opportunity Placeholder')} alt="No Data" />
-            </Box>
-          ) : (
-            <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
-          )}
-          <div className="pt-3 ">
-            {opportunityData && permissions?.supplierContact?.isRead && (
-              <Box mb={2}>
-                <OpportunityContacts
-                  contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
-                  title="Supplier Contacts"
-                  contactApi={supplierContact.contactApi}
-                  isExpanded={expanded.supplierContacts}
-                  onAddContact={() => {
-                    fetchSupplierContactData(true);
-                  }}
-                  onSetExpanded={() => {
-                    setExpanded({
-                      ...expanded,
-                      supplierContacts: !expanded.supplierContacts
-                    });
-                  }}
-                  recordsPerLine={recordsPerLine}
-                  accounts={cloneDeep(opportunityData?.supplierAccount)}
-                  isAllowedToUpdate={allowedToEdit}
-                />
+          <CustomTabs
+            value={currentTabIndex}
+            onChange={(index, newValue) => {
+              setCurrentTabIndex(newValue);
+            }}
+          >
+            <CustomTab value={0}>Details</CustomTab>
+            {resourceData && resourceData?.steps?.length && <CustomTab value={1}>Associations</CustomTab>}
+          </CustomTabs>
+          <TabPanel value={currentTabIndex} index={0}>
+            <ProcessFlow
+              disableBackNext={allowedToEdit ? false : true}
+              steps={steps}
+              activeStep={activeStep}
+              handleMarkAsCompleted={handleMarkAsCompleted}
+            />
+            {loading ? (
+              <Grid container spacing={2}>
+                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
+                  <Grid key={index} item sm={6} md={6}>
+                    <Skeleton variant="text" width="100px" height="16px" />
+                    <Box marginY={1} />
+                    <Skeleton width="100%" height="50px" />
+                  </Grid>
+                ))}
+              </Grid>
+            ) : !opportunityFields.length ? (
+              <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
+                <img src={SVG('Opportunity Placeholder')} alt="No Data" />
               </Box>
+            ) : (
+              <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
             )}
-            {opportunityData && permissions?.customerContact?.isRead && (
-              <Box mb={2}>
-                <OpportunityContacts
-                  contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
-                  title="Customer Contacts"
-                  isExpanded={expanded['customerContacts']}
-                  contactApi={customerContact.contactApi}
-                  onAddContact={() => {
-                    fetchCustomerContactData(true);
-                  }}
-                  onSetExpanded={() => {
-                    setExpanded({
-                      ...expanded,
-                      customerContacts: !expanded.customerContacts
-                    });
-                  }}
-                  recordsPerLine={recordsPerLine}
-                  saveContactToOpportunity={handleAssignContacts}
-                  accountId={opportunityData?.customerAccount?.optionValue}
-                  isAllowedToUpdate={allowedToEdit}
-                />
-              </Box>
-            )}
-            {permissions?.projectSales?.isRead && (
-              <Box mb={2}>
-                <ProjectInAccordion
+            <div className="pt-3 ">
+              {opportunityData && permissions?.supplierContact?.isRead && (
+                <Box mb={2}>
+                  <OpportunityContacts
+                    contacts={cloneDeep(opportunityData?.staticData?.supplierContact)}
+                    title="Supplier Contacts"
+                    contactApi={supplierContact.contactApi}
+                    isExpanded={expanded.supplierContacts}
+                    onAddContact={() => {
+                      fetchSupplierContactData(true);
+                    }}
+                    onSetExpanded={() => {
+                      setExpanded({
+                        ...expanded,
+                        supplierContacts: !expanded.supplierContacts
+                      });
+                    }}
+                    recordsPerLine={recordsPerLine}
+                    accounts={cloneDeep(opportunityData?.supplierAccount)}
+                    isAllowedToUpdate={allowedToEdit}
+                  />
+                </Box>
+              )}
+              {opportunityData && permissions?.customerContact?.isRead && (
+                <Box mb={2}>
+                  <OpportunityContacts
+                    contacts={cloneDeep(opportunityData?.staticData?.customerContact)}
+                    title="Customer Contacts"
+                    isExpanded={expanded['customerContacts']}
+                    contactApi={customerContact.contactApi}
+                    onAddContact={() => {
+                      fetchCustomerContactData(true);
+                    }}
+                    onSetExpanded={() => {
+                      setExpanded({
+                        ...expanded,
+                        customerContacts: !expanded.customerContacts
+                      });
+                    }}
+                    recordsPerLine={recordsPerLine}
+                    saveContactToOpportunity={handleAssignContacts}
+                    accountId={opportunityData?.customerAccount?.optionValue}
+                    isAllowedToUpdate={allowedToEdit}
+                  />
+                </Box>
+              )}
+              {permissions?.projectSales?.isRead && (
+                <Box mb={2}>
+                  <ProjectInAccordion
+                    recordsPerLine={3}
+                    projectSales={projectSales}
+                    type={typeCreateProjectSalesDialog}
+                    fetchData={fetchRelatedData}
+                    permissions={permissions}
+                    isAddProjectSale={true}
+                    isAllowedToEdit={allowedToEdit}
+                    accountId={opportunityData?._id}
+                    accountName={opportunityData?.opportunityName}
+                    resource={sidebarResource.opportunity}
+                  />
+                </Box>
+              )}
+              {permissions?.quoteBuilder?.isRead && (
+                <QuotesInAccordion
                   recordsPerLine={3}
-                  projectSales={projectSales}
-                  type={typeCreateProjectSalesDialog}
+                  quotes={quotes}
                   fetchData={fetchRelatedData}
-                  permissions={permissions}
-                  isAddProjectSale={true}
-                  isAllowedToEdit={allowedToEdit}
-                  accountId={opportunityData?._id}
-                  accountName={opportunityData?.opportunityName}
-                  resource={sidebarResource.opportunity}
+                  quoteBuilderPermission={permissions.quoteBuilder}
+                  opportunityId={id}
+                  accountId={opportunityData?.customerAccount?.optionValue}
+                  opportunityName={opportunityData?.opportunityName}
+                  marketSegmentId={opportunityData?.marketSegment?.optionValue}
+                  subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
+                  currency={opportunityData?.currency}
+                  estimatedAmount={opportunityData?.estimatedAmount}
+                  isRenderedFromOpportunity={true}
+                  isAllowedToUpdate={allowedToEdit}
                 />
-              </Box>
-            )}
-            {permissions?.quoteBuilder?.isRead && (
-              <QuotesInAccordion
-                recordsPerLine={3}
-                quotes={quotes}
-                fetchData={fetchRelatedData}
-                quoteBuilderPermission={permissions.quoteBuilder}
-                opportunityId={id}
-                accountId={opportunityData?.customerAccount?.optionValue}
-                opportunityName={opportunityData?.opportunityName}
-                marketSegmentId={opportunityData?.marketSegment?.optionValue}
-                subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
-                currency={opportunityData?.currency}
-                estimatedAmount={opportunityData?.estimatedAmount}
-                isRenderedFromOpportunity={true}
-                isAllowedToUpdate={allowedToEdit}
-              />
-            )}
-          </div>
+              )}
+            </div>
+          </TabPanel>
+          <TabPanel value={currentTabIndex} index={1}>
+            <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.opportunity}
+              data={opportunityData}
+              allowedToEdit={permissions?.opportunity?.isUpdate}
+            />
+          </TabPanel>
         </Box>
         {showConfirmBox ? (
           <ConfirmationDialog

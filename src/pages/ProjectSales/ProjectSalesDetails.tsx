@@ -21,7 +21,8 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { displayCardDate, formatAmountWithCurrency, projectSales } from '../../constants/helpers';
+import { checkSuperAdminAccess, displayCardDate, formatAmountWithCurrency, projectSales, sidebarResource } from '../../constants/helpers';
+import Step from '../DynamicForm/Step';
 import AssignDataDialog from './AssignDataDialog';
 import CreateProjectSales from './CreateProjectSales';
 import CustomerAccounts from './CustomerAccounts';
@@ -56,8 +57,9 @@ const ProjectSalesDetails = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const [dialogType, setDialogType] = useState('');
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes?.projectSales]);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [loadingGraphData, setLoadingGraphData] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
   const [graphData, setGraphData] = useState({
     edges: [],
     nodes: [],
@@ -110,15 +112,13 @@ const ProjectSalesDetails = () => {
         data: { data }
       } = await axiosInstance().get(`${projectSales.projectSalesApi}/${id}`);
 
-      // data.amount = formatAmountWithCurrency(data.currency, data.amount).fullFormatAmount;
-      // data.value = formatAmountWithCurrency(data.currency, data.value).fullFormatAmount;
       let modifiedData: any = {};
       Object.assign(modifiedData, data);
 
       modifiedData['amount'] = formatAmountWithCurrency(modifiedData.currency, modifiedData.amount).fullFormatAmount;
 
       var isAllowedToEdit = data.projectManager.optionValue === user?.user?._id;
-      if (user?.role?.selectedEntity?.superAdminAccess) {
+      if (checkSuperAdminAccess(user, sidebarResource.projectSales)) {
         isAllowedToEdit = true;
       }
       setAllowedToEdit(isAllowedToEdit);
@@ -146,7 +146,21 @@ const ProjectSalesDetails = () => {
   useEffect(() => {
     getSalesData();
     getProjectFields();
+    fetchPolicy();
   }, [id]);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.projectSales}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const getProjectFields = () => {
     axiosInstance()
@@ -333,18 +347,11 @@ const ProjectSalesDetails = () => {
                 setCurrentTabIndex(newValue);
               }}
             >
-              <CustomTab index={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0">
-                Header
-              </CustomTab>
-              <CustomTab index={1} aria-controls="a11y-tabpanel-1" id="a11y-tab-1">
-                OM-Neurons
-              </CustomTab>
-              <CustomTab index={2} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-                Project Team
-              </CustomTab>
-              <CustomTab index={3} aria-controls="a11y-tabpanel-2" id="a11y-tab-2">
-                Customer Account
-              </CustomTab>
+              <CustomTab value={0}>Header</CustomTab>
+              <CustomTab value={1}>OM-Neurons</CustomTab>
+              <CustomTab value={2}>Project Team</CustomTab>
+              <CustomTab value={3}>{routes.customerAccount.title}</CustomTab>
+              {resourceData && resourceData?.steps?.length && <CustomTab value={4}>Associations</CustomTab>}
             </CustomTabs>
             <TabPanel value={currentTabIndex} index={0}>
               <Box>
@@ -408,7 +415,6 @@ const ProjectSalesDetails = () => {
                 </Box>
               </Box>
             </TabPanel>
-
             <TabPanel value={currentTabIndex} index={3}>
               <Box>
                 <CustomerAccounts
@@ -432,6 +438,15 @@ const ProjectSalesDetails = () => {
                   users={teamUsers}
                 />
               </Box>
+            </TabPanel>
+            <TabPanel value={currentTabIndex} index={4}>
+              <Step
+                resourceData={resourceData}
+                resourceId={id}
+                resource={sidebarResource.projectSales}
+                data={projectSalesData}
+                allowedToEdit={permissions?.projectSales?.isUpdate}
+              />
             </TabPanel>
           </>
         )}

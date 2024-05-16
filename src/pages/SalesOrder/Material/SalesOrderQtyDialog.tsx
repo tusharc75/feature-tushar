@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -16,8 +16,8 @@ import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual, uniqBy } from 'lodash';
 import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import { fetch_salesOrder_product_fields } from 'src/components/SalesOrder/helper';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -67,7 +67,7 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = await fetch_salesOrder_product_fields(salesOrderData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.salesOrderProduct, salesOrderData?.currency, true);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];
@@ -98,6 +98,9 @@ const SalesOrderQtyDialog: FC<EditDialogProps> = ({
         }
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
+        }
+        if (element.fieldName === 'pricingCondition') {
+          element.option = [];
         }
         element.required = false;
         element.isFormula = false;

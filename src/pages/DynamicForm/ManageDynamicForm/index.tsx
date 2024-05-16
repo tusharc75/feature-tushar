@@ -15,7 +15,16 @@ import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constant
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
-const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, redirected = true, isClone = false, id = null }) => {
+const ManageDynamicForm = ({
+  resource,
+  resourcePath = '',
+  onClose,
+  onSuccess,
+  redirected = true,
+  isClone = false,
+  id = null,
+  referenceData = null
+}) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -23,6 +32,7 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
   useEffect(() => {
     fetchFields();
@@ -44,6 +54,16 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
             }
           })
           .then(({ data: { data } }) => {
+            if (referenceData) {
+              Object.keys(referenceData)?.forEach((_r) => {
+                fieldsDataForUpdate?.forEach((_f) => {
+                  if (_f?.fieldName === _r) {
+                    _f.disabled = true;
+                    return;
+                  }
+                });
+              });
+            }
             setInitialData({
               fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
               values: getObjKeysWithValues(data, isClone ? fieldsDataForCreate : fieldsDataForUpdate)
@@ -54,9 +74,20 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
           });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate)
+        const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
         if (primaryField) {
-          tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);;
+          tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
+        }
+        if (referenceData) {
+          Object.keys(referenceData)?.forEach((_r) => {
+            fieldsDataForCreate?.forEach((_f) => {
+              if (_f?.fieldName === _r) {
+                _f.disabled = true;
+                tempInitialData[_f?.fieldName] = referenceData[_f?.fieldName];
+                return;
+              }
+            });
+          });
         }
         setInitialData({
           fields: fieldsDataForCreate,
@@ -73,47 +104,42 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
     setSubmitting(true);
     if (id && !isClone) {
       values._id = id;
-      axiosInstance()
-        .put(`/dynamic-form`, values, {
-          headers: {
-            Resource: resource
-          }
-        })
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().put(`/dynamic-form`, values, {
+        headers: {
+          Resource: resource
+        }
+      }).then(({ data }) => {
+        setSubmitting(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      }).catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
     } else {
-      axiosInstance()
-        .post(`/dynamic-form`, values, {
-          headers: {
-            Resource: resource
-          }
-        })
-        .then(({ data: { data, message } }) => {
-          setLoading(false);
-          if (redirected){
-            history.push(`${resourcePath}/detail/${data._id}`);
-            onSuccess(data.data);
-          } else{
-            onSuccess(data, primaryField);
-          }
-          setSubmitting(true);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: message
-          });
-        })
+      axiosInstance().post(`/dynamic-form`, values, {
+        headers: {
+          Resource: resource
+        }
+      }).then(({ data: { data, message } }) => {
+        setLoading(false);
+        if (redirected) {
+          history.push(`${resourcePath}/detail/${data._id}`);
+          onSuccess(data.data);
+        } else {
+          onSuccess(data, primaryField);
+        }
+        setSubmitting(true);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: message
+        });
+      })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
@@ -124,8 +150,30 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
 
   function validate(values) {
     const errors = {};
+    const counterFields = initialData?.fields?.filter((f) => f?.type === 'counter');
+    if (counterFields?.length) {
+      counterFields?.forEach((field) => {
+        field?.subFields.forEach((_field) => {
+          if (_field?.required && values[field?.fieldName]?.some((v) => !v[_field?.fieldName])) {
+            errors[field?.fieldName] = `${field?.fieldLabel} is required`;
+          }
+        });
+      });
+    }
     return errors;
   }
+
+  const handleScroll = (errors) => {
+    const err = Object.keys(errors);
+    if (err?.length) {
+      const input = document.querySelector(`input[name=${err[0]}]`);
+      input?.scrollIntoView({
+        behavior: 'smooth',
+        block: 'center',
+        inline: 'start'
+      });
+    }
+  };
 
   return (
     <Dialog
@@ -167,6 +215,9 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    onImageUploadCompletePercentage={(completePercentage) => {
+                      setUploadingImageOrFileProgress(completePercentage);
+                    }}
                   />
                 </Form>
               </CustomDialogContent>
@@ -183,12 +234,16 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
                   Cancel
                 </Button>
                 <Button
-                  disabled={loading || submitting}
+                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
                   variant="contained"
                   color="primary"
                   type="submit"
                   size="small"
-                  onClick={submitForm}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(errors);
+                    submitForm();
+                  }}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
                   {' '}
@@ -201,6 +256,7 @@ const ManageDynamicForm = ({ resource, resourcePath = '', onClose, onSuccess, re
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
+                    handleScroll(errors);
                     submitForm();
                   }}
                   onClose={() => {

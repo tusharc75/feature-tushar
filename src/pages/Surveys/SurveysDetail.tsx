@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -17,6 +17,8 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import FieldDialog from './FieldDialog';
 import ManageSurveys from './ManageSurveys';
 import SurveysData from './SurveysData';
+import { checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const SurveysDetail = () => {
   const { id } = useParams();
@@ -62,11 +64,8 @@ const SurveysDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`/surveys/${id}`);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+      
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.surveys, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setHeadingLbl(data.surveyName);
       setSurveyData(data);
@@ -146,52 +145,26 @@ const SurveysDetail = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
-        </Tabs>
-        {tabValue === 0 && (
-          <Box>
-            {loading || !fields?.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={SurveyData} fields={fields} />
-            )}
-          </Box>
-        )}
-        {tabValue === 1 && <SurveysData surveyId={id} />}
+        <CustomTabs className="new-tab-container-v1" value={tabValue} onChange={handleMainTabChange} textColor="primary">
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+          </CustomTab>
+        </CustomTabs>
+        <TabPanel value={tabValue} index={0}>
+          {loading || !fields?.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={SurveyData} fields={fields} />
+          )}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <SurveysData surveyId={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

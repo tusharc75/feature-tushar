@@ -38,8 +38,7 @@ import {
   transferAsset
 } from '../../../constants/helpers';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -81,14 +80,12 @@ const AddSerializedAsset = ({
   const [inuseAssetConfirmBox, setInuseAssetConfirmBox] = useState(false);
   const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 600;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchAssets();
-    }, millisec);
+    const cencelToken = axios.CancelToken.source();
+    fetchAssets(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, selectedProduct, tabValue]);
 
   useEffect(() => {
@@ -155,7 +152,7 @@ const AddSerializedAsset = ({
     setSerializedProducts(tempProducts);
   }, [selectedRecords]);
 
-  const fetchAssets = () => {
+  const fetchAssets = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
 
     let queryString = getQueryString();
@@ -177,7 +174,7 @@ const AddSerializedAsset = ({
       api = `${serializedAsset.api}${queryString}`;
     }
     axiosInstance()
-      .get(api)
+      .get(api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         const rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u);
@@ -243,7 +240,7 @@ const AddSerializedAsset = ({
           deepFilter = `${deepFilter}&repairJob=true`;
         }
       } else if (referenceType === 'Transfer Asset') {
-        deepFilter = `${deepFilter}&transferable=true`;
+        deepFilter = `${deepFilter}&transferable=true&transferAssetId=${referenceData?._id}`;
       } else if (referenceType === 'Rental Job') {
         const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
         deepFilter = `${deepFilter}&rental=true&rentalJobId=${referenceData?._id}&date=${JSON.stringify(dateFilter)}`;
@@ -306,14 +303,13 @@ const AddSerializedAsset = ({
 
   const handleAddAssetToTransferAsset = (transferAssetId) => {
     axiosInstance()
-      .put(`${transferAsset.api}/add-asset/${transferAssetId}`, {
+      .put(`${transferAsset.api}/add-asset-complete-transfer-asset/${transferAssetId}`, {
         assets: selectedRecords?.map((s) => {
           return {
             _id: s._id,
             currentStatus: s.status
           };
-        }),
-        manualStatus: ASSET_STATUS.reserved
+        })
       })
       .then(({ data }) => {
         fetchAssets();
@@ -324,13 +320,6 @@ const AddSerializedAsset = ({
         toastConfig.setToastConfig(error);
       });
   };
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
 
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
@@ -425,7 +414,6 @@ const AddSerializedAsset = ({
 
   const handleAutoTransferAssets = () => {
     const assetsAdd: any = [];
-
     selectedProducts?.forEach((e: any) => {
       if (e.type === 'product') {
         let qty = e.realAssetQty - e.realAssetAssignedQty;
@@ -437,7 +425,7 @@ const AddSerializedAsset = ({
             obj.product = e.materialId;
             obj.asset = result[0]._id;
             obj.rentalJob = result[0].loadingTicket?.rentalJob?.optionValue;
-            const rentalAsset = result[0].loadingTicket?.assets?.find((ele) => ele.asset === result[0]._id)
+            const rentalAsset = result[0].loadingTicket?.assets?.find((ele) => ele.asset === result[0]._id);
             if (rentalAsset) {
               obj.uniqueId = rentalAsset?.uniqueId;
             }
@@ -448,13 +436,16 @@ const AddSerializedAsset = ({
         }
       }
     });
-
+    setIsSubmitting(true);
     axiosInstance()
       .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, { assets: assetsAdd, rentalJob: referenceData?._id })
       .then(({ data }) => {
+        setInuseAssetConfirmBox(false);
         handleSuccess();
+        setIsSubmitting(false);
       })
       .catch((error) => {
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -473,7 +464,7 @@ const AddSerializedAsset = ({
           title={`${replaceAssets ? 'Replace' : 'Add'} ${routes.serializedAsset.title}`}
           onClose={handleSerializedAssetClose}
         ></CustomDialogHeader>
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Box pt={1} pb={1} className="main-container-v1">
             <Grid container spacing={2}>
               <Grid item xs={12} md={4}>
@@ -641,9 +632,9 @@ const AddSerializedAsset = ({
                             setInuseAssetConfirmBox(true);
                           }}
                           variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          disabled={isAdding || checkUniqRentalJob()}
+                          disabled={isSubmitting || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
                           className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                          endIcon={isAdding && <CircularProgress size={20} />}
+                          endIcon={isSubmitting && <CircularProgress size={20} />}
                         >
                           {`Add to Job`}
                           {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
@@ -657,9 +648,9 @@ const AddSerializedAsset = ({
             {['Rental Job'].includes(referenceType) && (
               <Box pt={1}>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-                  <CustomTab value={0} index={0} label={'Assets'} {...a11yProps(0)} />
-                  {permissions?.sublease && <CustomTab className={'tabLayout'} value={1} index={1} label={'Sublease Assets'} {...a11yProps(1)} />}
-                  <CustomTab className={'tabLayout'} value={2} index={2} label={'In Use Assets'} {...a11yProps(2)} />
+                  <CustomTab value={0} label={'Assets'} />
+                  {permissions?.sublease && <CustomTab value={1} label={'Sublease Assets'} />}
+                  <CustomTab value={2} label={'In Use Assets'} />
                 </CustomTabs>
               </Box>
             )}
@@ -696,10 +687,11 @@ const AddSerializedAsset = ({
           referenceType={referenceType}
           referenceData={{
             transferFromPlant: selectedRecords[0]?.warehouseId,
-            transferToPlant: referenceData?.warehouse,
+            transfertoPlant: referenceData?.warehouse,
             wellName: referenceData?.wellName,
             wellNumber: referenceData?.wellNumber,
-            afeNumber: referenceData?.afeNumber
+            afeNumber: referenceData?.afeNumber,
+            transferType: 'Internal'
           }}
         />
       ) : null}
@@ -733,14 +725,13 @@ const AddSerializedAsset = ({
       {inuseAssetConfirmBox && (
         <ConfirmationDialog
           open={inuseAssetConfirmBox}
-          okBtnLoading={isAdding}
+          okBtnLoading={isSubmitting}
           message={`Do you want to move the assets to the new rental job?`}
           onClose={() => {
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
             handleAutoTransferAssets();
-            setInuseAssetConfirmBox(false);
           }}
         />
       )}

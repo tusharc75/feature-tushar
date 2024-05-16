@@ -1,336 +1,434 @@
-import { Box, Button, BoxProps, Grid, IconButton, Menu, MenuItem, Tab, Tabs, Typography } from '@material-ui/core';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Box, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import FieldTicket from './FieldTicket';
-import moment from 'moment';
-import { dateFormat } from 'src/constants/helpers';
-import EventNoteIcon from '@material-ui/icons/EventNote';
-import TabPanel from 'src/components/TabPanel';
-import Consumables from './Consumables';
-import RefreshIcon from '@material-ui/icons/Refresh';
-import { clearAll, deleteOne, findAll, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
+import CustomContainer from 'src/components/CustomContainer';
+import {
+  GenerateResourceLineNumber,
+  SERVICE_ORDER_STATUS,
+  checkIsAllowedToEdit,
+  cloneResourceData,
+  fieldServiceOrder,
+  getObjKeys,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  restoreObjKeysWithValues
+} from 'src/constants/helpers';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import { camelCase } from 'lodash';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useData } from 'src/StateProvider/Provider';
+import { cloneDisable } from 'src/constants/messageHelpers';
+import ViewFieldTicketDialog from './ViewFieldTicketDialog';
+import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
+import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from '../FieldServiceOrder/Services/OfflineHelper';
+import axios, { CancelTokenSource } from 'axios';
+import { Apps, FormatListNumbered } from '@material-ui/icons';
+import FieldTicket from '../FieldServiceOrder/FieldTicket';
+import { useHistory } from 'react-router-dom';
 
-const status = {
-  completed: 'Completed',
-  dispatched: 'Dispatched',
-  assigned: 'Assigned'
-};
+type Views = 'card' | 'table';
 
-const style = {
-  date: {
-    fontSize: 13,
-    fontWeight: 400,
-    display: 'flex',
-    gap: 5,
-    alignItems: 'center'
-  },
-  title: {
-    '& p': {
-      fontSize: 14,
-      fontWeight: 600,
-      lineHeight: '20px',
-      '& span': {
-        fontSize: 13
-      }
-    }
-  },
-  titleText: {
-    fontSize: 14,
-    fontWeight: 600,
-    lineHeight: '20px',
-    marginBottom: 7
-  },
-  subTitleText: {
-    fontSize: 13,
-    fontWeight: 400
-  },
-  serviceHead: {
-    '& p': {
-      fontSize: 14,
-      fontWeight: 600,
-      lineHeight: '20px',
-      marginBottom: 9
-    },
-    '& span': {}
-  },
-  borderBottom: {
-    borderBottom: '1px solid var(--common-border-color)'
-  },
-  serviceItem: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    paddingBottom: '5px',
-    '&:last-of-type': {
-      paddingBottom: 0
-    },
-    gap: '10px',
-    '& p ': {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '5px'
-    }
-  }
+const getActionColumn = ({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }) => {
+  return {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {![SERVICE_ORDER_STATUS.closed]?.includes(row?.original?.status) && (
+          <HtmlTooltip title={permissions?.fieldTicket?.isCreate ? `Create ${routes.fieldTicket.title}` : cloneDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Add"
+                disabled={permissions?.fieldTicket?.isCreate && !isSubmitting ? false : true}
+                onClick={() => {
+                  handleCreateFieldTicket(
+                    row?.original?.orignalData,
+                    data?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData)
+                  );
+                }}
+              >
+                <NoteAddIcon fontSize="small" color={permissions?.fieldTicket?.isCreate && !isSubmitting ? 'primary' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        )}
+        {view === 'table' && (
+          <Box>
+            <HtmlTooltip title={`View ${routes.fieldTicket.title}`}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="View"
+                  onClick={() => {
+                    setViewFieldTicket({ open: true, data: row?.original?.orignalData });
+                  }}
+                >
+                  <VisibilityIcon fontSize="small" color="primary" />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </Box>
+        )}
+      </>
+    )
+  };
 };
 
 const FieldServiceTechnician = () => {
+  const isMobileView = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
-  const { isOffline } = useContext(CustomOfflineContext);
-
+  const renderedFrom = camelCase(routes?.fieldServiceTechnician.title);
+  const [view, setView] = useState<Views>('table');
+  const [selectedData, setSelectedData] = useState(null);
+  const [colData, setColData] = useState(null);
   const {
-    state: { permissions, selectedEntity, user }
+    state: { user, permissions }
   }: any = useData();
+  const { state, dispatch } = useTableReducer();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-  const [fieldService, setFieldService] = useState(null);
-  const [selectedFieldService, setSelectedFieldService] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
-  const [offlineStore, setOfflineStore] = useState([]);
-  const [anchorEl, setAnchorEl] = useState({});
+  const [columns, setColumns] = useState(null);
+  const [viewFieldTicket, setViewFieldTicket] = useState({ open: false, data: null });
 
-  const fieldRef: any = useRef();
+  const { generateColumns } = useColumns();
+  const { isOffline } = useContext(CustomOfflineContext);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fieldRemoveRef: any = useRef();
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const history = useHistory();
 
   useEffect(() => {
-    fetchData();
-    findAllStoredData();
+    setColumns((prev) => {
+      return prev?.map((c) => {
+        if (c.accessor === 'action') {
+          return getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData });
+        }
+        return c;
+      });
+    });
   }, [isOffline]);
 
-  const findAllStoredData = async () => {
-    const data = await findAll(objectStore.fieldServiceTechnician);
-    setOfflineStore(data?.map((d) => d?._id) || []);
-  };
+  useEffect(() => {
+    setUpindexDB();
+    fetchColumns();
+  }, [isOffline]);
 
-  const fetchData = async () => {
-    setFieldService(null);
+  const fetchColumns = async () => {
+    let data;
     if (isOffline) {
-      const data: any = await findAll(objectStore.fieldServiceTechnician);
-      setFieldService(data);
-      setSelectedFieldService(data[0]);
+      data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
+    }
+    else {
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
+      data = response?.data?.data;
+      try {
+        insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);
+      } catch (e) {
+        console.error(`Field Service Order : ${e.message}`);
+      }
+    }
+    setColData(data);
+    const newColumns = [...generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path), ...getStaticFields()];
+    newColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data }));
+    setColumns(newColumns);
+  };
+
+  const handleCreateFieldTicket = async (data, fieldServiceOrderFields) => {
+    setIsSubmitting(true);
+    toastConfig.setToastConfig({
+      open: true,
+      type: 'success',
+      message: 'Field Ticket Creation In-Progress...'
+    });
+    var fieldTicketField: any = [];
+    if (isOffline) {
+      fieldTicketField = await findOne(objectStore.resource, sidebarResource.fieldTicket);
     } else {
-      axiosInstance()
-        .get(`/field-service-technician`)
-        .then(({ data: { data } }) => {
-          setFieldService(data?.data);
-          const isAvailable = data?.data.find((d) => d._id === selectedFieldService?._id);
-          const index = data?.data.findIndex((d) => d._id === selectedFieldService?._id);
-          if (data?.data?.length) {
-            isAvailable ? setSelectedFieldService(data?.data[index]) : setSelectedFieldService(data?.data[0]);
-          }
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`);
+      fieldTicketField = response?.data?.data;
+    }
+    fieldTicketField = fieldTicketField?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+
+    const tempInitialData = getObjKeys('', fieldTicketField);
+    tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data, user.user?.brandCurrency);
+    for (const key in referenceData) {
+      tempInitialData[key] = referenceData[key];
+    }
+    if (fieldTicketField?.some((e) => e.fieldName === 'currency')) {
+      tempInitialData['currency'] = user.user?.brandCurrency;
+    }
+    tempInitialData['fieldServiceOrder'] = data?._id;
+
+    if (isOffline) {
+      const _id: any = Math.floor(Math.random() * 1000000).toString();
+      const data: any = restoreObjKeysWithValues(tempInitialData, fieldTicketField);
+      data['_id'] = _id;
+      await insertUpdate(objectStore.fieldTicket, _id, data);
+      await insertUpdate(objectStore.offlineDataSync, _id, { type: 'fieldTicket', data: { ...tempInitialData, _id, offlineSyncStatus: 'new' } });
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Field Ticket Created Successfully'
+      });
+      history.push(`${routes.fieldTicketDetail.path}/${_id}`);
+      setIsSubmitting(false);
+    } else {
+      axiosInstance().post(`${routes.fieldTicket?.path}`, tempInitialData).then(({ data }) => {
+        window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+        setIsSubmitting(false);
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
     }
   };
 
-  const getBgColor = (data) => {
-    const currentStatus = data?.technicianAssign?.status;
-    let color = 'var(--dark-secondary, white)';
-    switch (currentStatus) {
-      case status.assigned:
-        color = '#F2FDFF';
-        break;
-      case status.dispatched:
-        color = '#FFF9E3';
-        break;
-      case status.completed:
-        color = '#F2FFEE';
-        break;
-      default:
-        color = 'var(--dark-secondary, white)';
-        break;
+  useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
+    fetchData(cancelToken);
+    return () => cancelToken.cancel();
+  }, [page, limit, filters, sorting, showFilteredRecordsOnly, search, isOffline]);
+
+  const fetchData = async (cancelToken?: CancelTokenSource) => {
+    dispatch({ type: 'loading', loading: true });
+    try {
+      let data, count;
+      if (isOffline) {
+        data = await findAll(objectStore.fieldServiceOrder);
+        count = data?.length || 0;
+      } else {
+        const queryString = getQueryString();
+        const response = await axiosInstance().get(`${fieldServiceOrder.api}${queryString}`, { cancelToken: cancelToken?.token });
+        data = response?.data?.data;
+        count = response?.data?.count;
+      }
+      let rows = data?.map((u) => {
+        let finalObject: any = prepareDataForGrid(u);
+        finalObject.orignalData = u;
+        return finalObject;
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    } finally {
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
     }
-    return color;
   };
 
-  const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
-    setTabValue(newValue);
+  const getQueryString = (isExport = false) => {
+    let deepFilter = `?page=${page}&limit=${limit}`;
+    if (isExport) {
+      deepFilter = `?`;
+    }
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    if (showFilteredRecordsOnly) {
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
+    }
+    return deepFilter;
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
-  const handleAddOffline = async (fieldService) => {
-    await insertUpdate(objectStore.fieldServiceTechnician, fieldService._id, fieldService);
-    fieldRef.current.triggerChildFunction();
-    closeActions();
-    findAllStoredData();
+  const handleSearch = (e) => {
+    dispatch({ type: 'search', search: e.target.value });
   };
 
-  const handleRemoveOffline = async (fieldService) => {
-    deleteOne(objectStore.fieldServiceTechnician, fieldService._id);
-    fieldRemoveRef.current.triggerChildFunction();
-    closeActions();
-    findAllStoredData();
+  const handleAddOffline = async () => {
+    const data: any = [];
+    selectedRecords.forEach((element) => {
+      data.push(element._id);
+    });
+    await fieldServiceOrderAddOffline(data);
+    dispatch({ type: 'selection', selectedRecords: [] });
   };
 
-  const openActions = (id, event) => {
-    setAnchorEl({ ...anchorEl, [id]: event.currentTarget });
+  const handleRemoveoffline = async () => {
+    await fieldServiceOrderClearOffline()
   };
 
-  const closeActions = () => {
-    setAnchorEl({});
+  const ActionMenuItems = () => {
+    return (
+      <>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
+          Add Offline
+        </MenuItem>
+        <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
+      </>
+    );
   };
+
+  const onRowClick = (row) => {
+    if (!selectedData || row._id !== selectedData._id) {
+      setSelectedData(row);
+      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) && ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status));
+    } else {
+      setSelectedData(null);
+      setAllowedToEdit(false);
+    }
+  };
+
+  const handleViewChange = useCallback(
+    (view: Views) => {
+      setView(view);
+      const updatedColumns = columns?.filter((c) => c.accessor !== 'action');
+      updatedColumns.push(getActionColumn({ view, permissions, isSubmitting, handleCreateFieldTicket, setViewFieldTicket, data: colData }));
+      setColumns(updatedColumns);
+    },
+    [colData, columns, handleCreateFieldTicket, isSubmitting, permissions]
+  );
+
+  useEffect(() => {
+    if (isMobileView && view === 'card') {
+      handleViewChange('table');
+    }
+  }, [isMobileView, view, handleViewChange]);
 
   return (
-    <Box className="main-container-v1">
-      <Box className="headerbox-v1">
-        <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[{ title: routes.fieldServiceTechnician.title }]} />
-        </Box>
-      </Box>
-      <Box className={`detail-container-v1`}>
-        {fieldService ? (
-          <>
-            <Box textAlign={'right'} mb={2}>
-              <Button
-                onClick={() => {
-                  clearAll(objectStore.fieldServiceTechnician);
-                  clearAll(objectStore.fieldTicket);
-                  findAllStoredData();
-                }}
-              >
-                Clear Offline
-              </Button>
-              <IconButton size="small" onClick={() => fetchData()} style={{ marginLeft: '8px' }}>
-                <RefreshIcon />
-              </IconButton>
-            </Box>
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={12} md={4} xl={3}>
-                <Box p={2} className="container-with-border">
-                  {fieldService?.map((data, index) => {
-                    return (
-                      <Box
-                        mb={2}
-                        key={index}
-                        onClick={() => {
-                          setSelectedFieldService(data);
-                        }}
-                        style={{
-                          cursor: 'pointer',
-                          backgroundColor: selectedFieldService === data ? 'var(--dark-secondary, #fff)' : getBgColor(data),
-                          border: selectedFieldService === data ? '2px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
-                          borderRadius: '8px'
-                        }}
-                        sx={{ position: 'relative' }}
-                      >
-                        <Box p={3}>
-                          <Box sx={{ ...style.serviceItem, ...style.title }}>
-                            <Typography>{data?.fieldServiceOrderNumber}</Typography>
-                            <Typography className={`chip chip-${data?.technicianAssign?.status}`} style={{ fontWeight: '500' }}>
-                              {data?.technicianAssign?.status}
-                            </Typography>
-                          </Box>
-                          <Box style={{ display: 'flex', justifyContent: 'space-between', gap: 8, alignItems: 'center', ...style.borderBottom }}>
-                            <Box sx={{ ...style.title, textAlign: 'unset' }}>
-                              <Typography>
-                                Service Name : <span>{data?.service?.serviceName}</span>
-                              </Typography>
-                              <Typography component={'span'} style={{ ...style.date, marginBottom: '8px', marginTop: '5px' }}>
-                                <EventNoteIcon style={{ fontSize: '15px' }} />
-                                {moment(data?.technicianAssign?.estimateStartDate).format(dateFormat)} -{' '}
-                                {moment(data?.technicianAssign?.estimateEndDate).format(dateFormat)}
-                              </Typography>
-                            </Box>
-                            {!isOffline && (
-                              <>
-                                <IconButton size="small" onClick={(e) => openActions(data._id, e)} aria-controls={`action-menu-${data._id}`}>
-                                  <MoreHorizIcon />
-                                </IconButton>
-                                <Menu
-                                  anchorEl={anchorEl[data._id]}
-                                  keepMounted
-                                  getContentAnchorEl={null}
-                                  anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'left'
-                                  }}
-                                  id={`action-menu-${data._id}`}
-                                  open={Boolean(anchorEl[data._id])}
-                                  onClose={closeActions}
-                                >
-                                  {!offlineStore?.includes(data._id) ? (
-                                    <MenuItem onClick={() => handleAddOffline(data)}>Add Offline</MenuItem>
-                                  ) : (
-                                    <MenuItem onClick={() => handleRemoveOffline(data)}>Remove Offline</MenuItem>
-                                  )}
-                                </Menu>
-                              </>
-                            )}
-                          </Box>
-
-                          <Box mt={1}>
-                            <Typography style={style.titleText}>
-                              Customer: <span style={style.subTitleText}>{data?.customerAccount?.optionLabel}</span>
-                            </Typography>
-                            <Typography style={{ ...style.titleText, marginBottom: 0 }}>
-                              Location: <span style={style.subTitleText}>{data?.shippingAddress?.optionLabel}</span>
-                            </Typography>
-                          </Box>
-                        </Box>
-                      </Box>
-                    );
-                  })}
-                </Box>
-              </Grid>
-              <Grid item xs={12} sm={12} md={8} xl={9}>
-                {selectedFieldService && (
-                  <Box p={2} className="container-with-border">
-                    <Tabs
-                      className="new-tab-container-v1"
-                      value={tabValue}
-                      onChange={handleMainTabChange}
-                      textColor="primary"
-                      TabIndicatorProps={{
-                        style: {
-                          display: 'none'
-                        }
-                      }}
-                    >
-                      <Tab
-                        className={'tabLayout'}
-                        label={<div className="d-flex align-items-center tab-font">{routes.fieldTicket.title}</div>}
-                        {...a11yProps(0)}
-                      />
-                      <Tab className={'tabLayout'} label={<div className="d-flex align-items-center tab-font">Consumables</div>} {...a11yProps(1)} />
-                    </Tabs>
-                    <TabPanel value={tabValue} index={0}>
-                      <Box>
-                        <FieldTicket selectedFieldService={selectedFieldService} fieldRef={fieldRef} fieldRemoveRef={fieldRemoveRef} />
-                      </Box>
-                    </TabPanel>
-                    <TabPanel value={tabValue} index={1}>
-                      <Box>
-                        <Consumables selectedFieldService={selectedFieldService} recall={fetchData} />
-                      </Box>
-                    </TabPanel>
-                  </Box>
+    <section className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.fieldServiceTechnician.title }]} />
+      </div>
+      <CustomContainer>
+        <ListingPageHeader
+          searchValue={search}
+          onSearch={handleSearch}
+          isActionButtonVisible={true}
+          isAddButtonVisible={false}
+          rightSideContents={isMobileView ? null : <ViewButtons handleViewChange={handleViewChange} view={view} />}
+          actionMenuItems={<ActionMenuItems />}
+        />
+        {columns ? (
+          view === 'card' ? (
+            <div className="grid md:grid-cols-[400px_1fr] grid-cols-1 gap-4">
+              <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
+                  showOnlyMobileView={true}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchData}
+                  resource={sidebarResource.fieldServiceOrder}
+                  showOnlyShowFilteredRecordSwitch={false}
+                  hideSelection={true}
+                  setWholeRowsCellColor={(row) =>
+                    row._id === selectedData?._id
+                      ? ' [box-shadow:inset_0px_0px_0px_3px_var(--new-theme-color)_!important]  transition-bg duration-300'
+                      : ' transition-bg duration-300'
+                  }
+                  onRowClick={onRowClick}
+                  showFilters={!isOffline}
+                />
+              </div>
+              <div className="container-with-border p-[20px]">
+                {selectedData ? (
+                  <FieldTicket
+                    serviceOrderData={selectedData?.orignalData}
+                    setNextStep={() => { }}
+                    allowedToEdit={allowedToEdit}
+                    handleChangeStatus={() => { }}
+                    resource={sidebarResource.fieldServiceTechnician}
+                    enableGlobalSearch={false}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full">
+                    <h6 className="text-xl text-gray-400">Please select a record</h6>
+                  </div>
                 )}
-              </Grid>
-            </Grid>
-          </>
+              </div>
+            </div>
+          ) : (
+            <>
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                showOnlyMobileView={false}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchData}
+                resource={sidebarResource.fieldServiceOrder}
+                showOnlyShowFilteredRecordSwitch={true}
+                showFilters={!isOffline}
+                isClientSideGrid={isOffline ? true : false}
+              />
+            </>
+          )
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-      </Box>
-    </Box>
+      </CustomContainer>
+      {viewFieldTicket.open && (
+        <ViewFieldTicketDialog
+          onClose={() => {
+            setViewFieldTicket({ open: false, data: null });
+          }}
+          serviceOrderData={viewFieldTicket?.data}
+        />
+      )}
+    </section>
   );
 };
 
 export default FieldServiceTechnician;
+
+const ViewButtons = ({ view, handleViewChange }) => {
+  return (
+    <>
+      <HtmlTooltip title={'Card View'} placement="top" arrow enterTouchDelay={0}>
+        <span>
+          <IconButton size="small" onClick={() => handleViewChange('card')} disabled={view === 'card'}>
+            <Apps color="primary" className={`${view === 'card' ? ' opacity-45' : ''}`} />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
+      <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
+        <span>
+          <IconButton size="small" onClick={() => handleViewChange('table')} disabled={view === 'table'}>
+            <FormatListNumbered color="primary" className={`${view === 'table' ? ' opacity-45' : ''}`} />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
+    </>
+  );
+};

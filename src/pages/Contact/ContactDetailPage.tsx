@@ -1,9 +1,8 @@
-import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Tab, Tabs, Tooltip, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, List, ListItemText, Paper, Typography } from '@material-ui/core';
 import ListItem from '@material-ui/core/ListItem/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiOutlineMail } from 'react-icons/ai';
@@ -15,6 +14,9 @@ import { RiLayoutFill } from 'react-icons/ri';
 import { Link, useHistory, useParams } from 'react-router-dom';
 import { AccountHierarchyIcon } from 'src/assets/svg/svgIcons';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -22,7 +24,6 @@ import AdditionalDialogPopUp from '../../components/AdditionalDialogPopUp';
 import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityDialog';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
 import FullScreenDialog from '../../components/Helpers/FullScreenDialog';
 import OpportunityInAccordian from '../../components/OpportunityInAccordian/OpportunityInAccordian';
 import OrgChartContainer from '../../components/OrgChart/OrgChartContainer';
@@ -33,7 +34,14 @@ import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccord
 import DetailsPage from '../../components/Shared/DetailsPage';
 import Warehouse from '../Account/Warehouse';
 import axiosInstance from './../../axios/axiosInstance';
-import { customerAccount, customerContact, getObjKeysWithValues, processFieldName, sidebarResource } from './../../constants/helpers';
+import {
+  checkIsAllowedToEdit,
+  customerAccount,
+  customerContact,
+  getObjKeysWithValues,
+  processFieldName,
+  sidebarResource
+} from './../../constants/helpers';
 import AddReportsToContact from './AddReportsToContact';
 import ManageContactDialog from './ManageContact';
 
@@ -45,18 +53,15 @@ const ContactDetailsPage = (props) => {
     contactBreadcrumb
   } = props;
   const history = useHistory();
-  const parsed = queryString.parse(history.location.search);
   const {
     state: { user, permissions, selectedEntity, tour },
     dispatch
   }: any = useData();
 
-  const [headingLbl, setHeadingLbl] = useState('');
   const [contactData, setContactData] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState({});
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
@@ -73,8 +78,7 @@ const ContactDetailsPage = (props) => {
     isDelete: false
   });
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
-  const [canEdit, setCanEdit] = useState(false);
-  const [currentTabIndex, setCurrentTabIndex] = useState(0);
+  const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [orgChartData, setOrgChartData] = useState([]);
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [opportunities, setOpportunities] = useState([]);
@@ -166,13 +170,10 @@ const ContactDetailsPage = (props) => {
     axiosInstance()
       .get(`/${contactApi}/${id}`)
       .then(({ data: { data } }) => {
-        handleMainPoints(data);
         let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
-
         if (data?.salutation?.optionLabel) {
           name = data.salutation.optionLabel + name;
         }
-        setHeadingLbl(name);
         handleAllowToEditList(data);
         setContactData(data);
         getContactFields();
@@ -180,12 +181,8 @@ const ContactDetailsPage = (props) => {
           { id: id, type: contactResource },
           { id: data?.accountName?.optionValue, type: accountResource }
         ]);
-        setCanEdit([...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id));
-
         setCustomizedRoutes([contactBreadcrumb, { title: [data.firstName, data.lastName].filter((d) => d).join(' ') }]);
-
         let orgChartData = [];
-
         let excludeContacts = [];
         if (data.parentHierarchy && data.parentHierarchy.length > 0) {
           data.parentHierarchy.map((d) => {
@@ -213,11 +210,8 @@ const ContactDetailsPage = (props) => {
           phone: data.phone,
           current: true
         });
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit);
+       
+        setAllowedToEdit(checkIsAllowedToEdit(user, contactResource, data));
         setOrgChartData(orgChartData);
       })
       .catch((err) => {
@@ -329,19 +323,6 @@ const ContactDetailsPage = (props) => {
       class: 'account'
     }
   ].filter((d) => d.show);
-
-  const handleMainPoints = (data) => {
-    let tempMp = {
-      phone: data.phone || '',
-      email: data.email || '',
-      title: data.title || ''
-    };
-    if (data?.accountName?.optionLabel) {
-      tempMp['Account Name'] = data.accountName.optionLabel;
-    }
-
-    setMainPoints(tempMp);
-  };
 
   const getContactFields = () => {
     axiosInstance()
@@ -559,7 +540,7 @@ const ContactDetailsPage = (props) => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             {permissions?.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
-              <Tooltip title="E-Commerce Access" arrow placement="top">
+              <HtmlTooltip title="E-Commerce Access" arrow placement="top">
                 <Button
                   size="small"
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -569,10 +550,10 @@ const ContactDetailsPage = (props) => {
                 >
                   {isMobile && !isTablet ? <HiShoppingCart /> : 'E-Commerce Access'}
                 </Button>
-              </Tooltip>
+              </HtmlTooltip>
             )}
             {contactPermissions?.isUpdate && contactData?.owner?.optionValue === user?.user?._id && (
-              <Tooltip title="Give Portal Access" arrow placement="top">
+              <HtmlTooltip title="Give Portal Access" arrow placement="top">
                 <Button
                   size="small"
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -582,10 +563,10 @@ const ContactDetailsPage = (props) => {
                 >
                   {isMobile && !isTablet ? <RiLayoutFill /> : 'Give Portal Access'}
                 </Button>
-              </Tooltip>
+              </HtmlTooltip>
             )}
-            {contactPermissions?.isUpdate && canEdit ? (
-              <Tooltip title="Edit" arrow placement="top">
+            {contactPermissions?.isUpdate && allowedToEdit ? (
+              <HtmlTooltip title="Edit" arrow placement="top">
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
                   size="small"
@@ -594,7 +575,7 @@ const ContactDetailsPage = (props) => {
                 >
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
-              </Tooltip>
+              </HtmlTooltip>
             ) : null}
 
             {contactPermissions?.isDelete && contactData?.owner?.optionValue && user?.user?._id && contactData.owner.optionValue === user.user._id ? (
@@ -610,7 +591,7 @@ const ContactDetailsPage = (props) => {
       </Box>
       <Box className={`detail-container-v1`}>
         <ProcessFlow
-          disableBackNext={contactPermissions?.isUpdate && canEdit ? false : true}
+          disableBackNext={contactPermissions?.isUpdate && allowedToEdit ? false : true}
           steps={steps}
           activeStep={activeStep}
           handleMarkAsCompleted={handleMarkAsCompleted}
@@ -628,7 +609,7 @@ const ContactDetailsPage = (props) => {
             </Grid>
           ) : (
             <>
-              <Tabs
+              <CustomTabs
                 className="new-tab-container-v1"
                 value={currentTabIndex}
                 onChange={(index, newValue) => {
@@ -636,20 +617,18 @@ const ContactDetailsPage = (props) => {
                 }}
                 textColor="primary"
               >
-                <Tab label={<div className="tab-font">Details</div>} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className="tabLayout" />
-                <Tab label={<div className="tab-font">Org Charts</div>} aria-controls="a11y-tabpanel-1" id="a11y-tab-1" className="tabLayout" />
-                {contactResource === 'customerContact' && permissions?.productInventory && (
-                  <Tab label={<div className="tab-font">Plants</div>} aria-controls="a11y-tabpanel-2" id="a11y-tab-2" className="tabLayout" />
-                )}
-              </Tabs>
-              <Box hidden={currentTabIndex !== 0}>
+                <CustomTab value={0} label={'Details'} />
+                <CustomTab value={1} label={'Org Charts'} />
+                {contactResource === 'customerContact' && permissions?.productInventory && <CustomTab value={2} label={'Plants'} />}
+              </CustomTabs>
+              <TabPanel value={currentTabIndex} index={0}>
                 {showAtLast ? (
                   <DetailsPage data={contactData} fields={contactFields} />
                 ) : (
                   <DetailsPage data={contactData} fields={filteredContactFields} />
                 )}
-              </Box>
-              <Box hidden={currentTabIndex !== 1}>
+              </TabPanel>
+              <TabPanel value={currentTabIndex} index={1}>
                 <OrgChartContainer
                   data={orgChartData}
                   onClick={(id) => {
@@ -659,7 +638,7 @@ const ContactDetailsPage = (props) => {
                   setShowAddContact={setShowAddContact}
                   isInContact={true}
                 />
-              </Box>
+              </TabPanel>
               {contactResource === 'customerContact' && permissions?.productInventory && (
                 <Box hidden={currentTabIndex !== 2}>
                   <Warehouse reference={contactResource} api={contactApi} id={id} accountId={contactData?.accountName?.optionValue} />
@@ -684,7 +663,7 @@ const ContactDetailsPage = (props) => {
                 isRedirect={false}
                 contactId={id}
                 contactResource={contactResource}
-                isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
+                isAllowedToUpdate={contactPermissions.isUpdate && allowedToEdit}
               />
             </Box>
           )}
@@ -697,7 +676,7 @@ const ContactDetailsPage = (props) => {
                 fetchData={fetchRelatedData}
                 permissions={permissions}
                 isAddProjectSale={true}
-                isAllowedToEdit={contactPermissions.isUpdate && canEdit}
+                isAllowedToEdit={contactPermissions.isUpdate && allowedToEdit}
                 accountId={contactData?.accountName?.optionValue}
                 accountName={contactData?.accountName?.optionLabel}
                 resource={accountResource}
@@ -718,7 +697,7 @@ const ContactDetailsPage = (props) => {
                 accountResource={accountResource}
                 isRenderedInCustomerContact={true}
                 isRenderedFromCustomerAccount={true}
-                isAllowedToUpdate={contactPermissions.isUpdate && canEdit}
+                isAllowedToUpdate={contactPermissions.isUpdate && allowedToEdit}
               />
             </Box>
           )}

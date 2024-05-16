@@ -1,16 +1,16 @@
-import { isEmpty } from 'lodash';
+import { flatMapDeep, isEmpty, snakeCase } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, dateTimeFormat, formatAmountWithCurrency } from 'src/constants/helpers';
+import xlsx from 'xlsx-js-style';
 import { TColType } from './TableComponents/TableHelperComponents';
+import { FilterModel } from './types';
 
 export const childrenProperty = 'subRows';
 
 export const gridFilterParser = (filters) => {
   const filterByIds: any = [];
   const deepFilters: any = [];
-
   if (!isEmpty(filters)) {
     Object.keys(filters).forEach((field) => {
       if (filters[field].operator && filters[field].condition1) {
@@ -85,10 +85,9 @@ export const getGridMetaDataFromLocalStorage = () => {
   try {
     const data = localStorage.getItem('gridMetaData');
     if (data && data !== 'undefined') {
-      return JSON.parse(data)
-    }
-    else {
-      return {}
+      return JSON.parse(data);
+    } else {
+      return {};
     }
   } catch (ex) {
     return {};
@@ -254,6 +253,12 @@ export const getUniqueDataByKey = (rows: any[], key = '_id') => {
 
 export const getCellValue = (cell) => {
   const { row, column } = cell;
+  if(column?.columnDef?.editable && column?.columnDef?.type === 'dropDown'){
+    return row.original[`${column.id}Id`]
+  }
+  if(column?.columnDef?.editable && column?.columnDef?.type === 'multiSelect'){
+    return [...(row.original[`${column.id}Id`] ? [row.original[`${column.id}Id`]] : []), ...(row.original[`rest${column.id}`]?.map(o => o?.optionValue) || [])]
+  }
   return row.original[column.id];
 };
 
@@ -320,55 +325,18 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
   }
 };
 
-export const createJsonDataForTableExport = (columns: TColType[], rowData: any[]) => {
-  const data = [];
-  if (!rowData || rowData.length === 0) return false;
-  const noCellData = '------';
-
-  for (let row of rowData) {
-    const temp = {};
-    for (let col of columns) {
-      let value = row[col.id];
-      switch (true) {
-        case ['action', 'selection', 'expander'].includes(col.id):
-          continue;
-        case Boolean(col.accessorFn):
-          value = col.accessorFn(row);
-          break;
-        case col.id === 'createdBy':
-          value = `${row?.createdBy || noCellData} • ${moment(row?.createdByDate?.slice(0, 10)).format(dateFormat)}`;
-          break;
-        case col.id === 'updatedBy':
-          value = `${row?.updatedBy || noCellData} • ${moment(row?.original?.updatedByDate?.slice(0, 10)).format(dateFormat)}`;
-          break;
-        case col.type === 'date':
-          value = value ? moment(value).format(dateFormat) : noCellData;
-          break;
-        case col.type === 'dateTime':
-          value = value ? moment(value).format(dateTimeFormat) : noCellData;
-          break;
-        case col.type === 'checkBox':
-          value = Boolean(value) ? 'Yes' : 'No';
-          break;
-        case col.type === 'number':
-          value = value ?? 0;
-          break;
-        case col.type === 'currencyAmount':
-          value = formatAmountWithCurrency(col.currency, value)?.amountWithouCurrencyCode;
-          break;
-        default:
-          break;
-      }
-      temp[col.Header] = value || noCellData;
-    }
-    data.push(temp);
-    if (row[childrenProperty]) {
-      const tempData = createJsonDataForTableExport(columns, row[childrenProperty]);
-      if (tempData) data.push(...tempData);
-    }
+const flatDataRowsItem = (mem) => {
+  const member = { ...mem };
+  delete member[childrenProperty];
+  if (!mem[childrenProperty] || !mem[childrenProperty].length) {
+    return member;
   }
-  return data;
+  return [member, flatMapDeep(mem[childrenProperty], flatDataRowsItem)];
 };
+
+export function normalizeRowData(array) {
+  return flatMapDeep(array, flatDataRowsItem);
+}
 
 export function camelCaseToWords(s: string) {
   const result = s.replace(/([A-Z])/g, ' $1');
@@ -384,13 +352,15 @@ export function alphaToNum(alpha) {
   }
   return num - 1;
 }
-export function numToAlpha(num) {
-  let alpha = '';
+
+export function numToAlpha(num: any) {
+  let alpha: any = '';
   for (; num >= 0; num = parseInt(num / 26, 10) - 1) {
     alpha = String.fromCharCode((num % 26) + 0x41) + alpha;
   }
   return alpha;
 }
+
 export function getExcelColumnNameFromRange(range) {
   let res = [],
     rangeNum = range.split(':').map(function (val) {
@@ -405,3 +375,115 @@ export function getExcelColumnNameFromRange(range) {
 
   return res;
 }
+
+export function extractLastNumberFromDataRange(input: string): number | null {
+  const regex = /(\d+)(?!.*\d)/;
+  const match = input.match(regex);
+  return match ? parseInt(match[1], 10) : null;
+}
+
+export function fitToColumn(columns, ws: xlsx.WorkSheet, padding = 5) {
+  // get maximum character of each column
+  const wch = [];
+  for (const a of columns) {
+    if (ws[`${a}1`]) {
+      wch.push({ wch: Math.max(ws[`${a}1`]?.v?.toString().length + padding, 15) });
+    }
+  }
+  return wch;
+}
+
+export const createFilterModel = (formValues, coloums) => {
+  const filterModel = new Map();
+  const colNames = Object.keys(formValues);
+
+  for (const col of coloums) {
+    const fieldName = col?.fieldName;
+
+    if (
+      !(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
+      (col.type !== 'dateTime' || col.type !== 'date')
+    ) {
+      continue;
+    }
+
+    switch (col.type) {
+      case 'singleLine':
+      case 'multiLine':
+      case 'email':
+      case 'mobileNumber':
+      case 'currency':
+      case 'lookUpDisplay':
+        if (formValues[fieldName]) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
+      case 'year':
+        if (formValues[fieldName]) {
+          filterModel.set(fieldName, { filter: moment(new Date(formValues[fieldName])).format('YYYY') });
+        }
+        break;
+      case 'multiSelect':
+      case 'dropDown':
+        if ((col.lookup || col.dataList) && formValues[fieldName]) {
+          const options = coloums?.find((item) => item.fieldName === fieldName)?.option || [];
+          if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
+            filterModel.set(fieldName, {
+              operator: 'OR',
+              condition1: {
+                filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
+              }
+            });
+          }
+        } else if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
+      case 'dateTime':
+      case 'date':
+        const from = `from_${fieldName}`;
+        const to = `to_${fieldName}`;
+
+        const fromDate = formValues[from] ? formValues[from] : null;
+        const toDate = formValues[to] ? formValues[to] : null;
+
+        if (fromDate || toDate) {
+          filterModel.set(fieldName, {
+            filter: {
+              from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
+              to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
+            }
+          });
+        }
+        break;
+      case 'checkBox':
+        if (formValues[fieldName] === true || formValues[fieldName] === false) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] === true ? 'Yes' : 'No' });
+        }
+        break;
+      case 'location':
+        if (formValues[fieldName]?.length > 0) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
+      default:
+        // Handle unexpected column types.
+        console.warn('Unknown column type:', col.type);
+    }
+  }
+
+  return Object.fromEntries(filterModel);
+};
+
+export const filtermodelToFormValue = (filtermodel: FilterModel) => {
+  const formValues = {};
+  for (const [key, value] of Object.entries(filtermodel)) {
+    if (value.filter?.['from'] || value.filter?.['to']) {
+      formValues[`from_${snakeCase(key)}`] = new Date(value.filter['from']);
+      formValues[`to_${snakeCase(key)}`] = new Date(value.filter['to']);
+    } else if (value.filter) {
+      formValues[key] = value.filter;
+    }
+  }
+  return formValues;
+};

@@ -1,14 +1,14 @@
-import { Chip, CircularProgress, Grid, TextField, Typography, ChipProps } from '@material-ui/core';
+import { Chip, ChipProps, CircularProgress, Grid, TextField, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { startCase } from 'lodash';
-import PropTypes from 'prop-types';
+import axios from 'axios';
+import { camelCase, startCase } from 'lodash';
 import React, { useEffect } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
 import { useData } from '../StateProvider/Provider';
-import { SearchActivity } from '../axios/activity';
-import routes from './Helpers/Routes';
 import ActivityModelHandler from './Activity/ActivityModelHandler';
-import { get_activity_resource } from './Activity/Helpers/utils';
+import { get_activity_resource, get_dynamic_resource } from './Activity/Helpers/utils';
+import routes from './Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
   chipStyle: {
@@ -63,25 +63,39 @@ export const SearchFilter = ({
   const [permissionsSearch, setPermissionsSearch] = React.useState([]);
 
   useEffect(() => {
+    setResource();
+  }, []);
+
+  const setResource = async () => {
     const resourceOptions = get_activity_resource(permissions);
     const data = [];
     resourceOptions.forEach((ele) => {
       data.push({ label: ele.optionLabel, type: ele.optionValue, name: 'All', isAll: true });
     });
     data.push({ label: 'my', type: 'my', name: user?._id, isAll: true });
+
+    const dynamicResource = await get_dynamic_resource(true);
+
+    dynamicResource?.data?.forEach((_r) => {
+      if (permissions[camelCase(_r.resource)]?.isRead) {
+        data.push({ label: _r.resource, type: camelCase(_r.resource), name: 'All', isAll: true });
+      }
+    });
+
     setPermissionsSearch(data);
-  }, []);
+  };
 
   const activityType = ['task', 'event', 'case', 'note', 'email', 'attachment'];
 
   useEffect(() => {
     filter?.forEach((e) => {
-      e.label = routes[e.type] ? routes[e.type].title : e.type;
+      e.label = routes[e.type] ? routes[e.type].title : startCase(e.type);
     });
     setValue(filter.filter((d) => permissionsSearch?.some((f) => f.type === d.type)));
   }, [filter, permissionsSearch]);
 
   useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
     if (inputValue === '') {
       let filteredSearch = dontShowMyActivity ? permissionsSearch?.filter((_o) => _o.type !== 'my') : permissionsSearch;
       setOptions(filteredSearch);
@@ -91,8 +105,9 @@ export const SearchFilter = ({
       if (_activityName === 'calendar') {
         _activityName = 'task,event,case';
       }
-      SearchActivity(inputValue, _activityName)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/search?searchText=${inputValue}&activity=${_activityName}`, { cancelToken: cancelTokenSource?.token })
+        .then(({ data: { data } }) => {
           setLoading(false);
           data?.forEach((e) => {
             e.label = routes[e.type] && routes[e.type]?.title ? routes[e.type]?.title : e.type;
@@ -103,6 +118,8 @@ export const SearchFilter = ({
           setLoading(false);
         });
     }
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [inputValue, permissionsSearch]);
 
   const handleChangeValue = (newValue) => {

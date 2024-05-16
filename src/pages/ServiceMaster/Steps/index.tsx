@@ -188,7 +188,6 @@ const Steps = ({ serviceId }) => {
               </IconButton>
             </HtmlTooltip>
           )}
-
           <HtmlTooltip title={'Delete'}>
             <IconButton
               size="small"
@@ -297,7 +296,7 @@ const Steps = ({ serviceId }) => {
         ) : null}
         {!isMobile ? (
           <ImportExportMenu
-            permissions={permissions?.packages}
+            permissions={permissions?.serviceMaster}
             module="stpes"
             api={`${serviceMaster.api}/steps/${serviceId}`}
             afterImportCompleted={() => {
@@ -337,7 +336,7 @@ const Steps = ({ serviceId }) => {
 
   return (
     <>
-      {permissions?.serviceMaster?.isUpdate && (
+      {permissions?.serviceMaster?.isUpdate || permissions?.serviceMaster?.isCreate && (
         <>
           <DetailsPageHeader
             isAddButtonVisible
@@ -359,6 +358,8 @@ const Steps = ({ serviceId }) => {
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchStepsData}
+          hideAction={permissions?.serviceMaster?.isCreate || permissions?.serviceMaster?.isUpdate ? false : true}
+          hideSelection={permissions?.serviceMaster?.isCreate || permissions?.serviceMaster?.isUpdate ? false : true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -392,9 +393,8 @@ const Steps = ({ serviceId }) => {
       )}
       {stepFieldsDialog.open && (
         <FieldDialog
-          serviceId={serviceId}
+          serviceIds={[serviceId]}
           stepIds={stepFieldsDialog.stepIds}
-          steps={[]}
           handleClose={() => {
             setStepFieldsDialog({ open: false, stepIds: [] });
           }}

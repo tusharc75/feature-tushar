@@ -1,15 +1,13 @@
-import { Box, Button, Grid, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
+import { Box, Button, Grid, Menu, MenuItem, MenuItemProps, Typography, useMediaQuery } from '@material-ui/core';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
 import { Skeleton } from '@material-ui/lab';
 import queryString from 'query-string';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaDoorClosed, FaWpforms } from 'react-icons/fa';
+import { FaDoorClosed, FaWpforms, FaDoorOpen } from 'react-icons/fa';
 import { IoHandRightSharp } from 'react-icons/io5';
-import { LuPackageCheck } from 'react-icons/lu';
-import { RiFileShredFill, RiFlowChart } from 'react-icons/ri';
+import { RiFileShredFill } from 'react-icons/ri';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -18,8 +16,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton, ThemeButton, ButtonType } from 'src/components/Helpers/Buttons';
+import { ThemeButton, ButtonType } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
@@ -31,6 +28,8 @@ import {
   MATERIAL_SUB_TYPE,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
+  checkIsAllowedToEdit,
+  repairJob,
   sidebarResource,
   workOrder
 } from 'src/constants/helpers';
@@ -42,24 +41,36 @@ import Versions from './Versions';
 import View from './View';
 import { TbProgressCheck } from 'react-icons/tb';
 import { FaCircleChevronDown } from 'react-icons/fa6';
+import ManageRepairJob from '../RepairJob/ManageRepairJob';
+import Step from '../DynamicForm/Step';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-type ToolbarElement = {
+type ToolbarMenuItem = {
+  type: 'menuItem';
+  id: string;
+  children: React.ReactNode;
+  isVisible?: Boolean;
+  tooltip?: string;
+} & MenuItemProps;
+
+type ToolbarElement<T> = {
   type: 'element';
   id: string;
-  visibilityInMobile: 'inActionMenu' | 'hidden' | 'visible';
+  isVisible?: boolean;
   component: React.ReactNode;
-};
+} & T;
 
 type ToolbarButton = {
-  id: string;
-  visibilityInMobile: 'inActionMenu' | 'hidden' | 'visible';
-  name: string;
-  ripple?: boolean;
-  onClick: (e: any) => void;
   type: 'button';
+  id: string;
+  name: string;
+  tooltip?: string;
+  isVisible?: boolean;
+  onClick: (e: any) => void;
+  ripple?: boolean;
 } & ButtonType;
 
-type ToolbarComponents = ToolbarElement | ToolbarButton;
+type ToolbarComponents<T> = ToolbarElement<T> | ToolbarButton | ToolbarMenuItem;
 
 const WorkOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -73,6 +84,7 @@ const WorkOrderDetails = () => {
   }: any = useData();
 
   const [workOrderData, setWorkOrderData] = useState(null);
+  const [totalConsumablesCost, setTotalConsumablesCost] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [workOrderFields, setWorkOrderFields] = useState([]);
@@ -86,6 +98,13 @@ const WorkOrderDetails = () => {
 
   const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
   const [versionDialog, setVersionDialog] = useState(false);
+  const [showManageRepairJobDialog, setShowManageRepairJobDialog] = useState({ open: false });
+
+  const [repairJobReceiveConfirmation, setRepairJobReceiveConfirmation] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -122,8 +141,16 @@ const WorkOrderDetails = () => {
   useEffect(() => {
     if (id) {
       fetchWorkOrderData();
+      fetchTotalConsumablesCost();
+      fetchPolicy();
     }
   }, [id]);
+
+  useEffect(() => {
+    if (tabValue === 0) {
+      fetchTotalConsumablesCost();
+    }
+  }, [tabValue]);
 
   useEffect(() => {
     getResourceFields();
@@ -133,22 +160,7 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.workOrder}`)
       .then(({ data: { data } }) => {
-        const adjustedData = [
-          ...data,
-          {
-            fieldData: {
-              _id: '63106511ba8a0bc11ff780ad',
-              fieldLabel: 'Total Consumables Cost',
-              type: 'singleLine',
-              fieldName: 'totalConsumablesCost',
-              sectionName: 'Consumable Information',
-              resource: 'Work Order'
-            },
-            isCreate: true,
-            isRead: true,
-            isUpdate: true
-          }
-        ];
+        const adjustedData = [...data];
         setWorkOrderFields(adjustedData);
       })
       .catch((err) => {
@@ -160,13 +172,34 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (user?.role?.selectedEntity?.superAdminAccess) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit && permissions?.workOrder?.isUpdate ? true : false);
+        
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.workOrder, data) && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.workOrder}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchTotalConsumablesCost = () => {
+    axiosInstance()
+      .get(`${routes.workOrder.path}/total-consumables-cost/${id}`)
+      .then(({ data: { data } }) => {
+        setTotalConsumablesCost(data?.totalConsumablesCost);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -205,7 +238,7 @@ const WorkOrderDetails = () => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: `Status changed to ${status}`
+          message: data
         });
         fetchWorkOrderData();
       })
@@ -214,12 +247,25 @@ const WorkOrderDetails = () => {
       });
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
+  const reOpenWorkOrder = () => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${workOrder.api}/re-open`, { _id: id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchWorkOrderData();
+        setIsSubmitting(false);
+        setShowReopenConfirmation(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+      });
+  };
 
   const openAddActions = (event) => {
     setAddAnchorEl(event.currentTarget);
@@ -245,91 +291,177 @@ const WorkOrderDetails = () => {
       });
   };
 
-  const createVersionMenuItems = [
+  const handleAddAssetInRepairJob = (data) => {
+    axiosInstance()
+      .put(`${repairJob.api}/add-assets-create-ticket`, { repairJob: data?._id, assets: [workOrderData?.serializedAsset?.optionValue] })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowManageRepairJobDialog({ open: false });
+        fetchWorkOrderData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleReceiveAssetInRepairJob = () => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${repairJob.api}/receive-assets-complete`, { repairJob: workOrderData?.currentRepairJob?.optionValue || workOrderData?.currentRepairJob })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setRepairJobReceiveConfirmation(false);
+        setIsSubmitting(false);
+        fetchWorkOrderData();
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const toolbarButtons: ToolbarComponents<ButtonType | MenuItemProps>[] = [
     {
-      text: 'Without Existing Data',
-      onClick: () => {
-        closeAddActions();
-        setShowConfirmVersion({ open: true, withData: 0 });
-      },
-      disabled: false
+      id: `Repair Job`,
+      type: 'menuItem',
+      isVisible:
+        permissions?.repairJob?.isCreate &&
+        allowedToEdit &&
+        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob
+          ? true
+          : false,
+      children: `Create ${routes?.repairJob.title}`,
+      tooltip: `Create ${routes?.repairJob.title}`,
+      onClick: () => setShowManageRepairJobDialog({ open: true })
+      // iconForMobile: <RiFileShredFill />
     },
     {
-      text: ' With Existing Data',
-      onClick: () => {
-        closeAddActions();
-        setShowConfirmVersion({ open: true, withData: 1 });
-      },
-      disabled: false
-    }
-  ];
-
-  const toolbarButtons: ToolbarComponents[] = [
+      type: 'menuItem',
+      id: `Repair Job Receive`,
+      isVisible:
+        permissions?.repairJob?.isUpdate && allowedToEdit && workOrderData?.type === WORK_ORDER_TYPE.repairOrder && workOrderData?.currentRepairJob
+          ? true
+          : false,
+      children: `Receive Asset From Supplier`,
+      tooltip: `Receive Asset From Supplier`,
+      onClick: () => setRepairJobReceiveConfirmation(true)
+      // iconForMobile: <RiFileShredFill />
+    },
     {
       id: 'Scrap Asset',
-      type: 'button',
-      visibilityInMobile: 'visible',
+      type: 'menuItem',
       isVisible: Boolean(
-        permissions?.workOrder?.isUpdate && workOrderData?.serializedAsset && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed
+        workOrderData?.serializedAsset && allowedToEdit && !workOrderData?.currentRepairJob && workOrderData?.status !== WORK_ORDER_STATUS.completed
       ),
-      name: `${ASSET_STATUS.scrap} Asset`,
+      children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
-      onClick: () => setShowConfirmBoxScrap(true),
-      iconForMobile: <RiFileShredFill />
+      onClick: () => setShowConfirmBoxScrap(true)
+      // iconForMobile: <RiFileShredFill />
     },
     {
       id: 'In-Progress',
-      type: 'button',
-      visibilityInMobile: 'inActionMenu',
-      isVisible: Boolean(permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status === WORK_ORDER_STATUS.onHold),
+      type: 'menuItem',
+      isVisible: Boolean(allowedToEdit && !workOrderData?.currentRepairJob && workOrderData?.status === WORK_ORDER_STATUS.onHold),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.inProgress),
       tooltip: `Change Status ${WORK_ORDER_STATUS.inProgress}`,
-      name: WORK_ORDER_STATUS.inProgress,
-      iconForMobile: <TbProgressCheck />
+      children: WORK_ORDER_STATUS.inProgress
     },
     {
       id: 'On-hold',
-      type: 'button',
-      visibilityInMobile: 'inActionMenu',
-      isVisible: Boolean(
-        permissions?.workOrder?.isUpdate && allowedToEdit && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)
-      ),
+      type: 'menuItem',
+      isVisible: Boolean(allowedToEdit && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.onHold),
       tooltip: `Change Status ${WORK_ORDER_STATUS.onHold}`,
-      name: WORK_ORDER_STATUS.onHold,
-      iconForMobile: <IoHandRightSharp />
+      children: WORK_ORDER_STATUS.onHold
     },
     {
       id: 'Close',
       type: 'button',
-      visibilityInMobile: 'visible',
       ripple: true,
-      isVisible: Boolean(
-        permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed
-      ),
+      isVisible: Boolean(allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed),
       onClick: () => updateJobStatus(WORK_ORDER_STATUS.completed),
       iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
       name: 'Close'
     },
     {
-      id: 'Create Version',
+      id: 'Re-Open',
       type: 'button',
-      visibilityInMobile: 'hidden',
-      isVisible: Boolean(
-        permissions?.workOrder?.isUpdate && allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.completed && !workOrderData?.deleted
-        && workOrderData?.canCreateWorkOrderVersion
-      ),
-      onClick: (e) => openAddActions(e),
-      iconForMobile: false,
-      endIcon: <ExpandMore fontSize="small" />,
+      isVisible: Boolean(allowedToEdit && workOrderData?.canReopen && workOrderData?.status === WORK_ORDER_STATUS.completed),
+      onClick: () => {
+        setShowReopenConfirmation(true);
+      },
+      iconForMobile: <FaDoorOpen />,
+      tooltip: 'Re-Open Work Order',
+      name: 'Re-Open'
+    },
+    // {
+    //   id: 'Create Version',
+    //   type: 'button',
+    //   visibleAs: 'menuItem',
+    //   isVisible: Boolean(
+    //     allowedToEdit &&
+    //       ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+    //       !workOrderData?.currentRepairJob &&
+    //       !workOrderData?.deleted &&
+    //       workOrderData?.canCreateWorkOrderVersion
+    //   ),
+    //   onClick: (e) => openAddActions(e),
+    //   iconForMobile: false,
+    //   endIcon: <ExpandMore fontSize="small" />,
+    //   tooltip: 'Create Version',
+    //   name: 'Create Version'
+    // },
+
+    {
+      type: 'menuItem',
+      id: 'Create Version Without Existing Data',
       tooltip: 'Create Version',
-      name: 'Create Version'
+      onClick: () => {
+        closeAddActions();
+        setShowConfirmVersion({ open: true, withData: 0 });
+      },
+      children: 'Create Version Without Existing Data',
+      isVisible: Boolean(
+        allowedToEdit &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          !workOrderData?.deleted &&
+          workOrderData?.canCreateWorkOrderVersion
+      )
+    },
+    {
+      type: 'menuItem',
+      id: 'Create Version With Existing Data',
+      children: 'Create Version With Existing Data',
+      tooltip: 'Create Version',
+      onClick: () => {
+        closeAddActions();
+        setShowConfirmVersion({ open: true, withData: 1 });
+      },
+      isVisible: Boolean(
+        allowedToEdit &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob &&
+          !workOrderData?.deleted &&
+          workOrderData?.canCreateWorkOrderVersion
+      ),
+      disabled: false
     },
     {
       id: 'Version-info',
       type: 'button',
-      visibilityInMobile: 'visible',
+      tooltip: 'View Versions',
       isVisible: Boolean(workOrderData?.versions?.length),
       iconForMobile: <VscVersions />,
       name: `Versions : ${workOrderData?.versions?.length + 1}`,
@@ -338,7 +470,6 @@ const WorkOrderDetails = () => {
     {
       id: 'preview-download',
       type: 'element',
-      visibilityInMobile: 'visible',
       component: (
         <PreviewDownload
           fileName={`${routes.workOrder.title}-${workOrderData?.workOrderNumber}`}
@@ -352,24 +483,18 @@ const WorkOrderDetails = () => {
     },
     {
       id: 'Edit',
-      type: 'button',
-      visibilityInMobile: 'inActionMenu',
+      type: 'menuItem',
       tooltip: 'Edit Work Order',
-      isVisible: Boolean(permissions?.workOrder?.isUpdate && allowedToEdit && !workOrderData?.deleted && !completed),
-      iconForMobile: <EditIcon />,
-      name: 'Edit',
+      isVisible: Boolean(allowedToEdit && !workOrderData?.deleted && !completed),
+      children: 'Edit',
       onClick: () => setOpenUpdateDialog(true)
     },
     {
       id: 'delete',
-      type: 'button',
-      visibilityInMobile: 'inActionMenu',
+      type: 'menuItem',
       onClick: () => setShowConfirmBox(true),
-      iconForMobile: <Delete style={{ fontSize: 18 }} />,
-      borderColor: 'red',
-      hasMobileBorder: false,
       isVisible: permissions?.workOrder?.isDelete && allowedToEdit && workOrderData?.canDelete && !workOrderData?.deleted,
-      name: 'Delete'
+      children: 'Delete'
     }
   ] as const;
 
@@ -379,40 +504,11 @@ const WorkOrderDetails = () => {
         <Box className="nav-v1">
           <CustomBreadCrumbs routes={[routes.workOrder, { title: workOrderData?.workOrderNumber }]} />
         </Box>
-        <Box className="controls-v1">
+        <Box className="controls-v1 ml-auto">
           <Box className="control-buttons-v1 items-center">
             {workOrderData ? (
               <>
-                <RenderHeaderButtons
-                  buttonOptions={toolbarButtons}
-                  extraMenuItems={createVersionMenuItems.map((c) => ({ ...c, text: `Create Version ${c.text}` }))}
-                  isExtraMenuItemsVisible={Boolean(
-                    permissions?.workOrder?.isUpdate &&
-                    allowedToEdit &&
-                    workOrderData?.status !== WORK_ORDER_STATUS.completed &&
-                    !workOrderData?.deleted
-                  )}
-                />
-                <Menu
-                  anchorEl={addAnchorEl}
-                  keepMounted
-                  getContentAnchorEl={null}
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left'
-                  }}
-                  id="add-menu"
-                  open={Boolean(addAnchorEl)}
-                  onClose={closeAddActions}
-                >
-                  {createVersionMenuItems.map((menuItem) => {
-                    return (
-                      <MenuItem key={menuItem.text} onClick={menuItem.onClick}>
-                        {menuItem.text}
-                      </MenuItem>
-                    );
-                  })}
-                </Menu>
+                <RenderHeaderButtons buttonOptions={toolbarButtons} />
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="40px" />
@@ -431,32 +527,13 @@ const WorkOrderDetails = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} value={0} {...a11yProps(0)}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
-          </CustomTab>
-          <CustomTab index={1} value={1} {...a11yProps(1)}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Services
-          </CustomTab>
-          {!user?.user?.brandPolicy?.workOrderConsumableHide && (
-            <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Products/Consumables
-            </CustomTab>
-          )}
-          {user?.user?.brandPolicy?.workOrderBom && (
-            <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> BOM
-            </CustomTab>
-          )}
-          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && (
-            <CustomTab index={4} value={4} className={'tabLayout'} {...a11yProps(4)}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Drawings
-            </CustomTab>
-          )}
-          {!(isMobile && !isTablet) && (
-            <CustomTab index={5} value={5} className={'tabLayout'} {...a11yProps(5)}>
-              <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-            </CustomTab>
-          )}
+          <CustomTab value={0}>Header</CustomTab>
+          <CustomTab value={1}>Services</CustomTab>
+          {!user?.user?.brandPolicy?.workOrderConsumableHide && <CustomTab value={2}>Products/Consumables</CustomTab>}
+          {user?.user?.brandPolicy?.workOrderBom && <CustomTab value={3}>BOM</CustomTab>}
+          <CustomTab value={4}>Drawings</CustomTab>
+          {!(isMobile && !isTablet) && <CustomTab value={5}>Views</CustomTab>}
+          {resourceData && resourceData?.steps?.length && <CustomTab value={6}>Associations</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -467,6 +544,36 @@ const WorkOrderDetails = () => {
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             )}
+            <Box pt={2}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={6} xl={6}>
+                  <div style={{ overflow: 'hidden' }} className="single-form-v1">
+                    <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
+                      <Box display="flex" alignItems="center">
+                        <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
+                          {`Consumable Information`}
+                        </Typography>
+                      </Box>
+                    </Box>
+                    {totalConsumablesCost !== null ? (
+                      <Box className="formdata-v1" display="flex">
+                        <Box style={{ width: '100%' }}>
+                          <Box display="flex" justifyContent="space-between">
+                            <Typography className="table-head-v1">Total Consumables Cost</Typography>
+
+                            <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
+                              {`${totalConsumablesCost}`}
+                            </Typography>
+                          </Box>
+                        </Box>
+                      </Box>
+                    ) : (
+                      <CommonSkeleton lenArray={[...Array(2).keys()]} />
+                    )}
+                  </div>
+                </Grid>
+              </Grid>
+            </Box>
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
@@ -486,7 +593,7 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={2}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && !completed}
+              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
               isCreate={true}
               service={null}
               uniqueId={null}
@@ -500,7 +607,7 @@ const WorkOrderDetails = () => {
         <TabPanel value={tabValue} index={3}>
           {workOrderData && (
             <Consumables
-              allowedToEdit={allowedToEdit && !completed}
+              allowedToEdit={allowedToEdit && workOrderData?.status !== WORK_ORDER_STATUS.onHold && !workOrderData?.deleted ? true : false}
               isCreate={true}
               service={null}
               uniqueId={null}
@@ -512,15 +619,29 @@ const WorkOrderDetails = () => {
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          {workOrderData && <Diagram
-            resource={ACTIVITY_RESOURCE.workOrder}
-            referenceId={id}
-            currentVersion={workOrderData?.versions?.length + 1 || 1}
-          />}
+          {workOrderData && (
+            <Diagram
+              resource={ACTIVITY_RESOURCE.workOrder}
+              referenceId={id}
+              currentVersion={workOrderData?.versions?.length + 1 || 1}
+              workOrderData={workOrderData}
+            />
+          )}
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
           <Box>
             <View workOrderName={workOrderData?.workOrderNumber || ''} workOrderId={id} workOrderStatus={workOrderData?.status} />
+          </Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={6}>
+          <Box>
+            <Step
+              resourceData={resourceData}
+              resourceId={id}
+              resource={sidebarResource.workOrder}
+              data={workOrderData}
+              allowedToEdit={permissions?.workOrder?.isUpdate}
+            />
           </Box>
         </TabPanel>
         <Box my={1} />
@@ -584,21 +705,48 @@ const WorkOrderDetails = () => {
           }}
         />
       )}
+      {showManageRepairJobDialog.open && (
+        <ManageRepairJob
+          onClose={() => setShowManageRepairJobDialog({ open: false })}
+          onSuccess={(data) => {
+            handleAddAssetInRepairJob(data);
+          }}
+          referenceType={sidebarResource.workOrder}
+          referenceData={{
+            warehouse: workOrderData?.warehouse?.optionValue,
+            workOrder: workOrderData?._id
+          }}
+        />
+      )}
+      {repairJobReceiveConfirmation && (
+        <ConfirmationDialog
+          open={repairJobReceiveConfirmation}
+          message={`Are you sure you want to receive asset?`}
+          onClose={() => {
+            setRepairJobReceiveConfirmation(false);
+          }}
+          onOk={handleReceiveAssetInRepairJob}
+          okBtnLoading={isSubmitting}
+        />
+      )}
+      {showReopenConfirmation && (
+        <ConfirmationDialog
+          open={showReopenConfirmation}
+          message={`Are you sure you want to re-open work order ?`}
+          onClose={() => {
+            setShowReopenConfirmation(false);
+          }}
+          onOk={reOpenWorkOrder}
+          okBtnLoading={isSubmitting}
+        />
+      )}
     </Box>
   );
 };
 
 export default WorkOrderDetails;
 
-const RenderHeaderButtons = ({
-  buttonOptions,
-  extraMenuItems,
-  isExtraMenuItemsVisible
-}: {
-  buttonOptions: ToolbarComponents[];
-  extraMenuItems: { text: string; onClick: () => void; disabled: boolean }[];
-  isExtraMenuItemsVisible: boolean;
-}) => {
+const RenderHeaderButtons = ({ buttonOptions }: { buttonOptions: ToolbarComponents<ButtonType | MenuItemProps>[] }) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const [actionAnchor, setActionAnchor] = useState<null | HTMLElement>(null);
 
@@ -610,18 +758,19 @@ const RenderHeaderButtons = ({
     setActionAnchor(event.currentTarget);
   };
 
-  const renderComponent = (componentOptions: ToolbarComponents) => {
-    const isInAction = componentOptions.visibilityInMobile === 'inActionMenu' && isMobile;
-    const isHidden = componentOptions.visibilityInMobile === 'hidden' && isMobile;
-    if (isHidden) return null;
-    if (isInAction) {
-      if (componentOptions.type === 'button') {
-        return componentOptions.isVisible ? (
-          <MenuItem onClick={componentOptions.onClick} disabled={componentOptions.disabled}>
-            {componentOptions.name}
-          </MenuItem>
-        ) : null;
-      }
+  const renderComponent = (componentOptions: ToolbarComponents<ButtonType | MenuItemProps>) => {
+    if (componentOptions.isVisible === false) return null;
+    if (componentOptions.type === 'menuItem') {
+      const { children, type, id, button, ...rest } = componentOptions;
+      return componentOptions.isVisible ? (
+        <HtmlTooltip title={componentOptions.tooltip || ''} placement="top" arrow enterTouchDelay={0}>
+          <span>
+            <MenuItem disabled={componentOptions.disabled} {...rest}>
+              {children}
+            </MenuItem>
+          </span>
+        </HtmlTooltip>
+      ) : null;
     }
 
     if (componentOptions.type === 'button' && componentOptions.ripple) {
@@ -644,67 +793,66 @@ const RenderHeaderButtons = ({
         </ThemeButton>
       );
     }
-    if (componentOptions.type === 'element') {
+    if (!componentOptions.type || componentOptions.type === 'element') {
       return componentOptions.component;
     }
   };
 
+  const menuItems = useMemo(() => {
+    return buttonOptions.filter((b) => b.type === 'menuItem' && b.isVisible);
+  }, [buttonOptions]);
+
+  const buttonItems = useMemo(() => {
+    return buttonOptions.filter((b) => b.type === 'button');
+  }, [buttonOptions]);
+
+  const otherItems = useMemo(() => {
+    return buttonOptions.filter((b) => !b.type || b.type === 'element');
+  }, [buttonOptions]);
+
   return (
     <>
-      {!isMobile ? (
-        buttonOptions.map((b) => {
-          return renderComponent(b);
-        })
-      ) : (
-        <>
-          {buttonOptions
-            .filter((b) => b.visibilityInMobile !== 'inActionMenu')
-            .map((menuItem) => {
-              return renderComponent(menuItem);
-            })}
-          <Button
-            variant={'outlined'}
-            color="default"
-            size="small"
-            className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
-            onClick={openActions}
-            aria-controls="action-menu"
-            endIcon={isMobile ? null : <ExpandMore />}
-          >
-            {isMobile ? <FaCircleChevronDown size={20} /> : <>Actions </>}
-          </Button>
-          <Menu
-            anchorEl={actionAnchor}
-            keepMounted
-            getContentAnchorEl={null}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'right'
-            }}
-            transformOrigin={{
-              vertical: 'top',
-              horizontal: 'right'
-            }}
-            id="add-menu"
-            open={Boolean(actionAnchor)}
-            onClose={closeActions}
-          >
-            <span onClick={closeActions}>
-              {buttonOptions
-                .filter((b) => b.visibilityInMobile === 'inActionMenu')
-                .map((menuItem) => {
-                  return <Fragment key={menuItem.id}>{renderComponent(menuItem)}</Fragment>;
-                })}
-              {isExtraMenuItemsVisible &&
-                extraMenuItems.map((m) => (
-                  <MenuItem key={m.text} onClick={m.onClick} disabled={m.disabled}>
-                    {m.text}
-                  </MenuItem>
-                ))}
-            </span>
-          </Menu>
-        </>
+      {buttonItems.map((item) => (
+        <Fragment key={item.id}>{renderComponent(item)}</Fragment>
+      ))}
+      {otherItems.map((item) => (
+        <Fragment key={item.id}>{renderComponent(item)}</Fragment>
+      ))}
+      {menuItems.length > 0 && (
+        <Button
+          variant={'outlined'}
+          color="default"
+          size="small"
+          className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
+          onClick={openActions}
+          aria-controls="action-menu"
+          endIcon={isMobile ? null : <ExpandMore />}
+        >
+          {isMobile ? <FaCircleChevronDown size={20} /> : <>Actions </>}
+        </Button>
       )}
+      <Menu
+        anchorEl={actionAnchor}
+        keepMounted
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        id="add-menu"
+        open={Boolean(actionAnchor)}
+        onClose={closeActions}
+      >
+        <span onClick={closeActions}>
+          {menuItems.map((item) => (
+            <Fragment key={item.id}>{renderComponent(item)}</Fragment>
+          ))}
+        </span>
+      </Menu>
     </>
   );
 };

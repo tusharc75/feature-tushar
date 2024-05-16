@@ -13,12 +13,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { FIELD_TICKET_STATUS, fieldTicket, sidebarResource } from 'src/constants/helpers';
-import { fetch_field_ticket_material_fields } from '../helper';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import ManageSubmit from './ManageSubmit';
 import ViewLogs from './ViewLogs';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
-const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) => {
+const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -37,10 +37,8 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
 
   const fetchFields = async () => {
     setColumns(null);
-    var fields = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
-    fields?.forEach((e) => {
-      e.isColumnEditable = false;
-    });
+    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, false);
+
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     let column: any = [
       {
@@ -74,15 +72,19 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
         Cell: ({ row }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p title={row.original.detail}>{row.original.detail}</p>
-            {['product', 'service'].includes(row.original.type) && (
-              <Box ml={1}>
+            {![MATERIAL_TYPE.manualEntry].includes(row.original.type) && (
+              <Box ml={1} className="flex-shrink-0">
                 <IconButton
                   size="small"
                   onClick={() => {
-                    if (row.original.type === 'service') {
+                    if (row.original.type === MATERIAL_TYPE.service) {
                       window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === 'product') {
+                    } else if (row.original.type === MATERIAL_TYPE.product) {
                       window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                     }
                   }}
                 >
@@ -106,30 +108,52 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
     setColumns(column);
   };
 
+  const generateNestedData = (material, parent) => {
+    const subRows: any = material.filter((e) => e.parentId === parent._id);
+    subRows.forEach((_subRow, j) => {
+      _subRow.index = parent.index + '.' + (j + 1);
+      _subRow.detail =
+        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
+              : _subRow.type === MATERIAL_TYPE.manualEntry ? _subRow?.detail || ''
+                : '';
+      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
+        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
+          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
+            : _subRow.description || '';
+      _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
+      _subRow.qty = _subRow.qty * parent.qty;
+      _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
+      _subRow.canDelete = _subRow.canDelete ?? true;
+      _subRow.subRows = generateNestedData(material, _subRow);
+    });
+    return subRows;
+  };
+
   const fetchGridData = async () => {
     dispatch({ type: 'loading', loading: true });
 
     const materialResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/material`);
     const costResponse = await axiosInstance().get(`${fieldTicket.api}/${fieldTicketData?._id}/cost`);
 
-    const material = materialResponse?.data?.data?.material;
+    const material = [...materialResponse?.data?.data?.material];
     const costs = costResponse?.data?.data || [];
+    const materialRows = material?.filter((e) => !e.parentId);
 
-    material?.forEach((parent, i) => {
+    materialRows?.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || '';
-      parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || '';
-      parent.qty = parent.qty;
-      parent.type = parent.type;
+      parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || parent?.serializedAssetDetail?.assetNumber || parent?.packageDetail?.packageName || '';
+      parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || parent?.packageDetail?.packageDescription || '';
+      parent.subRows = generateNestedData(material, parent);
     });
     costs?.forEach((ele, i) => {
       ele.index = i + 1 + material?.length;
       ele.detail = ele.description || '';
       ele.description = ele.description || '';
-      ele.type = 'manualEntry';
+      ele.type = MATERIAL_TYPE.manualEntry;
     });
-
-    dispatch({ type: 'initialize', data: [...material, ...costs], count: [...material, ...costs]?.length });
+    dispatch({ type: 'initialize', data: [...materialRows, ...costs], count: [...materialRows, ...costs]?.length });
     dispatch({ type: 'loading', loading: false });
   };
 
@@ -155,7 +179,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
 
   const previewDownloadProps = {
     fileName: `${routes.fieldTicket.title}-${fieldTicketData?.fieldTicketNumber}`,
-    hideDetailButton: true,
+    // hideDetailButton: true,
     resource: sidebarResource.fieldTicket,
     referenceId: fieldTicketData?._id,
     columns: columns,
@@ -227,6 +251,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData }) =
             hideAction={true}
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
+            expander={resourcePolicy?.showAddPackages ? true : false}
           />
         </Box>
       ) : (

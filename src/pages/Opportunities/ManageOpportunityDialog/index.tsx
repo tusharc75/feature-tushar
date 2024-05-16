@@ -13,7 +13,6 @@ import {
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -25,6 +24,7 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 export default function ManageOpportunityDialog({
   open,
   onSuccess,
@@ -52,7 +52,6 @@ export default function ManageOpportunityDialog({
 
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
 
   const [cloneHeading, setCloneHeading] = useState('');
@@ -95,10 +94,6 @@ export default function ManageOpportunityDialog({
       }
     });
   }, []);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   const handleSubmit = (values) => {
     if (isNew) {
@@ -193,48 +188,15 @@ export default function ManageOpportunityDialog({
                 />
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {formsData &&
-                      formsData.map((form, i) => {
-                        return (
-                          form.name && (
-                            <div key={i}>
-                              <div className={'detail-box-content'}>
-                                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                              </div>
-                              <Box marginY={2}>
-                                <Grid spacing={3} container>
-                                  {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      <FormTypes
-                                        {...field}
-                                        disabled={field.disableOnEdit}
-                                        values={values}
-                                        errors={errors}
-                                        fieldData={field}
-                                        fields={initialData.fields}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    </Grid>
-                                  ))}
-                                </Grid>
-                              </Box>
-                            </div>
-                          )
-                        );
-                      })}
+                    <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>

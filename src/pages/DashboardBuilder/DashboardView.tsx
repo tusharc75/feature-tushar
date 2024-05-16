@@ -1,18 +1,8 @@
 import React from 'react';
-import { Grid, makeStyles, ThemeOptions } from '@material-ui/core';
-import { useDrop } from 'react-dnd';
-import update from 'immutability-helper';
 
+import { Droppable } from '@hello-pangea/dnd';
 import { IFormDataType } from './builderHelpers';
 import DashboardItem from './DashboardItem';
-
-const useClasses = makeStyles((theme: ThemeOptions) => ({
-  chartViews: {
-    overflowY: 'auto',
-    maxHeight: 'calc(75vh)',
-    transition: '500ms all ease-in-out'
-  }
-}));
 
 interface ViewProps {
   formData: IFormDataType[];
@@ -22,58 +12,32 @@ interface ViewProps {
   selectedData?: IFormDataType | null;
 }
 
-const itemTypes = {
-  CARD: 'card'
-};
-
 const View = ({ formData, setFormData, handleEdit, handleRemove, selectedData }: ViewProps) => {
-  const classes = useClasses();
-
-  const findCard = React.useCallback(
-    (id: string) => {
-      const card = formData.find((c) => c.uniqueId === id);
-      return {
-        card,
-        index: formData.indexOf(card)
-      };
-    },
-    [formData]
-  );
-
-  const moveCard = React.useCallback(
-    (id: string, atIndex: number) => {
-      const { card, index } = findCard(id);
-      setFormData(
-        update(formData, {
-          $splice: [
-            [index, 1],
-            [atIndex, 0, card]
-          ]
-        })
-      );
-    },
-    [findCard, formData, setFormData]
-  );
-
-  const [, drop] = useDrop(() => ({ accept: itemTypes.CARD }));
-
   return (
-    <Grid ref={drop} container spacing={1} className={classes.chartViews}>
-      {formData.length > 0 &&
-        formData.map((form: IFormDataType, index) => (
-          <DashboardItem
-            key={form.chartTitle + ' ' + index}
-            id={form.uniqueId}
-            formData={form}
-            findCard={findCard}
-            moveCard={moveCard}
-            itemTypes={itemTypes}
-            handleEdit={handleEdit}
-            handleRemove={handleRemove}
-            selectedData={selectedData}
-          />
-        ))}
-    </Grid>
+    <>
+      {formData.length > 0 && (
+        <>
+          <Droppable droppableId="arrangeView">
+            {(provided) => (
+              <ul className="list-none overflow-y-auto max-h-[75vh] space-y-3" {...provided.droppableProps} ref={provided.innerRef}>
+                {formData.map((form: IFormDataType, index) => (
+                  <DashboardItem
+                    key={form.chartTitle + ' ' + index}
+                    id={form.uniqueId}
+                    formData={form}
+                    index={index}
+                    handleEdit={handleEdit}
+                    handleRemove={handleRemove}
+                    selectedData={selectedData}
+                  />
+                ))}
+                {provided.placeholder}
+              </ul>
+            )}
+          </Droppable>
+        </>
+      )}
+    </>
   );
 };
 

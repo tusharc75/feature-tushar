@@ -14,8 +14,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import SearchBox from '../../../components/Helpers/SearchBox';
 import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid } from '../../../constants/helpers';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 const AddExistingProductInventory = ({
   addProductInventory,
   handleProductInventoryClose,
@@ -70,20 +69,16 @@ const AddExistingProductInventory = ({
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchMaterial();
-    }, millisec);
-  }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchMaterial(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
-  const fetchMaterial = () => {
+  const fetchMaterial = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${type === 'product' ? `/rental-management/product-with-inventory` : packages.api}${queryString}`)
+      .get(`${type === 'product' ? `/rental-management/product-with-inventory` : packages.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);

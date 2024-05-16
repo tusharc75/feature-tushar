@@ -1,4 +1,4 @@
-import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
+import { Box, Button, Chip, IconButton, MenuItem } from '@material-ui/core';
 import AutorenewIcon from '@material-ui/icons/Autorenew';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -19,11 +19,11 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { PLANNING_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { PLANNING_STATUS, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePlanning from './ManagePlanning';
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const Planning = () => {
   const renderedFrom = camelCase(routes?.planning.title);
@@ -55,9 +55,8 @@ const Planning = () => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showConverConfirmBox, setShowConverConfirmBox] = useState({ open: false, id: null, planningNumber: '' });
-  const { type }: any = queryString.parse(history.location.search);
   const [selectedPlanningType, setSelectedPlanningType] = useState(history.location.state);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.planning));
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
@@ -65,18 +64,10 @@ const Planning = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -207,12 +198,12 @@ const Planning = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.planning?.path}${queryString}`)
+      .get(`${routes?.planning?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
@@ -400,26 +391,22 @@ const LeftSideContents = ({ permissions, history, selectedPlanningType, setSelec
   return (
     <>
       {permissions?.planningView?.isRead && (
-        <Box ml={1}>
-          <ToggleButtonGroup size="small">
-            <ToggleButton
-              onClick={() => {
-                history.push({
-                  pathname: routes.planningView.path,
-                  state: {
-                    resource: sidebarResource?.planning
-                  }
-                });
-              }}
-            >
-              <span>{`Calendar`}</span>
-            </ToggleButton>
-          </ToggleButtonGroup>
-        </Box>
+        <Button
+          className={'toggleButton-v1'}
+          onClick={() => {
+            history.push({
+              pathname: routes.planningView.path,
+              state: {
+                resource: sidebarResource?.planning
+              }
+            });
+          }}
+        >
+          <span>{`Calendar`}</span>
+        </Button>
       )}
       {selectedPlanningType && (
         <Chip
-          className="ml-3"
           color="primary"
           label={'Type: Rental Job'}
           onDelete={() => {

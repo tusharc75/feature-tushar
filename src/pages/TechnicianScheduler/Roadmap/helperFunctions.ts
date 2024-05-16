@@ -13,16 +13,16 @@ export const getPriority = (status: string = ''): TPriority => {
   return priority[Math.floor(Math.random() * priority.length)];
 };
 
-export const getColorFromPriority = (priority): React.CSSProperties => {
-  let color = { backgroundColor: '#EFF8FF' } as React.CSSProperties;
+export const getColorFromPriority = (priority): string => {
+  let color = 'bg-[#EFF8FF] dark:bg-[#B0C4DE]';
   if (priority === 'low') {
-    color = { backgroundColor: '#EFF8FF' } as React.CSSProperties;
+    color = 'bg-[#EFF8FF] dark:bg-[#B0C4DE]';
   }
   if (priority === 'medium') {
-    color = { backgroundColor: '#FEF5D6' } as React.CSSProperties;
+    color = 'bg-[#FEF5D6] dark:bg-[#DAA520]';
   }
   if (priority === 'high') {
-    color = { backgroundColor: '#FFEEF3' } as React.CSSProperties;
+    color = 'bg-[#FFEEF3] dark:bg-[#FFB6C1]';
   }
   return color;
 };

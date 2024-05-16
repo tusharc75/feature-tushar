@@ -1,9 +1,10 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import { ACTIVITY_RESOURCE, wellMaster } from 'src/constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
@@ -111,40 +112,22 @@ const WellMasterDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab label={<div className="tab-font">Details</div>} value={0} aria-controls="a11y-tabpanel-0" id="a11y-tab-0" className={'tabLayout'} />
-          {permissions?.wellNumber?.isRead && (
-            <Tab
-              label={<div className="tab-font">Well Number</div>}
-              value={1}
-              aria-controls="a11y-tabpanel-1"
-              id="a11y-tab-1"
-              className={'tabLayout'}
-            />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab label={'Details'} value={0} />
+          {permissions?.wellNumber?.isRead && <CustomTab label={'Well Number'} value={1} />}
+        </CustomTabs>
+        <TabPanel value={tabValue} index={0}>
+          {loading || !wellMasterFields.length ? (
+            <Grid container spacing={2} style={{ padding: '8px' }}>
+              <CommonSkeleton lenArray={[...Array(7).keys()]} />
+            </Grid>
+          ) : (
+            <DetailsPage data={wellMasterData} fields={wellMasterFields} />
           )}
-        </Tabs>
-        {tabValue === 0 && (
-          <Box>
-            {loading || !wellMasterFields.length ? (
-              <Grid container spacing={2} style={{ padding: '8px' }}>
-                <CommonSkeleton lenArray={[...Array(7).keys()]} />
-              </Grid>
-            ) : (
-              <DetailsPage data={wellMasterData} fields={wellMasterFields} />
-            )}
-          </Box>
-        )}
-        {tabValue === 1 && <WellNumber wellName={id} />}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <WellNumber wellName={id} />
+        </TabPanel>
       </Box>
       {showManageDialog.open && (
         <ManageWellMaster

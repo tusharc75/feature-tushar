@@ -1,19 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Button, Dialog, Box, Tab, Tabs } from '@material-ui/core';
-import FieldList from '../FieldList';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import { Box, Button, Dialog } from '@material-ui/core';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import CustomTabs, { TabPanel, CustomTab } from 'src/components/CustomTabs';
+import { object, string } from 'yup';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { object, string } from 'yup';
-import { Formik, Form } from 'formik';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constants/helpers';
-import { isEqual } from 'lodash';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { checkFormula } from '../../../constants/formulaUtility';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import TabPanel from 'src/components/TabPanel';
+import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constants/helpers';
+import FieldList from '../FieldList';
 import General from './General';
 import Setting from './Setting';
+import Visibility from './Visibility';
 
 const FieldSchema = object().shape({
   fieldLabel: string().required('please enter field label')
@@ -44,10 +45,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.isDefaultValue = false;
         values.defaultValue = '';
       }
-      if (!values.isShowFieldDependentOn) {
-        values.isShowFieldDependentOn = false;
-        values.showFieldDependentOn = null;
-      }
       if (!values.isFieldEntityWise) {
         values.isFieldEntityWise = false;
         values.fieldEntity = [];
@@ -55,6 +52,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!values.lookup) {
         values.lookup = false;
         values.lookupResource = null;
+      }
+      if (!values.dataList) {
+        values.dataList = false;
+        values.dataListId = null;
       }
       if (
         !values.isColumnEditable &&
@@ -195,10 +196,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.isMulitFormula = values.isMulitFormula;
             ele.isUneditable = values.isUneditable;
             ele.isVlookup = values.isVlookup;
-            ele.isShowFieldDependentOn = values.isShowFieldDependentOn;
-            if (values.isShowFieldDependentOn) {
-              ele.showFieldDependentOn = values.showFieldDependentOn;
-            }
             ele.hiddenField = values.hiddenField;
             ele.showAdditionalInfoPopup = values.showAdditionalInfoPopup;
             ele.additionalInfoSection = values.additionalInfoSection;
@@ -211,6 +208,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.addBulkOptions = values.addBulkOptions;
             ele.lookup = values.lookup || false;
             ele.lookupResource = values.lookup ? values.lookupResource : '';
+            ele.dataList = values.dataList || false;
+            ele.dataListId = values.dataList ? values.dataListId : '';
+            ele.preFilters = values.preFilters?.length > 0 ? values.preFilters : []
+            ele.htmlDescription = values.htmlDescription || ''
             ele.entityWiseLookup = values?.entityWiseLookup || false;
             ele.isMinMaxValue = values?.isMinMaxValue || false;
             ele.minValue = values?.minValue || 0;
@@ -218,6 +219,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.minValueServiceAdd = values.minValueServiceAdd ? values.minValueServiceAdd : '';
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
+            ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter(v => v?.fields?.length > 0) : [];
+            ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             if (values.isSystemGenerate) {
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
@@ -267,7 +270,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                     }
                   }
                 });
-              ele.option = values.option;
+              ele.option = fieldData?.dataList ? [] : values.option;
             }
             if (
               fieldData.type === 'decimal' ||
@@ -428,16 +431,16 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       errors['warningTooltipMessage'] = 'Please enter warning message.';
     }
 
-    if (values.isShowFieldDependentOn && !values.showFieldDependentOn) {
-      errors['showFieldDependentOn'] = 'Please select Show Field Dependent On.';
-    }
-
     if (values.isFieldEntityWise && !values.fieldEntity?.length) {
       errors['fieldEntity'] = 'Please select Entity.';
     }
 
     if (values.lookup && !values.lookupResource) {
       errors['lookupResource'] = 'Please select Lopkup Resource.';
+    }
+
+    if (values.dataList && !values.dataListId) {
+      errors['dataListId'] = 'Please select Data List.';
     }
 
     if (values?.isMinMaxValue) {
@@ -474,6 +477,20 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     setTabValue(newValue);
   };
 
+  const handleChangeFieldName = (values) => {
+    let data = [...section];
+    data.forEach((row) => {
+      if (row.sectionId.toString() === sectionId.toString()) {
+        row.field.forEach((ele) => {
+          if (ele._id.toString() === values?._id?.toString()) {
+            ele.fieldName = values?.fieldName;
+          }
+        });
+      }
+    });
+    setSection(data);
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -508,33 +525,11 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               <Box>
                 <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
                   <Box pt={1}>
-                    <Tabs
-                      className="new-tab-container-v1"
-                      value={tabValue}
-                      onChange={handleTabChange}
-                      textColor="primary"
-                      TabIndicatorProps={{
-                        style: {
-                          height: 0
-                        }
-                      }}
-                    >
-                      <Tab
-                        className={'tabLayout'}
-                        style={{ padding: '0px' }}
-                        label={<div className="d-flex align-items-center tab-font">General</div>}
-                        value={0}
-                        aria-controls="a11y-tabpanel-0"
-                        id="a11y-tab-0"
-                      />
-                      <Tab
-                        className={'tabLayout'}
-                        label={<div className="d-flex align-items-center tab-font">Setting</div>}
-                        value={1}
-                        aria-controls="a11y-tabpanel-1"
-                        id="a11y-tab-1"
-                      />
-                    </Tabs>
+                    <CustomTabs value={tabValue} onChange={handleTabChange}>
+                      <CustomTab value={0} label={'General'} />
+                      <CustomTab value={1} label={'Visibility'} />
+                      <CustomTab value={2} label={'Setting'} />
+                    </CustomTabs>
                     <TabPanel value={tabValue} index={0}>
                       <General
                         values={values}
@@ -545,9 +540,18 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                         errors={errors}
                         module={module}
                         isCalculativeField={isCalculativeField}
+                        handleChangeFieldName={handleChangeFieldName}
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
+                      <Visibility
+                        values={values}
+                        setFieldValue={setFieldValue}
+                        fields={fields}
+                        fieldData={fieldData}
+                      />
+                    </TabPanel>
+                    <TabPanel value={tabValue} index={2}>
                       <Setting
                         initialValues={initialValues}
                         values={values}

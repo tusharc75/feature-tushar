@@ -9,7 +9,7 @@ export type TEntity = {
   resource?: TResource[];
   policy?: Policy;
   dashboards?: any[];
-  superAdminAccess?: boolean;
+  superAdminAccessResource?: boolean;
 };
 
 export interface Policy {

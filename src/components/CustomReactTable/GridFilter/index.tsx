@@ -1,5 +1,5 @@
 import MomentUtils from '@date-io/moment';
-import { Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, FormControl, Grid, IconButton, InputLabel, MenuItem, Select, TextField, useMediaQuery } from '@material-ui/core';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { isEmpty } from 'lodash';
@@ -19,21 +19,13 @@ import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
-import { fetchFieldOptions } from '../utils';
+import { createFilterModel, fetchFieldOptions } from '../utils';
 
-function GridFilter({
-  resource,
-  handleClose,
-  setSelectedFilter,
-  selectedFilter,
-  currentFomValue,
-  setCurrentFomValue,
-  customFilters,
-  dispatch,
-}) {
+function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
+  const isMobileView = useMediaQuery('(max-width:768px)');
   const toastConfig = useContext(CustomToastContext);
   const [formValues, setFormValues] = useState({});
-  const [coloums, setColoums] = useState(null)
+  const [coloums, setColoums] = useState(null);
   const [userFilters, setUserFilters] = useState([]);
   const [selectedUserFilter, setSelectedUserFilter] = useState(null);
 
@@ -53,14 +45,18 @@ function GridFilter({
         }
       }
     }
-    setFormValues(currentFomValue || {});
+    if (selectedFilter) {
+      setFormValues(selectedFilter?.filterValue || {});
+    } else {
+      setFormValues(currentFomValue || {});
+    }
     setSelectedUserFilter(selectedFilter);
   }, []);
 
   const fetchAllColumns = async () => {
     try {
       const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
-      setColoums(columns)
+      setColoums(columns);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -136,91 +132,9 @@ function GridFilter({
     }
   };
 
-  const createFilterModel = () => {
-    const filterModel = new Map();
-    const colNames = Object.keys(formValues);
-
-    for (const col of coloums) {
-      const fieldName = col?.fieldName;
-
-      if (
-        !(colNames.includes(fieldName) || colNames.includes(`from_${fieldName}`) || colNames.includes(`to_${fieldName}`)) &&
-        (col.type !== 'dateTime' || col.type !== 'date')
-      ) {
-        continue;
-      }
-
-      switch (col.type) {
-        case 'singleLine':
-        case 'multiLine':
-        case 'email':
-        case 'mobileNumber':
-        case 'currency':
-        case 'lookUpDisplay':
-          if (formValues[fieldName]) {
-            filterModel.set(fieldName, { filter: formValues[fieldName] });
-          }
-          break;
-        case 'year':
-          if (formValues[fieldName]) {
-            filterModel.set(fieldName, { filter: moment(new Date(formValues[fieldName])).format('YYYY') });
-          }
-          break;
-        case 'multiSelect':
-        case 'dropDown':
-          if (col.lookup && formValues[fieldName]) {
-            const options = coloums?.find((item) => item.fieldName == fieldName)?.option || [];
-            if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
-              filterModel.set(fieldName, {
-                operator: 'OR',
-                condition1: {
-                  filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
-                }
-              });
-            }
-          } else if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
-            filterModel.set(fieldName, { filter: formValues[fieldName] });
-          }
-          break;
-        case 'dateTime':
-        case 'date':
-          const from = `from_${fieldName}`;
-          const to = `to_${fieldName}`;
-
-          const fromDate = formValues[from] ? formValues[from] : null;
-          const toDate = formValues[to] ? formValues[to] : null;
-
-          if (fromDate || toDate) {
-            filterModel.set(fieldName, {
-              filter: {
-                from: fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null,
-                to: toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
-              }
-            });
-          }
-          break;
-        case 'checkBox':
-          if (formValues[fieldName] === true || formValues[fieldName] === false) {
-            filterModel.set(fieldName, { filter: formValues[fieldName] === true ? 'Yes' : 'No' });
-          }
-          break;
-        case 'location':
-          if (formValues[fieldName]?.length > 0) {
-            filterModel.set(fieldName, { filter: formValues[fieldName] });
-          }
-          break;
-        default:
-          // Handle unexpected column types.
-          console.warn('Unknown column type:', col.type);
-      }
-    }
-
-    return Object.fromEntries(filterModel);
-  };
-
   const handleApplyFilter = () => {
     setCurrentFomValue(formValues || {});
-    dispatch({ type: 'filter', filters: createFilterModel() });
+    dispatch({ type: 'filter', filters: createFilterModel(formValues, coloums) });
     setSelectedFilter(selectedUserFilter || null);
     handleClose();
   };
@@ -253,8 +167,8 @@ function GridFilter({
           betweenDate && betweenDate[`from_${f?.fieldName}`]
             ? betweenDate[`from_${f?.fieldName}`]
             : formValues[`from_${f?.fieldName}`]
-            ? formValues[`from_${f?.fieldName}`]
-            : new Date();
+              ? formValues[`from_${f?.fieldName}`]
+              : new Date();
 
         if (new Date(minDate).getTime() > new Date(formValues[`to_${f?.fieldName}`]).getTime()) {
           isValid = false;
@@ -270,7 +184,7 @@ function GridFilter({
       <Dialog
         maxWidth={'md'}
         open={true}
-        fullScreen={isMobile && !isTablet}
+        fullScreen={(isMobile && !isTablet) || isMobileView}
         fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
@@ -398,8 +312,8 @@ function GridFilter({
                                 betweenDate && betweenDate[`from_${field.fieldName}`]
                                   ? betweenDate[`from_${field.fieldName}`]
                                   : formValues[`from_${field.fieldName}`]
-                                  ? formValues[`from_${field.fieldName}`]
-                                  : new Date()
+                                    ? formValues[`from_${field.fieldName}`]
+                                    : new Date()
                               }
                             />
                           </Grid>
@@ -472,6 +386,7 @@ function GridFilter({
           handleClose={() => {
             setIsSaveFilter({ open: false, data: null });
           }}
+          columns={coloums}
           resource={resource}
           handleSucess={() => {
             setIsSaveFilter({ open: false, data: null });

@@ -14,9 +14,9 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_cost_fields, fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import { RENTAL_STATUS, rentalManagement, sidebarResource } from '../../../constants/helpers';
+import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement, sidebarResource } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
-import AdditionalCostDialog from '../AdditionalCost/AdditionalCostDialog';
+import AdditionalCostDialog from '../Productpackage/AdditionalCostDialog';
 
 const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFullScreen, allowedToEdit, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -87,12 +87,12 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
                     ? '(Serialized)'
                     : '(Non-Serialized)'
                   : row.original?.type === 'package'
-                  ? row.original?.packageDetail.packageType === 'Product'
-                    ? '(Product)'
-                    : '(Service)'
-                  : row.original.type === 'service'
-                  ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                  : ''}
+                    ? row.original?.packageDetail.packageType === 'Product'
+                      ? '(Product)'
+                      : '(Service)'
+                    : row.original.type === 'service'
+                      ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                      : ''}
               </p>
             ) : (
               <NoDataCell />
@@ -108,7 +108,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
             row.original['type'] ? (
               <div className="d-flex gap-2 align-items-center">
                 <p className="text-truncate">{row.original.detail}</p>
-                {row.original.type !== 'Add On' && (
+                {row.original.type !== MATERIAL_TYPE.manualEntry && (
                   <IconButton
                     size="small"
                     onClick={() => {
@@ -146,7 +146,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
           Cell: ({ row }) => <p className="text-truncate">{row.original.status ? row.original.status : <NoDataCell />}</p>
         }
       ];
-      column = [...column, ...newColumns?.filter((e) => e.accessor !== 'description')];
+      column = [...column, ...newColumns?.filter((e) => !['detail', 'description']?.includes(e.accessor))];
       setColumns(column);
       fetchData();
     } catch (error) {
@@ -180,18 +180,16 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
             item.type === 'product'
               ? item.productDetail?.productName
               : item.type === 'service'
-              ? item.serviceDetail?.serviceName
-              : item.type === 'package'
-              ? item.packageDetail?.packageName
-              : '';
+                ? item.serviceDetail?.serviceName
+                : item.type === 'package'
+                  ? item.packageDetail?.packageName
+                  : '';
           item.type = item.type;
           combinedData.push(item);
         }
       });
       additionalcost?.forEach((e) => {
-        e.type = 'Add On';
-        e.detail = e.description;
-        e.description = e.description;
+        e.type = MATERIAL_TYPE.manualEntry;
         e.parentId = null;
       });
       combinedData = [...combinedData, ...additionalcost];
@@ -199,24 +197,25 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
       rows.forEach((parent, i) => {
         parent.index = i + 1;
         parent.detail =
-          parent.type === 'Add On'
+          parent.type === MATERIAL_TYPE.manualEntry
             ? parent.detail
-            : parent.type === 'product'
-            ? parent?.productDetail?.productName
-            : parent.type === 'service'
-            ? parent?.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName;
+            : parent.type === MATERIAL_TYPE.product
+              ? parent?.productDetail?.productName
+              : parent.type === MATERIAL_TYPE.service
+                ? parent?.serviceDetail?.serviceName
+                : parent.packageDetail?.packageName;
         parent.description =
-          parent?.type === 'service'
+          parent?.type === MATERIAL_TYPE.service
             ? parent?.serviceDetail?.serviceDescription || ''
-            : parent?.type === 'product'
-            ? parent?.productDetail?.productDescription || ''
-            : parent?.type === 'package'
-            ? parent?.packageDetail?.packageDescription || ''
-            : parent.type === 'Add On'
-            ? parent.description
-            : '';
+            : parent?.type === MATERIAL_TYPE.product
+              ? parent?.productDetail?.productDescription || ''
+              : parent?.type === MATERIAL_TYPE.package
+                ? parent?.packageDetail?.packageDescription || ''
+                : parent.type === MATERIAL_TYPE.manualEntry
+                  ? parent.description
+                  : '';
         parent.qty = parent.qty;
+        parent.status = parent?.productDetail?.serializedProduct ? parent.status : '';
         parent.subRows = generateNestedData(material, inventory, parent);
       });
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -249,20 +248,21 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
     childProduct.forEach((_subRow) => {
       _subRow.index = parent.index + '.' + (subRows?.length + 1);
       _subRow.detail =
-        _subRow?.type === 'product'
+        _subRow?.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+          : _subRow?.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
-        _subRow?.type === 'service'
+        _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow?.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow?.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+          : _subRow?.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.qty = `${parent.qty * _subRow.qty}`;
+      _subRow.status = _subRow?.productDetail?.serializedProduct ? parent.status : '';
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
       subRows.push(_subRow);
     });
@@ -323,7 +323,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
             columns={columns}
             state={state}
             dispatch={dispatch}
-            setWholeRowsCellColor={() => {}}
+            setWholeRowsCellColor={() => { }}
             refreshGrid={fetchData}
             hideSelection={true}
             hideAction={true}

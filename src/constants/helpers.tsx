@@ -23,6 +23,7 @@ import { TransitionProps } from '@material-ui/core/transitions';
 import { Slide } from '@material-ui/core';
 import { camelCase, isArray, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
+import { v4 as uuid } from 'uuid';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -54,17 +55,22 @@ export const termsAndConditionDocumentUploadMaxSize = {
 export const rentalManagementSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Add Services', title: 'Services', icon: 'add' },
-  { name: 'Add-on', title: 'Add-on', icon: 'add' },
   { name: 'Quotation', title: 'Quotation', icon: 'quote' },
-  { name: 'Serialized Asset', title: 'Asset', icon: 'serializedAssets' },
+  { name: 'Serialized Asset', title: 'Assign', icon: 'serializedAssets' },
   { name: 'Loading Ticket', title: 'Loading', icon: 'ticket' },
-  { name: 'Receiving Ticket', title: 'Receiving', icon: 'receivingTicket' },
+  { name: 'On Field', title: 'On Field', icon: 'onField' },
+  { name: 'Receiving Ticket', title: 'Receiving', icon: 'ticket' },
   { name: 'Final Slip', title: 'Slip', icon: 'invoice' }
 ];
 
+export const RENTAL_STEPS = {
+  loading: 'Loading',
+  onField: 'On Field',
+  receiving: 'Receiving'
+};
+
 export const fieldTicketSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Submit', title: 'Submit', icon: 'end' }
 ];
 
@@ -75,8 +81,6 @@ export const fieldServiceOrderSteps: stepInterface[] = [
 ];
 
 export const demandOrderSteps = ['Add Products'];
-
-export const purchaseRequisitionSteps = ['Add Products'];
 
 export const productionOrderSteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
@@ -92,7 +96,6 @@ export const jobProcessSteps: stepInterface[] = [
 
 export const salesOrderProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
   { name: 'Process', title: 'Process', icon: 'process' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
@@ -117,16 +120,20 @@ export const sublease_InterCompany_Steps: stepInterface[] = [
 
 export const quotationProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'add' },
   { name: 'Quote Builder', title: 'Builder', icon: 'quote' },
   { name: 'DOA', title: 'DOA', icon: 'doa' },
   { name: 'Quote Approval', title: 'Approval', icon: 'approval' },
   { name: 'End', title: 'End', icon: 'end' }
 ];
 
+export const purchaseRequisitionSteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'DOA', title: 'DOA', icon: 'doa' },
+  { name: 'End', title: 'End', icon: 'end' }
+];
+
 export const invoiceProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Manual Entry', title: 'Manual Entry', icon: 'manualEntry' },
   { name: 'Ready To Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -351,13 +358,11 @@ export const sidebarResource = {
   driverMaster: 'Driver Master',
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'Iot Data Points',
-  accountsReceivable: 'Accounts Receivable',
   iotDataPointsCategory: 'Iot Data Points Category',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash: 'Flash',
   rentalManagementInvoice: 'Rental Management Invoice',
   creditMemo: 'Credit Memo',
   outboundMessage: 'Outbound Message',
@@ -365,9 +370,13 @@ export const sidebarResource = {
   triggerNotificationMaster: 'Trigger Notification Master',
   deals: 'Deals',
   triggerNotificationHistory: 'Trigger Notification History',
-  userAttendance : 'User Attendance',
+  userAttendance: 'User Attendance',
   dataLists: 'Data Lists',
-  assetsReceiving : 'Assets Receiving'
+  assetsReceiving: 'Assets Receiving',
+  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
+  units: 'Units',
+  resourceDoaRequest: 'Resource Doa Request',
+  workOrderPlanning: 'Work Order Planning'
 };
 
 export const primaryFields = {
@@ -495,14 +504,11 @@ export const RESOURCE_LABEL = {
   trailerMaster: 'Trailer Master',
   iotDataPoints: 'IoT Data Points',
   iotChart: 'IoT Chart',
-  iotReport: 'IoT Report',
   sendOutboundMessage: 'Send Outbound Message',
   deviceTemplates: 'Device Templates',
   workStations: 'Work Stations',
   deviceTemplateAlert: 'Device Template Alert',
   chartOfAccount: 'Chart Of Account',
-  flash: 'Flash',
-  accountsReceivable: 'Accounts Receivable',
   creditMemo: 'Credit Memo',
   generateInvoice: 'Generate Invoice',
   repairOrderInvoice: 'Repair Order Invoice',
@@ -511,7 +517,8 @@ export const RESOURCE_LABEL = {
   triggerNotificationHistory: 'Trigger Notification History',
   userAttendance: 'User Attendance',
   dataList: 'Data List',
-  dataListitems: 'Data List Items'
+  dataListitems: 'Data List Items',
+  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request'
 };
 
 export const CHILD_RESOURCE = {
@@ -532,7 +539,8 @@ export const CHILD_RESOURCE = {
   quotationService: 'Quotation Service',
   repairOrderProduct: 'Repair Order Product',
   planningMaterial: 'Planning Material',
-  purchaseRequisition: 'Purchase Requisition Detail',
+  purchaseRequisitionDetail: 'Purchase Requisition Detail',
+  purchaseRequisitionCost: 'Purchase Requisition Cost',
   fieldServiceOrderDetails: 'Field Service Order Detail',
   fieldServiceOrderAddon: 'Field Service Order Addon',
   fieldTicketCost: 'Field Ticket Cost',
@@ -549,7 +557,8 @@ export const CHILD_RESOURCE = {
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
-  dealsMaterial: 'Deals Material'
+  dealsMaterial: 'Deals Material',
+  rentalManagementTechnician: 'Rental Management Technician'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -895,36 +904,24 @@ export const workOrder = {
   api: '/work-order'
 };
 
-export const flash = {
-  api: '/flash',
-  route: '/flash',
-  permission: 'Flash',
-  resource: 'Flash'
-};
-
 export const profileMenuItems = {
   profile: 1,
   notification: 2,
   setting: 3,
   users: 4,
-  securityPrivacy: 5
+  securityPrivacy: 5,
+  uiPreference: 6
 };
 
 export const SCHEDULE_FREQUENCY = ['Hourly', 'Daily', 'Weekly', 'Monthly'];
 export const FREQUENCY_WEEKS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
-  //let selectedEntity = localStorage.getItem("selectedEntity")
-  //let isCreate = (val === "") ? true : false
+  let user = JSON.parse(localStorage.getItem('userData'));
 
   const obj = {};
   for (const key of arr) {
-    let value = key.isDefaultValue ? key.defaultValue : val;
-
-    //let isEntityField = key?.fieldName === "entity"
-    // if (isEntityField && selectedEntity && isCreate) {
-    //   value = key?.type === "multiSelect" ? [selectedEntity] : selectedEntity
-    // }
+    let value = key.isDefaultValue ? (key.defaultValue === 'Current User' && user?.user?._id ? user?.user?._id : key.defaultValue) : val;
 
     if (key.type === 'dropDown') {
       let option = key.option?.find((data: any) => data.default === true);
@@ -976,6 +973,9 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'decimal') {
       obj[key.fieldName] = value && value !== '' ? parseFloat(value) : 0;
     } else if (key.type === 'lookUpDisplay') {
+    } else if (key.type === 'counter') {
+      obj[key.fieldName] = [];
+    } else if (key.type === 'description') {
     } else {
       obj[key.fieldName] = value;
     }
@@ -990,6 +990,28 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
   for (const key of arr) {
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
+    } else if ((key.type === 'multiSelect' || key.type === 'dropDown') && key?.dataList) {
+      if (key.type === 'multiSelect') {
+        const values =
+          dataObj[key.fieldName] && dataObj[key.fieldName].length
+            ? typeof dataObj[key.fieldName] === 'string'
+              ? [dataObj[key.fieldName]]
+              : dataObj[key.fieldName].map((val: any) => filterValues(val))
+            : [];
+
+        obj[key.fieldName] = values;
+
+        obj[`${key.fieldName}_dataList`] = dataObj[key.fieldName] ? dataObj[key.fieldName] : [];
+      } else {
+        const value =
+          dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length
+            ? dataObj[key.fieldName][0]
+            : filterValues(dataObj[key.fieldName]);
+
+        obj[key.fieldName] = value ? value : '';
+
+        obj[`${key.fieldName}_dataList`] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
+      }
     } else if (key.type === 'multiSelect') {
       const values =
         dataObj[key.fieldName] && dataObj[key.fieldName].length
@@ -1055,6 +1077,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'lookUpDisplay') {
+    } else if (key.type === 'description') {
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -1143,6 +1166,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else if (input.type === 'multiFileUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
+    } else if (input.type === 'counter') {
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
     }
@@ -1209,7 +1234,7 @@ export const initializeDropdownById = (field, fieldName, id) => {
 export const dateFormat = localStorage.getItem('dateFormat') ?? 'MM/DD/YYYY';
 export const dateTimeFormat = localStorage.getItem('dateTimeFormat') ?? 'MM/DD/YYYY hh:mm A';
 export const cardDateFormat = localStorage.getItem('cardDateFormat') ?? 'MMM DD, YYYY';
-export const dateTimeFormat24Hours = `${dateFormat} HH:mm`;
+export const dateTimeFormat24Hours = `${dateFormat} HH:mm:ss`;
 
 export const dateFormatForInputControl = localStorage.getItem('dateFormatForInputControl') ?? 'MM/dd/yyyy';
 // export const dateTimeFormat = "MM/dd/yyyy hh:mm A"
@@ -1504,6 +1529,7 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
       .format(amount)
       .replace(/^(\D+)/, '$1 '),
     fullFormatAmount: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1 '),
+    fullFormatAmountWithoutSpace: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, options).format(amount).replace(/^(\D+)/, '$1'),
     fullFormatAmountWithCurrencyName: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, {
       currencyDisplay: 'code',
       ...options
@@ -1949,7 +1975,7 @@ export const ASSET_STATUS = {
   standBy: 'Stand By',
   standByNotChargeable: 'Stand By-Not Chargeable',
   delivered: 'Delivered',
-  indTransit: 'In-Transit',
+  inTransit: 'In-Transit',
   underReview: 'Under Review',
   repair: 'Repair',
   readyToShip: 'Ready to ship',
@@ -1993,7 +2019,7 @@ export const INVENTORY_HISTORY_TYPE = {
 
 export const DELIVERY_TICKET_STATUS = {
   new: 'New',
-  indTransit: 'In-Transit',
+  inTransit: 'In-Transit',
   delivered: 'Delivered',
   cancelled: 'Cancelled'
 };
@@ -2017,6 +2043,7 @@ export const RENTAL_INTERNAL_ASSET_STATUS = {
   complete: 'Complete',
   return: 'Return',
   consumed: 'Consumed',
+  partiallyConsumed: 'Partially Consumed',
   standBy: 'Stand By',
   standByNotChargeable: 'Stand By-Not Chargeable',
   delivered: 'Delivered'
@@ -2029,7 +2056,7 @@ export const REPAIR_JOB_STATUS = {
 };
 
 export const DELIVERY_TICKET_MAPPED_STATUS = {
-  'Sign-off - Dispatch': DELIVERY_TICKET_STATUS.indTransit,
+  'Sign-off - Dispatch': DELIVERY_TICKET_STATUS.inTransit,
   'Sign-off - Delivery': DELIVERY_TICKET_STATUS.delivered
 };
 
@@ -2167,8 +2194,7 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket',
-  accountsReceivable: 'accountsReceivable'
+  irtTicket: 'irtTicket'
 };
 
 export const LOG_RESOURCE = {
@@ -2223,6 +2249,10 @@ export const LOG_RESOURCE = {
 
 export const INTERVALS = [
   {
+    optionValue: 'perCycle',
+    optionLabel: 'Per Cycle'
+  },
+  {
     optionValue: '1second',
     optionLabel: '1 Second'
   },
@@ -2268,7 +2298,7 @@ export const IOT_REPORT_LIST = [
   {
     title: sidebarResource.iotDataPoints,
     key: 'iotDataPoints',
-    api: '/report/iot/data-points',
+    api: '/report/iot-data-points',
     filters: [
       {
         fieldName: 'asset',
@@ -2302,6 +2332,7 @@ export const IOT_REPORT_LIST = [
         lookup: true,
         type: 'dropDown',
         multiple: true,
+        required: true,
         _id: '5'
       },
       {
@@ -2325,6 +2356,12 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: sidebarResource.quotation,
+    permission: 'quotation',
+    key: 'quotation',
+    type: 'dynamic'
+  },
+  {
     title: sidebarResource.salesOrder,
     permission: 'salesOrder',
     key: 'salesOrder',
@@ -2334,6 +2371,12 @@ export const REPORT_LIST = [
     title: sidebarResource.serializedAsset,
     permission: 'serializedAsset',
     key: 'serializedAsset',
+    type: 'dynamic'
+  },
+  {
+    title: sidebarResource.transferAsset,
+    permission: 'transferAsset',
+    key: 'transferAsset',
     type: 'dynamic'
   },
   {
@@ -2449,6 +2492,55 @@ export const REPORT_LIST = [
     permission: 'serializedAsset',
     key: 'standardReport',
     type: 'inUsedSerializedAsset'
+  },
+  {
+    title: 'Fleet Report',
+    permission: 'deals',
+    key: 'standardReport',
+    type: 'fleetReport'
+  },
+  {
+    title: 'Daily Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'dailyVolumeReport',
+    defaultColumn: true
+  },
+  {
+    title: 'Daily Volume Revenue Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'dailyVolumeRevenueReport',
+    defaultColumn: true
+  },
+  {
+    title: 'Day Wise Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'dayWiseVolumeReport',
+    defaultColumn: true
+  },
+  {
+    title: 'Weekly/Monthly Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'historicalReport',
+    defaultColumn: true,
+    notMultiSelectFields: ['frequency']
+  },
+  {
+    title: 'Unit Downtime Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'iotUnitDowntimeReport'
+  },
+  {
+    title: 'IOT Data Points',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'iotDataPoints',
+    defaultColumn: true,
+    notMultiSelectFields: ['asset', 'interval']
   }
 ];
 
@@ -2742,7 +2834,8 @@ export const MATERIAL_TYPE = {
   service: 'service',
   package: 'package',
   serializedAsset: 'serializedAsset',
-  manualEntry: 'manualEntry'
+  manualEntry: 'manualEntry',
+  other: 'other'
 };
 
 export const MATERIAL_SUB_TYPE = {
@@ -2837,24 +2930,34 @@ export const convertMsToTime = (milliseconds: any) => {
 
 export const ECOM_SECTIONS = [
   {
+    _id: uuid(),
     type: 'imageSlider',
-    label: 'Image Slider'
+    label: 'Image Slider',
+    column: '12'
   },
   {
+    _id: uuid(),
     type: 'image',
-    label: 'Image'
+    label: 'Image',
+    column: '12'
   },
   {
+    _id: uuid(),
     type: 'menu',
-    label: 'Menu'
+    label: 'Menu',
+    column: '12'
   },
   {
+    _id: uuid(),
     type: 'productCategory',
-    label: 'Product Category'
+    label: 'Product Category',
+    column: '12'
   },
   {
+    _id: uuid(),
     type: 'productList',
-    label: 'Product List'
+    label: 'Product List',
+    column: '12'
   }
 ];
 
@@ -2954,5 +3057,208 @@ export function clamp(val: number, min: number, max: number) {
 }
 
 export const getResourceLabel = (resource, user) => {
-  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource
+  return user?.role?.selectedEntity?.resource?.find((e) => e.name === resource)?.resourceLabel || resource;
+};
+
+export const ASSET_APPROVAL_STATUS = {
+  approved: 'Approved',
+  rejected: 'Rejected',
+  pending: 'Pending'
+};
+
+export const STEPS_STYLE = {
+  list: 'List',
+  step: 'Step',
+  sideBar: 'Side Bar'
+};
+
+export const DEAL_STAGE = {
+  proposalSent: 'Proposal Sent',
+  contractSigned: 'Contract Signed',
+  renewalSent: 'Renewal Sent',
+  renewalSigned: 'Renewal Signed'
+};
+
+export const cloneResourceData = (fromFields, toFields, data, currency) => {
+  const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
+  const result: any = {};
+  overlappingFields?.forEach((e) => {
+    let fieldName = e?.fieldName;
+    if (e.type === 'currencyAmount') {
+      fieldName = `${e?.fieldName}_${currency?.toLowerCase()}`;
+    }
+    if (data[fieldName]) {
+      if (e?.lookup) {
+        if (e?.type === 'dropDown') {
+          result[fieldName] = data[fieldName]?.optionValue || '';
+        } else {
+          result[fieldName] = isArray(data[fieldName]) ? data[fieldName]?.map((m) => m.optionValue) : [];
+        }
+      } else {
+        result[fieldName] = data[fieldName];
+      }
+    }
+  });
+  delete result?.owner;
+  delete result?.pdfTemplate;
+  delete result?.status;
+  return result;
+};
+
+export const getDefaultMyRecordType = (user, resource) => {
+  let userByDefaultRecord = user?.uiPreference?.byDefaultRecord;
+  if (!isArray(userByDefaultRecord) || userByDefaultRecord?.length === 0) {
+    if (isArray(user?.brandPolicy?.brandByDefaultRecord)) {
+      userByDefaultRecord = user?.brandPolicy?.brandByDefaultRecord;
+    }
+  }
+  if (isArray(userByDefaultRecord)) {
+    const byDefaultRecord = userByDefaultRecord?.find((e) => e.resource === resource);
+    if (byDefaultRecord) {
+      if (byDefaultRecord?.type === 'All') {
+        return 2;
+      } else {
+        return 1;
+      }
+    } else {
+      return 1;
+    }
+  } else {
+    return 1;
+  }
+};
+
+export const checkSuperAdminAccess = (user, resource) => {
+  return user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource) ? true : false;
+};
+
+export const DOA_RESOURCE = [
+  {
+    key: 'purchaseRequisition',
+    resorce: sidebarResource.purchaseRequisition
+  }
+];
+
+export const DoaApproveType = {
+  user: 'User',
+  role: 'Role'
+};
+
+export const DOAType = {
+  sequence: 'Sequence',
+  amount: 'Amount'
+};
+
+export const DOA_STATUS = {
+  pending: 'Pending',
+  approved: 'Approved',
+  rejected: 'Rejected',
+  sentForDoa: 'Sent for DOA',
+  acceptedbyDOA: 'Accepted by DOA',
+  rejectedbyDOA: 'Rejected by DOA'
+};
+
+export const checkIsAllowedToEdit = (user, resource, data) => {
+  let userIds = [];
+  if (data?.owner?.optionValue) {
+    userIds.push(data?.owner?.optionValue);
+  }
+  if (data?.collaborator) {
+    userIds = [...userIds, ...data.collaborator?.map((e) => e.optionValue)];
+  }
+  if (data?.processor?.optionValue) {
+    userIds.push(data?.processor?.optionValue);
+  }
+
+  if (data?.userGroup) {
+    if (isArray(data?.userGroup)) {
+      data?.userGroup?.forEach((e) => {
+        if (e?.users?.length) {
+          userIds = [...userIds, ...e.users];
+        }
+      });
+    } else if (data?.userGroup?.users?.length) {
+      userIds = [...userIds, ...data.userGroup.users];
+    }
+  }
+
+  let isAllowedToEdit = userIds.includes(user?.user?._id) ? true : false;
+
+  if (user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource)) {
+    isAllowedToEdit = true;
+  }
+
+  return isAllowedToEdit;
+};
+
+export function changeItemIndex<T>(array: T[], item: T, sourceIndex: number, destinationIndex: number) {
+  const newArray = Array.from(array);
+  newArray.splice(sourceIndex, 1); // remove the item at index
+  newArray.splice(destinationIndex, 0, item);
+  return newArray;
 }
+
+export function addItemAtIndex<T>(array: T[], item: T, destinationIndex: number) {
+  const newArray = [...array];
+  newArray.splice(destinationIndex, 0, item);
+  return newArray;
+}
+
+export function removeItemAtIndex<T>(array: T[], index: number) {
+  const newArray = [...array];
+  newArray.splice(index, 1);
+  return newArray;
+}
+
+export function reorder<T>(list: T[], startIndex: number, endIndex: number) {
+  const result = Array.from(list);
+  const [removed] = result.splice(startIndex, 1);
+  result.splice(endIndex, 0, removed);
+
+  return result;
+}
+
+export function groupByKey<T>(arr: T[] = [], keyGetter: ((d: T) => string) | string) {
+  let result = [];
+  result = arr.reduce((r, a) => {
+    const key = typeof keyGetter === 'string' ? keyGetter : keyGetter(a);
+    if (r[key]) {
+      r[key].push(a);
+    } else {
+      r[key] = [];
+    }
+    return r;
+  }, Object.create(null));
+  return result;
+}
+
+export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
+  const obj = { ...dataObj };
+  fields.forEach((field) => {
+    if (field.type === 'dropDown' && field.lookup) {
+      let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
+      if (filter.length) {
+        obj[field.fieldName] = {
+          optionLabel: filter[0].optionLabel,
+          optionValue: filter[0].optionValue
+        };
+      }
+    } else if (field.type === 'multiSelect') {
+      if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
+        let option = [];
+        dataObj[field.fieldName].forEach((e: any) => {
+          option.push({
+            optionLabel: e,
+            optionValue: e
+          });
+        });
+        obj[field.fieldName] = option;
+      }
+    } else if (field.type === 'date') {
+      obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
+    } else {
+      obj[field.fieldName] = dataObj[field.fieldName];
+    }
+  });
+  return obj;
+};

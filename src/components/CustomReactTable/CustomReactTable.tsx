@@ -13,7 +13,8 @@ import {
   getSortedRowModel,
   useReactTable
 } from '@tanstack/react-table';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import moment from 'moment';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { DndProvider } from 'react-dnd';
 import { HTML5Backend } from 'react-dnd-html5-backend';
@@ -23,14 +24,29 @@ import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
 import { useDebounce } from 'src/hooks';
-import { gridPageSizes } from '../../constants/helpers';
+import xlsx from 'xlsx-js-style';
+import { dateTimeFormat, gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
 import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
 import Pagination from './TableComponents/Pagination';
 import TableComponent from './TableComponents/Table';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
-import { childrenProperty, getStickyColumnNames, getUniqueDataByKey, updateGridHiddenColumns, useSkipper } from './utils';
+import {
+  camelCaseToWords,
+  childrenProperty,
+  extractLastNumberFromDataRange,
+  fitToColumn,
+  getExcelColumnNameFromRange,
+  getStickyColumnNames,
+  getUniqueDataByKey,
+  updateGridHiddenColumns,
+  useSkipper
+} from './utils';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import { isEmpty } from 'lodash';
+
+let exportTimeout;
 
 const CustomReactTable = ({
   columns,
@@ -55,7 +71,10 @@ const CustomReactTable = ({
   reportSave = false,
   virtualization = false,
   showArrangeView = true,
-  exportTable = false
+  hideExportTable = false,
+  showOnlyMobileView = false,
+  onRowClick = null,
+  enableGlobalSearch = true
 }) => {
   const {
     currentEditingCellPosition,
@@ -69,7 +88,8 @@ const CustomReactTable = ({
     filters: customFilters,
     error,
     visibleColumns,
-    columnOrder
+    columnOrder,
+    sorting
   }: TInitialState = state;
 
   const {
@@ -108,6 +128,10 @@ const CustomReactTable = ({
   const [autoResetPageIndex, skipAutoResetPageIndex] = useSkipper();
   const [sortedColumns, setSortedColumns] = useState([]);
   const [getsorting, setSorting] = useState([]);
+  const [exportTableView, setExportTableView] = useState(false);
+  const tableRef = useRef<HTMLTableElement | null>(null);
+
+  const { setSavedFilters } = useContext(FiltersContext);
 
   // initialize
   useEffect(() => {
@@ -180,6 +204,7 @@ const CustomReactTable = ({
         }
       });
       dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
+      if(!isClientSideGrid) setSavedFilters(prev => ({ ...prev, [resource]: tempResult }));
     }
   };
 
@@ -228,8 +253,10 @@ const CustomReactTable = ({
   }, [cellValue, currentEditingCellPosition, data, onSaveEdit]);
 
   useEffect(() => {
-    return setGlobalFilter(searchQuery);
-  }, [searchQuery, setGlobalFilter]);
+    if (enableGlobalSearch) {
+      return setGlobalFilter(searchQuery);
+    }
+  }, [searchQuery, setGlobalFilter, enableGlobalSearch]);
 
   const table = useReactTable({
     data: data || [],
@@ -375,11 +402,116 @@ const CustomReactTable = ({
     });
   }, [getsorting, isClientSideGrid, dispatch]);
 
+  useEffect(() => {
+    if (sorting.length === 0 || getsorting.length) return;
+    if (sorting[0].sort === 'desc' && getsorting.some((c) => c.id === sorting[0].colId)) return;
+    setSorting([{ id: sorting[0].colId, desc: sorting[0].sort === 'desc' }]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sorting]);
+
+  const handleTableExport = () => {
+    clearTimeout(exportTimeout);
+    setExportTableView(true);
+    const isFooterPresent = newColumns.some((c) => typeof c.Footer === 'function');
+    exportTimeout = setTimeout(() => {
+      if (!tableRef.current) return;
+      const wb = xlsx.utils.book_new();
+
+      // Remove Hidden Elements "data-hide-in-export="true""
+      const table = tableRef.current;
+      table?.querySelectorAll('[data-hide-in-export="true"]').forEach((e) => {
+        if (typeof e?.remove === 'function') e.remove();
+      });
+
+      const ws = xlsx.utils.table_to_sheet(table, { cellStyles: true, cellDates: true, raw: true, display: true });
+
+      const columns = getExcelColumnNameFromRange(ws['!ref']);
+
+      const lastRowNumber = extractLastNumberFromDataRange(ws['!ref']);
+      for (const col of columns) {
+        // For header style
+        if (ws[`${col}1`]) {
+          ws[`${col}1`].s = {
+            font: {
+              name: 'Calibri',
+              bold: true
+            }
+          };
+        }
+        // For footer style
+        if (lastRowNumber && isFooterPresent) {
+          ws[`${col}${lastRowNumber}`].s = {
+            font: {
+              name: 'Calibri',
+              bold: true
+            }
+          };
+        }
+      }
+
+      // For redirecting to the domain and cell style for links
+      const keys = Object.keys(ws);
+      // const origin = window?.location?.origin;
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (key.includes('!')) continue;
+        if (ws[key].hasOwnProperty('l')) {
+          delete ws[key].l; // this will remove link styles
+
+          //! this section will style links
+          // const data = ws[key];
+          //  data.l.Target = `${origin}${data.l.Target}`;
+          //  ws[key].s = {
+          //    font: {
+          //      name: 'Calibri',
+          //      color: { rgb: '171db1' }
+          //   }
+          //  };
+        }
+      }
+
+      // set column width to header width
+      ws['!cols'] = fitToColumn(columns, ws);
+
+      const name = `${camelCaseToWords(renderedFrom) || 'My Sheet'}-${moment().format(dateTimeFormat)}`;
+      xlsx.utils.book_append_sheet(wb, ws, `Page-${(page ?? 0) + 1}`);
+      xlsx.writeFile(wb, `${name}.xlsx`);
+      setExportTableView(false);
+    }, 0);
+  };
+
   return (
     <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+      {exportTableView && (
+        <div className="hidden [&_.hide-in-export]:!hidden">
+          <TableComponent
+            ref={tableRef}
+            virtualization={virtualization}
+            state={state}
+            setWholeRowsCellColor={() => ''}
+            table={table}
+            dispatch={dispatch}
+            setCellValue={setCellValue}
+            submitInput={submitInput}
+            cellValue={cellValue}
+            resetField={resetField}
+            isClientSideGrid={isClientSideGrid}
+            reorder={reorder}
+            loading={loading}
+            exportTableView={true}
+            error={error}
+            height={height}
+            onRowClick={onRowClick}
+            resource={resource}
+          />
+        </div>
+      )}
+
       <div className="react-table-v8 ">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
+            handleTableExport={handleTableExport}
+            isClientSideGrid={isClientSideGrid}
             resource={resource}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -395,9 +527,9 @@ const CustomReactTable = ({
             selectedReportView={selectedReportView}
             state={state}
             expander={expander}
-            exportTable={exportTable}
+            hideExportTable={hideExportTable}
           />
-          {!isMobileView && (
+          {!isMobileView && !showOnlyMobileView && (
             <div className="relative">
               <TableComponent
                 virtualization={virtualization}
@@ -414,10 +546,12 @@ const CustomReactTable = ({
                 loading={loading}
                 error={error}
                 height={height}
+                onRowClick={onRowClick}
+                resource={resource}
               />
             </div>
           )}
-          {isMobileView && rows ? (
+          {(isMobileView || showOnlyMobileView) && rows ? (
             <SwipableListForMobile
               table={table}
               key={page}
@@ -434,6 +568,7 @@ const CustomReactTable = ({
               cellValue={cellValue}
               setCellValue={setCellValue}
               isClientSideGrid={isClientSideGrid}
+              onRowClick={onRowClick}
             />
           ) : null}
           {(!isClientSideGrid || data?.length > 25) && (

@@ -64,6 +64,11 @@ const FieldList = {
     type: "currencyAmount",
     icon: "far fa-calendar-check",
   },
+  CURRENCYNUMBER: {
+    label: "Currency Number",
+    type: "currencyNumber",
+    icon: "far fa-calendar-check",
+  },
   PERCENT: {
     label: "Percent",
     type: "percent",
@@ -162,6 +167,16 @@ const FieldList = {
   LOOKUPDISPLAY: {
     label: "Look Up Display",
     type: "lookUpDisplay",
+    icon: "far fa-calendar-check",
+  },
+  COUNTER: {
+    label: "Counter",
+    type: "counter",
+    icon: "far fa-calendar-check",
+  },
+  DESCRIPTION: {
+    label: "Description",
+    type: "description",
     icon: "far fa-calendar-check",
   },
 };

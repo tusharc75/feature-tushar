@@ -3,7 +3,7 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeysWithValues, getObjKeys, yupSchema, arrayToDropwdownOption } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, arrayToDropwdownOption, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -13,8 +13,8 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { fetch_po_service_fields } from 'src/components/PurchaseOrder/helper';
 import { fetchTaxRate } from './helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, serviceData, bulkEdit, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -29,7 +29,7 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
 
   const fetchField = async () => {
     setInitialData({ fields: [], values: {} });
-    var poFields = await fetch_po_service_fields(purchaseOrderData?.currency);
+    var poFields = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderService, purchaseOrderData?.currency, true)
     setAllFields(JSON.parse(JSON.stringify(poFields)));
     if (bulkEdit) {
       let unitArray: any = [];
@@ -198,9 +198,19 @@ const ServiceDialog = ({ onClose, purchaseOrderData, handleUpdateService, servic
                                           options={field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
-                                            if (field.fieldName === 'taxCode') {
+                                            if (name === 'taxCode') {
                                               const taxCode = field.option?.find((d) => d.optionValue === value);
                                               setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                              const result = autoCalculateSpecificFields(
+                                                { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                                values,
+                                                initialData.fields
+                                              );
+                                              if (Object.keys(result).length >= 1) {
+                                                for (var x in result) {
+                                                  setFieldValue(x, result[x]);
+                                                }
+                                              }
                                             }
                                           }}
                                           required={field.required}

@@ -5,6 +5,7 @@ import TextField from '@material-ui/core/TextField';
 import { map } from 'lodash';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { getLookupOption } from '../helper';
+import { sidebarResource } from 'src/constants/helpers';
 
 export const ResourceDropdown = ({ type, lookupResource, value, setFieldValue, brandId, touched, errors }) => {
   const [lookupOption, setlookupOption] = useState(null);
@@ -14,7 +15,10 @@ export const ResourceDropdown = ({ type, lookupResource, value, setFieldValue, b
   }, [lookupResource]);
 
   const getData = async () => {
-    const data = await getLookupOption(brandId, lookupResource);
+    var data = await getLookupOption(brandId, lookupResource);
+    if (lookupResource === sidebarResource.user) {
+      data = [{ optionLabel: 'Current User', optionValue: 'Current User' }, ...data]
+    }
     setlookupOption(data);
   };
 
@@ -28,15 +32,15 @@ export const ResourceDropdown = ({ type, lookupResource, value, setFieldValue, b
           value={
             value && type === 'multiSelect'
               ? lookupOption?.filter((data) =>
-                  map(value, (optionValue) => {
-                    return optionValue;
-                  })?.includes(data?.optionValue)
-                )
+                map(value, (optionValue) => {
+                  return optionValue;
+                })?.includes(data?.optionValue)
+              )
               : lookupOption?.filter((data) => data?.optionValue === value)?.length > 0
-              ? lookupOption?.filter((data) => data?.optionValue === value)[0]
-              : type === 'multiSelect'
-              ? []
-              : ''
+                ? lookupOption?.filter((data) => data?.optionValue === value)[0]
+                : type === 'multiSelect'
+                  ? []
+                  : ''
           }
           multiple={type === 'multiSelect' ? true : false}
           onChange={(e, val) => {

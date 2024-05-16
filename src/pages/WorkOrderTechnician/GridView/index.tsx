@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, Tab, Tabs } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import { Info } from '@material-ui/icons';
 import DescriptionIcon from '@material-ui/icons/Description';
 import { camelCase } from 'lodash';
@@ -8,6 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
@@ -18,6 +19,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { WORKORDER_SERVICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from 'src/constants/helpers';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import TechnicianDialog from '../TechnicianDialog';
+import axios, { CancelTokenSource } from 'axios';
 
 const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   const renderedFrom = camelCase(routes?.workOrderTechnician.title);
@@ -41,20 +43,22 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   const [selectedService, setSelectedService] = useState(null);
 
   useEffect(() => {
-    setTabValue(serviceStatus[1]);
+    setTabValue(serviceStatus[0]);
   }, [serviceStatus]);
 
   useEffect(() => {
-    fetchGridColumns();
+    const cancelToken = axios.CancelToken.source();
+    fetchGridColumns(cancelToken);
+    return () => cancelToken.cancel();
   }, []);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: string) => {
     setTabValue(newValue);
   };
 
-  const fetchGridColumns = async () => {
+  const fetchGridColumns = async (cancelToken?: CancelTokenSource) => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`, { cancelToken: cancelToken?.token });
     data = response?.data?.data;
 
     const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path);
@@ -147,9 +151,11 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
   };
 
   useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
     if (tabValue) {
-      fetchData();
+      fetchData(cancelToken);
     }
+    return () => cancelToken.cancel();
   }, [page, limit, sorting, tabValue, filterQuery, filters]);
 
   useEffect(() => {
@@ -181,11 +187,11 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
     return deepFilter;
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelToken?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`/work-order-technician${queryString}`)
+      .get(`/work-order-technician${queryString}`, { cancelToken: cancelToken?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
@@ -250,7 +256,7 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
           }}
           disabled={
             selectedRecords?.length &&
-              selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
+            selectedRecords?.filter((s) => s?.serviceStatus === WORKORDER_SERVICE_STATUS.pending && s?.canPerform)?.length === selectedRecords?.length
               ? false
               : true
           }
@@ -265,50 +271,33 @@ const GridView = ({ serviceStatus, filterQuery, permissions }) => {
     <>
       {serviceStatus?.length ? (
         <Box>
-          <Tabs
-            className="new-tab-container-v1"
-            value={tabValue}
-            onChange={handleMainTabChange}
-            textColor="primary"
-            TabIndicatorProps={{
-              style: {
-                height: 0
-              }
-            }}
-          >
+          <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             {serviceStatus?.map((status, i) => {
-              return (
-                <Tab
-                  key={status}
-                  label={<div className="tab-font">{status}</div>}
-                  value={status}
-                  aria-controls={`a11y-tabpanel-${i}`}
-                  id={`a11y-tab-${i}`}
-                  className={'tabLayout'}
-                />
-              );
+              return <CustomTab key={status} label={status} value={status} />;
             })}
-          </Tabs>
+          </CustomTabs>
           <DetailsPageHeader
             isAddButtonVisible={false}
             isActionButtonVisible={true}
             actionButtonMenuItems={actionButtonMenuItems()}
             actionButtonProps={{ disabled: tabValue !== WORKORDER_SERVICE_STATUS.pending || selectedRecords?.length === 0 }}
             rightSideContents={
-              user?.user?.brandPolicy?.workOrderStepDataImport &&
-              <ImportExportMenu
-                permissions={permissions}
-                module={sidebarResource.workOrderTechnician}
-                api={`work-order-technician`}
-                afterImportCompleted={() => {
-                  fetchData();
-                }}
-                disabled={selectedRecords.length !== 1}
-                additionalParams={`${selectedRecords[0]?.repairOrderId
-                  ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
-                  : `productionOrder=${selectedRecords[0]?.productionOrderId}`
+              user?.user?.brandPolicy?.workOrderStepDataImport && (
+                <ImportExportMenu
+                  permissions={permissions}
+                  module={sidebarResource.workOrderTechnician}
+                  api={`work-order-technician`}
+                  afterImportCompleted={() => {
+                    fetchData();
+                  }}
+                  disabled={selectedRecords.length !== 1}
+                  additionalParams={`${
+                    selectedRecords[0]?.repairOrderId
+                      ? `repairOrder=${selectedRecords[0]?.repairOrderId}`
+                      : `productionOrder=${selectedRecords[0]?.productionOrderId}`
                   }&serviceId=${selectedRecords[0]?.serviceId}&uniqueId=${selectedRecords[0]?.uniqueId}`}
-              />
+                />
+              )
             }
             hasXpadding
           />

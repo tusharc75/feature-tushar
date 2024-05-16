@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -8,9 +8,10 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -61,11 +62,8 @@ const IrtTicketDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.irtTicket.path}/${id}`);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+  
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.irtTicket, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setHeadingLbl(data.irtTicketNumber);
       setIrtTicketData(data);
@@ -132,42 +130,12 @@ const IrtTicketDetail = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              height: 0
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={<div className="d-flex align-items-center tab-font">Header</div>}
-            value={0}
-            aria-controls="a11y-tabpanel-0"
-            id="a11y-tab-0"
-          />
-          <Tab
-            className={'tabLayout'}
-            label={<div className="d-flex align-items-center tab-font">Details</div>}
-            value={1}
-            aria-controls="a11y-tabpanel-1"
-            id="a11y-tab-1"
-          />
-          {!(isMobile && !isTablet) && (
-            <Tab
-              className={'tabLayout'}
-              label={<div className="d-flex align-items-center tab-font">Views</div>}
-              value={2}
-              aria-controls="a11y-tabpanel-1"
-              id="a11y-tab-1"
-            />
-          )}
-        </Tabs>
-        {tabValue === 0 && (
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0} label={'Header'} />
+          <CustomTab value={1} label={'Details'} />
+          {!(isMobile && !isTablet) && <CustomTab value={2} label={'Views'} />}
+        </CustomTabs>
+        <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !fields?.length ? (
               <Grid container spacing={2} style={{ padding: '8px' }}>
@@ -177,9 +145,13 @@ const IrtTicketDetail = () => {
               <DetailsPage data={irtTicketData} fields={fields} />
             )}
           </Box>
-        )}
-        {tabValue === 1 && <Approver irtTicketData={irtTicketData} />}
-        {tabValue === 2 && <IrtTicketView id={id} />}
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Approver irtTicketData={irtTicketData} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={2}>
+          <IrtTicketView id={id} />
+        </TabPanel>
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

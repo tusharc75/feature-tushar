@@ -1,13 +1,15 @@
-import React, { useEffect } from 'react';
-import TextField from '@material-ui/core/TextField';
-import { GetComment, PostComment } from '../../../axios/activity';
-import Box from '@material-ui/core/Box';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import { makeStyles } from '@material-ui/core/styles';
-import Grid from '@material-ui/core/Grid';
 import Avatar from '@material-ui/core/Avatar';
+import Box from '@material-ui/core/Box';
+import Button from '@material-ui/core/Button';
+import Grid from '@material-ui/core/Grid';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
+import { makeStyles } from '@material-ui/core/styles';
+import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';
+import React, { useEffect } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import { PostComment } from '../../../axios/activity';
 
 const useStyles = makeStyles((theme) => ({
   marginLeft: {
@@ -62,12 +64,16 @@ export const Comment = ({ referenceId }) => {
   };
 
   useEffect(() => {
-    fetchComment();
+    const cancelToken = axios.CancelToken.source();
+    fetchComment(cancelToken);
+    return () => cancelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const fetchComment = async () => {
-    await GetComment(referenceId)
-      .then(({ data }) => {
+  const fetchComment = async (cancelTokenSource?: CancelTokenSource) => {
+    axiosInstance()
+      .get(`/comment/${referenceId}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setComment(data.comment);
         setCurrentUser(data.currentUser);
       })
@@ -81,8 +87,9 @@ export const Comment = ({ referenceId }) => {
     let data: any = {};
     data.referenceId = referenceId;
     data.content = value;
-    PostComment(data)
-      .then(({ data }) => {
+    axiosInstance()
+      .post('/comment', data)
+      .then(() => {
         setValue('');
         fetchComment();
       })

@@ -14,14 +14,13 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { WORK_ORDER_STATUS, WORK_ORDER_TYPE, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
+import { WORK_ORDER_STATUS, WORK_ORDER_TYPE, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const WorkOrder = () => {
   const types = [
@@ -38,12 +37,11 @@ const WorkOrder = () => {
   let renderedFrom = camelCase(routes?.workOrder.title);
 
   const toastConfig = useContext(CustomToastContext);
-  const history = useHistory();
-  const { type }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
+  const history = useHistory();
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.workOrder));
   const { generateColumns } = useColumns();
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -66,20 +64,12 @@ const WorkOrder = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+      fetchData(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   useEffect(() => {
     dispatch({ type: 'filter', filters: { status: { filter: [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress] } } });
@@ -93,11 +83,11 @@ const WorkOrder = () => {
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${workOrder.api}${queryString}`)
+      .get(`${workOrder.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);

@@ -1,62 +1,24 @@
-import { useState, useEffect } from 'react';
-import { Box, Grid, Typography, Tooltip, Dialog, TextField, IconButton } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
-import { makeStyles } from '@material-ui/core/styles';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
-import { isEqual, kebabCase } from 'lodash';
-import { isMobile, isTablet } from 'react-device-detect';
-import { camelCase } from 'lodash';
-import statusList from '../../Helpers/statusList';
-import { GetBoard } from '../../../../axios/activity';
-import { useData } from '../../../../StateProvider/Provider';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+import { Box, Dialog, IconButton, TextField, Typography } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
-import { BoardList } from './BoardList';
-import { CustomDialogTransition } from '../../../../constants/helpers';
+import { Autocomplete } from '@material-ui/lab';
+import axios, { CancelTokenSource } from 'axios';
+import { camelCase } from 'lodash';
+import { useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useData } from '../../../../StateProvider/Provider';
 import axiosInstance from '../../../../axios/axiosInstance';
-import { CreateTask } from '../../Task/CreateTask';
+import { CustomDialogTransition, addItemAtIndex, changeItemIndex, removeItemAtIndex, sidebarResource } from '../../../../constants/helpers';
+import { get_activity_resource, get_dynamic_resource } from '../../../Activity/Helpers/utils';
 import { CreateCase } from '../../Case/CreateCase';
-import { get_activity_resource } from '../../../Activity/Helpers/utils';
-import { sidebarResource } from '../../../../constants/helpers';
-
-const useStyles = makeStyles((theme) => ({
-  block: {
-    background: 'var(--dark-secondary, #eeeeee)',
-    borderRadius: '4px',
-    minHeight: 'calc(100vh - 33.5vh)',
-    height: '100%'
-  },
-  activityMainBlock: {
-    height: 'calc(100vh - 32vh)',
-    overflow: 'auto'
-  },
-  '.MuiGrid-spacing-xs-1': {
-    width: 'calc(100vw + 14px)'
-  },
-  mediumDevice: {
-    ['@media (min-width:600px)']: {
-      flexGrow: '0',
-      maxWidth: '50%',
-      flexBasis: '50%'
-    },
-    ['@media (min-width:768px)']: {
-      flexGrow: '0',
-      maxWidth: '33.333333%',
-      flexBasis: '33.333333%'
-    },
-    ['@media (min-width:1100px)']: {
-      flexGrow: '0',
-      maxWidth: '25%',
-      flexBasis: '25%'
-    }
-  }
-}));
+import statusList from '../../Helpers/statusList';
+import { CreateTask } from '../../Task/CreateTask';
+import { BoardList } from './BoardList';
 
 const Board = ({ type, filter }) => {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState([]);
-  const classes = useStyles();
   const {
     state: {
       user: { user },
@@ -72,17 +34,39 @@ const Board = ({ type, filter }) => {
   const [click, setClick] = useState(false);
   const [openDialog, setOpenDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+  const getResourceOptions = async () => {
+    const resource: any = [];
+    const dynamicResource = await get_dynamic_resource(true);
+    dynamicResource?.data?.forEach((_r) => {
+      if (permissions[camelCase(_r.resource)]?.isRead) {
+        resource.push({
+          optionLabel: _r.resource,
+          optionValue: camelCase(_r.resource),
+          dynamicResource: true,
+          primaryField: _r?.collaborateToolsField
+        });
+      }
+    });
+
+    setResourceOptions([...get_activity_resource(permissions), ...resource]);
+  };
+
   useEffect(() => {
-    setResourceOptions(get_activity_resource(permissions));
+    getResourceOptions();
   }, []);
 
   useEffect(() => {
-    fetchBoard();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchBoard(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [type, filter]);
 
-  const fetchBoard = () => {
-    GetBoard(type, JSON.stringify(filter))
-      .then(({ data }) => {
+  const fetchBoard = (cancelTokenSource?: CancelTokenSource) => {
+    axiosInstance()
+      .get(`/activity/board?type=${type}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         setActivities(data);
         setLoading(false);
       })
@@ -101,16 +85,32 @@ const Board = ({ type, filter }) => {
   useEffect(() => {
     if (resource && resource?.optionValue) {
       setLoadingResources(true);
-      const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
-      axiosInstance()
-        .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
-        .then(({ data: { data } }) => {
-          setResourceData(data[lookupResource] || []);
-          setLoadingResources(false);
-        })
-        .catch((error) => {
-          setLoadingResources(false);
-        });
+      if (resource?.dynamicResource) {
+        axiosInstance()
+          .get(`dynamic-form`, {
+            headers: {
+              Resource: resource?.optionLabel
+            }
+          })
+          .then(({ data: { data } }) => {
+            setResourceData(data?.map((d) => ({ optionLabel: d[resource?.primaryField], optionValue: d?._id })) || []);
+            setLoadingResources(false);
+          })
+          .catch((error) => {
+            setLoadingResources(false);
+          });
+      } else {
+        const lookupResource = sidebarResource[resource?.optionValue === 'quote' ? 'quoteBuilder' : resource?.optionValue];
+        axiosInstance()
+          .get(`/sa-formbuilder/lookup?lookupResource=${lookupResource}`)
+          .then(({ data: { data } }) => {
+            setResourceData(data[lookupResource] || []);
+            setLoadingResources(false);
+          })
+          .catch((error) => {
+            setLoadingResources(false);
+          });
+      }
 
       return () => {
         setSelectedResourceData(null);
@@ -119,27 +119,40 @@ const Board = ({ type, filter }) => {
     }
   }, [resource]);
 
-  const handleChangeStatus = (activityId: string, status: string, newIndex: string) => {
-    const filterdByStatus = activities.filter((a) => a.status === status);
-    const activityIndex = filterdByStatus.findIndex((a) => a._id === activityId);
+  const onDragEnd = (result: DropResult) => {
+    const { source, destination, draggableId } = result;
+    if (!destination) return;
+    const sourceColumn = [...activities].filter((d) => d.status === source.droppableId);
+    const destinationeColumn = [...activities].filter((d) => d.status === destination.droppableId);
 
-    const updatedState = activities.map((activity: any) => {
-      if (activity._id === activityId && activity.status !== status) {
-        return {
-          ...activity,
-          status
-        };
+    const restOfTheListItems = [];
+    activities.forEach((a) => {
+      if (a.status === source.droppableId || a.status === destination.droppableId) {
+      } else {
+        restOfTheListItems.push(a);
       }
-
-      return activity;
     });
-    if (!isEqual(activities, updatedState)) {
-      setActivities(updatedState);
+
+    let draggedItem = activities.find((a) => a._id === result.draggableId);
+    if (!draggedItem) return;
+    draggedItem.status = destination.droppableId;
+
+    let newDestinationColum = destinationeColumn;
+    let newSourceColumn = sourceColumn;
+
+    // if same column
+    if (source.droppableId === destination.droppableId) {
+      newDestinationColum = changeItemIndex(sourceColumn, draggedItem, source.index, destination.index);
+      setActivities([...restOfTheListItems, ...newDestinationColum]);
+      //
+      return;
+    } else {
+      newDestinationColum = addItemAtIndex(destinationeColumn, draggedItem, destination.index);
+      newSourceColumn = removeItemAtIndex(sourceColumn, source.index);
     }
-    const updatedActivity = updatedState.find((a) => a._id === activityId);
-    if (updatedActivity && updatedActivity.status === status) {
-      updateStatus(activityId, updatedActivity);
-    }
+
+    setActivities([...restOfTheListItems, ...newSourceColumn, ...newDestinationColum]);
+    updateStatus(draggableId, draggedItem);
   };
 
   const updateStatus = (id: string, updatedData: any) => {
@@ -181,11 +194,14 @@ const Board = ({ type, filter }) => {
           />
         )}
       </Box>
-      <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+      <DragDropContext onDragEnd={onDragEnd}>
         <div className=" grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 h-[calc(100vh-32vh)] overflow-auto">
           {statusList.map((data, index) => {
+            const activity = activities.filter(function (o) {
+              return o.status === data.status;
+            });
             return (
-              <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px]`} key={data.status}>
+              <div className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px] group`} key={data.status}>
                 {!loading && (
                   <Box className="bg-[var(--dark-secondary,#f1f5ff)] sticky top-0 z-10 rounded-[8px] px-[13px] py-[14px]">
                     <Typography variant="subtitle2" style={{ width: '50%', fontSize: '0.95rem', fontWeight: 700 }} className=" capitalize">
@@ -197,7 +213,7 @@ const Board = ({ type, filter }) => {
                         ')'}
                     </Typography>
                     {permissions && permissions[type?.toLowerCase()]?.isCreate ? (
-                      <Tooltip title={`Create ${type}`}>
+                      <HtmlTooltip title={`Create ${type}`}>
                         <IconButton
                           size="small"
                           style={{ float: 'right', marginTop: '-25px' }}
@@ -209,7 +225,7 @@ const Board = ({ type, filter }) => {
                         >
                           <Add fontSize="small" />
                         </IconButton>
-                      </Tooltip>
+                      </HtmlTooltip>
                     ) : null}
                   </Box>
                 )}
@@ -218,12 +234,9 @@ const Board = ({ type, filter }) => {
                   selectedResource={selectedResourceData}
                   resource={resource?.optionValue}
                   status={data.status}
-                  activity={activities.filter(function (o) {
-                    return o.status === data.status;
-                  })}
+                  activity={activity}
                   fetchBoard={fetchBoard}
                   type={type}
-                  handleChangeStatus={handleChangeStatus}
                 />
               </div>
             );
@@ -286,7 +299,7 @@ const Board = ({ type, filter }) => {
             ) : null}
           </Dialog>
         </div>
-      </DndProvider>
+      </DragDropContext>
     </>
   );
 };

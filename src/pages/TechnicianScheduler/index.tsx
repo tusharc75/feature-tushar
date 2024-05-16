@@ -9,6 +9,7 @@ function TechnicianScheduler() {
   const [filter, setFilter] = useState({ view: 'Technician View', resource: '', fieldTicket: '' });
 
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState({ open: false, data: null });
+  const [unAssignTechnicianDialog, setUnAssignTechnicianDialog] = useState({ open: false, data: null });
   const [refresh, setRefresh] = useState(false);
 
   const [selectedRecords, setSelectedRecords] = useState([]);
@@ -30,15 +31,21 @@ function TechnicianScheduler() {
           handleAssignTechnician={(data) => {
             setAssignTechnicianDialog({ open: true, data: data });
           }}
+          handleUnAssignTechnician={(data) => {
+            setUnAssignTechnicianDialog({ open: true, data: data });
+          }}
         />
         <ServiceOrder
           assignTechnicianDialog={assignTechnicianDialog}
+          unAssignTechnicianDialog={unAssignTechnicianDialog}
           handleSucess={() => {
             setRefresh(!refresh);
             setAssignTechnicianDialog({ open: false, data: null });
+            setUnAssignTechnicianDialog({ open: false, data: null });
           }}
           handleClose={() => {
             setAssignTechnicianDialog({ open: false, data: null });
+            setUnAssignTechnicianDialog({ open: false, data: null });
           }}
           updateSelectedRecord = {updateSelectedRecord}
         />

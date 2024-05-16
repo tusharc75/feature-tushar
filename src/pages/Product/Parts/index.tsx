@@ -1,10 +1,11 @@
-import { Box, Button, IconButton, Menu, MenuItem, Tooltip } from '@material-ui/core';
-import { Delete, ExpandMore } from '@material-ui/icons';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
+import { Delete } from '@material-ui/icons';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import { isMobile } from 'react-device-detect';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -130,7 +131,7 @@ function Parts({ id }) {
       Cell: ({ row }) => (
         <>
           {hasPermissions && (
-            <Tooltip title="Delete">
+            <HtmlTooltip title="Delete">
               <IconButton
                 size="small"
                 onClick={() => {
@@ -139,7 +140,7 @@ function Parts({ id }) {
               >
                 <Delete fontSize="small" color="error" />
               </IconButton>
-            </Tooltip>
+            </HtmlTooltip>
           )}
         </>
       )
@@ -150,7 +151,6 @@ function Parts({ id }) {
 
   const handleRemove = () => {
     setIsDeleting(true);
-    closeActions();
     const { data } = showConfirmBox;
     if (data.length > 1) {
       data.forEach((p: any) => {
@@ -237,7 +237,7 @@ function Parts({ id }) {
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setOpenAssignProductDialog(true)}>Add Products</MenuItem>
+        <MenuItem onClick={() => setOpenAssignProductDialog(true)}>Add Existing Products</MenuItem>
       </>
     );
   };

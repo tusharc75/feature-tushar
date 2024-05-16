@@ -13,17 +13,15 @@ import {
   Theme,
   Typography,
   createStyles,
-  makeStyles
+  makeStyles,
+  useMediaQuery
 } from '@material-ui/core';
 import { DragHandle } from '@material-ui/icons';
-import { XYCoord } from 'dnd-core';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
 import React, { Dispatch, useEffect, useRef, useState } from 'react';
+import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from '@hello-pangea/dnd';
 import { isMobile, isTablet } from 'react-device-detect';
-import { DndProvider, DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
@@ -35,9 +33,6 @@ const useStyles = makeStyles((theme: Theme) =>
       width: '100%',
       maxHeight: 400,
       backgroundColor: theme.palette.background.paper
-    },
-    cursor: {
-      cursor: 'move'
     }
   })
 );
@@ -53,12 +48,9 @@ interface ArrangeColumnsProps {
   stickycolumns: { left: any[]; right: any[]; stickyColumns: any[] };
 }
 
-const ItemTypes = {
-  CARD: 'card'
-};
-
 const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
-  const { onClose, columns, updateGridHiddenColumns, renderedFrom, dispatch, state, stickycolumns } = props;
+  const isMobileView = useMediaQuery('(max-width:768px)');
+  const { onClose, columns = [], updateGridHiddenColumns, renderedFrom, dispatch, state, stickycolumns } = props;
   const { visibleColumns, columnOrder } = state;
   const isFirstRender = useRef(true);
 
@@ -72,14 +64,14 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [isMinimized, setMinimized] = React.useState(true);
 
   React.useEffect(() => {
-    const tempSortedColumns = columns
-      .filter((c) => !stickycolumns.stickyColumns.includes(c.id))
-      .toSorted((a: any, b: any) => {
+    const tempSortedColumns = [...columns]
+      .filter((c) => !stickycolumns?.stickyColumns?.includes(c.id))
+      ?.sort((a: any, b: any) => {
         return columnOrder?.indexOf(a.id) - columnOrder?.indexOf(b.id);
       });
 
-    setSortedColumns(tempSortedColumns);
-  }, [columnOrder, columns, stickycolumns.stickyColumns]);
+    if (tempSortedColumns) setSortedColumns(tempSortedColumns);
+  }, [columnOrder, columns, stickycolumns?.stickyColumns]);
 
   useEffect(() => {
     if (isFirstRender.current && sortedColumns.length > 0 && visibleColumns) {
@@ -142,9 +134,13 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   };
 
   const moveItem = React.useCallback(
-    (dragIndex: number, hoverIndex: number) => {
+    (result: DropResult) => {
+      if (!result.destination) return;
+      const dragIndex = result.source.index;
+      const dropIndex = result.destination?.index;
+
       const dragCard = sortedColumns[dragIndex];
-      const hoverCard = sortedColumns[hoverIndex];
+      const hoverCard = sortedColumns[dropIndex];
 
       if (dragCard?.accessor === 'action' || dragCard?.accessor === 'selection' || dragCard?.lockPosition) return;
       if (hoverCard?.accessor === 'action' || hoverCard?.accessor === 'selection' || hoverCard?.lockPosition) return;
@@ -152,7 +148,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
       const columnsForGrid = update(sortedColumns, {
         $splice: [
           [dragIndex, 1],
-          [hoverIndex, 0, dragCard]
+          [dropIndex, 0, dragCard]
         ]
       });
       setSortedColumns([...columnsForGrid]);
@@ -170,12 +166,12 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   }, [searchVal]);
 
   return (
-    <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet)}>
+    <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet) || isMobileView}>
       <CustomDialogHeader
         title="Arrange View"
         onClose={onClose}
         showRequiredLabel={false}
-        showManimizeMaximize={true}
+        showManimizeMaximize={isMobileView ? false : true}
         isMinimized={isMinimized}
         onMinimizeMaximize={() => setMinimized((prevState) => !prevState)}
       />
@@ -218,26 +214,36 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
               </ListItemSecondaryAction>
             </ListItem>
           )}
-
           {!searchVal ? (
-            <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
-              {sortedColumns.map(
-                (column, index) =>
-                  column?.accessor !== 'selection' &&
-                  column?.accessor !== 'expander' && (
-                    <RenderListItem
-                      key={column.accessor}
-                      checked={stateVisibleColumns[column.id]}
-                      column={column}
-                      handleToggle={handleToggle}
-                      moveItem={moveItem}
-                      index={index}
-                      accessor={column.accessor}
-                      columns={sortedColumns}
-                    />
-                  )
-              )}
-            </DndProvider>
+            <DragDropContext onDragEnd={moveItem}>
+              <Droppable droppableId="arrangeView">
+                {(provided) => (
+                  <ul className="list-none" {...provided.droppableProps} ref={provided.innerRef}>
+                    {sortedColumns.map((column, index) => (
+                      <Draggable key={column.accessor} draggableId={column.accessor} index={index} isDragDisabled={column.disabled}>
+                        {(provided, snapshot) => (
+                          <li
+                            {...provided.draggableProps}
+                            ref={provided.innerRef}
+                            className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
+                          >
+                            <RenderListItem
+                              key={column.accessor}
+                              dragHandleProps={provided.dragHandleProps}
+                              checked={stateVisibleColumns[column.id]}
+                              column={column}
+                              index={index}
+                              handleToggle={handleToggle}
+                            />
+                          </li>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </ul>
+                )}
+              </Droppable>
+            </DragDropContext>
           ) : searchedColumns.length > 0 ? (
             searchedColumns.map(
               (column, index) =>
@@ -291,97 +297,35 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
 
 interface ItemProps {
   column: any;
-  moveItem: CallableFunction;
   handleToggle: any;
-  accessor: string;
-  index: number;
-  columns: any[];
   checked: boolean;
-}
-
-interface DragItem {
+  dragHandleProps: DraggableProvidedDragHandleProps;
   index: number;
-  accessor: string;
-  type: string;
 }
 
 const RenderListItem = (props: ItemProps) => {
-  const { column, handleToggle, moveItem, accessor, index, columns, checked } = props;
-  const classes = useStyles();
+  const { column, handleToggle, checked, dragHandleProps, index } = props;
 
-  const ref = React.useRef<HTMLDivElement>(null);
-  const [{ handlerId }, drop] = useDrop({
-    accept: ItemTypes.CARD,
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId()
-      };
-    },
-    hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!ref.current) {
-        return;
-      }
-      const dragIndex = item.index;
-      const hoverIndex = index;
-
-      // Don't replace items with themselves
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      // Determine rectangle on screen
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      // Get vertical middle
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      // Determine mouse position
-      const clientOffset = monitor.getClientOffset();
-      // Get pixels to the top
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      // Dragging downwards
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      // Dragging upwards
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveItem(dragIndex, hoverIndex);
-      item.index = hoverIndex;
-    }
-  });
-
-  const [{ isDragging }, drag] = useDrag({
-    type: ItemTypes.CARD,
-    item: () => {
-      return { accessor, index };
-    },
-    collect: (monitor: any) => ({
-      isDragging: monitor.isDragging()
-    })
-  });
-
-  const opacity = isDragging ? 0 : 1;
-  drag(drop(ref));
-
-  return ['left', 'right']?.includes(column?.sticky) ? (
+  return ['left', 'right']?.includes(column?.sticky) || ['selection', 'expander'].includes(column.accessor) ? (
     <div className="d-none"></div>
   ) : (
-    <div ref={ref} style={{ opacity }} data-handler-accessor={handlerId}>
-      <ListItem divider disableGutters disabled={column.disabled}>
-        <ListItemIcon className={`${classes.cursor} pl-2`}>
-          <DragHandle />
-        </ListItemIcon>
-        <ListItemText id={column.accessor} primary={column.header || startCase(column?.accessor)} />
-        <ListItemSecondaryAction>
-          <Switch
-            size="small"
-            disabled={column.disabled}
-            checked={checked}
-            onChange={(e) => {
-              handleToggle(column, e);
-            }}
-          />
-        </ListItemSecondaryAction>
-      </ListItem>
+    <div
+      className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
+        index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+      } ${column.disabled ? ' opacity-65 pointer-events-none' : ''}`}
+    >
+      <ListItemIcon className={` pl-2`} {...dragHandleProps}>
+        <DragHandle />
+      </ListItemIcon>
+      <ListItemText id={column.accessor} primary={column.header || startCase(column?.accessor)} />
+      <Switch
+        size="small"
+        disabled={column.disabled}
+        checked={checked}
+        onChange={(e) => {
+          handleToggle(column, e);
+        }}
+      />
     </div>
   );
 };

@@ -1,9 +1,9 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, Fragment } from 'react';
 import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -12,9 +12,10 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { fetch_po_cost_fields } from '../../../components/PurchaseOrder/helper';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetchTaxRate } from './helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { bulkUpdate } from 'src/components/RentalManagment/helper';
 
 const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCost, costData, bulkEdit, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -29,33 +30,33 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    let poFields = await fetch_po_cost_fields(purchaseOrderData?.currency);
-    setAllFields(JSON.parse(JSON.stringify(poFields)));
+    let data = await fetch_child_resource_fields(CHILD_RESOURCE.purchaseOrderCost, purchaseOrderData?.currency, true);
+    setAllFields(JSON.parse(JSON.stringify(data)));
     if (bulkEdit) {
-      poFields.forEach((element) => {
+      data.forEach((element) => {
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
       });
-      poFields = poFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
-        fields: poFields,
-        values: { ...getObjKeys('', poFields) }
+        fields: data,
+        values: { ...getObjKeys('', data) }
       });
     } else {
       if (costData) {
         setInitialData({
-          fields: poFields,
-          values: getObjKeysWithValues(costData, poFields)
+          fields: data,
+          values: getObjKeysWithValues(costData, data)
         });
       } else {
         setInitialData({
-          fields: poFields,
-          values: getObjKeys('', poFields)
+          fields: data,
+          values: getObjKeys('', data)
         });
       }
     }
-    EvaluteproductFields(poFields);
+    EvaluteproductFields(data);
   };
 
   const EvaluteproductFields = async (fields) => {
@@ -81,15 +82,7 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
   const handleSubmit = (values) => {
     let returnData = [];
     if (bulkEdit) {
-      for (const x in values) {
-        if (values[x] === '' || values[x] === 0 || (Array.isArray(values[x]) && values[x].length === 0)) {
-          delete values[x];
-        }
-      }
-      costData.forEach((element) => {
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-        returnData.push({ _id: element._id, ...element, ...calValues });
-      });
+      returnData = bulkUpdate(values, costData, [], allFields, purchaseOrderData?.currency);
       handleUpdateCost(returnData);
     } else {
       if (!costData) {
@@ -186,9 +179,19 @@ const CostDialog = ({ onClose, purchaseOrderData, handleAddCost, handleUpdateCos
                                           options={field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
-                                            if (field.fieldName === 'taxCode') {
+                                            if (name === 'taxCode') {
                                               const taxCode = field.option?.find((d) => d.optionValue === value);
                                               setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                              const result = autoCalculateSpecificFields(
+                                                { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                                values,
+                                                initialData.fields
+                                              );
+                                              if (Object.keys(result).length >= 1) {
+                                                for (var x in result) {
+                                                  setFieldValue(x, result[x]);
+                                                }
+                                              }
                                             }
                                           }}
                                           required={field.required}

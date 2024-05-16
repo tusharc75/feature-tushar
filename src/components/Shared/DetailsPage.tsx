@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import { GetApp, Image, InfoOutlined, InsertDriveFile } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import { FcApproval } from 'react-icons/fc';
-import { getObjKeysWithValues } from '../../constants/helpers';
+import { formatAmountWithCurrency, getObjKeysWithValues } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -93,7 +93,7 @@ const Details = (props: DetailProps) => {
   const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
   const { data, fields, gridSize, containerPadding, fullHeight = false } = props;
   const [isDownloading, setDownloading] = useState(false);
@@ -170,22 +170,30 @@ const Details = (props: DetailProps) => {
    */
   const normalizeValues = (values, input) => {
     let text = '';
-    if (input.type === 'multiSelect') {
+    if((input.type === 'multiSelect' || input.type === 'dropDown') && input?.dataList){
+      if(input.type === 'multiSelect'){
+        const value = values[`${input?.fieldName}_dataList`]?.length ? values[`${input?.fieldName}_dataList`]?.map((d) => d.optionLabel).join(', ') : ''
+        text = value ? value : '-';
+      } else {
+        const value = values[`${input?.fieldName}_dataList`]?.optionLabel;
+        text = value ? value : '-';
+      }
+    } else if (input.type === 'multiSelect') {
       const filterOptions = input.option?.filter((opt) => values[input.fieldName].includes(opt.optionValue));
       const value =
         typeof values[input.fieldName] === 'string'
           ? values[input.fieldName]
           : filterOptions.length
-          ? filterOptions.map((d) => d.optionLabel).join(', ')
-          : '';
+            ? filterOptions.map((d) => d.optionLabel).join(', ')
+            : '';
       text = value ? value : '-';
     } else if (input.type === 'freeStyleMultiSelect') {
       const value =
         values[input.fieldName].length && Array.isArray(values[input.fieldName])
           ? values[input.fieldName].map((d) => d).join(', ')
           : typeof values[input.fieldName] === 'string'
-          ? values[input.fieldName]
-          : '';
+            ? values[input.fieldName]
+            : '';
 
       text = value ? value : '-';
     } else if (input.type === 'dropDown') {
@@ -195,6 +203,10 @@ const Details = (props: DetailProps) => {
     } else if (input.type === 'currency') {
       const opt = getUniqueCurrencies().find((c) => c.currencyCode === values[input.fieldName]);
       text = opt ? `${opt.currencyCode} - ${opt.currencyName}` : '-';
+    } else if (input.type === 'currencyNumber') {
+      const currency = user?.user?.brandCurrency || 'USD';
+      const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
+      text = `${currencySymbol}${formatAmountWithCurrency(currency, (values[input.fieldName] || 0))?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`
     } else if (input.type === 'switch') {
       text = values[input.fieldName] ? 'Inactive' : 'Active';
     } else if (input.type === 'checkBox') {
@@ -205,6 +217,8 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] ? displayDateTime(values[input.fieldName]) : '-';
     } else if (input.type === 'lookUpDisplay') {
       text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
+    } else if (input.type === 'counter') {
+      text = '-';
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }
@@ -422,36 +436,36 @@ const Details = (props: DetailProps) => {
                               {renderData(initialVals, field.fieldData)}
                               {field.fieldData.type === 'fileUpload'
                                 ? initialVals[field.fieldData.fieldName] &&
-                                  (isDownloading ? (
-                                    <Box display="flex" alignItems="center">
-                                      {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
+                                (isDownloading ? (
+                                  <Box display="flex" alignItems="center">
+                                    {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
 
-                                      <Box marginLeft={1} position="relative" display="inline-flex">
-                                        <CircularProgress size={30} variant="determinate" value={downloadProgress} />
-                                        <Box
-                                          top={0}
-                                          left={0}
-                                          bottom={0}
-                                          right={0}
-                                          position="absolute"
-                                          display="flex"
-                                          alignItems="center"
-                                          justifyContent="center"
-                                        >
-                                          <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
-                                        </Box>
+                                    <Box marginLeft={1} position="relative" display="inline-flex">
+                                      <CircularProgress size={30} variant="determinate" value={downloadProgress} />
+                                      <Box
+                                        top={0}
+                                        left={0}
+                                        bottom={0}
+                                        right={0}
+                                        position="absolute"
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                      >
+                                        <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
                                       </Box>
                                     </Box>
-                                  ) : (
-                                    <IconButton
-                                      title={`Download ${initialVals[field.fieldData.fieldName]}`}
-                                      disabled={isDownloading}
-                                      size="small"
-                                      onClick={() => downloadFile(normalizeValues(initialVals, field.fieldData))}
-                                    >
-                                      <GetApp />
-                                    </IconButton>
-                                  ))
+                                  </Box>
+                                ) : (
+                                  <IconButton
+                                    title={`Download ${initialVals[field.fieldData.fieldName]}`}
+                                    disabled={isDownloading}
+                                    size="small"
+                                    onClick={() => downloadFile(normalizeValues(initialVals, field.fieldData))}
+                                  >
+                                    <GetApp />
+                                  </IconButton>
+                                ))
                                 : null}{' '}
                             </Box>
                           )}

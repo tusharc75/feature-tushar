@@ -3,7 +3,6 @@ import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
 import Button from '@material-ui/core/Button';
-import { AiFillFilePdf } from 'react-icons/ai';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { gridLoadingTimeout, deliveryTicket, sidebarResource, DELIVERY_FROM_TO_TYPE } from '../../constants/helpers';
@@ -13,6 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from '../Helpers/Routes';
 import { Link } from 'react-router-dom';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 
 const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
 
@@ -134,7 +134,7 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
             type="button"
             size="small"
             disabled={downlodingFile || dataRows.length === 0}
-            startIcon={<AiFillFilePdf />}
+            startIcon={<VisibilityIcon />}
           >
             {downlodingFile ? 'Please wait...' : 'Preview'}
           </Button>

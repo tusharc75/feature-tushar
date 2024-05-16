@@ -1,4 +1,4 @@
-import { Box, IconButton, MenuItem, TextField, Tooltip } from '@material-ui/core';
+import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
 import CachedIcon from '@material-ui/icons/Cached';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase } from 'lodash';
@@ -15,8 +15,9 @@ import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { convertInventory, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import InventoryToAsset from './InventoryToAsset';
+import axios, { CancelTokenSource } from 'axios';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-let searchTimeout;
 const ConvertInventory = () => {
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
 
@@ -36,17 +37,6 @@ const ConvertInventory = () => {
 
   const { generateColumns } = useColumns();
 
-  useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      if (warehouseId) {
-        fetchProductInventory();
-      }
-    }, millisec);
-  }, [search]);
 
   useEffect(() => {
     getWarehouse();
@@ -74,36 +64,36 @@ const ConvertInventory = () => {
 
   useEffect(() => {
     if (warehouseId) {
-      fetchProductInventory();
+      const cencelToken = axios.CancelToken.source();
+      fetchProductInventory(cencelToken);
+      return () => cencelToken.cancel();
     }
-  }, [warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
+  }, [search, warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Product&view=true`);
     data = response?.data?.data;
     let columns = [];
-    let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
     columns = [...columns, ...newColumns];
     columns?.forEach((e) => {
       if (!['productName', 'serializedProduct'].includes(e.accessor)) {
         e.show = false;
       }
     });
-
     columns.push({
       accessor: 'availableInventory',
       Header: 'Available Inventory',
       width: 120,
       show: true,
-      sticky: isMobile ? 'none' : 'left',
       Cell: ({ row }) => <p className="text-truncate">{row.original.availableInventory}</p>
     });
-    columns = [...columns, ...getStaticFields(), ActionsRenderer];
+    columns = [...columns, ActionsRenderer];
     setColumns(columns);
   };
 
-  const fetchProductInventory = () => {
+  const fetchProductInventory = (cancelTokenSource?: CancelTokenSource) => {
     if (!warehouseId) {
       dispatch({ type: 'initialize', data: [], count: 0 });
       return;
@@ -112,7 +102,7 @@ const ConvertInventory = () => {
     if (warehouseId) {
       const queryString = getQueryString();
       axiosInstance()
-        .get(`${convertInventory.api}${queryString}`)
+        .get(`${convertInventory.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
             let finalObject = prepareDataForGrid(u, user);
@@ -183,7 +173,7 @@ const ConvertInventory = () => {
         {permissions?.inventoryToAsset?.isUpdate && (
           <Fragment>
             <Box pl={1}>
-              <Tooltip title="Convert Inventory">
+              <HtmlTooltip title="Convert Inventory">
                 <IconButton
                   size="small"
                   aria-label="Clone"
@@ -194,7 +184,7 @@ const ConvertInventory = () => {
                 >
                   <CachedIcon fontSize="small" color="primary" />
                 </IconButton>
-              </Tooltip>
+              </HtmlTooltip>
             </Box>
           </Fragment>
         )}
@@ -230,7 +220,7 @@ const ConvertInventory = () => {
         <ListingPageHeader
           leftSideContents={
             <LeftSideContents
-              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId }}
+              {...{ warehouseOptions, warehouseId, setWarehouseId, setStorageLocationId, user, storageLocationOptions, storageLocationId, dispatch }}
             />
           }
           searchValue={search}
@@ -285,7 +275,8 @@ const LeftSideContents = ({
   setStorageLocationId,
   user,
   storageLocationOptions,
-  storageLocationId
+  storageLocationId,
+  dispatch
 }) => {
   return (
     <>
@@ -303,6 +294,7 @@ const LeftSideContents = ({
         }
         onChange={(e, val) => {
           if (val !== null) {
+            dispatch({ type: 'selection', selectedRecords: [] });
             setWarehouseId(val && val.optionValue ? val.optionValue : '');
             setStorageLocationId(null);
           }

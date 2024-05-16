@@ -23,13 +23,19 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
+import {
+  calculateRowsField,
+  fetch_rental_cost_fields,
+  fetch_rental_product_fields,
+  getNestedSubRows
+} from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AssetAvailability from '../AssetAvailability';
 import AddExistingProductInventory from './AddExistingProductInventory';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
+import AdditionalCostDialog from './AdditionalCostDialog';
 
 const Productpackage = ({
   rentalManagementData,
@@ -63,6 +69,8 @@ const Productpackage = ({
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
+  const [costFields, setCostFields] = useState([]);
+  const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -89,6 +97,8 @@ const Productpackage = ({
 
   const fetchFields = async () => {
     var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
+    setCostFields(fields);
     setAllFields(JSON.parse(JSON.stringify(data)));
   };
 
@@ -169,7 +179,7 @@ const Productpackage = ({
                 {row.original.detail}
               </p>
             )}
-            {
+            {row.original.type !== MATERIAL_TYPE.manualEntry && (
               <Box ml={1} className="d-flex align-items-center">
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
@@ -185,8 +195,8 @@ const Productpackage = ({
                   </HtmlTooltip>
                 )}
               </Box>
-            }
-            {!isOffline && (
+            )}
+            {!isOffline && row.original.type !== MATERIAL_TYPE.manualEntry && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -245,7 +255,7 @@ const Productpackage = ({
               row.original.hideSelection ? (
                 <HtmlTooltip
                   title={
-                    row.original?.assetQty ? 'Asset is already assigned' : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
+                    row.original?.assetQty ? (row?.original?.productDetail?.serializedProduct ? 'Asset is already assigned' : 'Serial Number is already assigned') : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
                   }
                 >
                   <span>
@@ -287,15 +297,22 @@ const Productpackage = ({
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     var data: any = [];
+    var additionalCosts: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
     var nextStepMessage = null;
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
+      // data = data?.additionalCost;
       inventory = data.productInventory;
     } else {
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
+      const additionalData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
       data = response?.data?.data;
+      additionalCosts = additionalData?.data?.data;
+      additionalCosts = additionalCosts?.map((e: any) => {
+        return { ...e, type: MATERIAL_TYPE.manualEntry };
+      });
       setMaterial(JSON.parse(JSON.stringify(data.material)));
       inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
@@ -304,10 +321,10 @@ const Productpackage = ({
     let products = rows.filter((e) => e.type === MATERIAL_TYPE.product && !e?.isConsumbale);
     let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service');
 
-    rows = [...products, ...packages];
+    rows = [...products, ...packages, ...additionalCosts];
 
-    const isPriceRequired = allFields.filter((el) => el.fieldName === 'price' && el.required).length > 0;
-    setIsRateRequired(isPriceRequired)
+    const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
+    setIsRateRequired(isPriceRequired);
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -317,7 +334,9 @@ const Productpackage = ({
           : parent.packageDetail?.packageName
         : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.manualEntry
+            ? parent.detail
+            : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
@@ -326,7 +345,7 @@ const Productpackage = ({
             ? parent?.productDetail?.productDescription || ''
             : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
-              : '';
+              : parent.description;
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
@@ -336,7 +355,8 @@ const Productpackage = ({
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent?.assetQty > 0 ? true : parent?.status ? true : false;
+      parent.hideSelection = parent?.assetQty > 0 ||
+        data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage;
@@ -478,7 +498,22 @@ const Productpackage = ({
         setPriceDataDialog({ open: false, material: null });
       });
   };
-  
+
+  const handleAddCost = (rows) => {
+    setUpdating(true);
+    axiosInstance()
+      .post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/add`, { additionalCost: rows })
+      .then(() => {
+        fetchData();
+        setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+        setUpdating(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setUpdating(false);
+      });
+  };
+
   const handleSaveData = async (rows: any, saveAndNext = false) => {
     setUpdating(true);
     axiosInstance()
@@ -486,15 +521,28 @@ const Productpackage = ({
       .then(() => {
         fetchData();
         if (saveAndNext) {
-          const row = flattenArray(dataRows).find((ele)=>ele._id===rows[0]?._id);
-          if(!row?.parentId){
+          const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
+          if (!row?.parentId) {
             const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
-            setIsProductEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
-          }else{
-            const allSubRowData = flattenArray(dataRows).filter((ele)=>ele.parentId===row.parentId);
+            if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+              setIsProductEdit({
+                open: false,
+                data: null,
+                showSaveAndNext: false
+              });
+              setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            } else {
+              setIsProductEdit({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+            }
+          } else {
+            const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
             const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
-            setIsProductEdit({ open: true, data: allSubRowData[subRowIdx + 1], showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false });
-          }    
+            setIsProductEdit({
+              open: true,
+              data: allSubRowData[subRowIdx + 1],
+              showSaveAndNext: subRowIdx + 1 < allSubRowData?.length - 1 ? true : false
+            });
+          }
         } else {
           setIsProductEdit({ open: false, data: null, showSaveAndNext: false });
         }
@@ -507,41 +555,91 @@ const Productpackage = ({
       });
   };
 
-  const handleDelete = (rows) => {
-    setDeleting(true);
+  const handleSaveCostData = async (rows: any, saveAndNext = false) => {
+    setUpdating(true);
     axiosInstance()
-      .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: rows })
-      .then(() => {
-        setDeleting(false);
+      .put(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/update`, { additionalCost: rows })
+      .then(({ data }) => {
+        setUpdating(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+
+        if (saveAndNext) {
+          const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
+          if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
+            setShowCostDialog({ open: true, data: dataRows[rowIndex + 1], showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          } else {
+            setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+            setIsProductEdit({
+              open: true,
+              data: dataRows[rowIndex + 1],
+              showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+            });
+          }
+        } else {
+          setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+        }
         fetchData();
-        setDeleteData(null);
       })
       .catch((error) => {
-        setDeleting(false);
+        setUpdating(false);
         toastConfig.setToastConfig(error);
-        setDeleteData(null);
       });
+  };
+
+  const handleDelete = (rows) => {
+    setDeleting(true);
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
+    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
+    if (products?.length) {
+      axiosInstance()
+        .put(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/delete`, { ids: products })
+        .then(() => {
+          setDeleting(false);
+          fetchData();
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
+    }
+    if (cost?.length) {
+      axiosInstance()
+        .post(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}/delete`, { ids: cost })
+        .then(() => {
+          fetchData();
+          setDeleting(false);
+          setDeleteData(null);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
+        });
+    }
   };
 
   const openMaterial = (data, rows) => {
     let showSaveAndNext;
-    if(data.depth!=0){
-      const rootParent = data.getParentRows()[0];
-      if(rootParent?.original?.type===MATERIAL_TYPE.package){
-        const allRows = rows.filter((ele)=> ele.parentId===rows.parentId);
-        showSaveAndNext = data?.index < allRows.length-1 ? true : false;
-      }else{
-        showSaveAndNext = false;
-      }   
-    }else{
-      showSaveAndNext = data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false
+    if (data.depth != 0) {
+      const allRows = rows.filter((ele) => ele.parentId === data.parentId);
+      showSaveAndNext = data?.index < allRows.length - 1 ? true : false;
+    } else {
+      showSaveAndNext = data?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && data?.depth === 0 ? true : false;
     }
- 
-    setIsProductEdit({
-      open: true,
-      data: data.original,
-      showSaveAndNext: showSaveAndNext
-    });
+    if (data?.original?.type === MATERIAL_TYPE.manualEntry) {
+      setShowCostDialog({ open: true, data: data.original, showSaveAndNext: data?.index < rows?.length - 1 ? true : false });
+    } else {
+      setIsProductEdit({
+        open: true,
+        data: data.original,
+        showSaveAndNext: showSaveAndNext
+      });
+    }
     setIsBulkEdit(false);
   };
 
@@ -577,7 +675,13 @@ const Productpackage = ({
       }
     });
 
-    if (requiredItems.length > 0) {
+    for (const field of Object.keys(inputField)) {
+      if (inputField[field] === '' || isNaN(inputField[field])) {
+        requiredItems.push(field);
+      }
+    }
+
+    if (requiredItems.length > 0 && updatedData.type !== MATERIAL_TYPE.manualEntry) {
       handleOpen({
         ...updatedData,
         detail: updatedData.type === 'product' ? updatedData?.productDetail?.productName : updatedData?.packageDetail?.packageName
@@ -597,8 +701,7 @@ const Productpackage = ({
           updatedData
         }
       });
-    }
-    else {
+    } else {
       if (inputField.hasOwnProperty('qtyDisplay')) {
         inputField['qty'] = inputField['qtyDisplay'];
         if (rowData.hideSelection && inputField['qty'] < rowData?.assetQty) {
@@ -612,8 +715,13 @@ const Productpackage = ({
         }
       }
       let rows: any = [{ ...rowData, ...updatedData }];
-      rows = await calculateRowsField(material, inputField, allFields, updatedData);
-      handleSaveData(rows);
+      if (updatedData.type === MATERIAL_TYPE.manualEntry) {
+        rows = await calculateRowsField(flattenArray(dataRows), inputField, costFields, updatedData);
+        handleSaveCostData(rows);
+      } else {
+        rows = await calculateRowsField(material, inputField, allFields, updatedData);
+        handleSaveData(rows);
+      }
       setShowConfirmationDialog({ open: false, data: {} });
     }
   };
@@ -649,6 +757,15 @@ const Productpackage = ({
         >
           {`Add Existing ${routes.serializedAsset.title}`}
         </MenuItem>
+        {costFields?.length > 0 && (
+          <MenuItem
+            onClick={() => {
+              setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
+            }}
+          >
+            Add Manual Entry
+          </MenuItem>
+        )}
       </>
     );
   };
@@ -687,6 +804,7 @@ const Productpackage = ({
           placement="top"
         >
           <MenuItem
+            disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
             onClick={() => {
               setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
               setIsBulkEdit(true);
@@ -807,7 +925,7 @@ const Productpackage = ({
       {addExistingAssets && (
         <AssignSerializedAssetDialog
           reference={'rentalJob'}
-          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue }}
+          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue, rentalJob: rentalManagementData._id }}
           isAssigning={isAddingProducts}
           handleClose={() => setAddExistingAssets(false)}
           handleSucess={handleAddAsset}
@@ -904,6 +1022,19 @@ const Productpackage = ({
           handleClose={() => {
             setOpenAssetAvailibility(false);
           }}
+        />
+      )}
+      {showCostDialog.open && (
+        <AdditionalCostDialog
+          onClose={() => {
+            setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
+          }}
+          handleAddCost={handleAddCost}
+          handleUpdateCost={handleSaveCostData}
+          currency={rentalManagementData?.currency}
+          costData={showCostDialog.data}
+          loadingEdit={isUpdating}
+          showSaveAndNext={showCostDialog.showSaveAndNext}
         />
       )}
     </Fragment>

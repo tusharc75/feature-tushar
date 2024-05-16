@@ -17,7 +17,7 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { DELIVERY_FROM_TO_TYPE, deliveryTicket, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { DELIVERY_FROM_TO_TYPE, deliveryTicket, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -39,12 +39,12 @@ const DeliveryTicket = () => {
   let renderedFrom = camelCase(routes?.deliveryTicket.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
   const { generateColumns } = useColumns();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.deliveryTicket));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -70,10 +70,10 @@ const DeliveryTicket = () => {
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.deliveryTicket);
+      data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
     } else {
       const response = await axiosInstance().get(
-        `/field?resource=${sidebarResource['deliveryTicket']}&entity=${selectedEntity}&view=true&showHiddenFields=true`
+        `/field?resource=${sidebarResource.deliveryTicket}&entity=${selectedEntity}&view=true&showHiddenFields=true`
       );
       data = response?.data?.data;
     }
@@ -95,8 +95,8 @@ const DeliveryTicket = () => {
                 row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
                   : row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer
-                  ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
-                  : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
+                    ? `${routes.customerAccountDetail.path}/${row.original?.pickupFromId}`
+                    : `${routes.supplierAccountDetail.path}/${row.original?.pickupFromId}`
               }
             >
               {row.original[column.accessor]}
@@ -115,8 +115,8 @@ const DeliveryTicket = () => {
                 row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
                   ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`
                   : row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer
-                  ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
-                  : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
+                    ? `${routes.customerAccountDetail.path}/${row.original?.deliveryToId}`
+                    : `${routes.supplierAccountDetail.path}/${row.original?.deliveryToId}`
               }
             >
               {row.original[column.accessor]}
@@ -355,7 +355,6 @@ const DeliveryTicket = () => {
             onSearch={handleSearch}
             isActionButtonVisible={false}
             isAddButtonVisible={false}
-            synchronizeType
           />
 
           {columns ? (
@@ -367,7 +366,7 @@ const DeliveryTicket = () => {
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               showOnlyShowFilteredRecordSwitch={true}
-              showFilters={true}
+              showFilters={!isOffline}
               resource={sidebarResource.deliveryTicket}
             />
           ) : (
@@ -385,9 +384,8 @@ const DeliveryTicket = () => {
           {isConfirmDialogVisible ? (
             <ConfirmationDialog
               open={isConfirmDialogVisible}
-              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${
-                deleteRecord.ticketName || ''
-              } ?`}
+              message={`Are you sure you want to delete ${deleteRecord?.ticketName ? 'Delivery Ticket' : routes.deliveryTicket.title}   ${deleteRecord.ticketName || ''
+                } ?`}
               onClose={() => {
                 setDeleteRecord(null);
                 setIsConformDialogVisible(false);

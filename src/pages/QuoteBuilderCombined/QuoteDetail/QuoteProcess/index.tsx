@@ -1,4 +1,4 @@
-import { Button, Dialog, Grid, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import { Button, Dialog, Grid, MenuItem, Typography } from '@material-ui/core';
 import { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AiFillEdit } from 'react-icons/ai';
@@ -6,6 +6,7 @@ import { BiMailSend } from 'react-icons/bi';
 import { GiVintageRobot } from 'react-icons/gi';
 import { useHistory } from 'react-router-dom';
 import ContentFullScreen from 'src/components/ContentFullScreen';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { CustomToastContext } from '../../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../../StateProvider/Provider';
@@ -645,27 +646,25 @@ export default function QuoteProcess(props) {
   const addButtonMenuItems = () => {
     return (
       <>
-        <>
-          <Tooltip title="Add New Product">
-            <MenuItem
-              disabled={!permissions.product?.isCreate}
-              onClick={() => {
-                setIsAddNewProduct(true);
-              }}
-            >
-              Add New Product
-            </MenuItem>
-          </Tooltip>
-          <Tooltip title="Add Existing Product">
-            <Button
-              onClick={() => {
-                setIsAddExistingProduct(true);
-              }}
-            >
-              Add Existing Product
-            </Button>
-          </Tooltip>
-        </>
+        <HtmlTooltip title="Add New Product">
+          <MenuItem
+            disabled={!permissions.product?.isCreate}
+            onClick={() => {
+              setIsAddNewProduct(true);
+            }}
+          >
+            Add New Product
+          </MenuItem>
+        </HtmlTooltip>
+        <HtmlTooltip title="Add Existing Product">
+          <MenuItem
+            onClick={() => {
+              setIsAddExistingProduct(true);
+            }}
+          >
+            Add Existing Product
+          </MenuItem>
+        </HtmlTooltip>
       </>
     );
   };
@@ -709,7 +708,7 @@ export default function QuoteProcess(props) {
       <>
         {[QUOTE_PROCESS_STATUS.sendToCustomer].includes(processStatus) && (
           <>
-            <Tooltip title="AI Suggestion">
+            <HtmlTooltip title="AI Suggestion">
               <Button
                 variant={isMobile && !isTablet ? 'text' : 'outlined'}
                 className="btn-outline-v1"
@@ -722,10 +721,10 @@ export default function QuoteProcess(props) {
               >
                 {isMobile && !isTablet ? '' : 'AI Suggestion'}
               </Button>
-            </Tooltip>
+            </HtmlTooltip>
             {permissions[qbResource]?.isUpdate &&
               (user?.user?._id === quoteData?.owner?.optionValue || quoteData?.collaborator?.some((d) => d?.optionValue === user?.user?._id)) && (
-                <Tooltip title="Edit Quote PDF Template">
+                <HtmlTooltip title="Edit Quote PDF Template">
                   <Button
                     onClick={() => {
                       quoteData?.pDFTemplate.optionValue &&
@@ -742,7 +741,7 @@ export default function QuoteProcess(props) {
                     {isMobile && !isTablet ? <AiFillEdit size={20} /> : ''}
                     {isMobile && !isTablet ? '' : 'Quote Template'}
                   </Button>
-                </Tooltip>
+                </HtmlTooltip>
               )}
           </>
         )}
@@ -889,7 +888,7 @@ export default function QuoteProcess(props) {
             }}
             showManimizeMaximize={true}
           />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <div className="text-align-center">
               <Typography variant="h4">Under Construction </Typography>
               <img alt="image" src={`${PerformanceTuningImg}`} style={{ height: '300px' }} />
@@ -938,7 +937,7 @@ export default function QuoteProcess(props) {
             showManimizeMaximize={true}
             showRequiredLabel={false}
           />
-          <CustomDialogContent>
+          <CustomDialogContent isFooterPresent={false}>
             <Grid item className="quoteHeader">
               <div className={redCard ? 'quoteBox quoteRed' : 'quoteBox quoteProfit'}>
                 <span className="quoteAmount" title={totalProfit.fullFormatAmount}>

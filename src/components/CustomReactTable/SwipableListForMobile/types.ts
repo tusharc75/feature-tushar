@@ -17,4 +17,5 @@ export type TSwipableListInputProps = {
   cellValue: any;
   setCellValue: any;
   isClientSideGrid: boolean;
+  onRowClick?: (row: Row<any>) => void;
 };

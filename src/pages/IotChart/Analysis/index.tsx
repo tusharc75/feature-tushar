@@ -34,7 +34,7 @@ const Analysis = ({ assetId, dataPoints }: { assetId: string; dataPoints: any[] 
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
     to: new Date(),
-    intervals: '1hour'
+    intervals: 'perCycle'
   });
 
   const [searchValue, setSearchValue] = useState('');

@@ -1,5 +1,6 @@
-import { Box, Chip, Dialog, IconButton, MenuItem, Tooltip, Typography } from '@material-ui/core';
+import { Box, Chip, Dialog, IconButton, MenuItem, Typography } from '@material-ui/core';
 import { Delete as DeleteIcon } from '@material-ui/icons';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase, uniqBy } from 'lodash';
 import { FC, useContext, useEffect, useState } from 'react';
 import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
@@ -22,13 +23,11 @@ import NoDataCell from '../../components/Helpers/NoDataCell';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
+import { checkSuperAdminAccess, gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
 import ApprovalProcessDialog from './ApprovalProcessDialog';
 import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
 import UserSetupDialog from './UserSetupDialog';
-
-let searchTimeout: ReturnType<typeof setTimeout>;
 
 const User: FC = () => {
   const renderedFrom = camelCase(routes?.user.title);
@@ -89,7 +88,10 @@ const User: FC = () => {
                 {row?.original?.regionalWideRole}
               </Link>
               {row?.original?.restRegionalWideRoles.length > 0 && (
-                <span className="createdAtTime badge-date">{`+${row?.original?.restRegionalWideRoles.length} more..`}</span>
+                <span className="createdAtTime badge-date">
+                  <span className="hidden">&nbsp;&nbsp;</span>
+                  {`+${row?.original?.restRegionalWideRoles.length} more..`}
+                </span>
               )}
             </h5>
           </>
@@ -107,17 +109,17 @@ const User: FC = () => {
       Cell: ({ row }) => (
         <div style={{ width: 150 }}>
           {row?.original?.status ? (
-            <Tooltip title="Inactive">
+            <HtmlTooltip title="Inactive">
               <Typography>
                 <FaUserAltSlash className="text-error ml-2" />
               </Typography>
-            </Tooltip>
+            </HtmlTooltip>
           ) : (
-            <Tooltip title="Active">
+            <HtmlTooltip title="Active">
               <Typography>
                 <FaUserCheck className="text-success ml-2" />
               </Typography>
-            </Tooltip>
+            </HtmlTooltip>
           )}{' '}
         </div>
       )
@@ -219,21 +221,12 @@ const User: FC = () => {
   };
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-
-    searchTimeout = setTimeout(() => {
-      fetchUsers();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchUsers();
+      const cencelToken = axios.CancelToken.source();
+      fetchUsers(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, filters, sorting, entityRoleRedirectDetails, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, entityRoleRedirectDetails, showFilteredRecordsOnly]);
 
   const fetchLoggedInUserRole = async () => {
     let roleIds = [];
@@ -269,12 +262,12 @@ const User: FC = () => {
       });
   };
 
-  const fetchUsers = () => {
+  const fetchUsers = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`/user${queryString}`)
+      .get(`/user${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           const { createdBy, updatedBy, role, entities, ...restProperties } = u;
@@ -592,7 +585,7 @@ const User: FC = () => {
           Reset Password
         </MenuItem>
         <MenuItem
-          disabled={!user?.role?.selectedEntity?.superAdminAccess}
+          disabled={!checkSuperAdminAccess(user, sidebarResource.user)}
           onClick={() => {
             handleEmailVisibility(true);
           }}
@@ -600,7 +593,7 @@ const User: FC = () => {
           Hide Email
         </MenuItem>
         <MenuItem
-          disabled={!user?.role?.selectedEntity?.superAdminAccess}
+          disabled={!checkSuperAdminAccess(user, sidebarResource.user)}
           onClick={() => {
             handleEmailVisibility(false);
           }}
@@ -733,7 +726,6 @@ const User: FC = () => {
             }}
             isAddButtonVisible
             setQueryString={false}
-            synchronizeType={false}
           />
 
           {columns ? (

@@ -7,7 +7,7 @@ import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, checkIsAllowedToEdit, dateFormat, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -16,13 +16,15 @@ import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { fetch_invoice_product_fields } from 'src/components/Invoice/helper';
 import { camelCase, startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import moment from 'moment';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { useData } from 'src/StateProvider/Provider';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
 
@@ -41,6 +43,11 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const { generateColumns } = useColumns();
   const [allFields, setAllFields] = useState([]);
 
+  const {
+    state: { user, permissions }
+  }: any = useData();
+
+  const [allowedToEdit, setAllowedToEdit] = useState(checkIsAllowedToEdit(user, sidebarResource.invoice, invoiceData?.orignalData) && permissions?.invoice?.isUpdate);
 
   useEffect(() => {
     fetchFields();
@@ -54,10 +61,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
 
   const fetchFields = async () => {
     try {
-      let data = await fetch_invoice_product_fields(invoiceData?.currency);
-      data?.forEach((e) => {
-        e.isColumnEditable = false;
-      });
+      let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
       setAllFields(JSON.parse(JSON.stringify(data)));
       const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, invoiceData?.currency);
       var column: any = [
@@ -82,15 +86,15 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
             row.original['type'] ? (
               <p>
                 {`${startCase(row.original?.type)} `}
-                {row.original['type'] === 'product'
+                {row.original['type'] === MATERIAL_TYPE.product
                   ? row.original?.productDetail?.serializedProduct
                     ? '(Serialized)'
                     : '(Non-Serialized)'
-                  : row.original?.type === 'package'
+                  : row.original?.type === MATERIAL_TYPE.package
                     ? row.original?.packageDetail.packageType === 'Product'
                       ? '(Product)'
                       : '(Service)'
-                    : row.original.type === 'service'
+                    : row.original.type === MATERIAL_TYPE.service
                       ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                       : ''}
               </p>
@@ -110,16 +114,16 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
               <p className="text-truncate" title={row.original?.detail}>
                 {row.original?.detail}
               </p>
-              {row.original['type'] !== 'manualEntry' && (
+              {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
                 <Box ml={1}>
                   <IconButton
                     size="small"
                     onClick={() => {
-                      if (row.original.type === 'service') {
+                      if (row.original.type === MATERIAL_TYPE.service) {
                         window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === 'product') {
+                      } else if (row.original.type === MATERIAL_TYPE.product) {
                         window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === 'serializedAsset') {
+                      } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
                       } else {
                         window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -154,7 +158,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
         canDrag: false,
         Cell: ({ row }) => (
           <Grid container spacing={1}>
-            {row.original.isEditable && row.original.qty > 1 && (
+            {row.original['type'] !== MATERIAL_TYPE.other && row.original.isEditable && row.original.qty > 1 && (
               <>
                 <IconButton
                   size="small"
@@ -168,18 +172,23 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 <Box ml={1} />
               </>
             )}
-            <IconButton
-              disabled={!invoiceData?.isLatestInvoice}
-              size="small"
-              aria-label="Details"
-              onClick={() => {
-                const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                getNestedSubRows(obj, row.original);
-                setViewBillDialogConfirm({ open: true, rows: obj });
-              }}
-            >
-              <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
-            </IconButton>
+            {
+              row.original['type'] !== MATERIAL_TYPE.other && (
+                <IconButton
+                  disabled={!invoiceData?.isLatestInvoice}
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                    getNestedSubRows(obj, row.original);
+                    setViewBillDialogConfirm({ open: true, rows: obj });
+                  }}
+                >
+                  <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
+                </IconButton>
+              )
+            }
+
           </Grid>
         )
       });
@@ -203,22 +212,22 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'product'
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
         ? parent.productDetail?.productName
-        : parent.type === 'package'
+        : parent.type === MATERIAL_TYPE.package
           ? parent.packageDetail?.packageName
-          : parent.type === 'serializedAsset'
+          : parent.type === MATERIAL_TYPE.serializedAsset
             ? parent.serializedAssetDetail?.assetNumber
             : parent.serviceDetail?.serviceName
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
-              : parent.type === 'serializedAsset'
+              : parent.type === MATERIAL_TYPE.serializedAsset
                 ? `${parent.serializedAssetDetail?.product?.optionLabel}-${parent.serializedAssetDetail?.product?.productDescription || ''}`
                 : '';
       parent.isEditable = ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ? false : true;
@@ -228,8 +237,9 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     if (additionalCostData?.length > 0) {
       additionalCostData?.forEach((element) => {
         element.index = rows.length + 1;
-        element.detail = element.costType;
-        element.type = 'manualEntry';
+        element.detail = element.detail;
+        element.description = element.description;
+        element.type = MATERIAL_TYPE.manualEntry;
         element.qtyDisplay = element.qty;
         element.materialId = element?._id;
         element.parentId = null;
@@ -245,26 +255,31 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === 'product'
+      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
         ? _subRow?.productDetail?.productName
-        : _subRow?.type === 'package'
+        : _subRow?.type === MATERIAL_TYPE.package
           ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === 'serializedAsset'
+          : _subRow?.type === MATERIAL_TYPE.serializedAsset
             ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.serviceDetail?.serviceName
+            : _subRow?.type === MATERIAL_TYPE.service
+              ? _subRow?.serviceDetail?.serviceName
+              : _subRow?.type === MATERIAL_TYPE.other
+                ? _subRow.detail
+                : ''
         }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
-              : _subRow.type === 'serializedAsset'
+              : _subRow.type === MATERIAL_TYPE.serializedAsset
                 ? _subRow.serializedAssetDetail?.product?.productDescription || ''
                 : '';
       _subRow.isEditable = false;
-      _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.qtyDisplay = _subRow?.type === MATERIAL_TYPE.other ? '' : `${parent.qtyDisplay * _subRow.qty}`;
+      _subRow.hideSelection = _subRow?.type === MATERIAL_TYPE.other ? true : false
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -385,8 +400,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 state={state}
                 dispatch={dispatch}
                 refreshGrid={fetchData}
-                hideSelection={false}
-                hideAction={false}
+                hideSelection={!allowedToEdit}
+                hideAction={!allowedToEdit}
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
                 expander={true}

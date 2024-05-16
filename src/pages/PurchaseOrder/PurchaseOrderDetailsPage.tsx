@@ -21,7 +21,15 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, PURCHASE_ORDER_STATUS, purchaseOrder, purchaseOrderSteps } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  PURCHASE_ORDER_STATUS,
+  checkIsAllowedToEdit,
+  purchaseOrder,
+  purchaseOrderSteps,
+  sidebarResource
+} from '../../constants/helpers';
+import Step from '../DynamicForm/Step';
 import Invoice from './Invoice';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import Product from './Product';
@@ -43,22 +51,13 @@ const PurchaseOrderDetailsPage = () => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [purchaseOrderFields, setPurchaseOrderFields] = useState([]);
-  const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [currentStep, setCurrentStep] = useState(null);
-
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
   const [nextStep, setNextStep] = useState(true);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
+  const [resourceData, setResourceData] = useState(null);
 
   const purchaseOrderStepNames = React.useMemo(() => {
     return purchaseOrderSteps.map((item) => item.name);
@@ -79,6 +78,7 @@ const PurchaseOrderDetailsPage = () => {
     if (id) {
       getPurchaseOrderFields();
       fetchPurchaseOrderData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -94,11 +94,8 @@ const PurchaseOrderDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+     
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseOrder, data));
       setPurchaseOrderData(data);
       if (data?.status === PURCHASE_ORDER_STATUS.closed) {
         setCurrentStep(purchaseOrderSteps?.length - 1);
@@ -116,18 +113,23 @@ const PurchaseOrderDetailsPage = () => {
       .get('/field?resource=Purchase Order')
       .then(({ data }) => {
         setPurchaseOrderFields(data.data);
-        if (data.data && data.data.length) {
-          data.data.some((o) => {
-            if (o?.fieldData?.fieldName === 'status') {
-              setStatusOptions([...o.fieldData.option]);
-              return true;
-            }
-          });
-        }
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.purchaseOrder}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const handleOpenUpdateDialog = () => {
@@ -145,18 +147,6 @@ const PurchaseOrderDetailsPage = () => {
         toastConfig.setToastConfig(error);
         setShowConfirmBox(false);
       });
-  };
-
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleStatusChange = (o) => {
-    updateStatus(o.optionValue);
   };
 
   const updateProcessStatus = async (processStatus) => {
@@ -251,7 +241,7 @@ const PurchaseOrderDetailsPage = () => {
                     onClick={() => updateStatus(PURCHASE_ORDER_STATUS.received)}
                     disabled={permissions?.purchaseOrder?.isUpdate && allowedToEdit ? false : true}
                   >
-                    {isMobile && !isTablet ? <Edit /> : 'Reopen'}
+                    {isMobile && !isTablet ? <Edit /> : 'Re-Open'}
                   </Button>
                 </span>
               </HtmlTooltip>
@@ -266,22 +256,27 @@ const PurchaseOrderDetailsPage = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0} {...a11yProps(0)}>
+          <CustomTab value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Header
           </CustomTab>
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={1} {...a11yProps(1)}>
+            <CustomTab value={1}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
             </CustomTab>
           )}
           {purchaseOrderData?.deleted ? null : (
-            <CustomTab index={3} {...a11yProps(3)}>
+            <CustomTab value={2}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Invoice
             </CustomTab>
           )}
-          {purchaseOrderData?.deleted && isMobile && !isTablet ? null : (
-            <CustomTab className={'tabLayout'} index={2} {...a11yProps(2)}>
+          {purchaseOrderData?.deleted || (isMobile && !isTablet) ? null : (
+            <CustomTab value={3}>
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
+            </CustomTab>
+          )}
+          {resourceData && resourceData?.steps?.length && (
+            <CustomTab value={4}>
+              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
             </CustomTab>
           )}
         </CustomTabs>
@@ -326,7 +321,6 @@ const PurchaseOrderDetailsPage = () => {
                   {currentStep === 1 && (
                     <ReceivingAsset
                       purchaseOrderData={purchaseOrderData}
-                      updateStatus={updateStatus}
                       renderedFrom={`${renderedFrom}_grid-4`}
                       stepFullScreen={stepFullScreen}
                       allowedToEdit={allowedToEdit}
@@ -342,9 +336,16 @@ const PurchaseOrderDetailsPage = () => {
           <Box>{purchaseOrderData && <Invoice allowedToEdit={allowedToEdit} purchaseOrderData={purchaseOrderData} />}</Box>
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
-          <Box>
-            <PurchaseOrderViews pName={purchaseOrderData?.purchaseOrderNumber} pId={id} pStatus={purchaseOrderData?.status} />
-          </Box>
+          <Box>{purchaseOrderData && <PurchaseOrderViews purchaseOrderData={purchaseOrderData} />}</Box>
+        </TabPanel>
+        <TabPanel value={tabValue} index={4}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.purchaseOrder}
+            data={purchaseOrderData}
+            allowedToEdit={permissions?.purchaseOrder?.isUpdate}
+          />
         </TabPanel>
       </Box>
       {showConfirmBox && (

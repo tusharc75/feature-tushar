@@ -1,35 +1,36 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
-import { IconButton, Tooltip } from '@material-ui/core';
+import { Box, Grid, IconButton } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import { Formik, Form } from 'formik';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import Dialog from '@material-ui/core/Dialog';
+import AddIcon from '@material-ui/icons/AddCircle';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import Dialog from '@material-ui/core/Dialog';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../components/Helpers/CustomButton';
+import FormTypes from '../../components/Helpers/FormTypes';
 import routes from '../../components/Helpers/Routes';
-import { isMobile, isTablet } from 'react-device-detect';
+import CreateProduct from '../../components/Product/CreateProduct';
 import {
-  CustomDialogTransition,
+  ASSET_NUMBER_TYPE,
   ASSET_STATUS,
+  CustomDialogTransition,
+  getObjKeys,
+  getObjKeysWithValues,
   serializedAsset,
   setFieldsInAscendingOrder,
-  supplierAccount,
-  ASSET_NUMBER_TYPE
+  yupSchema
 } from '../../constants/helpers';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
-import FormTypes from '../../components/Helpers/FormTypes';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import AddIcon from '@material-ui/icons/AddCircle';
-import { FaDiceOne } from 'react-icons/fa';
-import { useData } from '../../StateProvider/Provider';
 import CreateProductCategory from '../ProductCategory/CreateProductCategory';
-import CreateProduct from '../../components/Product/CreateProduct';
-import { isEqual } from 'lodash';
 
 const ManageSerializedAsset = ({
   isClone = false,
@@ -64,9 +65,7 @@ const ManageSerializedAsset = ({
     axiosInstance()
       .get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
-        data = data.filter(
-          (d) => !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName)
-        );
+        data = data.filter((d) => !['currentOwnerType', 'currentOwner', 'purchaseOrder', 'bulkAssetCreation'].includes(d.fieldData.fieldName));
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         var fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -84,12 +83,26 @@ const ManageSerializedAsset = ({
             .get(`${serializedAsset.api}/` + productInventoryId)
             .then(({ data: { data } }) => {
               if (isClone) {
-                const { _id, createdBy, updatedBy, assetNumber, mtrAttached, mtrAttachedBy, mtrAttachedDate,
-                  certificateAttached, certificateIssueDate, certificateExpiryDate, ...rest } = data;
+                const {
+                  _id,
+                  createdBy,
+                  updatedBy,
+                  assetNumber,
+                  mtrAttached,
+                  mtrAttachedBy,
+                  mtrAttachedDate,
+                  certificateAttached,
+                  certificateIssueDate,
+                  certificateExpiryDate,
+                  ...rest
+                } = data;
                 setCloneHeading(assetNumber);
                 let oldValues = { ...rest };
                 oldValues.status = fieldsDataForUpdate?.find((e) => e.fieldName === 'status')?.defaultValue || ASSET_STATUS.new;
-                oldValues.assetNumber = fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
+                oldValues.assetNumber =
+                  data.assetNumberType === ASSET_NUMBER_TYPE.manual
+                    ? ''
+                    : fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
@@ -118,12 +131,12 @@ const ManageSerializedAsset = ({
           if (productCategory && fieldsDataForCreate.some((e) => e.fieldName === 'productCategory')) {
             createValues['productCategory'] = productCategory;
           }
-          const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpiryDate']
+          const keyClear = ['recertDate', 'mtrAttachedDate', 'certificateIssueDate', 'certificateExpiryDate'];
           keyClear?.forEach((key) => {
             if (fieldsDataForCreate.some((e) => e.fieldName === key)) {
               createValues[key] = '';
             }
-          })
+          });
           if (referenceType === 'repairOrder' || referenceType === 'repairJob') {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'customerAccount') && referenceData?.customerAccount) {
               createValues['customerAccount'] = referenceData?.customerAccount;
@@ -149,6 +162,9 @@ const ManageSerializedAsset = ({
             if (warehouseAddress && fieldsDataForCreate.some((e) => e.fieldName === 'currentLocation')) {
               createValues['currentLocation'] = warehouseAddress?.address;
             }
+          }
+          if (createValues['assetNumberType'] === ASSET_NUMBER_TYPE.manual) {
+            createValues['assetNumber'] = '';
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
@@ -248,16 +264,24 @@ const ManageSerializedAsset = ({
                                         <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
-                                            disabled={productId ? true :
-                                              Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
+                                            disabled={
+                                              productId
+                                                ? true
+                                                : Boolean(productInventoryId) && !isClone
+                                                ? field.disableOnEdit || field.isUneditable
+                                                : field.isUneditable
+                                            }
                                             values={values}
                                             errors={errors}
                                             touched={touched}
                                             label={field.fieldLabel}
                                             name={field.fieldName}
                                             type={field.type}
-                                            options={values['productCategory'] ?
-                                              productTypeOptions?.filter((e) => e?.productCategory === values['productCategory']) : productTypeOptions}
+                                            options={
+                                              values['productCategory']
+                                                ? productTypeOptions?.filter((e) => e?.productCategory === values['productCategory'])
+                                                : productTypeOptions
+                                            }
                                             required={field.required}
                                             fullWidth
                                             isTooltip={field?.isTooltip || false}
@@ -284,7 +308,7 @@ const ManageSerializedAsset = ({
                                         </Box>
                                         {permissions?.product?.isCreate && (
                                           <Box className="ml-1 mt-1">
-                                            <Tooltip title={`Add ${routes.product.title}`}>
+                                            <HtmlTooltip title={`Add ${routes.product.title}`}>
                                               <IconButton
                                                 onClick={() => {
                                                   setProductOpen({ open: true, isClone: false });
@@ -293,12 +317,20 @@ const ManageSerializedAsset = ({
                                                 size="small"
                                               >
                                                 <AddIcon
-                                                  color={productId ? 'disabled' :
-                                                    Boolean(productInventoryId) && !isClone ? (field.disableOnEdit || field.isUneditable) ?
-                                                      'disabled' : 'primary' : field.isUneditable ? 'disabled' : 'primary'}
+                                                  color={
+                                                    productId
+                                                      ? 'disabled'
+                                                      : Boolean(productInventoryId) && !isClone
+                                                      ? field.disableOnEdit || field.isUneditable
+                                                        ? 'disabled'
+                                                        : 'primary'
+                                                      : field.isUneditable
+                                                      ? 'disabled'
+                                                      : 'primary'
+                                                  }
                                                 />
                                               </IconButton>
-                                            </Tooltip>
+                                            </HtmlTooltip>
                                           </Box>
                                         )}
                                       </Box>
@@ -309,8 +341,13 @@ const ManageSerializedAsset = ({
                                         <Box flexGrow={1}>
                                           <FormTypes
                                             {...field}
-                                            disabled={productCategory ? true :
-                                              Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
+                                            disabled={
+                                              productCategory
+                                                ? true
+                                                : Boolean(productInventoryId) && !isClone
+                                                ? field.disableOnEdit || field.isUneditable
+                                                : field.isUneditable
+                                            }
                                             values={values}
                                             errors={errors}
                                             touched={touched}
@@ -335,22 +372,35 @@ const ManageSerializedAsset = ({
                                         </Box>
                                         {permissions?.productCategory?.isCreate && (
                                           <Box className="ml-1 mt-1">
-                                            <Tooltip title={`Add ${routes?.productCategory?.title}`}>
+                                            <HtmlTooltip title={`Add ${routes?.productCategory?.title}`}>
                                               <IconButton
                                                 onClick={() => {
                                                   setOpen({ open: true, isClone: false });
                                                 }}
-                                                disabled={productCategory ? true :
-                                                  Boolean(productInventoryId) && !isClone ? field.disableOnEdit || field.isUneditable : field.isUneditable}
+                                                disabled={
+                                                  productCategory
+                                                    ? true
+                                                    : Boolean(productInventoryId) && !isClone
+                                                    ? field.disableOnEdit || field.isUneditable
+                                                    : field.isUneditable
+                                                }
                                                 size="small"
                                               >
                                                 <AddIcon
-                                                  color={productCategory ? 'disabled' :
-                                                    Boolean(productInventoryId) && !isClone ? (field.disableOnEdit || field.isUneditable) ?
-                                                      'disabled' : 'primary' : field.isUneditable ? 'disabled' : 'primary'}
+                                                  color={
+                                                    productCategory
+                                                      ? 'disabled'
+                                                      : Boolean(productInventoryId) && !isClone
+                                                      ? field.disableOnEdit || field.isUneditable
+                                                        ? 'disabled'
+                                                        : 'primary'
+                                                      : field.isUneditable
+                                                      ? 'disabled'
+                                                      : 'primary'
+                                                  }
                                                 />
                                               </IconButton>
-                                            </Tooltip>
+                                            </HtmlTooltip>
                                           </Box>
                                         )}
                                       </Box>
@@ -362,7 +412,8 @@ const ManageSerializedAsset = ({
                                       fieldData={field}
                                       values={{
                                         ...values,
-                                        productDescription: productTypeOptions?.find((e) => e.optionValue === values['product'])?.productDescription || ''
+                                        productDescription:
+                                          productTypeOptions?.find((e) => e.optionValue === values['product'])?.productDescription || ''
                                       }}
                                       hidelookupAddButton={true}
                                       errors={errors}
@@ -413,8 +464,8 @@ const ManageSerializedAsset = ({
                                             ? false
                                             : true
                                           : Boolean(productInventoryId) && !isClone
-                                            ? field.disableOnEdit || field.isUneditable
-                                            : field.isUneditable
+                                          ? field.disableOnEdit || field.isUneditable
+                                          : field.isUneditable
                                       }
                                       fieldData={field}
                                       values={values}

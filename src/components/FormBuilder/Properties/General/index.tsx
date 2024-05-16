@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, FormControl, FormControlLabel, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import { Currency } from '../../AddField/currency';
 import { Fragment, useEffect, useState } from 'react';
 import { Autocomplete } from '@material-ui/lab';
@@ -9,22 +9,33 @@ import { Converter } from '../../AddField/converter';
 import { MultipleFormula } from '../../AddField/multipleformula';
 import { Vlookup } from '../../AddField/vlookup';
 import LookUpDisplay from '../LookUpDisplay';
-import { getLookupResource } from '../../helper';
+import { getLookupOption, getLookupResource } from '../../helper';
 import { DecimalPlaces } from '../../AddField/decimalPlaces';
 import { SignatureUser } from '../../AddField/signatureUser';
 import { MinMax } from '../../AddField/minMax';
 import { fieldLabelToFieldName } from '../../../../constants/helpers';
+import SettingsIcon from '@material-ui/icons/Settings';
+import IconButton from '@material-ui/core/IconButton';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import FieldNameDialog from './FieldNameDialog';
+import Description from '../../AddField/description';
+import PreFilter from '../../AddField/preFilter';
+import SubFieldsDialog from './SubFieldsDialog';
 
-const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField }) => {
+const General = ({ values, setFieldValue, fields, fieldData, touched, errors, module, isCalculativeField, handleChangeFieldName }) => {
   const [isInitialUpdated, setIsInitialUpdated] = useState({
     MultipleFormula: false,
     Currency: false,
     Converter: false
   });
   const [lookupResource, setLookupResource] = useState([]);
+  const [changeFieldNameDialog, setChangeFieldNameDialog] = useState(false);
+  const [dataList, setDataList] = useState([]);
+  const [subFieldOpen, setSubFieldOpen] = useState(false);
 
   useEffect(() => {
     getLookupList();
+    getDataList();
   }, []);
 
   const getLookupList = async () => {
@@ -32,24 +43,56 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
     setLookupResource(lookupResource);
   };
 
+  const getDataList = async () => {
+    const dataList = await getLookupOption(null, 'Data List');
+    setDataList(dataList);
+  };
+
+  const handleClick = () => {
+    setChangeFieldNameDialog(true);
+  };
+
   return (
     <Box>
-      <TextField
-        variant="outlined"
-        type="text"
-        label="Field Label"
-        required={true}
-        name="fieldLabel"
-        fullWidth
-        margin="dense"
-        disabled={!values['editAble']}
-        value={values['fieldLabel']}
-        error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
-        helperText={touched['fieldLabel'] && errors['fieldLabel']}
-        onChange={(e) => {
-          setFieldValue('fieldLabel', e.target.value.trimStart());
-        }}
-      />
+      <Grid container spacing={1}>
+        <Grid item xs={10} md={10} sm={10}>
+          <TextField
+            variant="outlined"
+            type="text"
+            label="Field Label"
+            required={true}
+            name="fieldLabel"
+            fullWidth
+            margin="dense"
+            disabled={!values['editAble']}
+            value={values['fieldLabel']}
+            error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
+            helperText={touched['fieldLabel'] && errors['fieldLabel']}
+            onChange={(e) => {
+              setFieldValue('fieldLabel', e.target.value.trimStart());
+            }}
+          />
+        </Grid>
+        <Grid item xs={2} md={2} sm={2} container justify="flex-end">
+          <HtmlTooltip title="Change Field Name">
+            <IconButton aria-label="setting" onClick={handleClick} size="small">
+              <SettingsIcon color="primary" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        </Grid>
+      </Grid>
+      {changeFieldNameDialog && (
+        <FieldNameDialog
+          fieldData={fieldData}
+          handleSave={(data) => {
+            setChangeFieldNameDialog(false);
+            handleChangeFieldName(data);
+          }}
+          handleClose={() => {
+            setChangeFieldNameDialog(false);
+          }}
+        />
+      )}
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
@@ -103,46 +146,46 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         values['type'] === 'converter' ||
         values['type'] === 'percent' ||
         values['type'] === 'currencyAmount') && (
-          <Grid spacing={3} container>
-            {values['type'] === 'formula' && (
-              <Grid item xs={12} sm={6} md={6}>
-                <FormControl fullWidth margin="dense" variant="outlined">
-                  <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-outlined-label"
-                    id="demo-simple-select-outlined"
-                    value={values['returnType']}
-                    onChange={(e) => {
-                      setFieldValue('returnType', e.target.value);
-                    }}
-                    label="Return Type"
-                    name="returnType"
-                  >
-                    <MenuItem value="decimal">Decimal</MenuItem>
-                    <MenuItem value="string">String</MenuItem>
-                    <MenuItem value="boolean">Boolean</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            )}
-            {(values['type'] === 'decimal' ||
-              values['type'] === 'converter' ||
-              values['type'] === 'percent' ||
-              values['type'] === 'currencyAmount' ||
-              values['returnType'] === 'decimal') && (
-                <Grid item xs={12} sm={6} md={6}>
-                  <DecimalPlaces
-                    values={values}
-                    setFieldValue={(name, value) => {
-                      setFieldValue(name, value);
-                    }}
-                  />
-                </Grid>
-              )}
-          </Grid>
-        )}
-      {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && (
-        <Fragment>
+        <Grid spacing={3} container>
+          {values['type'] === 'formula' && (
+            <Grid item xs={12} sm={6} md={6}>
+              <FormControl fullWidth margin="dense" variant="outlined">
+                <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                <Select
+                  labelId="demo-simple-select-outlined-label"
+                  id="demo-simple-select-outlined"
+                  value={values['returnType']}
+                  onChange={(e) => {
+                    setFieldValue('returnType', e.target.value);
+                  }}
+                  label="Return Type"
+                  name="returnType"
+                >
+                  <MenuItem value="decimal">Decimal</MenuItem>
+                  <MenuItem value="string">String</MenuItem>
+                  <MenuItem value="boolean">Boolean</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+          )}
+          {(values['type'] === 'decimal' ||
+            values['type'] === 'converter' ||
+            values['type'] === 'percent' ||
+            values['type'] === 'currencyAmount' ||
+            values['returnType'] === 'decimal') && (
+            <Grid item xs={12} sm={6} md={6}>
+              <DecimalPlaces
+                values={values}
+                setFieldValue={(name, value) => {
+                  setFieldValue(name, value);
+                }}
+              />
+            </Grid>
+          )}
+        </Grid>
+      )}
+      {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && !values['dataList'] && (
+        <Box>
           <FormControlLabel
             control={
               <Checkbox
@@ -198,12 +241,70 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                   setFieldValue(name, value);
                 }}
               />
+              {values['lookupResource'] && <PreFilter lookupResource={values['lookupResource']} values={values} setFieldValue={setFieldValue} />}
             </Box>
           )}
-        </Fragment>
+        </Box>
+      )}
+      {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && !values['lookup'] && (
+        <Box>
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="dataList"
+                checked={values['dataList']}
+                onChange={(e) => {
+                  const val = e.target.checked;
+                  setFieldValue('dataList', val);
+                  if (val) {
+                    setFieldValue('addAdditionalOption', false);
+                    setFieldValue('addManualOptionInExcel', false);
+                    setFieldValue('addBulkOptions', false);
+                  }
+                }}
+                color="primary"
+              />
+            }
+            label="Data List"
+          />
+          {values['dataList'] && (
+            <Box pt={1} pb={1}>
+              <Autocomplete
+                id="dataListId"
+                options={dataList}
+                getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                getOptionSelected={(option: any, val) => option?.optionValue === val}
+                value={
+                  dataList && dataList?.filter((data) => data.optionValue === values['dataListId'])?.length
+                    ? dataList && dataList?.filter((data) => data.optionValue === values['dataListId'])[0]
+                    : ''
+                }
+                onChange={(e: any, value) => {
+                  setFieldValue('dataListId', value && value?.optionValue ? value.optionValue : '');
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    margin="dense"
+                    variant="outlined"
+                    label="Data List"
+                    placeholder="Data List"
+                    name="dataListId"
+                    required
+                    error={touched['dataListId'] && Boolean(errors['dataListId'])}
+                    helperText={touched['dataListId'] && errors['dataListId']}
+                  />
+                )}
+              />
+
+              {values['dataListId'] && <PreFilter dataList={true} dataListId={values['dataListId']} values={values} setFieldValue={setFieldValue} />}
+            </Box>
+          )}
+        </Box>
       )}
       {(values['type'] === 'dropDown' || values['type'] === 'multiSelect' || values['type'] === 'radio' || values['type'] === 'process') &&
-        !values['lookup'] && (
+        !values['lookup'] &&
+        !values['dataList'] && (
           <Option
             values={values}
             setFieldValue={(name, value) => {
@@ -401,6 +502,30 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
       )}
       {fieldData.type === 'signature' && <SignatureUser values={values} setFieldValue={setFieldValue} />}
       {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
+      {fieldData.type === 'description' && <Description values={values} setFieldValue={setFieldValue} />}
+      {fieldData.type === 'counter' && (
+        <Box mt={1}>
+          <Button
+            variant="outlined"
+            size="small"
+            color="primary"
+            onClick={() => {
+              setSubFieldOpen(true);
+            }}
+          >
+            Sub Fields
+          </Button>
+        </Box>
+      )}
+      {subFieldOpen && (
+        <SubFieldsDialog
+          handleClose={() => {
+            setSubFieldOpen(false);
+          }}
+          fields={values?.subFields || []}
+          setFieldValue={setFieldValue}
+        />
+      )}
     </Box>
   );
 };

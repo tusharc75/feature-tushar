@@ -1,14 +1,14 @@
 import { Button, ButtonProps, CircularProgress, Menu, useMediaQuery } from '@material-ui/core';
-import { AddOutlined, ExpandMore, TouchApp } from '@material-ui/icons';
+import { AddOutlined, ExpandMore } from '@material-ui/icons';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import queryString from 'query-string';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
+import { FaCircleChevronDown } from 'react-icons/fa6';
 import { useHistory } from 'react-router-dom';
-import SearchBox from '../Helpers/SearchBox';
-import HideWhenOffline from '../HideWhenOffline';
 import { SearchFilter } from 'src/components/SearchFilter';
 import HtmlTooltip from '../CustomTooltipTitle';
-import { FaCircleChevronDown } from 'react-icons/fa6';
+import SearchBox from '../Helpers/SearchBox';
+import HideWhenOffline from '../HideWhenOffline';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -35,7 +35,6 @@ type ListingPageHeaderProps = {
   addButtonOnclick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isAddButtonVisible: boolean;
   setQueryString?: boolean;
-  synchronizeType?: boolean;
 } & React.ComponentProps<'div'>;
 
 const ListingPageHeader = ({
@@ -60,8 +59,7 @@ const ListingPageHeader = ({
 
   isActionButtonVisible,
   actionButtonProps = {},
-  actionMenuItems,
-  synchronizeType = false
+  actionMenuItems
 }: ListingPageHeaderProps) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
@@ -101,7 +99,7 @@ const ListingPageHeader = ({
 
   useEffect(() => {
     const { type }: any = queryString.parse(history.location.search);
-    if (synchronizeType && setSelectedType) setSelectedType(type ? parseInt(type) : 1);
+    if (type && setSelectedType) setSelectedType(parseInt(type));
 
     return history.listen((location) => {
       if (history.action === 'PUSH') {
@@ -125,7 +123,10 @@ const ListingPageHeader = ({
     if (isMobile) {
       return (
         <>
-          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>{mobileIcon}</span>
+          <span className={`${loading ? 'sr-only' : ''} flex items-center`}>
+            {mobileIcon}
+            {iconText ? iconText : null}
+          </span>
           <CircularProgress size={20} color="inherit" className={`${loading ? '' : 'sr-only'} `} />
         </>
       );
@@ -178,9 +179,8 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${
-            !isLeftSidePresent && isMobile ? '-mt-2' : ''
-          }`}
+          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
+            }`}
         >
           {onSearch ? (
             <HideWhenOffline>
@@ -204,30 +204,31 @@ const ListingPageHeader = ({
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>
               <div className="flex gap-[8px] flex-wrap items-center min-w-fit">
+                {/* <HideWhenOffline> */}
+                {isAddButtonVisible ? (
+                  <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
+                    <Button
+                      variant={'contained'}
+                      color="primary"
+                      size="small"
+                      disabled={addButtonLoading || addButtonDisabled}
+                      {...restOfAddButtonProps}
+                      onClick={(e) => {
+                        addButtonOnclick && addButtonOnclick(e);
+                      }}
+                      className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
+                      startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
+                    >
+                      {renderButtonText({
+                        text: `Add`,
+                        loading: addButtonLoading,
+                        iconText: addButtonText,
+                        mobileIcon: <AddOutlined />
+                      })}
+                    </Button>
+                  </HtmlTooltip>
+                ) : null}
                 <HideWhenOffline>
-                  {isAddButtonVisible ? (
-                    <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
-                      <Button
-                        variant={'contained'}
-                        color="primary"
-                        size="small"
-                        disabled={addButtonLoading || addButtonDisabled}
-                        {...restOfAddButtonProps}
-                        onClick={(e) => {
-                          addButtonOnclick && addButtonOnclick(e);
-                        }}
-                        className={`no-shadow ${addButtonLoading ? '' : ''} min-h-[32px] max-[600px]:[padding:4px_!important]`}
-                        startIcon={isMobile ? null : addButtonIconsEnabled ? <AddOutlined /> : null}
-                      >
-                        {renderButtonText({
-                          text: `Add`,
-                          loading: addButtonLoading,
-                          iconText: addButtonText,
-                          mobileIcon: <AddOutlined />
-                        })}
-                      </Button>
-                    </HtmlTooltip>
-                  ) : null}
                   {isActionButtonVisible ? (
                     <>
                       <HtmlTooltip title={actionButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
@@ -246,7 +247,11 @@ const ListingPageHeader = ({
                             {renderButtonText({
                               text: 'Actions',
                               loading: actionButtonLoading,
-                              mobileIcon: <FaCircleChevronDown size={20} />
+                              mobileIcon: (
+                                <span className="w-[20px] h-[16px]">
+                                  <FaCircleChevronDown size={16} />
+                                </span>
+                              )
                             })}
                           </Button>
                         </span>

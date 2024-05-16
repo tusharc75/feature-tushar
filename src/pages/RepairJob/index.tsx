@@ -1,13 +1,13 @@
-import { Box, Button, Chip, IconButton, Tooltip } from '@material-ui/core';
-import { AddOutlined } from '@material-ui/icons';
+import { Box, Chip, IconButton } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
@@ -16,12 +16,19 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { customerAccount, gridLoadingTimeout, prepareDataForGrid, repairJob, sidebarResource, supplierAccount } from '../../constants/helpers';
+import {
+  customerAccount,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  repairJob,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
 import { findAll, findOne, insertUpdate, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageRepairJob from './ManageRepairJob';
-import { ListingPageHeader } from 'src/components/PageHeaders';
 
 let repairJobTimeout;
 
@@ -44,8 +51,8 @@ const RepairJob = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.repairJob));
   const [renderCount, setRenderCount] = useState(0);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -77,12 +84,12 @@ const RepairJob = () => {
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.repairJob);
+      data = await findOne(objectStore.resource, sidebarResource.repairJob);
     } else {
       const response = await axiosInstance().get(`/field?resource=Repair Job`);
       data = response?.data?.data;
       try {
-        insertUpdate(objectStore.resource, objectStore.repairJob, data);
+        insertUpdate(objectStore.resource, sidebarResource.repairJob, data);
       } catch (ex) {
         console.error(`Repair Job: Error while storing data for Offline context. Error: ${ex.message}`);
       }
@@ -151,7 +158,7 @@ const RepairJob = () => {
     Cell: ({ row }) => (
       <>
         {permissions.repairJob?.isCreate ? (
-          <Tooltip title="Clone">
+          <HtmlTooltip title="Clone">
             <IconButton
               size="small"
               aria-label="Clone"
@@ -161,13 +168,13 @@ const RepairJob = () => {
             >
               <FileCopyIcon fontSize="small" color="primary" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         ) : (
-          <Tooltip className="cursor-stop" title="You do not have permission to clone/create">
+          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
             <IconButton aria-label="Clone" size="small">
               <FileCopyIcon fontSize="small" />
             </IconButton>
-          </Tooltip>
+          </HtmlTooltip>
         )}
       </>
     )
@@ -378,7 +385,7 @@ const RepairJob = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
+            showFilters={!isOffline}
             resource={sidebarResource.repairJob}
           />
         ) : (
@@ -396,9 +403,8 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
-              deleteRecord.repairJobName || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${deleteRecord.repairJobName || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

@@ -1,4 +1,4 @@
-import { Box, Button, Grid, Tab, Tabs } from '@material-ui/core';
+import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
@@ -12,7 +12,8 @@ import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import ContentFullScreen from 'src/components/ContentFullScreen';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import Steps, { getIndex } from 'src/components/Steps';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -22,9 +23,15 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import TabPanel from '../../components/TabPanel';
-import { ACTIVITY_RESOURCE, INVOICE_STATUS, SALES_ORDER_STATUS, salesOrder, salesOrderProcessSteps } from '../../constants/helpers';
-import AdditionalCost from './AdditionalCost';
+import {
+  ACTIVITY_RESOURCE,
+  INVOICE_STATUS,
+  SALES_ORDER_STATUS,
+  checkIsAllowedToEdit,
+  salesOrder,
+  salesOrderProcessSteps,
+  sidebarResource
+} from '../../constants/helpers';
 import Invoice from './Invoice';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import Material from './Material';
@@ -80,13 +87,6 @@ const SalesOrderDetails = () => {
     history.push(`?tab=${newValue}`);
   };
 
-  function a11yProps(index: any) {
-    return {
-      id: `main-tab-${index}`,
-      'aria-controls': `main-tabpanel-${index}`
-    };
-  }
-
   useEffect(() => {
     if (id && steps?.length) {
       getFields();
@@ -103,7 +103,7 @@ const SalesOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -129,11 +129,8 @@ const SalesOrderDetails = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (user?.role?.selectedEntity?.superAdminAccess) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+     
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.salesOrder, data));
       setSalesOrderData(data);
       setLoading(false);
     } catch (error) {
@@ -199,23 +196,22 @@ const SalesOrderDetails = () => {
                       Close
                     </ButtonWithPulse>
                   )}
-                {permissions?.salesOrder?.isUpdate &&
-                  [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      onClick={() => {
-                        if (salesOrderData?.invoice) {
-                          updateJobStatus(SALES_ORDER_STATUS.invoiced);
-                        } else {
-                          updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
-                        }
-                      }}
-                    >
-                      Re-Open
-                    </Button>
-                  )}
+                {permissions?.salesOrder?.isUpdate && [SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
+                  <ThemeButton
+                    variant="contained"
+                    iconForMobile={false}
+                    size="small"
+                    onClick={() => {
+                      if (salesOrderData?.invoice) {
+                        updateJobStatus(SALES_ORDER_STATUS.invoiced);
+                      } else {
+                        updateJobStatus(SALES_ORDER_STATUS.readyToInvoice);
+                      }
+                    }}
+                  >
+                    Re-Open
+                  </ThemeButton>
+                )}
                 {permissions?.salesOrder?.isUpdate && allowedToEdit && ![SALES_ORDER_STATUS.closed].includes(salesOrderData?.status) && (
                   <Button
                     className={'btn-outline-v1'}
@@ -239,47 +235,22 @@ const SalesOrderDetails = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Tabs
-          className="new-tab-container-v1"
-          value={tabValue}
-          onChange={handleMainTabChange}
-          textColor="primary"
-          TabIndicatorProps={{
-            style: {
-              display: 'none'
-            }
-          }}
-        >
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <FaWpforms className="mr-1" fontSize="inherit" /> Header
-              </div>
-            }
-            {...a11yProps(0)}
-          />
-          <Tab
-            className={'tabLayout'}
-            label={
-              <div className="d-flex align-items-center tab-font">
-                <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
-              </div>
-            }
-            {...a11yProps(1)}
-          />
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0}>
+            <FaWpforms className="mr-1" fontSize="inherit" />
+            Header
+          </CustomTab>
+          <CustomTab value={1}>
+            <BiFoodMenu className="mr-1" fontSize="inherit" />
+            Details
+          </CustomTab>
           {!(isMobile && !isTablet) && (
-            <Tab
-              className={'tabLayout'}
-              label={
-                <div className="d-flex align-items-center tab-font">
-                  <RiFlowChart className="mr-1" fontSize="inherit" /> Views
-                </div>
-              }
-              {...a11yProps(2)}
-            />
+            <CustomTab value={2}>
+              <RiFlowChart className="mr-1" fontSize="inherit" />
+              Views
+            </CustomTab>
           )}
-        </Tabs>
+        </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
             {loading || !salesOrderFields.length ? (
@@ -313,17 +284,9 @@ const SalesOrderDetails = () => {
               />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[1].name && salesOrderData && (
-              <AdditionalCost
-                salesOrderData={salesOrderData}
-                setNextStep={setNextStep}
-                stepFullScreen={stepFullScreen}
-                allowedToEdit={allowedToEdit}
-              />
-            )}
-            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[2].name && salesOrderData && (
               <Process salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
             )}
-            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[3].name && salesOrderData && (
+            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[2].name && salesOrderData && (
               <Invoice salesOrderData={salesOrderData} setNextStep={setNextStep} updateJobStatus={updateJobStatus} stepFullScreen={stepFullScreen} />
             )}
           </ContentFullScreen>

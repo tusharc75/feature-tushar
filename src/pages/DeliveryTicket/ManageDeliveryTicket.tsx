@@ -1,43 +1,45 @@
-import { useState, useEffect, useContext, useRef, Fragment } from 'react';
-import { Box, Dialog, Button, Grid, Tooltip, IconButton } from '@material-ui/core';
-import { Formik, Form } from 'formik';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
+import { Box, Button, Dialog, Grid, IconButton } from '@material-ui/core';
+import AddIcon from '@material-ui/icons/AddCircle';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { isMobile, isTablet } from 'react-device-detect';
-import {
-  getOwnerDropdownDataSource,
-  getCollaboratorDropdownDataSource,
-  CustomDialogTransition,
-  setFieldsInAscendingOrder,
-  generateUniqueIdOnly,
-  convertDateInDateTime
-} from './../../constants/helpers';
-import {
-  getObjKeysWithValues,
-  getObjKeys,
-  yupSchema,
-  deliveryTicket,
-  sidebarResource,
-  DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_FROM_TO_TYPE
-} from '../../constants/helpers';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import FormTypes from '../../components/Helpers/FormTypes';
-import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
-import { useData } from '../../StateProvider/Provider';
+import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { isEqual } from 'lodash';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne, findAll, insertUpdate } from '../../constants/indexdbhelper';
-import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
 import CustomButton from '../../components/Helpers/CustomButton';
-import AddIcon from '@material-ui/icons/AddCircle';
-import ManageAddressDialog from '../../components/Address/ManageAddressDialog';
+import FormTypes from '../../components/Helpers/FormTypes';
+import {
+  DELIVERY_FROM_TO_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  deliveryTicket,
+  getObjKeys,
+  getObjKeysWithValues,
+  sidebarResource,
+  yupSchema,
+  restoreObjKeysWithValues
+} from '../../constants/helpers';
+import { findOne, objectStore } from '../../constants/indexdbhelper';
+import {
+  CustomDialogTransition,
+  convertDateInDateTime,
+  generateUniqueIdOnly,
+  getCollaboratorDropdownDataSource,
+  getOwnerDropdownDataSource,
+  setFieldsInAscendingOrder
+} from './../../constants/helpers';
+import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
 
 const ManageDeliveryTicket = ({
   onClose,
@@ -48,7 +50,6 @@ const ManageDeliveryTicket = ({
   referenceData = null,
   assets = null,
   products = null,
-  serialNumber = null
 }) => {
   const {
     state: { user }
@@ -81,23 +82,25 @@ const ManageDeliveryTicket = ({
 
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [addressType, setAddressType] = useState('');
-  const [createDateMin, setCreateDateMin] = useState(new Date())
+  const [createDateMin, setCreateDateMin] = useState(new Date());
 
   useEffect(() => {
-    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && assets?.length) {
-      findValidationDate()
+    if (initialData?.fields?.some((field) => field?.fieldName === 'createDate') && assets?.length) {
+      findValidationDate();
     }
-  }, [initialData, assets])
+  }, [initialData, assets]);
 
   const findValidationDate = async () => {
-    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: 1 })
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: 1 });
     var lastDate: any = new Date();
     if (data?.date) {
       lastDate = new Date(data?.date);
       lastDate.setHours(0, 0, 0);
     }
-    setCreateDateMin(lastDate)
-  }
+    setCreateDateMin(lastDate);
+  };
 
   useEffect(() => {
     const fields = initialData.fields;
@@ -176,8 +179,8 @@ const ManageDeliveryTicket = ({
           if (!warehouse?.find((e) => e.optionValue === deliveryTo) && deliveryToLabel) {
             warehouse.push({
               optionLabel: deliveryToLabel,
-              optionValue: deliveryTo,
-            })
+              optionValue: deliveryTo
+            });
           }
           element.option = warehouse;
         }
@@ -234,7 +237,7 @@ const ManageDeliveryTicket = ({
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.deliveryTicket);
+        data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
       } else {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}`);
         data = response?.data?.data;
@@ -276,7 +279,9 @@ const ManageDeliveryTicket = ({
 
         if ((assets || products) && referenceType && referenceData) {
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
-          } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.storageLocation &&
+          } else if (
+            referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
+            user?.user?.brandPolicy?.storageLocation &&
             user?.user?.brandPolicy?.rentalInventoryDebit
           ) {
             if (ticketType === DELIVERY_TICKET_TYPE.loading) {
@@ -307,27 +312,29 @@ const ManageDeliveryTicket = ({
           tempInitialData['ticketType'] = ticketType;
           tempInitialData['assets'] = [];
           assets?.forEach((ele) => {
-            const obj: any = {}
+            const obj: any = {};
             obj.asset = ele._id;
             if (ele?.uniqueId) {
               obj.uniqueId = ele.uniqueId;
+            }
+            if(ele?.assetData){
+              obj.assetData = ele.assetData;
             }
             tempInitialData['assets'].push(obj);
           });
           tempInitialData['products'] = [];
           products?.forEach((ele) => {
-            const obj: any = {}
+            const obj: any = {};
             obj.product = ele._id;
             obj.qty = ele.qty;
             if (ele?.uniqueId) {
               obj.uniqueId = ele.uniqueId;
             }
+            if (ele?.productSerialNumbers?.length > 0) {
+              obj.serialNumber = ele?.productSerialNumbers?.map(s => s?.serialNumber)
+            }
             tempInitialData['products'].push(obj);
           });
-          tempInitialData['serialNumber'] = [];
-          if (serialNumber) {
-            tempInitialData['serialNumber'] = serialNumber;
-          }
           if (fieldsDataForUpdate.find((d) => d.fieldName === 'wellName') && referenceData?.wellName) {
             tempInitialData['wellName'] = referenceData?.wellName;
           }
@@ -411,10 +418,10 @@ const ManageDeliveryTicket = ({
           }
 
           if (referenceData?.pickupFromType === DELIVERY_FROM_TO_TYPE.customer && tempInitialData['pickupFromAddress']) {
-            setStaticPickupFromAddress(tempInitialData['pickupFromAddress'])
+            setStaticPickupFromAddress(tempInitialData['pickupFromAddress']);
           }
           if (referenceData?.deliveryToType === DELIVERY_FROM_TO_TYPE.customer && tempInitialData['deliveryToAddress']) {
-            setStaticDeliveryToAddress(tempInitialData['deliveryToAddress'])
+            setStaticDeliveryToAddress(tempInitialData['deliveryToAddress']);
           }
         }
         fieldsDataForCreate = updateFieldProperty(
@@ -448,36 +455,7 @@ const ManageDeliveryTicket = ({
     setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
   };
 
-  const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
-    const obj = { ...dataObj };
-    fields.forEach((field) => {
-      if (field.type === 'dropDown' && field.lookup) {
-        let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
-        if (filter.length) {
-          obj[field.fieldName] = {
-            optionLabel: filter[0].optionLabel,
-            optionValue: filter[0].optionValue
-          };
-        }
-      } else if (field.type === 'multiSelect') {
-        if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
-          let option = [];
-          dataObj[field.fieldName].forEach((e: any) => {
-            option.push({
-              optionLabel: e,
-              optionValue: e
-            });
-          });
-          obj[field.fieldName] = option;
-        }
-      } else if (field.type === 'date') {
-        obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
-      } else {
-        obj[field.fieldName] = dataObj[field.fieldName];
-      }
-    });
-    return obj;
-  };
+
 
   const handleSubmit = async (values) => {
     if (isOffline) {
@@ -534,7 +512,7 @@ const ManageDeliveryTicket = ({
 
   function validate(values) {
     const errors = {};
-    if (initialData?.fields?.some(field => field?.fieldName === "createDate") && assets?.length) {
+    if (initialData?.fields?.some((field) => field?.fieldName === 'createDate') && assets?.length) {
       let startDate = moment(values?.pickUpDate);
       let endDate = moment(values?.deliveryDate);
       if (endDate.diff(startDate, 'days') < 0) {
@@ -573,8 +551,11 @@ const ManageDeliveryTicket = ({
     } else if (pickupFromType === DELIVERY_FROM_TO_TYPE.customer) {
       let filterAddress = customerData.find((d) => d.optionValue === pickupFrom)?.shippingAddress;
       if (filterAddress || pickupFromAddress || staticPickupFromAddress) {
-        setPickupFromAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue)
-          || d.optionValue === pickupFromAddress || d.optionValue === staticPickupFromAddress));
+        setPickupFromAddress(
+          addressData.filter(
+            (d) => filterAddress?.some((u) => u === d.optionValue) || d.optionValue === pickupFromAddress || d.optionValue === staticPickupFromAddress
+          )
+        );
       } else {
         setPickupFromAddress([]);
       }
@@ -594,8 +575,11 @@ const ManageDeliveryTicket = ({
     } else if (deliveryToType === DELIVERY_FROM_TO_TYPE.customer) {
       let filterAddress = customerData.find((d) => d.optionValue === deliveryTo)?.shippingAddress;
       if (filterAddress || deliveryToAddress || staticDeliveryToAddress) {
-        setDeliveryToAddress(addressData.filter((d) => filterAddress?.some((u) => u === d.optionValue)
-          || d.optionValue === deliveryToAddress || d.optionValue === staticDeliveryToAddress));
+        setDeliveryToAddress(
+          addressData.filter(
+            (d) => filterAddress?.some((u) => u === d.optionValue) || d.optionValue === deliveryToAddress || d.optionValue === staticDeliveryToAddress
+          )
+        );
       } else {
         setDeliveryToAddress([]);
       }
@@ -699,7 +683,7 @@ const ManageDeliveryTicket = ({
                                       //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
                                       //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                       />
-                                    ) : (field.fieldName === "createDate") ? (
+                                    ) : field.fieldName === 'createDate' ? (
                                       <FormTypes
                                         {...field}
                                         fieldData={field}
@@ -895,7 +879,7 @@ const ManageDeliveryTicket = ({
                                         </Box>
                                         {values['pickupFromType'] !== DELIVERY_FROM_TO_TYPE.plant && (
                                           <Box>
-                                            <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
+                                            <HtmlTooltip title={`Add ${field.fieldLabel}`} className="mt-1">
                                               <IconButton
                                                 onClick={() => {
                                                   setShowAddressDialog(true);
@@ -906,7 +890,7 @@ const ManageDeliveryTicket = ({
                                               >
                                                 <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
                                               </IconButton>
-                                            </Tooltip>
+                                            </HtmlTooltip>
                                           </Box>
                                         )}
                                       </Box>
@@ -940,7 +924,7 @@ const ManageDeliveryTicket = ({
                                         </Box>
                                         {values['deliveryToType'] !== DELIVERY_FROM_TO_TYPE.plant && (
                                           <Box>
-                                            <Tooltip title={`Add ${field.fieldLabel}`} className="mt-1">
+                                            <HtmlTooltip title={`Add ${field.fieldLabel}`} className="mt-1">
                                               <IconButton
                                                 onClick={() => {
                                                   setShowAddressDialog(true);
@@ -951,7 +935,7 @@ const ManageDeliveryTicket = ({
                                               >
                                                 <AddIcon color={field.disableOnEdit ? 'disabled' : 'primary'} />
                                               </IconButton>
-                                            </Tooltip>
+                                            </HtmlTooltip>
                                           </Box>
                                         )}
                                       </Box>

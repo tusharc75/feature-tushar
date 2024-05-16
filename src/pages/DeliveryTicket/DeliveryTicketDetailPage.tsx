@@ -1,56 +1,56 @@
-import { useContext, useEffect, useState, Fragment } from 'react';
-import { useHistory, useParams } from 'react-router-dom';
-import { Box, Grid, Button, IconButton, Tooltip, Tabs, Tab } from '@material-ui/core';
-import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import queryString from 'query-string';
-import { deliveryTicket, getObjKeysWithValues, dateTimeFormat, ACTIVITY_RESOURCE, ASSET_STATUS, rentalManagement } from '../../constants/helpers';
-import { useData } from '../../StateProvider/Provider';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import routes from '../../components/Helpers/Routes';
-import axiosInstance from '../../axios/axiosInstance';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import DetailsPage from '../../components/Shared/DetailsPage';
-import ManageDeliveryTicket from './ManageDeliveryTicket';
-import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
-import { serializedAsset, gridLoadingTimeout } from '../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
-import SignatureDialog from '../../components/Helpers/SignatureDialog';
-import ViewSignsDialog from './ViewSignsDialog';
+import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import AddBoxRoundedIcon from '@material-ui/icons/AddBoxRounded';
-import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
-import moment from 'moment';
-import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
-import { FaSignature, FaWpforms } from 'react-icons/fa';
-import { BiFoodMenu } from 'react-icons/bi';
 import EditIcon from '@material-ui/icons/Edit';
+import RemoveCircleRoundedIcon from '@material-ui/icons/RemoveCircleRounded';
+import { camelCase } from 'lodash';
+import moment from 'moment';
+import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { BiFoodMenu } from 'react-icons/bi';
+import { FaSignature, FaWpforms } from 'react-icons/fa';
+import { useHistory, useParams } from 'react-router-dom';
+import ActivityButton from 'src/components/Activity/ActivityButton';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
+import { useData } from '../../StateProvider/Provider';
+import axiosInstance from '../../axios/axiosInstance';
+import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
+import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import routes from '../../components/Helpers/Routes';
+import SignatureDialog from '../../components/Helpers/SignatureDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import {
-  prepareDataForGrid,
+  ACTIVITY_RESOURCE,
+  ASSET_STATUS,
+  DELIVERY_FROM_TO_TYPE,
   DELIVERY_TICKET_MAPPED_STATUS,
-  sidebarResource,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_FROM_TO_TYPE
+  dateTimeFormat,
+  deliveryTicket,
+  getObjKeysWithValues,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  rentalManagement,
+  serializedAsset,
+  sidebarResource
 } from '../../constants/helpers';
-import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
-import { objectStore, findOne, findAll } from '../../constants/indexdbhelper';
-import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
-import { camelCase } from 'lodash';
-import DeliveryTicketProduct from './DeliveryTicketProduct';
-import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
-import ActivityButton from 'src/components/Activity/ActivityButton';
+import { findOne, objectStore } from '../../constants/indexdbhelper';
 import DateDialog from '../RentalManagement/LoadingTicket/DateDialog';
-import PreviewDownload from 'src/components/PreviewDownload';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-
-function a11yProps(index: any) {
-  return {
-    id: `main-tab-${index}`,
-    'aria-controls': `main-tabpanel-${index}`
-  };
-}
+import AddSerializedAsset from '../RentalManagement/SerializedAsset/AddSerializedAsset';
+import DeliveryTicketAdditionalCost from './DeliveryTicketAdditionalCost';
+import DeliveryTicketProduct from './DeliveryTicketProduct';
+import ManageDeliveryTicket from './ManageDeliveryTicket';
+import ViewSignsDialog from './ViewSignsDialog';
+import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-1`;
@@ -124,7 +124,7 @@ export default function DeliveryTicketDetail(props) {
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.deliveryTicket);
+        data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
       } else {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&showHiddenFields=true`);
         data = response?.data?.data;
@@ -350,11 +350,11 @@ export default function DeliveryTicketDetail(props) {
     try {
       let assetData, productData;
       if (isOffline) {
-        assetData = await findOne(objectStore.resource, 'serializedAsset');
-        productData = await findOne(objectStore.resource, 'Product');
+        assetData = await findOne(objectStore.resource, sidebarResource.serializedAsset);
+        productData = await findOne(objectStore.resource, sidebarResource.product);
       } else {
-        const assetResponse = await axiosInstance().get(`/field?resource=${serializedAsset.resource}&view=true`);
-        const productResponse = await axiosInstance().get('/field?resource=Product&view=true');
+        const assetResponse = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}&view=true`);
+        const productResponse = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
         assetData = assetResponse?.data?.data;
         productData = productResponse?.data?.data;
       }
@@ -454,8 +454,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-          ? 'Sign-off - Delivery'
-          : '';
+        ? 'Sign-off - Delivery'
+        : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
@@ -569,7 +569,7 @@ export default function DeliveryTicketDetail(props) {
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
-                [DELIVERY_TICKET_STATUS.indTransit].includes(deliveryTicketData?.status) &&
+                [DELIVERY_TICKET_STATUS.inTransit].includes(deliveryTicketData?.status) &&
                 [DELIVERY_TICKET_TYPE.loading, DELIVERY_TICKET_TYPE.receiving].includes(deliveryTicketData?.ticketType) && (
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -625,8 +625,10 @@ export default function DeliveryTicketDetail(props) {
                 referenceId={deliveryTicketData?._id}
                 hideDetailButton={true}
                 fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
-                columns={serializedAssetColumns?.length ? serializedAssetColumns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.accessor)) :
-                  productColumns?.filter((e) => ['productName', 'productDescription'].includes(e.accessor))
+                columns={
+                  serializedAssetColumns?.length
+                    ? serializedAssetColumns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.accessor))
+                    : productColumns?.filter((e) => ['productName', 'productDescription'].includes(e.accessor))
                 }
               />
               <ActivityButton
@@ -639,19 +641,19 @@ export default function DeliveryTicketDetail(props) {
         </Box>
         <Box className={`detail-container-v1`}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-            <CustomTab index={0} value={0} className={'tabLayout'} {...a11yProps(0)} >
+            <CustomTab value={0}>
               <FaWpforms className="mr-1" fontSize="inherit" /> Header
             </CustomTab>
             {permissions?.serializedAsset?.isRead && (
-              <CustomTab index={1} value={1} className={'tabLayout'} {...a11yProps(1)} >
+              <CustomTab value={1}>
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Serialized Assets
-              </CustomTab >
+              </CustomTab>
             )}
-            <CustomTab index={2} value={2} className={'tabLayout'} {...a11yProps(2)} >
+            <CustomTab value={2}>
               <BiFoodMenu className="mr-1" fontSize="inherit" /> Additional Products
             </CustomTab>
             {deliveryTicketData?.additionalCost?.length > 0 && (
-              <CustomTab index={3} value={3} className={'tabLayout'} {...a11yProps(3)}>
+              <CustomTab value={3}>
                 <BiFoodMenu className="mr-1" fontSize="inherit" /> Add-On
               </CustomTab>
             )}
@@ -713,9 +715,9 @@ export default function DeliveryTicketDetail(props) {
                       color="primary"
                       size="small"
                     >
-                      <Tooltip title="Add More Serialized Assets">
+                      <HtmlTooltip title="Add More Serialized Assets">
                         <AddBoxRoundedIcon />
-                      </Tooltip>
+                      </HtmlTooltip>
                     </IconButton>
                   )}
                   {deliveryTicketData?.status === 'New' && (
@@ -727,9 +729,9 @@ export default function DeliveryTicketDetail(props) {
                       color="primary"
                       size="small"
                     >
-                      <Tooltip title="Remove Serialized Assets">
+                      <HtmlTooltip title="Remove Serialized Assets">
                         <RemoveCircleRoundedIcon />
-                      </Tooltip>
+                      </HtmlTooltip>
                     </IconButton>
                   )}
                   <Box mx={1} />

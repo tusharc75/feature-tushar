@@ -25,7 +25,7 @@ import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/picker
 import { startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 
-const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialAssets = [] }) => {
+const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialserializedAssets, materialSerialNumbers }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -72,7 +72,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
 
   const handleReject = (values, rejectDate) => {
     setIsSubmitting(true);
-    const data = [];
+    const data: any = [];
     values?.forEach((element) => {
       if (parseInt(element?.rejectQuantity)) {
         data.push({
@@ -82,11 +82,11 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
           qty: parseInt(element?.rejectQuantity),
           comment: element?.comment === '' ? 'Rejected' : element?.comment,
           supplierPartNumber: element?.supplierPartNumber,
-          serialNumber: [],
           storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
           serializedProduct: element?.row?.serializedProduct || false,
           assetQty: element?.row?.assetQty || 0,
-          assetIds: element?.assetIds?.map((s) => s?.optionValue)
+          assetIds: element?.assetIds?.map((s) => s?.optionValue),
+          serialNumber: element?.serialNumber?.map((s) => s?.optionValue)
         });
       }
     });
@@ -114,24 +114,38 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
 
   const validate = (values) => {
     let errors: any = {};
+
     if (values.length > 0) {
       values.map((d) => {
         let tempProduct = material.find((u) => u._id === d._id);
         if (tempProduct && d.rejectQuantity > tempProduct.qty - (tempProduct.rejectQuantity || 0)) {
-          errors.rejectQuantity = 'should be greater';
+          errors.rejectQuantity = 'Please enter valid qty';
+        }
+        if (d.rejectQuantity <= 0) {
+          errors.rejectQuantity = 'Should be greater';
         }
         if (user?.user?.brandPolicy?.storageLocation) {
           if (tempProduct && !d.storageLocation) {
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        if (tempProduct?.assetQty) {
+        if (tempProduct?.serializedProduct) {
           if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
-            const removeActualReceivedQty = parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
-            if (d?.assetIds?.length !== removeActualReceivedQty) {
-              errors.assetIds = 'Selected Serialized Asset must be equal to Rejected Quantity';
+            const removeActualReceivedQty =
+              parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
+            const actualInventoryQty = removeActualReceivedQty - tempProduct?.assetQty;
+            if (tempProduct?.assetQty) {
+              if ((removeActualReceivedQty - actualInventoryQty) !== d?.assetIds?.length) {
+                errors.assetIds = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
+              }
+            }
+            if (user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) {
+              if ((removeActualReceivedQty - tempProduct?.assetQty) !== d.serialNumber?.length) {
+                errors['serialNumber'] = `Please enter serial numbers same as reject quantity`;
+              }
             }
           }
+
         }
       });
     }
@@ -187,10 +201,11 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
               materialId: d.materialId,
               detail: d.detail,
               storageLocation: purchaseOrderData?.storageLocation || null,
-              rejectQuantity: 0,
+              rejectQuantity: d.qty,
               comment: '',
               supplierPartNumber: '',
               assetIds: [],
+              serialNumber: [],
               row: d
             }))
           }}
@@ -220,7 +235,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                   <div>
                                     <div
                                       style={{ borderBottom: '1px solid var(--common-border-color)' }}
-                                      className="flex border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+                                      className="flex flex-wrap border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
                                     >
                                       <span>
                                         <span className="text-[var(--primary-text)] font-semibold">Type: </span>
@@ -267,7 +282,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                               name="storageLocation"
                                               label="Storage Location"
                                               error={validate([data]).storageLocation}
-                                              helperText={validate([data]).storageLocation ? 'Storage Location is required' : ''}
+                                              helperText={validate([data]).storageLocation}
                                               required
                                             />
                                           )}
@@ -291,7 +306,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                         }}
                                         onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                         error={validate([data])?.rejectQuantity}
-                                        helperText={validate([data]).rejectQuantity ? 'Reject quantity is more than quantity' : ''}
+                                        helperText={validate([data]).rejectQuantity}
                                       />
                                       {data.type === MATERIAL_TYPE.product && (
                                         <TextField
@@ -329,18 +344,18 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                       />
                                     </div>
                                     {data?.row?.serializedProduct && (
-                                      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-[20px] md:gap-[25px] mt-[28px]">
+                                      <div className="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-2 gap-[20px] md:gap-[25px] mt-[28px]">
                                         <Autocomplete
                                           size="small"
                                           multiple
                                           disableCloseOnSelect={true}
                                           value={data?.assetIds}
-                                          options={[{ optionLabel: 'All', optionValue: 'All' }, ...(materialAssets[data?._id] || [])]}
+                                          options={[{ optionLabel: 'All', optionValue: 'All' }, ...(materialserializedAssets[data?._id] || [])]}
                                           getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                                           onChange={(_, newValue) => {
                                             var tempValue = newValue;
                                             if (newValue?.find((e) => e.optionValue === 'All')) {
-                                              tempValue = materialAssets[data?._id] || [];
+                                              tempValue = materialserializedAssets[data?._id] || [];
                                             }
                                             arrayHelpers.replace(index, {
                                               ...values.material[index],
@@ -354,12 +369,40 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                               name="assetIds"
                                               label={routes.serializedAsset.title}
                                               error={validate([data]).assetIds}
-                                              helperText={
-                                                validate([data]).assetIds ? `Selected ${routes.serializedAsset.title} must be equal to reject quantity` : ''
-                                              }
+                                              helperText={validate([data]).assetIds}
                                             />
                                           )}
                                         />
+                                        {user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory &&
+                                          <Autocomplete
+                                            size="small"
+                                            multiple
+                                            disableCloseOnSelect={true}
+                                            value={data?.serialNumber}
+                                            options={[{ optionLabel: 'All', optionValue: 'All' }, ...(materialSerialNumbers[data?._id] || [])]}
+                                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                                            onChange={(_, newValue) => {
+                                              var tempValue = newValue;
+                                              if (newValue?.find((e) => e.optionValue === 'All')) {
+                                                tempValue = materialSerialNumbers[data?._id] || [];
+                                              }
+                                              arrayHelpers.replace(index, {
+                                                ...values.material[index],
+                                                ['serialNumber']: tempValue
+                                              });
+                                            }}
+                                            renderInput={(params) => (
+                                              <TextField
+                                                {...params}
+                                                variant="outlined"
+                                                name="serialNumber"
+                                                label="Serial Numbers"
+                                                error={validate([data]).serialNumber}
+                                                required={user?.user?.brandPolicy?.productInventorySerialNumberRequired ? true : false}
+                                                helperText={validate([data]).serialNumber}
+                                              />
+                                            )}
+                                          />}
                                       </div>
                                     )}
                                   </div>
@@ -414,6 +457,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                       !validate(values.material).rejectQuantity &&
                       !validate(values.material).storageLocation &&
                       !validate(values.material).assetIds &&
+                      !validate(values.material).serialNumber &&
                       !validateDate(values)?.rejectDate
                     ) {
                       handleReject(values.material, values.rejectDate);

@@ -1,33 +1,32 @@
 import { Chip, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
+import { Delete as DeleteIcon } from '@material-ui/icons';
+import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { Autocomplete } from '@material-ui/lab';
+
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../../StateProvider/Provider';
-import { GetNotes, GetReferenceName } from '../../../axios/activity';
-import axiosInstance from '../../../axios/axiosInstance';
-import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
-import { CreateNote } from '../../../components/Activity/Note/CreateNote';
-import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
-import CustomContainer from '../../../components/CustomContainer';
-import { CustomDialogTransition, gridLoadingTimeout, sidebarResource } from '../../../constants/helpers';
-
-import { Delete as DeleteIcon } from '@material-ui/icons';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { Autocomplete } from '@material-ui/lab';
-import { camelCase } from 'lodash';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
+import axiosInstance from '../../../axios/axiosInstance';
+import ActivityModelHandler from '../../../components/Activity/ActivityModelHandler';
 import { get_activity_resource } from '../../../components/Activity/Helpers/utils';
+import { CreateNote } from '../../../components/Activity/Note/CreateNote';
+import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
+import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { displayDate } from '../../../constants/helpers';
+import { CustomDialogTransition, displayDate, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
+import axios, { CancelTokenSource } from 'axios';
 
 const Note = () => {
   const renderedFrom = camelCase(routes?.activityNote.title);
@@ -50,12 +49,13 @@ const Note = () => {
   const [noteId, setNoteId] = useState(undefined);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [columns, setColumns] = useState(null);
-  const { selectedRecords } = state;
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
   const [loadingResources, setLoadingResources] = useState(false);
   const [selectedResourceData, setSelectedResourceData] = useState(null);
   const [resourceOptions, setResourceOptions] = useState([]);
+
+  const { page, limit, search, filters, sorting, selectedRecords } = state;
 
   useEffect(() => {
     setResourceOptions(get_activity_resource(permissions));
@@ -74,16 +74,18 @@ const Note = () => {
         disabled: true,
         primaryField: true,
         Cell: ({ row }) => (
-          <span
-            className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
-            onClick={() => {
-              if (permissions?.note?.isUpdate) {
-                handleActivityOpen(row.original);
-              }
-            }}
-          >
-            {row.original?.name}
-          </span>
+          <div>
+            <span
+              className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
+              onClick={() => {
+                if (permissions?.note?.isUpdate) {
+                  handleActivityOpen(row.original);
+                }
+              }}
+            >
+              {row.original?.name}
+            </span>
+          </div>
         )
       },
       {
@@ -95,7 +97,7 @@ const Note = () => {
         filter: false,
         sortable: false,
         Cell: ({ row }) => (
-          <>
+          <div>
             {row.original?.relatedTo && row.original?.relatedTo?.length > 0 ? (
               row.original?.relatedTo.map((d) => {
                 return (
@@ -111,7 +113,7 @@ const Note = () => {
             ) : (
               <NoDataCell />
             )}
-          </>
+          </div>
         )
       },
       {
@@ -120,7 +122,7 @@ const Note = () => {
         filter: false,
         sortable: false,
         show: true,
-        Cell: ({ row }) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(row.original?.createdByDate)}</span>
+        Cell: ({ row }) => <div>{displayDate(row.original?.createdByDate)}</div>
       },
       {
         accessor: 'updatedByDate',
@@ -128,16 +130,12 @@ const Note = () => {
         filter: false,
         sortable: false,
         show: true,
-        Cell: ({ row }) =>
-          row.original?.updatedByDate ? (
-            <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(row.original?.updatedByDate)}</span>
-          ) : (
-            <NoDataCell />
-          )
+        Cell: ({ row }) => (row.original?.updatedByDate ? <div>{displayDate(row.original?.updatedByDate)}</div> : <NoDataCell />)
       }
     ];
     setColumns([...column, ActionsRenderer]);
   };
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -162,8 +160,9 @@ const Note = () => {
 
   useEffect(() => {
     if (referenceType) {
-      GetReferenceName(referenceType, referenceId)
-        .then(({ data }) => {
+      axiosInstance()
+        .get(`/activity/referenceName?referenceType=${referenceType}&referenceId=${referenceId}`)
+        .then(({ data: { data } }) => {
           setFilter([{ _id: referenceId, type: referenceType, name: data.name }]);
         })
         .catch((err) => {
@@ -195,12 +194,6 @@ const Note = () => {
     }
   }, [resource]);
 
-  useEffect(() => {
-    if (filter) {
-      fetchData();
-    }
-  }, [filter]);
-
   const handleClose = () => {
     setShowCreateDialog(false);
     setIsNew(false);
@@ -212,48 +205,20 @@ const Note = () => {
     setIsNew(false);
   };
 
-  const NameRenderer = (params) => (
-    <span
-      className={permissions?.note?.isUpdate ? 'link cursor-pointer' : ''}
-      onClick={() => {
-        if (permissions?.note?.isUpdate) {
-          handleActivityOpen(params.data);
-        }
-      }}
-    >
-      {params.value}
-    </span>
-  );
+  useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
+    if (filter) fetchData(cancelToken);
+    return () => cancelToken.cancel();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, limit, filters, filter, sorting, search]);
 
-  const ReferenceRenderer = (params) => (
-    <>
-      {params.value && params.value?.length > 0 ? (
-        params.value.map((d) => {
-          return (
-            <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
-              <p> {d.name}</p>
-              <IconButton className="ml-3" size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-              <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
-            </div>
-          );
-        })
-      ) : (
-        <NoDataCell />
-      )}
-    </>
-  );
-
-  const CreatedAtDateRenderer = (params) => <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span>;
-
-  const UpdatedAtDateRenderer = (params) =>
-    params.value ? <span style={{ marginLeft: 5, fontSize: 12 }}>{displayDate(params.value)}</span> : <NoDataCell />;
-
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
+    const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-    await GetNotes(JSON.stringify(filter))
-      .then(({ data }) => {
+    let apiUrl = `/note?filter=${JSON.stringify(filter)}${queryString}`;
+    axiosInstance()
+      .get(apiUrl, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           const { createdBy, updatedBy, ...restProperties } = u;
           let res = {
@@ -281,6 +246,34 @@ const Note = () => {
       });
   };
 
+  const getQueryString = () => {
+    let deepFilter = `&page=${page}&limit=${limit}`;
+
+    if (!isObjectEmpty(filters)) {
+      const updatedFilters = [];
+
+      Object.keys(filters).forEach((field) => {
+        if (filters[field].filter?.toLowerCase() === 'me') {
+          filters[field].filter = user?.user?.email;
+        }
+        updatedFilters.push({
+          field: field,
+          term: filters[field].filter
+        });
+      });
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    }
+
+    if (sorting.length > 0) {
+      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+
+    if (search) {
+      deepFilter = `${deepFilter}&search=${search}`;
+    }
+    return deepFilter;
+  };
+
   const handleDeleteNote = async () => {
     if (deleteRecord.id || selectedRecords.length > 0) {
       setOkButtonLoading(true);
@@ -296,7 +289,6 @@ const Note = () => {
           setIsConformDialogVisible(false);
           setOkButtonLoading(false);
           setDeleteRecord({ id: null, name: null });
-
           fetchData();
         })
         .catch((error) => {
@@ -470,8 +462,8 @@ const LeftSideContents = ({
   return (
     <>
       <Autocomplete
-        options={resourceOptions}
-        getOptionLabel={(option) => option.optionLabel}
+        options={resourceOptions || []}
+        getOptionLabel={(option) => option.optionLabel || ''}
         className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
         value={resource}
         size="small"
@@ -499,10 +491,10 @@ const LeftSideContents = ({
       {resource && resourceData && (
         <Autocomplete
           disabled={loadingResources}
-          options={resourceData}
+          options={resourceData || []}
           fullWidth
           className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-          getOptionLabel={(option: any) => option.optionLabel}
+          getOptionLabel={(option: any) => option.optionLabel || ''}
           getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
           value={selectedResourceData}
           onChange={(event, newValue) => {

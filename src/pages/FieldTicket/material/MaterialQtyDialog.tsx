@@ -6,7 +6,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -21,7 +21,8 @@ import moment from 'moment';
 import { bulkUpdate, calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { fetch_field_ticket_material_fields } from '../helper';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -67,6 +68,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchData();
@@ -93,7 +95,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setFetchingData(true);
-    var data = await fetch_field_ticket_material_fields(fieldTicketData?.currency);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true, isOffline);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];
@@ -126,6 +128,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
         }
+        if (element.fieldName === 'pricingCondition') {
+          element.option = [];
+        }
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
@@ -150,16 +155,42 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         pricingMethodOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.pricingMethod);
       }
       setPriceMethodListConst(pricingMethodOptions);
-      await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      if (!isOffline) {
+        await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      }
       data.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
+        if (rowData?.type === MATERIAL_TYPE.serializedAsset) {
+          if (element.fieldName === 'qty') {
+            element.disabled = true;
+          }
+          if (element.fieldName === 'unit') {
+            element.option = [
+              {
+                optionLabel: 'Piece',
+                optionValue: 'Piece'
+              }
+            ];
+            element.value = 'Piece';
+          }
+          if (element.fieldName === 'pricingMethod') {
+            const assetPricingMethod = {
+              optionValue: 'Per Job',
+              optionLabel: 'Per Job'
+            }
+            pricingMethodOptions.push(assetPricingMethod)
+            element.option = [assetPricingMethod];
+            element.value = 'Per Job';
+          }
         }
-        if (element.fieldName === 'pricingMethod') {
-          element.option = pricingMethodOptions;
+        else {
+          if (element.fieldName === 'unit') {
+            element.option = unitOptions;
+          }
+          if (element.fieldName === 'pricingMethod') {
+            element.option = pricingMethodOptions;
+          }
         }
       });
-
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data)
@@ -197,10 +228,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    if (
-      fieldTicketData?.taxCode ||
-      (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))
-    ) {
+    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) && !isOffline) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -381,8 +409,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                             field.fieldName === 'pricingCondition'
                                               ? priceConditionList
                                               : field.fieldName === 'pricingMethod'
-                                              ? priceMethodList
-                                              : field.option
+                                                ? priceMethodList
+                                                : field.option
                                           }
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
@@ -470,8 +498,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                                           isTooltip={field.isTooltip}
                                           tooltipMessage={field.tooltipMessage}
                                           size="small"
-                                        // minDate={fieldTicketData?.estimateStartDate}
-                                        // maxDate={fieldTicketData?.estimateEndDate}
+                                          minDate={fieldTicketData?.estimateStartDate}
+                                          maxDate={fieldTicketData?.estimateEndDate}
                                         />
                                       </Box>
                                     </Box>

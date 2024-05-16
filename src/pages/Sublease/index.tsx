@@ -16,12 +16,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, sublease } from 'src/constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, sublease } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageSublease from './ManageSublease';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const Sublease = () => {
   let renderedFrom = camelCase(routes.sublease?.title);
@@ -39,7 +38,7 @@ const Sublease = () => {
   ];
 
   const history = useHistory();
-  let { type, referenceId, referenceType }: any = queryString.parse(history.location.search);
+  let { referenceId, referenceType }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -49,7 +48,7 @@ const Sublease = () => {
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.sublease));
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -60,20 +59,12 @@ const Sublease = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+      fetchData(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -160,11 +151,11 @@ const Sublease = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${sublease.api}${queryString}`)
+      .get(`${sublease.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);

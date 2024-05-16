@@ -224,7 +224,7 @@ export default function ManageAttachment({
                 if (isEqual(initialValues, values)) handleClose();
                 else setShowConfirmDialog(true);
               }}
-              title={`${isClone? 'Clone' : attachmentId? 'Edit' : 'New'} ${type === 'file' ? 'Attachment' : 'Folder'}`}
+              title={`${isClone ? 'Clone' : attachmentId ? 'Edit' : 'New'} ${type === 'file' ? 'Attachment' : 'Folder'}`}
               isMinimized={isMinimized}
               onMinimizeMaximize={onMinimizeMaximize}
               showManimizeMaximize={showManimizeMaximize}
@@ -233,7 +233,7 @@ export default function ManageAttachment({
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box padding={1}>
                   <Grid container spacing={2}>
-                    <Grid item xs={type == "file" ? 6 : 12}>
+                    <Grid item xs={12} md={type === 'file' ? 6 : 12}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -242,7 +242,8 @@ export default function ManageAttachment({
                         disabled={!canEdit && !isClone}
                         name="name"
                         fullWidth
-                        margin="dense"
+                        margin="none"
+                        size={'small'}
                         value={values['name']}
                         error={touched['name'] && Boolean(errors['name'])}
                         helperText={touched['name'] && errors['name']}
@@ -252,20 +253,12 @@ export default function ManageAttachment({
                       />
                     </Grid>
                     {type === 'file' && (
-                      <Grid item xs={6}>
+                      <Grid item xs={12} md={6}>
                         <Autocomplete
                           id="attachmentType"
                           size="small"
                           options={Object.values(ATTACHMENT_TYPE)}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              size="small"
-                              variant="outlined"
-                              label="Attachment Type"
-                              margin="dense"
-                            />
-                          )}
+                          renderInput={(params) => <TextField {...params} size="small" variant="outlined" label="Attachment Type" margin="none" />}
                           disabled={defaultAttachmentType === '' ? !canEdit : true}
                           getOptionLabel={(option) => option}
                           getOptionSelected={(option: any, value: any) => option === value}
@@ -281,9 +274,9 @@ export default function ManageAttachment({
                         <Grid item xs={12}>
                           <div style={{ width: '100%' }}>
                             <Box display="flex" flexDirection="row">
-                              <Box >
+                              <Box>
                                 <FormTypes
-                                  label="File"
+                                  label=""
                                   name="fileUrl"
                                   required={true}
                                   type="fileUpload"
@@ -303,11 +296,7 @@ export default function ManageAttachment({
                                 />
                               </Box>
                               <Box pl={2}>
-                                <CustomButton
-                                  variant="contained"
-                                  color="primary"
-                                  disabled={!canEdit}
-                                  onClick={() => setDocumentScanDialog(true)}>
+                                <CustomButton variant="contained" color="primary" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
                                   Scan Document
                                 </CustomButton>
                               </Box>
@@ -315,7 +304,11 @@ export default function ManageAttachment({
                           </div>
                         </Grid>
                         <Grid item xs={12}>
-                          <AttachmentThumbnail attachments={otherAttachments} handleDeleteAttachment={handleDeleteAttachment} canEdit={canEdit || isClone} />
+                          <AttachmentThumbnail
+                            attachments={otherAttachments}
+                            handleDeleteAttachment={handleDeleteAttachment}
+                            canEdit={canEdit || isClone}
+                          />
                         </Grid>
                       </Grid>
                     )}

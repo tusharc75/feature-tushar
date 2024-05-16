@@ -9,7 +9,6 @@ import {
   Menu,
   MenuItem,
   TextField,
-  Tooltip,
   Typography,
   makeStyles
 } from '@material-ui/core';
@@ -21,16 +20,18 @@ import queryString from 'query-string';
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import ReactDOM from 'react-dom';
-import { IoArrowDownCircleSharp } from 'react-icons/io5';
 import { BiFoodMenu, BiLayerPlus } from 'react-icons/bi';
 import { FaWpforms } from 'react-icons/fa';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { HiPencil } from 'react-icons/hi';
+import { IoArrowDownCircleSharp } from 'react-icons/io5';
 import { MdDelete } from 'react-icons/md';
 import { VscIssueReopened, VscVersions } from 'react-icons/vsc';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import { useTableReducer } from 'src/components/CustomReactTable';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -40,6 +41,7 @@ import routes from '../../../components/Helpers/Routes';
 import ProjectInAccordion from '../../../components/ProjectInAccordion/ProjectInAccordion';
 import {
   ACTIVITY_RESOURCE,
+  checkIsAllowedToEdit,
   customerAccount,
   formatAmountWithCurrency,
   gridLoadingTimeout,
@@ -51,11 +53,10 @@ import {
 } from '../../../constants/helpers';
 import contactClass from '../../Contact/contact.module.scss';
 import DOAReasonDialog from '../../DOA/DOAReasonDialog';
-import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
 import AllVersionStatus from '../AllVersionStatus';
+import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
 import QuoteDetailPage from './QuoteDetailPage';
 import QuoteProcess from './QuoteProcess';
-import { useTableReducer } from 'src/components/CustomReactTable';
 
 const useStyles = makeStyles((theme) => ({
   reasonDialog: {
@@ -336,11 +337,8 @@ export default function QuoteDetail() {
               });
             }
             setTypeCreateProjectSalesDialog(dataOfTyoes);
-            var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (user?.role?.selectedEntity?.superAdminAccess) {
-              isAllowedToEdit = true;
-            }
-            setAllowedToEdit(isAllowedToEdit);
+            
+            setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quoteBuilder, data));
             let keys = Object.keys(data.versions);
             let tempCurrentVersion;
             if (version == 0) {
@@ -627,7 +625,7 @@ export default function QuoteDetail() {
             {quoteData ? (
               <>
                 {processStatus !== 'New' && (
-                  <Tooltip title="Quote Summary">
+                  <HtmlTooltip title="Quote Summary">
                     <Button
                       onClick={() => {
                         setShowTotalSalesDialog(true);
@@ -640,9 +638,9 @@ export default function QuoteDetail() {
                     >
                       {isMobile && !isTablet ? '' : 'Quote Summary'}
                     </Button>
-                  </Tooltip>
+                  </HtmlTooltip>
                 )}
-                <Tooltip title={`Version : ${currentVersion}`}>
+                <HtmlTooltip title={`Version : ${currentVersion}`}>
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     color="primary"
@@ -656,7 +654,7 @@ export default function QuoteDetail() {
                   >
                     {isMobile && !isTablet ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
                   </Button>
-                </Tooltip>
+                </HtmlTooltip>
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'outlined'}
                   color="default"
@@ -774,7 +772,7 @@ export default function QuoteDetail() {
                 </Menu>
                 {DOAApproved && versionStatus === 'Sent for DOA' && (
                   <>
-                    <Tooltip title={`Accept`}>
+                    <HtmlTooltip title={`Accept`}>
                       <Button
                         onClick={() => {
                           QuoteStatusChange('Accepted', '', '');
@@ -787,8 +785,8 @@ export default function QuoteDetail() {
                       >
                         {isMobile && !isTablet ? '' : `Accept`}
                       </Button>
-                    </Tooltip>
-                    <Tooltip title="Reject">
+                    </HtmlTooltip>
+                    <HtmlTooltip title="Reject">
                       <Button
                         onClick={() => {
                           setQuoteStatusChangeData('Rejected');
@@ -802,7 +800,7 @@ export default function QuoteDetail() {
                       >
                         {isMobile && !isTablet ? '' : 'Reject'}
                       </Button>
-                    </Tooltip>
+                    </HtmlTooltip>
                   </>
                 )}
               </>
@@ -815,10 +813,10 @@ export default function QuoteDetail() {
       </Box>
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-          <CustomTab index={0}>
+          <CustomTab value={0}>
             <FaWpforms className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
-          <CustomTab index={1}>
+          <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
           </CustomTab>
         </CustomTabs>

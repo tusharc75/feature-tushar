@@ -208,7 +208,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     const filters = [];
     const data = {};
     values?.filters?.forEach((v) => {
-      if (Object.keys(selectedData).includes(v?.fieldName)) {
+      if (Object.keys(selectedData || {}).includes(v?.fieldName)) {
         data[v?.fieldName] = selectedData[v?.fieldName];
       }
     });
@@ -321,7 +321,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
         onClose={handleClose}
       />
       {!formData && (
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent={false}>
           <Loader minHeight={350} />
         </CustomDialogContent>
       )}

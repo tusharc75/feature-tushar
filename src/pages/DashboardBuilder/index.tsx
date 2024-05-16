@@ -15,8 +15,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { baseURL } from './builderHelpers';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const DashBoards = () => {
   const renderedFrom = 'dashboard-builder';
@@ -41,18 +40,10 @@ const DashBoards = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
-    fetchData();
-  }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
+  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     const columns = [
@@ -116,11 +107,11 @@ const DashBoards = () => {
     )
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
 
     axiosInstance()
-      .get(`${baseURL}`)
+      .get(`${baseURL}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);

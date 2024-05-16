@@ -5,6 +5,8 @@ import { Box } from '@material-ui/core';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ReactApexChart from 'react-apexcharts';
 import { useAppTheme } from 'src/constants/AppConfig';
+import moment from 'moment';
+import { dateTimeFormat24Hours } from 'src/constants/helpers';
 
 let chartOptions: any = {
   theme: {
@@ -32,10 +34,29 @@ let chartOptions: any = {
     type: 'solid'
   },
   xaxis: {
-    type: 'datetime'
+    type: 'datetime',
+    labels: {
+      formatter: function (value) {
+        const formattedDateTime = moment(value).format(dateTimeFormat24Hours);
+        return formattedDateTime;
+      }
+    },
+    tickAmount: 8
   },
   legend: {
     position: 'right'
+  },
+  tooltip: {
+    x: {
+      formatter: function (value) {
+        let date = new Date(value);
+        if (isNaN(date.getTime())) {
+          return value;
+        } else {
+          return moment(value).format(dateTimeFormat24Hours);
+        }
+      }
+    }
   }
 };
 
@@ -50,22 +71,31 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
   }, [assetId, dateFilters, dataPoints]);
 
   const fetchData = () => {
+    let filterById = [
+      {
+        field: 'dataPoints',
+        term: { $in: dataPoints?.filter((e) => e.type === 'Digital')?.map((d: any) => d._id) }
+      },
+      {
+        field: 'asset',
+        term: assetId
+      }
+    ];
+    let deepFilter = [
+      { field: 'from_date', term: new Date(dateFilters.from).toISOString() },
+      { field: 'to_date', term: new Date(dateFilters.to).toISOString() },
+      { field: 'interval', term: dateFilters.intervals }
+    ];
     axiosInstance()
-      .get(`/report/iot/data-points`, {
+      .get(`/report/iot-data-points`, {
         params: {
-          asset: assetId,
-          from_date: new Date(dateFilters.from).toISOString(),
-          to_date: new Date(dateFilters.to).toISOString(),
-          interval: dateFilters.intervals,
-          dataPoints: dataPoints
-            ?.filter((e) => e.type === 'Digital')
-            ?.map((e) => e._id)
-            ?.toString(),
+          filterById: JSON.stringify(filterById),
+          deepFilter: JSON.stringify(deepFilter),
           timezone: Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone
         }
       })
       .then(({ data: { data } }) => {
-        setChartData(data.data);
+        setChartData(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -139,7 +169,12 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
   return (
     <>
       {chartData ? (
-        <ReactApexChart key={currentChartTheme} options={chartOptions} series={series} type="rangeBar" height={500} />
+        <ReactApexChart
+          key={currentChartTheme}
+          options={chartOptions}
+          series={series}
+          type="rangeBar"
+          height={500} />
       ) : (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />

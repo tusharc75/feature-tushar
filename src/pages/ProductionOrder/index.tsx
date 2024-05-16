@@ -17,12 +17,11 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { PRODUCTION_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, productionOrder, sidebarResource } from '../../constants/helpers';
+import { PRODUCTION_ORDER_STATUS, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, productionOrder, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageProductionOrder from './ManageProductionOrder';
-
-let searchTimeout;
+import axios, { CancelTokenSource } from 'axios';
 
 const ProductionOrder = () => {
   const renderedFrom = camelCase(routes?.productionOrder.title);
@@ -40,7 +39,6 @@ const ProductionOrder = () => {
   ];
 
   const history = useHistory();
-  let { type }: any = queryString.parse(history.location.search);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -49,7 +47,7 @@ const ProductionOrder = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
-  const [selectedType, setSelectedType] = useState(type ? parseInt(type) : 2);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.productionOrder));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -68,20 +66,12 @@ const ProductionOrder = () => {
   }, []);
 
   useEffect(() => {
-    let millisec = Object.keys(search).length > 0 ? 600 : 5;
-    if (searchTimeout) {
-      clearTimeout(searchTimeout);
-    }
-    searchTimeout = setTimeout(() => {
-      fetchData();
-    }, millisec);
-  }, [search]);
-
-  useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+      fetchData(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
-  }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -166,12 +156,12 @@ const ProductionOrder = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${productionOrder.api}${queryString}`)
+      .get(`${productionOrder.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
@@ -286,7 +276,6 @@ const ProductionOrder = () => {
           }}
           isAddButtonVisible
           setQueryString
-          synchronizeType
         />
 
         {columns ? (
