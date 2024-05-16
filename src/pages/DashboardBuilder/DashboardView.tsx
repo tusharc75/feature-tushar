@@ -1,8 +1,8 @@
 import React from 'react';
 
-import { Droppable } from '@hello-pangea/dnd';
-import { IFormDataType } from './builderHelpers';
+import { SortableContext } from '@dnd-kit/sortable';
 import DashboardItem from './DashboardItem';
+import { IFormDataType } from './builderHelpers';
 
 interface ViewProps {
   formData: IFormDataType[];
@@ -12,29 +12,30 @@ interface ViewProps {
   selectedData?: IFormDataType | null;
 }
 
+function disableSortingStrategy() {
+  return null;
+}
+
 const View = ({ formData, setFormData, handleEdit, handleRemove, selectedData }: ViewProps) => {
   return (
     <>
       {formData.length > 0 && (
         <>
-          <Droppable droppableId="arrangeView">
-            {(provided) => (
-              <ul className="list-none overflow-y-auto max-h-[75vh] space-y-3" {...provided.droppableProps} ref={provided.innerRef}>
-                {formData.map((form: IFormDataType, index) => (
-                  <DashboardItem
-                    key={form.chartTitle + ' ' + index}
-                    id={form.uniqueId}
-                    formData={form}
-                    index={index}
-                    handleEdit={handleEdit}
-                    handleRemove={handleRemove}
-                    selectedData={selectedData}
-                  />
-                ))}
-                {provided.placeholder}
-              </ul>
-            )}
-          </Droppable>
+          <SortableContext items={formData?.map((d) => d._id) || []} strategy={disableSortingStrategy}>
+            <ul className="list-none overflow-y-auto max-h-[75vh] grid gap-3 grid-cols-12">
+              {formData.map((form: IFormDataType, index) => (
+                <DashboardItem
+                  key={form.chartTitle + ' ' + index}
+                  id={form.uniqueId}
+                  formData={form}
+                  index={index}
+                  handleEdit={handleEdit}
+                  handleRemove={handleRemove}
+                  selectedData={selectedData}
+                />
+              ))}
+            </ul>
+          </SortableContext>
         </>
       )}
     </>
