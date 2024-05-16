@@ -1,64 +1,119 @@
 import { useState, useEffect } from 'react';
-import { Box, Button } from '@material-ui/core';
+import { Box, Button, Grid, TextField } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import { CustomDialogTransition, productInventory } from '../../../constants/helpers';
+import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import History from './index';
 import axiosInstance from 'src/axios/axiosInstance';
 import AddSerialNumber from './AddSerialNumber';
+import { Autocomplete } from '@material-ui/lab';
+import routes from 'src/components/Helpers/Routes';
 
 const SerialNumberDialog = ({ close, product, warehouse, productName }) => {
   const [serialNumberCount, setSerialNumberCount] = useState(0);
   const [addserialNumber, setAddserialNumber] = useState(false);
   const [refresh, setRefresh] = useState(true);
+  const [warehouseOptions, setWarehouseOptions] = useState(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
 
   useEffect(() => {
-    if (warehouse && warehouse?.split(',')?.length === 1) {
+    if (selectedWarehouse == 'All') {
+      setSerialNumberCount(0)
+    }
+    else {
       fetchRecords();
     }
+  }, [selectedWarehouse]);
+
+  useEffect(() => {
+    getWarehouse();
   }, []);
 
-  const fetchRecords = () => {
-    let api = `${productInventory.api}/product/${product}?warehouse=${warehouse}`;
+  const getWarehouse = () => {
     axiosInstance()
-      .get(api)
+      .get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.warehouse}`)
       .then(({ data: { data } }) => {
-        const count = data?.inventory - (data?.softHold || 0) - data?.serialNumber;
-        if (count > 0) {
-          setSerialNumberCount(count);
-        } else {
-          setSerialNumberCount(0);
-        }
-      })
-      .catch((err) => { });
+        setWarehouseOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data[sidebarResource.warehouse]]);
+      });
+  };
+
+  const fetchRecords = () => {
+    let api = `${productInventory.api}/product/${product}?warehouse=${selectedWarehouse}`;
+    axiosInstance().get(api).then(({ data: { data } }) => {
+      const count = data?.inventory - (data?.softHold || 0) - data?.serialNumber;
+      if (count > 0) {
+        setSerialNumberCount(count);
+      } else {
+        setSerialNumberCount(0);
+      }
+    }).catch((err) => { });
   };
 
   return (
     <Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader title={`Serial Numbers - ${productName}`} onClose={close} showRequiredLabel={false}></CustomDialogHeader>
       <CustomDialogContent isFooterPresent={false}>
-        {serialNumberCount ? (
-          <Box>
-            <Button
-              variant="contained"
-              color="primary"
-              size="small"
-              onClick={() => {
-                setAddserialNumber(true);
-              }}
-              aria-controls="action-menu"
+        <Grid container spacing={3}>
+          <Grid item xs={6} sm={6}>
+            {warehouseOptions && (
+              <Autocomplete
+                options={warehouseOptions}
+                getOptionLabel={(option: any) => option.optionLabel}
+                disableClearable
+                style={{ width: '300px' }}
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={
+                  warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
+                    ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
+                    : ''
+                }
+                onChange={(e, val) => {
+                  if (val !== null) {
+                    setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
+                  }
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
+                )}
+              />
+            )}
+          </Grid>
+          <Grid item xs={6} sm={6}>
+            <Grid
+              container
+              direction="row"
+              justifyContent="flex-end"
+              alignItems="center"
             >
-              Add Serial Number
-            </Button>
-          </Box>
-        ) : null}
-        {refresh ? <History product={product} warehouse={warehouse} /> : null}
+              {serialNumberCount ? (
+                <Box>
+                  <Button
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    onClick={() => {
+                      setAddserialNumber(true);
+                    }}
+                    aria-controls="action-menu"
+                  >
+                    Add Serial Numbers
+                  </Button>
+                </Box>
+              ) : null}
+            </Grid>
+          </Grid>
+        </Grid>
+        {refresh ?
+          <History
+            product={product}
+            warehouse={selectedWarehouse === 'All' ? null : selectedWarehouse} />
+          : null}
       </CustomDialogContent>
       {addserialNumber && (
         <AddSerialNumber
           product={product}
-          warehouse={warehouse}
+          warehouse={selectedWarehouse}
           serialNumberCount={serialNumberCount}
           handleClose={() => setAddserialNumber(false)}
           handleSucess={() => {

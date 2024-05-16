@@ -1,58 +1,32 @@
 import Box from '@material-ui/core/Box/Box';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
+import { dateFormat, gridLoadingTimeout } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { Autocomplete } from '@material-ui/lab';
-import { TextField } from '@material-ui/core';
 
 const SerialNumber = ({ product, warehouse }) => {
-  
+
   const { state, dispatch } = useTableReducer();
   const { page, limit, filters, sorting } = state;
-  const [renderCount, setRenderCount] = useState(0);
-  const [warehouseOptions, setWarehouseOptions] = useState(null);
-  const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
-  const {
-    state: { user }
-  }: any = useData();
-
-  useEffect(() => {
-    getWarehouse();
-  }, []);
-
-  useEffect(() => {
-    if (warehouseOptions && renderCount > 0) {
-      fetchRecords();
-    } else {
-      setRenderCount(renderCount + 1);
-    }
-  }, [page, limit, filters, sorting, warehouseOptions, selectedWarehouse]);
 
   const toastConfig = useContext(CustomToastContext);
 
+  useEffect(() => {
+    fetchData();
+  }, [page, limit, filters, sorting, warehouse]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    if (selectedWarehouse) {
-      let tempWarehouse =
-        selectedWarehouse === 'All'
-          ? warehouseOptions
-            ?.filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
-          : selectedWarehouse;
-
-      deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
+    if (warehouse) {
+      deepFilter = `${deepFilter}&warehouse=${warehouse}`;
     }
 
     if (product) {
@@ -75,15 +49,7 @@ const SerialNumber = ({ product, warehouse }) => {
     return deepFilter;
   };
 
-  const getWarehouse = () => {
-    axiosInstance()
-      .get('/sa-formbuilder/lookup?lookupResource=Warehouse,Storage Location')
-      .then(({ data: { data } }) => {
-        setWarehouseOptions([{ optionLabel: 'All', optionValue: 'All' }, ...data.Warehouse]);
-      });
-  };
-
-  const fetchRecords = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     let queryString = getQueryString();
     axiosInstance().get(`/product-inventory/serial-number${queryString}`).then(({ data }) => {
@@ -167,44 +133,15 @@ const SerialNumber = ({ product, warehouse }) => {
 
   return (
     <>
-      { warehouseOptions ? (
-        <div className="md:pr-[82px]">
-        <Grid container spacing={2} justifyContent="space-between">
-          <Grid item md={3} sm={6} xs={12}>
-            <Autocomplete
-              options={warehouseOptions}
-              getOptionLabel={(option: any) => option.optionLabel}
-              disableClearable
-              getOptionSelected={(option: any, val) => option.optionValue === val}
-              value={
-                warehouseOptions.filter((data) => data.optionValue === selectedWarehouse).length
-                  ? warehouseOptions.filter((data) => data.optionValue === selectedWarehouse)[0]
-                  : ''
-              }
-              onChange={(e, val) => {
-                if (val !== null) {
-                  setSelectedWarehouse(val && val.optionValue ? val.optionValue : '');
-                }
-              }}
-              renderInput={(params) => (
-                <TextField {...params} margin="dense" name="plant" label={routes.warehouse.title} variant="outlined" fullWidth />
-              )}
-            />
-          </Grid>
-        </Grid>
-        </div>
-        ): (
-        <div className="min-h-[50px]" />
-      )}
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={'serialNumber_grid'}
-            refreshGrid={fetchRecords}
+            refreshGrid={fetchData}
             hideSelection={true}
           />
         ) : (
