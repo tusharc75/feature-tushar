@@ -291,8 +291,8 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     let statusChangeFieldColumns = []
     statusChangeFieldColumns  = uniq(resourceData?.policy?.statusChangeFields?.flatMap(ele => ele.fields))
     let statusChangeFields = fields?.filter((ele)=>[...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName))
-    let extraColumns = generateColumns(renderedFrom, statusChangeFields, routes.serializedAssetDetail.path, true);
-    setColumn([...columns,...extraColumns])
+    let extraColumns = generateColumns(renderedFrom, statusChangeFields?.filter(_field => !columns?.map(c => c?.accessor).includes(_field?.fieldData?.fieldName)), routes.serializedAssetDetail.path, true);
+    setColumn([...columns, ...extraColumns])
   },[])
 
   useEffect(() => {
