@@ -10,10 +10,11 @@ import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 import moment from 'moment';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid, transferInventory } from 'src/constants/helpers';
+import { dateFormat, gridLoadingTimeout, prepareDataForGrid, productInventory, transferInventory } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
+import AddSerialNumber from 'src/pages/ProductInventory/SerialNumber/AddSerialNumber';
 
 const AssignSerialNumbersDialog = ({
   selectedProducts = [],
@@ -40,6 +41,8 @@ const AssignSerialNumbersDialog = ({
   const [warehouseOption, setWarehouseOption] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
   const [showTransferInventoryDialog, setShowTransferInventoryDialog] = useState(false);
+  const [serialNumberCount, setSerialNumberCount] = useState(0);
+  const [addserialNumber, setAddserialNumber] = useState(false);
 
   const columns = [
     {
@@ -99,6 +102,29 @@ const AssignSerialNumbersDialog = ({
       )
     }
   ];
+
+  useEffect(() => {
+    if (selectedProduct && selectedWarehouse) {
+      fetchProductInventory();
+    } else {
+      setSerialNumberCount(0);
+    }
+  }, [selectedWarehouse, selectedProduct]);
+
+  const fetchProductInventory = () => {
+    let api = `${productInventory.api}/product/${selectedProduct}?warehouse=${selectedWarehouse}`;
+    axiosInstance()
+      .get(api)
+      .then(({ data: { data } }) => {
+        const count = data?.inventory - (data?.softHold || 0) - data?.serialNumber;
+        if (count > 0) {
+          setSerialNumberCount(count);
+        } else {
+          setSerialNumberCount(0);
+        }
+      })
+      .catch((err) => {});
+  };
 
   useEffect(() => {
     fetchData();
@@ -307,6 +333,25 @@ const AssignSerialNumbersDialog = ({
     ) : null;
   };
 
+  const leftSideContentsOfSearchFilter = () => {
+    return (
+      <>
+        {serialNumberCount ? (
+          <Button
+            variant={'contained'}
+            color="primary"
+            size="small"
+            onClick={() => {
+              setAddserialNumber(true);
+            }}
+          >
+            Add New Serial Number
+          </Button>
+        ) : null}
+      </>
+    );
+  };
+
   const handleTransferSerialNumber = (transferInventoryId) => {
     axiosInstance()
       .put(`${transferInventory.api}/add-product-complete-transfer-product/${transferInventoryId}`, {
@@ -319,7 +364,7 @@ const AssignSerialNumbersDialog = ({
       .then(({ data }) => {
         fetchData();
         setShowTransferInventoryDialog(false);
-        handleAdd()
+        handleAdd();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -336,6 +381,7 @@ const AssignSerialNumbersDialog = ({
           isActionButtonVisible={false}
           leftSideContents={leftSideContents()}
           rightSideContents={rightSideContents()}
+          leftSideContentsOfSearchFilter={leftSideContentsOfSearchFilter()}
           addButtonProps={{
             iconsEnabled: false,
             disabled: isAssigning || selectedRecords?.length === 0 || products?.some((d) => d?.qty < 0),
@@ -376,6 +422,19 @@ const AssignSerialNumbersDialog = ({
             referenceData={{
               transferFromPlant: selectedWarehouse,
               transfertoPlant: filterByPlant?.optionValue
+            }}
+          />
+        )}
+        {addserialNumber && (
+          <AddSerialNumber
+            product={selectedProduct}
+            warehouse={selectedWarehouse}
+            serialNumberCount={serialNumberCount}
+            handleClose={() => setAddserialNumber(false)}
+            handleSucess={() => {
+              setAddserialNumber(false);
+              fetchProductInventory();
+              fetchData()
             }}
           />
         )}
