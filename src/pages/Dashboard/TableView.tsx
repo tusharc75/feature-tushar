@@ -6,13 +6,12 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 interface Props {
   id: string;
   chartData: any[];
-  isScreenSmall: boolean;
   currency: string;
   type: string;
-  isCurrency: boolean;
+  chart: any
 }
 
-const TableView = ({ id, chartData, isScreenSmall, isCurrency, currency }: Props) => {
+const TableView = ({ id, chartData, chart, currency }: Props) => {
   const [tableData, setTableData] = useState([]);
   useEffect(() => {
     if (!chartData || chartData.length === 0) return;
@@ -67,9 +66,10 @@ const TableView = ({ id, chartData, isScreenSmall, isCurrency, currency }: Props
                     ? data[key]
                     : id === 'volumeVsBudget' || key.includes('MT') || key.includes('GM')
                       ? data[key]?.toFixed(2)
-                      : isCurrency
+                      : chart?.currency
                         ? formatAmountWithCurrency(currency, Number(data[key]) ? data[key] : '00').fullFormatAmount
-                        : data[key]}
+                        : chart?.percentage ? `${data[key]}%`
+                          : data[key]}
                 </TableCell>
               ))}
             </TableRow>
