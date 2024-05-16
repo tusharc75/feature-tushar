@@ -225,7 +225,7 @@ const AddRentalDataDialog = ({
               renderedFrom={renderedFrom}
               refreshGrid={fetchData}
               isClientSideGrid={true}
-              expander={true}
+              expander={type === MATERIAL_TYPE.package}
             />
           ) : (
             <Box p={2} height={500}>
