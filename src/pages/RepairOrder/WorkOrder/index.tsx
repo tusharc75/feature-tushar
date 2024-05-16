@@ -607,7 +607,7 @@ const WorkOrder = ({
       }
     });
 
-    if (isPostWorkService) {
+    if (isPostWorkService || (!repairOrderData.addQuotationStep && !user?.brandPolicy?.repairOrderPrice)) {
       if (rows?.some((e) => e.serviceStatus === WORK_ORDER_STATUS.completed)) {
         setNextStep(true);
       } else {
@@ -972,36 +972,36 @@ const WorkOrder = ({
     return (
       <>
         {!resourcePolicy?.hideAddExistingServices && (
-        <MenuItem
-          disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
-          onClick={() => {
-            setAddServicesDialog({ open: true, new: false });
-          }}
-        >
-          Add Existing Services
-        </MenuItem>
-      )}
+          <MenuItem
+            disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
+            onClick={() => {
+              setAddServicesDialog({ open: true, new: false });
+            }}
+          >
+            Add Existing Services
+          </MenuItem>
+        )}
         {!resourcePolicy?.hideAddNewService && (
-        <MenuItem
-          disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
-          onClick={() => {
-            setAddServicesDialog({ open: true, new: true });
-          }}
-        >
-          Add New Service
-        </MenuItem>
-      )}
+          <MenuItem
+            disabled={selectedRecords?.every((d) => d?.workOrder) && !isWorkOrderCompleted(selectedRecords) ? false : true}
+            onClick={() => {
+              setAddServicesDialog({ open: true, new: true });
+            }}
+          >
+            Add New Service
+          </MenuItem>
+        )}
         {!resourcePolicy?.hideAssignTechnician && (
-        <MenuItem
-          disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords)
-            ? false : true}
-          onClick={() => {
-            setUserAssignDialog(true);
-          }}
-        >
-          Assign Technician
-        </MenuItem>
-      )}
+          <MenuItem
+            disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords)
+              ? false : true}
+            onClick={() => {
+              setUserAssignDialog(true);
+            }}
+          >
+            Assign Technician
+          </MenuItem>
+        )}
         {!resourcePolicy?.hideAssignWorkstation && allowedToEdit && permissions?.workStations?.isRead && (
           <MenuItem
             disabled={selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.service)?.length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true}
@@ -1038,71 +1038,71 @@ const WorkOrder = ({
           </MenuItem>
         )}
         {!resourcePolicy?.hideArrangeServices && (
-        <MenuItem
-          onClick={() => {
-            const ids = selectedRecords.filter(s => s.type === MATERIAL_TYPE.service).map(s => s.workOrder._id);
-            const uniqueIds = [...new Set(ids)];
-            setArrangeView({ open: true, workOrderIds: uniqueIds, currentIndex: 0 });
-          }}
-          disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
-            ? false : true}
-        >
-          Arrange Services
-        </MenuItem>
-      )}
+          <MenuItem
+            onClick={() => {
+              const ids = selectedRecords.filter(s => s.type === MATERIAL_TYPE.service).map(s => s.workOrder._id);
+              const uniqueIds = [...new Set(ids)];
+              setArrangeView({ open: true, workOrderIds: uniqueIds, currentIndex: 0 });
+            }}
+            disabled={selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords)
+              ? false : true}
+          >
+            Arrange Services
+          </MenuItem>
+        )}
         {!resourcePolicy?.hideAutoCompleteWorkOrder && (
-        <MenuItem
-          onClick={() => {
-            setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
-            setCompleteConfirmBox(true);
-          }}
-          disabled={
-            selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
-              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
-              && !isWorkOrderCompleted(selectedRecords)
-              ? false
-              : true
-          }
-        >
-          Auto Complete Work Order(s)
-        </MenuItem>
-      )}
+          <MenuItem
+            onClick={() => {
+              setAutoCompleteData(selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset));
+              setCompleteConfirmBox(true);
+            }}
+            disabled={
+              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
+                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
+                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
+                && !isWorkOrderCompleted(selectedRecords)
+                ? false
+                : true
+            }
+          >
+            Auto Complete Work Order(s)
+          </MenuItem>
+        )}
         {!resourcePolicy?.hideCompleteSkipRevertService && (
-        <MenuItem
-          onClick={() => {
-            setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
-          }}
-          disabled={isDisabledCompleteService()}
-        >
-          Complete Service
-        </MenuItem>
-      )}
+          <MenuItem
+            onClick={() => {
+              setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
+            }}
+            disabled={isDisabledCompleteService()}
+          >
+            Complete Service
+          </MenuItem>
+        )}
         {!resourcePolicy?.hideCompleteSkipRevertService && (
-        <MenuItem
-          onClick={() => {
-            setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
-          }}
-          disabled={isDisabledCompleteService()}
-        >
-          Skip Service
-        </MenuItem>
-      )}
+          <MenuItem
+            onClick={() => {
+              setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
+            }}
+            disabled={isDisabledCompleteService()}
+          >
+            Skip Service
+          </MenuItem>
+        )}
         {!resourcePolicy?.hideCompleteSkipRevertService && (
-        <MenuItem
-          disabled={
-            selectedRecords?.length && selectedRecords?.some((e) =>
-              e.type === MATERIAL_TYPE.service
-              && e.status !== WORKORDER_SERVICE_STATUS.pending)
-              && !isWorkOrderCompleted(selectedRecords) ? false : true
-          }
-          onClick={() => {
-            setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
-          }}
-        >
-          Revert Service
-        </MenuItem >
-      )}
+          <MenuItem
+            disabled={
+              selectedRecords?.length && selectedRecords?.some((e) =>
+                e.type === MATERIAL_TYPE.service
+                && e.status !== WORKORDER_SERVICE_STATUS.pending)
+                && !isWorkOrderCompleted(selectedRecords) ? false : true
+            }
+            onClick={() => {
+              setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
+            }}
+          >
+            Revert Service
+          </MenuItem >
+        )}
         <MenuItem
           onClick={() => {
             setIsBulkEdit(true);
@@ -1291,12 +1291,11 @@ const WorkOrder = ({
                     return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork, parentId: d.workOrder._id };
                   }) || []
               }
-              title={`Arrange Services (${
-                selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset
-                  && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])?.map((d) => {
-                    return d.serializedAssetDetail.assetNumber;
-                  })[0]
-              })`}
+              title={`Arrange Services (${selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset
+                && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])?.map((d) => {
+                  return d.serializedAssetDetail.assetNumber;
+                })[0]
+                })`}
               handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
               handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}
               loading={isSubmitting}
