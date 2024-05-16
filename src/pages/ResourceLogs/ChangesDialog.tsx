@@ -55,9 +55,12 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 moment(data?.oldValue).format(dateFormat)
                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                 <p
-                                  className="link text-truncate"
+                                  className={`${data?.lookupResource!=='Brand' ? 'link' :''}text-truncate`}
                                   title={data?.oldValue?.label}
-                                  onClick={() => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}
+                                  onClick={() => {
+                                    if(data?.lookupResource!=='Brand')
+                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)
+                                    }}
                                 >
                                   {data?.oldValue?.label}
                                 </p>
@@ -74,9 +77,11 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 moment(data?.newValue).format(dateFormat)
                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                 <p
-                                  className="link text-truncate"
+                                  className={`${data?.lookupResource!=='Brand' ? 'link' :''} text-truncate`}
                                   title={data?.newValue?.label}
-                                  onClick={() => window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}
+                                  onClick={() => {
+                                    if(data?.lookupResource!=='Brand')
+                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}}
                                 >
                                   {data?.newValue?.label}
                                 </p>
@@ -150,13 +155,11 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                                 moment(data?.oldValue).format(dateFormat)
                                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                                 <p
-                                                  className="link text-truncate"
+                                                  className={`${data?.lookupResource!=='Brand' ? 'link' :''} text-truncate`}
                                                   title={data?.oldValue?.label}
-                                                  onClick={() =>
-                                                    window.open(
-                                                      `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`
-                                                    )
-                                                  }
+                                                  onClick={() => {
+                                                    if(data?.lookupResource!=='Brand')
+                                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}}
                                                 >
                                                   {data?.oldValue?.label}
                                                 </p>
@@ -173,13 +176,11 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                                 moment(data?.newValue).format(dateFormat)
                                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                                 <p
-                                                  className="link text-truncate"
+                                                className={`${data?.lookupResource!=='Brand' ? 'link' :''} text-truncate`}
                                                   title={data?.newValue?.label}
-                                                  onClick={() =>
-                                                    window.open(
-                                                      `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`
-                                                    )
-                                                  }
+                                                  onClick={() => {
+                                                    if(data?.lookupResource!=='Brand')
+                                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}}
                                                 >
                                                   {data?.newValue?.label}
                                                 </p>
