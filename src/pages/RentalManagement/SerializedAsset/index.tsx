@@ -1195,6 +1195,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           filterByPlant={rentalManagementData?.warehouse}
           ids={productSerialNumbers?.map(e => e?.serialNumber)}
           showWarehouseFilter={true}
+          referenceData={{ rentalJob: rentalManagementData._id }}
         />
       )}
     </Fragment>

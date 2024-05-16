@@ -123,7 +123,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
               }
             }
             fieldsDataForCreate?.forEach((e) => {
-              if (['transferFromPlant', 'transfertoPlant']?.includes(e.fieldName)) {
+              if (['rentalJob', 'transferFromPlant', 'transfertoPlant']?.includes(e.fieldName)) {
                 e.disableOnEdit = true;
                 e.isUneditable = true;
               }
@@ -167,7 +167,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
         });
     }
   };
-  
+
   const validate = (values) => {
     const errors = {};
     if (user?.user?.brandPolicy?.storageLocation) {
