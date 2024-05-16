@@ -343,7 +343,7 @@ const AssignSerialNumbersDialog = ({
             text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
           }}
           addButtonOnclick={handleAdd}
-          isAddButtonVisible={selectedWarehouse === filterByPlant?.optionValue}
+          isAddButtonVisible={referenceType === 'Rental Job' ? selectedWarehouse === filterByPlant?.optionValue : true}
           setQueryString={false}
         />
         {products.length > 0 && products.some((s) => s.qty < 0) ? (
