@@ -87,6 +87,12 @@ export const resourcePolicy = [
                     fieldName: "fields",
                     fieldLabel: "Fields",
                     type: "multiselect"
+                },
+                {
+                    fieldName: "sumDecimalField",
+                    fieldLabel: "Sum(Decimal Field)",
+                    type: "checkBox",
+                    defaultValue: false
                 }],
                 defaultValue: []
             },

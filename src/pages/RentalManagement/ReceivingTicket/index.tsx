@@ -133,7 +133,7 @@ const ReceivingTicket = ({
 
   const [columns, setColumns] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, fields: [], referenceData: {} });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {} });
   const [assetsData, setAssetsData] = useState([])
 
   const {
@@ -1057,9 +1057,9 @@ const ReceivingTicket = ({
     }
     //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
 
-    const matchedStatus = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
-    if (matchedStatus) {
-      setOpenAssetDataDialog({ open: true, fields: matchedStatus?.fields, referenceData: data })
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
+    if (statusPolicy) {
+      setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, referenceData: data })
     } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     }
@@ -1771,17 +1771,18 @@ const ReceivingTicket = ({
           ticketType={showTicketDialog.ticketType}
           referenceType={DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}
           referenceData={showTicketDialog.data}
-          assets={assetsData?.length ? selectedRecords?.filter((e) => e.type === 'Asset')?.map((ele) => {
-            const matchedAsset = assetsData.find(asset => asset._id === ele._id);
-            if (matchedAsset) {
-              const { _id, assetNumber, ...assetData } = matchedAsset;
-              return {
-                ...ele,
-                assetData: { ...assetData }
-              };
-            }
-            return ele
-          })
+          assets={assetsData?.length ?
+            selectedRecords?.filter((e) => e.type === 'Asset')?.map((ele) => {
+              const matchedAsset = assetsData.find(asset => asset._id === ele._id);
+              if (matchedAsset) {
+                const { _id, ...assetData } = matchedAsset;
+                return {
+                  ...ele,
+                  assetData: { ...assetData }
+                };
+              }
+              return ele
+            })
             : selectedRecords?.filter((e) => e.type === 'Asset')}
           products={
             showTicketDialog.ticketType === DELIVERY_TICKET_TYPE.return ?
@@ -1819,12 +1820,12 @@ const ReceivingTicket = ({
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
           assetData={selectedRecords?.filter((e) => e.type === 'Asset')}
-          statusFields={openAssetDataDialog.fields}
-          referenceData={openAssetDataDialog.referenceData}
+          statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={setAssetsData}
-          onClose={() => setOpenAssetDataDialog({ open: false, fields: null, referenceData: null })}
-          onSuccess={(referenceData) => {
-            setOpenAssetDataDialog({ open: false, fields: [], referenceData: {} })
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null })}
+          onSuccess={() => {
+            const referenceData = openAssetDataDialog.referenceData;
+            setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null })
             setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: referenceData });
           }}
         />

@@ -1,8 +1,8 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { CustomDialogTransition, getObjKeysWithValues, yupSchema, serializedAsset, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource } from '../../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -10,20 +10,21 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import axiosInstance from 'src/axios/axiosInstance';
 import { FieldArray, Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CircularProgress, Typography } from '@material-ui/core';
+import { CircularProgress } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 
-export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusFields, assetData, referenceData, setAssetsData }) {
-  const toastConfig = useContext(CustomToastContext);
+export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, assetData, setAssetsData }) {
+
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+
+  const [decimalFields, setDecimalFields] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -32,17 +33,28 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusFie
   const fetchFields = async () => {
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     let fieldsData = fields?.data?.data;
-    fieldsData = fieldsData.filter((d) => [...statusFields].includes(d.fieldData.fieldName));
+    fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
     let fieldsDataForUpdate = fieldsData.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
     let values = {};
     let tempAssetData = [];
+    const decimalField = [];
     for (const data of assetData) {
-      let temp = getObjKeysWithValues(data, fieldsDataForUpdate);
-      temp['_id'] = data?._id;
-      temp['assetNumber'] = data?.assetNumber;
-      tempAssetData.push(temp);
+      let initialValues = getObjKeysWithValues(data, fieldsDataForUpdate);
+      if (statusPolicy?.sumDecimalField) {
+        fieldsDataForUpdate?.forEach((e) => {
+          if (e?.type === 'decimal') {
+            decimalField.push(e.fieldName)
+            initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
+            initialValues[e.fieldName] = 0;
+          }
+        })
+      }
+      initialValues['_id'] = data?._id;
+      initialValues['assetNumber'] = data?.assetNumber;
+      tempAssetData.push(initialValues);
     }
     values['assetData'] = tempAssetData;
+    setDecimalFields(decimalField)
     setInitialData({
       fields: fieldsDataForUpdate,
       values: values
@@ -51,29 +63,22 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusFie
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-    let apiCalls = [];
-    values?.assetData?.forEach((value) => {
-      const matchedAsset = assetData?.find((e) => e._id === value._id);
-      let updatedValue = {
-        ...value,
-        productCategory: matchedAsset.productCategory.optionValue,
-        product: matchedAsset.product.optionValue,
-        warehouse: matchedAsset.warehouseId,
-        assetNumberType: matchedAsset.assetNumberType,
-        status: matchedAsset.status
-      };
-      apiCalls.push(axiosInstance().put(`${serializedAsset.api}`, updatedValue));
-    });
-    Promise.all(apiCalls)
-      .then(() => {
-        setAssetsData(values?.assetData)
-        onSuccess(referenceData);
-        setSubmitting(false);
+    const data = [];
+    values?.assetData?.forEach((ele) => {
+      const obj: any = { _id: ele._id }
+      statusPolicy?.fields?.forEach((fieldName) => {
+        if (statusPolicy?.sumDecimalField && decimalFields?.includes(fieldName)) {
+          obj[fieldName] = parseFloat(ele[fieldName] || 0) + parseFloat(ele[`${fieldName}_orignal`] || 0)
+        }
+        else {
+          obj[fieldName] = ele[fieldName]
+        }
       })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
+      data.push(obj)
+    })
+    setAssetsData(data)
+    onSuccess();
+    setSubmitting(false);
   };
 
   return (
@@ -91,7 +96,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusFie
     >
       {initialData.fields.length ? (
         <Formik initialValues={initialData.values} enableReinitialize={true} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
-          {({ values, errors, setFieldValue, touched, submitForm, setValues }) => (
+          {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
@@ -119,10 +124,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusFie
                               key={index}
                             >
                               <div>
-                                <span>
-                                  <span className="text-[var(--primary-text)] font-semibold">Asset Number: </span>
-                                  {data.assetNumber}
-                                </span>
+                                <span className="text-[var(--primary-text)] font-semibold">{data.assetNumber}</span>
                               </div>
                               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
                                 {initialData?.fields.map((field) => (

@@ -7,7 +7,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import PolicyIcon from '@material-ui/icons/Policy';
 import SettingIcon from '@material-ui/icons/Settings';
 import axios, { CancelTokenSource } from 'axios';
-import _ from 'lodash';
+import { sortBy } from 'lodash';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { MdDragIndicator } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -47,7 +47,7 @@ const Steps = ({ resource }) => {
         .then(({ data: { data } }) => {
           setResourceData(data);
           setResourceId(data?._id);
-          setSteps(_.sortBy(data?.steps, 'order'));
+          setSteps(sortBy(data?.steps, 'order'));
           setStepsLoading(false);
         })
         .catch((error) => {
@@ -55,14 +55,14 @@ const Steps = ({ resource }) => {
           toastConfig.setToastConfig(error);
         });
     },
-    [resource, toastConfig]
+    [resource]
   );
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [resource, fetchData]);
+  }, [resource]);
 
   const handleDelete = (step) => {
     setDeleting(true);
@@ -314,9 +314,8 @@ const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, dragHandleP
   return (
     <>
       <div
-        className={`${
-          snapshot.isDragging ? '[border:1px_dashed_var(--common-border-color)]' : '[border:1px_solid_var(--common-border-color)]'
-        }   p-3 rounded-[5px]`}
+        className={`${snapshot.isDragging ? '[border:1px_dashed_var(--common-border-color)]' : '[border:1px_solid_var(--common-border-color)]'
+          }   p-3 rounded-[5px]`}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
