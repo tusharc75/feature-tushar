@@ -19,7 +19,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculatePrice, calculateRowsField, getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, asyncForEach, fieldTicket } from 'src/constants/helpers';
+import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, SERVICE_TYPE, asyncForEach, fieldTicket, treeToFlatArray } from 'src/constants/helpers';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Consumables from './Consumables';
@@ -834,10 +834,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           handleClose={() => {
             setMaterialDialog({ open: false, type: '', parentId: null });
           }}
-          ids={dataRows?.flatMap((row) => [
-            row?.materialId,
-            ...(row?.subRows?.map(subRow => subRow.materialId) || [])
-          ])}
+          ids={treeToFlatArray(dataRows, 'subRows')?.map(e => e.materialId)}
           isSubmitting={isSubmitting}
         />
       )}
