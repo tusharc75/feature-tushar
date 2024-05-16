@@ -90,7 +90,8 @@ export interface IFormDataType {
   kpi: KPIListType;
   statusOptions?: { optionValue: string; optionLabel: string }[];
   currency?: boolean;
-  stack?: boolean
+  stack?: boolean;
+  _id: string;
 }
 
 export const defaultFormConfigs: IFormDataType = {

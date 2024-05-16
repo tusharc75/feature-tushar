@@ -3,7 +3,7 @@ import { Box, Button, CircularProgress, FormControl, Grid, InputLabel, MenuItem,
 import { saveAs } from 'file-saver';
 import { Form, Formik } from 'formik';
 import queryString from 'query-string';
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { MdDashboardCustomize } from 'react-icons/md';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -15,6 +15,10 @@ import Builder from './Builder';
 import DashboardView from './DashboardView';
 import { IFormDataType, baseURL } from './builderHelpers';
 import update from 'immutability-helper';
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import DashboardItem from './DashboardItem';
+
+import { createPortal } from 'react-dom';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -31,6 +35,7 @@ const DashboardBuilder = () => {
   const [isSubmitting, setSubmitting] = React.useState<boolean>(false);
   const [isLoading, setLoading] = React.useState<boolean>(false);
   const [values, setValues] = React.useState({ name: '', defaultDuration: 'current-year' });
+  const [activeItem, setActiveItem] = useState<IFormDataType | null>(null);
 
   React.useEffect(() => {
     if (!isNew) {
@@ -180,24 +185,45 @@ const DashboardBuilder = () => {
     return errors;
   };
 
-  const moveCard = React.useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
-      const dragIndex = result.source.index;
-      const dropIndex = result.destination?.index;
+  const onDragOver = (event: DragOverEvent) => {
+    const { active, over } = event;
+    if (!over) return;
+    if (active.id === over.id) return;
+    const dragIndex = active.data.current?.index;
+    const dropIndex = over.data.current?.index;
 
-      const card = formData[dragIndex];
-      setFormData(
-        update(formData, {
-          $splice: [
-            [dragIndex, 1],
-            [dropIndex, 0, card]
-          ]
-        })
-      );
-    },
-    [formData, setFormData]
-  );
+    const card = formData[dragIndex];
+    setFormData(
+      update(formData, {
+        $splice: [
+          [dragIndex, 1],
+          [dropIndex, 0, card]
+        ]
+      })
+    );
+  };
+
+  const onDragEnd = () => {
+    setActiveItem(null);
+  };
+
+  function onDragStart(event: DragStartEvent) {
+    setActiveItem(formData[event.active.data.current?.index] as IFormDataType);
+  }
+
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10
+    }
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 300,
+      tolerance: 5
+    }
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   return (
     <Box className="main-container-v1">
@@ -310,7 +336,7 @@ const DashboardBuilder = () => {
                     )}
                   </Box>
                 )}
-                <DragDropContext onDragEnd={moveCard}>
+                <DndContext onDragEnd={onDragEnd} onDragOver={onDragOver} sensors={sensors} onDragStart={onDragStart}>
                   <DashboardView
                     selectedData={selectedData}
                     formData={formData}
@@ -318,7 +344,8 @@ const DashboardBuilder = () => {
                     handleEdit={handleEdit}
                     handleRemove={handleRemove}
                   />
-                </DragDropContext>
+                  <DragOverlay>{activeItem && <DashboardItem formData={activeItem} id={activeItem.uniqueId} index={0} />}</DragOverlay>
+                </DndContext>
               </Box>
             </Grid>
           </Grid>
