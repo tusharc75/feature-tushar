@@ -11,16 +11,15 @@ interface Props {
   tableData: any[];
   chart: ChartDataType;
   isTableView?: boolean;
-  isCurrency?: boolean;
 }
 
-const ExportDropdown = ({ anchorEl, setAnchorClose, currency, tableData, chart, chartData, isTableView, isCurrency }: Props) => {
+const ExportDropdown = ({ anchorEl, setAnchorClose, currency, tableData, chart, chartData, isTableView }: Props) => {
   const handleClose = (type: string) => {
     if ((chart.chartType === 'list' && tableData.length === 0) || (chart.chartType !== 'list' && !chartData) || !type) {
       setAnchorClose(null);
       return;
     }
-    exportData(type, currency, tableData, chart, isTableView, isCurrency);
+    exportData(type, currency, tableData, chart, isTableView);
   };
 
   return (

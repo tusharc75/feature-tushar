@@ -82,7 +82,7 @@ const SerializedAssetDetailsPage = () => {
   const [deviceTemplate, setDeviceTemplate] = useState(null);
   const [dataPoints, setDataPoints] = useState([]);
   // const [openDataSimulationDialog, setOpenDataSimulationDialog] = useState(false);
-  const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({open:false, fields: []});
+  const [openStatusChangeFieldDialog, setOpenStatusChangeFieldDialog] = useState({ open: false, statusPolicy: null });
 
   useEffect(() => {
     if (id) {
@@ -258,23 +258,23 @@ const SerializedAssetDetailsPage = () => {
   };
 
   const handleStatusChange = (o) => {
-    const {policy} = resourceData;
-    const matchedStatus = policy?.statusChangeFields?.find((ele)=> ele.status===o.optionValue);
+    const { policy } = resourceData;
+    const statusPolicy = policy?.statusChangeFields?.find((ele) => ele.status === o.optionValue);
     setStatus(o.optionValue);
     if (
       (o.optionValue === ASSET_STATUS.available && assetDetails?.status === ASSET_STATUS.scrap) ||
       o.optionValue === ASSET_STATUS.scrap ||
       o.optionValue === ASSET_STATUS.lost
     ) {
-      if(matchedStatus){
-        setOpenStatusChangeFieldDialog({open:true,fields: matchedStatus?.fields})
-      }else{
+      if (statusPolicy) {
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy })
+      } else {
         setShowReasonDialog(true);
       }
     } else {
-      if(matchedStatus){
-        setOpenStatusChangeFieldDialog({open:true,fields: matchedStatus?.fields})
-      }else{
+      if (statusPolicy) {
+        setOpenStatusChangeFieldDialog({ open: true, statusPolicy: statusPolicy })
+      } else {
         handleStatusUpdate({ status: o.optionValue });
       }
     }
@@ -621,16 +621,16 @@ const SerializedAssetDetailsPage = () => {
         />
       )}
       {openStatusChangeFieldDialog.open && (
-        <StatusChangeFieldDialog 
-           fields={fields} 
-           statusFields={openStatusChangeFieldDialog.fields} 
-           serializedAssetData={assetDetails} 
-           productInventoryId={id}
-           onClose={()=> setOpenStatusChangeFieldDialog({open:false,fields:[]})} 
-           onSuccess={(values)=>{ 
+        <StatusChangeFieldDialog
+          fields={fields}
+          statusPolicy={openStatusChangeFieldDialog.statusPolicy}
+          serializedAssetData={assetDetails}
+          productInventoryId={id}
+          onClose={() => setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null })}
+          onSuccess={(values) => {
             handleStatusUpdate({ status: status, assetData: values });
-            setOpenStatusChangeFieldDialog({open:false,fields:[]})
-          }}  
+            setOpenStatusChangeFieldDialog({ open: false, statusPolicy: null })
+          }}
         />
       )}
       {/* {openDataSimulationDialog && <DataSimulationDialog onClose={() => setOpenDataSimulationDialog(false)} />} */}

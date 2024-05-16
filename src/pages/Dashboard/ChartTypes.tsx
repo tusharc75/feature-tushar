@@ -372,9 +372,8 @@ const ChartTypes = ({
                 <TableView
                   id={chart.uniqueId}
                   type={chart.chartType?.toLowerCase()}
+                  chart={chart}
                   chartData={chartData?.tableData}
-                  isScreenSmall={isScreenSmall}
-                  isCurrency={chart?.currency || false}
                   currency={globalFilters.currency || currency}
                 />
               ) : chart.graphType === 'Map' ? (
@@ -396,7 +395,7 @@ const ChartTypes = ({
                     }}
                     options={{
                       plugins: {
-                        ...(chart?.currency &&
+                        ...((chart?.currency || chart?.percentage) &&
                         {
                           tooltip: {
                             callbacks: {
@@ -405,8 +404,13 @@ const ChartTypes = ({
                                 if (label) {
                                   label += ': ';
                                 }
-                                if (context.parsed.y !== null) {
-                                  label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
+                                if (chart?.currency) {
+                                  if (context.parsed.y !== null) {
+                                    label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
+                                  }
+                                }
+                                else if (chart?.percentage) {
+                                  label += `${context.parsed}%`;
                                 }
                                 return label;
                               }
@@ -476,8 +480,7 @@ const ChartTypes = ({
                 id={chart.uniqueId}
                 type={chart.chartType}
                 chartData={chartData?.tableData}
-                isScreenSmall={isScreenSmall}
-                isCurrency={chart?.currency || false}
+                chart={chart}
                 currency={globalFilters.currency || currency}
               />
             )}
@@ -507,7 +510,6 @@ const ChartTypes = ({
           anchorEl={anchorElExport}
           setAnchorClose={setAnchorElExport}
           currency={globalFilters.currency || currency}
-          isCurrency={chart?.currency || false}
           tableData={chartData ? chartData?.tableData : []}
           chart={chart}
           isTableView={chartData?.graphType !== 'Table' && tableView}
