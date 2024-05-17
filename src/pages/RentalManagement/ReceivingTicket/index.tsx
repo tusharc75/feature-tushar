@@ -2384,7 +2384,7 @@ const ActionButtonMenuItems = ({
             }
           }}
         >
-          Delivered to Customer
+          Received on Field
         </MenuItem>
       )}
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.assetDeliveredStatus && user?.user?.brandPolicy?.rentalOnFieldStep && (
@@ -2506,7 +2506,8 @@ const ActionButtonMenuItems = ({
                 }
               }}
             >
-              Create Receiving Ticket (Chargeable)
+              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Returned Ticket (Chargeable)` :
+                `Create Receiving Ticket (Chargeable)`}
             </MenuItem>
             {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
@@ -2531,7 +2532,8 @@ const ActionButtonMenuItems = ({
                 }
               }}
             >
-              Create Return Ticket (Non-Chargeable)
+              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Returned Ticket (Non-Chargeable)` :
+                `Create Return Ticket (Non-Chargeable)`}
             </MenuItem>
             {permissions?.sublease?.isRead && (
               <MenuItem
@@ -2554,7 +2556,7 @@ const ActionButtonMenuItems = ({
             }
           }}
         >
-          {`Receive Items`}
+          {`Received Items`}
         </MenuItem>
       )}
       {!isOffline && ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
