@@ -248,8 +248,10 @@ export const DropField = ({
                   <MoreHorizIcon fontSize="small" />
                 </IconButton>
                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-                  <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
-                  <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
+                  <Fragment>
+                    <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
+                    <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
+                  </Fragment>
                   {((['product-template', 'price-template'].includes(module) && data.editAble) ||
                     ['form-builder-master'].includes(module) ||
                     data.deletAble ||
