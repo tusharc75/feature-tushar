@@ -166,7 +166,7 @@ export const FormBuilder = ({
   });
   const touchSensor = useSensor(TouchSensor, {
     activationConstraint: {
-      delay: 300,
+      delay: 100,
       tolerance: 5
     }
   });
