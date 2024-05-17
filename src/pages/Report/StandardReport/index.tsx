@@ -142,6 +142,15 @@ const Report = () => {
                 })
                 columns = [...newColumns]
             }
+            else if (type === 'day-wise-volume-report') {
+                newColumns?.forEach((e) => {
+                    if (['asset', 'customerAccount', 'padName']?.includes(e.accessor)) {
+                        e.disableFilters = true;
+                        e.disableSortBy = true;
+                    }
+                })
+                columns = [...newColumns]
+            }
             else if (type === 'purchase-order-details') {
                 newColumns?.forEach((e) => {
                     if (['productId', 'productNumber', 'productDescription', 'serviceName', 'serviceDescription', 'description']?.includes(e.accessor)) {

@@ -477,7 +477,27 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (row.original[field.fieldName] ? <SignatureCell base64={row?.original[field.fieldName]} /> : <NoDataCell />)
         });
-      } else {
+      } 
+      else if (field.type === 'percent') {
+        column.push({
+          ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => (
+            <div>
+              {row?.original?.[field?.fieldName] ? (
+                <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+                  {row?.original?.[field?.fieldName]}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        });
+      } 
+      else {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
