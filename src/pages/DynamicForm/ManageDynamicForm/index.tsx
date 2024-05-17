@@ -11,7 +11,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, GenerateResourceLineNumber } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
@@ -175,6 +175,19 @@ const ManageDynamicForm = ({
     }
   };
 
+  //This is for fixed logic
+  const handleFixedBrandWiseLogic = async (name, value, setFieldValue) => {
+    if (name === 'rentalJob' && resource === 'Daily Inspection Report' && initialData?.fields?.find((e) => e.fieldName === 'assets')) {
+      const response: any = await axiosInstance().get(`${rentalManagement.api}/${value}`);
+      if (response?.data?.data?.productInventory?.length) {
+        setFieldValue('assets', response?.data?.data?.productInventory?.map((e) => e.inventory))
+      }
+      else {
+        setFieldValue('assets', [])
+      }
+    }
+  }
+
   return (
     <Dialog
       maxWidth="md"
@@ -210,7 +223,10 @@ const ManageDynamicForm = ({
                   <InputField
                     errors={errors}
                     values={values}
-                    setFieldValue={setFieldValue}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                      handleFixedBrandWiseLogic(name, value, setFieldValue)
+                    }}
                     touched={touched}
                     fieldsData={initialData.fields}
                     size="small"
