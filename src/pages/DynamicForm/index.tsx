@@ -173,28 +173,24 @@ const DynamicForm = () => {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const values: any = {};
+    const values: any = { _id: updatedData?._id };
     Object.keys(inputField)?.map((_key) => {
       values[_key] = updatedData[_key] ? updatedData[_key] : '';
     });
-
-    axiosInstance()
-      .put(`/dynamic-form/${updatedData?._id}`, values, {
-        headers: {
-          Resource: resource
-        }
-      })
-      .then(({ data }) => {
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().put(`/dynamic-form/update-selected-field`, values, {
+      headers: {
+        Resource: resource
+      }
+    }).then(({ data }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleSearch = (e) => {
