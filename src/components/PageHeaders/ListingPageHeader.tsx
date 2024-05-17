@@ -28,6 +28,7 @@ type ListingPageHeaderProps = {
   searchFilter?: any[];
   handleSearchFilter?: (value: any) => void;
   rightSideContents?: ReactNode;
+  leftSideContentsOfSearchFilter?: ReactNode;
   isActionButtonVisible: boolean;
   actionButtonProps?: Omit<ButtonPropsWithExtraData, 'text'>;
   actionMenuItems?: ReactNode;
@@ -46,6 +47,7 @@ const ListingPageHeader = ({
 
   leftSideContents,
   rightSideContents,
+  leftSideContentsOfSearchFilter,
 
   searchValue,
   onSearch,
@@ -182,6 +184,7 @@ const ListingPageHeader = ({
           className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
             }`}
         >
+          {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
             <HideWhenOffline>
               <SearchBox
