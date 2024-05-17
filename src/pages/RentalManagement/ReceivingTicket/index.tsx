@@ -1058,7 +1058,7 @@ const ReceivingTicket = ({
     //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
 
     const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
-    if (statusPolicy) {
+    if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
       setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, referenceData: data })
     } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
