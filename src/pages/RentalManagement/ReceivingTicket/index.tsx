@@ -68,6 +68,7 @@ import ChangeActualDateDialog from './ChangeActualDateDialog';
 import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
 import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
+import ChangeAssetWellNumberDialog from './ChangeAssetWellNumberDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -135,6 +136,7 @@ const ReceivingTicket = ({
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {} });
   const [assetsData, setAssetsData] = useState([])
+  const [openAssetWellNumberDialog, setOpenAssetWellNumberDialog] = useState(false);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -226,7 +228,8 @@ const ReceivingTicket = ({
               replaceAsset: d?.replaceAsset
                 ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
                 : '',
-              description: d?.product?.productDescription
+              description: d?.product?.productDescription,
+              wellNumber: d?.inventory?.wellNumber?.map((e) => e?.optionLabel)?.toString()
             };
           })
           .map((u) => ({
@@ -644,12 +647,13 @@ const ReceivingTicket = ({
         },
         {
           resource: 'Serialized Asset',
-          fieldNames: ['serialNumber']
+          fieldNames: ['serialNumber','wellNumber']
         }
       ]
     });
     const productFields = data?.filter((d) => d.resource === 'Product');
-    const assetFields = data?.filter((d) => d.resource === 'Serialized Asset');
+    let assetFields = data?.filter((d) => d.resource === 'Serialized Asset');
+    assetFields = assetFields?.length ? assetFields[0]?.fieldNames : [];
     const column: any = [
       {
         accessor: 'index',
@@ -809,6 +813,11 @@ const ReceivingTicket = ({
             <NoDataCell />
           )
       },
+       ...(assetFields?.find((f) => f.fieldName === 'wellNumber') ? [{
+        accessor: 'wellNumber',
+        Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel || 'Well Number',
+        Cell: ({ row }) => (row?.original?.wellNumber ? <h5 className="text-truncate">{row?.original?.wellNumber}</h5> : <NoDataCell />)
+      }] : []),
       {
         accessor: 'description',
         Header: 'Description',
@@ -960,7 +969,7 @@ const ReceivingTicket = ({
         Header: 'Rental Asset Status',
         Cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
       }
-    ];
+    ]
     if (user?.user?.brandPolicy?.rentalReceivingStepConsume) {
       column.push({
         accessor: 'consumeQty',
@@ -1634,10 +1643,13 @@ const ReceivingTicket = ({
               setShowConformationCancleTicket,
               setShowConformationConsume,
               setShowConformationConsumeMultiple,
+              setOpenAssetWellNumberDialog,
               dataRows,
               user,
               setOpenDateDialog,
-              currentStep
+              currentStep,
+              columns,
+              rentalManagementData
             }}
           />
         }
@@ -2115,6 +2127,17 @@ const ReceivingTicket = ({
           }}
         />
       )}
+       {openAssetWellNumberDialog && (
+        <ChangeAssetWellNumberDialog
+          handleClose={() => setOpenAssetWellNumberDialog(false)}
+          wellNumberOptions={rentalManagementData?.wellNumber}
+          assets={selectedRecords?.filter((ele)=>ele.type==='Asset')?.map((e)=> e._id)}
+          handleSucess={() => {
+            setOpenAssetWellNumberDialog(false)
+            fetchRecords();
+          }}
+        />
+      )}
     </>
   );
 };
@@ -2139,10 +2162,13 @@ const ActionButtonMenuItems = ({
   setShowConformationCancleTicket,
   setShowConformationConsume,
   setShowConformationConsumeMultiple,
+  setOpenAssetWellNumberDialog,
   dataRows,
   user,
   setOpenDateDialog,
-  currentStep
+  currentStep,
+  columns,
+  rentalManagementData,
 }) => {
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
@@ -2700,6 +2726,13 @@ const ActionButtonMenuItems = ({
             }}
           >
             {`Revert Consumed Qty`}
+          </MenuItem>
+        )}
+        {columns?.some((col)=> col.accessor=== 'wellNumber') && rentalManagementData?.wellNumber?.length && (
+          <MenuItem onClick = {()=>{
+            setOpenAssetWellNumberDialog(true);
+          }}>
+          Change Well Number
           </MenuItem>
         )}
     </>
