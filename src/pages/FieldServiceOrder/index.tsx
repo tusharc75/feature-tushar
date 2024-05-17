@@ -307,7 +307,7 @@ const ServiceOrder = () => {
           {`Delete (${selectedRecords.length})`}
         </MenuItem>
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          Add Offline
+          {`Add ${routes.fieldServiceOrder.title} Offline`}
         </MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
