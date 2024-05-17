@@ -10,7 +10,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferInventory, setFieldsInAscendingOrder, GenerateResourceLineNumber } from 'src/constants/helpers';
+import { CustomDialogTransition, transferInventory, setFieldsInAscendingOrder, GenerateResourceLineNumber, TRANSFER_INVENTORY_STATUS } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -87,16 +87,23 @@ const ManageTransferInventory: FC<Props> = (props) => {
                 const { _id, createdBy, updatedBy, entity, transferNumber, ...rest } = data;
                 let oldValues = { ...rest };
                 oldValues.transferNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-                oldValues.status = 'New';
+                oldValues.status = TRANSFER_INVENTORY_STATUS.new;
                 setCloneHeading(transferNumber);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
                   values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
                 });
               } else {
-                if (data?.canEdit === false) {
+                if (!data?.canEdit) {
                   fieldsDataForUpdate?.forEach((e) => {
                     if (['transferFromPlant', 'transferFromStorageLocation']?.includes(e?.fieldName)) {
+                      e.isUneditable = true;
+                    }
+                  });
+                }
+                if (!data?.canEditDeliveryTo) {
+                  fieldsDataForUpdate?.forEach((e) => {
+                    if (['transfertoPlant', 'transferToStorageLocation']?.includes(e?.fieldName)) {
                       e.isUneditable = true;
                     }
                   });
