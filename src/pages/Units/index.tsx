@@ -183,6 +183,27 @@ const Units = () => {
       });
   };
 
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const values: any = { _id: updatedData?._id };
+    Object.keys(inputField)?.map((_key) => {
+      values[_key] = updatedData[_key] ? updatedData[_key] : '';
+    });
+    axiosInstance().put(`/dynamic-form/update-selected-field`, values, {
+      headers: {
+        Resource: sidebarResource.units
+      }
+    }).then(({ data }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
+  };
+
   const getQueryString = (isExport = false) => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
@@ -306,6 +327,7 @@ const Units = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
+            onSelect={onSaveInlineEdit}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.units}

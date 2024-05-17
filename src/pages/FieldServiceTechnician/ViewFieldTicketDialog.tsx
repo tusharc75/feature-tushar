@@ -3,7 +3,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import routes from 'src/components/Helpers/Routes';
-import { CustomDialogTransition, SERVICE_ORDER_STATUS, checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, SERVICE_ORDER_STATUS, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
 import { useData } from 'src/StateProvider/Provider';
 import { useEffect, useState } from 'react';
@@ -16,18 +16,13 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
 
   useEffect(() => {
-    var isAllowedToEdit = [...(serviceOrderData.collaborator ?? []), serviceOrderData.owner].some((d) => d?.optionValue === user?.user?._id);
-    if (checkSuperAdminAccess(user, sidebarResource.fieldTicket)) {
-      isAllowedToEdit = true;
-    }
-    setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(serviceOrderData?.status));
+    setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, serviceOrderData) && ![SERVICE_ORDER_STATUS.closed]?.includes(serviceOrderData?.status));
   }, [serviceOrderData]);
 
   return (
     <>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader
-          // title={`${routes.fieldServiceOrder.title} - ${serviceOrderData?.fieldServiceOrderNumber}`}
           title={`Field Ticket - ${serviceOrderData?.fieldServiceOrderNumber}`}
           onClose={onClose}
           showRequiredLabel={false}
@@ -35,9 +30,9 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
         <CustomDialogContent>
           <FieldTicket
             serviceOrderData={serviceOrderData}
-            setNextStep={() => {}}
+            setNextStep={() => { }}
             allowedToEdit={allowedToEdit}
-            handleChangeStatus={() => {}}
+            handleChangeStatus={() => { }}
             resource={sidebarResource.fieldServiceTechnician}
           />
         </CustomDialogContent>

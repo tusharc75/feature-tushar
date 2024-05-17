@@ -4,7 +4,7 @@
 
   // master colors COLOUR_MASTER in helpers.tsx
   --transferAsset-bg: #ecc19c;
-  --replaceAsset-bg: #ffff99;
+  --replaceAsset-bg: theme('colors.yellow.100');
 }
 
 [data-mode='dark']:root {
@@ -14,5 +14,5 @@
 
   // master colors for dark theme
   --transferAsset-bg: #67360c;
-  --replaceAsset-bg: #5bd036;
+  --replaceAsset-bg: theme('colors.yellow.700');
 }

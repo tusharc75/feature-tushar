@@ -290,6 +290,39 @@ const Quotation = ({
       });
   };
 
+  const leftSideContents = (
+    <>
+      {allowedToEdit && (
+        <>
+          <Button
+            onClick={() => {
+              setShowQuotationSummaryDialog(true);
+            }}
+            variant="outlined"
+            size="small"
+            startIcon={<GiReceiveMoney />}
+            color="primary"
+          >
+            Summary
+          </Button>
+          <Button
+            variant={isMobile ? 'text' : 'outlined'}
+            color="primary"
+            size="small"
+            className={'btn-outline-v1'}
+            onClick={() => {
+              setShowAllVersionStatus(true);
+            }}
+            style={isMobile ? { color: '#43aeaa' } : {}}
+            startIcon={isMobile ? null : <VscVersions />}
+          >
+            {isMobile ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
+          </Button>
+        </>
+      )}
+    </>
+  );
+
   const rightSideContents = () => {
     return (
       <>
@@ -336,30 +369,6 @@ const Quotation = ({
                 {`Clone Version-${currentVersion}`}
               </Button>
             ) : null}
-            <Button
-              onClick={() => {
-                setShowQuotationSummaryDialog(true);
-              }}
-              variant="outlined"
-              size="small"
-              startIcon={<GiReceiveMoney />}
-              color="primary"
-            >
-              Summary
-            </Button>
-            <Button
-              variant={isMobile ? 'text' : 'outlined'}
-              color="primary"
-              size="small"
-              className={'btn-outline-v1'}
-              onClick={() => {
-                setShowAllVersionStatus(true);
-              }}
-              style={isMobile ? { color: '#43aeaa' } : {}}
-              startIcon={isMobile ? null : <VscVersions />}
-            >
-              {isMobile ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-            </Button>
           </>
         )}
       </>
@@ -396,6 +405,7 @@ const Quotation = ({
         isActionButtonVisible={false}
         previewDownloadProps={previewDownloadProps}
         rightSideContents={rightSideContents()}
+        leftSideContents={leftSideContents}
         hasXpadding
       />
       {columns ? (

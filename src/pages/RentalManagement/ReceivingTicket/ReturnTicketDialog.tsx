@@ -89,6 +89,8 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
               consumeQty: d.consumeQty,
               invoiceQty: invoiceQtyData?.find((i) => i?._id === d?.uniqueId)?.qty || 0,
               orderQuantity: d.qty || 0,
+              uniqueId: d?.uniqueId,
+              productSerialNumbers: d?.productSerialNumbers,
               row: d
             }))
           }}

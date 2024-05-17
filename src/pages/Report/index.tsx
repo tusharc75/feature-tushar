@@ -23,15 +23,15 @@ import Dialog from '@material-ui/core/Dialog';
 import CustomReactTable, { useTableReducer, useColumns, getStaticFields } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 let cancelTokenSource = null;
 
 const Report = () => {
-
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
-    state: { selectedEntity }
+    state: { permissions, selectedEntity }
   } = useData();
   let { resource } = useParams();
 
@@ -370,18 +370,51 @@ const Report = () => {
     return `?${filterQuery}`;
   };
 
-  const exportData = () => {
-    if (isExporting) return;
-    toastConfig.setToastConfig({
-      open: true,
-      message: 'Please wait exporting data',
-      type: 'info'
-    });
+  // const exportData = () => {
+  //   if (isExporting) return;
+  //   toastConfig.setToastConfig({
+  //     open: true,
+  //     message: 'Please wait exporting data',
+  //     type: 'info'
+  //   });
+  //   let newColumns = columns.map((col) => col.accessor);
+  //   if (colState.length) {
+  //     newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor);
+  //   }
+  //   setExporting(true);
+  //   let filterQuery = getFilter(true);
+  //   let api = null;
+  //   if (resourceCamelCase === 'quotes') {
+  //     api = `/report/quote-builder/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
+  //   } else {
+  //     api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
+  //   }
+
+  //   axiosInstance()
+  //     .get(api, {
+  //       responseType: 'arraybuffer'
+  //     })
+  //     .then((res) => {
+  //       const fileName = res.headers['content-disposition'].split('filename=')[1];
+  //       downloadExcel(res.data, fileName);
+  //       setExporting(false);
+  //       toastConfig.setToastConfig({
+  //         open: true,
+  //         message: 'Successfully Exported',
+  //         type: 'success'
+  //       });
+  //     })
+  //     .catch((err) => {
+  //       setExporting(false);
+  //       toastConfig.setToastConfig(err);
+  //     });
+  // };
+
+  const getApi = () => {
     let newColumns = columns.map((col) => col.accessor);
     if (colState.length) {
       newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor);
     }
-    setExporting(true);
     let filterQuery = getFilter(true);
     let api = null;
     if (resourceCamelCase === 'quotes') {
@@ -390,24 +423,7 @@ const Report = () => {
       api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
     }
 
-    axiosInstance()
-      .get(api, {
-        responseType: 'arraybuffer'
-      })
-      .then((res) => {
-        const fileName = res.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(res.data, fileName);
-        setExporting(false);
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Successfully Exported',
-          type: 'success'
-        });
-      })
-      .catch((err) => {
-        setExporting(false);
-        toastConfig.setToastConfig(err);
-      });
+    return api
   };
 
   return (
@@ -427,18 +443,16 @@ const Report = () => {
               <Grid container direction="row">
                 <Grid item xs={12} sm={12}>
                   <Grid container justifyContent="flex-end">
-                    {showGrid && (
-                      <Button
-                        size="small"
-                        className="btn-outline-v1"
-                        variant="outlined"
-                        id="importExportLinks"
-                        style={{ minWidth: 80 }}
-                        disabled={isExporting}
-                        onClick={exportData}
-                      >
-                        Export All
-                      </Button>
+                    {showGrid && (                        
+                        <AsynImportExportMenu
+                          resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+                          subResource={'report'}
+                          permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+                          module={''}
+                          api={getApi()}
+                          afterImportCompleted={() => {}}
+                          onlyExport={true}
+                        />
                     )}
                   </Grid>
                 </Grid>

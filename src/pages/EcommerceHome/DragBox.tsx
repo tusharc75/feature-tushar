@@ -1,36 +1,46 @@
+import { Draggable } from '@hello-pangea/dnd';
 import { Box, Grid, Typography } from '@material-ui/core';
-import { useDrag } from 'react-dnd';
 import PropTypes from 'prop-types';
 
 const style = {
-  cursor: 'pointer',
   backgroundColor: 'var(--dark-primary, white)'
 };
 
-const DragBox = ({ type, label, setFormData }) => {
-  const item = { _id: (Math.random() * 100000).toString(), type, label, column: '12' };
-
-  const [{ isDragging }, drag] = useDrag({
-    item: item,
-    type: 'field',
-    end(item, monitor) {
-      const dropResult = monitor.getDropResult();
-      if (dropResult) {
-        setFormData((prev) => [...prev, item]);
-      }
-    },
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging()
-    })
-  });
-
-  const opacity = isDragging ? 0.4 : 1;
-
+const DragBox = ({ item, index }) => {
   return (
-    <Grid ref={drag} style={{ opacity }} item xs={12} sm={12}>
-      <Box border={1} p={1} style={{ ...style }} borderColor="var(--common-border-color)" className="text-truncate">
+    <>
+      <Draggable key={item._id} draggableId={`${item._id}`} index={index}>
+        {(provided, snapshot) => (
+          <>
+            <li
+              ref={provided.innerRef}
+              {...provided.draggableProps}
+              {...provided.dragHandleProps}
+              style={provided.draggableProps.style}
+              className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
+            >
+              <Item dashedBorder={snapshot.isDragging} item={item} />
+            </li>
+            {snapshot.isDragging && <Item item={item} />}
+          </>
+        )}
+      </Draggable>
+    </>
+  );
+};
+
+const Item = ({ dashedBorder = false, item }) => {
+  return (
+    <Grid item xs={12} sm={12}>
+      <Box
+        border={1}
+        p={1}
+        style={{ ...style }}
+        borderColor="var(--common-border-color)"
+        className={`text-truncate ${dashedBorder ? ' !border-dashed' : ''}`}
+      >
         <Typography variant="body2" className="text-truncate">
-          {label}
+          {item.label}
         </Typography>
       </Box>
     </Grid>

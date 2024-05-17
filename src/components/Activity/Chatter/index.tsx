@@ -3,12 +3,12 @@ import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import { SendIcon } from 'src/assets/svg/svgIcons';
-
 import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { backendApi } from 'src/config';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const Chatter = (props: any) => {
   const { relatedTo } = props;
@@ -18,6 +18,9 @@ const Chatter = (props: any) => {
       user: { user }
     }
   } = useData();
+
+  const { isOffline } = useContext(CustomOfflineContext);
+
   const token = localStorage.getItem('token');
   const { setToastConfig } = useContext(CustomToastContext);
   const [messages, setMessages] = useState([]);
@@ -30,21 +33,21 @@ const Chatter = (props: any) => {
 
   const getChatter = () => {
     setLoading(true);
-    axiosInstance()
-      .get(`/chatter/resource?relatedTo=${JSON.stringify(relatedTo)}`)
-      .then(({ data: { data } }) => {
-        if (data) {
-          setMessages(data.Messages.reverse());
-          setChatterId(data._id);
-        } else {
-          createChatter();
-        }
-        setLoading(false);
-      })
-      .catch((err) => {
-        //setToastConfig(err);
-        setLoading(false);
-      });
+    if (!isOffline) {
+      axiosInstance().get(`/chatter/resource?relatedTo=${JSON.stringify(relatedTo)}`)
+        .then(({ data: { data } }) => {
+          if (data) {
+            setMessages(data.Messages.reverse());
+            setChatterId(data._id);
+          } else {
+            createChatter();
+          }
+          setLoading(false);
+        })
+        .catch((err) => {
+          setLoading(false);
+        });
+    }
   };
 
   useEffect(() => {
@@ -55,8 +58,7 @@ const Chatter = (props: any) => {
   }, [relatedTo]);
 
   useEffect(() => {
-    if (!token || !chatterId) return;
-
+    if (!token || !chatterId || isOffline) return;
     const s = io(`${backendApi?.replace('/api', '')}/chatter`, {
       path: backendApi?.includes('/api') ? '/api/socket.io' : '/socket.io',
       auth: {
@@ -70,12 +72,11 @@ const Chatter = (props: any) => {
       s.emit('join', chatterId);
     });
     setSocket(s);
-  }, [token, chatterId]);
+  }, [token, chatterId, isOffline]);
 
   // Socket listening for data
   useEffect(() => {
     if (!socket) return;
-
     socket.on('data', (data) => {
       setMessages(data.Messages.reverse());
     });
@@ -98,16 +99,6 @@ const Chatter = (props: any) => {
     try {
       await axiosInstance().put(`/chatter/${chatterId}`, { message });
       setSending(false);
-
-      // setMessages((prevState) => [
-      //   {
-      //     message,
-      //     date: new Date().toISOString(),
-      //     userName: `${user?.firstName} ${user?.lastName}`,
-      //     userid: user._id
-      //   },
-      //   ...prevState
-      // ]);
     } catch (error) {
       setSending(false);
       setToastConfig(error);

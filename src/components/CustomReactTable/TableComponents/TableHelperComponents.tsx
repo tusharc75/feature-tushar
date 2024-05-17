@@ -1,12 +1,17 @@
-import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell } from '@material-ui/core';
+import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@material-ui/core';
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
-import React, { ReactNode, useEffect, useState } from 'react';
+import React, { ReactNode, useContext, useEffect, useState } from 'react';
 import { useDrag, useDrop } from 'react-dnd';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
+import { Autocomplete } from '@material-ui/lab';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
+import { eq, isEqual } from 'lodash';
+
+let cellId = null;
 
 export type TColType = {
   Header: string;
@@ -26,7 +31,10 @@ export type TColType = {
     | 'signature'
     | 'decimal'
     | 'currencyAmount'
-    | 'converter';
+    | 'converter'
+    | 'singleLine'
+    | 'dropDown'
+    | 'multiSelect';
   currency?: string;
   accessorFn: (data: any) => string;
   sticky: undefined | 'left' | 'right';
@@ -40,6 +48,7 @@ export type TColType = {
   id: string;
   isVisible: undefined | boolean;
   show: undefined | boolean;
+  option: any;
 } & ColumnDef<any>;
 
 const DebouncedInput = React.forwardRef(
@@ -239,7 +248,6 @@ export const IndeterminateCheckbox = React.forwardRef(({ indeterminate, from, st
       size="small"
       ref={resolvedRef}
       {...rest}
-      defaultChecked={false}
       color="primary"
       style={{ ...style, color: from === 'Header' ? 'white' : 'inherit', padding: 0 }}
       inputProps={{ 'aria-label': 'secondary checkbox' }}
@@ -256,6 +264,7 @@ interface DraggableHeaderProps {
   isClientSideGrid: boolean;
   reorder: (draggedColumn: string, column: string, columnOrder: string[]) => string[];
   virtualization: boolean;
+  resource: string;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
@@ -264,7 +273,8 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   dispatch,
   isClientSideGrid,
   reorder,
-  virtualization
+  virtualization,
+  resource
 }) => {
   const { getState, setColumnOrder } = table;
   const { columnOrder } = getState();
@@ -279,6 +289,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     ['action', 'selection', 'expand'].includes(column?.id);
 
   const [filters, setFilters] = useState([]);
+  const { savedFilters, setSavedFilters } = useContext(FiltersContext);
 
   // Use a useEffect to update filters when customFilters changes
   useEffect(() => {
@@ -330,6 +341,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           }
         });
         dispatch({ type: 'filter', filters: tempResult });
+        if (!isClientSideGrid) setSavedFilters({ ...savedFilters, [resource]: tempResult });
       }
     }, MINIMUM_SEARCH_DELAY);
 
@@ -457,7 +469,14 @@ export const CellRenderer = ({
           ...(virtualization ? { ...virtualStyles } : { ...style })
         }}
         onClick={() => {
-          handleCellClick({ cell, dispatch, row, setCellValue });
+          if (columnDef?.type === 'dropDown' || columnDef?.type === 'date' || columnDef?.type === 'multiSelect') {
+            if (cellId != cell.id) {
+              handleCellClick({ cell, dispatch, row, setCellValue });
+            }
+          } else {
+            handleCellClick({ cell, dispatch, row, setCellValue });
+          }
+          cellId = cell.id;
         }}
         {...others}
       >
@@ -481,27 +500,155 @@ export const CellRenderer = ({
       return (
         <CellShell>
           <div className="w-full">
-            <input
-              autoFocus
-              type="number"
-              min="0"
-              onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
-              value={cellValue}
-              onKeyDown={(e) => {
-                const target = e.target as HTMLInputElement;
-                if (!currentEditingCellPosition) return;
-                if (e.key === 'Enter') {
-                  e.preventDefault();
-                  target.blur();
+            {columnDef?.type === 'singleLine' ? (
+              <input
+                autoFocus
+                type="text"
+                onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
+                value={cellValue}
+                onKeyDown={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (!currentEditingCellPosition) return;
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    target.blur();
+                  }
+                }}
+                className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                onChange={(e) => {
+                  setCellValue(e.target.value || '');
+                }}
+              />
+            ) : columnDef?.type === 'dropDown' ? (
+              <Autocomplete
+                fullWidth
+                onKeyDown={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (!currentEditingCellPosition) return;
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    target.blur();
+                  }
+                }}
+                options={columnDef?.option || []}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                getOptionSelected={(option: any, val) => option.optionValue === val}
+                value={
+                  columnDef?.option?.filter((data) => data.optionValue === cellValue).length
+                    ? columnDef?.option?.filter((data) => data.optionValue === cellValue)[0]
+                    : ''
                 }
-              }}
-              className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
-              onChange={(e) => {
-                let value: any = e.target.value;
-                value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.columnDef?.decimalPlaces || 0));
-                setCellValue(value);
-              }}
-            />
+                onChange={(e, val) => {
+                  setCellValue(val?.optionValue || '');
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    autoFocus
+                    onBlur={() => {
+                      if (getCellValue(cell) !== cellValue) {
+                        submitInput();
+                      } else {
+                        resetField();
+                      }
+                      cellId = null;
+                    }}
+                  />
+                )}
+              />
+            ) : columnDef?.type === 'multiSelect' ? (
+              <Autocomplete
+                fullWidth
+                multiple
+                disableCloseOnSelect
+                limitTags={2}
+                onKeyDown={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (!currentEditingCellPosition) return;
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    target.blur();
+                  }
+                }}
+                selectOnFocus
+                options={columnDef?.option || []}
+                getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                value={
+                  columnDef?.option?.filter((data) => cellValue?.includes(data.optionValue)).length
+                    ? columnDef?.option?.filter((data) => cellValue?.includes(data.optionValue))
+                    : []
+                }
+                onChange={(e, val) => {
+                  setCellValue(val ? val?.map((v) => v?.optionValue) : []);
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    variant="standard"
+                    autoFocus
+                    onBlur={() => {
+                      if (!isEqual(getCellValue(cell), cellValue)) {
+                        submitInput();
+                      } else {
+                        resetField();
+                      }
+                      cellId = null;
+                    }}
+                  />
+                )}
+              />
+            ) : columnDef?.type === 'date' ? (
+              <input
+                type="date"
+                className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                value={cellValue ? new Date(cellValue).toISOString().split('T')[0] : ''}
+                onKeyDown={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (!currentEditingCellPosition) return;
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    target.blur();
+                  }
+                }}
+                autoFocus
+                onBlur={() => {
+                  if (!eq(getCellValue(cell), cellValue)) {
+                    submitInput();
+                  } else {
+                    resetField();
+                  }
+                  cellId = null;
+                }}
+                onChange={(e) => {
+                  const date = new Date();
+                  const time = date.toTimeString().split(' ')[0];
+                  setCellValue(`${e.target.value}T${time}.000Z`);
+                }}
+              />
+            ) : (
+              <input
+                autoFocus
+                type="number"
+                min="0"
+                onBlur={() => (getCellValue(cell) !== cellValue ? submitInput() : resetField())}
+                value={cellValue}
+                onKeyDown={(e) => {
+                  const target = e.target as HTMLInputElement;
+                  if (!currentEditingCellPosition) return;
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    target.blur();
+                  }
+                }}
+                className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                onChange={(e) => {
+                  let value: any = e.target.value;
+                  value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.columnDef?.decimalPlaces || 0));
+                  setCellValue(value);
+                }}
+              />
+            )}
           </div>
         </CellShell>
       );

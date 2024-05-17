@@ -24,7 +24,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   PURCHASE_ORDER_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   purchaseOrder,
   purchaseOrderSteps,
   sidebarResource
@@ -94,11 +94,8 @@ const PurchaseOrderDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${purchaseOrder.api}/${id}`);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.purchaseOrder)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+     
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseOrder, data));
       setPurchaseOrderData(data);
       if (data?.status === PURCHASE_ORDER_STATUS.closed) {
         setCurrentStep(purchaseOrderSteps?.length - 1);

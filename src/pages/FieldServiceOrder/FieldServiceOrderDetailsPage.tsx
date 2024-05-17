@@ -27,7 +27,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import {
   ACTIVITY_RESOURCE,
   SERVICE_ORDER_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   fieldServiceOrder,
   serviceOrderSteps,
   sidebarResource
@@ -132,16 +132,13 @@ const ServiceOrderDetailsPage = () => {
         data = response?.data?.data;
       }
       setLoadingDetails(false);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.fieldServiceOrder)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && isAllowedToEdit && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
+
+      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          data.owner.optionValue === user?.user?._id &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        data.owner.optionValue === user?.user?._id &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setServiceOrderData(data);
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
@@ -157,11 +154,13 @@ const ServiceOrderDetailsPage = () => {
 
   const fetchPolicy = async () => {
     try {
-      const {
-        data: { data }
-      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
-      if (data) {
-        setResourceData(data);
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.fieldServiceOrder}`);
+        if (data) {
+          setResourceData(data);
+        }
       }
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -175,14 +174,14 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
     try {
       let data: any;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
+        data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
       } else {
         const response = await axiosInstance().get(`/field/field-policy?resource=${sidebarResource.fieldServiceOrder}`);
         data = response?.data?.data?.field;
@@ -241,32 +240,34 @@ const ServiceOrderDetailsPage = () => {
           <CustomBreadCrumbs routes={[routes.fieldServiceOrder, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
-            {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
-              <ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={() => {
-                  setShowClosedConfirmBox(true);
-                }}
-                className={'btn-outline-v1'}
-              >
-                Close
-              </ButtonWithPulse>
-            )}
-            <Fragment>
-              <ThemeButton iconForMobile={<Edit />} disabled={!allowedToEdit} onClick={handleOpenUpdateDialog}>
-                Edit
-              </ThemeButton>
-            </Fragment>
-            <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
-            <ActivityButton
-              referenceId={serviceOrderData?._id}
-              resource={ACTIVITY_RESOURCE.fieldServiceOrder}
-              resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
-            />
-          </Box>
+          {!isOffline &&
+            <Box className="control-buttons-v1">
+              {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
+                <ButtonWithPulse
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={() => {
+                    setShowClosedConfirmBox(true);
+                  }}
+                  className={'btn-outline-v1'}
+                >
+                  Close
+                </ButtonWithPulse>
+              )}
+              <Fragment>
+                <ThemeButton iconForMobile={<Edit />} disabled={!allowedToEdit} onClick={handleOpenUpdateDialog}>
+                  Edit
+                </ThemeButton>
+              </Fragment>
+              <DeleteButton text="Delete" disabled={!allowedToDelete} onClick={() => setShowConfirmBox(true)} />
+              <ActivityButton
+                referenceId={serviceOrderData?._id}
+                resource={ACTIVITY_RESOURCE.fieldServiceOrder}
+                resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
+              />
+            </Box>
+          }
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>

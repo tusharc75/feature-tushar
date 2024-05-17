@@ -27,7 +27,8 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   sidebarResource,
-  yupSchema
+  yupSchema,
+  restoreObjKeysWithValues
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import {
@@ -49,7 +50,6 @@ const ManageDeliveryTicket = ({
   referenceData = null,
   assets = null,
   products = null,
-  serialNumber = null
 }) => {
   const {
     state: { user }
@@ -237,7 +237,7 @@ const ManageDeliveryTicket = ({
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.deliveryTicket);
+        data = await findOne(objectStore.resource, sidebarResource.deliveryTicket);
       } else {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}`);
         data = response?.data?.data;
@@ -317,6 +317,9 @@ const ManageDeliveryTicket = ({
             if (ele?.uniqueId) {
               obj.uniqueId = ele.uniqueId;
             }
+            if(ele?.assetData){
+              obj.assetData = ele.assetData;
+            }
             tempInitialData['assets'].push(obj);
           });
           tempInitialData['products'] = [];
@@ -327,12 +330,11 @@ const ManageDeliveryTicket = ({
             if (ele?.uniqueId) {
               obj.uniqueId = ele.uniqueId;
             }
+            if (ele?.productSerialNumbers?.length > 0) {
+              obj.serialNumber = ele?.productSerialNumbers?.map(s => s?.serialNumber)
+            }
             tempInitialData['products'].push(obj);
           });
-          tempInitialData['serialNumber'] = [];
-          if (serialNumber) {
-            tempInitialData['serialNumber'] = serialNumber;
-          }
           if (fieldsDataForUpdate.find((d) => d.fieldName === 'wellName') && referenceData?.wellName) {
             tempInitialData['wellName'] = referenceData?.wellName;
           }
@@ -453,36 +455,7 @@ const ManageDeliveryTicket = ({
     setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
   };
 
-  const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
-    const obj = { ...dataObj };
-    fields.forEach((field) => {
-      if (field.type === 'dropDown' && field.lookup) {
-        let filter: any = field?.option?.filter((e) => e.optionValue === dataObj[field.fieldName]);
-        if (filter.length) {
-          obj[field.fieldName] = {
-            optionLabel: filter[0].optionLabel,
-            optionValue: filter[0].optionValue
-          };
-        }
-      } else if (field.type === 'multiSelect') {
-        if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
-          let option = [];
-          dataObj[field.fieldName].forEach((e: any) => {
-            option.push({
-              optionLabel: e,
-              optionValue: e
-            });
-          });
-          obj[field.fieldName] = option;
-        }
-      } else if (field.type === 'date') {
-        obj[field.fieldName] = moment(dataObj[field.fieldName]).format('YYYY-MM-DD');
-      } else {
-        obj[field.fieldName] = dataObj[field.fieldName];
-      }
-    });
-    return obj;
-  };
+
 
   const handleSubmit = async (values) => {
     if (isOffline) {
@@ -647,11 +620,10 @@ const ManageDeliveryTicket = ({
                     onClose();
                   }
                 }}
-                title={`${
-                  deliveryTicketId
-                    ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
-                    : `Create Transaction Ticket`
-                }`}
+                title={`${deliveryTicketId
+                  ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
+                  : `Create Transaction Ticket`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -705,11 +677,11 @@ const ManageDeliveryTicket = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        //minDate={new Date()}
-                                        //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                        // maxDate={
-                                        //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
-                                        //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
+                                      //minDate={new Date()}
+                                      //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                      // maxDate={
+                                      //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
+                                      //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                       />
                                     ) : field.fieldName === 'createDate' ? (
                                       <FormTypes

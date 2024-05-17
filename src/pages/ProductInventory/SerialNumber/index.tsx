@@ -1,34 +1,38 @@
 import Box from '@material-ui/core/Box/Box';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, gridLoadingTimeout, productInventory } from 'src/constants/helpers';
+import { dateFormat, gridLoadingTimeout } from 'src/constants/helpers';
 import { prepareDataForGrid } from 'src/constants/helpers';
-import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const SerialNumber = ({ product, warehouse }) => {
+
   const { state, dispatch } = useTableReducer();
   const { page, limit, filters, sorting } = state;
-  const [renderCount, setRenderCount] = useState(0);
-  const {
-    state: { user }
-  }: any = useData();
+
+  const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
-    if (renderCount > 0) {
-      fetchRecords();
-    } else {
-      setRenderCount(renderCount + 1);
-    }
-  }, [page, limit, filters, sorting]);
+    fetchData();
+  }, [page, limit, filters, sorting, warehouse]);
 
   const getQueryString = () => {
-    let deepFilter = `&page=${page}&limit=${limit}`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
+
+    if (warehouse) {
+      deepFilter = `${deepFilter}&warehouse=${warehouse}`;
+    }
+
+    if (product) {
+      deepFilter = `${deepFilter}&products=${product}`;
+    }
+
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -45,24 +49,27 @@ const SerialNumber = ({ product, warehouse }) => {
     return deepFilter;
   };
 
-  const fetchRecords = async () => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    let data;
-    const queryString = getQueryString();
-    const query = warehouse ? `&warehouse=${warehouse}&isAll=true` : `?isAll=true`;
-    const response = await axiosInstance().get(`${routes?.serialNumber?.path}?products=${product}${query}${queryString}`);
-    // const response = await axiosInstance().get(`${productInventory.api}/serial-number/${product}${query}`);
-    data = response?.data?.data;
-    let count = response?.data?.count;
-    let rows = data.map((u) => {
-      let finalObject: any = prepareDataForGrid(u, user);
-      return finalObject;
-    });
-    dispatch({ type: 'initialize', data: rows, count });
-    setTimeout(() => {
-      dispatch({ type: 'loading', loading: false });
-    }, gridLoadingTimeout);
+    let queryString = getQueryString();
+    axiosInstance().get(`/product-inventory/serial-number${queryString}`).then(({ data }) => {
+      let rows = data.data.map((u) => {
+        let finalObject = prepareDataForGrid(u);
+        return {
+          ...finalObject
+        };
+      });
+
+      dispatch({ type: 'initialize', data: rows, count: data.count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
+
   const columns = [
     {
       accessor: 'serialNumber',
@@ -82,6 +89,7 @@ const SerialNumber = ({ product, warehouse }) => {
     {
       accessor: 'warehouse',
       Header: routes.warehouse.title,
+      disableFilters: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.warehouse ? (
@@ -125,15 +133,15 @@ const SerialNumber = ({ product, warehouse }) => {
 
   return (
     <>
-      <Grid item xs={12} md={12} sm={12} className="mt-3">
+      <Grid item xs={12} md={12} sm={12}>
         {columns ? (
           <CustomReactTable
-            height={'calc(100vh - 200px)'}
+            height={'calc(100vh - 250px)'}
             columns={columns}
             state={state}
             dispatch={dispatch}
             renderedFrom={'serialNumber_grid'}
-            refreshGrid={fetchRecords}
+            refreshGrid={fetchData}
             hideSelection={true}
           />
         ) : (

@@ -240,7 +240,7 @@ const AddSerializedAsset = ({
           deepFilter = `${deepFilter}&repairJob=true`;
         }
       } else if (referenceType === 'Transfer Asset') {
-        deepFilter = `${deepFilter}&transferable=true`;
+        deepFilter = `${deepFilter}&transferable=true&transferAssetId=${referenceData?._id}`;
       } else if (referenceType === 'Rental Job') {
         const dateFilter = { from: referenceData?.fromDate, to: referenceData?.toDate };
         deepFilter = `${deepFilter}&rental=true&rentalJobId=${referenceData?._id}&date=${JSON.stringify(dateFilter)}`;
@@ -303,14 +303,13 @@ const AddSerializedAsset = ({
 
   const handleAddAssetToTransferAsset = (transferAssetId) => {
     axiosInstance()
-      .put(`${transferAsset.api}/add-asset/${transferAssetId}`, {
+      .put(`${transferAsset.api}/add-asset-complete-transfer-asset/${transferAssetId}`, {
         assets: selectedRecords?.map((s) => {
           return {
             _id: s._id,
             currentStatus: s.status
           };
-        }),
-        manualStatus: ASSET_STATUS.reserved
+        })
       })
       .then(({ data }) => {
         fetchAssets();

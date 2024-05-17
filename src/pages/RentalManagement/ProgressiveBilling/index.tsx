@@ -149,12 +149,14 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
       .get(`${invoice.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data.map((u, idx) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
+          finalObject.orignalData = u;
           finalObject['isLatestInvoice'] = idx === 0 ? true : false;
           finalObject['isChecked'] = false;
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
+
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });

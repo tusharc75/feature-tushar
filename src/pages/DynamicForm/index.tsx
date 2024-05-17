@@ -157,6 +157,7 @@ const DynamicForm = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions[renderedFrom]?.isUpdate;
           finalObject['canDelete'] = permissions[renderedFrom]?.isDelete;
+          finalObject['test'] = '-';
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -169,6 +170,27 @@ const DynamicForm = () => {
           dispatch({ type: 'loading', loading: false });
         }, gridLoadingTimeout);
       });
+  };
+
+  const onSaveInlineEdit = async (inputField, updatedData) => {
+    const values: any = { _id: updatedData?._id };
+    Object.keys(inputField)?.map((_key) => {
+      values[_key] = updatedData[_key] ? updatedData[_key] : '';
+    });
+    axiosInstance().put(`/dynamic-form/update-selected-field`, values, {
+      headers: {
+        Resource: resource
+      }
+    }).then(({ data }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleSearch = (e) => {
@@ -262,6 +284,7 @@ const DynamicForm = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
+            onSaveEdit={onSaveInlineEdit}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={resource}

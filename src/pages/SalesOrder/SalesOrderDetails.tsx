@@ -27,7 +27,7 @@ import {
   ACTIVITY_RESOURCE,
   INVOICE_STATUS,
   SALES_ORDER_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   salesOrder,
   salesOrderProcessSteps,
   sidebarResource
@@ -129,11 +129,8 @@ const SalesOrderDetails = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.salesOrder)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+     
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.salesOrder, data));
       setSalesOrderData(data);
       setLoading(false);
     } catch (error) {

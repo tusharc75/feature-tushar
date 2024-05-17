@@ -28,7 +28,7 @@ import {
   QUOTATION_STATUS,
   RENTAL_STATUS,
   RENTAL_STEPS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   deliveryTicket,
   rentalManagement,
   rentalManagementSteps,
@@ -240,11 +240,7 @@ const RentalManagementDetailsPage = () => {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
       setLoadingDetails(false);
-      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.rentalManagement)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, data));
       setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
@@ -283,7 +279,7 @@ const RentalManagementDetailsPage = () => {
         });
         setRentalManagementFields(response?.data?.data);
       } else {
-        const response: any = await findOne(objectStore.resource, objectStore.rentalManagement);
+        const response: any = await findOne(objectStore.resource, sidebarResource.rentalManagement);
         setRentalManagementFields(response);
       }
     } catch (error) {
@@ -706,7 +702,7 @@ const RentalManagementDetailsPage = () => {
           <TabPanel value={tabValue} index={3}>
             <Box>
               {displayProgressiveBillingTab ? (
-                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={true} />
+                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={allowedToEdit} />
               ) : (
                 <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
               )}

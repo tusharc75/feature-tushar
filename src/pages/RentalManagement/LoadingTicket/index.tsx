@@ -38,6 +38,7 @@ import {
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
+  MATERIAL_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
   deliveryTicket,
   gridLoadingTimeout,
@@ -99,8 +100,7 @@ const LoadingTicket = ({
   const [openDeliveryTicketDialog, setOpenDeliveryTicketDialog] = useState(false);
   const [showProcessDeliveryTicket, setShowProcessDeliveryTicket] = useState(false);
   const [columnHeader, setColumnHeader] = useState(null);
-  const [showNonSerializeAsset, setShowNonSerializeAsset] = useState({ open: false, data: {} });
-  const [anchorActionEl, setAnchorActionEl] = useState(null);
+  const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
   const [replaceLoading, setReplaceLoading] = useState(false);
@@ -126,6 +126,7 @@ const LoadingTicket = ({
       var material: any = [];
       var products: any = [];
       var nonSerializeAsset: any = [];
+      var productSerialNumbers: any = [];
       var invoiceData: any = [];
       var consumeProducts: any = [];
 
@@ -192,6 +193,7 @@ const LoadingTicket = ({
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
+        productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
 
         const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
         invoiceData = invoiceResponse?.data?.data?.material || [];
@@ -219,6 +221,7 @@ const LoadingTicket = ({
 
         ticketProduct?.forEach((ele) => {
           var consumeQty = 0;
+
           consumeProducts
             ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
             ?.forEach((e) => {
@@ -234,10 +237,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
@@ -254,8 +257,8 @@ const LoadingTicket = ({
             ? ele.qty === consumeQty
               ? RENTAL_INTERNAL_ASSET_STATUS.consumed
               : consumeQty < ele.qty && consumeQty > 0
-              ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
-              : element?.status
+                ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
+                : element?.status
             : element?.status;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.loadingTicket = ele?.loadingTicket;
@@ -266,6 +269,7 @@ const LoadingTicket = ({
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
+
         if (qty > 0) {
           const obj: any = {};
           obj._id = element.materialId;
@@ -276,10 +280,10 @@ const LoadingTicket = ({
             element.type === 'service'
               ? element?.serviceDetail?.serviceDescription || ''
               : element.type === 'product'
-              ? element?.productDetail?.productDescription || ''
-              : element.type === 'package'
-              ? element?.packageDetail?.packageDescription || ''
-              : '';
+                ? element?.productDetail?.productDescription || ''
+                : element.type === 'package'
+                  ? element?.packageDetail?.packageDescription || ''
+                  : '';
           obj.parentId = element?.parentId;
           obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
@@ -290,7 +294,83 @@ const LoadingTicket = ({
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           productAssets.push(obj);
         }
+
       });
+
+      if (productSerialNumbers?.length) {
+        material?.filter((e) => e?.productDetail?.serializedProduct && e.type === MATERIAL_TYPE.product).forEach((element) => {
+          var qty = productSerialNumbers?.filter((e) => e?._id === element?._id)?.length;
+          if (qty) {
+            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+
+            ticketProduct?.forEach((ele) => {
+
+              var consumeQty = 0;
+              consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
+                consumeQty = consumeQty + e.qty;
+              });
+
+              const obj: any = {};
+              obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
+              obj.type = 'Product';
+              obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
+              obj.qty = ele.qty;
+              obj.description =
+                element.type === 'service'
+                  ? element?.serviceDetail?.serviceDescription || ''
+                  : element.type === 'product'
+                    ? element?.productDetail?.productDescription || ''
+                    : element.type === 'package'
+                      ? element?.packageDetail?.packageDescription || ''
+                      : '';
+              obj.assetNumber = element?.productDetail?.productName;
+              obj.productName = element?.productDetail?.productName;
+              obj.productId = element?.productDetail?._id;
+              obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
+              obj.parentId = element?.parentId;
+              obj.parentName = element?.parentName;
+              obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
+              obj.status = 'N/A';
+              obj.rentalAssetStatus = element?.status;
+              obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
+                ? ele.qty === consumeQty
+                  ? RENTAL_INTERNAL_ASSET_STATUS.consumed
+                  : consumeQty < ele.qty && consumeQty > 0
+                    ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
+                    : element?.status
+                : element?.status;
+              obj.loadingTicket = ele?.loadingTicket;
+              obj.loadingTicketId = ele?.loadingTicketId;
+              obj.loadingTicketStatus = ele?.loadingTicketStatus;
+              obj.startDate = element?.actualStartDate;
+              obj.productSerialNumbers = productSerialNumbers?.filter((e) => e?._id === element?._id)?.
+                map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
+              productAssets.push(obj);
+              qty = qty - ele.qty;
+            });
+
+            if (qty > 0) {
+              productAssets.push({
+                _id: element.materialId,
+                uniqueId: element?._id,
+                type: 'Product',
+                displayType: 'Product (Serialized)',
+                qty: qty,
+                description: element?.productDetail?.productDescription || '',
+                parentId: element?.parentId,
+                parentName: element?.parentName,
+                assetNumber: element?.productDetail?.productName,
+                productName: element?.productDetail?.productName,
+                productId: element?.productDetail?._id,
+                warehouse: rentalManagementData?.warehouse?.optionLabel,
+                warehouseId: rentalManagementData?.warehouse?.optionValue,
+                productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)
+                  ?.map((_p) => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber }))
+              });
+            }
+          }
+        });
+      }
 
       deliveryTicketList.map((obj) => {
         if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
@@ -309,10 +389,9 @@ const LoadingTicket = ({
         d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
         d['isChecked'] = false;
         d['hideSelection'] =
-          [ASSET_STATUS.repair, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.underReview].includes(d.status) ||
-          d?.manualStatus === ASSET_STATUS.reserved ||
-          d?.isReplaced;
-
+          [ASSET_STATUS.repair, ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(d.status) ||
+          [RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(d.rentalAssetStatus) ||
+          d?.manualStatus === ASSET_STATUS.reserved || d?.isReplaced;
         d['isReplaceable'] = true;
         if (invoiceData?.length && invoiceData?.some((e) => isEqual(e._id, d._id))) {
           d['isReplaceable'] = false;
@@ -325,7 +404,8 @@ const LoadingTicket = ({
         } else {
           setNextStepToolTip(rentalManagementMessage.loadingCreateToProceed);
         }
-      } else {
+      }
+      else {
         if (
           productAssets.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0 &&
           productAssets?.some((e: any) => e.startDate)
@@ -400,8 +480,8 @@ const LoadingTicket = ({
               row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue
                 ? COLOUR_MASTER.transferAsset.background
                 : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
-                ? COLOUR_MASTER.lostAssets.background
-                : ''
+                  ? COLOUR_MASTER.lostAssets.background
+                  : ''
           }}
         >
           <h5 className="text-truncate">{row?.original?.index}</h5>
@@ -440,29 +520,35 @@ const LoadingTicket = ({
             size="small"
             onClick={() => {
               window.open(
-                `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${
-                  row?.original?._id?.split('_')[0]
+                `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${row?.original?._id?.split('_')[0]
                 }`
               );
             }}
           >
             <OpenInNewIcon fontSize="small" color={'primary'} />
           </IconButton>
-          {row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0 && (
-            <HtmlTooltip title={`Non-${routes.serializedAsset.title}`}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  setShowNonSerializeAsset({
-                    open: true,
-                    data: { productName: row?.original?.productName, nonSerializeAsset: row?.original?.nonSerializeAsset }
-                  });
-                }}
+          {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
+            (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
+              <HtmlTooltip
+                title={row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`}
               >
-                <InfoIcon fontSize="small" color={'primary'} />
-              </IconButton>
-            </HtmlTooltip>
-          )}
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    setShowInfo({
+                      open: true,
+                      data: {
+                        productName: row?.original?.productName,
+                        data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                      },
+                      type: row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`
+                    });
+                  }}
+                >
+                  <InfoIcon fontSize="small" color={'primary'} />
+                </IconButton>
+              </HtmlTooltip>
+            )}
         </div>
       )
     },
@@ -479,16 +565,38 @@ const LoadingTicket = ({
       Cell: ({ row }) => (row?.original?.parentId ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
     },
     {
+      accessor: 'loadingTicket',
+      Header: 'Loading Ticket',
+      Cell: ({ row }) =>
+        row?.original?.loadingTicket ? (
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
+            <Box ml={1}>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
+                }}
+              >
+                <OpenInNewIcon fontSize="small" color="primary" />
+              </IconButton>
+            </Box>
+          </div>
+        ) : (
+          <NoDataCell />
+        )
+    },
+    {
       accessor: 'qty',
       Header: 'Qty',
       disabled: true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
     },
-    {
+    ...(findHeader(columnHeader?.assetFields, 'serialNumber') ? [{
       accessor: 'serialNumber',
       Header: findHeader(columnHeader?.assetFields, 'serialNumber'),
       Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-    },
+    }] : []),
     {
       accessor: 'productName',
       Header: findHeader(columnHeader?.productFields, 'productName'),
@@ -534,28 +642,6 @@ const LoadingTicket = ({
         )
     },
     {
-      accessor: 'loadingTicket',
-      Header: 'Loading Ticket',
-      Cell: ({ row }) =>
-        row?.original?.loadingTicket ? (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-          </div>
-        ) : (
-          <NoDataCell />
-        )
-    },
-    {
       accessor: 'rentalAssetStatus',
       Header: 'Rental Asset Status',
       Cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
@@ -586,10 +672,10 @@ const LoadingTicket = ({
     canDrag: false,
     Cell: ({ row }) =>
       user?.user?.brandPolicy?.assetDeliveredStatus &&
-      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-        row?.original?.rentalAssetStatus
-      ) &&
-      row?.original?.type === 'Asset' ? (
+        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+          row?.original?.rentalAssetStatus
+        ) &&
+        row?.original?.type === 'Asset' ? (
         <HtmlTooltip title={`Change ${routes.serializedAsset.title} Last Status Date`}>
           <IconButton
             size="small"
@@ -869,7 +955,7 @@ const LoadingTicket = ({
       if (action === rentalManagementActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyCreated });
-        } else if (e.type === 'Asset' && (e?.status !== ASSET_STATUS.reserved || e?.rentalAssetStatus !== RENTAL_INTERNAL_ASSET_STATUS.reserved)) {
+        } else if (e.type === 'Asset' && (![ASSET_STATUS.reserved, ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e?.status) || e?.rentalAssetStatus !== RENTAL_INTERNAL_ASSET_STATUS.reserved)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingReservedAssetStatus });
         }
       } else if (action === rentalManagementActions.deliveredToCustomer) {
@@ -1013,7 +1099,7 @@ const LoadingTicket = ({
         {(allowedToEdit || isProcessor) && (
           <>
             {selectedRecords.length &&
-            selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
               selectedRecords?.length ? (
               <HtmlTooltip title="Remove Assets From Loading Ticket(s)">
                 <Button
@@ -1265,8 +1351,12 @@ const LoadingTicket = ({
           }}
         />
       )}
-      {showNonSerializeAsset.open && (
-        <ShowNonSerializeAssets data={showNonSerializeAsset.data} onClose={() => setShowNonSerializeAsset({ open: false, data: {} })} />
+      {showInfo.open && (
+        <ShowNonSerializeAssets
+          data={showInfo.data}
+          onClose={() => setShowInfo({ open: false, data: {}, type: null })}
+          title={showInfo.type}
+        />
       )}
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset

@@ -64,6 +64,8 @@ import DataList from './FormTypes/DataList';
 import Dropdown from './FormTypes/Dropdown';
 import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
+import { LOGIC } from '../FormBuilder/helper';
+import Description from './FormTypes/Description';
 
 type MultiFileType = {
   fileName: string;
@@ -786,9 +788,85 @@ const FormTypes = (props) => {
     return label;
   };
 
-  return fieldData?.hiddenField ? null : !fieldData ||
-    !fieldData?.isShowFieldDependentOn ||
-    (fieldData?.isShowFieldDependentOn && fieldData?.showFieldDependentOn && values[fieldData?.showFieldDependentOn]) ? (
+  const checkCondition = (fieldName, value, values) => {
+    const _field = fields?.filter((f) => f?.fieldName === fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === fieldName)[0] : null;
+    if (_field) {
+      if (_field?.type === 'checkBox') {
+        if (value === 'yes') {
+          return values[fieldName];
+        } else {
+          return !values[fieldName];
+        }
+      } else if (_field?.type === 'dropDown') {
+        if (value?.split(',')?.includes(values[fieldName])) {
+          return true;
+        } else {
+          return false;
+        }
+      } else if (_field?.type === 'multiSelect') {
+        if (value?.split(',').some((v) => values[fieldName]?.includes(v))) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        if (values[fieldName] === value) {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    } else {
+      return false;
+    }
+  };
+
+  const isVisible = () => {
+    if (fieldData?.visibilityCondition?.length > 0) {
+      let visible = false;
+      let show = true;
+      fieldData?.visibilityCondition.forEach((condition, i) => {
+        if (condition?.logic === LOGIC[0]) {
+          condition?.fields?.forEach((field) => {
+            if (field?.fieldName && field?.value) {
+              if (!checkCondition(field?.fieldName, field?.value, values)) {
+                show = false;
+                return;
+              }
+            }
+          });
+        } else if (condition?.logic === LOGIC[1]) {
+          let count = 0;
+          condition?.fields?.forEach((field) => {
+            if (field?.fieldName && field?.value) {
+              if (checkCondition(field?.fieldName, field?.value, values)) {
+                return;
+              } else {
+                count = count + 1;
+              }
+            }
+          });
+
+          if (count === condition?.fields?.length) {
+            show = false;
+          }
+        }
+
+        if (!show) {
+          visible = false;
+          return;
+        }
+
+        if (i === fieldData?.visibilityCondition?.length - 1) {
+          visible = show;
+        }
+      });
+      return visible;
+    }
+    return true;
+  };
+
+  return fieldData?.hiddenField ? null : !fieldData || isVisible() ? (
     type === 'singleLine' || (type === 'lookUpDisplay' && fromFilter) ? (
       <InfoLabel
         info={tooltipMessage}
@@ -2683,7 +2761,9 @@ const FormTypes = (props) => {
         setFieldValue={setFieldValue}
       />
     ) : type === 'counter' ? (
-      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} />
+      <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
+    ) : type === 'description' ? (
+      <Description label={label} fieldData={fieldData}/>
     ) : null
   ) : null;
 };

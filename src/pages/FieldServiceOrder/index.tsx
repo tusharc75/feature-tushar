@@ -18,11 +18,11 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import { CHILD_RESOURCE, fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import ManageServiceOrder from './ManageServiceOrder';
-import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
+import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { fieldServiceOfflineUpdate } from './Services/OfflineHelper';
+import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from './Services/OfflineHelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 
 let serviceOrderTimeout;
@@ -68,13 +68,15 @@ const ServiceOrder = () => {
   const fetchGridColumns = async () => {
     let data;
     if (isOffline) {
-      data = await findOne(objectStore.resource, objectStore.fieldServiceOrder);
+      data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
       data = response?.data?.data;
       try {
-        insertUpdate(objectStore.resource, objectStore.fieldServiceOrder, data);
-      } catch (e) { }
+        insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);
+      } catch (e) {
+        console.error(`Field Service Order : ${e.message}`);
+      }
     }
     const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path, true);
     let staticFields = getStaticFields();
@@ -285,35 +287,12 @@ const ServiceOrder = () => {
     selectedRecords.forEach((element) => {
       data.push(element._id);
     });
-    await fieldServiceOfflineUpdate(data);
-    axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.fieldTicket, data);
-    });
-    axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}&view=true`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.serviceMaster, data);
-    });
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketMateial}`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.fieldTicketMaterial, data);
-    });
-    axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, 'fieldTicketCost', data);
-    });
-    axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`).then(({ data: { data } }) => {
-      insertUpdate(objectStore.resource, objectStore.product, data);
-    });
-    axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription']}]}).then(({data : {data}}) => {
-      insertUpdate(objectStore.resource, 'fieldTicketMaterialProduct', data);
-    });
+    await fieldServiceOrderAddOffline(data);
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
-  const handleRemoveoffline = async () => {
-    await clearAll(objectStore.fieldServiceOrder);
-    await clearAll(objectStore.fieldTicket);
-    await clearAll(objectStore.serviceMaster);
-    await clearAll(objectStore.fieldTicketMaterial);
-    await clearAll(objectStore.product);
-    
+  const handleRemoveoffline = async (ids: any[] = []) => {
+    await fieldServiceOrderClearOffline(ids);
   };
 
   const ActionMenuItems = () => {
@@ -328,8 +307,9 @@ const ServiceOrder = () => {
           {`Delete (${selectedRecords.length})`}
         </MenuItem>
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          Add Offline
+          {`Add ${routes.fieldServiceOrder.title} Offline`}
         </MenuItem>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map(e => e._id))}>{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );
@@ -339,22 +319,24 @@ const ServiceOrder = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.fieldServiceOrder]} />
-        <ImportExportLinks
-          permissions={permissions?.fieldServiceOrder}
-          module="fieldServiceOrder"
-          api={fieldServiceOrder.api}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          total={rowCount}
-          recordsToExport={selectedRecords?.length}
-          ids={selectedRecords?.map((obj) => obj._id)}
-          onExportToExcelSuccess={() => {
-            fetchData();
-          }}
-          additionalParams={getQueryString(true)}
-        />
+        {!isOffline &&
+          <ImportExportLinks
+            permissions={permissions?.fieldServiceOrder}
+            module="fieldServiceOrder"
+            api={fieldServiceOrder.api}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            total={rowCount}
+            recordsToExport={selectedRecords?.length}
+            ids={selectedRecords?.map((obj) => obj._id)}
+            onExportToExcelSuccess={() => {
+              fetchData();
+            }}
+            additionalParams={getQueryString(true)}
+          />
+        }
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -362,18 +344,14 @@ const ServiceOrder = () => {
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
-          // actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
-          isAddButtonVisible={permissions?.fieldServiceOrder?.isCreate}
+          isAddButtonVisible={!isOffline && permissions?.fieldServiceOrder?.isCreate}
         />
         {columns ? (
           <CustomReactTable
@@ -384,15 +362,15 @@ const ServiceOrder = () => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
-            showFilters={true}
+            showFilters={!isOffline}
             resource={sidebarResource.fieldServiceOrder}
+            isClientSideGrid={isOffline ? true : false}
           />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}

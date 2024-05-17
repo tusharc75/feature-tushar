@@ -328,6 +328,8 @@ export default function useColumns() {
       } else if (field?.lookup) {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          ...(Boolean(field?.isColumnEditable) ? {option: field?.option} : {}),
           accessorFn: (original) => {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
@@ -369,6 +371,7 @@ export default function useColumns() {
       } else if (field?.type === 'date') {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (
             <div>
               {row?.original?.[field?.fieldName] ? (
@@ -476,9 +479,30 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (row.original[field.fieldName] ? <SignatureCell base64={row?.original[field.fieldName]} /> : <NoDataCell />)
         });
-      } else {
+      } 
+      else if (field.type === 'percent') {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => (
+            <div>
+              {row?.original?.[field?.fieldName] ? (
+                <h5 className="text-truncate" title={row?.original?.[field?.fieldName]}>
+                  {row?.original?.[field?.fieldName]}
+                </h5>
+              ) : (
+                <NoDataCell />
+              )}
+            </div>
+          )
+        });
+      } 
+      else {
+        column.push({
+          ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (
             <div>
               {row?.original?.[field?.fieldName] ? (

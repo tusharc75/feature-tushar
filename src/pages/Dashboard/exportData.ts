@@ -7,7 +7,7 @@ import { formatAmountWithCurrency } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { ChartDataType } from './ChartTypes';
 
-export default async (type: string, currency: string, tableData: any[], chart: ChartDataType, isTableView: boolean, isCurrency: boolean) => {
+export default async (type: string, currency: string, tableData: any[], chart: ChartDataType, isTableView: boolean) => {
 
   const { uniqueId, graphType, chartTitle } = chart;
 
@@ -122,8 +122,9 @@ export default async (type: string, currency: string, tableData: any[], chart: C
             columns.map((key) =>
               isNaN(Number(data[key]))
                 ? data[key] : key.includes("MT") || key.includes("GM") ? Number(data[key]) ? data[key].toFixed(2) : '00'
-                  : isCurrency ? formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
-                    : Number(data[key])
+                  : chart?.currency ? formatAmountWithCurrency(currency, Number(data[key]) ? data[key].toFixed(2) : '00').fullFormatAmount
+                    : chart?.percentage ? `${data[key]}%`
+                      : Number(data[key])
             )
           );
           //@ts-ignore

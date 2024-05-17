@@ -26,7 +26,7 @@ import {
   DELIVERY_TICKET_TYPE,
   SUBLEASE_STATUS,
   SUBLEASE_TYPE,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   sidebarResource,
   sublease,
   sublease_InterCompany_Steps,
@@ -140,10 +140,7 @@ const SubleaseDetailsPage = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, subleaseSteps));
       }
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.sublease)) {
-        isAllowedToEdit = true;
-      }
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.sublease, data)
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       if (data.status === SUBLEASE_STATUS.issued) {
         setIsIssued(true);
