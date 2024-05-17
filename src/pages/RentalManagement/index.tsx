@@ -446,7 +446,7 @@ const RentalManagement = () => {
           </MenuItem>
         )}
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          Add Offline
+          {`Add ${routes.rentalManagement.title} Offline`}
         </MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
