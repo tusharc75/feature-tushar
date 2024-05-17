@@ -161,10 +161,10 @@ const Field = ({
         className={`${
           isDragging
             ? '[border:5px_dashed_var(--common-border-color)] bg-[var(--dark-secondary,theme("colors.cyan.100"))]'
-            : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
-        }  p-2 cursor-grab`}
+            : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
+        }  p-2 cursor-grab min-h-[56.5px] items-center flex`}
       >
-        <div className={isDragging ? ' opacity-50' : ''}>
+        <div className={`${isDragging ? ' opacity-50' : ''} flex-grow`}>
           <div className="grid grid-cols-[1fr_25px_25px] items-center justify-between gap-2">
             <div className="grid grid-cols-[1fr_1fr] items-center gap-2">
               <div className="">
@@ -179,7 +179,7 @@ const Field = ({
                     onChange={(event) => onChangeFieldName(data._id, event.target.value)}
                   />
                 ) : (
-                  <p className="MuiTypography-body2 min-h-[38px]">{data.fieldLabel}</p>
+                  <p className="MuiTypography-body2">{data.fieldLabel}</p>
                 )}
               </div>
               <p className="text-gray-500 dark:text-slate-300 line-clamp-1 min-w-0">{FieldList[data?.type?.toUpperCase()]?.label}</p>
