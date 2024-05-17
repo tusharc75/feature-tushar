@@ -103,12 +103,12 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -168,23 +168,22 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow?.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName
-      }`;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -228,25 +227,24 @@ const Quotation = ({
     const rows = [...rowsMaterial, ...additionalCostData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.detail
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.type === 'package'
+              ? parent.packageDetail?.packageName
+              : parent.detail
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent?.description;
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent?.description;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -331,7 +329,7 @@ const Quotation = ({
         {allowedToEdit && (
           <>
             {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-            quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
               <Button
                 disabled={material
                   .filter((e) => e.parentId === null)
