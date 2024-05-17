@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState, FC, Fragment } from 'react';
-import { Dialog, Button, Box, TextField, Grid, Chip, ButtonGroup, Container, InputAdornment, Paper, Typography, TableBody } from '@material-ui/core';
+import { useContext, useEffect, useState, } from 'react';
+import { Dialog, Button, Box, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -7,7 +7,6 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Formik, Form, FieldArray } from 'formik';
-import { isMobile, isTablet } from 'react-device-detect';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import {
   MATERIAL_TYPE,
@@ -26,6 +25,7 @@ import { startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialserializedAssets, materialSerialNumbers }) => {
+  
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -131,21 +131,24 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
         }
         if (tempProduct?.serializedProduct) {
           if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
-            const removeActualReceivedQty =
-              parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
-            const actualInventoryQty = removeActualReceivedQty - tempProduct?.assetQty;
-            if (tempProduct?.assetQty) {
-              if ((removeActualReceivedQty - actualInventoryQty) !== d?.assetIds?.length) {
-                errors.assetIds = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
+
+            const removeActualReceivedQty = parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
+
+            const totalSelected = d?.assetIds?.length + d.serialNumber?.length;
+
+            if (user?.user?.brandPolicy?.productInventorySerialNumberRequired || materialSerialNumbers[tempProduct?._id]?.length) {
+              if (totalSelected !== removeActualReceivedQty) {
+                errors['assetIds'] = `Selected ${routes.serializedAsset.title} & Serial Numbers must be equal to reject quantity`;
+                errors['serialNumber'] = `Selected ${routes.serializedAsset.title} & Serial Numbers must be equal to reject quantity`;
               }
             }
-            if (user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) {
-              if ((removeActualReceivedQty - tempProduct?.assetQty) !== d.serialNumber?.length) {
-                errors['serialNumber'] = `Please enter serial numbers same as reject quantity`;
+            else if (tempProduct?.assetQty) {
+              const actualInventoryQty = removeActualReceivedQty - tempProduct?.assetQty;
+              if ((removeActualReceivedQty - actualInventoryQty) !== d?.assetIds?.length) {
+                errors['assetIds'] = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
               }
             }
           }
-
         }
       });
     }
