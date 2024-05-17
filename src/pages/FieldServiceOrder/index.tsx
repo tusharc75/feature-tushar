@@ -291,8 +291,8 @@ const ServiceOrder = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
-  const handleRemoveoffline = async () => {
-    await fieldServiceOrderClearOffline()
+  const handleRemoveoffline = async (ids: any[] = []) => {
+    await fieldServiceOrderClearOffline(ids);
   };
 
   const ActionMenuItems = () => {
@@ -309,6 +309,7 @@ const ServiceOrder = () => {
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
           Add Offline
         </MenuItem>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map(e => e._id))}>{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );
