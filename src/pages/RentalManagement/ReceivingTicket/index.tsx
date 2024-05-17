@@ -642,18 +642,17 @@ const ReceivingTicket = ({
     } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
-          resource: 'Product',
+          resource: sidebarResource.product,
           fieldNames: ['productName']
         },
         {
-          resource: 'Serialized Asset',
-          fieldNames: ['serialNumber','wellNumber']
+          resource: sidebarResource.serializedAsset,
+          fieldNames: ['serialNumber']
         }
       ]
     });
-    const productFields = data?.filter((d) => d.resource === 'Product');
-    let assetFields = data?.filter((d) => d.resource === 'Serialized Asset');
-    assetFields = assetFields?.length ? assetFields[0]?.fieldNames : [];
+    const productFields = data?.find((d) => d.resource === sidebarResource.product)?.fieldNames || [];
+    const assetFields = data?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
     const column: any = [
       {
         accessor: 'index',

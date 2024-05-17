@@ -1,12 +1,25 @@
 import Box from '@material-ui/core/Box';
-import { CHILD_RESOURCE, addItemAtIndex, removeItemAtIndex } from '../../constants/helpers';
+import Grid from '@material-ui/core/Grid';
+import { makeStyles } from '@material-ui/core/styles';
+import { isMobile, isTablet } from 'react-device-detect';
+import { DndProvider } from 'react-dnd';
+import { HTML5Backend } from 'react-dnd-html5-backend';
+import { TouchBackend } from 'react-dnd-touch-backend';
+import { CHILD_RESOURCE } from '../../constants/helpers';
+import { CustomField } from './CustomField/index';
+import { DragBox } from './DragBox';
+import { DropMaster } from './DropMaster';
+import FieldList from './FieldList';
 
-import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/sortable';
-import DndOverlayWrapper from './NewDnd/DndOverlayWrapper';
-import Sections from './NewDnd/Sections';
-import Sidebar from './NewDnd/Sidebar';
-import { generateId } from './NewDnd/helper';
+import {
+  DragDropContext,
+  Draggable,
+  DraggableProvided,
+  DraggableProvidedDragHandleProps,
+  DraggableStateSnapshot,
+  DropResult,
+  Droppable
+} from '@hello-pangea/dnd';
 
 export const subForms = [
   CHILD_RESOURCE.rentalManagementProduct,
@@ -19,23 +32,23 @@ export const subForms = [
   CHILD_RESOURCE.subleaseProduct
 ];
 
-// const useStyles = makeStyles(() => ({
-//   root: {
-//     flexGrow: 1,
-//     margin: 10
-//   },
-//   screenHeightAutoFormBuilder: {
-//     height: 'calc(100vh - 200px)',
-//     overflow: 'auto'
-//   },
-//   screenHeightAutoFormTemplate: {
-//     height: 'calc(100vh - 300px)',
-//     overflow: 'auto'
-//   },
-//   screenHeight: {
-//     overflow: 'auto'
-//   }
-// }));
+const useStyles = makeStyles(() => ({
+  root: {
+    flexGrow: 1,
+    margin: 10
+  },
+  screenHeightAutoFormBuilder: {
+    height: 'calc(100vh - 200px)',
+    overflow: 'auto'
+  },
+  screenHeightAutoFormTemplate: {
+    height: 'calc(100vh - 300px)',
+    overflow: 'auto'
+  },
+  screenHeight: {
+    overflow: 'auto'
+  }
+}));
 
 export const FormBuilder = ({
   section,
@@ -54,7 +67,7 @@ export const FormBuilder = ({
     if (onAddRemoveField) onAddRemoveField();
     if (sectionHoverIndex !== null) {
       const obj = {
-        sectionId: generateId(),
+        sectionId: parseInt((Math.random() * 100000).toString()),
         sectionName: 'New Section ' + (data.length + 1),
         srno: data.length + 1,
         field: []
@@ -62,7 +75,7 @@ export const FormBuilder = ({
       data.splice(sectionHoverIndex, 0, obj);
     } else {
       data.push({
-        sectionId: generateId(),
+        sectionId: parseInt((Math.random() * 100000).toString()),
         sectionName: 'New Section ' + (data.length + 1),
         srno: data.length + 1,
         field: []
@@ -77,13 +90,13 @@ export const FormBuilder = ({
     setDeleteField(data);
   };
 
-  // const removeExtraField = () => {
-  //   let data = [...section];
-  //   data.forEach((row) => {
-  //     row.field = row.field.filter((i) => i._id);
-  //   });
-  //   setSection(data);
-  // };
+  const removeExtraField = () => {
+    let data = [...section];
+    data.forEach((row) => {
+      row.field = row.field.filter((i) => i._id);
+    });
+    setSection(data);
+  };
 
   var filterFieldType = [];
   var isCalculativeField = true;
@@ -96,113 +109,31 @@ export const FormBuilder = ({
     isCalculativeField = true;
   }
 
-  const movefield = (event: DragEndEvent) => {
-    const { active, over } = event;
+  // const handleDragEnd = (result: DropResult) => {
+  //   const { destination, source } = result;
+  //   if (!destination) {
+  //     return;
+  //   }
+  //   if (destination.droppableId === source.droppableId && destination.index === source.index) {
+  //     return;
+  //   }
+  //   let data = [...section];
+  //   let field = [...data[source.droppableId].field];
+  //   field.splice(source.index, 1);
+  //   data[source.droppableId].field = field;
+  //   let field1 = [...data[destination.droppableId].field];
+  //   field1.splice(destination.index, 0, field[0]);
+  //   data[destination.droppableId].field = field1;
+  //   setSection(data);
+  // };
 
-    const { data: item, sectionId } = active.data.current?.props || {};
-    const activeItemType = active.data.current?.type;
-    const overItemType = over.data.current?.type;
-    const activeIndex = active.data.current?.index;
-    const overIndex = over.data.current?.index;
-    const overSectionId = over.data.current?.sectionId;
-    if (activeItemType !== 'Field') return;
-
-    const newSections = [...section];
-    const sourceSectionIndex = newSections.findIndex((section) => section.sectionId === sectionId);
-
-    if (overItemType === 'Field' && activeItemType === 'Field') {
-      const destinationSectionIndex = newSections.findIndex((section) => section.sectionId === overSectionId);
-      if (destinationSectionIndex === -1) return;
-      const destionationSection = newSections[destinationSectionIndex];
-      const isInSameSection = destionationSection.sectionId === sectionId;
-      if (isInSameSection) {
-        newSections[destinationSectionIndex].field = arrayMove(newSections[destinationSectionIndex].field, activeIndex, overIndex);
-        setSection([...newSections]);
-      } else {
-        const sourceSection = newSections[sourceSectionIndex];
-        const sourceFields = removeItemAtIndex(sourceSection.field, activeIndex);
-        const destinationFields = addItemAtIndex(destionationSection.field, item, overIndex);
-        newSections[sourceSectionIndex].field = sourceFields;
-        newSections[destinationSectionIndex].field = destinationFields;
-        setSection([...newSections]);
-      }
-    } else if (activeItemType === 'Field' && overItemType === 'Section') {
-      const destinationSectionIndex = over.data.current.index;
-      const destionationSection = newSections[destinationSectionIndex];
-      const overIndex = destionationSection.field.length;
-      const sourceSection = newSections[sourceSectionIndex];
-      const sourceFields = removeItemAtIndex(sourceSection.field, activeIndex);
-      const destinationFields = addItemAtIndex(destionationSection.field, item, overIndex);
-      newSections[sourceSectionIndex].field = sourceFields;
-      newSections[destinationSectionIndex].field = destinationFields;
-      setSection([...newSections]);
-    }
-  };
-
-  const moveSection = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over) return;
-    if (active.id === over.id) return;
-    const activeItemType = active.data.current?.type;
-    const overItemType = over.data.current?.type;
-    if (activeItemType !== 'Section' || overItemType !== 'Section') return;
-    const activeIndex = active.data.current?.index;
-    const overIndex = over.data.current?.index;
-    const newSections = arrayMove(section, activeIndex, overIndex);
-    setSection(newSections);
-  };
-
-  const onDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (!over) return;
-    if (active.id === over.id) return;
-    movefield(event);
-  };
-
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 5
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
-
+  const classes = useStyles();
   return (
     <Box>
       {/* <DragDropContext onDragEnd={handleDragEnd}>
         <div></div>
       </DragDropContext> */}
-      <DndContext onDragEnd={onDragEnd} onDragOver={moveSection} sensors={sensors}>
-        <div className="grid grid-cols-[250px_1fr] md:grid-cols-[280px_1fr] lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-4">
-          <Sidebar
-            filterFieldType={filterFieldType}
-            sections={section}
-            setSections={setSection}
-            onAddRemoveField={onAddRemoveField}
-            addSection={addSection}
-            isCustomField={isCustomField}
-          />
-          <Sections
-            addSection={addSection}
-            sections={section}
-            setSections={setSection}
-            onAddRemoveField={onAddRemoveField}
-            addDeleteField={addDeleteField}
-            module={module}
-            extraFields={extraFields}
-            isCalculativeField={isCalculativeField}
-            brandId={brandId}
-          />
-        </div>
-        <DndOverlayWrapper />
-      </DndContext>
-      {/* <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+      <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
         <Grid container spacing={1}>
           <Grid item xs={12} md={3} sm={4}>
             <Box
@@ -221,7 +152,6 @@ export const FormBuilder = ({
                   ) : null;
                 })}
               </Grid>
-              <CustomField />
               {isCustomField && (
                 <Box>
                   <CustomField />
@@ -251,7 +181,7 @@ export const FormBuilder = ({
             </Box>
           </Grid>
         </Grid>
-      </DndProvider> */}
+      </DndProvider>
     </Box>
   );
 };
