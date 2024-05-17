@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react';
 import Button from '@material-ui/core/Button';
-import { CustomDialogTransition, workOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource, workOrder } from 'src/constants/helpers';
 import { Box, CircularProgress, Dialog, TextField } from '@material-ui/core';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -13,30 +13,33 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import routes from 'src/components/Helpers/Routes';
 
 const AssignWorkStationDialog = ({ wellNumberOptions, assets, handleClose, handleSucess }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const [selectedWellNumbers, setSelectedWellNumbers] = useState([]);
   const [submitting, setSubmitting] = useState(false);
-  const handleAssign = () => {
 
-    // const api = `${routes?.rentalManagement?.path}/update-assets`;
-    // const payload = {
-    //   wellNumber: selectedWellNumbers?.map((d) => d.optionValue),
-    //   assetIds: assets
-    // }
-    // axiosInstance()
-    //   .put(api, payload)
-    //   .then(({ data }) => {
-    //     toastConfig.setToastConfig({
-    //       open: true,
-    //       type: 'success',
-    //       message: data?.message
-    //     });
-    //     // handleSucess();
-    //   })
-    //   .catch((err) => {
-    //     toastConfig.setToastConfig(err);
-    //   });
+  
+  const handleAssign = () => {
+    setSubmitting(true)
+    const api = `${routes?.serializedAsset?.path}/update-well-number`;
+    const payload = {
+      wellNumbers: selectedWellNumbers?.map((d) => d.optionValue),
+      assetIds: assets
+    };
+    axiosInstance()
+      .put(api, payload)
+      .then(({ data }) => {
+        setSubmitting(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+        handleSucess();
+      })
+      .catch((err) => {
+        setSubmitting(false)
+        toastConfig.setToastConfig(err);
+      });
   };
 
   return (
