@@ -1,16 +1,13 @@
-import { arrayMove, useSortable } from '@dnd-kit/sortable';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { InfoOutlined, MoreHoriz, Opacity } from '@material-ui/icons';
+import { InfoOutlined, MoreHoriz } from '@material-ui/icons';
 import React, { useContext } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { checkFieldDependency } from 'src/constants/formulaUtility';
 import FieldList from '../FieldList';
 import { Properties } from '../Properties';
-import update from 'immutability-helper';
-import { useDndMonitor } from '@dnd-kit/core';
-import { addItemAtIndex, removeItemAtIndex } from 'src/constants/helpers';
 
 type ItemPorps = {
   section: any;
@@ -118,10 +115,6 @@ const Field = ({
 
   const { setNodeRef, attributes, listeners, transform, transition, over, active, isDragging } = useSortable({
     id: data._id,
-    transition: {
-      duration: 150, // milliseconds
-      easing: 'cubic-bezier(0.25, 1, 0.5, 1)'
-    },
     data: {
       type: 'Field',
       index: index,
@@ -150,12 +143,16 @@ const Field = ({
     transition
   };
 
-  const isPreviewVisible =
-    active?.data.current?.type !== 'NewSection' && active?.data.current.sectionId !== sectionId && over && over.id === data._id;
+  // const isPreviewVisible =
+  //   active?.data.current?.type !== 'NewSection' && active?.data.current.sectionId !== sectionId && over && over.id === data._id;
 
   return (
     <>
-      {isPreviewVisible && <div className="min-h-[80px] [border:1px_dashed_var(--common-border-color)] p-2 ">Drop</div>}
+      {/* {isPreviewVisible && (
+        <div className="min-h-[56.5px] [border:5px_dashed_var(--common-border-color)] p-2 py-8 text-xl font-bold text-gray-300 dark:text-gray-600 flex items-center justify-center text-center">
+          Drop
+        </div>
+      )} */}
       <div
         style={style}
         {...attributes}
@@ -163,12 +160,12 @@ const Field = ({
         ref={setNodeRef}
         className={`${
           isDragging
-            ? '[border:1px_dashed_var(--common-border-color)] bg-[var(--dark-secondary,theme("colors.cyan.100"))]'
+            ? '[border:5px_dashed_var(--common-border-color)] bg-[var(--dark-secondary,theme("colors.cyan.100"))]'
             : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
-        }  p-2`}
+        }  p-2 cursor-grab`}
       >
         <div className={isDragging ? ' opacity-50' : ''}>
-          <div className="grid grid-cols-[1fr_25px] items-center justify-between gap-2">
+          <div className="grid grid-cols-[1fr_25px_25px] items-center justify-between gap-2">
             <div className="grid grid-cols-[1fr_1fr] items-center gap-2">
               <div className="">
                 {data.editAble ? (
@@ -185,7 +182,7 @@ const Field = ({
                   <p className="MuiTypography-body2 min-h-[38px]">{data.fieldLabel}</p>
                 )}
               </div>
-              <p className="text-gray-500 dark:text-slate-300">{FieldList[data?.type?.toUpperCase()]?.label}</p>
+              <p className="text-gray-500 dark:text-slate-300 line-clamp-1 min-w-0">{FieldList[data?.type?.toUpperCase()]?.label}</p>
             </div>
             <HtmlTooltip title={`Field Name - ${data?.fieldName}`}>
               <InfoOutlined
@@ -197,33 +194,33 @@ const Field = ({
                 className="cursor-pointer"
               />
             </HtmlTooltip>
+            <div className=" text-right mr-[2px]">
+              <IconButton aria-label="setting" onClick={handleClick} size={'small'}>
+                <MoreHoriz fontSize="small" />
+              </IconButton>
+              <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+                <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
+                <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
+                {((['product-template', 'price-template'].includes(module) && data.editAble) ||
+                  ['form-builder-master'].includes(module) ||
+                  data.deletAble ||
+                  true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
+              </Menu>
+              {propertie_open ? (
+                <Properties
+                  handleClose={handleClosePropertie}
+                  fieldData={field_data}
+                  sectionId={sectionId}
+                  section={sections}
+                  setSection={setSections}
+                  module={module}
+                  extraFields={extraFields}
+                  isCalculativeField={isCalculativeField}
+                  brandId={brandId}
+                />
+              ) : null}
+            </div>
           </div>
-        </div>
-        <div className=" text-right mr-[2px]">
-          <IconButton aria-label="setting" onClick={handleClick} size={'small'}>
-            <MoreHoriz fontSize="small" />
-          </IconButton>
-          <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-            <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
-            <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
-            {((['product-template', 'price-template'].includes(module) && data.editAble) ||
-              ['form-builder-master'].includes(module) ||
-              data.deletAble ||
-              true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
-          </Menu>
-          {propertie_open ? (
-            <Properties
-              handleClose={handleClosePropertie}
-              fieldData={field_data}
-              sectionId={sectionId}
-              section={sections}
-              setSection={setSections}
-              module={module}
-              extraFields={extraFields}
-              isCalculativeField={isCalculativeField}
-              brandId={brandId}
-            />
-          ) : null}
         </div>
       </div>
     </>

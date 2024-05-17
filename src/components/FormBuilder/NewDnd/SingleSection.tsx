@@ -99,7 +99,7 @@ const SingleSection = ({
   return (
     <>
       {isPreviewVisible && (
-        <div className="min-h-[128px] [border:1px_dashed_var(--common-border-color)] p-2 bg-[var(--dark-secondary,theme('colors.cyan.100'))]">
+        <div className="min-h-[128px] [border:5px_dashed_var(--common-border-color)] p-2 bg-[var(--dark-secondary,theme('colors.slate.100'))] text-4xl font-bold text-gray-300 dark:text-gray-600 text-center flex justify-center items-center">
           Drop
         </div>
       )}
@@ -138,7 +138,9 @@ const SingleSection = ({
           {section.field.length === 0 ? (
             <div className="text-center">
               {isDropPreviewVisible ? (
-                <div className=" [border:5px_dashed_var(--dark-secondary,theme('colors.cyan.100'))] py-8 text-4xl font-bold">Drop</div>
+                <div className=" [border:5px_dashed_var(--dark-secondary,theme('colors.cyan.100'))] py-8 text-4xl font-bold text-gray-300 dark:text-gray-600">
+                  Drop
+                </div>
               ) : (
                 <div className="py-8 ">Drag and drop your fields here</div>
               )}

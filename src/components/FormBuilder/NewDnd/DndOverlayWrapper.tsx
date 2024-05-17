@@ -40,28 +40,32 @@ const DndOverlayWrapper = () => {
   });
 
   return (
-    <DragOverlay>
-      {activeSidebarItem && (
-        <span className=" !cursor-grabbing">
-          <SidebarItem item={activeSidebarItem} />
-        </span>
-      )}
-      {activeSection && (
-        <span className=" !cursor-grabbing">
-          <SingleSection {...activeSection} />
-        </span>
-      )}
-      {activeField && (
-        <span className=" !cursor-grabbing">
-          <Field {...activeField} />
-        </span>
-      )}
-      {activeSidebarCustomItem && (
-        <span className=" !cursor-grabbing">
-          <SingleCustomField {...activeSidebarCustomItem} />
-        </span>
-      )}
-    </DragOverlay>
+    <>
+      <DragOverlay>
+        {activeSection && (
+          <span className=" !cursor-grabbing">
+            <SingleSection {...activeSection} />
+          </span>
+        )}
+        {activeField && (
+          <span className=" !cursor-grabbing">
+            <Field {...activeField} />
+          </span>
+        )}
+      </DragOverlay>
+      <DragOverlay dropAnimation={null}>
+        {activeSidebarItem && (
+          <span className=" !cursor-grabbing">
+            <SidebarItem item={activeSidebarItem} />
+          </span>
+        )}
+        {activeSidebarCustomItem && (
+          <span className=" !cursor-grabbing">
+            <SingleCustomField {...activeSidebarCustomItem} />
+          </span>
+        )}
+      </DragOverlay>
+    </>
   );
 };
 

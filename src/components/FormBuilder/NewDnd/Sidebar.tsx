@@ -160,7 +160,7 @@ const Sidebar = ({ filterFieldType, sections, setSections, onAddRemoveField, add
 
   return (
     <div className="container-with-border p-5 grid grid-cols-2 gap-2 h-[calc(100vh-200px)] overflow-auto max-[960px]:h-[calc(100vh-200px)] overflow-x-hidden !overflow-y-auto">
-      <SortableContext items={ids}>
+      <SortableContext items={ids} strategy={() => null}>
         <SidebarItem type={newSection.type} item={newSection} />
         {sidebarItems.map((item) => (
           <SidebarItem key={item.id} item={item} />

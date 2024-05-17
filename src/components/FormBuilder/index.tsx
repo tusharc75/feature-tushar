@@ -175,11 +175,8 @@ export const FormBuilder = ({
 
   return (
     <Box>
-      {/* <DragDropContext onDragEnd={handleDragEnd}>
-        <div></div>
-      </DragDropContext> */}
       <DndContext onDragEnd={onDragEnd} onDragOver={moveSection} sensors={sensors}>
-        <div className="grid grid-cols-[250px_1fr] md:grid-cols-[280px_1fr] lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-[280px_1fr] lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-4">
           <Sidebar
             filterFieldType={filterFieldType}
             sections={section}
