@@ -19,7 +19,7 @@ import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAcc
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   customerContact,
   formatAmountWithCurrency,
   getObjKeysWithValues,
@@ -186,11 +186,8 @@ function OpportunityDetailsPage() {
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
           setCopyOfOpportunityData(modifiedData);
-          var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-          if (checkSuperAdminAccess(user, sidebarResource.opportunity)) {
-            isAllowedToEdit = true;
-          }
-          setAllowedToEdit(isAllowedToEdit);
+          
+          setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.opportunity, data));
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
 

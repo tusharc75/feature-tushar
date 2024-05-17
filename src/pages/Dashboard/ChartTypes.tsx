@@ -42,7 +42,17 @@ interface Props {
   fetchKpiFilters: any;
 }
 
-const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullScreen, selectedDashboardId, fetchDashboards, kpiFilters, fetchKpiFilters }: Props) => {
+const ChartTypes = ({
+  chart,
+  filterData,
+  globalFilters,
+  setSelectedChart,
+  fullScreen,
+  selectedDashboardId,
+  fetchDashboards,
+  kpiFilters,
+  fetchKpiFilters
+}: Props) => {
   const [themeColor] = useAppTheme();
   const theme = useTheme();
   const isScreenSmall = useMediaQuery(theme.breakpoints.down('xs'));
@@ -244,8 +254,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
           sx={{ border: '1px solid var(--common-border-color)', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
         >
           <Box style={{ padding: '15px 10px' }}>
-            <Box display="flex" justifyContent="space-between" alignItems="center">
-              <Box display="flex">
+            <div className="flex justify-between items-center">
+              <div>
                 {chart.hasFilters && (
                   <Badge color="secondary" variant="dot" invisible={invisible}>
                     <Button
@@ -260,8 +270,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     </Button>
                   </Badge>
                 )}
-              </Box>
-              <Box display="flex">
+              </div>
+              <div className="flex items-center">
                 {chart.hasExport && (
                   <Button
                     disabled={loading}
@@ -319,12 +329,12 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     </HtmlTooltip>
                   )
                 ) : null}
-                <HtmlTooltip title='Refresh'>
+                <HtmlTooltip title="Refresh">
                   <IconButton
                     color="primary"
                     size="small"
                     onClick={() => {
-                      fetchData()
+                      fetchData();
                     }}
                     style={{ marginRight: 10 }}
                   >
@@ -332,17 +342,14 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                   </IconButton>
                 </HtmlTooltip>
                 {setSelectedChart && (
-                  <HtmlTooltip title='Full Screen'>
-                    <IconButton
-                      size="small"
-                      color="primary"
-                      onClick={() => setSelectedChart(chart)}>
+                  <HtmlTooltip title="Full Screen">
+                    <IconButton size="small" color="primary" onClick={() => setSelectedChart(chart)}>
                       <FiMaximize2 fontSize="18px" />
                     </IconButton>
                   </HtmlTooltip>
                 )}
-              </Box>
-            </Box>
+              </div>
+            </div>
 
             {chart.chartTitle && (
               <Typography component="div" align="center" color="textPrimary">
@@ -365,9 +372,8 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                 <TableView
                   id={chart.uniqueId}
                   type={chart.chartType?.toLowerCase()}
+                  chart={chart}
                   chartData={chartData?.tableData}
-                  isScreenSmall={isScreenSmall}
-                  isCurrency={chart?.currency || false}
                   currency={globalFilters.currency || currency}
                 />
               ) : chart.graphType === 'Map' ? (
@@ -389,7 +395,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                     }}
                     options={{
                       plugins: {
-                        ...(chart?.currency &&
+                        ...((chart?.currency || chart?.percentage) &&
                         {
                           tooltip: {
                             callbacks: {
@@ -398,8 +404,13 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                                 if (label) {
                                   label += ': ';
                                 }
-                                if (context.parsed.y !== null) {
-                                  label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
+                                if (chart?.currency) {
+                                  if (context.parsed.y !== null) {
+                                    label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
+                                  }
+                                }
+                                else if (chart?.percentage) {
+                                  label += `${context.parsed}%`;
                                 }
                                 return label;
                               }
@@ -427,8 +438,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                             }
                           },
                         },
-                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') &&
-                        {
+                        ...(chartData.datasets.some((d) => d?.yAxisID === 'y1') && {
                           y1: {
                             position: 'right',
                             grid: {
@@ -439,7 +449,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                             ticks: {
                               callback: function (value) {
                                 return value + '%';
-                              },
+                              }
                             }
                           }
                         })
@@ -470,8 +480,7 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
                 id={chart.uniqueId}
                 type={chart.chartType}
                 chartData={chartData?.tableData}
-                isScreenSmall={isScreenSmall}
-                isCurrency={chart?.currency || false}
+                chart={chart}
                 currency={globalFilters.currency || currency}
               />
             )}
@@ -501,7 +510,6 @@ const ChartTypes = ({ chart, filterData, globalFilters, setSelectedChart, fullSc
           anchorEl={anchorElExport}
           setAnchorClose={setAnchorElExport}
           currency={globalFilters.currency || currency}
-          isCurrency={chart?.currency || false}
           tableData={chartData ? chartData?.tableData : []}
           chart={chart}
           isTableView={chartData?.graphType !== 'Table' && tableView}

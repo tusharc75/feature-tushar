@@ -1,5 +1,4 @@
 import { Box, Checkbox, FormControlLabel, Grid, TextField, Typography } from '@material-ui/core';
-import { ShowFieldDependentOn } from '../../AddField/showFieldDependentOn';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
 import { Autocomplete } from '@material-ui/lab';
@@ -403,38 +402,6 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
             />
           </Grid>
           <Grid item xs={12} md={6}></Grid>
-        </Grid>
-      </Box>
-      <Box>
-        <Grid container>
-          <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="isShowFieldDependentOn"
-                  checked={values['isShowFieldDependentOn']}
-                  onChange={(e) => {
-                    setFieldValue('isShowFieldDependentOn', e.target.checked);
-                  }}
-                  color="primary"
-                />
-              }
-              label="Show Field Dependent On"
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            {values['isShowFieldDependentOn'] && (
-              <ShowFieldDependentOn
-                values={values}
-                name={'showFieldDependentOn'}
-                setFieldValue={setFieldValue}
-                fields={fields}
-                _id={fieldData._id}
-                touched={touched}
-                errors={errors}
-              />
-            )}
-          </Grid>
         </Grid>
       </Box>
       <Box>

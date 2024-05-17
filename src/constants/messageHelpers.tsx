@@ -45,7 +45,7 @@ export const rentalManagementMessage = {
     loadingAlreadyCreated: 'Loading Ticket is already created',
     loadingNotCreated: 'Loading Ticket is not created',
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
-    loadingReservedAssetStatus: 'Loading Ticket can create for only Reserved asset status',
+    loadingReservedAssetStatus: 'Loading Ticket can create for only New/Available/Under Review/Reserved asset status',
     loadingNotDelivered: 'Loading Ticket is not delivered',
     inTransitDeliveredLoadingTicket: 'Only In-Transit/Delivered tickets can be cancelled',
     receivingAlreadyCreated: 'Receiving Ticket is already created',
@@ -56,7 +56,7 @@ export const rentalManagementMessage = {
     returnAlreadyDelivered: 'Return Ticket is already delivered',
     receivingOrReturnNotCreated: 'Receiving or Return Ticket is not created',
     receivingOrReturnNotDelivered: 'Receiving or Return Ticket is not delivered',
-    receivingNotProduct: `Receiving Ticket cannot be created for product(s)`,
+    receivingNotProduct: `Receiving Ticket cannot be created for Non-Serialized Product(s)`,
     receivingNotValidStatus: `Ticket cannot be created as asset status is not valid`,
     ticketNotForLost: `Ticket cannot be created for lost assets`,
     onlySubleaseAsset: "Only Sublease assets can be selected for this action",
@@ -112,3 +112,7 @@ export const subleaseMessage = {
     sameWarehouse: `Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
     pickupDeliveryDifferent: 'Pickup and Delivery must be different',
 };
+
+export const transferInventoryMessage = {
+    assignSerialNumbers: 'Assign Serial Numbers to proceed',
+}

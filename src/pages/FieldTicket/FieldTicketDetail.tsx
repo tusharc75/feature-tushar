@@ -1,6 +1,6 @@
 import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
-import { camelCase } from 'lodash';
+import { camelCase, isNumber } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiFoodMenu } from 'react-icons/bi';
@@ -24,7 +24,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   FIELD_TICKET_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   fieldTicket,
   fieldTicketSteps,
   sidebarResource
@@ -74,11 +74,19 @@ const FieldTicketDetail = () => {
     }
   }, [id, isOffline]);
 
+  useEffect(() => {
+    if (!isOffline) {
+      if (!isNaN(id)) {
+        history.push(`${routes.fieldTicket.path}`);
+      }
+    }
+  }, [isOffline]);
+
   const fetchFields = async () => {
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.fieldTicket);
+        data = await findOne(objectStore.resource, sidebarResource?.fieldTicket);
       } else {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
         data = response?.data?.data;
@@ -95,7 +103,7 @@ const FieldTicketDetail = () => {
       let data;
       if (isOffline) {
         data = await findOne(objectStore.fieldTicket, id);
-      } else {
+      } else if (/^[0-9a-fA-F]{24}$/.test(id)) {
         const response = await axiosInstance().get(`${routes.fieldTicket.path}/${id}`);
         data = response?.data?.data;
       }
@@ -104,11 +112,8 @@ const FieldTicketDetail = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
       }
-      let isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.fieldTicket)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && isAllowedToEdit);
+
+      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, data));
       setAllowedToDelete(permissions?.fieldTicket?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
       setFieldTicketData(data);
       setLoading(false);
@@ -171,10 +176,10 @@ const FieldTicketDetail = () => {
   }, [currentStep]);
 
   const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+    if (!isOffline) {
+      axiosInstance().put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
+        .catch((error) => { toastConfig.setToastConfig(error); });
+    }
   };
 
   const handleChangeStatus = async (status) => {

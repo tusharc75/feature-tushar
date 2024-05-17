@@ -24,6 +24,7 @@ import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
 import { camelCase } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { calculatePrice } from 'src/components/RentalManagment/helper';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
 
@@ -240,7 +241,9 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
           res.technicianName = u?.technician['firstName'] + ' ' + u?.technician['lastName'];
           res.technicianId = u?.technician['_id'];
           res.competencyType = u?.technician['competencyType']?.optionLabel;
+          res.competenciesWithIds = u?.technician['competencies'];
           res.competencies = u?.technician['competencies']?.map((e) => e?.optionLabel)?.toString();
+
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -280,29 +283,51 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       });
   };
 
-  const handleAssign = (rows) => {
+  const handleAssign = async (rows) => {
     const technician: any = [];
     rows.forEach((d) => {
       const element: any = {};
       element.rentalJob = rentalManagementData?._id;
       element.technician = d?._id;
-      element.uniqueId = selectedService?._id;
+      element.uniqueId = selectedService?._id || '';
+      element.materialId = d?.competenciesId;
+      element.type = 'competency';
+      element.competence = d?.competenciesId;
       element.service = selectedService?.optionValue !== 'All' ? selectedService?.optionValue : null;
+      element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : d.pricingMethod ? d.pricingMethod : '';
       element.status = 'Assigned';
       element.warehouse = rentalManagementData?.warehouse?.optionValue;
       element.startDate = rentalManagementData?.estimateStartDate || new Date();
       element.endDate = rentalManagementData?.estimateEndDate || new Date();
-      if (allFields?.length) {
-        const pricingMethodField = allFields?.find((e) => e.fieldName === 'pricingMethod')
-        if (pricingMethodField) {
-          const calValues = autoCalculateSpecificFields({ pricingMethod: pricingMethodField.option[0]?.optionValue }, element, allFields);
-          Object.assign(element, calValues);
-        }
+      const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+      element.duration = 1;
+      if (calValues && calValues['duration']) {
+        element.duration = calValues['duration'];
       }
       technician.push(element);
     });
+   
+      const priceData = await calculatePrice(rentalManagementData, technician) || [];
+      AddMaterial(technician, priceData);
+  };
+
+  const AddMaterial = async (technician, priceData) => {
+    const tempMaterial = [...technician];
+    tempMaterial.forEach((element) => {
+      const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type);
+       if (rateResult.length && rateResult[0].mrp) {
+        const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+        element[priceFieldName] = rateResult[0].mrp;
+        element['pricingCondition'] = rateResult[0].conditionId;
+        element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
+        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp, pricingMethod: element.pricingMethod }, element, allFields);
+        Object.assign(element, calValues);
+      }
+      delete element.materialId
+    });
+  
     axiosInstance()
-      .post(`${rentalManagement.api}/technician`, { technician })
+      .post(`${rentalManagement.api}/technician`, { technician: tempMaterial })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -315,7 +340,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
+  }
 
   return (
     <>
@@ -427,7 +452,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
             setTechnicianEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
             setIsBulkEdit(false);
           }}
-          technicianData={technicianEdit.data}
+          technicianData={{ ...technicianEdit.data, pricingCondition: technicianEdit.data?.pricingConditionId, competence: technicianEdit.data?.competenceId }}
           rentalManagementData={rentalManagementData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}

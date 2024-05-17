@@ -98,7 +98,8 @@ const InputField = (props) => {
                         field.type === 'fileUpload' ||
                         field.type === 'multiImageUpload' ||
                         field.type === 'multiFileUpload' ||
-                        field.type === 'counter'
+                        field.type === 'counter' ||
+                        field.type === 'description'
                           ? 12
                           : 6
                       }
@@ -107,7 +108,8 @@ const InputField = (props) => {
                         field.type === 'fileUpload' ||
                         field.type === 'multiImageUpload' ||
                         field.type === 'multiFileUpload' ||
-                        field.type === 'counter' 
+                        field.type === 'counter' ||
+                        field.type === 'description' 
                           ? 12
                           : 6
                       }

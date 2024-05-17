@@ -28,7 +28,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   INVOICE_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   invoice,
   invoiceProcessSteps,
   sidebarResource
@@ -94,7 +94,7 @@ const InvoiceDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -128,11 +128,8 @@ const InvoiceDetails = () => {
       }
       setHeadingLabel(data.invoiceNumber);
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.invoice)) {
-        isAllowedToEdit = true;
-      }
-      setAllowedToEdit(isAllowedToEdit);
+
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
       setInvoiceData(data);
       setLoading(false);
     } catch (error) {
@@ -251,19 +248,20 @@ const InvoiceDetails = () => {
                     </Button>
                   )}
                 {permissions?.invoice?.isDelete && invoiceData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                {permissions?.invoice?.isUpdate && [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
-                  <ButtonWithPulse
-                    variant={'outlined'}
-                    color="default"
-                    size="small"
-                    onClick={() => {
-                      setShowClosedConfirmBox(true);
-                    }}
-                    className={'btn-outline-v1'}
-                  >
-                    Close
-                  </ButtonWithPulse>
-                )}
+                {permissions?.invoice?.isUpdate &&
+                  allowedToEdit && [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
+                    <ButtonWithPulse
+                      variant={'outlined'}
+                      color="default"
+                      size="small"
+                      onClick={() => {
+                        setShowClosedConfirmBox(true);
+                      }}
+                      className={'btn-outline-v1'}
+                    >
+                      Close
+                    </ButtonWithPulse>
+                  )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />

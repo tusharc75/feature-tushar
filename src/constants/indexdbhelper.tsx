@@ -4,15 +4,13 @@ const DB_NAME = 'OMS';
 export const objectStore = {
   rentalManagement: 'rentalManagement',
   deliveryTicket: 'deliveryTicket',
-  resource: 'resource',
   repairJob: 'Repair Job',
   offlineDataSync: 'offlineDataSync',
-  fieldServiceTechnician: 'fieldServiceTechnician',
+  fieldServiceOrder: 'fieldServiceOrder',
   fieldTicket: 'fieldTicket',
-  fieldServiceOrder : 'fieldServiceOrder',
-  serviceMaster: 'serviceMaster',
   fieldTicketMaterial: 'fieldTicketMaterial',
-  product: 'product',
+  resource: 'resource',
+  resourceData: 'resourceData'
 };
 
 export const setUpindexDB = () => {
@@ -29,7 +27,7 @@ export const setUpindexDB = () => {
       }
       return true;
     };
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const findAll = async (store) => {
@@ -41,7 +39,7 @@ export const findAll = async (store) => {
     var transaction = db.transaction([store], 'readwrite');
     const result = await transaction.objectStore(store).getAll();
     return result;
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const findOne = async (store, key) => {
@@ -50,7 +48,7 @@ export const findOne = async (store, key) => {
     var transaction = db.transaction([store], 'readwrite');
     const result = await transaction.objectStore(store).get(key);
     return result;
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const insertUpdate = async (store, key, value) => {
@@ -58,7 +56,7 @@ export const insertUpdate = async (store, key, value) => {
     const db = await openDB(DB_NAME, 1);
     var transaction = db.transaction([store], 'readwrite');
     transaction.objectStore(store).put(value, key);
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const deleteOne = (store, key) => {
@@ -69,7 +67,7 @@ export const deleteOne = (store, key) => {
       var transaction = db.transaction([store], 'readwrite');
       transaction.objectStore(store).delete(key);
     };
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const clearAll = (store) => {
@@ -80,7 +78,7 @@ export const clearAll = (store) => {
       var transaction = db.transaction([store], 'readwrite');
       transaction.objectStore(store).clear();
     };
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const deleteMany = (store, keys) => {
@@ -93,7 +91,7 @@ export const deleteMany = (store, keys) => {
         transaction.objectStore(store).delete(key);
       });
     };
-  } catch (e) {}
+  } catch (e) { }
 };
 
 export const ifExists = async (store, key) => {
@@ -102,5 +100,5 @@ export const ifExists = async (store, key) => {
     var transaction = db.transaction([store], 'readwrite');
     const result = await transaction.objectStore(store).get(key);
     return result;
-  } catch (e) {}
+  } catch (e) { }
 }

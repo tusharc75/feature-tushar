@@ -34,7 +34,7 @@ import {
   QUOTATION_STATUS,
   QUOTATION_TYPE,
   RENTAL_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   quotation,
   quotationProcessSteps,
   sidebarResource
@@ -191,11 +191,8 @@ const QuotationDetails = () => {
             [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
             quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
           ) {
-            var isAllowedToEdit = [...(quotationData.collaborator ?? []), quotationData.owner].some((d) => d?.optionValue === user?.user?._id);
-            if (checkSuperAdminAccess(user, sidebarResource.quotation)) {
-              isAllowedToEdit = true;
-            }
-            setAllowedToEdit(isAllowedToEdit);
+
+            setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quotation, quotationData));
             setCanConvert(true);
           } else if (!quotationData?.rentalJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
             setCanConvert(true);
@@ -232,17 +229,12 @@ const QuotationDetails = () => {
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
 
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.quotation)) {
-        isAllowedToEdit = true;
-      }
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.quotation, data)
       if ([QUOTATION_STATUS.converted].includes(data.status)) {
         isAllowedToEdit = false;
       }
       setAllowedToEdit(isAllowedToEdit && permissions?.quotation?.isUpdate);
-
       setQuotationData(data);
-
       var tempStepList = quotationProcessSteps;
       if (!data?.doasetup) {
         tempStepList = quotationProcessSteps?.filter((e) => e.name !== 'DOA');
@@ -609,10 +601,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-            <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
-              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-            </Box>
-          )}
+              <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
+                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+              </Box>
+            )}
           <div>
             <Steps
               isNextStep={false}
@@ -629,8 +621,10 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
+                    if (allowedToEdit) {
                       setCustomerAcceptable(true);
                     }
+                  }
                   : null
               }
             />

@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, Fragment } from 'react';
 import { Box, Divider, TextField, Typography } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -6,7 +6,7 @@ import { CustomDialogTransition, productInventory } from '../../../constants/hel
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { Formik, Form, Field } from 'formik';
+import { Formik, Form } from 'formik';
 import { Autocomplete } from '@material-ui/lab';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -49,69 +49,71 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
         TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         open={true}
-        fullScreen={fullScreen || isMobile || isTablet}
+        fullScreen={fullScreen}
         fullWidth
     >
-        <CustomDialogHeader
-            title={'Add Serial Number'}
-            onClose={(e, reason) => {
-                if (reason !== 'backdropClick') {
-                    handleClose();
-                }
-            }}
-            showRequiredLabel={false}
-            isMinimized={!fullScreen}
-            onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-            }}
-            showManimizeMaximize={true}
-        ></CustomDialogHeader>
         <Formik initialValues={{ serialNumber: [] }} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ submitForm, touched, errors, setFieldValue, values }) => (
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                    <CustomDialogContent>
-                        <Box pt={1} pb={1}>
-                            <Typography>{`Inventory without Serial Number - ${serialNumberCount}`}</Typography>
-                            <Box pt={2} pb={2}>
-                                <Divider />
+                    <Fragment>
+                        <CustomDialogHeader
+                            title={'Add Serial Numbers'}
+                            onClose={(e, reason) => {
+                                if (reason !== 'backdropClick') {
+                                    handleClose();
+                                }
+                            }}
+                            showRequiredLabel={false}
+                            isMinimized={!fullScreen}
+                            onMinimizeMaximize={() => {
+                                setFullScreen((prevState) => !prevState);
+                            }}
+                            showManimizeMaximize={true}
+                        ></CustomDialogHeader>
+                        <CustomDialogContent>
+                            <Box pt={1} pb={1}>
+                                <Typography>{`Inventory without Serial Number - ${serialNumberCount}`}</Typography>
+                                <Box pt={2} pb={2}>
+                                    <Divider />
+                                </Box>
+                                <Autocomplete
+                                    size="small"
+                                    options={[]}
+                                    freeSolo={true}
+                                    multiple={true}
+                                    disableCloseOnSelect
+                                    value={values['serialNumber']}
+                                    onChange={(_, val) => {
+                                        setFieldValue('serialNumber', val);
+                                    }}
+                                    getOptionSelected={(item, current) => item === current}
+                                    getOptionLabel={(option) => option}
+                                    renderInput={(props) => (
+                                        <TextField
+                                            {...props}
+                                            placeholder={'Enter serial number and press enter'}
+                                            variant="outlined"
+                                            name="serialNumber"
+                                            label={'Serial Number'}
+                                            error={touched['serialNumber'] && Boolean(errors['serialNumber'])}
+                                            helperText={touched['serialNumber'] && errors['serialNumber']}
+                                        />
+                                    )}
+                                />
                             </Box>
-                            <Autocomplete
-                                size="small"
-                                options={[]}
-                                freeSolo={true}
-                                multiple={true}
-                                disableCloseOnSelect
-                                value={values['serialNumber']}
-                                onChange={(_, val) => {
-                                    setFieldValue('serialNumber', val);
-                                }}
-                                getOptionSelected={(item, current) => item === current}
-                                getOptionLabel={(option) => option}
-                                renderInput={(props) => (
-                                    <TextField
-                                        {...props}
-                                        placeholder={'Enter serial number and press enter'}
-                                        variant="outlined"
-                                        name="serialNumber"
-                                        label={'Serial Number'}
-                                        error={touched['serialNumber'] && Boolean(errors['serialNumber'])}
-                                        helperText={touched['serialNumber'] && errors['serialNumber']}
-                                    />
-                                )}
-                            />
-                        </Box>
-                    </CustomDialogContent>
-                    <CustomDialogFooter>
-                        <CustomButton
-                            loading={loading}
-                            disabled={loading}
-                            variant="contained"
-                            color="primary"
-                            type="submit"
-                            onClick={submitForm}>
-                            Add
-                        </CustomButton>
-                    </CustomDialogFooter>
+                        </CustomDialogContent>
+                        <CustomDialogFooter>
+                            <CustomButton
+                                loading={loading}
+                                disabled={loading}
+                                variant="contained"
+                                color="primary"
+                                type="submit"
+                                onClick={submitForm}>
+                                Add
+                            </CustomButton>
+                        </CustomDialogFooter>
+                    </Fragment>
                 </Form>
             )}
         </Formik>

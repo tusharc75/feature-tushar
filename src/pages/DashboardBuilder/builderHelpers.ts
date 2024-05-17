@@ -90,7 +90,9 @@ export interface IFormDataType {
   kpi: KPIListType;
   statusOptions?: { optionValue: string; optionLabel: string }[];
   currency?: boolean;
-  stack?: boolean
+  percentage?: boolean;
+  stack?: boolean;
+  _id?: string;
 }
 
 export const defaultFormConfigs: IFormDataType = {
@@ -104,7 +106,8 @@ export const defaultFormConfigs: IFormDataType = {
   hasExport: false,
   statusOptions: [],
   filters: [],
-  currency: false
+  currency: false,
+  percentage: false
 };
 
 export const frequencyData = [

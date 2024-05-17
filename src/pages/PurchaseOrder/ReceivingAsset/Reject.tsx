@@ -130,20 +130,22 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
           }
         }
         if (tempProduct?.serializedProduct) {
-          if (tempProduct?.assetQty) {
-            if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
-              const removeActualReceivedQty =
-                parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
-              if (d?.assetIds?.length !== removeActualReceivedQty) {
+          if (tempProduct?.qty - (tempProduct?.actualReceived || 0) < parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0)) {
+            const removeActualReceivedQty =
+              parseInt(d?.rejectQuantity || 0) + parseInt(tempProduct.rejectQuantity || 0) - (tempProduct?.qty - (tempProduct?.actualReceived || 0));
+            const actualInventoryQty = removeActualReceivedQty - tempProduct?.assetQty;
+            if (tempProduct?.assetQty) {
+              if ((removeActualReceivedQty - actualInventoryQty) !== d?.assetIds?.length) {
                 errors.assetIds = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
               }
             }
-          }
-          if (user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) {
-            if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && parseInt(d.rejectQuantity) !== d.serialNumber?.length) {
-              errors['serialNumber'] = `Please enter serial numbers same as reject quantity`;
+            if (user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) {
+              if ((removeActualReceivedQty - tempProduct?.assetQty) !== d.serialNumber?.length) {
+                errors['serialNumber'] = `Please enter serial numbers same as reject quantity`;
+              }
             }
           }
+
         }
       });
     }

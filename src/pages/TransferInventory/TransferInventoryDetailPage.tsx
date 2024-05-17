@@ -22,7 +22,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   TRANSFER_INVENTORY_STATUS,
-  checkSuperAdminAccess,
+  checkIsAllowedToEdit,
   sidebarResource,
   transferInventory,
   transferInventorySteps
@@ -54,6 +54,7 @@ const TransferInventoryDetailPage = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [locationKeys, setLocationKeys] = useState([]);
   const [nextStep, setNextStep] = useState(false);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
@@ -126,11 +127,8 @@ const TransferInventoryDetailPage = () => {
         } else {
           setCurrentStep(getIndex(data?.processStatus, transferInventorySteps));
         }
-        var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-        if (checkSuperAdminAccess(user, sidebarResource.transferInventory)) {
-          isAllowedToEdit = true;
-        }
-        setAllowedToEdit(isAllowedToEdit && permissions?.transferInventory?.isUpdate);
+        
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setTransferInventoryData(data);
       })
       .catch((err) => {
@@ -261,6 +259,7 @@ const TransferInventoryDetailPage = () => {
                 setCurrentStep={setCurrentStep}
                 isNextStep={false}
                 nextStep={nextStep}
+                nextStepToolTip={nextStepToolTip}
                 updateStatus={updateProcessStatus}
                 isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
                 setStepFullScreen={() => setStepFullScreen(true)}
@@ -270,6 +269,7 @@ const TransferInventoryDetailPage = () => {
                   <Products
                     transferInventoryData={transferInventoryData}
                     setNextStep={setNextStep}
+                    setNextStepToolTip={setNextStepToolTip}
                     renderedFrom={`${renderedFrom}_grid-1`}
                     allowedToEdit={allowedToEdit}
                     updateStatus={updateStatus}

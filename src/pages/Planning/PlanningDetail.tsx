@@ -14,7 +14,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, PLANNING_STATUS, checkSuperAdminAccess, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, PLANNING_STATUS, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -69,10 +69,7 @@ const PlanningDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.planning.path}/${id}`);
-      var isAllowedToEdit = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id);
-      if (checkSuperAdminAccess(user, sidebarResource.planning)) {
-        isAllowedToEdit = true;
-      }
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.planning, data)
       if (data?.status === PLANNING_STATUS.converted) {
         isAllowedToEdit = false;
       }

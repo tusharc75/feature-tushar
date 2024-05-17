@@ -1,56 +1,24 @@
-import { Box, Grid, IconButton, makeStyles, Paper, ThemeOptions, Typography } from '@material-ui/core';
-import { Delete, Edit } from '@material-ui/icons';
-import { useDrag, useDrop } from 'react-dnd';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Box, Grid, IconButton, Paper, Typography } from '@material-ui/core';
+import { Delete, DragIndicator, Edit } from '@material-ui/icons';
 import { useState } from 'react';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfigureItemDialog from './ConfigureItemDialog';
-interface Item {
-  id: string;
-  originalIndex: number;
-}
 
-const ItemView = ({ itemData, label, handleRemove, id, findCard, moveCard, setFormData }) => {
-  const originalIndex = findCard(itemData?._id).index;
-
+const ItemView = ({ itemData, label, handleRemove, id, dragHandleProps, setFormData }) => {
   const [editDialog, setEditDialog] = useState(false);
-  const [{ isDragging }, drag] = useDrag(
-    () => ({
-      type: 'view',
-      item: { id, originalIndex },
-      collect: (monitor) => ({
-        isDragging: monitor.isDragging()
-      }),
-      end: (item, monitor) => {
-        const { id: droppedId, originalIndex } = item;
-        const didDrop = monitor.didDrop();
-        if (!didDrop) {
-          moveCard(droppedId, originalIndex);
-        }
-      }
-    }),
-    [id, originalIndex, moveCard]
-  );
-
-  const [, drop] = useDrop(
-    () => ({
-      accept: 'view',
-      hover({ id: draggedId }: Item) {
-        if (draggedId !== id) {
-          const { index: overIndex } = findCard(id);
-          moveCard(draggedId, overIndex);
-        }
-      }
-    }),
-    [findCard, moveCard]
-  );
 
   return (
-    <Grid ref={(node) => drag(drop(node))} item xs={6} sm={itemData?.column} md={itemData?.column}>
+    <Grid item xs={6} sm={itemData?.column} md={itemData?.column}>
       <Paper>
         <Box p={2}>
-          <Typography variant="body1" style={{ fontWeight: 500 }} className="text-truncate">
-            {label}
-          </Typography>
+          <div className="flex items-center gap-2">
+            <IconButton size="small" {...dragHandleProps}>
+              <DragIndicator />
+            </IconButton>
+            <Typography variant="body1" style={{ fontWeight: 500 }} className="text-truncate">
+              {label}
+            </Typography>
+          </div>
           <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
             <HtmlTooltip title="Edit">
               <IconButton

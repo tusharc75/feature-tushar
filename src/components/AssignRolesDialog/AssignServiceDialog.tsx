@@ -14,7 +14,7 @@ import CommonSkeleton from '../Helpers/CommonSkeleton';
 import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
-import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
+import { findOne, objectStore } from 'src/constants/indexdbhelper';
 
 const AssignServiceDialog = ({
   onSuccess,
@@ -68,7 +68,7 @@ const AssignServiceDialog = ({
     try {
       let data;
       if (isOffline) {
-        data = await findOne(objectStore.resource, objectStore.serviceMaster);
+        data = await findOne(objectStore.resource, sidebarResource.serviceMaster);
       } else {
         const response = await axiosInstance().get('/field?resource=Service Master&view=true');
         data = response?.data?.data;
@@ -91,7 +91,7 @@ const AssignServiceDialog = ({
       dispatch({ type: 'loading', loading: true });
       let data, count;
       if (isOffline) {
-        data = await findAll(objectStore.serviceMaster);
+        data = await findOne(objectStore.resourceData, sidebarResource.serviceMaster);
         data = data?.filter((d: any) => !ids?.includes(d?._id?.toString()));
         count = data?.length;
       } else {
