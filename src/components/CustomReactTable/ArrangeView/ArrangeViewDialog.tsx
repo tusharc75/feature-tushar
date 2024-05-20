@@ -1,3 +1,4 @@
+import { CSS } from '@dnd-kit/utilities';
 import {
   Box,
   Button,
@@ -20,12 +21,15 @@ import { DragHandle } from '@material-ui/icons';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
 import React, { Dispatch, useEffect, useRef, useState } from 'react';
-import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from '@hello-pangea/dnd';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
+
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -59,6 +63,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
   const [searchedColumns, setSearchedColumns] = React.useState([]);
   const [searchVal, setSearchVal] = React.useState('');
   const [stateVisibleColumns, setStateVisibleColumns] = useState(visibleColumns);
+  const [activeItem, setActiveItem] = useState(null);
 
   const [allChecked, setAllChecked] = React.useState(true);
   const [isMinimized, setMinimized] = React.useState(true);
@@ -70,7 +75,10 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         return columnOrder?.indexOf(a.id) - columnOrder?.indexOf(b.id);
       });
 
-    if (tempSortedColumns) setSortedColumns(tempSortedColumns);
+    if (tempSortedColumns)
+      setSortedColumns(
+        tempSortedColumns.filter((column) => !['left', 'right']?.includes(column?.sticky) || !['selection', 'expander'].includes(column.accessor))
+      );
   }, [columnOrder, columns, stickycolumns?.stickyColumns]);
 
   useEffect(() => {
@@ -133,28 +141,32 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     onClose();
   };
 
-  const moveItem = React.useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
-      const dragIndex = result.source.index;
-      const dropIndex = result.destination?.index;
+  const moveItem = (event: DragEndEvent) => {
+    setActiveItem(null);
+    if (!event.over || event.active.id === event.over.id) return;
+    const { active, over } = event;
+    const dragIndex = active.data.current.index;
+    const dropIndex = over.data.current.index;
 
-      const dragCard = sortedColumns[dragIndex];
-      const hoverCard = sortedColumns[dropIndex];
+    const dragCard = sortedColumns[dragIndex];
+    const hoverCard = sortedColumns[dropIndex];
 
-      if (dragCard?.accessor === 'action' || dragCard?.accessor === 'selection' || dragCard?.lockPosition) return;
-      if (hoverCard?.accessor === 'action' || hoverCard?.accessor === 'selection' || hoverCard?.lockPosition) return;
+    if (dragCard?.accessor === 'action' || dragCard?.accessor === 'selection' || dragCard?.lockPosition) return;
+    if (hoverCard?.accessor === 'action' || hoverCard?.accessor === 'selection' || hoverCard?.lockPosition) return;
 
-      const columnsForGrid = update(sortedColumns, {
-        $splice: [
-          [dragIndex, 1],
-          [dropIndex, 0, dragCard]
-        ]
-      });
-      setSortedColumns([...columnsForGrid]);
-    },
-    [sortedColumns]
-  );
+    const columnsForGrid = update(sortedColumns, {
+      $splice: [
+        [dragIndex, 1],
+        [dropIndex, 0, dragCard]
+      ]
+    });
+    setSortedColumns([...columnsForGrid]);
+  };
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!event) return;
+    setActiveItem(event?.active?.data.current?.props);
+  };
 
   useEffect(() => {
     if (!searchVal) return;
@@ -164,6 +176,20 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
     });
     setSearchedColumns(matchedColumns);
   }, [searchVal]);
+
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10
+    }
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 300,
+      tolerance: 5
+    }
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet) || isMobileView}>
@@ -175,6 +201,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
         isMinimized={isMinimized}
         onMinimizeMaximize={() => setMinimized((prevState) => !prevState)}
       />
+
       <CustomDialogContent>
         <List
           disablePadding
@@ -215,35 +242,28 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
             </ListItem>
           )}
           {!searchVal ? (
-            <DragDropContext onDragEnd={moveItem}>
-              <Droppable droppableId="arrangeView">
-                {(provided) => (
-                  <ul className="list-none" {...provided.droppableProps} ref={provided.innerRef}>
-                    {sortedColumns.map((column, index) => (
-                      <Draggable key={column.accessor} draggableId={column.accessor} index={index} isDragDisabled={column.disabled}>
-                        {(provided, snapshot) => (
-                          <li
-                            {...provided.draggableProps}
-                            ref={provided.innerRef}
-                            className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
-                          >
-                            <RenderListItem
-                              key={column.accessor}
-                              dragHandleProps={provided.dragHandleProps}
-                              checked={stateVisibleColumns[column.id]}
-                              column={column}
-                              index={index}
-                              handleToggle={handleToggle}
-                            />
-                          </li>
-                        )}
-                      </Draggable>
-                    ))}
-                    {provided.placeholder}
-                  </ul>
+            <DndContext onDragEnd={moveItem} modifiers={[restrictToVerticalAxis]} onDragStart={onDragStart} sensors={sensors}>
+              <SortableContext items={sortedColumns.map((c) => c.accessor)}>
+                <ul className="list-none">
+                  {sortedColumns.map((column, index) => (
+                    <RenderListItem
+                      key={column.accessor}
+                      checked={stateVisibleColumns[column.id]}
+                      column={column}
+                      index={index}
+                      handleToggle={handleToggle}
+                    />
+                  ))}
+                </ul>
+              </SortableContext>
+              <DragOverlay>
+                {activeItem && (
+                  <span className=" cursor-grabbing">
+                    <RenderListItem {...activeItem} />
+                  </span>
                 )}
-              </Droppable>
-            </DragDropContext>
+              </DragOverlay>
+            </DndContext>
           ) : searchedColumns.length > 0 ? (
             searchedColumns.map(
               (column, index) =>
@@ -299,34 +319,54 @@ interface ItemProps {
   column: any;
   handleToggle: any;
   checked: boolean;
-  dragHandleProps: DraggableProvidedDragHandleProps;
   index: number;
 }
 
 const RenderListItem = (props: ItemProps) => {
-  const { column, handleToggle, checked, dragHandleProps, index } = props;
+  const { column, handleToggle, checked, index } = props;
+
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+    id: column.accessor,
+    data: {
+      type: 'Column',
+      index,
+      props: { column, handleToggle, checked, index }
+    },
+    disabled: column.disabled
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition
+  };
 
   return ['left', 'right']?.includes(column?.sticky) || ['selection', 'expander'].includes(column.accessor) ? (
     <div className="d-none"></div>
   ) : (
-    <div
-      className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
-        index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-      } ${column.disabled ? ' opacity-65 pointer-events-none' : ''}`}
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : 'bg-[var(--dark-primary,white)]'} transition-colors`}
     >
-      <ListItemIcon className={` pl-2`} {...dragHandleProps}>
-        <DragHandle />
-      </ListItemIcon>
-      <ListItemText id={column.accessor} primary={column.header || startCase(column?.accessor)} />
-      <Switch
-        size="small"
-        disabled={column.disabled}
-        checked={checked}
-        onChange={(e) => {
-          handleToggle(column, e);
-        }}
-      />
-    </div>
+      <div
+        className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
+          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+        } ${column.disabled ? ' opacity-65 pointer-events-none' : ''}`}
+      >
+        <ListItemIcon className={` pl-2 cursor-grab ${isDragging ? ' cursor-grabbing' : ''}`} {...attributes} {...listeners}>
+          <DragHandle />
+        </ListItemIcon>
+        <ListItemText id={column.accessor} primary={column.header || startCase(column?.accessor)} className=" select-none" />
+        <Switch
+          size="small"
+          disabled={column.disabled}
+          checked={checked}
+          onChange={(e) => {
+            handleToggle(column, e);
+          }}
+        />
+      </div>
+    </li>
   );
 };
 
