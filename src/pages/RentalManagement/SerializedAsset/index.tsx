@@ -33,6 +33,7 @@ import { removeAssetsInRental } from '../rentalOfflineHelper';
 import AddNonSerializeAssets from './AddNonSerializeAssets';
 import AddSerializedAsset from './AddSerializedAsset';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
+import AddNonSerializedInventory from './AddNonSerializedInventory';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +44,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false });
   const [addNonSerializedAssetDialog, setAddNonSerializedAssetDialog] = useState(false);
+  const [addNonSerializedInventoryDialog, setAddNonSerializedInventoryDialog] = useState(false);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [nonSerializedAssetProduct, setNonSerializedAssetProduct] = useState([]);
   const [deleteData, setDeleteData] = useState([]);
@@ -387,7 +389,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
           ? (data.inventory?.filter((e) => e._id === parent._id).length + data?.productSerialNumbers?.filter(e => e._id === parent._id)?.length)
-          : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+          : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length + data?.nonSerializedInventory?.filter(n => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0);
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
         // parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
@@ -903,22 +905,32 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             {`Create ${routes.sublease.title}`}
           </MenuItem>
         )}
-        {selectedRecords.length && assetAssignedProduct?.length ?
+        {selectedRecords.length && assetAssignedProduct?.length ? (
           <MenuItem
             onClick={() => {
-              setAssignSerialNumbersDialog(true)
+              setAssignSerialNumbersDialog(true);
             }}
           >
             {`Assign Serial Numbers`}
-          </MenuItem> :
-          selectedRecords.length && nonSerializedAssetProduct?.length ?
+          </MenuItem>
+        ) : selectedRecords.length && nonSerializedAssetProduct?.length ? (
+          <>
             <MenuItem
               onClick={() => {
                 setAddNonSerializedAssetDialog(true);
               }}
             >
               {`Assign Serial Numbers`}
-            </MenuItem> : null}
+            </MenuItem>
+            <MenuItem
+              onClick={() => {
+                setAddNonSerializedInventoryDialog(true);
+              }}
+            >
+              {`Assign Inventory`}
+            </MenuItem>
+          </>
+        ) : null}
         <MenuItem
           disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
           onClick={() => {
@@ -1089,6 +1101,19 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           }}
           products={isOffline ? [...assetAssignedProduct, ...nonSerializedAssetProduct] : nonSerializedAssetProduct}
           warehouse={rentalManagementData?.warehouse?.optionValue}
+          referenceId={rentalManagementData?._id}
+        />
+      )}
+      {addNonSerializedInventoryDialog && (
+        <AddNonSerializedInventory
+          onClose={() => {
+            setAddNonSerializedInventoryDialog(false);
+          }}
+          onSuccess={() => {
+            setAddNonSerializedInventoryDialog(false);
+            fetchData()
+          }}
+          products={nonSerializedAssetProduct}
           referenceId={rentalManagementData?._id}
         />
       )}
