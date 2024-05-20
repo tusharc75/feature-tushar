@@ -72,6 +72,7 @@ export type KPIListType = {
 export const statuses = {
   'asset/location-base-assets': RentalStatus,
   'asset/customer-in-rental': openCloseStatus,
+  'asset/bar-chart-customer-in-rental': openCloseStatus,
   'quote/quote-customer-account': quotesStatus,
   'quote/sales-rep': quotesStatus
 };
