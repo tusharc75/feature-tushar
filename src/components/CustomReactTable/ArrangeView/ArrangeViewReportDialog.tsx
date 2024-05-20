@@ -339,7 +339,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
                 </ul>
                 <DragOverlay>
                   {activeItem && (
-                    <span className=" cursor-grabbing">
+                    <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
                       <RenderListItem {...activeItem} />
                     </span>
                   )}
