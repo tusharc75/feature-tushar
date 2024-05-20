@@ -1,4 +1,3 @@
-import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
 import { Box, Button, IconButton } from '@material-ui/core';
 import AddAlertIcon from '@material-ui/icons/AddAlert';
 import BuildIcon from '@material-ui/icons/Build';
@@ -23,10 +22,10 @@ import Setting from './Setting';
 import { resourcePolicy } from './helper';
 import PolicyDialog from './policyDialog';
 
-import { CSS } from '@dnd-kit/utilities';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const Steps = ({ resource }) => {
   const toastConfig = useContext(CustomToastContext);
