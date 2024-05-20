@@ -67,7 +67,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
             setPackageName(packageName);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user)}
             });
           } else {
             setInitialData({

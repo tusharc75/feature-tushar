@@ -15,11 +15,14 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import routes from 'src/components/Helpers/Routes';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess }) => {
 
   const toastConfig = useContext(CustomToastContext);
-
+  const {
+    state: { user }
+  }: any = useData();
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -44,7 +47,7 @@ const ManageTrailerMaster = ({ isClone = false, id = null, onClose, onSuccess })
                 setTitle(`Clone - ${trailerName}`);
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
                 setLoading(false);
               } else {

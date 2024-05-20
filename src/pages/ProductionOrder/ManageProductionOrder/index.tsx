@@ -73,7 +73,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
             setCloneHeading(productionOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate, true)
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
             });
             setLoading(false);
           } else {

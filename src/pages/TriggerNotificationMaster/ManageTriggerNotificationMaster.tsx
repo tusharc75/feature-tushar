@@ -47,7 +47,7 @@ const ManageTriggerNotificationMaster = ({ onClose, onSuccess, isClone = false, 
             }
             setInitialData({
               fields: fields,
-              values: getObjKeysWithValues(data, fields)
+              values: isClone ? getObjKeysWithValues(data, fields, true, user) :getObjKeysWithValues(data, fields)
             });
           })
           .catch((error) => {

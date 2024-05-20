@@ -121,7 +121,7 @@ const CreateProduct = (props) => {
               });
               setInitialData({
                 fields: newField,
-                values: getObjKeysWithValues(data.productData, newField)
+                values: isClone ? getObjKeysWithValues(data.productData, newField, true, user) :getObjKeysWithValues(data.productData, newField)
               });
               EvaluteproductFields(newField);
               if (_isProductTemplate) {

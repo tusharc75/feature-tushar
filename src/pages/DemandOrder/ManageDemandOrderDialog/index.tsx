@@ -67,7 +67,7 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
             setCloneHeading(demandOrderNumber);
             setSalesData({
               fields: fieldsDataForCreate,
-              initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
+              initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
             });
             setLoading(false);
           } else {

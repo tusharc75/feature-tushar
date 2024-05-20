@@ -50,7 +50,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
                 setCloneHeading(wellNumber);
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
                 });
                 setLoading(false);
               } else {

@@ -81,7 +81,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 rest.status = REPAIR_JOB_STATUS.new;
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate), expectedCompletionDate: null }
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user), expectedCompletionDate: null }
                 });
                 setLoading(false);
               } else {

@@ -18,9 +18,13 @@ import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageMarketSegmentDialog = (props) => {
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user }
+  }: any = useData();
   const { marketSegmentId, onClose, onSuccess, isClone = false } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -56,7 +60,7 @@ const ManageMarketSegmentDialog = (props) => {
               }
               setInitialData({
                 fields: fieldsData,
-                values: getObjKeysWithValues(tempData, fieldsData)
+                values: isClone ? getObjKeysWithValues(tempData, fieldsData, true, user) : getObjKeysWithValues(tempData, fieldsData)
               });
             })
             .catch((error) => {

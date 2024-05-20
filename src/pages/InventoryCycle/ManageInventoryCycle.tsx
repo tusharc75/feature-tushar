@@ -17,10 +17,13 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDisabled = false, isClone = false }) => {
   const toastConfig = useContext(CustomToastContext);
-
+  const {
+    state: { user }
+  }: any = useData();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -87,7 +90,7 @@ const ManageInventoryCycle = ({ inventoryCycleId, onClose, onSuccess, isUpdateDi
               if (isClone) {
                 setInitialData({
                   fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                  values: { ...getObjKeysWithValues(data, fieldsDataForUpdate, true, user) }
                 });
               } else {
                 setInitialData({

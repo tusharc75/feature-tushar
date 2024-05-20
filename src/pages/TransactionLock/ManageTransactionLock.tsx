@@ -52,7 +52,7 @@ const ManageTransactionLock = ({ isClone = false, id = null, onClose, onSuccess 
                 setCloneHeading(lockNumber);
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
                 });
                 setLoading(false);
               } else {

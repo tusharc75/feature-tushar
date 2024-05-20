@@ -58,7 +58,7 @@ const ManageSerializedAsset = ({
   const [productCategoryName, setProductCategoryName] = useState(null);
 
   const {
-    state: { permissions }
+    state: { user, permissions }
   }: any = useData();
 
   useEffect(() => {
@@ -105,7 +105,7 @@ const ManageSerializedAsset = ({
                     : fieldsDataForUpdate?.find((e) => e.fieldName === 'assetNumber')?.defaultValue || '';
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
+                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
                 });
                 setLoading(false);
               } else {

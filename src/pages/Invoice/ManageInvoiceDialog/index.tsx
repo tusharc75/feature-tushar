@@ -75,7 +75,7 @@ const ManageInvoiceDialog = ({ isClone, invoiceId, invoiceData = null, onClose, 
             setCloneHeading(invoiceNumber);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user)}
             });
             setLoading(false);
           } else {

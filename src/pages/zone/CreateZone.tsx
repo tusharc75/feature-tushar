@@ -17,9 +17,13 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const CreateZone = (props) => {
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user }
+  }: any = useData();
   const { zoneId, onClose, onSuccess, isUpdateDisabled = false, isClone = false } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -46,7 +50,7 @@ const CreateZone = (props) => {
               if (isClone) {
                 setInitialData({
                   fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                  values: getObjKeysWithValues(data, fieldsDataForUpdate, true, user)
                 });
               } else {
                 setInitialData({
