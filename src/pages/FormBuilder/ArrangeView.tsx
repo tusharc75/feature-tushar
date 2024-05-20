@@ -108,11 +108,12 @@ const ArrangeView = (props) => {
       const destIndex = over.data.current.index;
 
       const sourceType = active.data.current.type;
-      if (sourceType === 'Section') {
+      const destinationType = over.data.current.type;
+      if (sourceType === 'Section' && destinationType === 'Section') {
         setData(reorder(data, sourceIndex, destIndex));
       }
 
-      if (sourceType === 'Item') {
+      if (sourceType === 'Item' && destinationType === 'Item') {
         const activeSection = active.data.current.props.section;
         const overSection = over.data.current.props.section;
         const activeItemParent = activeSection.id;
@@ -144,6 +145,7 @@ const ArrangeView = (props) => {
     if (active.id === over.id) return;
     setHasChanged(true);
     const sourceType = active.data.current.type;
+    const destinationType = over.data.current.type;
     if (sourceType === 'Item') {
       const activeSection = active.data.current.props.section;
       const overSection = over.data.current.props.section;
@@ -151,8 +153,6 @@ const ArrangeView = (props) => {
       const sourceSubItems = activeSection.subItems;
       const destSubItems = overSection.subItems;
       let newItems = [...data];
-
-      const destinationType = over.data.current.type;
 
       if (destinationType === 'Item') {
         const activeItemParent = activeSection.id;
