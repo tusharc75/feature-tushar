@@ -75,11 +75,9 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
           const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data;
           rest['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           rest['status'] = WORK_ORDER_STATUS.new;
-          rest['estimateCompleteDate'] = new Date();
-          rest['createDate'] = new Date();
           setInitialData({
             fields: fieldsDataForUpdate,
-            values: getObjKeysWithValues(rest, fieldsDataForUpdate)
+            values: getObjKeysWithValues(rest, fieldsDataForUpdate, true, user)
           });
         } else {
           setInitialData({

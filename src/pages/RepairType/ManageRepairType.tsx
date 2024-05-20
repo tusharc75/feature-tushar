@@ -54,7 +54,7 @@ const ManageRepairType = ({ isClone = false, repairTypeId = null, onClose, onSuc
                 const { _id, createdBy, updatedBy, repairType, ...rest } = data;
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
                 });
                 setLoading(false);
               } else {

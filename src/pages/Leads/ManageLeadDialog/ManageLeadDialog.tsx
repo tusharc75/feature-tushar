@@ -77,7 +77,7 @@ export default function ManageLeadDialog({
             }
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(tempData, fieldsDataForCreate)
+              values: { ...getObjKeysWithValues(tempData, fieldsDataForCreate, true, user) }
             });
           });
       } else {

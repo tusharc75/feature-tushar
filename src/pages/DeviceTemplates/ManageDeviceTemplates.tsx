@@ -79,7 +79,7 @@ const ManageDeviceTemplates = ({
                         }
                         setInitialData({
                             fields: fields,
-                            values: getObjKeysWithValues(tempData, fields)
+                            values: getObjKeysWithValues(tempData, fields, true, user)
                         });
                         setLoading(false);
                     } else {
