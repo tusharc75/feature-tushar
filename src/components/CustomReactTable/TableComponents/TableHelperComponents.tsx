@@ -10,6 +10,7 @@ import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
 import { Autocomplete } from '@material-ui/lab';
 import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import { eq, isEqual } from 'lodash';
+import DataList from './DataList';
 
 let cellId = null;
 
@@ -49,6 +50,8 @@ export type TColType = {
   isVisible: undefined | boolean;
   show: undefined | boolean;
   option: any;
+  dataList?: undefined | boolean;
+  dataListId?: undefined | string;
 } & ColumnDef<any>;
 
 const DebouncedInput = React.forwardRef(
@@ -519,7 +522,14 @@ export const CellRenderer = ({
                   setCellValue(e.target.value || '');
                 }}
               />
-            ) : columnDef?.type === 'dropDown' ? (
+            ) : columnDef?.dataList && columnDef?.dataListId ? (
+              <DataList
+                columnDef={columnDef}
+                cellValue={cellValue}
+                setCellValue={setCellValue}
+                cell={cell}
+              />
+            ) : columnDef?.type === 'dropDown' && !columnDef?.dataList ? (
               <Autocomplete
                 fullWidth
                 onKeyDown={(e) => {
@@ -557,7 +567,7 @@ export const CellRenderer = ({
                   />
                 )}
               />
-            ) : columnDef?.type === 'multiSelect' ? (
+            ) : columnDef?.type === 'multiSelect' && !columnDef?.dataList ? (
               <Autocomplete
                 fullWidth
                 multiple

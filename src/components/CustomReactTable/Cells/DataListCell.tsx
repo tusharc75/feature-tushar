@@ -31,7 +31,7 @@ function DataListCell({ field, original }) {
   const more = isArray(original?.[field?.fieldName]) ? getMore(original?.[field?.fieldName]) : original[`rest${joinedFieldName}`];
 
   return (
-    <div>
+    <div className='d-flex'>
       {optionLabel ? (
         <>
           <h5 className="text-truncate" title={optionLabel}>
