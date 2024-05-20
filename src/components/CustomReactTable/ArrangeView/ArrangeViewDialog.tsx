@@ -350,7 +350,7 @@ const RenderListItem = (props: ItemProps) => {
         isDragging
           ? ' bg-[var(--dark-secondary,theme("colors.cyan.100"))] opacity-50 [border:4px_dashed_var(--common-border-color)]'
           : 'bg-[var(--dark-secondary,#fff)]'
-      } transition-colors`}
+      } transition-colors list-none`}
     >
       <div
         className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
