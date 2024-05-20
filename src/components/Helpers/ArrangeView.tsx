@@ -2,9 +2,7 @@ import { Box, Button, Dialog, Grid, Typography } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import TextField from '@material-ui/core/TextField';
 import { DragIndicator } from '@material-ui/icons';
-import update from 'immutability-helper';
 import React, { useEffect } from 'react';
-import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -12,12 +10,17 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { changeItemIndex } from 'src/constants/helpers';
 
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast = true }) => {
   const [valid, setValid] = React.useState(false);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
   const [preRows, setPreRows] = React.useState([]);
   const [postRows, setPostRows] = React.useState([]);
+  const [activeItem, setActiveItem] = React.useState(null);
 
   const buttonText = isLast ? 'Save' : 'Save and Next';
 
@@ -48,36 +51,56 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
     setPreRows(data);
   };
 
-  const moveItem = React.useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
-      const { destination, source } = result;
-      const dragIndex = source.index;
-      const dropIndex = destination?.index;
+  const moveItem = (event: DragEndEvent) => {
+    setActiveItem(null);
+    if (!event.over) return;
+    const { active, over } = event;
+    const dragIndex = active.data.current?.index;
+    const dropIndex = over.data.current?.index;
 
-      if (destination.droppableId !== source.droppableId) return;
+    const itemType = active.data.current.type;
 
-      if (source.droppableId === 'arrangeViewPost') {
-        const dragCard = postRows[dragIndex];
-        let updatedIndexColumns = changeItemIndex(postRows, dragCard, dragIndex, dropIndex);
-        updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 + preRows.length }));
-        setPostRows(updatedIndexColumns);
-      }
-      if (source.droppableId === 'arrangeViewPre') {
-        const dragCard = preRows[dragIndex];
-        let updatedIndexColumns = changeItemIndex(preRows, dragCard, dragIndex, dropIndex);
-        updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 }));
-        setPreRows(updatedIndexColumns);
-      }
-    },
-    [postRows, preRows]
-  );
+    if (active.id === over.id) return;
+
+    if (itemType === 'arrangeViewPost') {
+      const dragCard = postRows[dragIndex];
+
+      let updatedIndexColumns = changeItemIndex(postRows, dragCard, dragIndex, dropIndex);
+      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 + preRows.length }));
+      setPostRows(updatedIndexColumns);
+    }
+    if (itemType === 'arrangeViewPre') {
+      const dragCard = preRows[dragIndex];
+      let updatedIndexColumns = changeItemIndex(preRows, dragCard, dragIndex, dropIndex);
+      updatedIndexColumns = updatedIndexColumns.map((n, i) => ({ ...n, order: i + 1 }));
+      setPreRows(updatedIndexColumns);
+    }
+  };
 
   const onChangeValuePost = (index, field, value) => {
     let data = [...postRows];
     data[index][field] = value;
     setPostRows(data);
   };
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!event.active) return;
+    setActiveItem(event.active.data.current.props);
+  };
+
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10
+    }
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 300,
+      tolerance: 5
+    }
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   return (
     <Dialog
@@ -102,8 +125,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
         onClose={handleClose}
       />
       <CustomDialogContent>
-        {' '}
-        <DragDropContext onDragEnd={moveItem}>
+        <DndContext onDragEnd={moveItem} onDragStart={onDragStart} sensors={sensors}>
           {preRows?.length > 0 && (
             <Box mb={2} p={1} border={1} borderColor="var(--common-border-color)" bgcolor="var(--dark-secondary, white)">
               {postRows?.length > 0 ? (
@@ -113,32 +135,13 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
               ) : null}
 
               {preRows?.length && (
-                <Droppable droppableId="arrangeViewPre">
-                  {(provided) => (
-                    <ul className="list-none" {...provided.droppableProps} ref={provided.innerRef}>
-                      {preRows?.map((column: any, index) => (
-                        <Draggable key={column._id || column.field} draggableId={column._id || column.field} index={index}>
-                          {(provided, snapshot) => (
-                            <li
-                              {...provided.draggableProps}
-                              ref={provided.innerRef}
-                              className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
-                            >
-                              <RenderListItem
-                                key={column.field}
-                                column={column}
-                                index={index}
-                                onChangeValue={onChangeValuePre}
-                                dragHandleProps={provided.dragHandleProps}
-                              />
-                            </li>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </ul>
-                  )}
-                </Droppable>
+                <SortableContext items={preRows?.map((d) => d._id)}>
+                  <ul className="list-none space-y-2">
+                    {preRows?.map((column: any, index) => (
+                      <RenderListItem key={column.field} column={column} type={'arrangeViewPre'} index={index} onChangeValue={onChangeValuePre} />
+                    ))}
+                  </ul>
+                </SortableContext>
               )}
             </Box>
           )}
@@ -151,36 +154,24 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
               ) : null}
 
               {postRows?.length && (
-                <Droppable droppableId="arrangeViewPost">
-                  {(provided) => (
-                    <ul className="list-none" {...provided.droppableProps} ref={provided.innerRef}>
-                      {postRows?.map((column: any, index) => (
-                        <Draggable key={column._id || column.field} draggableId={column._id || column.field} index={index}>
-                          {(provided, snapshot) => (
-                            <li
-                              {...provided.draggableProps}
-                              ref={provided.innerRef}
-                              className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
-                            >
-                              <RenderListItem
-                                column={column}
-                                index={index}
-                                onChangeValue={onChangeValuePost}
-                                dragHandleProps={provided.dragHandleProps}
-                              />
-                            </li>
-                          )}
-                        </Draggable>
-                      ))}
-
-                      {provided.placeholder}
-                    </ul>
-                  )}
-                </Droppable>
+                <SortableContext items={postRows?.map((d) => d._id)}>
+                  <ul className="list-none space-y-2">
+                    {postRows?.map((column: any, index) => (
+                      <RenderListItem key={column.field} column={column} type={'arrangeViewPost'} index={index} onChangeValue={onChangeValuePost} />
+                    ))}
+                  </ul>
+                </SortableContext>
               )}
             </Box>
           )}
-        </DragDropContext>
+          <DragOverlay>
+            {activeItem && (
+              <span className="[&_.MuiIconButton-root]:!cursor-grabbing">
+                <RenderListItem {...activeItem} />
+              </span>
+            )}
+          </DragOverlay>
+        </DndContext>
       </CustomDialogContent>
       <CustomDialogFooter>
         <Button variant="outlined" size="small" color="primary" onClick={handleClose}>
@@ -204,14 +195,37 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
   );
 };
 
-const RenderListItem = ({ column, index, onChangeValue, dragHandleProps }) => {
+const RenderListItem = ({ column, index, onChangeValue, type }) => {
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+    id: column._id,
+    data: {
+      type,
+      index,
+      props: { column, index, onChangeValue }
+    },
+    disabled: column.disabled
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition
+  };
+
   return (
-    <div>
-      <Box bgcolor="var(--dark-primary, white)" border={1} mb={1} p={1} borderColor="var(--common-border-color)">
+    <li
+      style={style}
+      ref={setNodeRef}
+      className={`${
+        isDragging
+          ? ' bg-[var(--dark-secondary,theme("colors.cyan.100"))] opacity-50 [border:4px_dashed_var(--common-border-color)]'
+          : 'bg-[var(--dark-secondary,#fff)]'
+      } transition-colors list-none`}
+    >
+      <Box bgcolor="var(--dark-primary, white)" border={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>
           <Grid item xs={1}>
             <Box pt={1}>
-              <IconButton size="small" {...dragHandleProps}>
+              <IconButton size="small" {...attributes} {...listeners} className=" !cursor-grab">
                 <DragIndicator fontSize="small" />
               </IconButton>
             </Box>
@@ -239,7 +253,7 @@ const RenderListItem = ({ column, index, onChangeValue, dragHandleProps }) => {
           </Grid>
         </Grid>
       </Box>
-    </div>
+    </li>
   );
 };
 

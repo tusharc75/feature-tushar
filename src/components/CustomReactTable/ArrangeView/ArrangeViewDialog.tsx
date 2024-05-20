@@ -258,7 +258,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
               </SortableContext>
               <DragOverlay>
                 {activeItem && (
-                  <span className=" cursor-grabbing">
+                  <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
                     <RenderListItem {...activeItem} />
                   </span>
                 )}
@@ -346,7 +346,11 @@ const RenderListItem = (props: ItemProps) => {
     <li
       ref={setNodeRef}
       style={style}
-      className={`${isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : 'bg-[var(--dark-primary,white)]'} transition-colors`}
+      className={`${
+        isDragging
+          ? ' bg-[var(--dark-secondary,theme("colors.cyan.100"))] opacity-50 [border:4px_dashed_var(--common-border-color)]'
+          : 'bg-[var(--dark-secondary,#fff)]'
+      } transition-colors list-none`}
     >
       <div
         className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
