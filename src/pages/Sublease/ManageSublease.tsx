@@ -69,14 +69,10 @@ const ManageSublease = ({
                 const { _id, createdBy, updatedBy, serialNumber, ...rest } = data;
                 rest['subleaseName'] = GenerateResourceLineNumber(fieldsDataForCreate);
                 rest['status'] = SUBLEASE_STATUS.new;
-                rest['estimateStartDate'] = new Date();
-                rest['estimateEndDate'] = '';
-                rest['actualStartDate'] = '';
-                rest['actualEndDate'] = '';
                 fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
                 });
                 setLoading(false);
               } else {

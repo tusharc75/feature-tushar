@@ -80,7 +80,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             setCloneHeading(quotationNumber);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
             });
             setLoading(false);
           } else {

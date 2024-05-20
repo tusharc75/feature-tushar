@@ -74,15 +74,10 @@ const ManagePurchaseOrder = ({
                 const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data;
                 rest['status'] = PURCHASE_ORDER_STATUS.open;
                 rest['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-                if (fieldsDataForCreate?.filter((e) => e.fieldName === 'purchaseOrderDate').length) {
-                  rest['purchaseOrderDate'] = new Date();
-                }
-                if (fieldsDataForCreate?.filter((e) => e.fieldName === 'deliveryDate').length) {
-                  rest['deliveryDate'] = new Date();
-                }
+
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
                 });
                 setCloneHeading(purchaseOrderNumber);
                 setLoading(false);

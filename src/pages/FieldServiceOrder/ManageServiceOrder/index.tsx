@@ -91,7 +91,7 @@ const ManageServiceOrderDialog = ({
             setCloneHeading(fieldServiceOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
             });
             setLoading(false);
           } else {
