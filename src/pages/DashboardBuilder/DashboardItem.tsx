@@ -1,10 +1,10 @@
-import { Draggable } from '@hello-pangea/dnd';
-import { Box, Grid, IconButton, ThemeOptions, Typography, makeStyles } from '@material-ui/core';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Box, IconButton, ThemeOptions, Typography, makeStyles } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
 import RenderIcon from './RenderIcon';
 import { IFormDataType } from './builderHelpers';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { colSpans } from 'src/constants/helpers';
 
 const useClasses = makeStyles((theme: ThemeOptions) => ({
   paper: {
@@ -63,21 +63,6 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
     transform: CSS.Translate.toString(transform),
     transition
   };
-
-  const colSpans = [
-    'col-span-1',
-    'col-span-2',
-    'col-span-3',
-    'col-span-4',
-    'col-span-5',
-    'col-span-6',
-    'col-span-7',
-    'col-span-8',
-    'col-span-9',
-    'col-span-10',
-    'col-span-11',
-    'col-span-12'
-  ];
 
   return (
     <li ref={setNodeRef} {...attributes} {...listeners} className={colSpans[formData.column - 1]} style={style}>
