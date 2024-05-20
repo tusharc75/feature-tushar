@@ -983,14 +983,15 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, defaultCurrentDate: boolean = false) => {
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, user: any = null) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
   for (const key of arr) {
     if (key.type === 'switch' || key.type === 'checkBox') {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : false;
-    } else if ((key.type === 'multiSelect' || key.type === 'dropDown') && key?.dataList) {
+    }
+    else if ((key.type === 'multiSelect' || key.type === 'dropDown') && key?.dataList) {
       if (key.type === 'multiSelect') {
         const values =
           dataObj[key.fieldName] && dataObj[key.fieldName].length
@@ -1012,21 +1013,32 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
 
         obj[`${key.fieldName}_dataList`] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
       }
-    } else if (key.type === 'multiSelect') {
-      const values =
+    }
+    else if (key.type === 'multiSelect') {
+      let values =
         dataObj[key.fieldName] && dataObj[key.fieldName].length
           ? typeof dataObj[key.fieldName] === 'string'
             ? [dataObj[key.fieldName]]
             : dataObj[key.fieldName].map((val: any) => filterValues(val))
           : [];
+      if (isClone && key.fieldName === 'collaborator') {
+        values = values?.filter((e) => e !== user?.user?._id)
+      }
       obj[key.fieldName] = values;
-    } else if (key.type === 'dropDown') {
+    }
+    else if (key.type === 'dropDown') {
       const value =
         dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length
           ? dataObj[key.fieldName][0]
           : filterValues(dataObj[key.fieldName]);
-      obj[key.fieldName] = value ? value : '';
-    } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
+      if (isClone && key.fieldName === 'owner') {
+        obj[key.fieldName] = user?.user?._id
+      }
+      else {
+        obj[key.fieldName] = value ? value : '';
+      }
+    } 
+    else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
           key.displayUnits.forEach((_unit) => {
@@ -1058,27 +1070,29 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
             obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
           });
       }
-    } else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
+    } 
+    else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
-    } else if (key.type === 'dateTime') {
+    } 
+    else if (key.type === 'dateTime') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
-      } else if (defaultCurrentDate) {
-        obj[key.fieldName] = new Date();
       }
-    } else if (key.type === 'date') {
+    } 
+    else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
-      } else if (defaultCurrentDate) {
-        obj[key.fieldName] = new Date();
       }
-    } else if (key.type === 'lookUpDisplay') {
-    } else if (key.type === 'description') {
-    } else {
+    } 
+    else if (key.type === 'lookUpDisplay') {
+    } 
+    else if (key.type === 'description') {
+    } 
+    else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
   }
@@ -1100,21 +1114,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
