@@ -1,4 +1,3 @@
-import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from '@hello-pangea/dnd';
 import {
   Box,
   Button,
@@ -19,7 +18,7 @@ import {
 } from '@material-ui/core';
 import { DragHandle } from '@material-ui/icons';
 import update from 'immutability-helper';
-import { over, startCase } from 'lodash';
+import { startCase } from 'lodash';
 import React, { Dispatch, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -29,10 +28,9 @@ import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
 
-import { CSS } from '@dnd-kit/utilities';
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
