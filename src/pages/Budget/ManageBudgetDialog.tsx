@@ -133,7 +133,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
               }
               setInitialData({
                 fields: newFields,
-                values: getObjKeysWithValues(clonedData, newFields)
+                values: isClone ? getObjKeysWithValues(clonedData, newFields, true, user) : getObjKeysWithValues(clonedData, newFields)
               });
             })
             .catch((error) => {

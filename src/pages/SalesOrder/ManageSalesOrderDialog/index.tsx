@@ -35,7 +35,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
@@ -70,7 +70,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
             setCloneHeading(salesOrderNo);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
             });
             setLoading(false);
           } else {

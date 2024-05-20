@@ -24,7 +24,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user }
   }: any = useData();
   const ref = useRef(null);
 
@@ -51,7 +51,7 @@ const ManageProductAuction = ({ isClone = false, productAuctionId = null, onClos
                 rest['auctionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
                 setLoading(false);
               } else {

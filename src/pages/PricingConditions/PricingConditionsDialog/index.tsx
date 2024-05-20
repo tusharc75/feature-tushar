@@ -45,7 +45,7 @@ const PricingConditionsDialog = ({ pricingConditionId, onClose, onSuccess, isUpd
               if (isClone) {
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(data, fieldsDataForCreate)
+                  values: { ...getObjKeysWithValues(data, fieldsDataForCreate, true, user) }
                 });
               } else {
                 setInitialData({

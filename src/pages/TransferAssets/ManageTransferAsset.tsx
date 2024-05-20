@@ -36,7 +36,7 @@ interface Props {
 
 const ManageTransferAsset: FC<Props> = (props) => {
   const {
-    state: { selectedEntity, permissions }
+    state: { user }
   }: any = useData();
   const {
     isClone = false,
@@ -90,7 +90,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 setCloneHeading(transferAssetNumber);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
+                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
                 });
               } else {
                 if (data?.canEdit === false) {

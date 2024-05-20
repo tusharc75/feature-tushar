@@ -86,7 +86,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
               });
             }
 
-            const tempInitialData: any = getObjKeysWithValues(tempData, fields);
+            const tempInitialData: any = isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields);
             tempInitialData.formula = tempData?.formula || '';
             tempInitialData.dataPoints = tempData?.dataPoints || [];
             setInitialData({

@@ -241,13 +241,10 @@ export default function ManageQuoteDialog({
           const { _id, createdBy, updatedBy, quoteName, versions, ...rest } = tempQuoteData;
           rest.owner = user?.user?._id;
           rest['quoteName'] = GenerateResourceLineNumber(newFields);
-          if (newFields?.some((e) => e.fieldName === 'quoteDate')) {
-            rest['quoteDate'] = new Date();
-          }
           setInitialData({
             fields: newFields,
             values: {
-              ...getObjKeysWithValues(rest, newFields)
+              ...getObjKeysWithValues(rest, newFields, true, user)
             }
           });
         } else {

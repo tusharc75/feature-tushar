@@ -53,7 +53,7 @@ const ManageSurveys = ({ onClose, onSuccess, isClone = false, id = null }) => {
             }
             setInitialData({
               fields: fields,
-              values: getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {

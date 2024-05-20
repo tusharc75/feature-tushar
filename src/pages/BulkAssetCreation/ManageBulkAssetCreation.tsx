@@ -58,7 +58,7 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                 rest['status'] = 'New';
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: {...getObjKeysWithValues(rest, fieldsDataForCreate, true, user)}
                 });
                 setCloneHeading(baNumber);
                 setLoading(false);

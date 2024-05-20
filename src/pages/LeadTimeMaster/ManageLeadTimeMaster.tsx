@@ -29,9 +29,13 @@ import React from 'react';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user }
+  }: any = useData();
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const history = useHistory();
   const [loading, setLoading] = useState(false);
@@ -66,7 +70,7 @@ const ManageLeadTimeMaster = ({ isClone = false, leadTimeMasterId = null, onClos
                 setTitle(`Clone - ${leadTimeName}`);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
                 setAllFields(fieldsDataForCreate);
                 setLoading(false);

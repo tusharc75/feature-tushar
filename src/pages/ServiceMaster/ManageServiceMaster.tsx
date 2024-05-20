@@ -51,7 +51,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                 rest['serviceName'] = '';
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
                 });
                 setLoading(false);
               } else {

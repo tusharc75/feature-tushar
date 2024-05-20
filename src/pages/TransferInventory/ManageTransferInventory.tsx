@@ -91,7 +91,7 @@ const ManageTransferInventory: FC<Props> = (props) => {
                 setCloneHeading(transferNumber);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
+                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
                 });
               } else {
                 if (!data?.canEdit) {
