@@ -318,8 +318,8 @@ export default function useColumns() {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
               : isObject(original?.[field?.fieldName])
-              ? original?.[field?.fieldName]?.optionLabel
-              : original?.[field?.fieldName];
+                ? original?.[field?.fieldName]?.optionLabel
+                : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DataListCell field={field} original={row?.original} />
         });
@@ -327,13 +327,13 @@ export default function useColumns() {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
-          ...(Boolean(field?.isColumnEditable) ? {option: field?.option} : {}),
+          ...(Boolean(field?.isColumnEditable) ? { option: field?.option } : {}),
           accessorFn: (original) => {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
               : isObject(original?.[field?.fieldName])
-              ? original?.[field?.fieldName]?.optionLabel
-              : original?.[field?.fieldName];
+                ? original?.[field?.fieldName]?.optionLabel
+                : original?.[field?.fieldName];
           },
           cell: ({ row }) => <DropdownCell permissions={permissions} permissionForLinks={permissionForLinks} field={field} original={row?.original} />
         });
@@ -477,8 +477,7 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (row.original[field.fieldName] ? <SignatureCell base64={row?.original[field.fieldName]} /> : <NoDataCell />)
         });
-      } 
-      else if (field.type === 'percent') {
+      } else if (field.type === 'percent') {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
@@ -496,11 +495,11 @@ export default function useColumns() {
             </div>
           )
         });
-      } 
-      else {
+      } else {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
+          ...(Boolean(field?.isColumnEditable) && ['dropDown', 'multiSelect']?.includes(field.type) ? { option: field?.option } : {}),
           cell: ({ row }) => (
             <div>
               {row?.original?.[field?.fieldName] ? (
