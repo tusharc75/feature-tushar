@@ -400,7 +400,7 @@ const ChartTypes = ({
                           tooltip: {
                             callbacks: {
                               label: function (context) {
-                                let label = context.dataset.label || '';
+                                let label = context.label || context.dataset.label || '';
                                 if (label) {
                                   label += ': ';
                                 }

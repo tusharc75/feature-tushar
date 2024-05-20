@@ -48,6 +48,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
     });
   }, [filters]);
 
+
   React.useEffect(() => {
     setSelectedKpiFilter(kpiFilters?.find((f) => f?.default) || null);
   }, [kpiFilters]);
@@ -64,8 +65,8 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
             [filter.key]: filter?.multiple
               ? []
               : filter.key === 'status' && isCRM
-              ? { optionValue: 'open', optionLabel: 'Open' }
-              : filter?.defaultValue
+                ? { optionValue: 'open', optionLabel: 'Open' }
+                : filter?.defaultValue
           };
         }, {});
       });
@@ -206,7 +207,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   loading={loading.loading && loading.resource === filter?.resource}
                   options={options}
                   autoHighlight
-                  value={values[filter.key]}
+                  value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : {}}
                   getOptionLabel={(option: any) => option?.optionLabel}
                   getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
                   onChange={(_, val) => {
@@ -245,9 +246,9 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   size="small"
                   multiple={filter?.multiple}
                   fullWidth
-                  options={filterOptions[filter?.key]}
+                  options={filterOptions[filter?.key] || []}
                   autoHighlight
-                  value={values[filter?.key]}
+                  value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : {}}
                   getOptionLabel={(option: any) => option?.optionLabel}
                   getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
                   onChange={(_, val) => {
@@ -274,7 +275,7 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
                   fullWidth
                   margin="none"
                   size="small"
-                  value={values[filter.key]}
+                  value={values[filter.key] || ''}
                   onChange={(e) => {
                     handleChange(filter.key, Number(e.target.value));
                     setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: e.target.value }));

@@ -327,7 +327,7 @@ const Units = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            onSelect={onSaveInlineEdit}
+            onSaveEdit={onSaveInlineEdit}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.units}
