@@ -1,4 +1,4 @@
-import { Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { Fragment, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -12,7 +12,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 const schema = object().shape({
   title: string().required('Please enter title'),
   default: boolean(),
-  access: string().oneOf(['private','everyone']).required("Please select access option")
+  access: string().oneOf(['private', 'everyone']).required("Please select access option")
 });
 
 const ACCESS_OPTIONS = {
@@ -27,7 +27,7 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
   const [initialValue] = useState({
     title: filterData?.title || '',
     default: filterData?.default || false,
-    access: filterData?.access
+    access: filterData?.access || ACCESS_OPTIONS.private
   });
 
   const handleSubmit = (values) => {
@@ -106,29 +106,32 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
                   }}
                   error={touched['title'] && Boolean(errors['title'])}
                   helperText={touched['title'] && errors['title']}
-                />   
-                <FormControlLabel
-                  control={<Checkbox checked={values['default']}
-                    onChange={(e) => setFieldValue('default', e.target.checked)}
-                    name="default" />}
-                  label="Set this as default"
                 />
-                <RadioGroup>
+                <Box pt={1}>
+                  <RadioGroup row>
                     <FormControlLabel
                       control={<Radio
-                        checked={values['access']===ACCESS_OPTIONS.private}
+                        checked={values['access'] === ACCESS_OPTIONS.private}
                         onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)} name="private" />}
                       label="Private"
                     />
                     <FormControlLabel
                       control={<Radio
-                        checked={values['access']===ACCESS_OPTIONS.everyone}
+                        checked={values['access'] === ACCESS_OPTIONS.everyone}
                         onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)} name="everyone"
-                        />}
+                      />}
                       label="Everyone"
                     />
-                    </RadioGroup>
-                    {errors.access && <div style={{ color: 'red' }}>{errors.access}</div>}
+                  </RadioGroup>
+                </Box>
+                <Box pt={1}>
+                  <FormControlLabel
+                    control={<Checkbox checked={values['default']}
+                      onChange={(e) => setFieldValue('default', e.target.checked)}
+                      name="default" />}
+                    label="Set this as default"
+                  />
+                </Box>
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
