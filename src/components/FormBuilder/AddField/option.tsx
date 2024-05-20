@@ -36,7 +36,6 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
   const [isUpdate, setUpdate] = useState(false);
   const [isAsc, setIsAsc] = useState(true);
 
-  console.log({ options });
 
   useEffect(() => {
     if (values['isDependentDropdown'] && values['dropdowDependentOn']) {
@@ -525,23 +524,23 @@ const Card = (props) => {
                 {values['dropdowDependentOn'] && fields.filter((_f) => _f.fieldName === values['dropdowDependentOn']).length
                   ? fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].lookup
                     ? lookupOption &&
-                      lookupOption.map((_option) => {
+                    lookupOption.map((_option) => {
+                      return (
+                        <MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                          {_option.optionLabel}
+                        </MenuItem>
+                      );
+                    })
+                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
+                    fields
+                      .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
+                      .option.map((_option) => {
                         return (
-                          <MenuItem key={_option.optionLabel} value={_option.optionValue}>
+                          <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
                             {_option.optionLabel}
                           </MenuItem>
                         );
                       })
-                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
-                      fields
-                        .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
-                        .option.map((_option) => {
-                          return (
-                            <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
-                              {_option.optionLabel}
-                            </MenuItem>
-                          );
-                        })
                   : null}
               </Select>
               {/* <TextField
