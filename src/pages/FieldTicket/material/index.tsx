@@ -419,7 +419,6 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element['pricingCondition'] = rateResult[0].conditionId;
           element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
           const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp }, element, allFields);
-          console.log(calValues)
           Object.assign(element, calValues);
         }
       });
