@@ -3,7 +3,7 @@ import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import CustomTabs, { TabPanel, CustomTab } from 'src/components/CustomTabs';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { object, string } from 'yup';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -210,8 +210,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.lookupResource = values.lookup ? values.lookupResource : '';
             ele.dataList = values.dataList || false;
             ele.dataListId = values.dataList ? values.dataListId : '';
-            ele.preFilters = values.preFilters?.length > 0 ? values.preFilters : []
-            ele.htmlDescription = values.htmlDescription || ''
+            ele.preFilters = values.preFilters?.length > 0 ? values.preFilters : [];
+            ele.htmlDescription = values.htmlDescription || '';
             ele.entityWiseLookup = values?.entityWiseLookup || false;
             ele.isMinMaxValue = values?.isMinMaxValue || false;
             ele.minValue = values?.minValue || 0;
@@ -219,7 +219,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.minValueServiceAdd = values.minValueServiceAdd ? values.minValueServiceAdd : '';
             ele.maxValueServiceAdd = values.maxValueServiceAdd ? values.maxValueServiceAdd : '';
             ele.isDropdown = values.isDropdown || false;
-            ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter(v => v?.fields?.length > 0) : [];
+            ele.visibilityCondition = values.visibilityCondition?.length > 0 ? values.visibilityCondition?.filter((v) => v?.fields?.length > 0) : [];
             ele.subFields = values.subFields?.length > 0 ? values.subFields : [];
             ele.isSystemGenerate = values?.isSystemGenerate || false;
             if (values.isSystemGenerate) {
@@ -544,12 +544,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
-                      <Visibility
-                        values={values}
-                        setFieldValue={setFieldValue}
-                        fields={fields}
-                        fieldData={fieldData}
-                      />
+                      <Visibility values={values} setFieldValue={setFieldValue} fields={fields} fieldData={fieldData} />
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
                       <Setting
