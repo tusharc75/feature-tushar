@@ -309,7 +309,7 @@ function Product({ id }) {
 
   return (
     <div>
-      {permissions?.serviceMaster?.isUpdate || permissions?.serviceMaster?.isCreate && (
+      {permissions?.serviceMaster?.isUpdate && (
         <>
           <DetailsPageHeader
             isAddButtonVisible
@@ -333,8 +333,8 @@ function Product({ id }) {
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={onSaveInlineEdit}
-          hideAction={permissions?.serviceMaster?.isCreate || permissions?.serviceMaster?.isUpdate ? false : true}
-          hideSelection={permissions?.serviceMaster?.isCreate || permissions?.serviceMaster?.isUpdate ? false : true}
+          hideAction={permissions?.serviceMaster?.isUpdate ? false : true}
+          hideSelection={permissions?.serviceMaster?.isUpdate ? false : true}
         />
       ) : (
         <Box p={2} height={500}>

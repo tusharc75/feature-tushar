@@ -225,7 +225,7 @@ const RenderListItem = ({ column, index, onChangeValue, type }) => {
         <Grid container spacing={1}>
           <Grid item xs={1}>
             <Box pt={1}>
-              <IconButton size="small" {...attributes} {...listeners} className=" !cursor-grab">
+              <IconButton size="small" {...attributes} {...listeners} className=" !cursor-grab drag-handle">
                 <DragIndicator fontSize="small" />
               </IconButton>
             </Box>
