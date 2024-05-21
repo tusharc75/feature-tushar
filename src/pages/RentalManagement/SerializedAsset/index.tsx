@@ -1113,7 +1113,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             setAddNonSerializedInventoryDialog(false);
             fetchData()
           }}
-          products={nonSerializedAssetProduct}
+          selectedProducts={nonSerializedAssetProduct}
           referenceId={rentalManagementData?._id}
         />
       )}
