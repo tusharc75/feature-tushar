@@ -1,15 +1,13 @@
-import { DropResult } from '@hello-pangea/dnd';
 import { Box, Button, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import update from 'immutability-helper';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import { ECOM_SECTIONS, addItemAtIndex, changeItemIndex } from 'src/constants/helpers';
+import { addItemAtIndex, changeItemIndex } from 'src/constants/helpers';
 import { v4 as uuid } from 'uuid';
 
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
@@ -90,33 +88,6 @@ const EcommerceHome = () => {
   const handleRemove = (id: string) => {
     setFormData((prevState) => prevState.filter((i) => (i._id ? i._id !== id : i.name !== id)));
   };
-
-  const moveCard = React.useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
-      const { draggableId, destination, source } = result;
-      const dropIndex = destination?.index;
-      const sourceIndex = source.index;
-
-      if (source.droppableId === 'field') {
-        let draggedField = Array.from(ECOM_SECTIONS).find((s) => s._id === draggableId);
-        const newData = addItemAtIndex(formData, { ...draggedField, _id: uuid() }, destination.index);
-        setFormData(newData);
-        return;
-      } else {
-        const card = formData[source.index];
-        setFormData(
-          update(formData, {
-            $splice: [
-              [sourceIndex, 1],
-              [dropIndex, 0, card]
-            ]
-          })
-        );
-      }
-    },
-    [formData, setFormData]
-  );
 
   const handleImport = (event) => {
     if (event.target.files && event.target.files.length) {

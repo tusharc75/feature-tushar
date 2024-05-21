@@ -1,7 +1,8 @@
 import { Box, IconButton } from '@material-ui/core';
 import { Map } from '@material-ui/icons';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import update from 'immutability-helper';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -10,8 +11,9 @@ import routes from 'src/components/Helpers/Routes';
 import DispatchDialog from './DispatchDialog';
 import DispatchList from './DispatchList';
 import MapView from './Map';
-import { DragDropContext, DropResult } from '@hello-pangea/dnd';
-import update from 'immutability-helper';
+
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import FleetDispatchBox from './DispatchCard';
 
 const FleetDispatch = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -20,6 +22,7 @@ const FleetDispatch = () => {
   const [jobs, setJobs] = useState(null);
   const [dispatchDialogOpen, setDispatchDialogOpen] = useState({ open: false, fleet: null, job: null });
   const [showMapView, setShowMapView] = useState(false);
+  const [activeItem, setActiveItem] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -41,33 +44,52 @@ const FleetDispatch = () => {
     setDispatchDialogOpen({ open: true, fleet: fleet, job: job });
   };
 
-  const moveCard = useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
-      if (result.destination.droppableId !== result.source.droppableId) return;
-      const { source, destination } = result;
-      const dragIndex = source.index;
-      const dropIndex = destination?.index;
-      function updateList(list, setList) {
-        const dragCard = list[dragIndex];
-        setList(
-          update(list, {
-            $splice: [
-              [dragIndex, 1],
-              [dropIndex, 0, dragCard]
-            ]
-          })
-        );
-      }
-      if (source.droppableId === 'fleet') {
-        updateList(fleets, setFleets);
-      }
-      if (source.droppableId === 'job') {
-        updateList(jobs, setJobs);
-      }
-    },
-    [fleets, jobs]
-  );
+  const onDragEnd = (event: DragEndEvent) => {
+    setActiveItem(null);
+    if (!event.over) return;
+    const { active, over } = event;
+    const activeType = active.data.current.type;
+    const overType = active.data.current.type;
+    if (activeType !== overType) return;
+    const dragIndex = active.data.current.index;
+    const dropIndex = over.data.current.index;
+    function updateList(list, setList) {
+      const dragCard = list[dragIndex];
+      setList(
+        update(list, {
+          $splice: [
+            [dragIndex, 1],
+            [dropIndex, 0, dragCard]
+          ]
+        })
+      );
+    }
+    if (activeType === 'fleet') {
+      updateList(fleets, setFleets);
+    }
+    if (activeType === 'job') {
+      updateList(jobs, setJobs);
+    }
+  };
+
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10
+    }
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 300,
+      tolerance: 5
+    }
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!event?.active) return;
+    setActiveItem(event.active.data.current.props);
+  };
 
   return (
     <Box className="main-container-v1">
@@ -93,12 +115,15 @@ const FleetDispatch = () => {
           </Box>
         </Box>
         {fleets && jobs ? (
-          <DragDropContext onDragEnd={moveCard}>
-            <div className="grid grid-cols-1 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-3">
-              <DispatchList activity={fleets} cardType="fleet" handleDispatch={handleDispatch} />
-              <DispatchList activity={jobs} cardType="job" handleDispatch={handleDispatch} />
-            </div>
-          </DragDropContext>
+          <>
+            <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+              <ul className="grid grid-cols-1 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-3">
+                <DispatchList activity={fleets} cardType="fleet" handleDispatch={handleDispatch} />
+                <DispatchList activity={jobs} cardType="job" handleDispatch={handleDispatch} />
+              </ul>
+              <DragOverlay>{activeItem && <FleetDispatchBox {...activeItem} />}</DragOverlay>
+            </DndContext>
+          </>
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

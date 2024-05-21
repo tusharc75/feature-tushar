@@ -1,32 +1,16 @@
-import { Draggable, Droppable } from '@hello-pangea/dnd';
+import { SortableContext } from '@dnd-kit/sortable';
 import DispatchCard from './DispatchCard';
 
 const DispatchList = ({ activity, cardType, handleDispatch }) => {
+  if (activity.length === 0) return null;
+  console.log(activity);
   return (
     <>
-      <Droppable droppableId={cardType}>
-        {(provided) => (
-          <ul className={`list-none `} {...provided.droppableProps} ref={provided.innerRef}>
-            {activity.map((element, index) => (
-              <Draggable key={element._id} draggableId={`${element._id}`} index={index}>
-                {(provided, snapshot) => (
-                  <li {...provided.draggableProps} {...provided.dragHandleProps} ref={provided.innerRef}>
-                    <DispatchCard
-                      data={element}
-                      key={element?.id}
-                      id={element?.id}
-                      index={index}
-                      cardType={cardType}
-                      handleDispatch={handleDispatch}
-                    />
-                  </li>
-                )}
-              </Draggable>
-            ))}
-            {provided.placeholder}
-          </ul>
-        )}
-      </Droppable>
+      <SortableContext items={activity.map((d) => d._id)}>
+        {activity.map((element, index) => (
+          <DispatchCard data={element} key={element?._id} id={element?._id} index={index} cardType={cardType} handleDispatch={handleDispatch} />
+        ))}
+      </SortableContext>
     </>
   );
 };

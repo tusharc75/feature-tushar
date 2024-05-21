@@ -465,8 +465,9 @@ const ReceivingTicket = ({
           var qty = productSerialNumbers?.filter((e) => e?._id === element?._id)?.length;
 
           if (qty) {
-            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId && e.uniqueId === element._id);
             ticketProduct?.forEach((ele) => {
+              
               const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
               const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
 
@@ -500,18 +501,16 @@ const ReceivingTicket = ({
               obj.productId = element?.productDetail?._id;
               obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
               obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-              obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
               obj.parentId = element?.parentId;
               obj.parentName = element?.parentName;
-              obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
-                ? ele.qty === consumeQty
+              obj.status = ASSET_STATUS.notApplied;
+              obj.rentalAssetStatus =
+                ele.qty === consumeQty
                   ? RENTAL_INTERNAL_ASSET_STATUS.consumed
                   : consumeQty < ele.qty && consumeQty > 0
                     ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
                     : ele.qty === (returnTicket?.qty || 0)
-                      ? 'Returned'
-                      : element?.status
-                : element?.status;
+                      ? 'Returned' : element?.status;
               obj.startDate = element?.actualStartDate;
               obj.endDate = element?.actualEndDate;
               obj.manualStartDate = element?.manualStartDate;
@@ -560,7 +559,7 @@ const ReceivingTicket = ({
                 warehouse: rentalManagementData?.warehouse?.optionLabel,
                 warehouseId: rentalManagementData?.warehouse?.optionValue,
                 productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber })),
-                status: element?.productDetail?.serializedProduct === true ? element?.status : 'N/A',
+                status: ASSET_STATUS.notApplied,
                 rentalAssetStatus: element?.productDetail?.serializedProduct ? element?.status : '',
                 currentLocation:
                   element?.currentLocation?.optionValue ||
