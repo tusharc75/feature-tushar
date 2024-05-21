@@ -26,6 +26,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import Steps from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
+  ASSET_STATUS,
   MATERIAL_TYPE,
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
@@ -151,7 +152,7 @@ const RepairOrderDetails = () => {
       .get(`${routes.repairOrder.path}/${id}`)
       .then(({ data: { data } }) => {
         setisAnyMaterial(data?.canDelete ? false : true);
-        
+
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairOrder, data));
         var steps: any = JSON.parse(JSON.stringify(repairOrderSteps));
         if (data?.type === REPAIR_ORDER_TYPE.internal) {
@@ -210,8 +211,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -258,30 +259,21 @@ const RepairOrderDetails = () => {
         toastConfig.setToastConfig(error);
       });
   };
-  const handleAddAssetToTransferAsset =async (transferAssetData) => {
-    const transferAssetId=transferAssetData._id;
 
-    var data: any = [];
-    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
-    data = response?.data?.data;
-    const assets = data.material.filter((e) => e.type === MATERIAL_TYPE.serializedAsset);
-
-    axiosInstance()
-      .put(`${transferAsset.api}/add-asset-complete-transfer-asset/${transferAssetId}`, {
-        assets: assets?.map((s) => {
-          return {
-            _id: s.materialId,
-            currentStatus: s.serializedAssetDetail.status,
-          };
-        }),
-        repairOrderId:id
-      })
-      .then(({ data }) => {
-        setShowTransferAssetDialog(false);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+  const handleAddAssetToTransferAsset = async (data) => {
+    const assets: any = repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => {
+      return { _id: e.materialId, currentStatus: e.status }
+    });
+    axiosInstance().put(`${transferAsset.api}/add-asset-complete-transfer-asset/${data._id}`, { assets, repairOrderId: id }).then(({ data }) => {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+      setShowTransferAssetDialog(false);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   return (
@@ -294,20 +286,22 @@ const RepairOrderDetails = () => {
           <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
-                {permissions?.transferAsset?.isCreate  && (
-                  <Button
-                    style={{ minWidth: 'max-content' }}
-                    size="small"
-                    color="primary"
-                    onClick={() => {
-                      setShowTransferAssetDialog(true);
-                    }}
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                  >
-                    {`Create Tranfer Asset`}
-                  </Button>
-                )}
+                {allowedToEdit
+                  && permissions?.repairOrder?.isUpdate && permissions?.transferAsset?.isCreate
+                  && resourceData?.policy?.showTransferAssets
+                  && repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e.status === ASSET_STATUS.inRepair) &&
+                  (
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        setShowTransferAssetDialog(true);
+                      }}
+                      variant={'contained'}
+                      className={'btn-outline-v1'}
+                    >
+                      {`Create ${routes.transferAsset.title}`}
+                    </Button>
+                  )}
                 {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
                   <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.repairOrder.title}`}>
                     <span>
@@ -471,10 +465,10 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationVersionData?.status
-                      )
-                    ? false
-                    : allowedToEdit
+                      quotationVersionData?.status
+                    )
+                      ? false
+                      : allowedToEdit
                 }
                 isPostWorkService={Boolean(currentStep === 3)}
                 setCurrentStep={setCurrentStep}
@@ -525,7 +519,7 @@ const RepairOrderDetails = () => {
         </TabPanel>
         <TabPanel value={tabValue} index={3}>
           <Box>
-          <Step
+            <Step
               resourceData={resourceData}
               resourceId={id}
               resource={sidebarResource.repairOrder}
