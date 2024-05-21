@@ -124,7 +124,7 @@ const AssignSerialNumbersDialog = ({
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -357,8 +357,8 @@ const AssignSerialNumbersDialog = ({
       .put(`${transferInventory.api}/add-product-complete-transfer-product/${transferInventoryId}`, {
         products: products?.map((product) => ({
           product: product?.id,
-          qty: selectedProducts?.find((p) => p?.materialId === product?.id)?.qty || 0,
-          serialNumber: selectedRecords?.filter((r) => r?.product === product?.id)?.map((s) => s?._id)
+          qty: selectedRecords?.filter((e) => e?.product === product?.id)?.length,
+          serialNumber: selectedRecords?.filter((e) => e?.product === product?.id)?.map((e) => e?._id)
         }))
       })
       .then(({ data }) => {

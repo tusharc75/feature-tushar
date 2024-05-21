@@ -531,7 +531,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         status: _inventory?.status,
         warehouse: rentalManagementData?.warehouse?.optionValue,
         isValid: true,
-        canRemove: true
+        canRemove: parent?.status ? false : true
       });
     });
 
@@ -548,7 +548,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         status: e?.status,
         warehouse: rentalManagementData?.warehouse?.optionValue,
         isValid: true,
-        canRemove: true
+        canRemove: parent?.status ? false : true
       });
     });
 

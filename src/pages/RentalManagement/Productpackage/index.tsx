@@ -300,6 +300,7 @@ const Productpackage = ({
     var additionalCosts: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
+    var productSerialNumbers: any = [];
     var nextStepMessage = null;
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -316,7 +317,9 @@ const Productpackage = ({
       setMaterial(JSON.parse(JSON.stringify(data.material)));
       inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
+      productSerialNumbers = data.productSerialNumbers;
     }
+
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
     let products = rows.filter((e) => e.type === MATERIAL_TYPE.product && !e?.isConsumbale);
     let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service');
@@ -353,11 +356,11 @@ const Productpackage = ({
         nextStepMessage = rentalManagementMessage.validPrice;
       }
       parent.assetQty = parent.serializedProduct
-        ? inventory?.filter((e) => e._id === parent._id).length
+        ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent?.assetQty > 0 ||
         data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
+      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired);
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage;
       }
@@ -374,7 +377,7 @@ const Productpackage = ({
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent, isPriceRequired) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -398,10 +401,10 @@ const Productpackage = ({
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       _subRow.assetQty = _subRow.serializedProduct
-        ? inventory?.filter((e) => e._id === _subRow._id).length
+        ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, isPriceRequired);
+      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, productSerialNumbers, _subRow, isPriceRequired);
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;

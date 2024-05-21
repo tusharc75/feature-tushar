@@ -314,6 +314,10 @@ export default function useColumns() {
       } else if (field?.dataList) {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          dataList: true,
+          ...(Boolean(field?.isColumnEditable) ? { dataListId: field?.dataListId } : ''),
+          ...(Boolean(field?.isColumnEditable) ? { option: [] } : {}),
           accessorFn: (original) => {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel

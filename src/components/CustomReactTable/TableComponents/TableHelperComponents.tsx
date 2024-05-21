@@ -11,6 +11,7 @@ import { GrFormClose } from 'react-icons/gr';
 import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
+import DataList from './DataList';
 
 let cellId = null;
 
@@ -51,6 +52,8 @@ export type TColType = {
   isVisible: undefined | boolean;
   show: undefined | boolean;
   option: any;
+  dataList?: undefined | boolean;
+  dataListId?: undefined | string;
 } & ColumnDef<any>;
 
 const DebouncedInput = React.forwardRef(
@@ -527,7 +530,26 @@ export const CellRenderer = ({
                   setCellValue(e.target.value || '');
                 }}
               />
-            ) : columnDef?.type === 'dropDown' ? (
+            ) : columnDef?.dataList && columnDef?.dataListId ? (
+              <DataList
+                columnDef={columnDef}
+                cellValue={cellValue}
+                setCellValue={setCellValue}
+                cell={cell}
+                currentEditingCellPosition={currentEditingCellPosition}
+                onBlur={() => {
+                  if (
+                    (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
+                    (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
+                  ) {
+                    submitInput();
+                  } else {
+                    resetField();
+                  }
+                  cellId = null;
+                }}
+              />
+            ) : columnDef?.type === 'dropDown' && !columnDef?.dataList ? (
               <Autocomplete
                 fullWidth
                 onKeyDown={(e) => {
@@ -565,7 +587,7 @@ export const CellRenderer = ({
                   />
                 )}
               />
-            ) : columnDef?.type === 'multiSelect' ? (
+            ) : columnDef?.type === 'multiSelect' && !columnDef?.dataList ? (
               <Autocomplete
                 fullWidth
                 multiple
