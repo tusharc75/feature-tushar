@@ -15,11 +15,13 @@ import ArrangeView from './ArrangeView';
 import { AddOutlined } from '@material-ui/icons';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
+import SectionMaster from './sectionMaster';
 
 const FormBuilder = () => {
   const renderedFrom = 'form-builder';
   const toastConfig = useContext(CustomToastContext);
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
+  const [openSectionMaster, setOpenSectionMaster] = useState(false);
   const [resource, setResource] = useState([]);
   const [columns, setColumns] = useState([]);
   const { state, dispatch } = useTableReducer();
@@ -123,6 +125,15 @@ const FormBuilder = () => {
         >
           Change Resource Order
         </Button>
+        <Button
+          variant="outlined"
+          className={'btn-outline-v1'}
+          onClick={() => {
+            setOpenSectionMaster(true);
+          }}
+        >
+          Sections
+        </Button>
       </>
     );
   };
@@ -135,6 +146,7 @@ const FormBuilder = () => {
       <CustomContainer>
         <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
+        {openSectionMaster && <SectionMaster open={openSectionMaster} close={()=> setOpenSectionMaster(false) } />}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}
