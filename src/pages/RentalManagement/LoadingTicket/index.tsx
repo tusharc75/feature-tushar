@@ -312,7 +312,7 @@ const LoadingTicket = ({
         material?.filter((e) => e?.productDetail?.serializedProduct && e.type === MATERIAL_TYPE.product).forEach((element) => {
           var qty = productSerialNumbers?.filter((e) => e?._id === element?._id)?.length;
           if (qty) {
-            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId && e.uniqueId === element._id);
 
             ticketProduct?.forEach((ele) => {
 
