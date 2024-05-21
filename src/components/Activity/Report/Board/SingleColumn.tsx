@@ -63,7 +63,7 @@ const SingleColumn = ({ column, loading, type, setSelectedStatus, setOpenDialog,
           </div>
         )}
         <ul
-          className={`body min-h-[calc(100%-120px)] px-2 ${
+          className={`body min-h-[calc(100%-120px)] p-2 ${
             active?.data.current.column === column.status ? 'bg-blue-200 dark:bg-gray-900' : ''
           } transition-colors`}
         >

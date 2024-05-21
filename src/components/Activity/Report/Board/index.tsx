@@ -79,6 +79,11 @@ const Board = ({ type, filter }) => {
               ...status,
               items: groupedData[status.status]
             });
+          } else {
+            updatedData.push({
+              ...status,
+              items: []
+            });
           }
         }
         setGroupedActivities(updatedData);
