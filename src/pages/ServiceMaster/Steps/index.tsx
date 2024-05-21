@@ -336,7 +336,7 @@ const Steps = ({ serviceId }) => {
 
   return (
     <>
-      {permissions?.serviceMaster?.isUpdate || permissions?.serviceMaster?.isCreate && (
+      {permissions?.serviceMaster?.isUpdate && (
         <>
           <DetailsPageHeader
             isAddButtonVisible
@@ -358,8 +358,8 @@ const Steps = ({ serviceId }) => {
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchStepsData}
-          hideAction={permissions?.serviceMaster?.isCreate || permissions?.serviceMaster?.isUpdate ? false : true}
-          hideSelection={permissions?.serviceMaster?.isCreate || permissions?.serviceMaster?.isUpdate ? false : true}
+          hideAction={permissions?.serviceMaster?.isUpdate ? false : true}
+          hideSelection={permissions?.serviceMaster?.isUpdate ? false : true}
         />
       ) : (
         <Box p={2} height={500}>
