@@ -1,15 +1,16 @@
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Checkbox, CheckboxProps, CircularProgress, IconButton, TableCell, TextField } from '@material-ui/core';
 import { Check, DragIndicator, Edit, ExpandLess, ExpandMore } from '@material-ui/icons';
+import { Autocomplete } from '@material-ui/lab';
 import { Column, ColumnDef, Header, Table, flexRender } from '@tanstack/react-table';
-import React, { ReactNode, useContext, useEffect, useState } from 'react';
-import { useDrag, useDrop } from 'react-dnd';
+import { eq, isEqual } from 'lodash';
+import React, { useContext, useEffect, useState } from 'react';
 import { CgSearch } from 'react-icons/cg';
 import { GrFormClose } from 'react-icons/gr';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { getCellValue, getStickyPosition, handleCellClick } from '../utils';
-import { Autocomplete } from '@material-ui/lab';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
-import { eq, isEqual } from 'lodash';
 import DataList from './DataList';
 
 let cellId = null;
@@ -18,6 +19,7 @@ export type TColType = {
   Header: string;
   header: string;
   isHideColumnSum?: boolean;
+  disabled?: boolean;
   Footer?: (data: any) => React.ReactNode;
   type?:
     | 'mobileNumber'
@@ -265,9 +267,9 @@ interface DraggableHeaderProps {
   customFilters: any;
   dispatch: (action: any) => void;
   isClientSideGrid: boolean;
-  reorder: (draggedColumn: string, column: string, columnOrder: string[]) => string[];
   virtualization: boolean;
   resource: string;
+  overlayMode?: boolean;
 }
 export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   header,
@@ -275,20 +277,19 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
   customFilters,
   dispatch,
   isClientSideGrid,
-  reorder,
   virtualization,
-  resource
+  resource,
+  overlayMode
 }) => {
-  const { getState, setColumnOrder } = table;
-  const { columnOrder } = getState();
   const { column, index } = header;
   const columnDef = column.columnDef as TColType;
 
   const isNotDraggable =
     columnDef.canDrag === false ||
-    columnDef.sticky ||
+    Boolean(columnDef.sticky) ||
     columnDef.primaryField ||
     columnDef.lockPosition ||
+    columnDef.disabled === true ||
     ['action', 'selection', 'expand'].includes(column?.id);
 
   const [filters, setFilters] = useState([]);
@@ -305,24 +306,6 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     return () => setFilters([]);
   }, [customFilters]); // Add customFilters as a dependency
   const MINIMUM_SEARCH_DELAY = 1000; // Adjust this delay as needed
-
-  const [, dropRef] = useDrop({
-    accept: 'column',
-    drop: (draggedColumn: TColType) => {
-      const newColumnOrder = reorder(draggedColumn.id, column.id, columnOrder);
-      setColumnOrder(newColumnOrder);
-    },
-    canDrop: () => !isNotDraggable
-  });
-
-  const [{ isDragging }, dragRef, previewRef] = useDrag({
-    collect: (monitor) => ({
-      isDragging: monitor.isDragging()
-    }),
-    item: () => column,
-    type: 'column',
-    canDrag: !isNotDraggable
-  });
 
   useEffect(() => {
     if (isClientSideGrid) return;
@@ -356,6 +339,28 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
 
   const { style } = getStickyPosition(columnDef, index, table);
 
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+    id: header.column.columnDef.id,
+    data: {
+      index,
+      props: {
+        header,
+        table,
+        customFilters,
+        dispatch,
+        isClientSideGrid,
+        virtualization,
+        resource
+      }
+    },
+    disabled: isNotDraggable
+  });
+
+  const styleDnd = {
+    transform: CSS.Translate.toString(transform),
+    transition
+  };
+
   return (
     <TableCell
       {...{
@@ -364,20 +369,23 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
       }}
       title={typeof columnDef.header === 'string' ? columnDef.header : ''}
       colSpan={header.colSpan}
-      className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? 'bg-[var(--dark-primary,_white)] z-10' : ''} `}
-      ref={dropRef}
+      className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? 'z-10' : ''} bg-[var(--dark-primary,_white)] ${
+        overlayMode ? 'border font-semibold text-[13px]' : ''
+      } `}
+      ref={setNodeRef}
       style={{
         minWidth: `${colSize}px`,
         maxWidth: `${colSize}px`,
         paddingLeft: columnDef.id === 'expander' ? '8px' : '6px',
         zIndex: columnDef.sticky === 'left' || columnDef.sticky === 'right' ? 12 : 'unset',
-        ...(virtualization ? {} : style)
+        ...(virtualization ? {} : style),
+        ...styleDnd
       }}
     >
       <div
-        ref={previewRef}
-        style={{ opacity: isDragging ? 0.5 : 1 }}
-        className={`flex items-center pos-rel flex-grow  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'}`}
+        className={`flex items-center pos-rel flex-grow  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${
+          isDragging ? ' opacity-50 [outline:4px_dashed_var(--common-border-color)]' : ''
+        }`}
       >
         <div
           className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
@@ -401,7 +409,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
             ''
           )}
         </div>
-        {column?.getCanFilter() && column?.id !== 'action' && columnDef.disableFilters !== true ? (
+        {column?.getCanFilter() && column?.id !== 'action' && columnDef.disableFilters !== true && !overlayMode ? (
           <>
             {!isClientSideGrid ? (
               <TempFilter
@@ -418,7 +426,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           </>
         ) : null}
         {isNotDraggable || header.column.getIsResizing() ? null : (
-          <div ref={dragRef} className={`drag-icon mr-2 ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}>
+          <div {...attributes} {...listeners} className={`drag-icon mr-2 drag-handle ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}>
             <DragIndicator className="text-[16px]" />
           </div>
         )}
