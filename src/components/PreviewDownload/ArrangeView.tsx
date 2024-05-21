@@ -1,9 +1,8 @@
-import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from '@hello-pangea/dnd';
 import { Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText } from '@material-ui/core';
 import { DragIndicator } from '@material-ui/icons';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import update from 'immutability-helper';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
@@ -11,9 +10,9 @@ import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import HtmlTooltip from '../CustomTooltipTitle';
 
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 
 export default function ArrangeView({ columns, setColumns }) {
   const [open, setOpen] = useState(false);

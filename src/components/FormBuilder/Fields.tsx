@@ -1,16 +1,6 @@
-import React from 'react';
-
-import {
-  DragDropContext,
-  Draggable,
-  DraggableProvided,
-  DraggableProvidedDragHandleProps,
-  DraggableStateSnapshot,
-  DropResult,
-  Droppable
-} from '@hello-pangea/dnd';
-import FieldList from './FieldList';
+import { Droppable } from '@hello-pangea/dnd';
 import { DragBox } from './DragBox';
+import FieldList from './FieldList';
 
 const Fields = ({ filterFieldType }) => {
   return (
