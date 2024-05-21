@@ -1,7 +1,8 @@
-import { DragDropContext, DropResult } from '@hello-pangea/dnd';
+import { DndContext, DragOverEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { Box, Button, CircularProgress, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@material-ui/core';
 import { saveAs } from 'file-saver';
 import { Form, Formik } from 'formik';
+import update from 'immutability-helper';
 import queryString from 'query-string';
 import React, { Fragment, useState } from 'react';
 import { MdDashboardCustomize } from 'react-icons/md';
@@ -12,13 +13,9 @@ import { ExportIcon, ImportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import Builder from './Builder';
+import DashboardItem from './DashboardItem';
 import DashboardView from './DashboardView';
 import { IFormDataType, baseURL } from './builderHelpers';
-import update from 'immutability-helper';
-import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
-import DashboardItem from './DashboardItem';
-
-import { createPortal } from 'react-dom';
 
 const DashboardBuilder = () => {
   const history = useHistory();

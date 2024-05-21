@@ -1,4 +1,6 @@
-import { makeStyles, Typography, Box, Grid } from '@material-ui/core';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Box, Typography, makeStyles } from '@material-ui/core';
 import WorkIcon from '@material-ui/icons/Work';
 
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
@@ -98,8 +100,22 @@ const useStyles = makeStyles((theme) => ({
 const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
   const classes = useStyles();
 
+  const { setNodeRef, attributes, listeners, transform, transition } = useSortable({
+    id,
+    data: {
+      type: cardType,
+      index,
+      props: { data, id, index, cardType, handleDispatch }
+    }
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition
+  };
+
   return (
-    <div key={index}>
+    <li className="list-none" key={id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
       {cardType === 'fleet' ? (
         <Box className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px]`}>
           <div>
@@ -137,7 +153,7 @@ const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
           </Box>
         </Box>
       )}
-    </div>
+    </li>
   );
 };
 

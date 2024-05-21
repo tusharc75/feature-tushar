@@ -1,4 +1,3 @@
-import { DropResult } from '@hello-pangea/dnd';
 import { Box, Dialog, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import axios, { CancelTokenSource } from 'axios';
