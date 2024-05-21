@@ -1,3 +1,4 @@
+import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { Box, CircularProgress, TableBody, TableHead, TableRow } from '@material-ui/core';
 import MaUTable from '@material-ui/core/Table';
 import { Error } from '@material-ui/icons';
@@ -20,7 +21,6 @@ type TTableProps = {
   cellValue: string;
   resetField: () => void;
   isClientSideGrid: boolean;
-  reorder: (draggedColumnId: string, targetColumnId: string, columnOrder: string[]) => string[];
   loading: boolean;
   error: boolean;
   height?: any;
@@ -41,7 +41,6 @@ const TableComponent = forwardRef(function (
     cellValue,
     resetField,
     isClientSideGrid,
-    reorder,
     loading,
     error,
     height,
@@ -257,22 +256,23 @@ const TableComponent = forwardRef(function (
           >
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="tr sticky top-0 bg-[var(--dark-primary,_white)] z-[11] " key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
-                  return (
-                    <DraggableHeader
-                      virtualization={virtualization}
-                      table={table}
-                      customFilters={customFilters}
-                      dispatch={dispatch}
-                      isClientSideGrid={isClientSideGrid}
-                      reorder={reorder}
-                      header={header}
-                      key={header.id}
-                      resource={resource}
-                    />
-                  );
-                })}
+                <SortableContext items={headerGroup.headers.map((header) => header.column.columnDef.id)} strategy={horizontalListSortingStrategy}>
+                  {headerGroup.headers.map((header) => {
+                    if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
+                    return (
+                      <DraggableHeader
+                        virtualization={virtualization}
+                        table={table}
+                        customFilters={customFilters}
+                        dispatch={dispatch}
+                        isClientSideGrid={isClientSideGrid}
+                        header={header}
+                        key={header.id}
+                        resource={resource}
+                      />
+                    );
+                  })}
+                </SortableContext>
               </TableRow>
             ))}
           </TableHead>
