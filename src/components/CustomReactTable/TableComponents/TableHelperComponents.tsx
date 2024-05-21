@@ -528,6 +528,18 @@ export const CellRenderer = ({
                 cellValue={cellValue}
                 setCellValue={setCellValue}
                 cell={cell}
+                currentEditingCellPosition={currentEditingCellPosition}
+                onBlur={() => {
+                  if (
+                    (columnDef?.type === 'multiSelect' && !isEqual(getCellValue(cell), cellValue)) ||
+                    (columnDef?.type === 'dropDown' && getCellValue(cell) !== cellValue)
+                  ) {
+                    submitInput();
+                  } else {
+                    resetField();
+                  }
+                  cellId = null;
+                }}
               />
             ) : columnDef?.type === 'dropDown' && !columnDef?.dataList ? (
               <Autocomplete
