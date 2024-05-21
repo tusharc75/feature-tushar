@@ -1,14 +1,14 @@
-import { CreateTask } from "./Task/CreateTask";
-import { CreateEvent } from "./Event/CreateEvent";
-import { CreateCase } from "./Case/CreateCase";
-import { CreateNote } from "./Note/CreateNote";
-import { CreateEmail } from "./Email/CreateEmail";
-import ManageAttachment from "./Attachments/ManageAttachment";
+import { CreateTask } from './Task/CreateTask';
+import { CreateEvent } from './Event/CreateEvent';
+import { CreateCase } from './Case/CreateCase';
+import { CreateNote } from './Note/CreateNote';
+import { CreateEmail } from './Email/CreateEmail';
+import ManageAttachment from './Attachments/ManageAttachment';
 
-import Dialog from "@material-ui/core/Dialog";
-import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition } from "./../../constants/helpers";
-import { useState } from "react";
+import Dialog from '@material-ui/core/Dialog';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition } from './../../constants/helpers';
+import { useState } from 'react';
 
 const ActivityModelHandler = (props) => {
   const { activityType, activityId, setActivityData, fetchBoard, onClose = null } = props;
@@ -16,9 +16,8 @@ const ActivityModelHandler = (props) => {
 
   const handleClose = () => {
     if (onClose) {
-      onClose()
-    }
-    else {
+      onClose();
+    } else {
       setActivityData(null);
       fetchBoard();
     }
@@ -27,88 +26,98 @@ const ActivityModelHandler = (props) => {
   return (
     <Dialog
       open={true}
-      fullScreen={fullScreen || (isMobile || isTablet)}
+      fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
-      maxWidth={"md"}
+      maxWidth={'md'}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
-          handleClose()
+          handleClose();
           setFullScreen(false);
         }
       }}
       fullWidth
     >
-      {activityType === "task" ? (
-        <CreateTask taskId={activityId} handleClose={() => {
-          handleClose()
-          setFullScreen(false);
-        }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
-          }}
-          showManimizeMaximize={true}
-        />
-      ) : null}
-      {activityType === "event" ? (
-        <CreateEvent eventId={activityId} handleClose={() => {
-          handleClose()
-          setFullScreen(false);
-        }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
-          }}
-          showManimizeMaximize={true}
-        />
-      ) : null}
-      {activityType === "case" ? (
-        <CreateCase caseId={activityId} handleClose={() => {
-          handleClose()
-          setFullScreen(false);
-        }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
-          }}
-          showManimizeMaximize={true}
-        />
-      ) : null}
-      {activityType === "note" ? (
-        <CreateNote noteId={activityId} handleClose={() => {
-          handleClose()
-          setFullScreen(false);
-        }}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
-          }}
-          showManimizeMaximize={true}
-        />
-      ) : null}
-      {activityType === "email" ? (
-        <CreateEmail
-          emailId={activityId}
+      {activityType === 'task' ? (
+        <CreateTask
+          taskId={activityId}
           handleClose={() => {
-            handleClose()
+            handleClose();
             setFullScreen(false);
           }}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
+            setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
         />
       ) : null}
-      {activityType === "attachment" ? (
-        <ManageAttachment attachmentId={activityId} handleClose={() => {
-          handleClose()
-          setFullScreen(false);
-        }}
+      {activityType === 'event' ? (
+        <CreateEvent
+          eventId={activityId}
+          handleClose={() => {
+            handleClose();
+            setFullScreen(false);
+          }}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
-            setFullScreen(prevState => !prevState)
+            setFullScreen((prevState) => !prevState);
+          }}
+          showManimizeMaximize={true}
+        />
+      ) : null}
+      {activityType === 'case' ? (
+        <CreateCase
+          caseId={activityId}
+          handleClose={() => {
+            handleClose();
+            setFullScreen(false);
+          }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+          }}
+          showManimizeMaximize={true}
+        />
+      ) : null}
+      {activityType === 'note' ? (
+        <CreateNote
+          noteId={activityId}
+          handleClose={() => {
+            handleClose();
+            setFullScreen(false);
+          }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+          }}
+          showManimizeMaximize={true}
+        />
+      ) : null}
+      {activityType === 'email' ? (
+        <CreateEmail
+          emailId={activityId}
+          handleClose={() => {
+            handleClose();
+            setFullScreen(false);
+          }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+          }}
+          showManimizeMaximize={true}
+        />
+      ) : null}
+      {activityType === 'attachment' ? (
+        <ManageAttachment
+          attachmentId={activityId}
+          handleClose={() => {
+            handleClose();
+            setFullScreen(false);
+          }}
+          isMinimized={!fullScreen}
+          onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
           }}
           showManimizeMaximize={true}
         />
