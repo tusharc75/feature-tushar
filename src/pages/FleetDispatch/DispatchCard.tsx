@@ -100,7 +100,7 @@ const useStyles = makeStyles((theme) => ({
 const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
   const classes = useStyles();
 
-  const { setNodeRef, attributes, listeners, transform, transition } = useSortable({
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id,
     data: {
       type: cardType,
@@ -115,9 +115,13 @@ const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
   };
 
   return (
-    <li className="list-none" key={id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
+    <li className={`list-none `} key={id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
       {cardType === 'fleet' ? (
-        <Box className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px]`}>
+        <Box
+          className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px] ${
+            isDragging ? ' opacity-50 [border:4px_dashed_var(--common-border-color)_!important]' : ''
+          }`}
+        >
           <div>
             <div className="mb-[14px] md:mb-[24px]">
               <Typography className={classes.primaryText}>Fleet : {data?.fleetNumber}</Typography>
