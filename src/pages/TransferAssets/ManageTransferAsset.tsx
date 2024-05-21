@@ -143,6 +143,19 @@ const ManageTransferAsset: FC<Props> = (props) => {
             });
             createValues['rentalJob'] = referenceId;
           }
+          if(referenceType=== 'Repair Order'){
+            for (const key in referenceData) {
+              if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
+                createValues[key] = referenceData[key];
+              }
+            }
+            fieldsDataForCreate?.forEach((e) => {
+              if (['transferFromPlant']?.includes(e.fieldName)) {
+                e.disableOnEdit = true;
+                e.isUneditable = true;
+              }
+            });
+          }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),
             values: createValues

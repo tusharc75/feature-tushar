@@ -26,13 +26,15 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import Steps from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
+  MATERIAL_TYPE,
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
   REPAIR_ORDER_TYPE,
   checkIsAllowedToEdit,
   repairOrder,
   repairOrderSteps,
-  sidebarResource
+  sidebarResource,
+  transferAsset
 } from 'src/constants/helpers';
 import LoadingTicket from './LoadingTicket';
 import ManageRepairOrder from './ManageRepairOrder';
@@ -41,6 +43,7 @@ import Quotation from './Quotation';
 import View from './View';
 import WorkOrder from './WorkOrder';
 import Step from '../DynamicForm/Step';
+import ManageTransferAsset from '../TransferAssets/ManageTransferAsset';
 
 const RepairOrderDetails = () => {
   const renderedFrom = camelCase(routes?.repairOrder.title);
@@ -77,6 +80,7 @@ const RepairOrderDetails = () => {
   const [stepList, setStepList] = useState(repairOrderSteps);
   const [stepNames, setStepNames] = useState(repairOrderSteps.map((item) => item.name));
   const [resourceData, setResourceData] = useState(null);
+  const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -254,6 +258,31 @@ const RepairOrderDetails = () => {
         toastConfig.setToastConfig(error);
       });
   };
+  const handleAddAssetToTransferAsset =async (transferAssetData) => {
+    const transferAssetId=transferAssetData._id;
+
+    var data: any = [];
+    const response = await axiosInstance().get(`${repairOrder.api}/${repairOrderData._id}/product-package`);
+    data = response?.data?.data;
+    const assets = data.material.filter((e) => e.type === MATERIAL_TYPE.serializedAsset);
+
+    axiosInstance()
+      .put(`${transferAsset.api}/add-asset-complete-transfer-asset/${transferAssetId}`, {
+        assets: assets?.map((s) => {
+          return {
+            _id: s.materialId,
+            currentStatus: s.serializedAssetDetail.status,
+          };
+        }),
+        repairOrderId:id
+      })
+      .then(({ data }) => {
+        setShowTransferAssetDialog(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   return (
     <Box className="main-container-v1">
@@ -265,6 +294,20 @@ const RepairOrderDetails = () => {
           <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
+                {permissions?.transferAsset?.isCreate  && (
+                  <Button
+                    style={{ minWidth: 'max-content' }}
+                    size="small"
+                    color="primary"
+                    onClick={() => {
+                      setShowTransferAssetDialog(true);
+                    }}
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                  >
+                    {`Create Tranfer Asset`}
+                  </Button>
+                )}
                 {permissions?.repairOrder?.isUpdate && [REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status) && (
                   <HtmlTooltip title={allowedToEdit ? '' : `Owner or Collaborator can reopen ${routes.repairOrder.title}`}>
                     <span>
@@ -539,6 +582,22 @@ const RepairOrderDetails = () => {
           }}
         />
       )}
+      {showTransferAssetDialog ? (
+        <ManageTransferAsset
+          isClone={false}
+          transferAssetId={null}
+          onClose={() => setShowTransferAssetDialog(false)}
+          onSuccess={(data) => {
+            handleAddAssetToTransferAsset(data);
+          }}
+          referenceId={repairOrderData._id}
+          referenceType={"Repair Order"}
+          referenceData={{
+            transferFromPlant: repairOrderData?.warehouse.optionValue,
+            transferType: 'Internal'
+          }}
+        />
+      ) : null}
     </Box>
   );
 };
