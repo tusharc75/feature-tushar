@@ -100,18 +100,20 @@ const FormBuilder = () => {
 
   const RightSideContents = () => {
     return (
-      <>{permissions.formBuilder?.isCreate &&
-        <Button
-          variant="contained"
-          color='primary'
-          size='small'
-          onClick={() => {
-            history.push('/form-builder/0')
-          }}
-          startIcon={<AddOutlined />}
-        >
-          Add
-        </Button>}
+      <>
+        {permissions.formBuilder?.isCreate && (
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => {
+              history.push('/form-builder/0');
+            }}
+            startIcon={<AddOutlined />}
+          >
+            Add
+          </Button>
+        )}
         <Button
           variant="outlined"
           className={'btn-outline-v1'}

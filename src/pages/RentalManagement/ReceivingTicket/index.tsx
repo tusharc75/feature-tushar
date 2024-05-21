@@ -68,6 +68,8 @@ import ChangeActualDateDialog from './ChangeActualDateDialog';
 import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
 import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
+import ChangeAssetsDetailsDialog from './ChangeAssetsDetailsDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -135,6 +137,7 @@ const ReceivingTicket = ({
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {} });
   const [assetsData, setAssetsData] = useState([])
+  const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -226,7 +229,8 @@ const ReceivingTicket = ({
               replaceAsset: d?.replaceAsset
                 ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
                 : '',
-              description: d?.product?.productDescription
+              description: d?.product?.productDescription,
+              wellNumber: d?.inventory?.wellNumber
             };
           })
           .map((u) => ({
@@ -639,17 +643,17 @@ const ReceivingTicket = ({
     } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
-          resource: 'Product',
+          resource: sidebarResource.product,
           fieldNames: ['productName']
         },
         {
-          resource: 'Serialized Asset',
-          fieldNames: ['serialNumber']
+          resource: sidebarResource.serializedAsset,
+          fieldNames: ['serialNumber', 'wellNumber']
         }
       ]
     });
-    const productFields = data?.filter((d) => d.resource === 'Product');
-    const assetFields = data?.filter((d) => d.resource === 'Serialized Asset');
+    const productFields = data?.find((d) => d.resource === sidebarResource.product)?.fieldNames || [];
+    const assetFields = data?.find((d) => d.resource === sidebarResource.serializedAsset)?.fieldNames || [];
     const column: any = [
       {
         accessor: 'index',
@@ -907,6 +911,19 @@ const ReceivingTicket = ({
         Header: 'Asset Status',
         Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
       },
+      ...(assetFields?.find((f) => f.fieldName === 'wellNumber') ? [{
+        accessor: 'wellNumber',
+        Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
+        Cell: ({ row }) =>
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'wellNumber',
+              lookupResource: sidebarResource.wellNumber
+            }}
+            original={row?.original} />
+      }] : []),
       {
         accessor: 'manualStartDate',
         Header: 'Start Date',
@@ -960,7 +977,7 @@ const ReceivingTicket = ({
         Header: 'Rental Asset Status',
         Cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
       }
-    ];
+    ]
     if (user?.user?.brandPolicy?.rentalReceivingStepConsume) {
       column.push({
         accessor: 'consumeQty',
@@ -1058,7 +1075,7 @@ const ReceivingTicket = ({
     //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
 
     const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
-    if (statusPolicy) {
+    if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
       setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, referenceData: data })
     } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
@@ -1634,10 +1651,13 @@ const ReceivingTicket = ({
               setShowConformationCancleTicket,
               setShowConformationConsume,
               setShowConformationConsumeMultiple,
+              setOpenAssetsDetailsChangeDialog,
               dataRows,
               user,
               setOpenDateDialog,
-              currentStep
+              currentStep,
+              columns,
+              rentalManagementData
             }}
           />
         }
@@ -2115,6 +2135,17 @@ const ReceivingTicket = ({
           }}
         />
       )}
+      {openAssetsDetailsChangeDialog && (
+        <ChangeAssetsDetailsDialog
+          handleClose={() => setOpenAssetsDetailsChangeDialog(false)}
+          wellNumberOptions={rentalManagementData?.wellNumber}
+          assets={selectedRecords?.filter((ele) => ele.type === 'Asset')?.map((e) => e._id)}
+          handleSucess={() => {
+            setOpenAssetsDetailsChangeDialog(false)
+            fetchRecords();
+          }}
+        />
+      )}
     </>
   );
 };
@@ -2139,10 +2170,13 @@ const ActionButtonMenuItems = ({
   setShowConformationCancleTicket,
   setShowConformationConsume,
   setShowConformationConsumeMultiple,
+  setOpenAssetsDetailsChangeDialog,
   dataRows,
   user,
   setOpenDateDialog,
-  currentStep
+  currentStep,
+  columns,
+  rentalManagementData,
 }) => {
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
@@ -2384,7 +2418,7 @@ const ActionButtonMenuItems = ({
             }
           }}
         >
-          Delivered to Customer
+          Received on Field
         </MenuItem>
       )}
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.assetDeliveredStatus && user?.user?.brandPolicy?.rentalOnFieldStep && (
@@ -2506,7 +2540,8 @@ const ActionButtonMenuItems = ({
                 }
               }}
             >
-              Create Receiving Ticket (Chargeable)
+              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Returned Ticket (Chargeable)` :
+                `Create Receiving Ticket (Chargeable)`}
             </MenuItem>
             {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
@@ -2531,7 +2566,8 @@ const ActionButtonMenuItems = ({
                 }
               }}
             >
-              Create Return Ticket (Non-Chargeable)
+              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Returned Ticket (Non-Chargeable)` :
+                `Create Return Ticket (Non-Chargeable)`}
             </MenuItem>
             {permissions?.sublease?.isRead && (
               <MenuItem
@@ -2554,7 +2590,7 @@ const ActionButtonMenuItems = ({
             }
           }}
         >
-          {`Receive Items`}
+          {`Received Items`}
         </MenuItem>
       )}
       {!isOffline && ((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
@@ -2700,6 +2736,16 @@ const ActionButtonMenuItems = ({
             }}
           >
             {`Revert Consumed Qty`}
+          </MenuItem>
+        )}
+      {selectedRecords?.length > 0
+        && columns?.some((col) => col.accessor === 'wellNumber')
+        && rentalManagementData?.wellNumber?.length
+        && selectedRecords?.filter((e) => e.type === 'Asset')?.length === selectedRecords?.length && (
+          <MenuItem onClick={() => {
+            setOpenAssetsDetailsChangeDialog(true);
+          }}>
+            Change Well Number
           </MenuItem>
         )}
     </>

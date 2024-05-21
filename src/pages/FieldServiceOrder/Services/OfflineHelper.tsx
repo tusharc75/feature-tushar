@@ -1,4 +1,4 @@
-import { objectStore, insertUpdate, clearAll } from '../../../constants/indexdbhelper';
+import { objectStore, insertUpdate, clearAll, findOne, deleteMany } from '../../../constants/indexdbhelper';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CHILD_RESOURCE, MATERIAL_TYPE, asyncForEach, fieldServiceOrder, sidebarResource } from '../../../constants/helpers';
 
@@ -44,9 +44,26 @@ export const fieldServiceOrderAddOffline = async (ids) => {
     }
 };
 
-export const fieldServiceOrderClearOffline = async () => {
-    await clearAll(objectStore.fieldServiceOrder);
-    await clearAll(objectStore.fieldTicket);
-    await clearAll(objectStore.fieldTicketMaterial);
+export const fieldServiceOrderClearOffline = async (ids: any []= []) => {
+    if(!ids.length) {
+        clearAll(objectStore.fieldServiceOrder);
+        clearAll(objectStore.fieldTicket);
+        clearAll(objectStore.fieldTicketMaterial);
+    } else {
+        const fieldTicketIdsToDelete = [];
+        const fieldTicketMaterialIdsToDelete = [];
+        for(const id of ids) {
+            const fieldServiceOrder = await findOne(objectStore.fieldServiceOrder, id);
+            fieldServiceOrder?.fieldTickets?.forEach((fieldTicket: any) => {
+                fieldTicketIdsToDelete.push(fieldTicket?._id);
+                fieldTicket?.material?.forEach((fieldTicketMaterial: any) => {
+                    fieldTicketMaterialIdsToDelete.push(fieldTicketMaterial?._id);
+                })
+            })
+        }
+        deleteMany(objectStore.fieldServiceOrder, ids);
+        deleteMany(objectStore.fieldTicket, fieldTicketIdsToDelete);
+        deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterialIdsToDelete);
+    }  
 }
 

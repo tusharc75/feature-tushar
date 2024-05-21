@@ -279,16 +279,17 @@ const FieldServiceTechnician = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
-  const handleRemoveoffline = async () => {
-    await fieldServiceOrderClearOffline()
+  const handleRemoveoffline = async (ids: any[]= []) => {
+    await fieldServiceOrderClearOffline(ids);
   };
 
   const ActionMenuItems = () => {
     return (
       <>
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          Add Offline
+          {`Add ${routes.fieldServiceOrder.title} Offline`}
         </MenuItem>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map(e => e._id))}>{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );

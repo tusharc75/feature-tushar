@@ -33,7 +33,7 @@ import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } f
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
-import { rentalJobOfflineUpdate } from './rentalOfflineHelper';
+import { rentalJobOfflineUpdate, rentalJobClearOffline } from './rentalOfflineHelper';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { IOTIcon } from 'src/assets/svg/svgIcons';
@@ -320,9 +320,8 @@ const RentalManagement = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
-  const handleRemoveoffline = async () => {
-    await clearAll(objectStore.rentalManagement);
-    await clearAll(objectStore.deliveryTicket);
+  const handleRemoveoffline = async (ids: any[]= []) => {
+    await rentalJobClearOffline(ids);
   };
 
   const handleSingleDelete = async () => {
@@ -446,8 +445,9 @@ const RentalManagement = () => {
           </MenuItem>
         )}
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
-          Add Offline
+          {`Add ${routes.rentalManagement.title} Offline`}
         </MenuItem>
+        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map(e => e._id))}>{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );

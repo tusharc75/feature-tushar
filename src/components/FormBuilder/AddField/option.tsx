@@ -1,3 +1,7 @@
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import Box from '@material-ui/core/Box';
 import Checkbox from '@material-ui/core/Checkbox';
 import FormControl from '@material-ui/core/FormControl';
@@ -14,21 +18,24 @@ import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import SortIcon from '@material-ui/icons/Sort';
 import Autocomplete from '@material-ui/lab/Autocomplete';
-import { XYCoord } from 'dnd-core';
 import update from 'immutability-helper';
 import { orderBy } from 'lodash';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { DropTargetMonitor, useDrag, useDrop } from 'react-dnd';
+import React, { useCallback, useEffect, useState } from 'react';
 import { FixedSizeList } from 'react-window';
 import { read, utils, writeFile } from 'xlsx';
 import axiosInstance from '../../../axios/axiosInstance';
+import { generateId } from '../NewDnd/helper';
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
-  const defaultOption = [{ optionLabel: 'Option 1', optionValue: 'Option 1' }];
-  const [options, setOptions] = useState(values.option ? (values.option.length == 0 ? defaultOption : values.option) : defaultOption);
+  const defaultOption = [{ optionLabel: 'Option 1', optionValue: 'Option 1', id: 1715944580321 }];
+  const [options, setOptions] = useState(
+    values.option ? (values.option.length === 0 ? defaultOption : values.option.map((d) => ({ ...d, id: generateId() }))) : defaultOption
+  );
+  const [activeOption, setActiveOption] = useState(null);
   const [lookupOption, setlookupOption] = useState([]);
   const [isUpdate, setUpdate] = useState(false);
   const [isAsc, setIsAsc] = useState(true);
+
 
   useEffect(() => {
     if (values['isDependentDropdown'] && values['dropdowDependentOn']) {
@@ -65,7 +72,8 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     if (type === 'add') {
       data.splice(index + 1, 0, {
         optionLabel: 'Option ' + (data.length + 1),
-        optionValue: 'Option ' + (data.length + 1)
+        optionValue: 'Option ' + (data.length + 1),
+        id: generateId()
       });
     } else {
       if (data.length !== 1) {
@@ -207,11 +215,30 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
             AddRemoveValue={AddRemoveValue}
             fields={fields}
             lookupOption={lookupOption}
+            options={options}
           />
         )}
       </div>
     ));
   }, [isUpdate]);
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    setActiveOption(null);
+    const { active, over } = event;
+    if (!over) return;
+    const activeType = active.data.current?.type;
+    const overType = over.data.current?.type;
+    if (activeType !== 'Option' || overType !== 'Option') return;
+    const activeIndex = active.data.current?.index;
+    const overIndex = over.data.current?.index;
+    moveCard(activeIndex, overIndex);
+  };
+  const handleDragStart = (event: DragStartEvent) => {
+    const { active } = event;
+    if (active?.data.current?.type === 'Option') {
+      setActiveOption(active?.data.current?.props);
+    }
+  };
 
   const sortOptions = () => {
     let _option = values['option'];
@@ -224,6 +251,20 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
   const clearAll = () => {
     setOptions(defaultOption);
   };
+
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10
+    }
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 300,
+      tolerance: 5
+    }
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   return (
     <Box>
@@ -310,15 +351,14 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
         </Grid>
       </Grid>
       <Box border={1} mt={1} borderColor="var(--common-border-color)">
-        <FixedSizeList
-          height={300}
-          width={'100%'}
-          itemSize={60}
-          itemData={values['option'] && values['option']}
-          itemCount={values['option'] && values['option'].length}
-        >
-          {Row}
-        </FixedSizeList>
+        <DndContext onDragEnd={handleDragEnd} onDragStart={handleDragStart} modifiers={[restrictToVerticalAxis]} sensors={sensors}>
+          <SortableContext items={options.map((d) => d.id) || []} strategy={verticalListSortingStrategy}>
+            <FixedSizeList height={300} width={'100%'} itemSize={60} itemData={options} itemCount={values['option'] && values['option'].length}>
+              {Row}
+            </FixedSizeList>
+          </SortableContext>
+          <DragOverlay dropAnimation={null}>{activeOption && <Card {...activeOption} />}</DragOverlay>
+        </DndContext>
         {/* {options.length > 0 &&
         options.map((data, index) => (
           <Card
@@ -383,55 +423,80 @@ interface DragItem {
 }
 
 const Card = (props) => {
-  const { index, id, data, moveCard, onChangeValue, values, AddRemoveValue, fields, lookupOption } = props;
-  const ref = useRef<HTMLDivElement>(null);
-  const [{ handlerId }, drop] = useDrop({
-    accept: 'card',
-    collect(monitor) {
-      return {
-        handlerId: monitor.getHandlerId()
-      };
-    },
-    hover(item: DragItem, monitor: DropTargetMonitor) {
-      if (!ref.current) {
-        return;
+  const { index, data, onChangeValue, values, AddRemoveValue, fields, lookupOption, options } = props;
+  // const ref = useRef<HTMLDivElement>(null);
+  // const [{ handlerId }, drop] = useDrop({
+  //   accept: 'card',
+  //   collect(monitor) {
+  //     return {
+  //       handlerId: monitor.getHandlerId()
+  //     };
+  //   },
+  //   hover(item: DragItem, monitor: DropTargetMonitor) {
+  //     if (!ref.current) {
+  //       return;
+  //     }
+  //     const dragIndex = item.index;
+  //     const hoverIndex = index;
+  //     if (dragIndex === hoverIndex) {
+  //       return;
+  //     }
+  //     const hoverBoundingRect = ref.current?.getBoundingClientRect();
+  //     const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
+  //     const clientOffset = monitor.getClientOffset();
+  //     const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
+  //     if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
+  //       return;
+  //     }
+  //     if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
+  //       return;
+  //     }
+  //     moveCard(dragIndex, hoverIndex);
+  //     item.index = hoverIndex;
+  //   }
+  // });
+  // const [{ isDragging }, drag] = useDrag({
+  //   type: 'card',
+  //   item: () => {
+  //     return { id, index };
+  //   },
+  //   collect: (monitor: any) => ({
+  //     isDragging: monitor.isDragging()
+  //   })
+  // });
+  // const opacity = isDragging ? 0.4 : 1;
+  // drag(drop(ref));
+
+  const { setNodeRef, attributes, listeners, transform, transition } = useSortable({
+    id: options[index].id,
+    data: {
+      type: 'Option',
+      index: index,
+      data,
+      props: {
+        index,
+        data,
+        onChangeValue,
+        values,
+        AddRemoveValue,
+        fields,
+        lookupOption,
+        options
       }
-      const dragIndex = item.index;
-      const hoverIndex = index;
-      if (dragIndex === hoverIndex) {
-        return;
-      }
-      const hoverBoundingRect = ref.current?.getBoundingClientRect();
-      const hoverMiddleY = (hoverBoundingRect.bottom - hoverBoundingRect.top) / 2;
-      const clientOffset = monitor.getClientOffset();
-      const hoverClientY = (clientOffset as XYCoord).y - hoverBoundingRect.top;
-      if (dragIndex < hoverIndex && hoverClientY < hoverMiddleY) {
-        return;
-      }
-      if (dragIndex > hoverIndex && hoverClientY > hoverMiddleY) {
-        return;
-      }
-      moveCard(dragIndex, hoverIndex);
-      item.index = hoverIndex;
     }
   });
-  const [{ isDragging }, drag] = useDrag({
-    type: 'card',
-    item: () => {
-      return { id, index };
-    },
-    collect: (monitor: any) => ({
-      isDragging: monitor.isDragging()
-    })
-  });
-  const opacity = isDragging ? 0.4 : 1;
-  drag(drop(ref));
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition
+  };
+
   return (
-    <div ref={ref} style={{ opacity }} data-handler-id={handlerId}>
+    <div style={style} ref={setNodeRef} className="bg-[var(--dark-primary,white)]">
       <Box border={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>
           <Grid item md={1}>
-            <IconButton>
+            <IconButton {...attributes} {...listeners}>
               <DragIndicator />
             </IconButton>
           </Grid>

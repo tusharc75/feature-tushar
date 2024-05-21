@@ -13,9 +13,13 @@ import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/hel
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open }) => {
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user }
+  }: any = useData();
   const [cloneHeading, setCloneHeading] = useState('');
   const [loading, setLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -45,7 +49,7 @@ const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open 
               }
               setInitialData({
                 fields: fields,
-                values: getObjKeysWithValues(tempData, fields)
+                values: isClone ? getObjKeysWithValues(tempData, fields, true, user) :getObjKeysWithValues(tempData, fields)
               });
             })
             .catch((error) => {

@@ -76,7 +76,7 @@ export default function ManageOpportunityDialog({
           setCloneHeading(opportunityName);
           setInitialData({
             fields: fieldsDataForUpdate,
-            values: { ...getObjKeysWithValues(rest, fieldsDataForUpdate) }
+            values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
           });
         }
         else {

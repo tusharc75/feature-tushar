@@ -184,24 +184,24 @@ const Units = () => {
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
-    const values: any = {};
+    const values: any = { _id: updatedData?._id };
     Object.keys(inputField)?.map((_key) => {
       values[_key] = updatedData[_key] ? updatedData[_key] : '';
     });
-
-    axiosInstance()
-      .put(`${routes.units?.path}/${updatedData?._id}`, values)
-      .then(({ data }) => {
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().put(`/dynamic-form/update-selected-field`, values, {
+      headers: {
+        Resource: sidebarResource.units
+      }
+    }).then(({ data }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const getQueryString = (isExport = false) => {
@@ -327,7 +327,7 @@ const Units = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            onSelect={onSaveInlineEdit}
+            onSaveEdit={onSaveInlineEdit}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.units}

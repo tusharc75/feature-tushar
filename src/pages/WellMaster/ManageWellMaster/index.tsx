@@ -57,7 +57,7 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
                 setTitle(`Clone - ${wellName}`);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate) }
+                  values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
                 });
                 setAllFields(fieldsDataForCreate);
                 setLoading(false);

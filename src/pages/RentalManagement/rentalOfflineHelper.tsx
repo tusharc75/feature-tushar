@@ -1,5 +1,5 @@
 
-import { objectStore, insertUpdate, findOne, findAll, clearAll } from '../../constants/indexdbhelper';
+import { objectStore, insertUpdate, findOne, findAll, clearAll, deleteMany } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { ASSET_STATUS, rentalManagement } from '../../constants/helpers';
 
@@ -149,4 +149,16 @@ export const getNestedQty = (material, parent) => {
     else {
         return parent.qty
     }
+}
+
+export const rentalJobClearOffline = async (ids: any []= []) => {
+    if(!ids.length) {
+        clearAll(objectStore.rentalManagement);
+        clearAll(objectStore.deliveryTicket);
+    } else {
+        const deliveryTickets = await findAll(objectStore.deliveryTicket);
+        const deliveryTicketIdsToDelete = deliveryTickets?.filter((d: any) => ids?.includes(d?.rentalJob?.optionValue))?.map((d: any) => d._id);
+        deleteMany(objectStore.rentalManagement, ids);
+        deleteMany(objectStore.deliveryTicket, deliveryTicketIdsToDelete);   
+    }  
 }

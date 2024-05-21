@@ -369,6 +369,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           }
           material.push(element);
         });
+        AddMaterial(material, null);
       } else {
         rows.forEach((d) => {
           const element: any = {};
@@ -391,15 +392,11 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           }
           material.push(element);
         });
-      }
-      if (fieldTicketData?.pricingCondition?.optionValue) {
-        const priceData: any = await calculatePrice(fieldTicketData, material);
-        AddMaterial(
-          material,
-          priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
-        );
-      } else {
-        AddMaterial(material, null);
+        let priceData: any = await calculatePrice(fieldTicketData, material);
+        if (fieldTicketData?.pricingCondition?.optionValue) {
+          priceData = priceData?.filter((e) => e.conditionId === fieldTicketData?.pricingCondition?.optionValue)
+        }
+        AddMaterial(material, priceData);
       }
     }
   };

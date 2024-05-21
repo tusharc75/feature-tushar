@@ -65,10 +65,17 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       }
 
       case 'excel': {
-        // const canvas = document.getElementById(uniqueId) as HTMLCanvasElement;
-        // const dataUrl = canvas.toDataURL('image/png', 1.0);
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-        const ws = utils.json_to_sheet(newData);
+
+        const transformedData = newData.map(item => {
+          const transformedItem = {};
+          for (let key in item) {
+            transformedItem[startCase(key)] = item[key];
+          }
+          return transformedItem;
+        });
+
+        const ws = utils.json_to_sheet(transformedData);
         const wb = {
           Sheets: {
             data: ws
@@ -140,7 +147,16 @@ export default async (type: string, currency: string, tableData: any[], chart: C
       case 'excel': {
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const fileExtension = '.xlsx';
-        const ws = utils.json_to_sheet(newData);
+
+        const transformedData = newData.map(item => {
+          const transformedItem = {};
+          for (let key in item) {
+            transformedItem[startCase(key)] = item[key];
+          }
+          return transformedItem;
+        });
+
+        const ws = utils.json_to_sheet(transformedData);
         const wb = {
           Sheets: {
             data: ws

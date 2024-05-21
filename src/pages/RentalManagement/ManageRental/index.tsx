@@ -82,17 +82,13 @@ const ManageRentalManagementDialog = ({
           data = response?.data?.data;
           if (isClone) {
             const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data;
-            rest['status'] = 'New';
+            rest['status'] = RENTAL_STATUS.new;
             rest['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-            rest['estimateStartDate'] = new Date();
-            rest['estimateEndDate'] = '';
-            rest['actualStartDate'] = '';
-            rest['actualEndDate'] = '';
             fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
             setCloneHeading(rentalJobName);
             setRentalData({
               fields: fieldsDataForCreate,
-              initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate), estimateEndDate: null }
+              initialValues: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user), estimateEndDate: null }
             });
             setLoading(false);
           } else {

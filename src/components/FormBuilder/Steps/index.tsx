@@ -1,4 +1,3 @@
-import { DragDropContext, Draggable, DropResult, Droppable } from '@hello-pangea/dnd';
 import { Box, Button, IconButton } from '@material-ui/core';
 import AddAlertIcon from '@material-ui/icons/AddAlert';
 import BuildIcon from '@material-ui/icons/Build';
@@ -23,6 +22,11 @@ import Setting from './Setting';
 import { resourcePolicy } from './helper';
 import PolicyDialog from './policyDialog';
 
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 const Steps = ({ resource }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -38,6 +42,7 @@ const Steps = ({ resource }) => {
   const [openAction, setOpenAction] = useState(false);
   const [openNotifications, setOpenNotifications] = useState(false);
   const [openPolicy, setOpenPolicy] = useState(false);
+  const [activeItem, setActiveItem] = useState(null);
 
   const fetchData = useCallback(
     async (cancelTokenSource?: CancelTokenSource) => {
@@ -94,18 +99,41 @@ const Steps = ({ resource }) => {
       });
   };
 
-  const handleOnDragEnd = (result: DropResult) => {
-    if (!result.destination || result.source.index === result.destination.index) {
+  const handleOnDragEnd = (result: DragEndEvent) => {
+    if (!result.over || result.active.id === result.over.id) {
       return;
     }
+    const { active, over } = result;
+    const overIndex = over.data.current?.index;
+    const activeIndex = active.data.current?.index;
+
     const items: any = Array.from(steps);
-    const [reorderedItem] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, { ...reorderedItem, order: result.destination.index });
+    const [reorderedItem] = items.splice(activeIndex, 1);
+    items.splice(overIndex, 0, { ...reorderedItem, order: overIndex });
     const updatedSteps = items.map((i, index) => ({ ...i, order: index }));
     setSteps(updatedSteps);
 
     handleUpdateOrder(updatedSteps);
   };
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!event?.active) return;
+    setActiveItem(event?.active?.data.current.props);
+  };
+
+  const mouseSensor = useSensor(MouseSensor, {
+    activationConstraint: {
+      distance: 10
+    }
+  });
+  const touchSensor = useSensor(TouchSensor, {
+    activationConstraint: {
+      delay: 300,
+      tolerance: 5
+    }
+  });
+
+  const sensors = useSensors(mouseSensor, touchSensor);
 
   return (
     <Box>
@@ -166,9 +194,10 @@ const Steps = ({ resource }) => {
         </Box>
       </Box>
       <Box pt={2}>
-        <DragDropContext onDragEnd={handleOnDragEnd}>
-          <RenderStepItems {...{ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData, handleUpdateOrder }} />
-        </DragDropContext>
+        <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
+          <RenderStepItems {...{ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData }} />
+          <DragOverlay>{activeItem && <SingleStep {...activeItem} />}</DragOverlay>
+        </DndContext>
       </Box>
 
       <>
@@ -270,33 +299,17 @@ const Steps = ({ resource }) => {
 
 export default Steps;
 
-const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData, handleUpdateOrder }) => {
+const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData }) => {
   return (
     <div className="grid grid-cols-1 gap-2">
       {steps && steps?.length ? (
-        <Droppable droppableId="droppable" type="section">
-          {(provided, snapshot) => (
-            <ul ref={provided.innerRef} {...provided.droppableProps} className="list-none grid gap-2 items-start">
-              {steps?.map((step, i) => {
-                return (
-                  <Draggable key={step._id} draggableId={step._id} index={i}>
-                    {(provided, snapshot) => (
-                      <li ref={provided.innerRef} {...provided.draggableProps} className="bg-[var(--dark-secondary,white)]">
-                        <SingleStep
-                          key={step._id}
-                          snapshot={snapshot}
-                          dragHandleProps={provided.dragHandleProps}
-                          {...{ step, i, setSteps, setOpen, setOpenField, setDeleteData }}
-                        />
-                      </li>
-                    )}
-                  </Draggable>
-                );
-              })}
-              {provided.placeholder}
-            </ul>
-          )}
-        </Droppable>
+        <ul className="list-none grid gap-2 items-start">
+          <SortableContext items={steps.map((d) => d._id)}>
+            {steps?.map((step, index) => {
+              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setOpenField, setDeleteData, index }} />;
+            })}
+          </SortableContext>
+        </ul>
       ) : stepsLoading ? (
         <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -310,59 +323,75 @@ const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setOpenField,
   );
 };
 
-const SingleStep = ({ step, i, setOpen, setOpenField, setDeleteData, dragHandleProps, snapshot }) => {
+const SingleStep = ({ step, setOpen, setOpenField, setDeleteData, index }) => {
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+    id: step._id,
+    data: {
+      index,
+      props: { step, setOpen, setOpenField, setDeleteData, index }
+    }
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition
+  };
+
   return (
     <>
-      <div
-        className={`${snapshot.isDragging ? '[border:1px_dashed_var(--common-border-color)]' : '[border:1px_solid_var(--common-border-color)]'
+      <li ref={setNodeRef} style={style} className="bg-[var(--dark-secondary,white)] cursor-grab list-none">
+        <div
+          className={`${
+            isDragging ? '[border:1px_dashed_var(--common-border-color)]' : '[border:1px_solid_var(--common-border-color)]'
           }   p-3 rounded-[5px]`}
-      >
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <IconButton size={'small'} className={`[cursor:move_!important]`} {...dragHandleProps}>
-              <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
-            </IconButton>
-            <h3 className="line-clamp-2 md:line-clamp-1 font-semibold">{step?.stepName}</h3>
-          </div>
-          <div className="min-w-fit">
-            <HtmlTooltip title={'Edit'}>
-              <IconButton
-                size="small"
-                aria-label="Edit"
-                onClick={() => {
-                  setOpen({ open: true, data: step });
-                }}
-              >
-                <EditIcon fontSize="small" color={'primary'} />
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <IconButton size={'small'} className={`[cursor:move_!important]`} {...attributes} {...listeners}>
+                <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
               </IconButton>
-            </HtmlTooltip>
-            {!step?.linkWithResource && (
-              <HtmlTooltip title={'Add Fields'}>
+              <h3 className="line-clamp-2 md:line-clamp-1 font-semibold">{step?.stepName}</h3>
+            </div>
+            <div className="min-w-fit">
+              <HtmlTooltip title={'Edit'}>
                 <IconButton
                   size="small"
                   aria-label="Edit"
                   onClick={() => {
-                    setOpenField({ open: true, step: step });
+                    setOpen({ open: true, data: step });
                   }}
                 >
-                  <BuildIcon fontSize="small" color={'primary'} />
+                  <EditIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
-            )}
-            <HtmlTooltip title={'Delete'}>
-              <IconButton
-                size="small"
-                aria-label="Delete"
-                onClick={() => {
-                  setDeleteData(step);
-                }}
-              >
-                <DeleteIcon fontSize="small" color={'error'} />
-              </IconButton>
-            </HtmlTooltip>
+              {!step?.linkWithResource && (
+                <HtmlTooltip title={'Add Fields'}>
+                  <IconButton
+                    size="small"
+                    aria-label="Edit"
+                    onClick={() => {
+                      setOpenField({ open: true, step: step });
+                    }}
+                  >
+                    <BuildIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
+              <HtmlTooltip title={'Delete'}>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  onClick={() => {
+                    setDeleteData(step);
+                  }}
+                >
+                  <DeleteIcon fontSize="small" color={'error'} />
+                </IconButton>
+              </HtmlTooltip>
+            </div>
           </div>
         </div>
-      </div>
+      </li>
     </>
   );
 };

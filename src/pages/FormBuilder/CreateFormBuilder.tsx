@@ -91,7 +91,6 @@ const CreateFormBuilder = () => {
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
-
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (event: React.ChangeEvent<{}>, value: any) => {
     setTabValue(value);
@@ -152,8 +151,7 @@ const CreateFormBuilder = () => {
       setHomePageLabel('');
       setOriSection([]);
       setSteppers([]);
-    }
-    else {
+    } else {
       axiosInstance()
         .get(`/sa-formbuilder/resourcedata/` + resource)
         .then(({ data: { data } }) => {
@@ -200,7 +198,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => { });
+          .catch((error) => {});
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -238,21 +236,22 @@ const CreateFormBuilder = () => {
     if (isNew) {
       sendData.resource = resourceLabel;
       sendData.brandId = user.user.brand;
-      axiosInstance().post(`/sa-formbuilder`, sendData).then(({ data: { message } }) => {
-        setIsUpdating(false);
-        history.push('/form-builder')
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: message
-        });
-      })
+      axiosInstance()
+        .post(`/sa-formbuilder`, sendData)
+        .then(({ data: { message } }) => {
+          setIsUpdating(false);
+          history.push('/form-builder');
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+        })
         .catch((error) => {
           setIsUpdating(false);
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
+    } else {
       axiosInstance()
         .put(`/sa-formbuilder/resourcedata`, sendData)
         .then(({ data: { message } }) => {
@@ -407,14 +406,7 @@ const CreateFormBuilder = () => {
                       autoSelect
                       options={sectionNameList}
                       getOptionLabel={(option) => option}
-                      renderInput={(params) => <TextField
-                        {...params}
-                        label="Section Name"
-                        variant="outlined"
-                        required
-                        margin="dense"
-                        fullWidth />
-                      }
+                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" required margin="dense" fullWidth />}
                       value={sectionName}
                       onChange={(e, value) => {
                         setsectionName(value);
