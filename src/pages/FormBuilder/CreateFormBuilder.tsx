@@ -88,6 +88,7 @@ const CreateFormBuilder = () => {
   const [sectionName, setsectionName] = useState('');
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
   const [steppers, setSteppers] = useState([]);
+  const [sectionNameList,setSectionNameList] = useState([]);
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -96,16 +97,20 @@ const CreateFormBuilder = () => {
     setTabValue(value);
   };
 
-  const sectionNameList = [
-    'Sales Management',
-    'eCommerce',
-    'Inventory Management',
-    'Rental Operations Management',
-    'Repair & Maintenance Management',
-    'Purchasing Management',
-    'Planning & Forecasting',
-    'Collaboration Tools'
-  ];
+  // const sectionNameList = [
+  //   'Sales Management',
+  //   'eCommerce',
+  //   'Inventory Management',
+  //   'Rental Operations Management',
+  //   'Repair & Maintenance Management',
+  //   'Purchasing Management',
+  //   'Planning & Forecasting',
+  //   'Collaboration Tools'
+  // ];
+
+  useEffect(()=>{
+    
+  },[])
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -141,6 +146,7 @@ const CreateFormBuilder = () => {
 
   useEffect(() => {
     fetchBrandResourceData();
+    fetchSectionList();
   }, []);
 
   const fetchBrandResourceData = async () => {
@@ -167,6 +173,15 @@ const CreateFormBuilder = () => {
         });
     }
   };
+
+  const fetchSectionList = async ()=>{
+    await axiosInstance().get(`section-master`).then(({ data: { data } })=>{
+      const sectionList = data?.map((ele)=> ele.sectionName);
+      setSectionNameList(sectionList);
+    }).catch((error)=>{
+      toastConfig.setToastConfig(error);
+    })  
+  }
 
   const handleSave = async () => {
     if (resourceLabel === '') {

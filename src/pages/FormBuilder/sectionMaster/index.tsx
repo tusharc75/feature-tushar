@@ -1,7 +1,7 @@
 import { Box, Button, Dialog, IconButton } from '@material-ui/core';
 import { AddOutlined } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -11,10 +11,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import ManageSectionMaster from './ManageSectionMaster';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const sectionMaster = ({ open, close }) => {
   const renderedFrom = `section-master`;
-  const [fullScreen, setFullScreen] = useState(true);
+  const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [openManageSectionMaster, setOpenManageSectionMaster] = useState({ open: false, data: null });
 
@@ -24,7 +25,7 @@ const sectionMaster = ({ open, close }) => {
     fetchColumn();
     fetchData();
   }, []);
-console.log(state)
+
   const fetchColumn = async () => {
     const column: any = [
       {
@@ -75,9 +76,16 @@ console.log(state)
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    const { data } = await axiosInstance().get(`section-master`);
-    dispatch({ type: 'initialize', data: data?.data, count: data?.data?.length });
-    dispatch({ type: 'loading', loading: false });
+    await axiosInstance()
+      .get(`section-master`)
+      .then(({ data: { data } }) => {
+        dispatch({ type: 'initialize', data: data, count: data?.length });
+        dispatch({ type: 'loading', loading: false });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        dispatch({ type: 'loading', loading: false });
+      });
   };
 
   const RightSideContents = () => {
@@ -102,8 +110,8 @@ console.log(state)
     <>
       <Dialog
         open
-        fullScreen={fullScreen}
         maxWidth="md"
+        fullScreen={true}
         fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
@@ -114,17 +122,13 @@ console.log(state)
         <CustomDialogHeader
           title={`Section Master`}
           onClose={close}
-          isMinimized={!fullScreen}
-          onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-          }}
+          showManimizeMaximize={false}
           showRequiredLabel={false}
-          showManimizeMaximize={true}
         />
         <CustomDialogContent isFooterPresent={false}>
           <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />
           {columns ? (
-            <Box zIndex={5} width={'100%'} height={'calc(100vh - 200px)'}>
+            <Box>
               <CustomReactTable
                 height={'calc(100vh - 200px)'}
                 columns={columns}
