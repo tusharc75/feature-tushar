@@ -51,6 +51,12 @@ export const resourcePolicy = [
                 fieldLabel: "Hide Complete/Skip/Revert Service",
                 type: "checkBox",
                 defaultValue: false
+            },
+            {
+                fieldName: "showTransferAssets",
+                fieldLabel: "Show Transfer Assets",
+                type: "checkBox",
+                defaultValue: false
             }
         ]
     },
