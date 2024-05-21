@@ -146,7 +146,7 @@ const FormBuilder = () => {
       <CustomContainer>
         <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
-        {openSectionMaster && <SectionMaster open={openSectionMaster} close={()=> setOpenSectionMaster(false) } />}
+        {openSectionMaster && <SectionMaster close={()=> setOpenSectionMaster(false) } />}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}

@@ -97,21 +97,6 @@ const CreateFormBuilder = () => {
     setTabValue(value);
   };
 
-  // const sectionNameList = [
-  //   'Sales Management',
-  //   'eCommerce',
-  //   'Inventory Management',
-  //   'Rental Operations Management',
-  //   'Repair & Maintenance Management',
-  //   'Purchasing Management',
-  //   'Planning & Forecasting',
-  //   'Collaboration Tools'
-  // ];
-
-  useEffect(()=>{
-    
-  },[])
-
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };

@@ -13,7 +13,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import ManageSectionMaster from './ManageSectionMaster';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const sectionMaster = ({ open, close }) => {
+const sectionMaster = ({ close }) => {
   const renderedFrom = `section-master`;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -31,7 +31,6 @@ const sectionMaster = ({ open, close }) => {
       {
         accessor: 'sectionName',
         Header: 'Section Name',
-        disableFilters: true,
         width: 150,
         disabled: true,
         Cell: ({ row }) => {
