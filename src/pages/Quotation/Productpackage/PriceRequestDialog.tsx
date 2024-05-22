@@ -16,8 +16,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
-import {Link} from "react-router-dom"
 import routes from 'src/components/Helpers/Routes';
+import {Link} from 'react-router-dom';
 
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
   let renderedFrom = 'ViewQuotationSupplierPrice';
@@ -84,9 +84,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                   ? _material?.packageDetail?.packageDescription
                   : '';
               res.uniqueId = d?._id;
-              res.supplierAccount = d?.supplierAccount;
-              res.supplierContact = d?.supplierContact;
-              res.responseDate = d?.responseDate;
               res.subRows = generateNestedData(d?.material, res);
 
               rows = [...rows, res];
@@ -126,64 +123,15 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
           : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageDescription
           : '';
-     _subRow.supplierAccount = parent.supplierAccount;
-     _subRow.supplierContact = parent.supplierContact;
-     _subRow.responseDate = parent.responseDate;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
 
     return subRows;
   };
 
-  const fetchColumns = (id = null, status: string) => {
+  const fetchColumns = (id = null) => {
     let columns = [];
-    let supplierColumns = [
-       {
-        accessor: 'supplierContact',
-        Header: 'Supplier Contact',
-        Cell: ({ row }) =>
-          row?.original?.supplierContact ? (
-            <Link
-              className="link text-truncate"
-              target="_blank"
-              title={row?.original?.supplierContact?.optionLabel}
-              to={`${routes.supplierContactDetail.path}/${row?.original?.supplierContact?.optionValue}`}
-            >
-             
-              {row?.original?.supplierContact?.optionLabel}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
-        accessor: 'supplierAccount',
-        Header: 'Supplier Account',
-        Cell: ({ row }) =>
-          row?.original?.supplierContact ? (
-            <Link
-              className="link text-truncate"
-              target="_blank"
-              title={row?.original?.supplierAccount?.optionLabel}
-              to={`${routes.supplierAccountDetail.path}/${row?.original?.supplierAccount?.optionValue}`}
-            >
-              {row?.original?.supplierAccount?.optionLabel}
-            </Link>
-          ) : (
-            <NoDataCell />
-          )
-      }
-    ]
-    let dateColumn = [
-      {
-        accessor: 'responseDate',
-        Header: 'Response Date',
-        width: 150,
-        show: true,
-        disabled: true,
-        Cell: ({ row }) => (row?.original?.responseDate ? <p className="text-truncate">{moment(row?.original?.responseDate).format(dateTimeFormat)}</p> : <NoDataCell />)
-      },
-    ]
+
     columns = [
       {
         accessor: 'index',
@@ -233,7 +181,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
         e.editable = false;
       });
 
-      columns = [...columns, ...(status==='Send' ? supplierColumns : dateColumn ), ...newColumns];
+      columns = [...columns, ...newColumns];
     }
 
     return columns;
@@ -327,8 +275,54 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                 <AccordionDetails>
                   {expandSupplierGrid === data?._id && (
                     <>
+                  <div className="flex flex-wrap gap-2 items-center justify-between">
+                    <div>
+                    {data?.status==='Submit' && 
+                      <Box className="min-w-0  line-clamp-1" title={data?.responseDate ? moment(data?.responseDate).format(dateTimeFormat) : ''}>
+                        <Typography variant="subtitle2">
+                          {data?.responseDate && `Response Date : ${moment(data?.responseDate).format(dateTimeFormat)} `}
+                        </Typography>
+                      </Box>
+                      }
+                      {data?.status==='Send' && 
+                      <div className="flex gap-3">
+                      <Box className="min-w-0  line-clamp-1" title={data?.supplierAccount ? data?.supplierAccount?.optionLabel : ''}>
+                        <Typography variant="subtitle2">
+                          {data?.supplierAccount && (
+                             <>
+                             Supplier Account :{" "}
+                             <Link 
+                               className="link text-truncate" 
+                               target="_blank" 
+                               to={`${routes.supplierAccountDetail.path}/${data.supplierAccount?.optionValue}`}>
+                               {data.supplierAccount.optionLabel}
+                             </Link>
+                             
+                           </>
+                          )}
+                        </Typography>
+                      </Box>
+                      <Box className="min-w-0  line-clamp-1" title={data?.supplierContact ? data?.supplierContact?.optionLabel : ''}>
+                      <Typography variant="subtitle2">
+                        {data?.supplierContact && (
+                          <>
+                           Supplier Contact :{" "}
+                             <Link 
+                               className="link text-truncate" 
+                               target="_blank" 
+                               to={`${routes.supplierContactDetail.path}/${data.supplierContact?.optionValue}`}>
+                               {data.supplierContact.optionLabel}
+                             </Link>
+                          </>
+                        )}
+                      </Typography>
+                    </Box>
+                    </div>
+                      }
+                    </div>
                       {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
-                        <div className="flex flex-wrap gap-2 justify-end">
+                        
+                        <div className="flex gap-2">
                           <ThemeButton
                             borderColor="default"
                             iconForMobile={<FaThumbsUp />}
@@ -350,11 +344,12 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                           >
                             Reject
                           </ThemeButton>
-                        </div>
+                          </div>
                       )}
+                      </div>
                       <CustomReactTable
                         height={'calc(100vh - 393px)'}
-                        columns={fetchColumns(data?._id, data?.status)}
+                        columns={fetchColumns(data?._id)}
                         state={{ ...state, dataRows: dataRows?.filter((d) => d?.uniqueId === data?._id) }}
                         dispatch={dispatch}
                         renderedFrom={renderedFrom}
