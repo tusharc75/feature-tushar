@@ -271,7 +271,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                             resource={childrenResource}
                             setField={setField}
                             setResource={setChildrenResource}
-                            tier={values?.tier}
+                            tier={ROLE_TIER.tier1}
                           />
                         </Box>
                       )}

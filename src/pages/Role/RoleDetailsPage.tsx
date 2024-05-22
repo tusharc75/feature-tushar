@@ -585,7 +585,7 @@ const RoleDetailsPage = () => {
                             setField={setField}
                             setResource={setChildrenResource}
                             isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
-                            tier={values?.tier}
+                            tier={ROLE_TIER.tier1}
                           />
                         </Box>
                       )}
