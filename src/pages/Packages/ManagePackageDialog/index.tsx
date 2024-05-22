@@ -110,14 +110,7 @@ const ManagePackageDialog = ({ isClone, packageId, onClose, onSuccess, open, isR
 
   const handleSubmit = (values: any) => {
     const newValues = { ...values };
-    if (newValues?.customerAccount && newValues?.customerAccount !== '') {
-      const customerName = findCustomerName(newValues?.customerAccount);
-      if (customerName) {
-        if (customerName && !newValues['packageName']?.includes(customerName)) {
-          newValues['packageName'] = `${newValues?.packageName} — ${customerName}`;
-        }
-      }
-    }
+
     setSubmitting(true);
     if (packageId && isClone === false) {
       newValues._id = packageId;
