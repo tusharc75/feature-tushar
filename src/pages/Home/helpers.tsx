@@ -34,12 +34,16 @@ export const groupByKey = (arr = [], keyGetter) => {
 };
 
 // CREATE LIST FROM OBJECT SEPATATED BY KEY SECTIONNAME AND ASSGIN ICON, DESCRIPTOIN, AND COLOR
-export const assignIconAndText = (groupedData) => {
+export const assignIconAndText = (groupedData, brandSectionMaster) => {
   let dataList = [];
   let index = 0;
   for (const [key, values] of Object.entries(groupedData)) {
     if (key !== '') {
       let obj: any = { ...setDataBySectionName(key, index) };
+      const section = brandSectionMaster?.find((e) => e?.sectionName === key);
+      if (section && section.description !== '') {
+        obj.text = section.description;
+      }
       obj.head = key;
       obj.items = values;
       dataList.push(obj);

@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog, Grid, TextField } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -11,108 +11,45 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
 const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
-  const [loading, setLoading] = useState(false);
+  const [initialData, setInitialData] = useState({ sectionName: sectionData?.sectionName || '', description: sectionData?.description || '' });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  useEffect(() => {
-    fetchFields();
-  }, []);
-
-  const fetchFields = async () => {
-    try {
-      let data;
-      data = [
-        {
-          fieldData: {
-            fieldLabel: 'Section Name',
-            fieldName: 'sectionName',
-            isTooltip: false,
-            option: [],
-            order: 1,
-            required: true,
-            tooltipMessage: '',
-            sectionName: 'Section',
-            type: 'singleLine'
-          },
-          isCreate: true,
-          isDelete: true,
-          isUpdate: true
-        },
-        {
-          fieldData: {
-            fieldLabel: 'Description',
-            fieldName: 'description',
-            isTooltip: false,
-            option: [],
-            order: 1,
-            required: false,
-            tooltipMessage: '',
-            sectionName: 'Section',
-            type: 'multiLine'
-          },
-          isCreate: true,
-          isDelete: true,
-          isUpdate: true
-        }
-      ];
-      let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-      if (sectionData) {
-        setInitialData({
-          fields: fieldsDataForUpdate,
-          values: getObjKeysWithValues(sectionData, fieldsDataForUpdate)
-        });
-      } else {
-        const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: tempInitialData
-        });
-      }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
-  };
-
   const handleSubmit = (values) => {
     setSubmitting(true);
-    if (sectionData && sectionData?._id) values._id = sectionData?._id;
-    axiosInstance()
-      .put(`section-master`, values)
-      .then(({ data }) => {
-        setSubmitting(false);
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
+    if (sectionData && sectionData?._id) {
+      values._id = sectionData?._id;
+    }
+    axiosInstance().put(`section-master`, values).then(({ data }) => {
+      setSubmitting(false);
+      onSuccess();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+    }).catch((error) => {
+      setSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   function validate(values) {
     const errors = {};
     if (!values?.sectionName) {
-      errors['sectionName'] = 'Enter the section name';
+      errors['sectionName'] = 'Please enter section name';
     }
     return errors;
   }
 
   return (
     <Dialog
-      maxWidth="md"
+      maxWidth="sm"
       fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
@@ -124,13 +61,13 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
         }
       }}
     >
-      {initialData.fields.length ? (
-        <Formik initialValues={initialData.values} validate={validate} onSubmit={handleSubmit}>
+      {initialData ?
+        <Formik initialValues={initialData} validate={validate} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
                 onClose={() => {
-                  if (isEqual(initialData.values, values)) onClose();
+                  if (isEqual(initialData, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
                 title={sectionData ? `Edit Section` : 'Create Section'}
@@ -143,13 +80,13 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={12}>
                       <TextField
                         margin="dense"
                         type="text"
                         label="Section Name"
                         name="sectionName"
-                        placeholder="Enter Section Name"
+                        placeholder="Section Name"
                         fullWidth
                         required
                         onChange={(e) => setFieldValue('sectionName', e.target.value)}
@@ -159,13 +96,13 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                         helperText={touched['sectionName'] && errors['sectionName']}
                       />
                     </Grid>
-                    <Grid item xs={12} sm={6}>
+                    <Grid item xs={12} sm={12}>
                       <TextField
                         margin="dense"
                         type="text"
                         label="Description"
                         name="description"
-                        placeholder="Enter Description"
+                        placeholder="Description"
                         fullWidth
                         multiline
                         rows={4}
@@ -183,14 +120,14 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                   color="primary"
                   disabled={submitting}
                   onClick={() => {
-                    if (isEqual(initialData.values, values)) onClose();
+                    if (isEqual(initialData, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
                 >
                   Cancel
                 </Button>
                 <Button
-                  disabled={loading || submitting}
+                  disabled={submitting}
                   variant="contained"
                   color="primary"
                   type="submit"
@@ -218,12 +155,11 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
               ) : null}
             </Fragment>
           )}
-        </Formik>
-      ) : (
-        <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>
-      )}
+        </Formik> : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
     </Dialog>
   );
 };
