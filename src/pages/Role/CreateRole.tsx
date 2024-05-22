@@ -27,6 +27,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
   const [cloneHeading, setCloneHeading] = useState('');
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
+  const [childrenResource, setChildrenResource] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -48,6 +49,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
       setCloneHeading(data.name);
       setField(data.field);
       setResource(data.resource);
+      setChildrenResource(data.childrenResource);
       setLoading(false);
     } catch (error) {
       setToastConfig(error);
@@ -84,8 +86,20 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
           isUpdate: false,
           isUpdateDisabled: !r.isUpdate
         }));
+        const childrenResource = data.childrenResource.map((r: any) => ({
+          ...r,
+          isCreate: false,
+          isCreateDisabled: !r.isCreate,
+          isDelete: false,
+          isDeleteDisabled: !r.isDelete,
+          isRead: false,
+          isReadDisabled: !r.isRead,
+          isUpdate: false,
+          isUpdateDisabled: !r.isUpdate
+        }));
         setField(field);
         setResource(resource);
+        setChildrenResource(childrenResource);
         setLoading(false);
       })
       .catch((err) => {
@@ -233,18 +247,35 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                     <Loader style={{ height: '100%' }} text="Loading..." />
                   </div>
                 ) : (
-                  field.length &&
-                  resource.length && (
-                    <RoleEngine
-                      style={{
-                        height: fullScreen || isMobile || isTablet ? `calc(100vh - 200px)` : '500px'
-                      }}
-                      field={field}
-                      resource={resource}
-                      setField={setField}
-                      setResource={setResource}
-                      tier={values?.tier}
-                    />
+                  field.length && (
+                    <>
+                      {resource.length && (
+                        <RoleEngine
+                          style={{
+                            height: fullScreen || isMobile || isTablet ? `calc(100vh - 200px)` : '500px'
+                          }}
+                          field={field}
+                          resource={resource}
+                          setField={setField}
+                          setResource={setResource}
+                          tier={values?.tier}
+                        />
+                      )}
+                      {childrenResource.length && (
+                        <Box mt={2}>
+                          <RoleEngine
+                            style={{
+                              height: fullScreen || isMobile || isTablet ? `calc(100vh - 200px)` : '500px'
+                            }}
+                            field={field}
+                            resource={childrenResource}
+                            setField={setField}
+                            setResource={setChildrenResource}
+                            tier={values?.tier}
+                          />
+                        </Box>
+                      )}
+                    </>
                   )
                 )}
               </Paper>
