@@ -13,6 +13,7 @@ import {
   serializedAsset,
   GenerateResourceLineNumber,
   WORK_ORDER_STATUS,
+  WORK_ORDER_TYPE,
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, workOrder, sidebarResource } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -245,7 +246,8 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                     <FormTypes
                                       {...field}
                                       fieldData={field}
-                                      disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit)}
+                                      disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit
+                                        || values['type'] === WORK_ORDER_TYPE.productionOrder)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}
