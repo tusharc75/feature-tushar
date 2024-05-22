@@ -282,18 +282,16 @@ const WorkOrder = () => {
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={permissions?.workOrder?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
-          // addButtonOnclick
-          isAddButtonVisible={false}
+          addButtonOnclick={() => {
+            setShowManageWorkOrder({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.workOrder?.isCreate && permissions?.productionOrder?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
