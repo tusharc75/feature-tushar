@@ -26,7 +26,7 @@ export default function Sections({
   isCalculativeField,
   brandId
 }: SectionPorps) {
-  const sectionIds = useMemo(() => sections.map((s) => s.sectionId), [sections]);
+  const sectionIds = useMemo(() => sections.map((s) => `${s.sectionId}`), [sections]);
 
   return (
     <div className=" container-with-border p-5 space-y-2 max-h-[calc(100vh-200px)] overflow-auto max-[960px]:h-[calc(100vh-200px)] overflow-x-hidden !overflow-y-auto">
