@@ -3,7 +3,6 @@ import DispatchCard from './DispatchCard';
 
 const DispatchList = ({ activity, cardType, handleDispatch }) => {
   if (activity.length === 0) return null;
-  console.log(activity);
   return (
     <>
       <SortableContext items={activity.map((d) => d._id)}>
