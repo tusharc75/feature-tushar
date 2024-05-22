@@ -86,7 +86,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
               res.uniqueId = d?._id;
               res.supplierAccount = d?.supplierAccount;
               res.supplierContact = d?.supplierContact;
-              res.status = d?.status
               res.responseDate = d?.responseDate;
               res.subRows = generateNestedData(d?.material, res);
 
@@ -129,7 +128,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
           : '';
      _subRow.supplierAccount = parent.supplierAccount;
      _subRow.supplierContact = parent.supplierContact;
-     _subRow.status = parent.status;
      _subRow.responseDate = parent.responseDate;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
