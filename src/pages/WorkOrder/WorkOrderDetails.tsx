@@ -44,6 +44,7 @@ import { FaCircleChevronDown } from 'react-icons/fa6';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import Step from '../DynamicForm/Step';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import UpdateTotalCostDialog from './updateTotalCostDialog';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -105,6 +106,7 @@ const WorkOrderDetails = () => {
 
   const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [openTotalCostDialog, setOpenTotalCostDialog] = useState(false)
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -389,7 +391,7 @@ const WorkOrderDetails = () => {
       type: 'button',
       ripple: true,
       isVisible: Boolean(allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed),
-      onClick: () => updateJobStatus(WORK_ORDER_STATUS.completed),
+      onClick: () => workOrderData?.productionOrder && totalConsumablesCost ? setOpenTotalCostDialog(true) : updateJobStatus(WORK_ORDER_STATUS.completed),
       iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
       name: 'Close'
@@ -716,6 +718,17 @@ const WorkOrderDetails = () => {
             warehouse: workOrderData?.warehouse?.optionValue,
             workOrder: workOrderData?._id
           }}
+        />
+      )}
+      {openTotalCostDialog && (
+        <UpdateTotalCostDialog
+        id={id}
+        currency={workOrderData?.currency || 'USD'}
+        onClose={()=> setOpenTotalCostDialog(false)}
+        onSuccess={()=>{
+          setOpenTotalCostDialog(false)
+          updateJobStatus(WORK_ORDER_STATUS.completed)
+        }}
         />
       )}
       {repairJobReceiveConfirmation && (

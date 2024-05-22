@@ -290,8 +290,10 @@ const WorkOrder = () => {
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           // addButtonProps
-          // addButtonOnclick
-          isAddButtonVisible={false}
+          addButtonOnclick={() => {
+            setShowManageWorkOrder({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.workOrder?.isCreate && permissions?.productionOrder?.isCreate}
         />
 
         {columns ? (
