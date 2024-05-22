@@ -236,7 +236,7 @@ const RoleDetailsPage = () => {
       } = await axiosInstance().get(`/role/${id}`);
       setRoleData(data);
       setValues({ name: data.name, description: data.description, tier: data?.tier || ROLE_TIER?.tier1 });
-      setResource(data.resource);
+      setResource([...data.resource, ...data.childrenResource]);
       setField(data.field);
       const current = {
         name: data.name,
@@ -313,7 +313,7 @@ const RoleDetailsPage = () => {
     setUpdating(true);
     let dashBoardIds = dashboardName.map((obj) => obj.id);
 
-    const resources = resource.map((r) => {
+    const resources = resource?.filter(r => !r?.parentResource)?.map((r) => {
       const newData = { ...r };
       delete newData.isReadDisabled;
       delete newData.isUpdateDisabled;
