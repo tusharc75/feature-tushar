@@ -5,10 +5,9 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { CustomDialogTransition, dateTimeFormat, prepareDataForGrid } from '../../../constants/helpers';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { withStyles } from '@material-ui/core/styles';
 import { Box, Button, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa6';
 import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -17,6 +16,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import {Link} from "react-router-dom"
+import routes from 'src/components/Helpers/Routes';
 
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
   let renderedFrom = 'ViewQuotationSupplierPrice';
@@ -83,6 +84,10 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                   ? _material?.packageDetail?.packageDescription
                   : '';
               res.uniqueId = d?._id;
+              res.supplierAccount = d?.supplierAccount;
+              res.supplierContact = d?.supplierContact;
+              res.status = d?.status
+              res.responseDate = d?.responseDate;
               res.subRows = generateNestedData(d?.material, res);
 
               rows = [...rows, res];
@@ -122,15 +127,65 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
           : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageDescription
           : '';
-
+     _subRow.supplierAccount = parent.supplierAccount;
+     _subRow.supplierContact = parent.supplierContact;
+     _subRow.status = parent.status;
+     _subRow.responseDate = parent.responseDate;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
 
     return subRows;
   };
 
-  const fetchColumns = (id = null) => {
+  const fetchColumns = (id = null, status: string) => {
     let columns = [];
+    let supplierColumns = [
+       {
+        accessor: 'supplierContact',
+        Header: 'Supplier Contact',
+        Cell: ({ row }) =>
+          row?.original?.supplierContact ? (
+            <Link
+              className="link text-truncate"
+              target="_blank"
+              title={row?.original?.supplierContact?.optionLabel}
+              to={`${routes.supplierContactDetail.path}/${row?.original?.supplierContact?.optionValue}`}
+            >
+             
+              {row?.original?.supplierContact?.optionLabel}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'supplierAccount',
+        Header: 'Supplier Account',
+        Cell: ({ row }) =>
+          row?.original?.supplierContact ? (
+            <Link
+              className="link text-truncate"
+              target="_blank"
+              title={row?.original?.supplierAccount?.optionLabel}
+              to={`${routes.supplierAccountDetail.path}/${row?.original?.supplierAccount?.optionValue}`}
+            >
+              {row?.original?.supplierAccount?.optionLabel}
+            </Link>
+          ) : (
+            <NoDataCell />
+          )
+      }
+    ]
+    let dateColumn = [
+      {
+        accessor: 'responseDate',
+        Header: 'Response Date',
+        width: 150,
+        show: true,
+        disabled: true,
+        Cell: ({ row }) => (row?.original?.responseDate ? <p className="text-truncate">{moment(row?.original?.responseDate).format(dateTimeFormat)}</p> : <NoDataCell />)
+      },
+    ]
     columns = [
       {
         accessor: 'index',
@@ -170,7 +225,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
         show: true,
         disabled: true,
         Cell: ({ row }) => (row?.original?.description ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />)
-      }
+      },
     ];
 
     if (id) {
@@ -180,7 +235,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
         e.editable = false;
       });
 
-      columns = [...columns, ...newColumns];
+      columns = [...columns, ...(status==='Send' ? supplierColumns : dateColumn ), ...newColumns];
     }
 
     return columns;
@@ -301,7 +356,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                       )}
                       <CustomReactTable
                         height={'calc(100vh - 393px)'}
-                        columns={fetchColumns(data?._id)}
+                        columns={fetchColumns(data?._id, data?.status)}
                         state={{ ...state, dataRows: dataRows?.filter((d) => d?.uniqueId === data?._id) }}
                         dispatch={dispatch}
                         renderedFrom={renderedFrom}
