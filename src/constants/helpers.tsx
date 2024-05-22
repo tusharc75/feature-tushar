@@ -554,6 +554,7 @@ export const CHILD_RESOURCE = {
   serializedAssetsCertification: 'Serialized Assets Certificate',
   invoiceCreditMemo: 'Invoice Credit Memo',
   workOrderProduct: 'Work Order Product',
+  workOrderCost: 'Work Order Cost',
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
