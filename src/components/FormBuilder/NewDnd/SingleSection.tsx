@@ -63,7 +63,7 @@ const SingleSection = ({
   };
 
   const { setNodeRef, attributes, listeners, transform, transition, active, over, isDragging } = useSortable({
-    id: section.sectionId,
+    id: `${section.sectionId}`,
     data: {
       type: 'Section',
       index,
@@ -93,7 +93,7 @@ const SingleSection = ({
   const isDropPreviewVisible =
     ['SidebarItem', 'SidebarCustomItem', 'Field'].includes(active?.data.current?.type) &&
     over &&
-    over.id === section.sectionId &&
+    over.id === `${section.sectionId}` &&
     section.field?.length === 0;
 
   return (
