@@ -47,7 +47,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
       setValues({ name: '', description: data.description, tier: data?.tier || ROLE_TIER.tier1 });
       setCloneHeading(data.name);
       setField(data.field);
-      setResource(data.resource);
+      setResource([...data.resource, ...data.childrenResource]);
       setLoading(false);
     } catch (error) {
       setToastConfig(error);
@@ -84,8 +84,19 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
           isUpdate: false,
           isUpdateDisabled: !r.isUpdate
         }));
+        const childrenResource = data.childrenResource.map((r: any) => ({
+          ...r,
+          isCreate: false,
+          isCreateDisabled: !r.isCreate,
+          isDelete: false,
+          isDeleteDisabled: !r.isDelete,
+          isRead: false,
+          isReadDisabled: !r.isRead,
+          isUpdate: false,
+          isUpdateDisabled: !r.isUpdate
+        }));
         setField(field);
-        setResource(resource);
+        setResource([...resource, ...childrenResource]);
         setLoading(false);
       })
       .catch((err) => {
@@ -99,7 +110,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
       resource.some((d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete) ||
       field.some((d) => d.isCreate || d.isRead || d.isUpdate || d.isDelete)
     ) {
-      const resources = resource.map((r) => {
+      const resources = resource?.filter(r => !r?.parentResource)?.map((r) => {
         const newData = { ...r };
         delete newData.isReadDisabled;
         delete newData.isUpdateDisabled;
