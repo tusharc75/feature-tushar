@@ -31,9 +31,8 @@ function Dashboard() {
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    let arr = [];
     let allData = [];
-    // let allData = user && [...user?.role.sideBar];
+
     let entityData;
     if (user?.entity && user.entity.length) {
       entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
@@ -41,17 +40,17 @@ function Dashboard() {
     if (entityData?.resource) {
       allData = entityData.resource;
     }
+
     allData = allData?.filter((e) => isSectionVisible(e));
     allData?.forEach((u) => {
       u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
       u['resourceLabelLowerCase'] = u?.homePageLabel?.toLowerCase() || u?.resourceLabel?.toLowerCase() || u?.name?.toLowerCase();
-      !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
 
     const groupedData = groupByKey(allData, (section) => section.sectionName);
     setObjBySectionName(groupedData);
-    const data = assignIconAndText(groupedData);
+    const data = assignIconAndText(groupedData, user?.role?.brandSectionMaster || []);
     setSections(data);
   }, [user, selectedEntity]);
 

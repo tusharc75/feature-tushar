@@ -14,6 +14,7 @@ import ManageSectionMaster from './ManageSectionMaster';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const sectionMaster = ({ close }) => {
+
   const renderedFrom = `section-master`;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -45,38 +46,37 @@ const sectionMaster = ({ close }) => {
         Cell: ({ row }) => {
           return row?.original['description'] ? <p className="text-truncate">{row?.original['description']}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 60,
+        width: 60,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <HtmlTooltip title="Edit">
+            <IconButton
+              size="small"
+              aria-label="Issue"
+              onClick={() => {
+                setOpenManageSectionMaster({ open: true, data: row?.original });
+              }}
+            >
+              <EditIcon fontSize="small" color="primary" />
+            </IconButton>
+          </HtmlTooltip>
+        )
       }
     ];
-    const actionColumn = {
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 60,
-      width: 60,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row }) => (
-        <HtmlTooltip title="Edit section">
-          <IconButton
-            size="small"
-            aria-label="Issue"
-            onClick={() => {
-              setOpenManageSectionMaster({ open: true, data: row?.original });
-            }}
-          >
-            <EditIcon fontSize="small" color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-      )
-    };
-    setColumns([...column, actionColumn]);
+    setColumns(column);
   };
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    await axiosInstance()
-      .get(`section-master`)
+    await axiosInstance().get(`section-master`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'initialize', data: data, count: data?.length });
         dispatch({ type: 'loading', loading: false });
@@ -119,13 +119,16 @@ const sectionMaster = ({ close }) => {
         }}
       >
         <CustomDialogHeader
-          title={`Section Master`}
+          title={`Sections`}
           onClose={close}
           showManimizeMaximize={false}
           showRequiredLabel={false}
         />
         <CustomDialogContent isFooterPresent={false}>
-          <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />
+          <ListingPageHeader
+            rightSideContents={<RightSideContents />}
+            isActionButtonVisible={false}
+            isAddButtonVisible={false} />
           {columns ? (
             <Box>
               <CustomReactTable
@@ -147,7 +150,6 @@ const sectionMaster = ({ close }) => {
           )}
         </CustomDialogContent>
       </Dialog>
-
       {openManageSectionMaster.open && (
         <ManageSectionMaster
           onClose={() => {

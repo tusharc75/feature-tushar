@@ -61,7 +61,6 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
   }, [selectedProducts]);
 
   const handleSubmit = () => {
-    console.log('productInventoryData', productInventoryData);
     const data = productInventoryData?.filter((p) => p?.inventory > 0);
     if (data?.length > 0) {
       setSubmitting(true);
