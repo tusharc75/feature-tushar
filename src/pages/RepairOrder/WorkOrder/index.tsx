@@ -1007,7 +1007,7 @@ const WorkOrder = ({
       </>
     );
   };
-console.log(dataRows)
+
   const isWorkOrderCompleted = (data) => {
     return data?.some(e => [WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(e.workOrderStatus));
   }
