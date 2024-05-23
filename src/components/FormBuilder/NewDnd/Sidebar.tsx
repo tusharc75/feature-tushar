@@ -6,6 +6,8 @@ import { FieldListType } from './types';
 import { useMemo } from 'react';
 import { useDndMonitor } from '@dnd-kit/core';
 import CustomFields from './CustomFields';
+import { DragIndicator } from '@material-ui/icons';
+import { IconButton } from '@material-ui/core';
 
 const newSection = {
   id: generateId(),
@@ -196,12 +198,13 @@ export const SidebarItem = ({ item, type = 'SidebarItem' }: SidebarItemProps) =>
     <div
       className={`p-2 border border-[var(--common-border-color)] bg-[var(--dark-secondary,white)] ${
         type === 'NewSection' ? 'col-span-2' : ''
-      } cursor-grab`}
+      } flex gap-2 items-center `}
       style={style}
-      {...attributes}
-      {...listeners}
       ref={setNodeRef}
     >
+      <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
+        <DragIndicator />
+      </IconButton>
       <p className="MuiTypography-body2 line-clamp-1" title={item.label}>
         {item.label}
       </p>

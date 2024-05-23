@@ -1,7 +1,7 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { InfoOutlined, MoreHoriz } from '@material-ui/icons';
+import { DragIndicator, InfoOutlined, MoreHoriz } from '@material-ui/icons';
 import React, { useContext } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -155,19 +155,20 @@ const Field = ({
       )} */}
       <div
         style={style}
-        {...attributes}
-        {...listeners}
         ref={setNodeRef}
         className={`${
           isDragging
             ? '[border:5px_dashed_var(--common-border-color)] bg-[var(--dark-secondary,theme("colors.cyan.100"))]'
             : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
-        }  p-2 cursor-grab min-h-[56.5px] items-center flex`}
+        }  p-2 min-h-[56.5px] items-center flex`}
       >
         <div className={`${isDragging ? ' opacity-50' : ''} flex-grow`}>
-          <div className="grid grid-cols-[1fr_25px_25px] items-center justify-between gap-2">
-            <div className="grid grid-cols-[1fr_1fr] items-center gap-2">
-              <div className="">
+          <div className="grid grid-cols-[1fr_28px] lg:grid-cols-[1fr_50px] items-center justify-between gap-2">
+            <div className="grid lg:grid-cols-[1.2fr_1fr] items-center gap-2">
+              <div className="flex items-center gap-2">
+                <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
+                  <DragIndicator />
+                </IconButton>
                 {data.editAble ? (
                   <TextField
                     id={data._id}
@@ -182,43 +183,47 @@ const Field = ({
                   <p className="MuiTypography-body2">{data.fieldLabel}</p>
                 )}
               </div>
-              <p className="text-gray-500 dark:text-slate-300 line-clamp-1 min-w-0">{FieldList[data?.type?.toUpperCase()]?.label}</p>
+              <p className="text-gray-500 dark:text-slate-300 line-clamp-1 min-w-0 ml-[40px] lg:ml-0">
+                {FieldList[data?.type?.toUpperCase()]?.label}
+              </p>
             </div>
-            <HtmlTooltip title={`Field Name - ${data?.fieldName}`}>
-              <InfoOutlined
-                fontSize="small"
-                color="primary"
-                onClick={() => {
-                  navigator.clipboard.writeText(data?.fieldName);
-                }}
-                className="cursor-pointer"
-              />
-            </HtmlTooltip>
-            <div className=" text-right mr-[2px]">
-              <IconButton aria-label="setting" onClick={handleClick} size={'small'}>
-                <MoreHoriz fontSize="small" />
-              </IconButton>
-              <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-                <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
-                <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
-                {((['product-template', 'price-template'].includes(module) && data.editAble) ||
-                  ['form-builder-master'].includes(module) ||
-                  data.deletAble ||
-                  true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
-              </Menu>
-              {propertie_open ? (
-                <Properties
-                  handleClose={handleClosePropertie}
-                  fieldData={field_data}
-                  sectionId={sectionId}
-                  section={sections}
-                  setSection={setSections}
-                  module={module}
-                  extraFields={extraFields}
-                  isCalculativeField={isCalculativeField}
-                  brandId={brandId}
+            <div className="flex items-center ml-auto flex-col lg:flex-row">
+              <HtmlTooltip title={`Field Name - ${data?.fieldName}`}>
+                <InfoOutlined
+                  fontSize="small"
+                  color="primary"
+                  onClick={() => {
+                    navigator.clipboard.writeText(data?.fieldName);
+                  }}
+                  className="cursor-pointer"
                 />
-              ) : null}
+              </HtmlTooltip>
+              <div className=" text-right mr-[2px]">
+                <IconButton aria-label="setting" onClick={handleClick} size={'small'}>
+                  <MoreHoriz fontSize="small" />
+                </IconButton>
+                <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
+                  <MenuItem onClick={() => handleClickOpenPropertie(data)}>Edit Properties</MenuItem>
+                  <MenuItem onClick={() => handleClone(data)}>Clone</MenuItem>
+                  {((['product-template', 'price-template'].includes(module) && data.editAble) ||
+                    ['form-builder-master'].includes(module) ||
+                    data.deletAble ||
+                    true) && <MenuItem onClick={() => deleteField(data._id)}>Delete</MenuItem>}
+                </Menu>
+                {propertie_open ? (
+                  <Properties
+                    handleClose={handleClosePropertie}
+                    fieldData={field_data}
+                    sectionId={sectionId}
+                    section={sections}
+                    setSection={setSections}
+                    module={module}
+                    extraFields={extraFields}
+                    isCalculativeField={isCalculativeField}
+                    brandId={brandId}
+                  />
+                ) : null}
+              </div>
             </div>
           </div>
         </div>

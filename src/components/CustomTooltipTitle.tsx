@@ -12,7 +12,7 @@ const TooltipWithStyle = withStyles((theme) => ({
 
 const HtmlTooltip = ({ children, ...props }: TooltipProps) => {
   return (
-    <TooltipWithStyle {...props} enterDelay={0} placement="top" arrow>
+    <TooltipWithStyle {...props} enterTouchDelay={0} placement="top" arrow>
       <span className="tooltip-asdfkljashdfkjas">{children}</span>
     </TooltipWithStyle>
   );

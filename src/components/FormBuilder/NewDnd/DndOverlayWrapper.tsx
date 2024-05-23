@@ -43,24 +43,24 @@ const DndOverlayWrapper = () => {
     <>
       <DragOverlay>
         {activeSection && (
-          <span className=" !cursor-grabbing">
+          <span className=" [&_.drag-handle]:!cursor-grabbing">
             <SingleSection {...activeSection} />
           </span>
         )}
         {activeField && (
-          <span className=" !cursor-grabbing">
+          <span className=" [&_.drag-handle]:!cursor-grabbing">
             <Field {...activeField} />
           </span>
         )}
       </DragOverlay>
       <DragOverlay dropAnimation={null}>
         {activeSidebarItem && (
-          <span className=" !cursor-grabbing">
+          <span className=" [&_.drag-handle]:!cursor-grabbing">
             <SidebarItem item={activeSidebarItem} />
           </span>
         )}
         {activeSidebarCustomItem && (
-          <span className=" !cursor-grabbing">
+          <span className=" [&_.drag-handle]:!cursor-grabbing">
             <SingleCustomField {...activeSidebarCustomItem} />
           </span>
         )}

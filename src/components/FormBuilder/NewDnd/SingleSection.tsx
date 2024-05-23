@@ -1,7 +1,7 @@
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { Settings } from '@material-ui/icons';
+import { DragIndicator, Settings } from '@material-ui/icons';
 import update from 'immutability-helper';
 import React, { useMemo } from 'react';
 import Field from './Field';
@@ -89,7 +89,7 @@ const SingleSection = ({
     transition
   };
 
-  const isPreviewVisible = active?.data.current?.type === 'NewSection' && over && over.id === section.sectionId;
+  const isPreviewVisible = active?.data.current?.type === 'NewSection' && over && over.id === `${section.sectionId}`;
   const isDropPreviewVisible =
     ['SidebarItem', 'SidebarCustomItem', 'Field'].includes(active?.data.current?.type) &&
     over &&
@@ -106,8 +106,6 @@ const SingleSection = ({
       <div
         ref={setNodeRef}
         style={style}
-        {...attributes}
-        {...listeners}
         className={`p-2 ${
           isDragging
             ? "bg-[var(--dark-secondary,theme('colors.cyan.100'))] [border:1px_dashed_var(--common-border-color)]"
@@ -116,13 +114,18 @@ const SingleSection = ({
       >
         <div className={isDragging ? 'opacity-40' : ''}>
           <div className="flex items-center justify-between gap-2 mb-2">
-            <TextField
-              id="standard-basic"
-              variant="outlined"
-              margin="dense"
-              value={section.sectionName}
-              onChange={(event) => onChangeSectionName(section.sectionId, event.target.value)}
-            />
+            <div className="flex items-center gap-2">
+              <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
+                <DragIndicator />
+              </IconButton>
+              <TextField
+                id="standard-basic"
+                variant="outlined"
+                margin="dense"
+                value={section.sectionName}
+                onChange={(event) => onChangeSectionName(section.sectionId, event.target.value)}
+              />
+            </div>
             <IconButton
               aria-label="setting"
               onClick={handleClick}

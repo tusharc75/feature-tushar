@@ -5,7 +5,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { AddField } from '../AddField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
-import { MoreHoriz } from '@material-ui/icons';
+import { DragIndicator, MoreHoriz } from '@material-ui/icons';
 import { CSS } from '@dnd-kit/utilities';
 
 const CustomFields = () => {
@@ -119,7 +119,7 @@ const CustomFields = () => {
           type="file"
         />
       </div>
-      <SortableContext items={fields.map((d) => d._id)}>
+      <SortableContext items={fields.map((d) => d._id)} strategy={() => null}>
         {fields &&
           fields.map((d) => (
             <SingleCustomField data={d} key={d._id} handleDelete={handleDelete} handleEdit={handleEdit} handleAddField={handleAddField} />
@@ -178,12 +178,13 @@ export const SingleCustomField = ({ data, handleEdit, handleDelete, handleAddFie
   return (
     <div
       style={style}
-      {...attributes}
-      {...listeners}
       ref={setNodeRef}
-      className={`flex items-center justify-between border p-2 bg-[var(--dark-secondary,white)] cursor-grab`}
+      className={`flex items-center justify-between border p-2 bg-[var(--dark-secondary,white)]`}
       title={data.fieldLabel}
     >
+      <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
+        <DragIndicator />
+      </IconButton>
       <p className="MuiTypography-body2 line-clamp-1">{data.fieldLabel}</p>
       <div>
         <IconButton size="small" aria-label="setting" onClick={handleClick}>
