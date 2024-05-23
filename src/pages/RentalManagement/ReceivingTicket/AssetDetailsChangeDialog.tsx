@@ -77,7 +77,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       data.push(obj)
     })
     setAssetsData(data)
-    onSuccess();
+    onSuccess(data);
     setSubmitting(false);
   };
 
