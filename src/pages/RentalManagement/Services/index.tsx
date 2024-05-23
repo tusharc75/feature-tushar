@@ -81,7 +81,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
 
   const createColumns = () => {
     setColumns(null);
-    const data = [...allFields];
+    const data = [...allFields]?.filter(f => f?.isRead);
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
