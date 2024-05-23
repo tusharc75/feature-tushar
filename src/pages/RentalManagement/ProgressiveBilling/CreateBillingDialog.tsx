@@ -73,7 +73,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   const fetchFields = async () => {
     setColumns(null);
-    var data = await fetch_rental_product_fields(rentalManagementData?.currency, false);
+    var {allFields: data} = await fetch_rental_product_fields(rentalManagementData?.currency, false);
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });

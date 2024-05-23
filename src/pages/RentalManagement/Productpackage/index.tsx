@@ -96,10 +96,10 @@ const Productpackage = ({
   }, [allFields, allowedToEdit, quotationApproved]);
 
   const fetchFields = async () => {
-    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    var { visibleFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
     setCostFields(fields);
-    setAllFields(JSON.parse(JSON.stringify(data)));
+    setAllFields(JSON.parse(JSON.stringify(visibleFields)));
   };
 
   const createColumns = () => {

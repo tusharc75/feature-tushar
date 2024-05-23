@@ -75,8 +75,8 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
   }, [allFields, allowedToEdit, quotationApproved]);
 
   const fetchFields = async () => {
-    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
-    setAllFields(JSON.parse(JSON.stringify(data)));
+    var { allFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    setAllFields(JSON.parse(JSON.stringify(allFields)));
   };
 
   const createColumns = () => {

@@ -118,8 +118,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setFetchingData(true);
-    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
-    setAllFields(JSON.parse(JSON.stringify(data)));
+    var { allFields, visibleFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    setAllFields(JSON.parse(JSON.stringify(allFields)));
     if (isBulkedit) {
       let unitArray: any = [];
       let pricingMethodArray: any = [];
@@ -144,7 +144,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       const unitOptions: any = arrayToDropwdownOption(unit);
       const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
 
-      data.forEach((element) => {
+      visibleFields.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
@@ -158,11 +158,26 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         element.isFormula = false;
         element.isMulitFormula = false;
       });
-      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
+      allFields.forEach((element) => {
+        if (element.fieldName === 'unit') {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === 'pricingMethod') {
+          element.option = pricingMethodOptions;
+        }
+        if (element.fieldName === 'pricingCondition') {
+          element.option = [];
+        }
+        element.required = false;
+        element.isFormula = false;
+        element.isMulitFormula = false;
+      });
+      visibleFields = visibleFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
+      allFields = allFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
-        fields: data,
+        fields: allFields,
         values: {
-          ...getObjKeys('', data),
+          ...getObjKeys('', allFields),
           estimateStartDate: '',
           estimateEndDate: '',
           actualStartDate: '',
@@ -182,7 +197,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
       setPriceMethodListConst(pricingMethodOptions);
       await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
-      data.forEach((element) => {
+      visibleFields.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
@@ -193,8 +208,19 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         //   element.isUneditable = true;
         // }
       });
+
+      allFields.forEach((element) => {
+        if (element.fieldName === 'unit') {
+          element.option = unitOptions;
+        }
+        if (element.fieldName === 'pricingMethod') {
+          element.option = pricingMethodOptions;
+        }
+      });
+
       if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
-        data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
+        visibleFields = visibleFields.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
+        allFields = allFields.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }
 
       // let initialValues = getObjKeysWithValues(rowData, data);
@@ -211,12 +237,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       //   });
       // } else {
       setInitialData({
-        fields: data,
-        values: getObjKeysWithValues(rowData, data)
+        fields: allFields,
+        values: getObjKeysWithValues(rowData, allFields)
       });
       // }
     }
-    EvaluteproductFields(data);
+    EvaluteproductFields(visibleFields);
     setFetchingData(false);
   };
 

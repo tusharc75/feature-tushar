@@ -45,13 +45,12 @@ const AddRentalDataDialog = ({
   }, [allFields]);
 
   const fetchFields = async () => {
-    var data = [];
-    data = await fetch_rental_product_fields(currency, false);
-    setAllFields(JSON.parse(JSON.stringify(data)));
-    data?.forEach((e) => {
+    var { allFields } = await fetch_rental_product_fields(currency, false);
+    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    allFields?.forEach((e) => {
       e.isColumnEditable = false;
     });
-    const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }),
+    const newColumns = generateColumns(renderedFrom, allFields?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }),
       null,
       false,
       currency
