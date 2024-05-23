@@ -968,7 +968,7 @@ const WorkOrder = ({
 
   const reOpenWorkOrder = () => {
     setSubmitting(true);
-    const ids = selectedRecords?.filter((d)=> d.type === MATERIAL_TYPE.service && d?.workOrderStatus === WORK_ORDER_STATUS.completed)?.map((e)=> e?.workOrder?._id);
+    const ids = selectedRecords?.filter((d)=> d.type === MATERIAL_TYPE.serializedAsset && d?.workOrderStatus === WORK_ORDER_STATUS.completed)?.map((e)=> e?.workOrder?._id);
     axiosInstance()
       .put(`${workOrder.api}/re-open-multiple`, { ids: ids, repairOrderId: repairOrderData?._id })
       .then(({ data }) => {
@@ -1148,7 +1148,7 @@ console.log(dataRows)
           </MenuItem >
         )}
         <MenuItem
-            disabled={!selectedRecords?.some((e)=> e?.workOrderStatus!==WORK_ORDER_STATUS.completed) }
+            disabled={!selectedRecords?.some((e)=> e.type===MATERIAL_TYPE.serializedAsset && e?.workOrderStatus!==WORK_ORDER_STATUS.completed) }
             onClick={() => {
               updateJobStatus();
             }}
@@ -1156,7 +1156,7 @@ console.log(dataRows)
             Close
           </MenuItem>
           <MenuItem
-            disabled={!selectedRecords?.some((e)=> e?.workOrderStatus===WORK_ORDER_STATUS.completed)}
+            disabled={!selectedRecords?.some((e)=> e.type===MATERIAL_TYPE.serializedAsset && e?.workOrderStatus===WORK_ORDER_STATUS.completed)}
             onClick={() => {
               setShowReopenConfirmation(true);
             }}
