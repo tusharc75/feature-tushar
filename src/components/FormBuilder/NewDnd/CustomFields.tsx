@@ -1,12 +1,12 @@
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { Divider, IconButton, Menu, MenuItem } from '@material-ui/core';
-import React, { useContext, useEffect, useState } from 'react';
+import { DragIndicator, MoreHoriz } from '@material-ui/icons';
+import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
-import { AddField } from '../AddField';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { SortableContext, useSortable } from '@dnd-kit/sortable';
-import { DragIndicator, MoreHoriz } from '@material-ui/icons';
-import { CSS } from '@dnd-kit/utilities';
+import { AddField } from '../AddField';
 
 const CustomFields = () => {
   const [fields, setFields] = useState([]);
@@ -183,7 +183,7 @@ export const SingleCustomField = ({ data, handleEdit, handleDelete, handleAddFie
       title={data.fieldLabel}
     >
       <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
-        <DragIndicator />
+        <DragIndicator fontSize="small" />
       </IconButton>
       <p className="MuiTypography-body2 line-clamp-1">{data.fieldLabel}</p>
       <div>

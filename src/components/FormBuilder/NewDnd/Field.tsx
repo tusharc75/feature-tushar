@@ -167,7 +167,7 @@ const Field = ({
             <div className="grid lg:grid-cols-[1.2fr_1fr] items-center gap-2">
               <div className="flex items-center gap-2">
                 <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
-                  <DragIndicator />
+                  <DragIndicator fontSize="small" />
                 </IconButton>
                 {data.editAble ? (
                   <TextField

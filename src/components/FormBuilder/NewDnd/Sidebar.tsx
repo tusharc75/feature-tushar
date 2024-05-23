@@ -203,7 +203,7 @@ export const SidebarItem = ({ item, type = 'SidebarItem' }: SidebarItemProps) =>
       ref={setNodeRef}
     >
       <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
-        <DragIndicator />
+        <DragIndicator fontSize="small" />
       </IconButton>
       <p className="MuiTypography-body2 line-clamp-1" title={item.label}>
         {item.label}

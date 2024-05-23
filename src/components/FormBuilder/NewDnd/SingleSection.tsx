@@ -116,7 +116,7 @@ const SingleSection = ({
           <div className="flex items-center justify-between gap-2 mb-2">
             <div className="flex items-center gap-2">
               <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
-                <DragIndicator />
+                <DragIndicator fontSize="small" />
               </IconButton>
               <TextField
                 id="standard-basic"
