@@ -1,4 +1,4 @@
-import { DndContext, DragOverEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragOverEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { Box, Button, CircularProgress, FormControl, Grid, InputLabel, MenuItem, Select, TextField, Typography } from '@material-ui/core';
 import { saveAs } from 'file-saver';
 import { Form, Formik } from 'formik';
@@ -12,6 +12,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { ExportIcon, ImportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import { useDndSensors } from 'src/hooks';
 import Builder from './Builder';
 import DashboardItem from './DashboardItem';
 import DashboardView from './DashboardView';
@@ -208,19 +209,7 @@ const DashboardBuilder = () => {
     setActiveItem(formData[event.active.data.current?.index] as IFormDataType);
   }
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   return (
     <Box className="main-container-v1">

@@ -28,9 +28,10 @@ import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
 
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDndSensors } from 'src/hooks';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -239,19 +240,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
     setSearchedColumns(matchedColumns);
   }, [searchVal]);
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   const onDragStart = (event: DragStartEvent) => {
     if (!event?.active) return;

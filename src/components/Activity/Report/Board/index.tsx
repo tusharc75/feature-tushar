@@ -12,7 +12,8 @@ import { CreateCase } from '../../Case/CreateCase';
 import statusList from '../../Helpers/statusList';
 import { CreateTask } from '../../Task/CreateTask';
 
-import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { useDndSensors } from 'src/hooks';
 import SingleCard from './SingleCard';
 import SingleColumn from './SingleColumn';
 import { Column } from './type';
@@ -225,19 +226,7 @@ const Board = ({ type, filter }) => {
     }
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   return (
     <>

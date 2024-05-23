@@ -14,6 +14,7 @@ import MapView from './Map';
 
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
 import FleetDispatchBox from './DispatchCard';
+import { useDndSensors } from 'src/hooks';
 
 const FleetDispatch = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -72,19 +73,7 @@ const FleetDispatch = () => {
     }
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   const onDragStart = (event: DragStartEvent) => {
     if (!event?.active) return;

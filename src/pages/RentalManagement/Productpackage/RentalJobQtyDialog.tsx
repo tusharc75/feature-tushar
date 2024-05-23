@@ -193,6 +193,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         //   element.isUneditable = true;
         // }
       });
+
       if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }
@@ -240,9 +241,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       });
     }
 
-    const sections = uniq(map(fields, 'sectionName'));
+    const sections = uniq(map(fields?.filter(f => f?.isRead), 'sectionName'));
     const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name);
+      let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
@@ -454,7 +455,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           innerRef={ref}
           enableReinitialize={true}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
+          validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
           validateOnMount
           validate={validate}
           onSubmit={handleSubmit}

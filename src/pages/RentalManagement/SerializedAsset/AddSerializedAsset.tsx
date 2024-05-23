@@ -39,6 +39,7 @@ import {
 } from '../../../constants/helpers';
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import axios, { CancelTokenSource } from 'axios';
+import AssetDetailsChangeDialog from '../ReceivingTicket/AssetDetailsChangeDialog';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -54,7 +55,8 @@ const AddSerializedAsset = ({
   filterByPlant = null,
   handleSuccess = null,
   chartOfAccount = null,
-  replaceAssets = false
+  replaceAssets = false,
+  assetPolicyData = null
 }) => {
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
   const toastConfig = useContext(CustomToastContext);
@@ -81,6 +83,7 @@ const AddSerializedAsset = ({
   const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
 
   useEffect(() => {
     const cencelToken = axios.CancelToken.source();
@@ -584,11 +587,8 @@ const AddSerializedAsset = ({
                           style={{ minWidth: 'max-content' }}
                           onClick={() => {
                             if (referenceType === 'Rental Job') {
-                              if (
-                                user?.user?.brandPolicy?.serializedAssetCertification &&
-                                selectedRecords?.some(
-                                  (e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime()
-                                )
+                              if (user?.user?.brandPolicy?.serializedAssetCertification &&
+                                selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
                               ) {
                                 setCertificateExpireAlert({
                                   open: true,
@@ -597,13 +597,18 @@ const AddSerializedAsset = ({
                                     ?.map((e) => e.assetNumber)
                                     ?.toString()
                                 });
-                              } else if (checkMTRValidation) {
+                              }
+                              else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                                setOpenAssetDataDialog({ open: true, statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) })
+                              }
+                              else if (checkMTRValidation) {
                                 if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                                   setMtrConfirmBox(true);
                                 } else {
                                   addSerializedAsset(selectedRecords);
                                 }
-                              } else {
+                              }
+                              else {
                                 addSerializedAsset(selectedRecords);
                               }
                             } else {
@@ -741,6 +746,18 @@ const AddSerializedAsset = ({
           header="Certification Information"
           message={`Certification has expired for asset(s) - ${certificateExpireAlert.asset}`}
           onClose={() => setCertificateExpireAlert({ open: false, asset: '' })}
+        />
+      )}
+      {openAssetDataDialog.open && (
+        <AssetDetailsChangeDialog
+          assetData={selectedRecords}
+          statusPolicy={openAssetDataDialog.statusPolicy}
+          setAssetsData={() => { }}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+          onSuccess={(data) => {
+            addSerializedAsset(selectedRecords, false, data);
+            setOpenAssetDataDialog({ open: false, statusPolicy: null });
+          }}
         />
       )}
     </Fragment>

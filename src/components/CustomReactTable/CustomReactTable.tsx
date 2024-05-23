@@ -1,4 +1,4 @@
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@material-ui/core';
 import {
@@ -22,7 +22,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
-import { useDebounce } from 'src/hooks';
+import { useDebounce, useDndSensors } from 'src/hooks';
 import xlsx from 'xlsx-js-style';
 import { dateTimeFormat, gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
@@ -484,18 +484,7 @@ const CustomReactTable = ({
     setActiveHeader(event.active.data.current.props);
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
   return (
     <DndContext onDragEnd={onDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToHorizontalAxis]}>
       {exportTableView && (

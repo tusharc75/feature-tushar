@@ -58,6 +58,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState(false)
   const [isAssigning, setIsAssigning] = useState(false);
   const [productSerialNumbers, setProductSerialNumbers] = useState([]);
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -70,6 +71,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   useEffect(() => {
     fetchFields();
+    fetchPolicy()
   }, []);
 
   const OpenInNewWindow = (url) => {
@@ -79,6 +81,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const fetchFields = async () => {
     setNextStep(false)
     var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    data = data?.filter(d => d?.isRead);
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
@@ -293,6 +296,19 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);
     fetchData();
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const checkProductInside = (item, material) => {
@@ -652,7 +668,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     );
   };
 
-  const handleAddSerializedAsset = (assets, withTransfer = false) => {
+  const handleAddSerializedAsset = (assets, withTransfer = false, assetsData = null) => {
     var data = [];
     var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
     flatArray = uniqBy(flatArray, '_id');
@@ -666,6 +682,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             obj._id = e._id;
             obj.inventory = result[0].id;
             obj.product = e.materialId;
+            const matchedAsset = assetsData.find(asset => asset._id === obj.inventory);
+            if (matchedAsset) {
+              const { _id, ...assetData } = matchedAsset;
+              obj.assetData = assetData;
+            }
             data.push(obj);
             result[0].isCounted = true;
           }
@@ -673,22 +694,19 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         }
       }
     });
-
     if (data.length) {
       setAdding(true);
-      axiosInstance()
-        .post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data, withTransfer })
-        .then(({ data }) => {
-          setAddSerializedAssetDialog({ open: false });
-          fetchData();
-          setAssetAssignedProduct([]);
-          setAdding(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
+      axiosInstance().post(`${rentalManagement.api}/${rentalManagementData._id}/inventory`, { products: data, withTransfer }).then(({ data }) => {
+        setAddSerializedAssetDialog({ open: false });
+        fetchData();
+        setAssetAssignedProduct([]);
+        setAdding(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
         .catch((error) => {
           setAdding(false);
           toastConfig.setToastConfig(error);
@@ -1064,6 +1082,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       )}
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset
+          assetPolicyData={assetPolicyData}
           addSerializedAsset={handleAddSerializedAsset}
           handleSerializedAssetClose={() => {
             setAddSerializedAssetDialog({ open: false });

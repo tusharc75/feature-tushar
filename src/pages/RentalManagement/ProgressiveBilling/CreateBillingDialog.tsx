@@ -79,7 +79,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     });
     setAllFields(JSON.parse(JSON.stringify(data)));
 
-    let newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
+    let newColumns = generateColumns(renderedFrom, data?.filter(d => d?.isRead), null, false, rentalManagementData?.currency);
 
     let coloum: any = [
       {

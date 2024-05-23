@@ -21,7 +21,7 @@ const PerformanceAnalysis = ({ assetId, dataPoints = [] }) => {
             <TimleineChart
               assetId={assetId}
               dateFilters={dateFilters}
-              dataPoints={dataPoints} />
+              dataPoints={dataPoints?.filter((e) => e.type === 'Digital')} />
           </Box>
         </>
         : <span>Status Data Point Not Configured Yet</span>}
