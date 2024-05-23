@@ -1,8 +1,9 @@
 import Box from '@material-ui/core/Box';
 import { CHILD_RESOURCE, addItemAtIndex, removeItemAtIndex } from '../../constants/helpers';
 
-import { DndContext, DragEndEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent } from '@dnd-kit/core';
 import { arrayMove } from '@dnd-kit/sortable';
+import { useDndSensors } from 'src/hooks';
 import DndOverlayWrapper from './NewDnd/DndOverlayWrapper';
 import Sections from './NewDnd/Sections';
 import Sidebar from './NewDnd/Sidebar';
@@ -159,19 +160,7 @@ export const FormBuilder = ({
     movefield(event);
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 5
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 100,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   return (
     <Box>

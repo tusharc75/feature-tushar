@@ -13,6 +13,7 @@ import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, Tou
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDndSensors } from 'src/hooks';
 
 export default function ArrangeView({ columns, setColumns }) {
   const [open, setOpen] = useState(false);
@@ -63,19 +64,7 @@ export default function ArrangeView({ columns, setColumns }) {
     setOpen(false);
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   return (
     <>
