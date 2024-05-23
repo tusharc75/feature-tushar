@@ -158,7 +158,7 @@ const Field = ({
         ref={setNodeRef}
         className={`${
           isDragging
-            ? '[border:5px_dashed_var(--common-border-color)] bg-[var(--dark-secondary,theme("colors.cyan.100"))]'
+            ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
             : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
         }  p-2 min-h-[56.5px] items-center flex`}
       >
@@ -180,7 +180,7 @@ const Field = ({
                     onChange={(event) => onChangeFieldName(data._id, event.target.value)}
                   />
                 ) : (
-                  <p className="MuiTypography-body2">{data.fieldLabel}</p>
+                  <p className="MuiTypography-body2 line-clamp-1">{data.fieldLabel}</p>
                 )}
               </div>
               <p className="text-gray-500 dark:text-slate-300 line-clamp-1 min-w-0 ml-[40px] lg:ml-0">
