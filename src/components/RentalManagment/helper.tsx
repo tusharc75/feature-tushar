@@ -6,20 +6,16 @@ import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../c
 import { unionBy, uniq, map, isArray } from 'lodash';
 
 export const fetch_rental_product_fields = async (currency, isOffline) => {
-    var allFields;
+    var data;
     if (isOffline) {
-        allFields = await findOne(objectStore.resource, CHILD_RESOURCE.rentalManagementProduct);
+        data = await findOne(objectStore.resource, CHILD_RESOURCE.rentalManagementProduct);
     } else {
-      const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
-      allFields = response?.data?.data;
+        const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
+        data = response?.data?.data;
     }
-    const visibleFields = allFields?.filter((f) => f?.isRead)?.map((d) => d?.fieldData);
-    allFields = CURReplaceByCurrencySingle(
-        allFields?.map((d) => d?.fieldData),
-      currency ? currency : 'USD'
-    );
-    return { allFields, visibleFields };
-};
+    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
+    return data;
+}
 
 export const fetch_rental_cost_fields = async (currency, isOffline) => {
     var data;

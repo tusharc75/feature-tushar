@@ -118,8 +118,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setFetchingData(true);
-    var { allFields, visibleFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
-    setAllFields(JSON.parse(JSON.stringify(allFields)));
+    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];
       let pricingMethodArray: any = [];
@@ -144,7 +144,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       const unitOptions: any = arrayToDropwdownOption(unit);
       const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
 
-      visibleFields.forEach((element) => {
+      data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
@@ -158,26 +158,11 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         element.isFormula = false;
         element.isMulitFormula = false;
       });
-      allFields.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
-        }
-        if (element.fieldName === 'pricingMethod') {
-          element.option = pricingMethodOptions;
-        }
-        if (element.fieldName === 'pricingCondition') {
-          element.option = [];
-        }
-        element.required = false;
-        element.isFormula = false;
-        element.isMulitFormula = false;
-      });
-      visibleFields = visibleFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
-      allFields = allFields.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
+      data = data.filter((e: any) => !e.isUneditable && !e.disableOnEdit);
       setInitialData({
-        fields: allFields,
+        fields: data,
         values: {
-          ...getObjKeys('', allFields),
+          ...getObjKeys('', data),
           estimateStartDate: '',
           estimateEndDate: '',
           actualStartDate: '',
@@ -197,7 +182,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
       setPriceMethodListConst(pricingMethodOptions);
       await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
-      visibleFields.forEach((element) => {
+      data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
         }
@@ -209,18 +194,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         // }
       });
 
-      allFields.forEach((element) => {
-        if (element.fieldName === 'unit') {
-          element.option = unitOptions;
-        }
-        if (element.fieldName === 'pricingMethod') {
-          element.option = pricingMethodOptions;
-        }
-      });
-
       if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
-        visibleFields = visibleFields.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
-        allFields = allFields.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
+        data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }
 
       // let initialValues = getObjKeysWithValues(rowData, data);
@@ -237,12 +212,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       //   });
       // } else {
       setInitialData({
-        fields: allFields,
-        values: getObjKeysWithValues(rowData, allFields)
+        fields: data,
+        values: getObjKeysWithValues(rowData, data)
       });
       // }
     }
-    EvaluteproductFields(visibleFields);
+    EvaluteproductFields(data);
     setFetchingData(false);
   };
 
@@ -266,9 +241,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       });
     }
 
-    const sections = uniq(map(fields, 'sectionName'));
+    const sections = uniq(map(fields?.filter(f => f?.isRead), 'sectionName'));
     const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name);
+      let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });

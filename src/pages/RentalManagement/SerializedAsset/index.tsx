@@ -78,7 +78,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   const fetchFields = async () => {
     setNextStep(false)
-    var {allFields: data} = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
+    var data = await fetch_rental_product_fields(rentalManagementData.currency, isOffline);
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });

@@ -96,15 +96,15 @@ const Productpackage = ({
   }, [allFields, allowedToEdit, quotationApproved]);
 
   const fetchFields = async () => {
-    var { visibleFields } = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
+    var data = await fetch_rental_product_fields(rentalManagementData?.currency, isOffline);
     const fields = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
     setCostFields(fields);
-    setAllFields(JSON.parse(JSON.stringify(visibleFields)));
+    setAllFields(JSON.parse(JSON.stringify(data)));
   };
 
   const createColumns = () => {
     setColumns(null);
-    const data = [...allFields];
+    const data = [...allFields]?.filter(f => f?.isRead);
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
