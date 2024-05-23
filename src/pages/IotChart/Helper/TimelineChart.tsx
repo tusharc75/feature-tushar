@@ -74,7 +74,7 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
     let filterById = [
       {
         field: 'dataPoints',
-        term: { $in: dataPoints?.filter((e) => e.type === 'Digital')?.map((d: any) => d._id) }
+        term: { $in: dataPoints?.map((d: any) => d._id) }
       },
       {
         field: 'asset',
@@ -95,26 +95,31 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
         }
       })
       .then(({ data: { data } }) => {
-        setChartData(data);
+        if (data?.length) {
+          setChartData(transformData(data));
+        }
+        else {
+          setChartData({ active: [], inactive: [] });
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   };
 
-  const dataPointsMapping = dataPoints.reduce((acc, point) => {
-    acc[point.fieldName] = point.fieldLabel;
-    return acc;
-  }, {});
-
   function transformData(piData) {
+
+    const dataPointsFieldName: any = dataPoints?.map((e) => e.fieldName);
+
     if (!piData) return null;
-    const statusKeys = Object.keys(piData[0]).filter((key) => key !== 'time');
+    const statusKeys = Object.keys(piData[0]).filter((key) => key !== 'time' && dataPointsFieldName?.includes(key));
 
     let activeIntervals = [];
     let inactiveIntervals = [];
 
     for (let key of statusKeys) {
+      const fieldLabel = dataPoints?.find((e) => e?.fieldName === key)?.fieldLabel || key
+
       let currentIntervalStart = new Date(piData[0].time).getTime();
       let currentStatus = piData[0][key];
 
@@ -124,9 +129,9 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
         if (piData[i][key] !== currentStatus) {
           // If status changes, push the previous interval
           if (currentStatus === 1) {
-            activeIntervals.push({ x: dataPointsMapping[key] || key, y: [currentIntervalStart, currentTime] });
+            activeIntervals.push({ x: fieldLabel, y: [currentIntervalStart, currentTime] });
           } else {
-            inactiveIntervals.push({ x: dataPointsMapping[key] || key, y: [currentIntervalStart, currentTime] });
+            inactiveIntervals.push({ x: fieldLabel, y: [currentIntervalStart, currentTime] });
           }
 
           // Reset currentIntervalStart and currentStatus for the next series
@@ -137,27 +142,14 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
 
       // Push the last interval after the loop
       if (currentStatus === 1) {
-        activeIntervals.push({ x: dataPointsMapping[key] || key, y: [currentIntervalStart, new Date(piData[piData.length - 1].time).getTime()] });
+        activeIntervals.push({ x: fieldLabel, y: [currentIntervalStart, new Date(piData[piData.length - 1].time).getTime()] });
       } else {
-        inactiveIntervals.push({ x: dataPointsMapping[key] || key, y: [currentIntervalStart, new Date(piData[piData.length - 1].time).getTime()] });
+        inactiveIntervals.push({ x: fieldLabel, y: [currentIntervalStart, new Date(piData[piData.length - 1].time).getTime()] });
       }
     }
 
     return { active: activeIntervals, inactive: inactiveIntervals };
   }
-
-  let transformedData = transformData(chartData);
-
-  let series = [
-    {
-      name: 'Active',
-      data: transformedData?.active
-    },
-    {
-      name: 'Inactive',
-      data: transformedData?.inactive
-    }
-  ];
 
   useEffect(() => {
     const newOptions = { ...chartOptions };
@@ -172,7 +164,16 @@ const TimelineChart = ({ assetId, dateFilters, dataPoints }) => {
         <ReactApexChart
           key={currentChartTheme}
           options={chartOptions}
-          series={series}
+          series={[
+            {
+              name: 'Active',
+              data: chartData?.active
+            },
+            {
+              name: 'Inactive',
+              data: chartData?.inactive
+            }
+          ]}
           type="rangeBar"
           height={500} />
       ) : (
