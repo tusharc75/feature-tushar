@@ -760,7 +760,7 @@ const Productpackage = ({
         >
           {`Add Existing ${routes.serializedAsset.title}`}
         </MenuItem>
-        {costFields?.length > 0 && (
+        {costFields?.filter(f => f?.isRead)?.length > 0 && (
           <MenuItem
             onClick={() => {
               setShowCostDialog({ open: true, data: null, showSaveAndNext: false });

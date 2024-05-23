@@ -1,4 +1,4 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { Box, Button, Dialog, Grid } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
@@ -13,7 +13,8 @@ import { orderBy, uniq, map, uniqBy } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FaDiceOne } from 'react-icons/fa';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
+import { calculatePrice, calculateRowsField, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const rateChangeFields = ['pricingMethod', 'pricingCondition'];
 
@@ -28,13 +29,15 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceMethodList, setPriceMethodList] = useState([]);
 
+  const { isOffline } = useContext(CustomOfflineContext);
+
   useEffect(() => {
     fetchFields();
   }, [technicianData]);
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    let data = await fetch_child_resource_fields(CHILD_RESOURCE.rentalManagementTechnician, rentalManagementData?.currency, true);
+    let data = await fetch_rental_technician_fields(rentalManagementData?.currency, isOffline);
     if (bulkEdit) {
       data = data.filter((e: any) => (!e.isUneditable && !e.disableOnEdit));
       setInitialData({
@@ -73,9 +76,9 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
   };
 
   const EvaluteproductFields = (fields) => {
-    const sections = uniq(map(fields, 'sectionName'));
+    const sections = uniq(map(fields?.filter(f => f?.isRead), 'sectionName'));
     const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name);
+      let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
@@ -164,7 +167,7 @@ const RentalTechnicianQtyDialog = ({ onClose, technicianData, rentalManagementDa
           <Formik
             enableReinitialize={true}
             initialValues={initialData.values}
-            validationSchema={yupSchema(initialData.fields)}
+            validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
             validateOnMount
             onSubmit={handleSubmit}
           >

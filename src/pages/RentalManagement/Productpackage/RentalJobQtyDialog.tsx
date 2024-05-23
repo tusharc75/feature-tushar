@@ -455,7 +455,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           innerRef={ref}
           enableReinitialize={true}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
+          validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
           validateOnMount
           validate={validate}
           onSubmit={handleSubmit}
