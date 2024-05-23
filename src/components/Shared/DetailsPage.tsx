@@ -170,8 +170,8 @@ const Details = (props: DetailProps) => {
    */
   const normalizeValues = (values, input) => {
     let text = '';
-    if((input.type === 'multiSelect' || input.type === 'dropDown') && input?.dataList){
-      if(input.type === 'multiSelect'){
+    if ((input.type === 'multiSelect' || input.type === 'dropDown') && input?.dataList) {
+      if (input.type === 'multiSelect') {
         const value = values[`${input?.fieldName}_dataList`]?.length ? values[`${input?.fieldName}_dataList`]?.map((d) => d.optionLabel).join(', ') : ''
         text = value ? value : '-';
       } else {
@@ -207,6 +207,10 @@ const Details = (props: DetailProps) => {
       const currency = user?.user?.brandCurrency || 'USD';
       const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
       text = `${currencySymbol}${formatAmountWithCurrency(currency, (values[input.fieldName] || 0))?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`
+    } else if (input.type === 'currencyAmount') {
+      const currency = user?.user?.brandCurrency || 'USD';
+      const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
+      text = `${currencySymbol}${formatAmountWithCurrency(currency, (values[`${input.fieldName}_${currency?.toLowerCase()}`] || 0))?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`
     } else if (input.type === 'switch') {
       text = values[input.fieldName] ? 'Inactive' : 'Active';
     } else if (input.type === 'checkBox') {

@@ -83,6 +83,7 @@ const Products = ({ packageId, packageData }) => {
       _subRow.detail = _subRow?.assetNumber;
       _subRow.description = parent?.description;
       _subRow.productCategory = _subRow?.productCategory?.optionLabel;
+      _subRow.position = _subRow?.position;
       _subRow.parentId = _subRow.product;
       _subRow.qty = 1;
     });
@@ -96,7 +97,7 @@ const Products = ({ packageId, packageData }) => {
       fields: [
         {
           resource: 'Product',
-          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct']
+          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct', 'position']
         }
       ]
     });
@@ -152,7 +153,9 @@ const Products = ({ packageId, packageData }) => {
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          return row.original['description'] ? <div>
+            <p className="text-truncate">{row.original.description}</p>
+          </div> : <NoDataCell />;
         }
       },
       {
@@ -171,6 +174,16 @@ const Products = ({ packageId, packageData }) => {
           return row.original['productCategory'] ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
         }
       },
+      ...(productFields?.find((e) => e.fieldName === 'position') ? [{
+        accessor: 'position',
+        Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['position'] ? <div>
+            <p className="text-truncate">{row.original.position}</p>
+          </div> : <NoDataCell />;
+        }
+      }] : []),
       {
         accessor: 'qty',
         Header: 'Qty',

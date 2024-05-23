@@ -103,5 +103,16 @@ export const resourcePolicy = [
                 defaultValue: []
             },
         ]
-    }
+    },
+    {
+        resource: sidebarResource.workOrder,
+        policy: [
+            {
+                fieldName: "showBom",
+                fieldLabel: "Show BOM",
+                type: "checkBox",
+                defaultValue: false
+            }
+        ]
+    },
 ]

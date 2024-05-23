@@ -5,10 +5,9 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import { CustomDialogTransition, dateTimeFormat, prepareDataForGrid } from '../../../constants/helpers';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import { withStyles } from '@material-ui/core/styles';
 import { Box, Button, Grid, IconButton, TextField, Typography } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { FaThumbsUp, FaThumbsDown } from 'react-icons/fa6';
 import moment from 'moment';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -17,6 +16,8 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import routes from 'src/components/Helpers/Routes';
+import {Link} from 'react-router-dom';
 
 const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId }) => {
   let renderedFrom = 'ViewQuotationSupplierPrice';
@@ -122,7 +123,6 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
           : _subRow?.type === 'package'
           ? _subRow?.packageDetail?.packageDescription
           : '';
-
       _subRow.subRows = generateNestedData(material, _subRow);
     });
 
@@ -131,6 +131,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
 
   const fetchColumns = (id = null) => {
     let columns = [];
+
     columns = [
       {
         accessor: 'index',
@@ -170,7 +171,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
         show: true,
         disabled: true,
         Cell: ({ row }) => (row?.original?.description ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />)
-      }
+      },
     ];
 
     if (id) {
@@ -274,8 +275,54 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                 <AccordionDetails>
                   {expandSupplierGrid === data?._id && (
                     <>
+                  <div className="flex flex-wrap gap-2 items-center justify-between">
+                    <div>
+                    {data?.status==='Submit' && 
+                      <Box className="min-w-0  line-clamp-1" title={data?.responseDate ? moment(data?.responseDate).format(dateTimeFormat) : ''}>
+                        <Typography variant="subtitle2">
+                          {data?.responseDate && `Response Date : ${moment(data?.responseDate).format(dateTimeFormat)} `}
+                        </Typography>
+                      </Box>
+                      }
+                      {data?.status==='Send' && 
+                      <div className="flex gap-3">
+                      <Box className="min-w-0  line-clamp-1" title={data?.supplierAccount ? data?.supplierAccount?.optionLabel : ''}>
+                        <Typography variant="subtitle2">
+                          {data?.supplierAccount && (
+                             <>
+                             Supplier Account :{" "}
+                             <Link 
+                               className="link text-truncate" 
+                               target="_blank" 
+                               to={`${routes.supplierAccountDetail.path}/${data.supplierAccount?.optionValue}`}>
+                               {data.supplierAccount.optionLabel}
+                             </Link>
+                             
+                           </>
+                          )}
+                        </Typography>
+                      </Box>
+                      <Box className="min-w-0  line-clamp-1" title={data?.supplierContact ? data?.supplierContact?.optionLabel : ''}>
+                      <Typography variant="subtitle2">
+                        {data?.supplierContact && (
+                          <>
+                           Supplier Contact :{" "}
+                             <Link 
+                               className="link text-truncate" 
+                               target="_blank" 
+                               to={`${routes.supplierContactDetail.path}/${data.supplierContact?.optionValue}`}>
+                               {data.supplierContact.optionLabel}
+                             </Link>
+                          </>
+                        )}
+                      </Typography>
+                    </Box>
+                    </div>
+                      }
+                    </div>
                       {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
-                        <div className="flex flex-wrap gap-2 justify-end">
+                        
+                        <div className="flex gap-2">
                           <ThemeButton
                             borderColor="default"
                             iconForMobile={<FaThumbsUp />}
@@ -297,8 +344,9 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                           >
                             Reject
                           </ThemeButton>
-                        </div>
+                          </div>
                       )}
+                      </div>
                       <CustomReactTable
                         height={'calc(100vh - 393px)'}
                         columns={fetchColumns(data?._id)}
