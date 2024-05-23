@@ -10,9 +10,10 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { changeItemIndex } from 'src/constants/helpers';
 
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDndSensors } from 'src/hooks';
 
 const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast = true }) => {
   const [valid, setValid] = React.useState(false);
@@ -88,19 +89,7 @@ const ArrangeView = ({ data, title, handleClose, handleSubmit, loading, isLast =
     setActiveItem(event.active.data.current.props);
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   return (
     <Dialog

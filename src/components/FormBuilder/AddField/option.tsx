@@ -25,6 +25,7 @@ import { FixedSizeList } from 'react-window';
 import { read, utils, writeFile } from 'xlsx';
 import axiosInstance from '../../../axios/axiosInstance';
 import { generateId } from '../NewDnd/helper';
+import { useDndSensors } from 'src/hooks';
 
 export const Option = ({ values, setFieldValue, fields, _id }) => {
   const defaultOption = [{ optionLabel: 'Option 1', optionValue: 'Option 1', id: 1715944580321 }];
@@ -35,7 +36,6 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
   const [lookupOption, setlookupOption] = useState([]);
   const [isUpdate, setUpdate] = useState(false);
   const [isAsc, setIsAsc] = useState(true);
-
 
   useEffect(() => {
     if (values['isDependentDropdown'] && values['dropdowDependentOn']) {
@@ -252,19 +252,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
     setOptions(defaultOption);
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   return (
     <Box>
@@ -524,23 +512,23 @@ const Card = (props) => {
                 {values['dropdowDependentOn'] && fields.filter((_f) => _f.fieldName === values['dropdowDependentOn']).length
                   ? fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].lookup
                     ? lookupOption &&
-                    lookupOption.map((_option) => {
-                      return (
-                        <MenuItem key={_option.optionLabel} value={_option.optionValue}>
-                          {_option.optionLabel}
-                        </MenuItem>
-                      );
-                    })
-                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
-                    fields
-                      .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
-                      .option.map((_option) => {
+                      lookupOption.map((_option) => {
                         return (
-                          <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
+                          <MenuItem key={_option.optionLabel} value={_option.optionValue}>
                             {_option.optionLabel}
                           </MenuItem>
                         );
                       })
+                    : fields.filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0].option &&
+                      fields
+                        .filter((_f) => _f.fieldName === values['dropdowDependentOn'])[0]
+                        .option.map((_option) => {
+                          return (
+                            <MenuItem key={_option.optionLabel} value={_option.optionLabel}>
+                              {_option.optionLabel}
+                            </MenuItem>
+                          );
+                        })
                   : null}
               </Select>
               {/* <TextField
