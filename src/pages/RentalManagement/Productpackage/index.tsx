@@ -357,7 +357,7 @@ const Productpackage = ({
       }
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
-        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
+        : nonSerializeAsset?.filter((e) => e._id === parent._id).length + data?.nonSerializedInventory?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.hideSelection = parent?.assetQty > 0 ||
         data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired);
