@@ -24,7 +24,7 @@ import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
 import { camelCase } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { calculatePrice } from 'src/components/RentalManagment/helper';
+import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
 
@@ -88,7 +88,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
   };
 
   const fetchColumns = async () => {
-    let data = isOffline ? [] : await fetch_child_resource_fields(CHILD_RESOURCE.rentalManagementTechnician, rentalManagementData?.currency, true);
+    let data = isOffline ? [] : await fetch_rental_technician_fields(rentalManagementData?.currency, false);
     const column: any = [
       {
         accessor: 'index',
@@ -217,7 +217,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         }
       }
     ];
-    const newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
+    const newColumns = generateColumns(renderedFrom, data?.filter(f => f?.isRead), null, false, rentalManagementData?.currency);
     setAllFields(data);
     setColumns([...column, ...newColumns]);
   };

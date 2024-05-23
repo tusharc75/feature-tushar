@@ -98,9 +98,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
                 }`}
                 borderColor="var(--common-border-color)"
                 onClick={() => {
-                  if (selectedProduct === d.product) {
-                    setSelectedProduct(null);
-                  } else {
+                  if (selectedProduct !== d.product) {                    
                     setSelectedProduct(d.product);
                   }
                 }}
