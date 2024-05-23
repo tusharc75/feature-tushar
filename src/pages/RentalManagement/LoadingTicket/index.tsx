@@ -158,20 +158,19 @@ const LoadingTicket = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets
-          ?.filter((e) => e.replace != true)
-          .map((d) => ({
-            ...d.inventory,
-            uniqueId: d._id,
-            isReplaced: d.isReplaced,
-            replaceReason: d.replaceReason,
-            replaceAsset: d?.replaceAsset
-              ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
-              : '',
-            description: d?.product?.productDescription,
-            rentalAssetStatus: d?.status,
-            startDate: d?.startDate
-          }))
+
+        productAssets = productAssets?.filter((e) => e.replace != true).map((d) => ({
+          ...d.inventory,
+          uniqueId: d._id,
+          isReplaced: d.isReplaced,
+          replaceReason: d.replaceReason,
+          replaceAsset: d?.replaceAsset
+            ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
+            : '',
+          description: d?.product?.productDescription,
+          rentalAssetStatus: d?.status,
+          startDate: d?.startDate
+        }))
           .map((u) => ({
             ...u,
             type: 'Asset',
@@ -256,7 +255,6 @@ const LoadingTicket = ({
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.parentId = element?.parentId;
-          obj.parentName = element?.parentName;
           obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
           obj.status =
@@ -297,7 +295,6 @@ const LoadingTicket = ({
                   ? element?.packageDetail?.packageDescription || ''
                   : '';
           obj.parentId = element?.parentId;
-          obj.parentName = element?.parentName;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
@@ -339,7 +336,6 @@ const LoadingTicket = ({
               obj.productName = element?.productDetail?.productName;
               obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
               obj.parentId = element?.parentId;
-              obj.parentName = element?.parentName;
               obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
               obj.status = 'N/A';
               obj.rentalAssetStatus = element?.status;
@@ -370,7 +366,6 @@ const LoadingTicket = ({
                 qty: qty,
                 description: element?.productDetail?.productDescription || '',
                 parentId: element?.parentId,
-                parentName: element?.parentName,
                 assetNumber: element?.productDetail?.productName,
                 productName: element?.productDetail?.productName,
                 warehouse: rentalManagementData?.warehouse?.optionLabel,
@@ -396,8 +391,20 @@ const LoadingTicket = ({
       });
 
       productAssets.forEach((d) => {
-        d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
-        d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.materialId;
+        if (d.type === 'Asset') {
+          const parentId = material?.find((e) => e._id === d.uniqueId)?.parentId;
+          if (parentId) {
+            const parent = material?.find((e) => e._id === parentId);
+            if (parent) {
+              d['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+            }
+          }
+        } else if (d?.parentId) {
+          const parent = material?.find((e) => e._id === d?.parentId);
+          if (parent) {
+            d['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+          }
+        }
         d['isChecked'] = false;
         d['hideSelection'] =
           [ASSET_STATUS.repair, ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(d.status) ||
@@ -574,7 +581,7 @@ const LoadingTicket = ({
       accessor: 'parentName',
       Header: 'Parent',
       disabled: true,
-      Cell: ({ row }) => (row?.original?.parentId ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+      Cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
     },
     {
       accessor: 'loadingTicket',

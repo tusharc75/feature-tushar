@@ -389,7 +389,6 @@ const ReceivingTicket = ({
           obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.parentId = element?.parentId;
-          obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? ele.qty === consumeQty
               ? RENTAL_INTERNAL_ASSET_STATUS.consumed
@@ -439,7 +438,6 @@ const ReceivingTicket = ({
                   : '';
           obj.qty = qty;
           obj.parentId = element?.parentId;
-          obj.parentName = element?.parentName;
           obj.consumeQty = 0;
           obj.returnQty = 0;
           obj.assetNumber = element?.productDetail?.productName;
@@ -467,7 +465,7 @@ const ReceivingTicket = ({
           if (qty) {
             const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId && e.uniqueId === element._id);
             ticketProduct?.forEach((ele) => {
-              
+
               const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
               const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
 
@@ -502,7 +500,6 @@ const ReceivingTicket = ({
               obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
               obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
               obj.parentId = element?.parentId;
-              obj.parentName = element?.parentName;
               obj.status = ASSET_STATUS.notApplied;
               obj.rentalAssetStatus =
                 ele.qty === consumeQty
@@ -550,7 +547,6 @@ const ReceivingTicket = ({
                 qty: qty,
                 description: element?.productDetail?.productDescription || '',
                 parentId: element?.parentId,
-                parentName: element?.parentName,
                 consumeQty: 0,
                 returnQty: 0,
                 assetNumber: element?.productDetail?.productName,
@@ -594,8 +590,20 @@ const ReceivingTicket = ({
       });
 
       productAssets.forEach((d) => {
-        d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
-        d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
+        if (d.type === 'Asset') {
+          const parentId = material?.find((e) => e._id === d.uniqueId)?.parentId;
+          if (parentId) {
+            const parent = material?.find((e) => e._id === parentId);
+            if (parent) {
+              d['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+            }
+          }
+        } else if (d?.parentId) {
+          const parent = material?.find((e) => e._id === d?.parentId);
+          if (parent) {
+            d['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+          }
+        }
         d['isChecked'] = false;
         d['hideSelection'] = [ASSET_STATUS.lost].includes(d.status) || d?.manualStatus === ASSET_STATUS.reserved ? true : false;
 
@@ -798,7 +806,7 @@ const ReceivingTicket = ({
         accessor: 'parentName',
         Header: 'Parent',
         disabled: true,
-        Cell: ({ row }) => (row?.original?.parentId ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
       },
       {
         accessor: 'qty',
