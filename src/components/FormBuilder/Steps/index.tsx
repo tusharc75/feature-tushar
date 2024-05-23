@@ -22,10 +22,11 @@ import Setting from './Setting';
 import { resourcePolicy } from './helper';
 import PolicyDialog from './policyDialog';
 
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDndSensors } from 'src/hooks';
 
 const Steps = ({ resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -121,19 +122,7 @@ const Steps = ({ resource }) => {
     setActiveItem(event?.active?.data.current.props);
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(mouseSensor, touchSensor);
+  const sensors = useDndSensors();
 
   return (
     <Box>

@@ -9,20 +9,10 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, changeItemIndex, generateId, reorder } from './../../constants/helpers';
 
-import {
-  DndContext,
-  DragEndEvent,
-  DragOverEvent,
-  DragOverlay,
-  DragStartEvent,
-  KeyboardSensor,
-  MouseSensor,
-  TouchSensor,
-  useSensor,
-  useSensors
-} from '@dnd-kit/core';
-import { SortableContext, sortableKeyboardCoordinates, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useDndSensors } from 'src/hooks';
 
 const ArrangeView = (props) => {
   const { open, close, resourceData: gridData } = props;
@@ -209,25 +199,7 @@ const ArrangeView = (props) => {
     }
   };
 
-  const mouseSensor = useSensor(MouseSensor, {
-    activationConstraint: {
-      distance: 10
-    }
-  });
-  const touchSensor = useSensor(TouchSensor, {
-    activationConstraint: {
-      delay: 300,
-      tolerance: 5
-    }
-  });
-
-  const sensors = useSensors(
-    mouseSensor,
-    touchSensor,
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
-    })
-  );
+  const sensors = useDndSensors();
 
   const sectionIds = useMemo(() => data?.map((d) => d.id) || [], [data]);
 

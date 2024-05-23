@@ -57,9 +57,9 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   };
 
   const EvaluteproductFields = (fields) => {
-    const sections = uniq(map(fields, 'sectionName'));
+    const sections = uniq(map(fields?.filter(f => f?.isRead), 'sectionName'));
     const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name);
+      let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
@@ -92,7 +92,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
           innerRef={ref}
           enableReinitialize={true}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
+          validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
           validateOnMount
           onSubmit={handleSubmit}
         >

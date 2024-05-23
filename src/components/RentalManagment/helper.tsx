@@ -10,10 +10,10 @@ export const fetch_rental_product_fields = async (currency, isOffline) => {
     if (isOffline) {
         data = await findOne(objectStore.resource, CHILD_RESOURCE.rentalManagementProduct);
     } else {
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
+        const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
         data = response?.data?.data;
     }
-    data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
+    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
     return data;
 }
 
@@ -22,10 +22,23 @@ export const fetch_rental_cost_fields = async (currency, isOffline) => {
     if (isOffline) {
         data = await findOne(objectStore.resource, CHILD_RESOURCE.rentalManagementCost);
     } else {
-        const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`);
+        // const response = await axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.rentalManagementCost}`);
+        const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.rentalManagementCost}`);
         data = response?.data?.data;
     }
-    data = CURReplaceByCurrencySingle(data, currency ? currency : "USD");
+    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
+    return data;
+}
+
+export const fetch_rental_technician_fields = async (currency, isOffline) => {
+    var data;
+    if (isOffline) {
+        data = await findOne(objectStore.resource, CHILD_RESOURCE.rentalManagementTechnician);
+    } else {
+        const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.rentalManagementTechnician}`);
+        data = response?.data?.data;
+    }
+    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
     return data;
 }
 
