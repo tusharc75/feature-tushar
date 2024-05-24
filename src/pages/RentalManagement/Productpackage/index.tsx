@@ -255,17 +255,11 @@ const Productpackage = ({
             {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
                 <HtmlTooltip
-                  title={
-                    row.original?.assetQty
-                      ? row?.original?.productDetail?.serializedProduct
-                        ? 'Asset is already assigned'
-                        : nonSerializedInventory?.filter((s) => s?._id === row?.original?._id)?.length > 0
-                        ? nonSerializedInventory?.filter((s) => s?._id === row?.original?._id)?.reduce((sum, row) => (sum + row?.qty) | 0, 0) ===
-                          row?.original?.assetQty
-                          ? 'Inventory is already assigned'
-                          : 'Serial Number and inventory are already assigned'
-                        : 'Serial Number is already assigned'
-                      : row.original?.status
+                  title={row.original?.assetQty
+                    ? row?.original?.productDetail?.serializedProduct
+                      ? 'Assets/Serial Numbers is already assigned'
+                      : 'Inventory/Serial Numbers is already assigned'
+                    : row.original?.status
                       ? rentalManagementMessage.loadingAlreadyCreated
                       : ''
                   }
