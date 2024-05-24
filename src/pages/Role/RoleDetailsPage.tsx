@@ -584,7 +584,7 @@ const RoleDetailsPage = () => {
                             resource={childrenResource}
                             setField={setField}
                             setResource={setChildrenResource}
-                            isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
+                            isDisable={permissions?.role.isUpdate ? (!isEdit ? true : false) : true}
                             tier={ROLE_TIER.tier1}
                           />
                         </Box>
@@ -848,10 +848,10 @@ const RoleDetailsPage = () => {
               roleDeleteRec
                 ? `Are you sure you want to delete this Role ?`
                 : userDeleteRec
-                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-                : entityDeleteRec
-                ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-                : ''
+                  ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                  : entityDeleteRec
+                    ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                    : ''
             }
             onClose={() => {
               setShowConfirmBox(false);
