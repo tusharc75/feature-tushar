@@ -674,7 +674,7 @@ const ReceivingTicket = ({
         s.isAllowedStartDate = true;
       })
 
-      dispatch({ type: 'initialize', data: rentalPolicyData?.showServiceOnFieldStep ? [...productAssets, ...services] : productAssets, count: productAssets.length });
+      dispatch({ type: 'initialize', data: rentalPolicyData?.showServiceOnFieldStep ? [...productAssets, ...services] : productAssets, count: rentalPolicyData?.showServiceOnFieldStep ? (productAssets.length + services.length) : productAssets.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
