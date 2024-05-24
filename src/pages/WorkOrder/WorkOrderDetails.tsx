@@ -262,7 +262,7 @@ const WorkOrderDetails = () => {
   const reOpenWorkOrder = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${workOrder.api}/re-open`, { _id: id })
+      .put(`${workOrder.api}/re-open`, { ids: [id] })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,

@@ -85,6 +85,7 @@ const WorkOrder = ({
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
+  const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -962,6 +963,49 @@ const WorkOrder = ({
       });
   };
 
+  const updateJobStatus = () => {
+    setSubmitting(true);
+    const ids = selectedRecords?.filter((d)=> d.type === MATERIAL_TYPE.serializedAsset && d?.workOrderStatus!==WORK_ORDER_STATUS.completed)?.map((e)=> e?.workOrder?._id);
+
+    const data: any = { status: WORK_ORDER_STATUS.completed, ids:ids };
+    axiosInstance().put(`${workOrder.api}/update-multiple-status`, data)
+      .then(({ data: { data } }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data
+        });
+        fetchData();
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSubmitting(false);
+      });
+  };
+
+  const reOpenWorkOrder = () => {
+    setSubmitting(true);
+    const ids = selectedRecords?.filter((d)=> d.type === MATERIAL_TYPE.serializedAsset && d?.workOrderStatus === WORK_ORDER_STATUS.completed)?.map((e)=> e?.workOrder?._id);
+    axiosInstance()
+      .put(`${workOrder.api}/re-open`, { ids: ids })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+        setSubmitting(false);
+        setShowReopenConfirmation(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSubmitting(false);
+        setShowReopenConfirmation(false);
+      });
+  };
+
   const leftSideContents = () => {
     return (
       <>
@@ -1127,6 +1171,22 @@ const WorkOrder = ({
             Revert Service
           </MenuItem>
         )}
+        <MenuItem
+            disabled={!selectedRecords?.some((e)=> e.type===MATERIAL_TYPE.serializedAsset && e?.workOrderStatus!==WORK_ORDER_STATUS.completed) }
+            onClick={() => {
+              updateJobStatus();
+            }}
+          >
+            Close
+          </MenuItem>
+          <MenuItem
+            disabled={!selectedRecords?.some((e)=> e.type===MATERIAL_TYPE.serializedAsset && e?.workOrderStatus===WORK_ORDER_STATUS.completed)}
+            onClick={() => {
+              setShowReopenConfirmation(true);
+            }}
+          >
+            Re-Open
+          </MenuItem>
         <MenuItem
           onClick={() => {
             setIsBulkEdit(true);
@@ -1357,6 +1417,17 @@ const WorkOrder = ({
               extraDeepFilter={[{ field: 'expenseItem', term: 'No' }]}
             />
           )}
+      {showReopenConfirmation && (
+        <ConfirmationDialog
+          open={showReopenConfirmation}
+          message={`Are you sure you want to re-open work order ?`}
+          onClose={() => {
+            setShowReopenConfirmation(false);
+          }}
+          onOk={reOpenWorkOrder}
+          okBtnLoading={isSubmitting}
+        />
+      )}
         </Grid>
       </Grid>
     </Fragment>
