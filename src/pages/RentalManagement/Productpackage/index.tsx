@@ -70,7 +70,6 @@ const Productpackage = ({
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
   const [costFields, setCostFields] = useState([]);
-  const [nonSerializedInventory, setNonSerializedInventory] = useState([]);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
 
   const { state, dispatch } = useTableReducer();
@@ -324,7 +323,6 @@ const Productpackage = ({
       inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
       productSerialNumbers = data.productSerialNumbers;
-      setNonSerializedInventory(nonSerializedInventory)
     }
 
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
