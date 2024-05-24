@@ -53,6 +53,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             inventory: 0
           }));
 
+        console.log('aaaaaa', [...productInventoryData, ...nonExistingInventory]);
+
         setProductInventoryData([...productInventoryData, ...nonExistingInventory]);
       })
       .catch((error) => {
@@ -173,69 +175,74 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
           rightSideContents={rightSideContents()}
           isAddButtonVisible={false}
         />
-        <TableContainer component={Paper}>
-          <Table aria-label="customized table">
-            <TableHead>
-              <TableRow>
-                <TableCell>{routes.warehouse.title}</TableCell>
-                <TableCell align="left">Qty</TableCell>
-                <TableCell align="left">{type === 'add' ? 'Assign' : 'Remove'} Inventory</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {productInventoryData?.length > 0 &&
-                productInventoryData
-                  ?.filter((p) => p?.product === selectedProduct)
-                  ?.map((_product: any) => (
-                    <TableRow key={_product?._id}>
-                      <TableCell component="th" scope="row">
-                        {_product?.warehouse}
-                      </TableCell>
-                      <TableCell align="left">{_product?.qty}</TableCell>
-                      <TableCell align="left">
-                        <TextField
-                          size="small"
-                          type="number"
-                          variant="outlined"
-                          value={_product['inventory']}
-                          placeholder="Assign inventory"
-                          autoComplete="off"
-                          name={'inventory'}
-                          onChange={(e) => {
-                            const inventory = parseInt(e?.target?.value) >= 0 ? parseInt(e?.target?.value) : 0;
-                            setProductInventoryData(
-                              productInventoryData?.map((_data) => (_data?._id === _product?._id ? { ..._data, inventory: inventory } : _data))
-                            );
+        {productInventoryData?.filter((p) => p?.product === selectedProduct)?.length > 0 ? (
+          <TableContainer component={Paper}>
+            <Table aria-label="customized table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>{routes.warehouse.title}</TableCell>
+                  <TableCell align="left">Qty</TableCell>
+                  <TableCell align="left">{type === 'add' ? 'Assign' : 'Remove'} Inventory</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {productInventoryData?.length > 0 &&
+                  productInventoryData
+                    ?.filter((p) => p?.product === selectedProduct)
+                    ?.map((_product: any) => (
+                      <TableRow key={_product?._id}>
+                        <TableCell component="th" scope="row">
+                          {_product?.warehouse}
+                        </TableCell>
+                        <TableCell align="left">{_product?.qty}</TableCell>
+                        <TableCell align="left">
+                          <TextField
+                            size="small"
+                            type="number"
+                            variant="outlined"
+                            value={_product['inventory']}
+                            placeholder="Assign inventory"
+                            autoComplete="off"
+                            name={'inventory'}
+                            onChange={(e) => {
+                              const inventory = parseInt(e?.target?.value) >= 0 ? parseInt(e?.target?.value) : 0;
+                              setProductInventoryData(
+                                productInventoryData?.map((_data) => (_data?._id === _product?._id ? { ..._data, inventory: inventory } : _data))
+                              );
 
-                            setProducts((preVal) => {
-                              preVal?.forEach((_p) => {
-                                if (_p?.product === selectedProduct) {
-                                  _p.qty =
-                                    _p.totalQty -
-                                    (inventory +
-                                      productInventoryData
-                                        ?.filter((p) => p?._id != _product?._id && p?.product === selectedProduct)
-                                        ?.reduce((sum, row) => sum + row?.inventory, 0));
-                                }
+                              setProducts((preVal) => {
+                                preVal?.forEach((_p) => {
+                                  if (_p?.product === selectedProduct) {
+                                    _p.qty =
+                                      _p.totalQty -
+                                      (inventory +
+                                        productInventoryData
+                                          ?.filter((p) => p?._id != _product?._id && p?.product === selectedProduct)
+                                          ?.reduce((sum, row) => sum + row?.inventory, 0));
+                                  }
+                                });
+                                return preVal;
                               });
-                              return preVal;
-                            });
-                          }}
-                          error={_product?.inventory > _product?.qty}
-                          helperText={
-                            _product?.inventory > _product?.qty
-                              ? type === 'add'
-                                ? 'Assigned inventory more than available Qty'
-                                : 'Removed inventory more than Assigned'
-                              : ''
-                          }
-                        />
-                      </TableCell>
-                    </TableRow>
-                  ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+                            }}
+                            error={_product?.inventory > _product?.qty}
+                            helperText={
+                              _product?.inventory > _product?.qty
+                                ? type === 'add'
+                                  ? 'Assigned inventory more than available Qty'
+                                  : 'Removed inventory more than Assigned'
+                                : ''
+                            }
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        ) : (
+          <Typography>Inventory not available</Typography>
+        )}
+
         <Box pt={1}>
           {productInventoryData?.filter((p) => p?.product === selectedProduct)?.reduce((sum, row) => row?.inventory + sum, 0) >
             selectedProducts?.find((s) => s?.id === selectedProduct)?.qty && (
