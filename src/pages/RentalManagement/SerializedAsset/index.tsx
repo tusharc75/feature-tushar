@@ -44,7 +44,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false });
   const [addNonSerializedAssetDialog, setAddNonSerializedAssetDialog] = useState(false);
-  const [addNonSerializedInventoryDialog, setAddNonSerializedInventoryDialog] = useState({open: false, type: ''});
+  const [addNonSerializedInventoryDialog, setAddNonSerializedInventoryDialog] = useState({ open: false, type: '' });
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [nonSerializedAssetProduct, setNonSerializedAssetProduct] = useState([]);
   const [deleteData, setDeleteData] = useState([]);
@@ -684,10 +684,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             obj._id = e._id;
             obj.inventory = result[0].id;
             obj.product = e.materialId;
-            const matchedAsset = assetsData.find(asset => asset._id === obj.inventory);
-            if (matchedAsset) {
-              const { _id, ...assetData } = matchedAsset;
-              obj.assetData = assetData;
+            if (assetsData) {
+              const matchedAsset = assetsData?.find(asset => asset._id === obj.inventory);
+              if (matchedAsset) {
+                const { _id, ...assetData } = matchedAsset;
+                obj.assetData = assetData;
+              }
             }
             data.push(obj);
             result[0].isCounted = true;
@@ -944,7 +946,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddNonSerializedInventoryDialog({open: true, type: 'add'});
+                setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
               }}
             >
               {`Assign Inventory`}
@@ -960,7 +962,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             >
               Remove Inventory
             </MenuItem>
-        )}
+          )}
         <MenuItem
           disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
           onClick={() => {
@@ -1135,7 +1137,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           referenceId={rentalManagementData?._id}
         />
       )}
-       {addNonSerializedInventoryDialog.open && (
+      {addNonSerializedInventoryDialog.open && (
         <AddNonSerializedInventory
           onClose={() => {
             setAddNonSerializedInventoryDialog({ open: false, type: '' });
@@ -1148,14 +1150,14 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             addNonSerializedInventoryDialog.type === 'add'
               ? nonSerializedAssetProduct
               : selectedRecords
-                  ?.filter((r) => r?.type === 'product' && !r?.productDetail?.serializedProduct && r?.realAssetAssignedQty > 0)
-                  ?.map((s) => ({
-                    ...s,
-                    _id: s._id,
-                    id: s.materialId,
-                    productName: s.productDetail?.productName,
-                    qty: s.realAssetAssignedQty
-                  }))
+                ?.filter((r) => r?.type === 'product' && !r?.productDetail?.serializedProduct && r?.realAssetAssignedQty > 0)
+                ?.map((s) => ({
+                  ...s,
+                  _id: s._id,
+                  id: s.materialId,
+                  productName: s.productDetail?.productName,
+                  qty: s.realAssetAssignedQty
+                }))
           }
           referenceId={rentalManagementData?._id}
           type={addNonSerializedInventoryDialog.type}
