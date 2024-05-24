@@ -233,7 +233,7 @@ const WorkOrderDetails = () => {
     }
   };
 
-  const updateJobStatus = (status, assetStatus = null, workOrderCost = null) => {
+  const updateStatus = (status, assetStatus = null, workOrderCost = null) => {
     setIsSubmitting(true);
     const data: any = { status: status };
     if (assetStatus) {
@@ -373,7 +373,7 @@ const WorkOrderDetails = () => {
       id: 'In-Progress',
       type: 'menuItem',
       isVisible: Boolean(allowedToEdit && !workOrderData?.currentRepairJob && workOrderData?.status === WORK_ORDER_STATUS.onHold),
-      onClick: () => updateJobStatus(WORK_ORDER_STATUS.inProgress),
+      onClick: () => updateStatus(WORK_ORDER_STATUS.inProgress),
       tooltip: `Change Status ${WORK_ORDER_STATUS.inProgress}`,
       children: WORK_ORDER_STATUS.inProgress
     },
@@ -381,7 +381,7 @@ const WorkOrderDetails = () => {
       id: 'On-hold',
       type: 'menuItem',
       isVisible: Boolean(allowedToEdit && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)),
-      onClick: () => updateJobStatus(WORK_ORDER_STATUS.onHold),
+      onClick: () => updateStatus(WORK_ORDER_STATUS.onHold),
       tooltip: `Change Status ${WORK_ORDER_STATUS.onHold}`,
       children: WORK_ORDER_STATUS.onHold
     },
@@ -391,7 +391,7 @@ const WorkOrderDetails = () => {
       ripple: true,
       isVisible: Boolean(allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed),
       onClick: () => workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length
-        ? setOpenTotalCostDialog(true) : updateJobStatus(WORK_ORDER_STATUS.completed),
+        ? setOpenTotalCostDialog(true) : updateStatus(WORK_ORDER_STATUS.completed),
       iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
       name: 'Close'
@@ -652,7 +652,7 @@ const WorkOrderDetails = () => {
           }}
           onOk={() => {
             setShowConfirmBoxScrap(false);
-            updateJobStatus(WORK_ORDER_STATUS.completed, ASSET_STATUS.scrap);
+            updateStatus(WORK_ORDER_STATUS.completed, ASSET_STATUS.scrap);
           }}
         />
       )}
@@ -710,7 +710,7 @@ const WorkOrderDetails = () => {
           currency={workOrderData?.currency || user.user?.brandCurrency}
           onClose={() => setOpenTotalCostDialog(false)}
           onSuccess={(data) => {
-            updateJobStatus(WORK_ORDER_STATUS.completed, null, data)
+            updateStatus(WORK_ORDER_STATUS.completed, null, data)
           }}
           isSubmitting={isSubmitting}
         />
