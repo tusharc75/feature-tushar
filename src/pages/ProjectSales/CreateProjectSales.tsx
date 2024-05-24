@@ -83,7 +83,7 @@ const CreateProjectSales = ({
           if (isClone) {
             const { projectName, ...rest } = data;
             let tempData = { ...rest };
-            rest['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+            tempData['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate); 
             let tempObjKeysWithValues = getObjKeysWithValues(tempData, fieldsDataForUpdate, true, user);
             if (fieldsDataForUpdate?.some((e) => e.fieldName === 'projectManager')) {
               tempObjKeysWithValues['projectManager'] = user._id;
