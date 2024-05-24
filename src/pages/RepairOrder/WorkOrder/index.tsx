@@ -949,7 +949,7 @@ const WorkOrder = ({
     setSubmitting(true);
     const ids = selectedRecords?.filter((d)=> d.type === MATERIAL_TYPE.serializedAsset && d?.workOrderStatus!==WORK_ORDER_STATUS.completed)?.map((e)=> e?.workOrder?._id);
 
-    const data: any = { status: WORK_ORDER_STATUS.completed, ids:ids, repairOrderId: repairOrderData?._id };
+    const data: any = { status: WORK_ORDER_STATUS.completed, ids:ids };
     axiosInstance().put(`${workOrder.api}/update-multiple-status`, data)
       .then(({ data: { data } }) => {
         toastConfig.setToastConfig({
@@ -970,7 +970,7 @@ const WorkOrder = ({
     setSubmitting(true);
     const ids = selectedRecords?.filter((d)=> d.type === MATERIAL_TYPE.serializedAsset && d?.workOrderStatus === WORK_ORDER_STATUS.completed)?.map((e)=> e?.workOrder?._id);
     axiosInstance()
-      .put(`${workOrder.api}/re-open-multiple`, { ids: ids, repairOrderId: repairOrderData?._id })
+      .put(`${workOrder.api}/re-open`, { ids: ids })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
