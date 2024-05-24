@@ -70,6 +70,7 @@ const Productpackage = ({
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [openAssetAvailibility, setOpenAssetAvailibility] = useState(false);
   const [costFields, setCostFields] = useState([]);
+  const [nonSerializedInventory, setNonSerializedInventory] = useState([]);
   const [showCostDialog, setShowCostDialog] = useState({ open: false, data: null, showSaveAndNext: false });
 
   const { state, dispatch } = useTableReducer();
@@ -255,7 +256,18 @@ const Productpackage = ({
               row.original.hideSelection ? (
                 <HtmlTooltip
                   title={
-                    row.original?.assetQty ? (row?.original?.productDetail?.serializedProduct ? 'Asset is already assigned' : 'Serial Number is already assigned') : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
+                    row.original?.assetQty
+                      ? row?.original?.productDetail?.serializedProduct
+                        ? 'Asset is already assigned'
+                        : nonSerializedInventory?.filter((s) => s?._id === row?.original?._id)?.length > 0
+                        ? nonSerializedInventory?.filter((s) => s?._id === row?.original?._id)?.reduce((sum, row) => (sum + row?.qty) | 0, 0) ===
+                          row?.original?.assetQty
+                          ? 'Inventory is already assigned'
+                          : 'Serial Number and inventory are already assigned'
+                        : 'Serial Number is already assigned'
+                      : row.original?.status
+                      ? rentalManagementMessage.loadingAlreadyCreated
+                      : ''
                   }
                 >
                   <span>
@@ -318,6 +330,7 @@ const Productpackage = ({
       inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
       productSerialNumbers = data.productSerialNumbers;
+      setNonSerializedInventory(nonSerializedInventory)
     }
 
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);

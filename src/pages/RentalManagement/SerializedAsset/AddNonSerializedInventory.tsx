@@ -165,7 +165,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
 
   return (
     <Dialog open onClose={onClose} fullScreen>
-      <CustomDialogHeader title={`Assign Inventory`} onClose={onClose} />
+      <CustomDialogHeader title={`${type === 'add' ? 'Assign' : 'Remove'} Inventory`} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           isActionButtonVisible={false}

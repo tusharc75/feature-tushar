@@ -951,15 +951,15 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             </MenuItem>
           </>
         ) : null}
-        {selectedRecords.length && (
-          <MenuItem
-            disabled={!nonSerializedInventory?.filter(ns => selectedRecords?.map(r => r?._id)?.includes(ns?._id))?.some(ns => ns?.qty > 0)}
-            onClick={() => {
-              setAddNonSerializedInventoryDialog({open: true, type: 'remove'});
-            }}
-          >
-            Remove Inventory
-          </MenuItem>
+        {selectedRecords.length &&
+          nonSerializedInventory?.filter((ns) => selectedRecords?.map((r) => r?._id)?.includes(ns?._id))?.some((ns) => ns?.qty > 0) && (
+            <MenuItem
+              onClick={() => {
+                setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });
+              }}
+            >
+              Remove Inventory
+            </MenuItem>
         )}
         <MenuItem
           disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
@@ -1148,7 +1148,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             addNonSerializedInventoryDialog.type === 'add'
               ? nonSerializedAssetProduct
               : selectedRecords
-                  ?.filter((r) => r?.type === 'product' && !r?.productDetail?.serializedProduct)
+                  ?.filter((r) => r?.type === 'product' && !r?.productDetail?.serializedProduct && r?.realAssetAssignedQty > 0)
                   ?.map((s) => ({
                     ...s,
                     _id: s._id,
