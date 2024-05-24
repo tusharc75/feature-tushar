@@ -44,7 +44,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false });
   const [addNonSerializedAssetDialog, setAddNonSerializedAssetDialog] = useState(false);
-  const [addNonSerializedInventoryDialog, setAddNonSerializedInventoryDialog] = useState(false);
+  const [addNonSerializedInventoryDialog, setAddNonSerializedInventoryDialog] = useState({ open: false, type: '' });
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
   const [nonSerializedAssetProduct, setNonSerializedAssetProduct] = useState([]);
   const [deleteData, setDeleteData] = useState([]);
@@ -58,6 +58,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [assignSerialNumbersDialog, setAssignSerialNumbersDialog] = useState(false)
   const [isAssigning, setIsAssigning] = useState(false);
   const [productSerialNumbers, setProductSerialNumbers] = useState([]);
+  const [nonSerializedInventory, setNonSerializedInventory] = useState([]);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
 
   const {
@@ -360,6 +361,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         offlineAssetErrorLog = data?.offlineAssetErrorLog;
 
         setProductSerialNumbers(data.productSerialNumbers)
+        setNonSerializedInventory(data.nonSerializedInventory)
 
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
         const transactionData = result?.data?.data;
@@ -682,10 +684,12 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             obj._id = e._id;
             obj.inventory = result[0].id;
             obj.product = e.materialId;
-            const matchedAsset = assetsData.find(asset => asset._id === obj.inventory);
-            if (matchedAsset) {
-              const { _id, ...assetData } = matchedAsset;
-              obj.assetData = assetData;
+            if (assetsData) {
+              const matchedAsset = assetsData?.find(asset => asset._id === obj.inventory);
+              if (matchedAsset) {
+                const { _id, ...assetData } = matchedAsset;
+                obj.assetData = assetData;
+              }
             }
             data.push(obj);
             result[0].isCounted = true;
@@ -942,13 +946,23 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             </MenuItem>
             <MenuItem
               onClick={() => {
-                setAddNonSerializedInventoryDialog(true);
+                setAddNonSerializedInventoryDialog({ open: true, type: 'add' });
               }}
             >
               {`Assign Inventory`}
             </MenuItem>
           </>
         ) : null}
+        {selectedRecords.length &&
+          nonSerializedInventory?.filter((ns) => selectedRecords?.map((r) => r?._id)?.includes(ns?._id))?.some((ns) => ns?.qty > 0) && (
+            <MenuItem
+              onClick={() => {
+                setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });
+              }}
+            >
+              Remove Inventory
+            </MenuItem>
+          )}
         <MenuItem
           disabled={flattenArray(selectedRecords)?.filter((d) => ['asset', 'serialNumber']?.includes(d.type) && d.canRemove)?.length === 0}
           onClick={() => {
@@ -1123,17 +1137,31 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           referenceId={rentalManagementData?._id}
         />
       )}
-      {addNonSerializedInventoryDialog && (
+      {addNonSerializedInventoryDialog.open && (
         <AddNonSerializedInventory
           onClose={() => {
-            setAddNonSerializedInventoryDialog(false);
+            setAddNonSerializedInventoryDialog({ open: false, type: '' });
           }}
           onSuccess={() => {
-            setAddNonSerializedInventoryDialog(false);
-            fetchData()
+            setAddNonSerializedInventoryDialog({ open: false, type: '' });
+            fetchData();
           }}
-          selectedProducts={nonSerializedAssetProduct}
+          selectedProducts={
+            addNonSerializedInventoryDialog.type === 'add'
+              ? nonSerializedAssetProduct
+              : selectedRecords
+                ?.filter((r) => r?.type === 'product' && !r?.productDetail?.serializedProduct && r?.realAssetAssignedQty > 0)
+                ?.map((s) => ({
+                  ...s,
+                  _id: s._id,
+                  id: s.materialId,
+                  productName: s.productDetail?.productName,
+                  qty: s.realAssetAssignedQty
+                }))
+          }
           referenceId={rentalManagementData?._id}
+          type={addNonSerializedInventoryDialog.type}
+          nonSerializedInventory={nonSerializedInventory}
         />
       )}
       {showConfirmBox && (

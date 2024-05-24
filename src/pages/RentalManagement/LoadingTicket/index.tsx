@@ -78,7 +78,8 @@ const LoadingTicket = ({
   isProcessor,
   allowUpdateStatus,
   checkProgressiveBilling,
-  stepFullScreen
+  stepFullScreen,
+  rentalPolicyData
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
@@ -1095,7 +1096,7 @@ const LoadingTicket = ({
             </Button>
           </span>
         </HtmlTooltip>
-        {allowedToEdit && (
+        {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <Button
             variant={'outlined'}
             color="primary"

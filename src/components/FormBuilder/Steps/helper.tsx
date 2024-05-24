@@ -115,4 +115,21 @@ export const resourcePolicy = [
             }
         ]
     },
+    {
+        resource: sidebarResource.rentalManagement,
+        policy: [
+            {
+                fieldName: "showServiceOnFieldStep",
+                fieldLabel: "Show Service On-Field Step",
+                type: "checkBox",
+                defaultValue: false
+            },
+            {
+                fieldName: "hideAssetChangeStatus",
+                fieldLabel: "Hide Asset Change Status",
+                type: "checkBox",
+                defaultValue: false
+            }
+        ]
+    },
 ]

@@ -185,7 +185,13 @@ const Steps = ({ resource }) => {
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
           <RenderStepItems {...{ steps, setSteps, stepsLoading, setOpen, setOpenField, setDeleteData }} />
-          <DragOverlay>{activeItem && <SingleStep {...activeItem} />}</DragOverlay>
+          <DragOverlay>
+            {activeItem && (
+              <span className="[&_.drag-handle]:!cursor-grabbing">
+                <SingleStep {...activeItem} />
+              </span>
+            )}
+          </DragOverlay>
         </DndContext>
       </Box>
 
@@ -328,7 +334,7 @@ const SingleStep = ({ step, setOpen, setOpenField, setDeleteData, index }) => {
 
   return (
     <>
-      <li ref={setNodeRef} style={style} className="bg-[var(--dark-secondary,white)] cursor-grab list-none">
+      <li ref={setNodeRef} style={style} className="bg-[var(--dark-secondary,white)] list-none">
         <div
           className={`${
             isDragging ? '[border:1px_dashed_var(--common-border-color)]' : '[border:1px_solid_var(--common-border-color)]'
@@ -336,7 +342,7 @@ const SingleStep = ({ step, setOpen, setOpenField, setDeleteData, index }) => {
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <IconButton size={'small'} className={`[cursor:move_!important]`} {...attributes} {...listeners}>
+              <IconButton size={'small'} className={`!cursor-grab drag-handle `} {...attributes} {...listeners}>
                 <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
               </IconButton>
               <h3 className="line-clamp-2 md:line-clamp-1 font-semibold">{step?.stepName}</h3>
