@@ -858,3 +858,12 @@ export const GeneratePasswordIcon: FC<svgInterfaceWithSize> = ({ width = null, h
     </svg>
   );
 };
+
+export const AutoCompleteWorkOrder: FC<svgInterfaceWithSize> = ({ width = null, height = null, size = 18, ...others }) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentcolor" width={width ?? size} height={height ?? size} {...others}>
+      <path d="M16.7 3.1c-.4-.7-1.1-1.1-1.9-1.1H9.2c-.8 0-1.5.4-1.9 1.1C5.4 3.4 4 5 4 7v11c0 2.2 1.8 4 4 4h8c2.2 0 4-1.8 4-4V7c0-2-1.4-3.6-3.3-3.9zM9 4.1s.1-.1.2-.1h5.7l.1.1v.7c0 .1-.1.2-.2.2H9.2c-.1 0-.2-.1-.2-.2v-.7zM18 18c0 1.1-.9 2-2 2H8c-1.1 0-2-.9-2-2V7c0-.8.4-1.4 1-1.8v.1c0 .1.1.2.1.3 0 0 0 .1.1.1 0 .1.1.2.1.2l.1.1c0 .1.1.1.2.2l.1.1.2.2.1.1c.1 0 .1.1.2.1 0 0 .1 0 .1.1.1 0 .2.1.3.1h.1c.2.1.3.1.5.1h6.2c.1 0 .2 0 .3-.1 0 0 .1 0 .1-.1.1 0 .1-.1.2-.1l.1-.1c.1 0 .1-.1.2-.2l.1-.1.2-.2.1-.1c0-.1.1-.1.1-.2 0 0 0-.1.1-.1 0-.1.1-.2.1-.3v-.1c.6.3 1 1 1 1.8V18z"></path>
+      <path d="M14.4 11.1c-.5-.2-1.1 0-1.3.4l-1.4 2.8-1-1c-.4-.4-1-.4-1.4 0s-.4 1 0 1.4l2 2c.2.2.4.3.7.3h.2c.3-.1.6-.3.7-.5l2-4c.2-.5 0-1.1-.5-1.4z"></path>
+    </svg>
+  );
+};
