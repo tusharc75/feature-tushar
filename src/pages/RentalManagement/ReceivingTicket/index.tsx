@@ -94,7 +94,8 @@ const ReceivingTicket = ({
   isProcessor,
   allowUpdateStatus,
   stepFullScreen,
-  checkProgressiveBilling
+  checkProgressiveBilling,
+  rentalPolicyData
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -1609,7 +1610,7 @@ const ReceivingTicket = ({
         >
           {downlodingFile ? 'Please wait...' : 'Preview'}
         </Button>
-        {allowedToEdit && (
+        {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <Button
             variant={'outlined'}
             color="primary"
