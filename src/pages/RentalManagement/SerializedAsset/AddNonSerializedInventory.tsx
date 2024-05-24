@@ -22,7 +22,7 @@ import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { productInventory, rentalManagement } from 'src/constants/helpers';
 
-const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, referenceId }) => {
+const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, referenceId, type = 'add', nonSerializedInventory = [] }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [selectedProduct, setSelectedProduct] = useState(selectedProducts[0]?.id);
@@ -45,7 +45,11 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             product: selectedProduct,
             warehouse: d?.warehouse?.name,
             warehouseId: d?.warehouse?._id,
-            qty: d?.inventory,
+            qty:
+              type === 'add'
+                ? d?.inventory
+                : nonSerializedInventory?.find((s) => s?.product?.optionValue === selectedProduct && s?.warehouse?.optionValue === d?.warehouse?._id)
+                    ?.qty || 0,
             inventory: 0
           }));
 
@@ -64,23 +68,43 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
     const data = productInventoryData?.filter((p) => p?.inventory > 0);
     if (data?.length > 0) {
       setSubmitting(true);
-      axiosInstance()
-        .put(
-          `${rentalManagement.api}/${referenceId}/add-non-serial-inventory`,
-          data?.map((p) => ({
-            product: p?.product,
-            warehouse: p?.warehouseId,
-            qty: p?.inventory,
-            _id: products?.find((_p) => _p?.product === p?.product)?._id
-          }))
-        )
-        .then(() => {
-          setSubmitting(false);
-          onSuccess();
-        })
-        .catch((err) => {
-          setSubmitting(false);
-        });
+      if (type === 'add') {
+        axiosInstance()
+          .put(
+            `${rentalManagement.api}/${referenceId}/add-non-serial-inventory`,
+            data?.map((p) => ({
+              product: p?.product,
+              warehouse: p?.warehouseId,
+              qty: p?.inventory,
+              _id: products?.find((_p) => _p?.product === p?.product)?._id
+            }))
+          )
+          .then(() => {
+            setSubmitting(false);
+            onSuccess();
+          })
+          .catch((err) => {
+            setSubmitting(false);
+          });
+      } else {
+        axiosInstance()
+          .put(
+            `${rentalManagement.api}/${referenceId}/remove-non-serial-inventory`,
+            data?.map((p) => ({
+              product: p?.product,
+              warehouse: p?.warehouseId,
+              qty: p?.inventory,
+              _id: products?.find((_p) => _p?.product === p?.product)?._id
+            }))
+          )
+          .then(() => {
+            setSubmitting(false);
+            onSuccess();
+          })
+          .catch((err) => {
+            setSubmitting(false);
+          });
+      }
     }
   };
 
@@ -98,7 +122,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
                 }`}
                 borderColor="var(--common-border-color)"
                 onClick={() => {
-                  if (selectedProduct !== d.product) {                    
+                  if (selectedProduct !== d.product) {
                     setSelectedProduct(d.product);
                   }
                 }}
@@ -134,14 +158,14 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
         }
         onClick={handleSubmit}
       >
-        Assign
+        {type === 'add' ? 'Assign' : 'Remove'}
       </Button>
     );
   };
 
   return (
     <Dialog open onClose={onClose} fullScreen>
-      <CustomDialogHeader title={`Assign Inventory`} onClose={onClose} />
+      <CustomDialogHeader title={`${type === 'add' ? 'Assign' : 'Remove'} Inventory`} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           isActionButtonVisible={false}
@@ -155,7 +179,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               <TableRow>
                 <TableCell>{routes.warehouse.title}</TableCell>
                 <TableCell align="left">Qty</TableCell>
-                <TableCell align="left">Assign Inventory</TableCell>
+                <TableCell align="left">{type === 'add' ? 'Assign' : 'Remove'} Inventory</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -178,10 +202,9 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
                           autoComplete="off"
                           name={'inventory'}
                           onChange={(e) => {
+                            const inventory = parseInt(e?.target?.value) >= 0 ? parseInt(e?.target?.value) : 0;
                             setProductInventoryData(
-                              productInventoryData?.map((_data) =>
-                                _data?._id === _product?._id ? { ..._data, inventory: parseInt(e?.target?.value) } : _data
-                              )
+                              productInventoryData?.map((_data) => (_data?._id === _product?._id ? { ..._data, inventory: inventory } : _data))
                             );
 
                             setProducts((preVal) => {
@@ -189,7 +212,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
                                 if (_p?.product === selectedProduct) {
                                   _p.qty =
                                     _p.totalQty -
-                                    (parseInt(e?.target?.value) +
+                                    (inventory +
                                       productInventoryData
                                         ?.filter((p) => p?._id != _product?._id && p?.product === selectedProduct)
                                         ?.reduce((sum, row) => sum + row?.inventory, 0));
@@ -199,7 +222,13 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
                             });
                           }}
                           error={_product?.inventory > _product?.qty}
-                          helperText={_product?.inventory > _product?.qty && 'Assigned inventory more than available Qty'}
+                          helperText={
+                            _product?.inventory > _product?.qty
+                              ? type === 'add'
+                                ? 'Assigned inventory more than available Qty'
+                                : 'Removed inventory more than Assigned'
+                              : ''
+                          }
                         />
                       </TableCell>
                     </TableRow>
@@ -210,7 +239,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
         <Box pt={1}>
           {productInventoryData?.filter((p) => p?.product === selectedProduct)?.reduce((sum, row) => row?.inventory + sum, 0) >
             selectedProducts?.find((s) => s?.id === selectedProduct)?.qty && (
-            <Typography color="error">You are trying to assign more inventory</Typography>
+            <Typography color="error">You are trying to {type === 'add' ? 'assign' : 'remove'} more inventory</Typography>
           )}
         </Box>
       </CustomDialogContent>
