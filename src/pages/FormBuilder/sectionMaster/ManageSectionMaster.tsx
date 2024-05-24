@@ -11,11 +11,16 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import IconAutoComplete from './IconAutoComplete';
+import { defaultIcons } from 'src/assets/IconGenerator';
 
 const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
-
   const toastConfig = useContext(CustomToastContext);
-  const [initialData, setInitialData] = useState({ sectionName: sectionData?.sectionName || '', description: sectionData?.description || '' });
+  const [initialData] = useState({
+    sectionName: sectionData?.sectionName || '',
+    description: sectionData?.description || '',
+    iconName: sectionData?.iconName ? sectionData?.iconName : defaultIcons.includes(sectionData?.sectionName || '') ? sectionData?.sectionName : ''
+  });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -25,18 +30,22 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
     if (sectionData && sectionData?._id) {
       values._id = sectionData?._id;
     }
-    axiosInstance().put(`section-master`, values).then(({ data }) => {
-      setSubmitting(false);
-      onSuccess();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    values.oldSectionName = sectionData?.sectionName
+    axiosInstance()
+      .put(`section-master`, values)
+      .then(({ data }) => {
+        setSubmitting(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      setSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
   };
 
   function validate(values) {
@@ -61,7 +70,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
         }
       }}
     >
-      {initialData ?
+      {initialData ? (
         <Formik initialValues={initialData} validate={validate} onSubmit={handleSubmit}>
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
@@ -111,6 +120,14 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
                         value={values['description']}
                       />
                     </Grid>
+                    <Grid item xs={12}>
+                      <IconAutoComplete
+                        onChange={(e, val) => {
+                          setFieldValue('iconName', val);
+                        }}
+                        value={values['iconName']}
+                      />
+                    </Grid>
                   </Grid>
                 </Form>
               </CustomDialogContent>
@@ -155,11 +172,12 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
               ) : null}
             </Fragment>
           )}
-        </Formik> : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Dialog>
   );
 };

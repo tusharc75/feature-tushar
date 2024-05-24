@@ -18,6 +18,7 @@ import { isSectionActive, isSectionVisible, staticSidebarData } from './utils';
 import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
 import { BsChatLeftTextFill } from 'react-icons/bs';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { DynamicIcon } from 'src/assets/IconGenerator';
 
 function SideBar({ location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -92,6 +93,10 @@ function SideBar({ location }) {
             link: null,
             items: [itemWithLink]
           };
+          const section = user?.role?.brandSectionMaster.find((e) => e?.sectionName === item.sectionName);
+          if (section?.iconName !== undefined) {
+            newSection.icon = DynamicIcon(section.iconName, { size: 18 });
+          }
           sections.push(newSection);
         } else {
           const sectionIndex = sections.findIndex((s) => s.sectionName === item.sectionName);
