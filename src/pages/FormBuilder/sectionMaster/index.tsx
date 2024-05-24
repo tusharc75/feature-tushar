@@ -12,9 +12,10 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import ManageSectionMaster from './ManageSectionMaster';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { DynamicIcon, defaultIcons } from 'src/assets/IconGenerator';
+import { ServiceManagementIcon } from 'src/assets/sidebar_assets/icons';
 
-const sectionMaster = ({ close }) => {
-
+const SectionMaster = ({ close }) => {
   const renderedFrom = `section-master`;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -35,7 +36,19 @@ const sectionMaster = ({ close }) => {
         width: 150,
         disabled: true,
         Cell: ({ row }) => {
-          return row?.original['sectionName'] ? <p className="text-truncate">{row?.original['sectionName']}</p> : <NoDataCell />;
+          const iconName = row.original?.iconName
+            ? row.original?.iconName
+            : defaultIcons.includes(row.original?.sectionName || '')
+            ? row.original?.sectionName
+            : '';
+          return row?.original['sectionName'] ? (
+            <p className="text-truncate">
+              <span className="mr-2">{DynamicIcon(iconName, { size: 18 }) || <ServiceManagementIcon size={18} />}</span>
+              {row?.original['sectionName']}
+            </p>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -76,7 +89,8 @@ const sectionMaster = ({ close }) => {
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
-    await axiosInstance().get(`section-master`)
+    await axiosInstance()
+      .get(`section-master`)
       .then(({ data: { data } }) => {
         dispatch({ type: 'initialize', data: data, count: data?.length });
         dispatch({ type: 'loading', loading: false });
@@ -118,17 +132,9 @@ const sectionMaster = ({ close }) => {
           }
         }}
       >
-        <CustomDialogHeader
-          title={`Sections`}
-          onClose={close}
-          showManimizeMaximize={false}
-          showRequiredLabel={false}
-        />
+        <CustomDialogHeader title={`Sections`} onClose={close} showManimizeMaximize={false} showRequiredLabel={false} />
         <CustomDialogContent isFooterPresent={false}>
-          <ListingPageHeader
-            rightSideContents={<RightSideContents />}
-            isActionButtonVisible={false}
-            isAddButtonVisible={false} />
+          <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />
           {columns ? (
             <Box>
               <CustomReactTable
@@ -166,4 +172,4 @@ const sectionMaster = ({ close }) => {
   );
 };
 
-export default sectionMaster;
+export default SectionMaster;
