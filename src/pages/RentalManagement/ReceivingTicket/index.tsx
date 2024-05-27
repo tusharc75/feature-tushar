@@ -657,7 +657,7 @@ const ReceivingTicket = ({
       productAssets?.forEach((e, index) => {
         e.index = index + 1;
       });
-      
+
 
       services?.forEach((s: any, index: number) => {
         s.index = (productAssets?.length || 0) + index;
@@ -670,8 +670,8 @@ const ReceivingTicket = ({
         s.endDate = s?.actualEndDate;
         const parent = material?.find((e) => e._id === s?.parentId);
         if (parent) s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
-        s.isAllowedEndDate = true;
-        s.isAllowedStartDate = true;
+        if(s.startDate) s.isAllowedStartDate = true;
+        if(s.endDate) s.isAllowedEndDate = true;
       })
 
       const data = rentalPolicyData?.showServiceOnFieldStep ? [...productAssets, ...services] : productAssets;
@@ -1052,7 +1052,9 @@ const ReceivingTicket = ({
                   ? `Can change the Date after delivered`
                   : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
                     ? `Can change the End Date after received`
-                    : 'Update - Start Date/End Date'
+                    : !row?.original?.isAllowedStartDate && row?.original?.type === MATERIAL_TYPE.service
+                      ? `Can update Start/End Date after service start/end`
+                      : 'Update - Start Date/End Date'
             }
           >
             <span>
