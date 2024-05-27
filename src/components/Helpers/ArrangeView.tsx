@@ -205,16 +205,14 @@ const RenderListItem = ({ column, index, onChangeValue, type }) => {
       style={style}
       ref={setNodeRef}
       className={`${
-        isDragging
-          ? ' bg-[var(--dark-secondary,theme("colors.cyan.100"))] opacity-50 [border:4px_dashed_var(--common-border-color)]'
-          : 'bg-[var(--dark-secondary,#fff)]'
-      } transition-colors list-none`}
+        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,#fff)]'
+      } list-none transition-colors`}
     >
       <Box bgcolor="var(--dark-primary, white)" border={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>
           <Grid item xs={1}>
             <Box pt={1}>
-              <IconButton size="small" {...attributes} {...listeners} className=" !cursor-grab drag-handle">
+              <IconButton size="small" {...attributes} {...listeners} className=" drag-handle !cursor-grab">
                 <DragIndicator fontSize="small" />
               </IconButton>
             </Box>

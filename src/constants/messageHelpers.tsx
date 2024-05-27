@@ -28,7 +28,9 @@ export const rentalManagementActions = {
     createRepairJob: 'Create Repair Job',
     createRepairOrder: 'Create Repair Order',
     transferToAnotherRental: 'Transfer to another Rental',
-    swapInUseAssets: 'Swap In-Use Assets'
+    swapInUseAssets: 'Swap In-Use Assets',
+    startService: 'Start Service',
+    stopService: 'Stop Service'
 };
 
 export const rentalManagementMessage = {
@@ -77,6 +79,9 @@ export const rentalManagementMessage = {
     onlySwapAssets: 'Only Assets can be swapped',
     onlySwapInUseAssets: 'Only In-Use assets can be swapped',
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
+    serviceAlreadyStarted: 'Service already started',
+    serviceNotstarted: 'Service not started',
+    serviceAlreadyStopped: 'Service already stopped',
 };
 
 export const subleaseActions = {

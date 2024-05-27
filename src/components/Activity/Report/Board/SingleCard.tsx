@@ -92,10 +92,10 @@ const SingleCard = ({ type, data, index, fetchBoard, setSelectedId, canUpdate, c
           }
         }}
         className={`text-[#2A3042] dark:text-white ${canUpdate ? 'cursor-pointer' : ''} ${
-          isDragging ? 'opacity-50 [border:4px_dashed_var(--common-border-color)]' : ''
-        } flex flex-col relative mb-[14px] rounded-lg shadow-[0px_3.5833494663238525px_26.8751220703125px_rgba(0,0,0,0.06)] p-[11px_18px] bg-[var(--dark-primary,white)] `}
+          isDragging ? 'opacity-50 ' : ''
+        } relative mb-[14px] flex flex-col rounded-lg bg-[var(--dark-primary,white)] p-[11px_18px] shadow-[0px_3.5833494663238525px_26.8751220703125px_rgba(0,0,0,0.06)] `}
       >
-        <div className="flex flex-wrap items-center justify-between gap-4  mb-[5px]">
+        <div className="mb-[5px] flex flex-wrap items-center justify-between  gap-4">
           <Typography className=" truncate" variant="subtitle2" style={{ fontSize: 15, fontWeight: 600, lineHeight: 1.57 }}>
             {data?.name}
           </Typography>
@@ -106,7 +106,7 @@ const SingleCard = ({ type, data, index, fetchBoard, setSelectedId, canUpdate, c
           ) : null}
         </div>
         <Typography
-          className="flex gap-[5px] items-center text-[#6B6B6B] dark:text-[var(--dark-secondary-text)] pb-[12px] mb-[12px]"
+          className="mb-[12px] flex items-center gap-[5px] pb-[12px] text-[#6B6B6B] dark:text-[var(--dark-secondary-text)]"
           variant="body2"
           style={{ fontSize: 12, borderBottom: '1px solid var(--common-border-color)', marginBottom: 12 }}
         >

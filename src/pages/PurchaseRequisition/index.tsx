@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -22,6 +22,16 @@ import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import axios, { CancelTokenSource } from 'axios';
 
 const PurchaseRequisition = () => {
+  const PurchaseRequisitionType = [
+    {
+      key: `My ${routes.purchaseRequisition.title}`,
+      value: 1
+    },
+    {
+      key: `All ${routes.purchaseRequisition.title}`,
+      value: 2
+    }
+  ];
   const renderedFrom = camelCase(routes?.purchaseRequisition.title);
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
@@ -30,7 +40,7 @@ const PurchaseRequisition = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const [selectedType, setSelectedType] = useState(1);
+  const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.purchaseRequisition));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showOrderDialog, setOrderDialog] = useState({ open: false, currency: null, warehouse: null, products: [], services: [] });
@@ -138,6 +148,9 @@ const PurchaseRequisition = () => {
     if (isExport) {
       deepFilter = `?`;
     }
+    if (selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
+    }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
@@ -235,6 +248,10 @@ const PurchaseRequisition = () => {
       });
   };
 
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+  };
+
   const ActionMenuItems = () => {
     return (
       <>
@@ -273,10 +290,10 @@ const PurchaseRequisition = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          // toggleButtonList
-          // onToggle
-          // selectedType
-          // setSelectedType
+            toggleButtonList={PurchaseRequisitionType}
+            onToggle={onTypeChange}
+            selectedType={selectedType}
+            setSelectedType={setSelectedType}
           // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
