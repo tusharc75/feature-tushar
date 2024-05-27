@@ -280,11 +280,11 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
         <List
           disablePadding
           subheader={
-            <Box className="flex items-center flex-wrap sm:gap-2">
+            <Box className="flex flex-wrap items-center sm:gap-2">
               <ListSubheader disableGutters disableSticky>
                 Toggle and Drag & Drop to arrange
               </ListSubheader>
-              <div className="sm:ml-auto sm:w-1/2 w-full">
+              <div className="w-full sm:ml-auto sm:w-1/2">
                 <TextField
                   type="search"
                   fullWidth
@@ -420,18 +420,14 @@ const RenderListItem = (props: ItemProps) => {
     <li
       ref={setNodeRef}
       style={style}
-      className={`${
-        isDragging
-          ? ' bg-[var(--dark-secondary,theme("colors.cyan.100"))] opacity-50 [border:4px_dashed_var(--common-border-color)]'
-          : 'bg-[var(--dark-secondary,#fff)]'
-      } transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,#fff)]'} transition-colors`}
     >
       <div
-        className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
           index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-        } ${column.disabled ? ' opacity-65 pointer-events-none' : ''}`}
+        } ${column.disabled ? ' pointer-events-none opacity-65' : ''}`}
       >
-        <ListItemIcon className={` pl-2 cursor-grab ${isDragging ? ' cursor-grabbing' : ''}`} {...attributes} {...listeners}>
+        <ListItemIcon className={` cursor-grab pl-2 ${isDragging ? ' cursor-grabbing' : ''}`} {...attributes} {...listeners}>
           <DragHandle />
         </ListItemIcon>
         <ListItemText id={column.accessor} primary={column.Header || startCase(column?.accessor)} />

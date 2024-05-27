@@ -113,7 +113,7 @@ const Field = ({
     handleClose();
   };
 
-  const { setNodeRef, attributes, listeners, transform, transition, over, active, isDragging } = useSortable({
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: data._id,
     data: {
       type: 'Field',
@@ -160,13 +160,13 @@ const Field = ({
           isDragging
             ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
             : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
-        }  p-2 min-h-[56.5px] items-center flex`}
+        }  flex min-h-[56.5px] items-center p-2`}
       >
         <div className={`${isDragging ? ' opacity-50' : ''} flex-grow`}>
-          <div className="grid grid-cols-[1fr_28px] lg:grid-cols-[1fr_50px] items-center justify-between gap-2">
-            <div className="grid lg:grid-cols-[1.2fr_1fr] items-center gap-2">
+          <div className="grid grid-cols-[1fr_28px] items-center justify-between gap-2 lg:grid-cols-[1fr_50px]">
+            <div className="grid items-center gap-2 lg:grid-cols-[1.2fr_1fr]">
               <div className="flex items-center gap-2">
-                <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
+                <IconButton size="small" {...attributes} {...listeners} className="drag-handle !cursor-grab">
                   <DragIndicator fontSize="small" />
                 </IconButton>
                 {data.editAble ? (
@@ -183,11 +183,11 @@ const Field = ({
                   <p className="MuiTypography-body2 line-clamp-1">{data.fieldLabel}</p>
                 )}
               </div>
-              <p className="text-gray-500 dark:text-slate-300 line-clamp-1 min-w-0 ml-[40px] lg:ml-0">
+              <p className="ml-[40px] line-clamp-1 min-w-0 text-gray-500 dark:text-slate-300 lg:ml-0">
                 {FieldList[data?.type?.toUpperCase()]?.label}
               </p>
             </div>
-            <div className="flex items-center ml-auto flex-col lg:flex-row">
+            <div className="ml-auto flex flex-col items-center lg:flex-row">
               <HtmlTooltip title={`Field Name - ${data?.fieldName}`}>
                 <InfoOutlined
                   fontSize="small"
@@ -198,7 +198,7 @@ const Field = ({
                   className="cursor-pointer"
                 />
               </HtmlTooltip>
-              <div className=" text-right mr-[2px]">
+              <div className=" mr-[2px] text-right">
                 <IconButton aria-label="setting" onClick={handleClick} size={'small'}>
                   <MoreHoriz fontSize="small" />
                 </IconButton>

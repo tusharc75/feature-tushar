@@ -11,7 +11,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { groupBy, map, uniq } from 'lodash';
+import { groupBy, map, startCase, uniq } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -139,6 +139,7 @@ const ReceivingTicket = ({
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {} });
   const [assetsData, setAssetsData] = useState([])
   const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
+  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({open : false, type : null});
 
   const {
     state: { user, permissions, selectedEntity }
@@ -187,6 +188,7 @@ const ReceivingTicket = ({
       var consumeProducts: any = [];
       var transactionData: any = [];
       var nonSerializedInventory: any = [];
+      var services: any = [];
 
       var invoiceData: any = [];
 
@@ -650,11 +652,31 @@ const ReceivingTicket = ({
 
       productAssets = [...productAssets?.filter((e) => !e.isReplaced), ...productAssets?.filter((e) => e.isReplaced)];
 
+      services = material?.filter(m => m.type === MATERIAL_TYPE.service);
+
       productAssets?.forEach((e, index) => {
         e.index = index + 1;
       });
 
-      dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
+
+      services?.forEach((s: any, index: number) => {
+        s.index = (productAssets?.length || 0) + index;
+        s.uniqueId = s._id;
+        s._id = s?.materialId;
+        s.description = s?.serviceDetail?.serviceDescription || '';
+        s.displayType = startCase(MATERIAL_TYPE.service);
+        s.assetNumber = s?.serviceDetail?.serviceName;
+        s.startDate = s?.actualStartDate;
+        s.endDate = s?.actualEndDate;
+        const parent = material?.find((e) => e._id === s?.parentId);
+        if (parent) s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+        if(s.startDate) s.isAllowedStartDate = true;
+        if(s.endDate) s.isAllowedEndDate = true;
+      })
+
+      const data = rentalPolicyData?.showServiceOnFieldStep ? [...productAssets, ...services] : productAssets;
+
+      dispatch({ type: 'initialize', data: data, count: data?.length});
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -739,10 +761,8 @@ const ReceivingTicket = ({
             <IconButton
               size="small"
               onClick={() => {
-                window.open(
-                  `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${row?.original?._id?.split('_')[0]
-                  }`
-                );
+                const basePath = row.original.type === 'Asset' ? routes.serializedAssetDetail.path : row.original.type === MATERIAL_TYPE.service ? routes.serviceMasterDetail.path : routes.productDetail.path;
+                window.open(`${basePath}/${row?.original?._id?.split('_')[0]}`);
               }}
             >
               <OpenInNewIcon fontSize="small" color="primary" />
@@ -1032,7 +1052,9 @@ const ReceivingTicket = ({
                   ? `Can change the Date after delivered`
                   : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
                     ? `Can change the End Date after received`
-                    : 'Update - Start Date/End Date'
+                    : !row?.original?.isAllowedStartDate && row?.original?.type === MATERIAL_TYPE.service
+                      ? `Can update Start/End Date after service start/end`
+                      : 'Update - Start Date/End Date'
             }
           >
             <span>
@@ -1419,33 +1441,39 @@ const ReceivingTicket = ({
     }
   };
 
-  const handleSubmitChangeDates = (values) => {
-    if (!openChangeActualDateDialog.data) return;
-    setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
-    const data: any = {
-      _id: openChangeActualDateDialog?.data?.uniqueId,
-      asset: openChangeActualDateDialog?.data?._id?.split('_')[0]
-    };
-    if (values.manualStartDate) {
-      data.startDate = values.manualStartDate;
-    }
-    if (values.manualEndDate) {
-      data.endDate = values.manualEndDate;
-    }
-    axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
-      .then(() => {
+  const handleSubmitChangeDates = (values, type: string= '') => {
+      let data;
+      if(type) {
+        setOkBtnLoading(true);
+        data = { ids: selectedRecords?.map(s => s?.uniqueId)}
+        if (type === 'start') data.startDate = new Date();
+        else data.endDate = new Date();
+      } else {
+        if (!openChangeActualDateDialog.data) return;
+        setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
+        data = {
+          ids: [openChangeActualDateDialog?.data?.uniqueId],
+          asset: openChangeActualDateDialog?.data?._id?.split('_')[0]
+        };
+        if (values.manualStartDate) data.startDate = values.manualStartDate;
+        if (values.manualEndDate) data.endDate = values.manualEndDate;
+      }
+      axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data).then((response) => {
         toastConfig.setToastConfig({
           open: true,
-          message: 'Dates Updated Successfully',
+          message: response?.data?.message,
           type: 'success'
         });
         setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+        setOkBtnLoading(false);
+        setServiceConfirmationDialog({open: false, type: null});
         fetchRecords();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setOkBtnLoading(false);
         setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+        setServiceConfirmationDialog({open: false, type: null});
       });
   };
 
@@ -1693,7 +1721,8 @@ const ReceivingTicket = ({
               setOpenDateDialog,
               currentStep,
               columns,
-              rentalManagementData
+              rentalManagementData,
+              setServiceConfirmationDialog
             }}
           />
         }
@@ -1946,6 +1975,7 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
+      
       {statusToUpdate.open && (
         <Dialog
           open
@@ -2090,6 +2120,19 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
+      {serviceConfirmationDialog.open && (
+        <ConfirmationDialog
+          open={serviceConfirmationDialog.open}
+          message={`Are you sure you want to ${serviceConfirmationDialog.type} Service?`}
+          onClose={() => {
+            setServiceConfirmationDialog({ open: false, type: null });
+          }}
+          onOk={() => {
+            handleSubmitChangeDates(null, serviceConfirmationDialog.type);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
       {openChangeActualDateDialog.open && (
         <ChangeActualDateDialog
           data={openChangeActualDateDialog.data}
@@ -2213,6 +2256,7 @@ const ActionButtonMenuItems = ({
   currentStep,
   columns,
   rentalManagementData,
+  setServiceConfirmationDialog
 }) => {
 
   const checkUniqWarehouse = () => {
@@ -2402,6 +2446,11 @@ const ActionButtonMenuItems = ({
         } else {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapInUseAssets });
         }
+      } else if (action === rentalManagementActions.startService) {
+        if(e?.startDate) errorMessages.push({index: e.index, message: rentalManagementMessage.startService });
+      } else if (action === rentalManagementActions.stopService) {
+        if(!e?.startDate) errorMessages.push({index: e.index, message: rentalManagementMessage.serviceNotStart});
+        else if(e?.endDate) errorMessages.push({index: e.index, message: rentalManagementMessage.stopService});
       }
     });
     if (action === rentalManagementActions.transferToAnotherRental && errorMessages?.length === 0) {
@@ -2787,6 +2836,20 @@ const ActionButtonMenuItems = ({
             Change Well Number
           </MenuItem>
         )}
+        <MenuItem onClick={() => { 
+          if (!validateAction(rentalManagementActions.startService)) {
+            setServiceConfirmationDialog({open: true, type: 'start' })}}
+          }
+        >
+          Start Service
+        </MenuItem>
+        <MenuItem onClick={() => { 
+          if (!validateAction(rentalManagementActions.stopService)) {
+            setServiceConfirmationDialog({open: true, type: 'stop' })}}
+          }
+        >
+          Stop Service
+        </MenuItem>
     </>
   );
 };
