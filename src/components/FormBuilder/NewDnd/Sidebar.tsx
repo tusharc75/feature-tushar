@@ -194,7 +194,7 @@ export const SidebarItem = ({ item, type = 'SidebarItem' }: SidebarItemProps) =>
 
   return (
     <div
-      className={`border border-[var(--common-border-color)] bg-[var(--dark-secondary,white)] p-2 ${
+      className={`drag-handle cursor-grab border border-[var(--common-border-color)] bg-[var(--dark-secondary,white)] p-2 ${
         type === 'NewSection' ? 'col-span-2' : ''
       } flex items-center gap-2 `}
       style={style}
