@@ -40,7 +40,6 @@ const PurchaseRequisition = () => {
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  // const [selectedType, setSelectedType] = useState(1);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.purchaseRequisition));
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
