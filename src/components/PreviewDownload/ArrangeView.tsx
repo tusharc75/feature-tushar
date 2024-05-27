@@ -72,7 +72,7 @@ export default function ArrangeView({ columns, setColumns }) {
         <IconButton
           aria-describedby="columnSelection"
           size="small"
-          className="px-2  arrange-view-v1"
+          className="arrange-view-v1  px-2"
           color="primary"
           onClick={(event) => {
             setOpen(true);
@@ -146,18 +146,16 @@ const RenderListItem = ({ index, id, fieldLabel }: ItemProps) => {
       style={style}
       ref={setNodeRef}
       className={`${
-        isDragging
-          ? ' bg-[var(--dark-secondary,theme("colors.cyan.100"))] opacity-50 [border:4px_dashed_var(--common-border-color)]'
-          : 'bg-[var(--dark-secondary,#fff)]'
-      } transition-colors list-none`}
+        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+      } list-none transition-colors`}
     >
       <div
         key={id}
-        className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
           index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
         } `}
       >
-        <ListItemIcon {...attributes} {...listeners} className="!cursor-grab drag-handle">
+        <ListItemIcon {...attributes} {...listeners} className="drag-handle !cursor-grab">
           <DragIndicator />
         </ListItemIcon>
         <ListItemText primary={fieldLabel} />
