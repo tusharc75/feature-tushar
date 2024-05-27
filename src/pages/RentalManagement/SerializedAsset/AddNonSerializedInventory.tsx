@@ -49,12 +49,9 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               type === 'add'
                 ? d?.inventory
                 : nonSerializedInventory?.find((s) => s?.product?.optionValue === selectedProduct && s?.warehouse?.optionValue === d?.warehouse?._id)
-                    ?.qty || 0,
+                  ?.qty || 0,
             inventory: 0
           }));
-
-        console.log('aaaaaa', [...productInventoryData, ...nonExistingInventory]);
-
         setProductInventoryData([...productInventoryData, ...nonExistingInventory]);
       })
       .catch((error) => {
@@ -115,30 +112,29 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
       <Box style={{ display: 'inline' }}>
         {products.length > 0
           ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${
-                  selectedProduct === d.product ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+            <Box
+              m={0.5}
+              p={1}
+              border={1}
+              className={`cursor-pointer rounded-sm ${selectedProduct === d.product ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                 }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct !== d.product) {
-                    setSelectedProduct(d.product);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d?.name} (${d?.qty})`}</span>
-                ) : d?.totalQty - d?.qty > 0 ? (
-                  <span key={d.name} className="text-success">{`${d?.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d?.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+              borderColor="var(--common-border-color)"
+              onClick={() => {
+                if (selectedProduct !== d.product) {
+                  setSelectedProduct(d.product);
+                }
+              }}
+              style={{ display: 'inline-block' }}
+            >
+              {d?.qty < 0 ? (
+                <span key={d.name} className="text-error">{`${d?.name} (${d?.qty})`}</span>
+              ) : d?.totalQty - d?.qty > 0 ? (
+                <span key={d.name} className="text-success">{`${d?.name} (${d?.qty})`}</span>
+              ) : (
+                <span key={d.name}>{`${d?.name} (${d?.qty})`}</span>
+              )}
+            </Box>
+          ))
           : null}
       </Box>
     );
@@ -152,11 +148,8 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
         size="small"
         color="primary"
         endIcon={isSubmitting && <CircularProgress size={18} />}
-        disabled={
-          isSubmitting ||
-          !productInventoryData?.length ||
-          products?.some((d) => d?.qty < 0) ||
-          productInventoryData?.some((p) => p?.inventory > p?.qty)
+        disabled={isSubmitting || !productInventoryData?.length || products?.some((d) => d?.qty < 0) || productInventoryData?.some((p) => p?.inventory > p?.qty)
+          || productInventoryData?.every((p) => p?.inventory === 0)
         }
         onClick={handleSubmit}
       >
@@ -167,7 +160,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
 
   return (
     <Dialog open onClose={onClose} fullScreen>
-      <CustomDialogHeader title={`${type === 'add' ? 'Assign' : 'Remove'} Inventory`} onClose={onClose} />
+      <CustomDialogHeader title={`${type === 'add' ? 'Assign' : 'Remove'} Inventory`} onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
           isActionButtonVisible={false}
@@ -187,67 +180,64 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
               </TableHead>
               <TableBody>
                 {productInventoryData?.length > 0 &&
-                  productInventoryData
-                    ?.filter((p) => p?.product === selectedProduct)
-                    ?.map((_product: any) => (
-                      <TableRow key={_product?._id}>
-                        <TableCell component="th" scope="row">
-                          {_product?.warehouse}
-                        </TableCell>
-                        <TableCell align="left">{_product?.qty}</TableCell>
-                        <TableCell align="left">
-                          <TextField
-                            size="small"
-                            type="number"
-                            variant="outlined"
-                            value={_product['inventory']}
-                            placeholder="Assign inventory"
-                            autoComplete="off"
-                            name={'inventory'}
-                            onChange={(e) => {
-                              const inventory = parseInt(e?.target?.value) >= 0 ? parseInt(e?.target?.value) : 0;
-                              setProductInventoryData(
-                                productInventoryData?.map((_data) => (_data?._id === _product?._id ? { ..._data, inventory: inventory } : _data))
-                              );
-
-                              setProducts((preVal) => {
-                                preVal?.forEach((_p) => {
-                                  if (_p?.product === selectedProduct) {
-                                    _p.qty =
-                                      _p.totalQty -
-                                      (inventory +
-                                        productInventoryData
-                                          ?.filter((p) => p?._id != _product?._id && p?.product === selectedProduct)
-                                          ?.reduce((sum, row) => sum + row?.inventory, 0));
-                                  }
-                                });
-                                return preVal;
+                  productInventoryData?.filter((p) => p?.product === selectedProduct)?.map((_product: any) => (
+                    <TableRow key={_product?._id}>
+                      <TableCell component="th" scope="row">
+                        {_product?.warehouse}
+                      </TableCell>
+                      <TableCell align="left">{_product?.qty}</TableCell>
+                      <TableCell align="left">
+                        <TextField
+                          size="small"
+                          type="number"
+                          variant="outlined"
+                          value={_product['inventory']}
+                          placeholder="Assign inventory"
+                          autoComplete="off"
+                          style={{ width: "250px" }}
+                          name={'inventory'}
+                          onChange={(e) => {
+                            const inventory = parseInt(e?.target?.value) >= 0 ? parseInt(e?.target?.value) : 0;
+                            setProductInventoryData(
+                              productInventoryData?.map((_data) => (_data?._id === _product?._id ? { ..._data, inventory: inventory } : _data))
+                            );
+                            setProducts((preVal) => {
+                              preVal?.forEach((_p) => {
+                                if (_p?.product === selectedProduct) {
+                                  _p.qty =
+                                    _p.totalQty -
+                                    (inventory +
+                                      productInventoryData
+                                        ?.filter((p) => p?._id != _product?._id && p?.product === selectedProduct)
+                                        ?.reduce((sum, row) => sum + row?.inventory, 0));
+                                }
                               });
-                            }}
-                            error={_product?.inventory > _product?.qty}
-                            helperText={
-                              _product?.inventory > _product?.qty
-                                ? type === 'add'
-                                  ? 'Assigned inventory more than available Qty'
-                                  : 'Removed inventory more than Assigned'
-                                : ''
-                            }
-                          />
-                        </TableCell>
-                      </TableRow>
-                    ))}
+                              return preVal;
+                            });
+                          }}
+                          error={_product?.inventory > _product?.qty}
+                          helperText={
+                            _product?.inventory > _product?.qty
+                              ? type === 'add'
+                                ? 'Assigned inventory more than available Qty'
+                                : 'Removed inventory more than Assigned'
+                              : ''
+                          }
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
         ) : (
           <Typography>Inventory not available</Typography>
         )}
-
         <Box pt={1}>
           {productInventoryData?.filter((p) => p?.product === selectedProduct)?.reduce((sum, row) => row?.inventory + sum, 0) >
             selectedProducts?.find((s) => s?.id === selectedProduct)?.qty && (
-            <Typography color="error">You are trying to {type === 'add' ? 'assign' : 'remove'} more inventory</Typography>
-          )}
+              <Typography color="error">You are trying to {type === 'add' ? 'assign' : 'remove'} more inventory</Typography>
+            )}
         </Box>
       </CustomDialogContent>
     </Dialog>

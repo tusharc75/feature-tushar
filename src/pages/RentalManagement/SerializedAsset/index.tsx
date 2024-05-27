@@ -385,32 +385,30 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       }
 
       const material = data.material;
+
       let rows = data.material.filter((e) => e.parentId === null)?.filter((ele) => checkProductInside(ele, material) === true);
 
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === 'product'
-            ? parent?.productDetail?.productName
+        parent.detail = `${parent.type === MATERIAL_TYPE.service ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productName
             : parent?.packageDetail?.packageName
           }`;
         parent.description =
-          parent.type === 'service'
+          parent.type === MATERIAL_TYPE.service
             ? parent?.serviceDetail?.serviceDescription || ''
-            : parent.type === 'product'
+            : parent.type === MATERIAL_TYPE.product
               ? parent?.productDetail?.productDescription || ''
-              : parent.type === 'package'
+              : parent.type === MATERIAL_TYPE.package
                 ? parent?.packageDetail?.packageDescription || ''
                 : '';
-        parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
+        parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.serializedProduct : false;
         parent.assetQty = parent.qty;
         parent.assetAssignedQty = parent.serializedProduct
           ? (data.inventory?.filter((e) => e._id === parent._id).length + data?.productSerialNumbers?.filter(e => e._id === parent._id)?.length)
           : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length + data?.nonSerializedInventory?.filter(n => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0);
         parent.realAssetQty = parent.assetQty;
         parent.realAssetAssignedQty = parent.assetAssignedQty;
-        // parent.isValid = parent.serializedProduct ? (parent.assetAssignedQty === parent.assetQty ? true : false) : true;
         parent.isSublease = subleaseProduct?.some((e) => e.materialId === parent.materialId);
         parent.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === parent.materialId);
         parent.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === parent.materialId);
@@ -418,6 +416,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         if (parent.isOfflineError) {
           parent.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === parent._id).map((e) => e.assetNumber);
         }
+        parent.canRemove = parent?.status ? true : false;
+
         parent.subRows = generateNestedData(
           data.material,
           data.inventory,
@@ -572,43 +572,40 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
 
-    var assetQtySUM = 0;
     var assetAssignedQtySUM = 0;
     childProduct.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (subRows?.length + 1);
       _subRow.detail =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productName
             : _subRow?.packageDetail?.packageName;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
-      _subRow.serializedProduct = _subRow.type === 'product' ? _subRow?.productDetail?.serializedProduct : false;
-      // _subRow.assetQty = _subRow.type === 'product' || _subRow.type === 'package' ? _subRow.qty * parent.assetQty : 0;
+      _subRow.serializedProduct = _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.serializedProduct : false;
       _subRow.assetQty =
-        _subRow.type === 'product' || _subRow.type === 'package'
-          ? parent.type === 'product' || parent.type === 'package'
+        _subRow.type === MATERIAL_TYPE.product || _subRow.type === MATERIAL_TYPE.package
+          ? parent.type === MATERIAL_TYPE.product || parent.type === MATERIAL_TYPE.package
             ? _subRow.qty * parent.assetQty
             : _subRow.qty * parent.qty
           : 0;
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter(e => e?._id === _subRow._id)?.length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.realAssetQty =
-        _subRow.type === 'product' || _subRow.type === 'package' || _subRow.type === 'service' ? _subRow.qty * parent.realAssetQty : 0;
+      _subRow.realAssetQty = [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(_subRow.type) ? _subRow.qty * parent.realAssetQty : 0;
       _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
-      // _subRow.isValid = _subRow.serializedProduct ? (_subRow.assetAssignedQty === _subRow.assetQty ? true : false) : true;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === _subRow.materialId);
       _subRow.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === _subRow.materialId);
       _subRow.isOfflineError = offlineAssetErrorLog?.some((e) => e._id === _subRow._id);
+      _subRow.canRemove = _subRow?.status ? true : false;
       if (_subRow.isOfflineError) {
         _subRow.offlineErrorAsset = offlineAssetErrorLog?.filter((e) => e._id === _subRow._id).map((e) => e.assetNumber);
       }
@@ -954,7 +951,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           </>
         ) : null}
         {selectedRecords.length &&
-          nonSerializedInventory?.filter((ns) => selectedRecords?.map((r) => r?._id)?.includes(ns?._id))?.some((ns) => ns?.qty > 0) && (
+          nonSerializedInventory?.filter((e) => e?.canRemove &&
+            selectedRecords?.map((ele) => ele?._id)?.includes(e?._id))?.some((e) => e?.qty > 0) && (
             <MenuItem
               onClick={() => {
                 setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });
