@@ -46,7 +46,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const [addNonSerializedAssetDialog, setAddNonSerializedAssetDialog] = useState(false);
   const [addNonSerializedInventoryDialog, setAddNonSerializedInventoryDialog] = useState({ open: false, type: '' });
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
-  const [nonSerializedAssetProduct, setNonSerializedAssetProduct] = useState([]);
+  const [nonSerializedProduct, setNonSerializedProduct] = useState([]);
   const [deleteData, setDeleteData] = useState([]);
   const [columns, setColumns] = useState(null);
   const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], type: '' });
@@ -803,10 +803,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
     const nonSerializeAssetProduct = [];
     let flatArrayNonSerializeAsset = treeToFlatArray(selectedRecords, 'subRows').filter(
-      (f) => f.type === 'product' && !f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
+      (e) => e.type === MATERIAL_TYPE.product && !e.status && !e.serializedProduct && e.realAssetQty > e.realAssetAssignedQty
     );
     flatArrayNonSerializeAsset.forEach((element) => {
-      if (element.type === 'product' && element.realAssetQty > element.realAssetAssignedQty) {
+      if (element.type === MATERIAL_TYPE.product && element.realAssetQty > element.realAssetAssignedQty) {
         nonSerializeAssetProduct.push({
           ...element,
           _id: element._id,
@@ -816,7 +816,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         });
       }
     });
-    setNonSerializedAssetProduct([...nonSerializeAssetProduct]);
+    setNonSerializedProduct([...nonSerializeAssetProduct]);
   }, [selectedRecords]);
 
   const disableAssignSerializedAssets = () => {
@@ -932,7 +932,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           >
             {`Assign Serial Numbers`}
           </MenuItem>
-        ) : selectedRecords.length && nonSerializedAssetProduct?.length ? (
+        ) : selectedRecords.length && nonSerializedProduct?.length ? (
           <>
             <MenuItem
               onClick={() => {
@@ -1130,7 +1130,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             setAddNonSerializedAssetDialog(false);
             fetchData();
           }}
-          products={isOffline ? [...assetAssignedProduct, ...nonSerializedAssetProduct] : nonSerializedAssetProduct}
+          products={isOffline ? [...assetAssignedProduct, ...nonSerializedProduct] : nonSerializedProduct}
           warehouse={rentalManagementData?.warehouse?.optionValue}
           referenceId={rentalManagementData?._id}
         />
@@ -1146,7 +1146,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           }}
           selectedProducts={
             addNonSerializedInventoryDialog.type === 'add'
-              ? nonSerializedAssetProduct
+              ? nonSerializedProduct
               : selectedRecords
                 ?.filter((r) => r?.type === 'product' && !r?.productDetail?.serializedProduct && r?.realAssetAssignedQty > 0)
                 ?.map((s) => ({
