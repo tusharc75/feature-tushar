@@ -298,7 +298,7 @@ const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setOpenField,
   return (
     <div className="grid grid-cols-1 gap-2">
       {steps && steps?.length ? (
-        <ul className="list-none grid gap-2 items-start">
+        <ul className="grid list-none items-start gap-2">
           <SortableContext items={steps.map((d) => d._id)}>
             {steps?.map((step, index) => {
               return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setOpenField, setDeleteData, index }} />;
@@ -334,18 +334,16 @@ const SingleStep = ({ step, setOpen, setOpenField, setDeleteData, index }) => {
 
   return (
     <>
-      <li ref={setNodeRef} style={style} className="bg-[var(--dark-secondary,white)] list-none">
+      <li ref={setNodeRef} style={style} className={` list-none `}>
         <div
-          className={`${
-            isDragging ? '[border:1px_dashed_var(--common-border-color)]' : '[border:1px_solid_var(--common-border-color)]'
-          }   p-3 rounded-[5px]`}
+          className={` rounded-[5px]  p-3 [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <IconButton size={'small'} className={`!cursor-grab drag-handle `} {...attributes} {...listeners}>
+              <IconButton size={'small'} className={`drag-handle !cursor-grab `} {...attributes} {...listeners}>
                 <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
               </IconButton>
-              <h3 className="line-clamp-2 md:line-clamp-1 font-semibold">{step?.stepName}</h3>
+              <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{step?.stepName}</h3>
             </div>
             <div className="min-w-fit">
               <HtmlTooltip title={'Edit'}>

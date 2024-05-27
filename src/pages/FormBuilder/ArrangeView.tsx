@@ -226,11 +226,9 @@ const ArrangeView = (props) => {
         <div className="isolate z-50">
           {data && (
             <DndContext onDragEnd={handleDragEnd} onDragOver={onDragOver} onDragStart={onDragStart} sensors={sensors}>
-              <div role="list" className="list-none grid gap-2">
+              <div role="list" className="grid list-none gap-2">
                 <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
-                  {data?.map((section, index) => (
-                    <RenderSection section={section} index={index} key={section.id} />
-                  ))}
+                  {data?.map((section, index) => <RenderSection section={section} index={index} key={section.id} />)}
                 </SortableContext>
               </div>
               <DragOverlay>
@@ -281,7 +279,12 @@ const RenderSection = ({ section, index }) => {
 
   return (
     <>
-      <div role="listitem" ref={setNodeRef} style={style} className={`${isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}>
+      <div
+        role="listitem"
+        ref={setNodeRef}
+        style={style}
+        className={`${isDragging ? ' [&_.MuiAccordionSummary-root]:!bg-[var(--dark-secondary,theme("colors.blue.200"))]' : ''} transition-colors`}
+      >
         <Accordion TransitionProps={{ unmountOnExit: true }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <IconButton size="small" {...attributes} {...listeners} className={` !cursor-grab`}>
@@ -292,9 +295,7 @@ const RenderSection = ({ section, index }) => {
           <AccordionDetails>
             <SortableContext items={subItemIds} strategy={verticalListSortingStrategy}>
               <ul className={`list-none rounded-md`}>
-                {section.subItems?.map((item, nestedIndex) => (
-                  <RenderSubItems key={item.id} itemData={item} section={section} index={nestedIndex} />
-                ))}
+                {section.subItems?.map((item, nestedIndex) => <RenderSubItems key={item.id} itemData={item} section={section} index={nestedIndex} />)}
               </ul>
             </SortableContext>
           </AccordionDetails>
@@ -328,8 +329,9 @@ const RenderSubItems = ({ itemData, index, section }: ItemProps) => {
     >
       <ListItem
         divider={true}
-        className={`${isDragging ? ' [border:1px_solid_var(--common-border-color)_!important] ' : ''
-          } transition-colors rounded-md bg-[var(--dark-secondary,white)]`}
+        className={`${
+          isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : ''
+        } rounded-md bg-[var(--dark-secondary,white)] transition-colors`}
       >
         <ListItemIcon className={` cursor-grab`} {...attributes} {...listeners}>
           <DragHandle />

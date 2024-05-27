@@ -58,19 +58,17 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
   const isEditing = selectedData?.uniqueId === id;
   const CHART_TYPE = formData.chartType || formData.graphType;
 
-  const style = {
-    opacity: isDragging ? 0.5 : undefined,
+  const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
     transition
   };
 
   return (
-    <li ref={setNodeRef} {...attributes} {...listeners} className={colSpans[formData.column - 1]} style={style}>
+    <li ref={setNodeRef} {...attributes} {...listeners} className={`${colSpans[formData.column - 1]}  list-none`} style={style}>
       <Box
-        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] `}
-        style={{
-          backgroundColor: isEditing ? 'var(--dark-primary,#dedede)' : 'var(--dark-secondary, white)'
-        }}
+        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${
+          isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
+        }`}
       >
         <Box>
           <Typography className={classes.title}>{formData.chartTitle}</Typography>
