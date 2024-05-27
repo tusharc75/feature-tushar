@@ -36,7 +36,7 @@ const DropContainer = ({ formData, setFormData, handleRemove }: DropContainerPro
   });
 
   return (
-    <Grid component={'ul'} container className=" list-none min-h-[200px]" ref={setNodeRef} spacing={1}>
+    <Grid component={'ul'} container className=" min-h-[200px] list-none" ref={setNodeRef} spacing={1}>
       <SortableContext items={formData?.map((d) => d._id) || []} strategy={verticalListSortingStrategy}>
         {formData.map((d, index) => {
           return <SingleSection key={d._id} itemData={d} index={index} setFormData={setFormData} handleRemove={handleRemove} />;
@@ -44,7 +44,7 @@ const DropContainer = ({ formData, setFormData, handleRemove }: DropContainerPro
       </SortableContext>
       {isOver && (
         <Grid item xs={12} className="bg-[var(--dark-secondary, white)]">
-          <div className="[border:4px_dashed_var(--common-border-color)]  p-10 text-4xl font-bold text-center text-gray-400 dark:text-gray-600">
+          <div className="p-10  text-center text-4xl font-bold text-gray-400 [border:4px_dashed_var(--common-border-color)] dark:text-gray-600">
             Drop here
           </div>
         </Grid>
@@ -68,7 +68,6 @@ export const SingleSection = ({ itemData, index, handleRemove, setFormData }) =>
   });
 
   const style = {
-    opacity: isDragging ? 0.5 : undefined,
     transform: CSS.Translate.toString(transform),
     transition
   };
@@ -76,15 +75,15 @@ export const SingleSection = ({ itemData, index, handleRemove, setFormData }) =>
     <>
       <Grid item component={'li'} xs={itemData.column} ref={setNodeRef} style={style} className=" list-none">
         <div
-          className={`flex items-center gap-2 justify-between ${
-            isDragging ? '[border:4px_dashed_var(--common-border-color)]' : '[border:1px_solid_var(--common-border-color)]'
-          } p-4 list-none bg-[var(--dark-secondary,white)]`}
+          className={`flex items-center justify-between gap-2 ${
+            isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)] '
+          } list-none p-4 [border:1px_solid_var(--common-border-color)]`}
         >
           <div className="flex items-center gap-2">
-            <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
+            <IconButton size="small" {...attributes} {...listeners} className="drag-handle !cursor-grab">
               <DragIndicator />
             </IconButton>
-            <h6 className="truncate font-semibold text-[1rem] leading-[1.5]">{itemData.label}</h6>
+            <h6 className="truncate text-[1rem] font-semibold leading-[1.5]">{itemData.label}</h6>
           </div>
           <div className="flex items-center">
             <HtmlTooltip title="Edit">

@@ -1,13 +1,11 @@
+import { useDndMonitor } from '@dnd-kit/core';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useMemo } from 'react';
 import FieldList, { sidebarItems } from '../FieldList';
+import CustomFields from './CustomFields';
 import { generateId } from './helper';
 import { FieldListType } from './types';
-import { useMemo } from 'react';
-import { useDndMonitor } from '@dnd-kit/core';
-import CustomFields from './CustomFields';
-import { DragIndicator } from '@material-ui/icons';
-import { IconButton } from '@material-ui/core';
 
 const newSection = {
   id: generateId(),
@@ -161,7 +159,7 @@ const Sidebar = ({ filterFieldType, sections, setSections, onAddRemoveField, add
   });
 
   return (
-    <div className="container-with-border p-5 grid grid-cols-2 gap-2 h-[calc(100vh-200px)] overflow-auto max-[960px]:h-[calc(100vh-200px)] overflow-x-hidden !overflow-y-auto">
+    <div className="container-with-border grid h-[calc(100vh-200px)] grid-cols-2 gap-2 overflow-auto !overflow-y-auto overflow-x-hidden p-5 max-[960px]:h-[calc(100vh-200px)]">
       <SortableContext items={ids} strategy={() => null}>
         <SidebarItem type={newSection.type} item={newSection} />
         {sidebarItems.map((item) => (
@@ -196,15 +194,14 @@ export const SidebarItem = ({ item, type = 'SidebarItem' }: SidebarItemProps) =>
 
   return (
     <div
-      className={`p-2 border border-[var(--common-border-color)] bg-[var(--dark-secondary,white)] ${
+      className={`drag-handle cursor-grab border border-[var(--common-border-color)] bg-[var(--dark-secondary,white)] p-2 ${
         type === 'NewSection' ? 'col-span-2' : ''
-      } flex gap-2 items-center `}
+      } flex items-center gap-2 `}
       style={style}
+      {...attributes}
+      {...listeners}
       ref={setNodeRef}
     >
-      <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
-        <DragIndicator fontSize="small" />
-      </IconButton>
       <p className="MuiTypography-body2 line-clamp-1" title={item.label}>
         {item.label}
       </p>

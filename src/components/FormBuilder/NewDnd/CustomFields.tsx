@@ -1,8 +1,8 @@
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Divider, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { DragIndicator, MoreHoriz } from '@material-ui/icons';
-import { useContext, useEffect, useState } from 'react';
+import { MoreHoriz } from '@material-ui/icons';
+import { useCallback, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
@@ -14,11 +14,7 @@ const CustomFields = () => {
   const [fieldData, setFieldData] = useState(null);
   const toastConfig = useContext(CustomToastContext);
 
-  useEffect(() => {
-    fetchCustomField();
-  }, []);
-
-  const fetchCustomField = () => {
+  const fetchCustomField = useCallback(() => {
     axiosInstance()
       .get(`/sa-formbuilder/custom-field`)
       .then(({ data: { data } }) => {
@@ -27,7 +23,11 @@ const CustomFields = () => {
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  };
+  }, [toastConfig]);
+
+  useEffect(() => {
+    fetchCustomField();
+  }, [fetchCustomField]);
 
   const handleOpenAddField = () => {
     setIsAddField(true);
@@ -106,7 +106,7 @@ const CustomFields = () => {
       </div>
       <div className="col-span-2">
         <ThemeButton iconForMobile={false} fullWidth>
-          <label htmlFor="importcustomField" className={`cursor-pointer relative`}>
+          <label htmlFor="importcustomField" className={`relative cursor-pointer`}>
             Import Custom Field
           </label>
         </ThemeButton>
@@ -179,12 +179,11 @@ export const SingleCustomField = ({ data, handleEdit, handleDelete, handleAddFie
     <div
       style={style}
       ref={setNodeRef}
-      className={`flex items-center justify-between border p-2 bg-[var(--dark-secondary,white)]`}
+      className={`flex items-center justify-between border bg-[var(--dark-secondary,white)] p-2`}
       title={data.fieldLabel}
+      {...attributes}
+      {...listeners}
     >
-      <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
-        <DragIndicator fontSize="small" />
-      </IconButton>
       <p className="MuiTypography-body2 line-clamp-1">{data.fieldLabel}</p>
       <div>
         <IconButton size="small" aria-label="setting" onClick={handleClick}>

@@ -317,7 +317,7 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
           </Box>
         </Grid>
         <Grid item xs={12} sm={6} md={6} container justify="flex-end">
-          <label htmlFor="optionimportFromExcel" className={`cursor-pointer mr-3`}>
+          <label htmlFor="optionimportFromExcel" className={`mr-3 cursor-pointer`}>
             Import from Excel
           </label>
           <input
@@ -345,7 +345,13 @@ export const Option = ({ values, setFieldValue, fields, _id }) => {
               {Row}
             </FixedSizeList>
           </SortableContext>
-          <DragOverlay dropAnimation={null}>{activeOption && <Card {...activeOption} />}</DragOverlay>
+          <DragOverlay dropAnimation={null}>
+            {activeOption && (
+              <span className="[&_.drag-handle]:!cursor-grabbing">
+                <Card {...activeOption} />
+              </span>
+            )}
+          </DragOverlay>
         </DndContext>
         {/* {options.length > 0 &&
         options.map((data, index) => (
@@ -455,7 +461,7 @@ const Card = (props) => {
   // const opacity = isDragging ? 0.4 : 1;
   // drag(drop(ref));
 
-  const { setNodeRef, attributes, listeners, transform, transition } = useSortable({
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: options[index].id,
     data: {
       type: 'Option',
@@ -480,11 +486,15 @@ const Card = (props) => {
   };
 
   return (
-    <div style={style} ref={setNodeRef} className="bg-[var(--dark-primary,white)]">
+    <div
+      style={style}
+      ref={setNodeRef}
+      className={`${isDragging ? "bg-[var(--dark-secondary,theme('colors.blue.200'))]" : 'bg-[var(--dark-primary,white)]'}`}
+    >
       <Box border={1} p={1} borderColor="var(--common-border-color)">
         <Grid container spacing={1}>
           <Grid item md={1}>
-            <IconButton {...attributes} {...listeners}>
+            <IconButton {...attributes} {...listeners} className=" drag-handle !cursor-grab">
               <DragIndicator />
             </IconButton>
           </Grid>

@@ -13,6 +13,7 @@ import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent } 
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 
 const ArrangeView = (props) => {
   const { open, close, resourceData: gridData } = props;
@@ -163,25 +164,26 @@ const ArrangeView = (props) => {
           return item;
         });
         setData(newItems);
-      } else if (destinationType === 'Section') {
-        const activeItemParent = activeSection.id;
-        const overItemParent = over.data.current.props.section.id;
-        const isInSameSection = activeItemParent === overItemParent;
-        if (isInSameSection) return;
+        // } else if (destinationType === 'Section') {
+        //   const activeItemParent = activeSection.id;
+        //   const overItemParent = over.data.current.props.section.id;
+        //   const isInSameSection = activeItemParent === overItemParent;
+        //   if (isInSameSection) return;
 
-        let newSourceSubItems = [...sourceSubItems];
-        const [item] = newSourceSubItems.splice(active.data.current.index, 1);
-        let newDestSubItems = [...over.data.current.props.section.subItems];
-        newDestSubItems.splice(newDestSubItems.length, 0, { ...item, section: overItemParent });
-        newItems = newItems.map((item) => {
-          if (item.id === activeItemParent) {
-            item.subItems = newSourceSubItems;
-          } else if (item.id === over.data.current.props.section.id) {
-            item.subItems = newDestSubItems;
-          }
-          return item;
-        });
-        setData(newItems);
+        //   let newSourceSubItems = [...sourceSubItems];
+        //   const [item] = newSourceSubItems.splice(active.data.current.index, 1);
+        //   let newDestSubItems = [...over.data.current.props.section.subItems];
+        //   newDestSubItems.splice(newDestSubItems.length, 0, { ...item, section: overItemParent });
+        //   newItems = newItems.map((item) => {
+        //     if (item.id === activeItemParent) {
+        //       item.subItems = newSourceSubItems;
+        //     } else if (item.id === over.data.current.props.section.id) {
+        //       item.subItems = newDestSubItems;
+        //     }
+        //     return item;
+        //   });
+        //   setData(newItems);
+        // }
       }
     }
   };
@@ -225,12 +227,16 @@ const ArrangeView = (props) => {
         <br />
         <div className="isolate z-50">
           {data && (
-            <DndContext onDragEnd={handleDragEnd} onDragOver={onDragOver} onDragStart={onDragStart} sensors={sensors}>
-              <div role="list" className="list-none grid gap-2">
+            <DndContext
+              onDragEnd={handleDragEnd}
+              onDragOver={onDragOver}
+              onDragStart={onDragStart}
+              sensors={sensors}
+              modifiers={[restrictToVerticalAxis]}
+            >
+              <div role="list" className="grid list-none gap-2">
                 <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
-                  {data?.map((section, index) => (
-                    <RenderSection section={section} index={index} key={section.id} />
-                  ))}
+                  {data?.map((section, index) => <RenderSection section={section} index={index} key={section.id} />)}
                 </SortableContext>
               </div>
               <DragOverlay>
@@ -281,7 +287,12 @@ const RenderSection = ({ section, index }) => {
 
   return (
     <>
-      <div role="listitem" ref={setNodeRef} style={style} className={`${isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}>
+      <div
+        role="listitem"
+        ref={setNodeRef}
+        style={style}
+        className={`${isDragging ? ' [&_.MuiAccordionSummary-root]:!bg-[var(--dark-secondary,theme("colors.blue.200"))]' : ''} transition-colors`}
+      >
         <Accordion TransitionProps={{ unmountOnExit: true }}>
           <AccordionSummary expandIcon={<ExpandMore />}>
             <IconButton size="small" {...attributes} {...listeners} className={` !cursor-grab`}>
@@ -292,9 +303,7 @@ const RenderSection = ({ section, index }) => {
           <AccordionDetails>
             <SortableContext items={subItemIds} strategy={verticalListSortingStrategy}>
               <ul className={`list-none rounded-md`}>
-                {section.subItems?.map((item, nestedIndex) => (
-                  <RenderSubItems key={item.id} itemData={item} section={section} index={nestedIndex} />
-                ))}
+                {section.subItems?.map((item, nestedIndex) => <RenderSubItems key={item.id} itemData={item} section={section} index={nestedIndex} />)}
               </ul>
             </SortableContext>
           </AccordionDetails>
@@ -328,8 +337,9 @@ const RenderSubItems = ({ itemData, index, section }: ItemProps) => {
     >
       <ListItem
         divider={true}
-        className={`${isDragging ? ' [border:1px_solid_var(--common-border-color)_!important] ' : ''
-          } transition-colors rounded-md bg-[var(--dark-secondary,white)]`}
+        className={`${
+          isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : ''
+        } rounded-md bg-[var(--dark-secondary,white)] transition-colors`}
       >
         <ListItemIcon className={` cursor-grab`} {...attributes} {...listeners}>
           <DragHandle />

@@ -14,7 +14,6 @@ const useStyles = makeStyles((theme) => ({
     border: '1px solid var(--common-border-color)',
 
     transition: 'transform .2s, background .3s',
-    backgroundColor: 'var(--dark-secondary, #fff)',
     boxShadow: '0px 3px 30px rgba(0, 0, 0, 0.08)',
     '&:hover': {
       transform: 'scale(1.01)',
@@ -119,7 +118,7 @@ const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
       {cardType === 'fleet' ? (
         <Box
           className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px] ${
-            isDragging ? ' opacity-50 [border:4px_dashed_var(--common-border-color)_!important]' : ''
+            isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'
           }`}
         >
           <div>
