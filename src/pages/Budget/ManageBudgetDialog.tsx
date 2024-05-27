@@ -21,6 +21,7 @@ import CustomButton from '../../components/Helpers/CustomButton';
 import FormTypes from '../../components/Helpers/FormTypes';
 import {
   CustomDialogTransition,
+  GenerateResourceLineNumber,
   budget,
   getObjKeys,
   getObjKeysWithValues,
@@ -130,6 +131,7 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
               if (isClone) {
                 let { name, _id, ...rest } = clonedData;
                 clonedData = { ...rest };
+                clonedData['name'] = GenerateResourceLineNumber(newFields); 
               }
               setInitialData({
                 fields: newFields,
@@ -140,12 +142,12 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
               toastConfig.setToastConfig(error);
             });
         } else {
+          let tempObjKeysWithValues = getObjKeys('', filterData);
+          let fields=filterData.map((m) => m.fieldData);
+          tempObjKeysWithValues['name'] = GenerateResourceLineNumber(fields);
           setInitialData({
-            fields: filterData.map((m) => m.fieldData),
-            values: getObjKeys(
-              '',
-              filterData.map((m) => m.fieldData)
-            )
+            fields: fields,
+            values: tempObjKeysWithValues
           });
         }
       });
