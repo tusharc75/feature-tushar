@@ -66,6 +66,20 @@ const FormBuilder = () => {
         Header: 'Resource',
         width: 120,
         Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row?.original?.resource}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'childResource',
+        Header: 'Child Resource',
+        width: 100,
+        accessorFn: (data) => (data?.childResource ? 'Yes' : 'No'),
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.childResource ? 'Yes' : 'No'}</p>
+      },
+      {
+        accessor: 'dynamicResource',
+        Header: 'Dynamic Resource',
+        width: 100,
+        accessorFn: (data) => (data?.dynamicResource ? 'Yes' : 'No'),
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.dynamicResource ? 'Yes' : 'No'}</p>
       }
     ];
     setColumns(columns);

@@ -254,8 +254,13 @@ const Productpackage = ({
             {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
                 <HtmlTooltip
-                  title={
-                    row.original?.assetQty ? (row?.original?.productDetail?.serializedProduct ? 'Asset is already assigned' : 'Serial Number is already assigned') : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
+                  title={row.original?.assetQty
+                    ? row?.original?.productDetail?.serializedProduct
+                      ? 'Assets/Serial Numbers is already assigned'
+                      : 'Inventory/Serial Numbers is already assigned'
+                    : row.original?.status
+                      ? rentalManagementMessage.loadingAlreadyCreated
+                      : ''
                   }
                 >
                   <span>

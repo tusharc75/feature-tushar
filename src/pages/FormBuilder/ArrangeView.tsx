@@ -328,9 +328,8 @@ const RenderSubItems = ({ itemData, index, section }: ItemProps) => {
     >
       <ListItem
         divider={true}
-        className={`${
-          isDragging ? ' [border:1px_solid_var(--common-border-color)_!important] ' : ''
-        } transition-colors rounded-md bg-[var(--dark-secondary,white)]`}
+        className={`${isDragging ? ' [border:1px_solid_var(--common-border-color)_!important] ' : ''
+          } transition-colors rounded-md bg-[var(--dark-secondary,white)]`}
       >
         <ListItemIcon className={` cursor-grab`} {...attributes} {...listeners}>
           <DragHandle />

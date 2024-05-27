@@ -30,6 +30,7 @@ const ManageSectionMaster = ({ onClose, onSuccess, sectionData }) => {
     if (sectionData && sectionData?._id) {
       values._id = sectionData?._id;
     }
+    values.oldSectionName = sectionData?.sectionName
     axiosInstance()
       .put(`section-master`, values)
       .then(({ data }) => {

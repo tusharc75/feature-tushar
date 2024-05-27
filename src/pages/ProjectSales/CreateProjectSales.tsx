@@ -11,6 +11,7 @@ import {
   yupSchema,
   setFieldsInAscendingOrder,
   getObjKeysWithValues,
+  GenerateResourceLineNumber,
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -82,6 +83,7 @@ const CreateProjectSales = ({
           if (isClone) {
             const { projectName, ...rest } = data;
             let tempData = { ...rest };
+            tempData['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate); 
             let tempObjKeysWithValues = getObjKeysWithValues(tempData, fieldsDataForUpdate, true, user);
             if (fieldsDataForUpdate?.some((e) => e.fieldName === 'projectManager')) {
               tempObjKeysWithValues['projectManager'] = user._id;
@@ -103,6 +105,7 @@ const CreateProjectSales = ({
           });
       } else {
         let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
+        tempObjKeysWithValues['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
           tempObjKeysWithValues['currency'] = user?.brandCurrency;
         }
