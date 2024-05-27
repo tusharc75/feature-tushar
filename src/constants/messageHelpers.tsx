@@ -79,9 +79,9 @@ export const rentalManagementMessage = {
     onlySwapAssets: 'Only Assets can be swapped',
     onlySwapInUseAssets: 'Only In-Use assets can be swapped',
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
-    startService: 'Service already started',
-    serviceNotStart: 'Service not started',
-    stopService: 'Service already stopped',
+    serviceAlreadyStarted: 'Service already started',
+    serviceNotstarted: 'Service not started',
+    serviceAlreadyStopped: 'Service already stopped',
 };
 
 export const subleaseActions = {
