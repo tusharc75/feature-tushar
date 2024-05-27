@@ -48,14 +48,14 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
   const classes = useClasses();
 
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
-    id: formData._id,
+    id: formData.uniqueId,
     data: {
       type: 'formData',
       index
     }
   });
 
-  const isEditing = selectedData?.uniqueId === id;
+  const isEditing = Boolean(selectedData) && selectedData?.uniqueId === id;
   const CHART_TYPE = formData.chartType || formData.graphType;
 
   const style: React.CSSProperties = {

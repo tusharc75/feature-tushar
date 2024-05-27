@@ -1,11 +1,12 @@
-import React from 'react';
-import { TextField, Box, Paper, Radio, RadioGroup, FormControl, FormControlLabel, FormLabel, FormGroup, Checkbox, Button, Grid } from '@material-ui/core';
-import { makeStyles } from '@material-ui/styles';
+import { Box, Button, Checkbox, FormControl, FormControlLabel, FormGroup, FormLabel, Grid, Radio, RadioGroup, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
+import { makeStyles } from '@material-ui/styles';
 import { camelCase, startCase } from 'lodash';
+import React from 'react';
 
-import { CHART_TYPES, FILTERS_OPTIONS, KPIListType, GRAPH_TYPES, IFormDataType, defaultFormConfigs, statuses } from './builderHelpers';
 import axiosInstance from 'src/axios/axiosInstance';
+import { generateId } from 'src/constants/helpers';
+import { CHART_TYPES, GRAPH_TYPES, IFormDataType, KPIListType, defaultFormConfigs, statuses } from './builderHelpers';
 
 const useClasses = makeStyles(() => ({
   column: {
@@ -47,7 +48,7 @@ const Builder = (props: Props) => {
       .then(({ data: { data } }) => {
         setKpiLists(data);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   React.useEffect(fetchKpis, []);
@@ -63,7 +64,7 @@ const Builder = (props: Props) => {
     if (selectedData) {
       handleUpdate(formValues);
     } else {
-      const formedData = { uniqueId: camelCase(formValues.chartTitle), ...formValues };
+      const formedData = { uniqueId: `${camelCase(formValues.chartTitle)}_${generateId()}`, ...formValues };
       setFormData((prevState: any) => [...prevState, formedData]);
       setFormValues(defaultFormConfigs);
     }
@@ -288,15 +289,17 @@ const Builder = (props: Props) => {
             <Grid item>
               <FormGroup row>
                 <FormControlLabel
-                  control={<Checkbox
-                    checked={formValues.currency}
-                    onChange={(e) => {
-                      handleChange('currency', e.target.checked)
-                      if (e.target.checked) {
-                        handleChange('percentage', false)
-                      }
-                    }}
-                  />}
+                  control={
+                    <Checkbox
+                      checked={formValues.currency}
+                      onChange={(e) => {
+                        handleChange('currency', e.target.checked);
+                        if (e.target.checked) {
+                          handleChange('percentage', false);
+                        }
+                      }}
+                    />
+                  }
                   label="Currency"
                 />
               </FormGroup>
@@ -304,15 +307,17 @@ const Builder = (props: Props) => {
             <Grid item>
               <FormGroup row>
                 <FormControlLabel
-                  control={<Checkbox
-                    checked={formValues.percentage}
-                    onChange={(e) => {
-                      handleChange('percentage', e.target.checked)
-                      if (e.target.checked) {
-                        handleChange('currency', false)
-                      }
-                    }}
-                  />}
+                  control={
+                    <Checkbox
+                      checked={formValues.percentage}
+                      onChange={(e) => {
+                        handleChange('percentage', e.target.checked);
+                        if (e.target.checked) {
+                          handleChange('currency', false);
+                        }
+                      }}
+                    />
+                  }
                   label="Percentage"
                 />
               </FormGroup>
