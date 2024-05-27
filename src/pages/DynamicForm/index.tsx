@@ -34,6 +34,17 @@ const DynamicForm = () => {
   const resourcePath = `/${route}`;
   const detailPagePath = `/${route}/detail`;
 
+  const DynamicFormType = [
+    {
+      key: `My ${resource}`,
+      value: 1
+    },
+    {
+      key: `All ${resource}`,
+      value: 2
+    }
+  ];
+
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
@@ -41,6 +52,8 @@ const DynamicForm = () => {
   const { generateColumns } = useColumns();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedType, setSelectedType] = useState(1);
+  const [showToggleButtons, setShowToggleButtons] = useState(false);
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
@@ -55,13 +68,16 @@ const DynamicForm = () => {
     const cencelToken = axios.CancelToken.source();
     fetchData(cencelToken);
     return () => cencelToken.cancel();
-  }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
+  }, [search, page, limit, filters, sorting, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${resource}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, detailPagePath, true);
+    if(newColumns?.some((ele)=> ele.accessor==='owner')){
+      setShowToggleButtons(true);
+    }
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -117,6 +133,9 @@ const DynamicForm = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
     if (isExport) {
       deepFilter = `?`;
+    }
+    if (showToggleButtons && selectedType === 1) {
+      deepFilter = deepFilter + `&myRecords=1`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
     if (filterByIds?.length) {
@@ -197,6 +216,10 @@ const DynamicForm = () => {
     dispatch({ type: 'search', search: e.target.value });
   };
 
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
+  };
+
   const handleDelete = () => {
     setIsSubmitting(true);
     let ids = [];
@@ -266,6 +289,10 @@ const DynamicForm = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
+          toggleButtonList={showToggleButtons ? DynamicFormType: null}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={permissions[renderedFrom]?.isDelete}
