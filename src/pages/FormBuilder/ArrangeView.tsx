@@ -13,6 +13,7 @@ import { DndContext, DragEndEvent, DragOverEvent, DragOverlay, DragStartEvent } 
 import { SortableContext, useSortable, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 
 const ArrangeView = (props) => {
   const { open, close, resourceData: gridData } = props;
@@ -163,25 +164,26 @@ const ArrangeView = (props) => {
           return item;
         });
         setData(newItems);
-      } else if (destinationType === 'Section') {
-        const activeItemParent = activeSection.id;
-        const overItemParent = over.data.current.props.section.id;
-        const isInSameSection = activeItemParent === overItemParent;
-        if (isInSameSection) return;
+        // } else if (destinationType === 'Section') {
+        //   const activeItemParent = activeSection.id;
+        //   const overItemParent = over.data.current.props.section.id;
+        //   const isInSameSection = activeItemParent === overItemParent;
+        //   if (isInSameSection) return;
 
-        let newSourceSubItems = [...sourceSubItems];
-        const [item] = newSourceSubItems.splice(active.data.current.index, 1);
-        let newDestSubItems = [...over.data.current.props.section.subItems];
-        newDestSubItems.splice(newDestSubItems.length, 0, { ...item, section: overItemParent });
-        newItems = newItems.map((item) => {
-          if (item.id === activeItemParent) {
-            item.subItems = newSourceSubItems;
-          } else if (item.id === over.data.current.props.section.id) {
-            item.subItems = newDestSubItems;
-          }
-          return item;
-        });
-        setData(newItems);
+        //   let newSourceSubItems = [...sourceSubItems];
+        //   const [item] = newSourceSubItems.splice(active.data.current.index, 1);
+        //   let newDestSubItems = [...over.data.current.props.section.subItems];
+        //   newDestSubItems.splice(newDestSubItems.length, 0, { ...item, section: overItemParent });
+        //   newItems = newItems.map((item) => {
+        //     if (item.id === activeItemParent) {
+        //       item.subItems = newSourceSubItems;
+        //     } else if (item.id === over.data.current.props.section.id) {
+        //       item.subItems = newDestSubItems;
+        //     }
+        //     return item;
+        //   });
+        //   setData(newItems);
+        // }
       }
     }
   };
@@ -225,7 +227,13 @@ const ArrangeView = (props) => {
         <br />
         <div className="isolate z-50">
           {data && (
-            <DndContext onDragEnd={handleDragEnd} onDragOver={onDragOver} onDragStart={onDragStart} sensors={sensors}>
+            <DndContext
+              onDragEnd={handleDragEnd}
+              onDragOver={onDragOver}
+              onDragStart={onDragStart}
+              sensors={sensors}
+              modifiers={[restrictToVerticalAxis]}
+            >
               <div role="list" className="grid list-none gap-2">
                 <SortableContext items={sectionIds} strategy={verticalListSortingStrategy}>
                   {data?.map((section, index) => <RenderSection section={section} index={index} key={section.id} />)}
