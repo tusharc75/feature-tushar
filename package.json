@@ -207,7 +207,8 @@
     "enzyme-adapter-react-16": "^1.15.6",
     "husky": "^7.0.1",
     "postcss": "^8.4.26",
-    "prettier": "^2.3.2",
+    "prettier": "^3.2.5",
+    "prettier-plugin-tailwindcss": "^0.5.14",
     "react-test-renderer": "^17.0.2",
     "sass": "^1.63.4",
     "sentry-files": "^1.0.1",
@@ -217,25 +218,6 @@
     "vite": "^4.3.9",
     "vite-plugin-pwa": "^0.16.4",
     "vite-tsconfig-paths": "^4.2.0"
-  },
-  "prettier": {
-    "arrowParens": "always",
-    "bracketSpacing": true,
-    "htmlWhitespaceSensitivity": "css",
-    "insertPragma": false,
-    "jsxBracketSameLine": false,
-    "jsxSingleQuote": false,
-    "printWidth": 150,
-    "proseWrap": "preserve",
-    "quoteProps": "as-needed",
-    "requirePragma": false,
-    "semi": true,
-    "singleQuote": true,
-    "tabWidth": 2,
-    "trailingComma": "none",
-    "useTabs": false,
-    "vueIndentScriptAndStyle": false,
-    "rangeStart": 0
   },
   "config": {
     "commitizen": {
