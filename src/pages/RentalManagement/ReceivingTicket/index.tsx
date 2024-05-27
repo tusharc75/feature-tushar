@@ -342,22 +342,24 @@ const ReceivingTicket = ({
 
         var ticketProduct: any = [];
         if (element?.warehouse) {
-          ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId
+          ticketProduct = loadingTicketProducts?.filter((e) => e.uniqueId === element._id && e.product === element.materialId
             && e?.warehouse?.optionValue === element?.warehouse?.optionValue);
         }
         else {
-          ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+          ticketProduct = loadingTicketProducts?.filter((e) => e.uniqueId === element._id && e.product === element.materialId);
         }
 
         ticketProduct?.forEach((ele) => {
 
           var returnTicket: any = []
           if (ele?.warehouse) {
-            returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount
+            returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty
+              && e.uniqueId === element._id && e.product === element.materialId && !e.isCount
               && e?.warehouse?.optionValue === ele?.warehouse?.optionValue);
           }
           else {
-            returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+            returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty
+              && e.uniqueId === element._id && e.product === element.materialId && !e.isCount);
           }
 
           var consumeQty = 0;
@@ -426,7 +428,7 @@ const ReceivingTicket = ({
         if (qty > 0) {
           const obj: any = {};
           obj._id = `${element.materialId}_${productAssets?.length + 1}`;
-          obj.uniqueId = element?.uniqueId;
+          obj.uniqueId = element?._id;
           obj.materialId = element?.materialId;
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
@@ -468,8 +470,10 @@ const ReceivingTicket = ({
             const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId && e.uniqueId === element._id);
             ticketProduct?.forEach((ele) => {
 
-              const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
-              const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+              const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty
+                && e.uniqueId === element._id && e.product === element.materialId && !e.isCount);
+              const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty
+                && e.uniqueId === element._id && e.product === element.materialId && !e.isCount);
 
               var consumeQty = 0;
               consumeProducts
@@ -543,7 +547,7 @@ const ReceivingTicket = ({
               productAssets.push({
                 _id: element?._id,
                 materialId: element?.materialId,
-                uniqueId: element?.uniqueId,
+                uniqueId: element?._id,
                 type: 'Product',
                 displayType: 'Product (Serialized)',
                 qty: qty,

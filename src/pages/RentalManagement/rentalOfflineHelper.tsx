@@ -134,16 +134,7 @@ export const uniqueProduct = (material, nonSerializedInventory) => {
             });
         }
         else {
-            if (result.filter((e) => e.materialId === ele.materialId).length) {
-                result.forEach(element => {
-                    if (element.materialId === ele.materialId) {
-                        element.qty += getNestedQty(material, ele)
-                    }
-                });
-            }
-            else {
-                result.push({ ...ele, qty: getNestedQty(material, ele) })
-            }
+            result.push({ ...ele, qty: getNestedQty(material, ele) })
         }
     })
     return result;
