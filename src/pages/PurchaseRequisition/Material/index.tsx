@@ -62,13 +62,16 @@ const Material = ({
     fetchFields();
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [allFields]);
+
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(
       CHILD_RESOURCE.purchaseRequisitionDetail,
       purchaseRequisitionData?.currency,
       allowedToEdit && allowedToAddMaterial
     );
-    setAllFields(data);
     const newColumns = generateColumns(renderedFrom, data, null, false, purchaseRequisitionData?.currency);
     let coloum: any = [
       {
@@ -188,7 +191,7 @@ const Material = ({
       )
     });
     setColumns(coloum);
-    fetchData();
+    setAllFields(data);
   };
 
   const fetchData = async () => {

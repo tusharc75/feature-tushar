@@ -89,13 +89,7 @@ const PurchaseRequisitionDetail = () => {
         tempStepList = purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA');
       }
       setStepList(tempStepList);
-
-      if (data?.status === PURCHASE_REQUISITION_STATUS.converted) {
-        setCurrentStep(stepList?.length - 1);
-        setPrevStep(false);
-      } else {
-        setCurrentStep(getIndex(data?.processStatus, stepList));
-      }
+      setCurrentStep(getIndex(data?.processStatus, stepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
@@ -165,6 +159,8 @@ const PurchaseRequisitionDetail = () => {
       fetchData();
     });
   };
+
+  console.log(currentStep);
 
   return (
     <Box className="main-container-v1">
@@ -252,9 +248,9 @@ const PurchaseRequisitionDetail = () => {
                     steps={stepList}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
-                    isStepEnded={false}
                     isPrevStep={prevStep}
                     setStepFullScreen={() => setStepFullScreen(true)}
+                    isStepEnded={[PURCHASE_REQUISITION_STATUS.converted].includes(purchaseRequisitionData?.status)}
                   />
                   <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {stepList[currentStep]?.name === 'Add' && purchaseRequisitionData && (
