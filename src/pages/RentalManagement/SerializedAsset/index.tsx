@@ -1229,6 +1229,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           }}
           rentalManagementId={rentalManagementData._id}
           warehouseId={rentalManagementData?.warehouse?.optionValue}
+          isRedirectTodetailPage={false}
         />
       )}
       {showOrderDialog.open && showOrderDialog.type === 'sublease' && (
