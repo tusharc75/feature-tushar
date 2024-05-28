@@ -558,6 +558,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
       data.supplier = [];
       data.customer = [salesOrderData?.customerAccount?.optionValue];
       data.warehouse = [salesOrderData?.warehouse?.optionValue];
+      data.address = salesOrderData?.shippingAddress?.optionValue ? [salesOrderData?.shippingAddress?.optionValue] : [];
       return new Promise((resolve, reject) => {
         axiosInstance()
           .post(pricingCondition.api + `/calculatePrice`, data)
