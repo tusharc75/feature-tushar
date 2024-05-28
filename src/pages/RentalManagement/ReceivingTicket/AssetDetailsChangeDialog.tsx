@@ -130,15 +130,39 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       };
     });
 
-    const header = ['Asset Number', ...initialData?.fields?.map((f) => f?.fieldLabel)];
+    const field_option_label = initialData?.fields?.filter(f => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map(field => {
+      return [...field?.option?.map(o => ({[field?.fieldLabel]: o?.optionLabel}))]
+    })
+
+    const maxLength = Math.max(...field_option_label.map(arr => arr.length));
+    const json_data_value = [];
+
+    for (let i = 0; i < maxLength; i++) {
+      const mergedObject = {};
+      for (const arr of field_option_label) {
+        if (arr[i]) {
+          Object.assign(mergedObject, arr[i]);
+        }
+      }
+      json_data_value.push(mergedObject);
+    }
+
+    const header1 = ['Asset Number', ...initialData?.fields?.map((f) => f?.fieldLabel)];
+
+    const header2 = initialData?.fields?.filter(f => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map(f => f?.fieldLabel)
 
     const ws = utils.json_to_sheet(json_data);
-    if (header.length) {
-      utils.sheet_add_aoa(ws, [header]);
+    const ws_value = utils.json_to_sheet(json_data_value);
+    if (header1.length) {
+      utils.sheet_add_aoa(ws, [header1]);
+    }
+    if (header2.length) {
+      utils.sheet_add_aoa(ws_value, [header2]);
     }
     const wb = utils.book_new();
 
     utils.book_append_sheet(wb, ws, 'Sheet1');
+    utils.book_append_sheet(wb, ws_value, 'Value');
     writeFile(wb, 'Rental Job Receaving Ticket Asset.xlsx');
   };
 
