@@ -42,6 +42,7 @@ import ActivityButton from 'src/components/Activity/ActivityButton';
 import { stepIconInterface, StepIconType } from 'src/components/Steps/icons';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from '../DynamicForm/Step';
+import QuotationInAccordion from 'src/components/QuotationInAccordion/QuotationInAccordion';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -75,6 +76,7 @@ function OpportunityDetailsPage() {
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [quotes, setQuotes] = useState([]);
+  const [quotations, setQuotations] = useState([]);
   const [showAddSupplierContactsDialog, setShowAddSupplierContactsDialog] = useState(false);
   const [showAddCustomerContactsDialog, setShowAddCustomerContactsDialog] = useState(false);
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
@@ -275,6 +277,12 @@ function OpportunityDetailsPage() {
             ? data[sidebarResource.quoteBuilder][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
             : []
         );
+        setQuotations(
+          data[sidebarResource.quotation] &&
+          data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+          ? data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+          : []
+        )
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -731,6 +739,7 @@ function OpportunityDetailsPage() {
                 </Box>
               )}
               {permissions?.quoteBuilder?.isRead && (
+                <Box mb={2}>
                 <QuotesInAccordion
                   recordsPerLine={3}
                   quotes={quotes}
@@ -744,6 +753,19 @@ function OpportunityDetailsPage() {
                   currency={opportunityData?.currency}
                   estimatedAmount={opportunityData?.estimatedAmount}
                   isRenderedFromOpportunity={true}
+                  isAllowedToUpdate={allowedToEdit}
+                />
+                </Box>
+              )}
+             
+              {permissions?.quotation?.isRead && (
+                <QuotationInAccordion
+                  recordsPerLine={3}
+                  quotations={quotations}
+                  fetchData={fetchRelatedData}
+                  quotationPermission={permissions.quotation}
+                  opportunityId={id}
+                  opportunityName={opportunityData?.opportunityName}
                   isAllowedToUpdate={allowedToEdit}
                 />
               )}
