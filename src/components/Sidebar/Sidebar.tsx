@@ -1,24 +1,23 @@
-import { Collapse, CssBaseline, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar, Tooltip } from '@material-ui/core';
+import { Collapse, CssBaseline, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@material-ui/core';
 import { Close, ExpandLess, ExpandMore } from '@material-ui/icons';
 import clsx from 'clsx';
 import { kebabCase, lowerCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useHistory, withRouter } from 'react-router-dom';
+import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
+import { DynamicIcon } from 'src/assets/IconGenerator';
 import { setDataBySectionName } from 'src/pages/Home/helpers';
 import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
+import HtmlTooltip from '../CustomTooltipTitle';
 import Header from '../Header/Header';
 import routes from '../Helpers/Routes';
 import styles from './sidebar.module.scss';
 import useStyles from './style';
 import { TResource, TSidebarItem, TSidebarSection } from './type';
 import { isSectionActive, isSectionVisible, staticSidebarData } from './utils';
-import { useStore, SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON } from 'src/StateProvider/fastContext';
-import { BsChatLeftTextFill } from 'react-icons/bs';
-import HtmlTooltip from '../CustomTooltipTitle';
-import { DynamicIcon } from 'src/assets/IconGenerator';
 
 function SideBar({ location }) {
   const [itemToAddActiveClass, setItemToAddActiveClass] = useState(NaN);
@@ -94,8 +93,8 @@ function SideBar({ location }) {
             items: [itemWithLink]
           };
           const section = user?.role?.brandSectionMaster.find((e) => e?.sectionName === item.sectionName);
-          if (section?.iconName !== undefined) {
-            newSection.icon = DynamicIcon(section.iconName, { size: 18 });
+          if (section?.iconName && section?.iconName !== '') {
+            newSection.icon = DynamicIcon(section.iconName, { size: 20 });
           }
           sections.push(newSection);
         } else {
@@ -158,7 +157,7 @@ function SideBar({ location }) {
       >
         <Toolbar />
         <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>
-          <div className="max-[959px]:min-h-[56px] min-[769px]:min-h-[unset] max-[768px]:min-h-[56px] bg-white">
+          <div className="bg-white max-[959px]:min-h-[56px] max-[768px]:min-h-[56px] min-[769px]:min-h-[unset]">
             <div className={`max-[768px]:pr-[50px] ${styles.logo} `}>
               <img
                 className={` ${isSidebarOpen ? 'block' : 'hidden'} mx-auto max-h-[33px]`}
@@ -175,7 +174,7 @@ function SideBar({ location }) {
                 title="eQuipt Logo"
               />
             </div>
-            <div className={`${sidebarOpenedByButton && 'max-[768px]:block'} hidden absolute right-0 top-[5px]`}>
+            <div className={`${sidebarOpenedByButton && 'max-[768px]:block'} absolute right-0 top-[5px] hidden`}>
               <IconButton onClick={handleSidebarClose}>
                 <Close />
               </IconButton>
