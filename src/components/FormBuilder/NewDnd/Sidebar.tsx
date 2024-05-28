@@ -183,7 +183,8 @@ export const SidebarItem = ({ item, type = 'SidebarItem' }: SidebarItemProps) =>
     id: item.id,
     data: {
       type,
-      data: item
+      data: item,
+      label: item.label
     }
   });
 

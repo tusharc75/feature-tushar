@@ -166,7 +166,8 @@ export const SingleCustomField = ({ data, handleEdit, handleDelete, handleAddFie
     data: {
       type: 'SidebarCustomItem',
       data,
-      props: { data, handleEdit, handleDelete, handleAddField }
+      props: { data, handleEdit, handleDelete, handleAddField },
+      label: data.fieldLabel
     }
   });
 

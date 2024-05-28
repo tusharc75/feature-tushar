@@ -68,6 +68,7 @@ export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => 
         data.supplier = [];
         data.customer = [rentalManagementData?.customerAccount?.optionValue];
         data.warehouse = [rentalManagementData?.warehouse?.optionValue];
+        data.address = rentalManagementData?.shippingAddress?.optionValue ? [rentalManagementData?.shippingAddress?.optionValue] : [];
         return new Promise((resolve, reject) => {
             axiosInstance()
                 .post(pricingCondition.api + `/calculatePrice`, data)
