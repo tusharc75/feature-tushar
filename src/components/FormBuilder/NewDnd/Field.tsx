@@ -157,18 +157,13 @@ const Field = ({
             : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
         }  flex min-h-[56.5px] items-center justify-center p-2 text-center`}
       >
-        <h6 className="text-center text-2xl font-bold text-gray-400 dark:text-gray-600">Drop here</h6>
+        <h6 className="text-center text-2xl font-bold text-gray-400 dark:text-gray-600">Drop {active.data.current.label}</h6>
       </div>
     );
   }
 
   return (
     <>
-      {/* {isPreviewVisible && (
-        <div className="min-h-[56.5px] [border:5px_dashed_var(--common-border-color)] p-2 py-8 text-xl font-bold text-gray-300 dark:text-gray-600 flex items-center justify-center text-center">
-          Drop
-        </div>
-      )} */}
       <div
         style={style}
         ref={setNodeRef}
