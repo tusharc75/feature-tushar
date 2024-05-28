@@ -359,7 +359,7 @@ const ManageDeliveryTicket = ({
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
             tempInitialData['rentalJob'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.salesOrder) {
-            tempInitialData['salesOrder'] = referenceData?._id;
+            tempInitialData['salesOrder'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.repairJob) {
             tempInitialData['repairJob'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset) {
