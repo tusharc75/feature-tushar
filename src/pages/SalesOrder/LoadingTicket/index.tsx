@@ -115,6 +115,16 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 					)
 			},
 			{
+				accessor: 'loadingTicketStatus',
+				Header: 'Status',
+				Cell: ({ row }) =>
+					row?.original?.loadingTicketStatus ? (
+						<h5 className="text-truncate">{row?.original?.loadingTicketStatus}</h5>
+					) : (
+						<NoDataCell />
+					)
+			},
+			{
 				accessor: 'leadTime',
 				Header: 'Lead Time (Days)',
 				Cell: ({ row }) => <p>{row.original['leadTime'] ? row.original['leadTime'] : 0}</p>,
@@ -167,9 +177,9 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 		});
 
 		deliveryTicketList.map((obj) => {
-			if (obj.ticketType === DELIVERY_TICKET_TYPE.loading) {
+			if (obj.ticketType === DELIVERY_TICKET_TYPE.delivery) {
 				rows.map((d, index) => {
-					if (obj?.products?.some((p) => p?.product === d?._id && p?.uniqueId === d?.uniqueId)) {
+					if (obj?.products?.some((p) => p?.product === d?.materialId && p?.uniqueId === d?.uniqueId)) {
 						rows[index]['loadingTicket'] = obj?.ticketName;
 						rows[index]['loadingTicketId'] = obj?._id;
 						rows[index]['loadingTicketStatus'] = obj?.status;
