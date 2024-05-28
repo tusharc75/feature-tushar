@@ -54,6 +54,7 @@ import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from './../rentalOfflineHelper';
 import DateDialog from './DateDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -85,7 +86,7 @@ const LoadingTicket = ({
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width:600px)');
   const {
-    state: { user }
+    state: { user, permissions }
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
@@ -168,9 +169,11 @@ const LoadingTicket = ({
           replaceAsset: d?.replaceAsset
             ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
             : '',
-          description: d?.product?.productDescription,
           rentalAssetStatus: d?.status,
-          startDate: d?.startDate
+          startDate: d?.startDate,
+          description: d?.product?.productDescription,
+          wellNumber: d?.inventory?.wellNumber,
+          position: d?.inventory?.position
         }))
           .map((u) => ({
             ...u,
@@ -467,17 +470,17 @@ const LoadingTicket = ({
     } = await axiosInstance().put(`/field/find-field-labels`, {
       fields: [
         {
-          resource: 'Product',
+          resource: sidebarResource.product,
           fieldNames: ['productName']
         },
         {
-          resource: 'Serialized Asset',
-          fieldNames: ['serialNumber', 'mtrAttached']
+          resource: sidebarResource.serializedAsset,
+          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached']
         }
       ]
     });
-    const productFields = data?.find((d) => d.resource === 'Product');
-    const assetFields = data?.find((d) => d.resource === 'Serialized Asset');
+    const productFields = data?.find((d) => d.resource === sidebarResource.product);
+    const assetFields = data?.find((d) => d.resource === sidebarResource.serializedAsset);
 
     setCheckMTRValidation(assetFields?.fieldNames?.some((e) => e?.fieldName === 'mtrAttached'));
     setColumnHeader({ productFields, assetFields });
@@ -621,6 +624,11 @@ const LoadingTicket = ({
       Header: findHeader(columnHeader?.assetFields, 'serialNumber'),
       Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
     }] : []),
+    ...(findHeader(columnHeader?.assetFields, 'position') ? [{
+      accessor: 'position',
+      Header: findHeader(columnHeader?.assetFields, 'position'),
+      Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+    }] : []),
     {
       accessor: 'productName',
       Header: findHeader(columnHeader?.productFields, 'productName'),
@@ -674,7 +682,20 @@ const LoadingTicket = ({
       accessor: 'status',
       Header: 'Asset Status',
       Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
-    }
+    },
+    ...(findHeader(columnHeader?.assetFields, 'wellNumber') ? [{
+      accessor: 'wellNumber',
+      Header: findHeader(columnHeader?.assetFields, 'wellNumber'),
+      Cell: ({ row }) =>
+        <DropdownCell
+          permissions={permissions}
+          permissionForLinks={{}}
+          field={{
+            fieldName: 'wellNumber',
+            lookupResource: sidebarResource.wellNumber
+          }}
+          original={row?.original} />
+    }] : []),
   ];
 
   if (findHeader(columnHeader?.assetFields, 'mtrAttached')) {

@@ -520,6 +520,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
       data.supplier = [];
       data.customer = [invoiceData?.customerAccount?.optionValue];
       data.warehouse = [invoiceData?.warehouse?.optionValue];
+      data.address = invoiceData?.shippingAddress?.optionValue ? [invoiceData?.shippingAddress?.optionValue] : [];
       return new Promise((resolve, reject) => {
         axiosInstance()
           .post(pricingCondition.api + `/calculatePrice`, data)
