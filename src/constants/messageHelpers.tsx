@@ -121,3 +121,14 @@ export const subleaseMessage = {
 export const transferInventoryMessage = {
     assignSerialNumbers: 'Assign Serial Numbers to proceed',
 }
+
+export const salesOrderActions = {
+    createLoadingTicket: 'Create Loading Ticket',
+    deliverLoadingTicket: 'Deliver Loading Ticket',
+}
+
+export const salesOrderMessage = {
+    loadingAlreadyCreated: 'Loading Ticket is already created',
+    loadingNotCreated: 'Loading Ticket is not created',
+    loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+}
