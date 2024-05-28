@@ -2053,6 +2053,10 @@ export const RENTAL_STATUS = {
   closed: 'Closed'
 };
 
+export const PURCHASE_REQUISITION_STATUS = {
+  converted : 'Converted'
+}
+
 export const RENTAL_INTERNAL_ASSET_STATUS = {
   reserved: 'Reserved',
   inUse: 'In-Use',
