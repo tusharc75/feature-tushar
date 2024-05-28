@@ -148,13 +148,14 @@ const ArrangeView = (props) => {
       if (destinationType === 'Item') {
         const activeItemParent = activeSection.id;
         const overItemParent = overSection.id;
+        const overItemParentname = overSection.section;
         const isInSameSection = activeItemParent === overItemParent;
         if (isInSameSection) return;
 
         let newSourceSubItems = [...sourceSubItems];
         const [item] = newSourceSubItems.splice(active.data.current.index, 1);
         let newDestSubItems = [...destSubItems];
-        newDestSubItems.splice(over.data.current.index, 0, { ...item, section: overItemParent });
+        newDestSubItems.splice(over.data.current.index, 0, { ...item, section: overItemParentname });
         newItems = newItems.map((item) => {
           if (item.id === activeItemParent) {
             item.subItems = newSourceSubItems;
