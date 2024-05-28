@@ -54,6 +54,7 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
     data.supplier = [];
     data.customer = [referenceData?.customerAccount?.optionValue];
     data.warehouse = [referenceData?.warehouse?.optionValue];
+    data.address =referenceData?.shippingAddress?.optionValue ? [referenceData?.shippingAddress?.optionValue] : [];
     axiosInstance()
       .post(pricingCondition.api + `/calculatePrice`, data)
       .then(({ data: { data } }) => {
