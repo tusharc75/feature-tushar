@@ -16,7 +16,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, checkIsAllowedToEdit, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, PURCHASE_REQUISITION_STATUS, checkIsAllowedToEdit, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -41,6 +41,7 @@ const PurchaseRequisitionDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [showOrderDialog, setOrderDialog] = useState({ open: false });
   const [nextStep, setNextStep] = useState(true);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [prevStep, setPrevStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
@@ -88,8 +89,7 @@ const PurchaseRequisitionDetail = () => {
         tempStepList = purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA');
       }
       setStepList(tempStepList);
-
-      setCurrentStep(getIndex(data?.processStatus, purchaseRequisitionSteps));
+      setCurrentStep(getIndex(data?.processStatus, stepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
@@ -147,7 +147,7 @@ const PurchaseRequisitionDetail = () => {
     axiosInstance().put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
       _id: id,
       purchaseOrder: data?._id,
-      status: 'Converted'
+      status: PURCHASE_REQUISITION_STATUS.converted
     }).then(({ data }) => {
       fetchData();
       toastConfig.setToastConfig({
@@ -172,14 +172,14 @@ const PurchaseRequisitionDetail = () => {
               {purchaseRequisitionData?.material?.length > 0 &&
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  disabled={purchaseRequisitionData?.status === 'Converted' ? true : false}
+                  disabled={purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? true : false}
                   className="btn-outline-v1"
                   onClick={() => {
                     setOrderDialog({ open: true });
                   }}
                   style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
                 >
-                  {purchaseRequisitionData?.status === 'Converted' ? 'Converted' : 'Convert'}
+                  {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
                 </Button>
               }
               {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
@@ -242,12 +242,13 @@ const PurchaseRequisitionDetail = () => {
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}
+                    nextStepToolTip={nextStepToolTip}
                     steps={stepList}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
-                    isStepEnded={false}
                     isPrevStep={prevStep}
                     setStepFullScreen={() => setStepFullScreen(true)}
+                    isStepEnded={[PURCHASE_REQUISITION_STATUS.converted].includes(purchaseRequisitionData?.status)}
                   />
                   <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {stepList[currentStep]?.name === 'Add' && purchaseRequisitionData && (
@@ -260,6 +261,7 @@ const PurchaseRequisitionDetail = () => {
                         currentStep={stepList[currentStep]?.name}
                         setNextStep={setNextStep}
                         setPrevStep={setPrevStep}
+                        setNextStepToolTip={setNextStepToolTip}
                       />
                     )}
                     {stepList[currentStep]?.name === 'DOA' && purchaseRequisitionData && (
@@ -273,6 +275,7 @@ const PurchaseRequisitionDetail = () => {
                         fetchParentData={fetchData}
                         setNextStep={setNextStep}
                         setPrevStep={setPrevStep}
+                        setNextStepToolTip={setNextStepToolTip}
                       />
                     )}
                     {stepList[currentStep]?.name === 'End' && purchaseRequisitionData && (
@@ -284,6 +287,7 @@ const PurchaseRequisitionDetail = () => {
                         currentStep={stepList[currentStep]?.name}
                         setNextStep={setNextStep}
                         setPrevStep={setPrevStep}
+                        setNextStepToolTip={setNextStepToolTip}
                       />
                     )}
                   </ContentFullScreen>

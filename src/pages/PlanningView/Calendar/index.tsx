@@ -695,7 +695,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                                 window.open(`${routes.purchaseOrderDetail.path}/${row.referenceId}`);
                               }
                               else if (row?.resource === sidebarResource.purchaseRequisition) {
-                                window.open(`${routes.purchaseOrderDetail.path}/${row.referenceId}`);
+                                window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
                               }
                               else if (row?.resource === sidebarResource.productionOrder) {
                                 window.open(`${routes.productionOrderDetail.path}/${row.referenceId}`);
