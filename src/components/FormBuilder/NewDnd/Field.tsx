@@ -113,7 +113,7 @@ const Field = ({
     handleClose();
   };
 
-  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging, active, over } = useSortable({
     id: data._id,
     data: {
       type: 'Field',
@@ -143,8 +143,24 @@ const Field = ({
     transition
   };
 
-  // const isPreviewVisible =
-  //   active?.data.current?.type !== 'NewSection' && active?.data.current.sectionId !== sectionId && over && over.id === data._id;
+  const isPreviewVisible =
+    active?.data.current?.type !== 'NewSection' && active?.data.current.sectionId !== sectionId && over && over.id === data._id;
+
+  if (isPreviewVisible) {
+    return (
+      <div
+        style={style}
+        ref={setNodeRef}
+        className={`${
+          isPreviewVisible
+            ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
+            : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
+        }  flex min-h-[56.5px] items-center justify-center p-2 text-center`}
+      >
+        <h6 className="text-center text-2xl font-bold text-gray-400 dark:text-gray-600">Drop here</h6>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -157,7 +173,7 @@ const Field = ({
         style={style}
         ref={setNodeRef}
         className={`${
-          isDragging
+          isDragging || isPreviewVisible
             ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
             : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
         }  flex min-h-[56.5px] items-center p-2`}
