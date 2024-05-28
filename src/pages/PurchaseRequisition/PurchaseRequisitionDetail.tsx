@@ -160,8 +160,6 @@ const PurchaseRequisitionDetail = () => {
     });
   };
 
-  console.log(currentStep);
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
