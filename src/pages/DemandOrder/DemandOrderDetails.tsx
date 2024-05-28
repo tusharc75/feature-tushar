@@ -1,5 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
+import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Edit, ExpandMore } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
@@ -20,9 +20,11 @@ import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, demandOrder, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, checkIsAllowedToEdit, demandOrder, sidebarResource, warehouse } from '../../constants/helpers';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Material from './Material';
+import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
+import ManageProductionOrder from '../ProductionOrder/ManageProductionOrder';
 
 const DemandOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -43,6 +45,8 @@ const DemandOrderDetails = () => {
   const [fields, setFields] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [convertAnchorEl, setConvertAnchorEl] = useState(null);
+  const [convertDialog, setConvertDialog] = useState({ open: false, type: '' })
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -71,7 +75,7 @@ const DemandOrderDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
-     
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data));
       setDemandOrderData(data);
       setLoading(false);
@@ -98,6 +102,33 @@ const DemandOrderDetails = () => {
       });
   };
 
+  const closeConvertMenu = () => {
+    setConvertAnchorEl(null);
+  };
+
+  const handleConvertSuccess = (data: any) => {
+    closeConvertMenu()
+    const value = {
+      _id: id,
+      status: 'Converted'
+    }
+    if (convertDialog.type === 'purchaseOrder') {
+      value['purchaseOrder'] = data?._id
+    } else {
+      value['productionOrder'] = data?._id
+    }
+    axiosInstance().put(`${routes?.demandOrder?.path}/update-converted`, value).then(({ data }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `${convertDialog.type === 'purchaseOrder' ? sidebarResource.purchaseOrder : sidebarResource.productionOrder} has been created successfully`
+      });
+    }).catch((err) => {
+      fetchData();
+    });
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -108,6 +139,46 @@ const DemandOrderDetails = () => {
           <Box className="control-buttons-v1">
             {demandOrderData ? (
               <>
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  className="btn-outline-v1"
+                  disabled={demandOrderData?.status === 'Converted' ? true : false}
+                  size="small"
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                  onClick={(e) => { setConvertAnchorEl(e.currentTarget) }}
+                  aria-controls="convert-menu"
+                  endIcon={demandOrderData?.status === 'Converted' ? null : <ExpandMore fontSize="small" />}
+                >
+                  {demandOrderData?.status === 'Converted' ? 'Converted' : 'Convert'}
+                </Button>
+                <Menu
+                  anchorEl={convertAnchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="convert-menu"
+                  open={Boolean(convertAnchorEl)}
+                  onClose={closeConvertMenu}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      setConvertDialog({ open: true, type: 'purchaseOrder' })
+                    }}
+                  >
+                    {routes.purchaseOrder.title}
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      setConvertDialog({ open: true, type: 'productionOrder' })
+                    }}
+                  >
+                    {routes.productionOrder.title}
+                  </MenuItem>
+                </Menu>
+
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
                   <Button
                     className="btn-outline-v1"
@@ -189,6 +260,35 @@ const DemandOrderDetails = () => {
             fetchData();
             setOpenUpdateDialog(false);
           }}
+        />
+      )}
+      {convertDialog.open && convertDialog.type === 'purchaseOrder' && (
+        <ManagePurchaseOrder
+          isClone={false}
+          purchaseOrderId={null}
+          onClose={() => setConvertDialog({ open: false, type: '' })}
+          onSuccess={(data: any) => {
+            handleConvertSuccess(data)
+          }}
+          products={demandOrderData?.material?.filter((item: any) => item?.type == MATERIAL_TYPE.product)?.map((e) => {
+            return { ...e, product: e.materialId };
+          })}
+          services={demandOrderData?.material?.filter((item: any) => item?.type == MATERIAL_TYPE.service)?.map((e) => {
+            return { ...e, service: e.materialId };
+          })}
+          warehouseId={demandOrderData?.warehouse?.optionValue}
+        />
+      )}
+
+      {convertDialog.open && convertDialog.type === 'productionOrder' && (
+        <ManageProductionOrder
+          isClone={false}
+          productionOrderId={null}
+          onClose={() => setConvertDialog({ open: false, type: '' })}
+          onSuccess={(data) => {
+            handleConvertSuccess(data)
+          }}
+          referenceData={{warehouse: demandOrderData?.warehouse?.optionValue}}
         />
       )}
     </Box>
