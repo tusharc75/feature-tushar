@@ -399,6 +399,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       data.supplier = [subleaseData?.supplierAccount?.optionValue];
       data.customer = [];
       data.warehouse = [];
+      data.address = subleaseData?.shippingAddress?.optionValue ? [subleaseData?.shippingAddress?.optionValue] : [];
       return new Promise((resolve, reject) => {
         axiosInstance()
           .post(pricingCondition.api + `/calculatePrice`, data)
