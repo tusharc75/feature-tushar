@@ -233,7 +233,8 @@ const ReceivingTicket = ({
                 ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
                 : '',
               description: d?.product?.productDescription,
-              wellNumber: d?.inventory?.wellNumber
+              wellNumber: d?.inventory?.wellNumber,
+              position: d?.inventory?.position
             };
           })
           .map((u) => ({
@@ -695,7 +696,7 @@ const ReceivingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber', 'wellNumber']
+          fieldNames: ['serialNumber', 'position', 'wellNumber']
         }
       ]
     });
@@ -836,6 +837,11 @@ const ReceivingTicket = ({
         accessor: 'serialNumber',
         Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
         Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+      }] : []),
+      ...(assetFields?.find((f) => f.fieldName === 'position') ? [{
+        accessor: 'position',
+        Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
+        Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
       }] : []),
       {
         accessor: 'productName',
