@@ -45,7 +45,7 @@ export const assignIconAndText = (groupedData, brandSectionMaster) => {
       if (section && section.description !== '') {
         obj.text = section.description;
       }
-      if (section?.iconName !== undefined) {
+      if (section?.iconName !== undefined && section.iconName) {
         obj.icon = section.iconName;
         obj.sideBarIcon = DynamicIcon(section.iconName);
       }

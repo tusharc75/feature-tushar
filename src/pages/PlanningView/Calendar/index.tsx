@@ -12,6 +12,7 @@ import { sidebarResource } from 'src/constants/helpers';
 import { useAppTheme } from 'src/constants/AppConfig';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 const localizer = momentLocalizer(moment);
@@ -685,14 +686,38 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                     {isOpen.data.map((row) => (
                       <TableRow key={row.referenceId}  >
                         <TableCell component="th" scope="row">
-                          <Link
-                            className="link"
-                            target="_blank"
+                          <p
+                            onClick={() => {
+                              if (row?.resource === sidebarResource.rentalManagement) {
+                                window.open(`${routes.rentalManagementDetail.path}/${row.referenceId}`);
+                              }
+                              else if (row?.resource === sidebarResource.purchaseOrder) {
+                                window.open(`${routes.purchaseOrderDetail.path}/${row.referenceId}`);
+                              }
+                              else if (row?.resource === sidebarResource.purchaseRequisition) {
+                                window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
+                              }
+                              else if (row?.resource === sidebarResource.productionOrder) {
+                                window.open(`${routes.productionOrderDetail.path}/${row.referenceId}`);
+                              }
+                              else if (row?.resource === sidebarResource.demandOrder) {
+                                window.open(`${routes.demandOrderDetail.path}/${row.referenceId}`);
+                              }
+                              else if (row?.resource === sidebarResource.repairOrder) {
+                                window.open(`${routes.repairOrderDetail.path}/${row.referenceId}`);
+                              }
+                              else if (row?.resource === sidebarResource.repairJob) {
+                                window.open(`${routes.repairJobDetail.path}/${row.referenceId}`);
+                              }
+                              else if (row?.resource === sidebarResource.salesOrder) {
+                                window.open(`${routes.salesOrderDetail.path}/${row.referenceId}`);
+                              }
+                            }}
+                            className="link text-truncate"
                             title={row?.resourceLabel}
-                            to={`${routes.rentalManagementDetail.path}/${row?.referenceId}`}
                           >
                             {row.resourceLabel}
-                          </Link>
+                          </p>
                         </TableCell>
                         <TableCell component="th" scope="row">
                           {row.qty}
@@ -701,7 +726,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                           {row?.warehouse?.optionLabel}
                         </TableCell>
                         <TableCell component="th" scope="row">
-                          {row?.customerAccount?.optionLabel}
+                          {row?.customerAccount?.optionLabel ? row?.customerAccount?.optionLabel : <NoDataCell />}
                         </TableCell>
                       </TableRow>
                     ))}

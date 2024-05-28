@@ -106,15 +106,15 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
           }
           let icon = section.icon;
           const iconColors = getColors(index).icon;
-          if (typeof icon === 'string') {
+          if (typeof icon === 'string' && icon) {
             icon = (
               <span
-                className=" h-full aspect-square as text-white flex items-center justify-center rounded-md custom"
+                className=" as custom flex aspect-square h-full items-center justify-center rounded-md text-white"
                 style={{
                   background: `linear-gradient(129deg, ${iconColors[0]} 0%, ${iconColors[1]} 100%)`
                 }}
               >
-                {DynamicIcon(icon, { size: 22 })}
+                {DynamicIcon(icon, { size: 28 })}
               </span>
             );
           }
