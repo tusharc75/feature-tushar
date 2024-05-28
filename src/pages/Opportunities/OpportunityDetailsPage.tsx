@@ -188,7 +188,7 @@ function OpportunityDetailsPage() {
           Object.assign(modifiedData, data);
           modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
           setCopyOfOpportunityData(modifiedData);
-          
+
           setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.opportunity, data));
           handleMainPoints(data);
           setHeadingLbl(data.opportunityName);
@@ -279,9 +279,9 @@ function OpportunityDetailsPage() {
         );
         setQuotations(
           data[sidebarResource.quotation] &&
-          data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
-          ? data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
-          : []
+            data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+            ? data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+            : []
         )
       })
       .catch((error) => {
@@ -625,9 +625,9 @@ function OpportunityDetailsPage() {
                     </Button>
                   ) : null}
                   {opportunityPermissions.isDelete &&
-                  opportunityData?.owner.optionValue &&
-                  user?.user?._id &&
-                  opportunityData.owner.optionValue === user.user._id ? (
+                    opportunityData?.owner.optionValue &&
+                    user?.user?._id &&
+                    opportunityData.owner.optionValue === user.user._id ? (
                     <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
                   ) : null}
                   <ActivityButton
@@ -740,33 +740,30 @@ function OpportunityDetailsPage() {
               )}
               {permissions?.quoteBuilder?.isRead && (
                 <Box mb={2}>
-                <QuotesInAccordion
-                  recordsPerLine={3}
-                  quotes={quotes}
-                  fetchData={fetchRelatedData}
-                  quoteBuilderPermission={permissions.quoteBuilder}
-                  opportunityId={id}
-                  accountId={opportunityData?.customerAccount?.optionValue}
-                  opportunityName={opportunityData?.opportunityName}
-                  marketSegmentId={opportunityData?.marketSegment?.optionValue}
-                  subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
-                  currency={opportunityData?.currency}
-                  estimatedAmount={opportunityData?.estimatedAmount}
-                  isRenderedFromOpportunity={true}
-                  isAllowedToUpdate={allowedToEdit}
-                />
+                  <QuotesInAccordion
+                    recordsPerLine={3}
+                    quotes={quotes}
+                    fetchData={fetchRelatedData}
+                    quoteBuilderPermission={permissions.quoteBuilder}
+                    opportunityId={id}
+                    accountId={opportunityData?.customerAccount?.optionValue}
+                    opportunityName={opportunityData?.opportunityName}
+                    marketSegmentId={opportunityData?.marketSegment?.optionValue}
+                    subMarketSegmentId={opportunityData?.subMarketSegment?.optionValue}
+                    currency={opportunityData?.currency}
+                    estimatedAmount={opportunityData?.estimatedAmount}
+                    isRenderedFromOpportunity={true}
+                    isAllowedToUpdate={allowedToEdit}
+                  />
                 </Box>
               )}
-             
               {permissions?.quotation?.isRead && (
                 <QuotationInAccordion
                   recordsPerLine={3}
                   quotations={quotations}
                   fetchData={fetchRelatedData}
-                  quotationPermission={permissions.quotation}
-                  opportunityId={id}
-                  opportunityName={opportunityData?.opportunityName}
-                  isAllowedToUpdate={allowedToEdit}
+                  opportunityData={opportunityData}
+                  allowedToEdit={allowedToEdit}
                 />
               )}
             </div>
