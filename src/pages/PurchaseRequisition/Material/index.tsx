@@ -27,6 +27,7 @@ const Material = ({
   allowedToEdit,
   allowedToAddMaterial,
   purchaseRequisitionData,
+  fetchpurchaseRequisitionData,
   updateDOASetup = null,
   currentStep,
   DOAData = null,
@@ -309,6 +310,7 @@ const Material = ({
           message: data.message
         });
         fetchData();
+        fetchpurchaseRequisitionData()
         setSubmitting(false);
       })
       .catch((error) => {
@@ -324,6 +326,7 @@ const Material = ({
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
+        fetchpurchaseRequisitionData()
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -370,6 +373,7 @@ const Material = ({
             message: data.message
           });
           fetchData();
+          fetchpurchaseRequisitionData()
           setDeleteData(null);
         })
         .catch((error) => {
@@ -389,6 +393,7 @@ const Material = ({
             message: data.message
           });
           fetchData();
+          fetchpurchaseRequisitionData()
           setDeleteData(null);
         })
         .catch((error) => {

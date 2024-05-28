@@ -290,10 +290,10 @@ const PurchaseRequisition = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-            toggleButtonList={PurchaseRequisitionType}
-            onToggle={onTypeChange}
-            selectedType={selectedType}
-            setSelectedType={setSelectedType}
+          toggleButtonList={PurchaseRequisitionType}
+          onToggle={onTypeChange}
+          selectedType={selectedType}
+          setSelectedType={setSelectedType}
           // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
@@ -358,10 +358,10 @@ const PurchaseRequisition = () => {
             handleConvertSuccess(data);
           }}
           products={showOrderDialog?.products?.map((e) => {
-            return { product: e._id, unit: e.unit, qty: e.qty };
+            return { ...e, product: e.materialId };
           })}
           services={showOrderDialog?.services?.map((e) => {
-            return { service: e._id, unit: e.unit, qty: e.qty };
+            return { ...e, service: e.materialId };
           })}
           currency={showOrderDialog.currency}
           warehouseId={showOrderDialog?.warehouse}

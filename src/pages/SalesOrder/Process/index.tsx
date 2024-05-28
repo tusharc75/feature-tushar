@@ -10,6 +10,7 @@ import { startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
   const renderedFrom = `${routes.salesOrder.title}_Process`;
@@ -80,14 +81,14 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         accessor: 'description',
         Header: 'Description',
         width: 200,
-        Cell: ({ row }) => <p title={row.original?.description}>{row.original?.description}</p>
+        Cell: ({ row }) => row.original?.description ? <p title={row.original?.description}>{row.original?.description} </p> : <NoDataCell />
       },
       {
         accessor: 'procurementType',
         Header: 'Procurement Type',
         width: 200,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>{<p title={row.original?.procurementType}>{row.original?.procurementType}</p>}</div>
+          row.original?.procurementType ? <div>{<p title={row.original?.procurementType}>{row.original?.procurementType}</p>}</div> : <NoDataCell />
         )
       },
       {
@@ -95,23 +96,32 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         Header: 'Procurement',
         width: 200,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            {row.original?.procurementType === sidebarResource.purchaseRequisition ? (
-              <a className="link text-truncate" href={`${routes.purchaseRequisitionDetail.path}/${row.original.procurementId}`} target="_blank">
-                {row.original.procurementName}
-              </a>
-            ) : row.original?.procurementType === sidebarResource.demandOrder ? (
-              <a className="link text-truncate" href={`${routes.demandOrderDetail.path}/${row.original.procurementId}`} target="_blank">
-                {row.original.procurementName}
-              </a>
-            ) : row.original?.procurementType === sidebarResource.productionOrder ? (
-              <a className="link text-truncate" href={`${routes.productionOrderDetail.path}/${row.original.procurementId}`} target="_blank">
-                {row.original.procurementName}
-              </a>
-            ) : (
-              row.original.procurementName
-            )}
-          </div>
+          row.original.procurementName ?
+            <div >
+              {row.original?.procurementType === sidebarResource.purchaseRequisition ? (
+                <a className="link text-truncate" href={`${routes.purchaseRequisitionDetail.path}/${row.original.procurementId}`} target="_blank">
+                  {row.original.procurementName}
+                </a>
+              ) : row.original?.procurementType === sidebarResource.demandOrder ? (
+                <a className="link text-truncate" href={`${routes.demandOrderDetail.path}/${row.original.procurementId}`} target="_blank">
+                  {row.original.procurementName}
+                </a>
+              ) : row.original?.procurementType === sidebarResource.productionOrder ? (
+                <a className="link text-truncate" href={`${routes.productionOrderDetail.path}/${row.original.procurementId}`} target="_blank">
+                  {row.original.procurementName}
+                </a>
+              ) : (
+                row.original.procurementName
+              )}
+            </div> : <NoDataCell />
+        )
+      },
+      {
+        accessor: 'procurementStatus',
+        Header: 'Status',
+        width: 200,
+        Cell: ({ row }) => (
+          row.original?.procurementStatus ? <div>{<p title={row.original?.procurementStatus}>{row.original?.procurementStatus}</p>}</div> : <NoDataCell />
         )
       },
       {
@@ -148,10 +158,10 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
+        ? parent.productDetail?.productName
+        : parent.type === 'service'
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === 'product'
@@ -163,8 +173,14 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
       parent.isValid = true;
-      parent.procurementName = parent?.procurement?.optionLabel;
-      parent.procurementId = parent?.procurement?.optionValue;
+      if (parent?.procurement?.optionLabel) {
+        parent.procurementName = parent?.procurement?.optionLabel;
+        parent.procurementId = parent?.procurement?.optionValue;
+        parent.procurementStatus = parent?.procurement?.status;
+      }
+      else {
+        parent.procurementName = 'Inventory Available';
+      }
       parent.subRows = generateNestedData(material, parent);
     });
     setNextStep(true);
@@ -177,10 +193,10 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.detail = `${_subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
+        ? _subRow.productDetail?.productName
+        : _subRow.type === 'service'
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.packageDetail?.packageName
         }`;
       _subRow.description =
         _subRow.type === 'product'

@@ -37,6 +37,7 @@ import ManageSalesOrderDialog from './ManageSalesOrderDialog';
 import Material from './Material';
 import Process from './Process';
 import SalesOrderView from './View';
+import LoadingTicket from './LoadingTicket';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -70,7 +71,7 @@ const SalesOrderDetails = () => {
         if (data?.some((d) => d?.fieldData?.fieldName === 'procurementMethod')) {
           setSteps(salesOrderProcessSteps);
         } else {
-          setSteps(salesOrderProcessSteps?.filter((s) => s.name !== 'Process'));
+          setSteps(salesOrderProcessSteps?.filter((s) => s.name !== 'Process' && s.name !== 'Loading'));
         }
       })
       .catch((error) => {
@@ -287,6 +288,9 @@ const SalesOrderDetails = () => {
               <Process salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[2].name && salesOrderData && (
+              <LoadingTicket salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen}/>
+            )}
+            {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[3].name && salesOrderData && (
               <Invoice salesOrderData={salesOrderData} setNextStep={setNextStep} updateJobStatus={updateJobStatus} stepFullScreen={stepFullScreen} />
             )}
           </ContentFullScreen>

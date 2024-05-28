@@ -113,7 +113,7 @@ const Field = ({
     handleClose();
   };
 
-  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging, active, over } = useSortable({
     id: data._id,
     data: {
       type: 'Field',
@@ -143,21 +143,32 @@ const Field = ({
     transition
   };
 
-  // const isPreviewVisible =
-  //   active?.data.current?.type !== 'NewSection' && active?.data.current.sectionId !== sectionId && over && over.id === data._id;
+  const isPreviewVisible =
+    active?.data.current?.type !== 'NewSection' && active?.data.current.sectionId !== sectionId && over && over.id === data._id;
 
-  return (
-    <>
-      {/* {isPreviewVisible && (
-        <div className="min-h-[56.5px] [border:5px_dashed_var(--common-border-color)] p-2 py-8 text-xl font-bold text-gray-300 dark:text-gray-600 flex items-center justify-center text-center">
-          Drop
-        </div>
-      )} */}
+  if (isPreviewVisible) {
+    return (
       <div
         style={style}
         ref={setNodeRef}
         className={`${
-          isDragging
+          isPreviewVisible
+            ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
+            : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
+        }  flex min-h-[56.5px] items-center justify-center p-2 text-center`}
+      >
+        <h6 className="text-center text-2xl font-bold text-gray-400 dark:text-gray-600">Drop {active.data.current.label}</h6>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div
+        style={style}
+        ref={setNodeRef}
+        className={`${
+          isDragging || isPreviewVisible
             ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
             : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
         }  flex min-h-[56.5px] items-center p-2`}
