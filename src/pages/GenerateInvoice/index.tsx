@@ -120,6 +120,7 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const response = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
     let data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, selectedResource?.path);
+    console.log({ newColumns, data });
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
