@@ -140,11 +140,11 @@ export default function QuotationInAccordion({
                           </CardContent>
                           <Grid container>
                             <Grid item xs={12} sm={6} md={6}>
-                              {obj.expectedDeliveryDate && (
+                              {obj.expectedCustomerDeliveryDate && (
                                 <DisplayData
                                   key={index}
-                                  label="Expected Delivery Date"
-                                  value={displayDate(obj.expectedDeliveryDate)}
+                                  label="Expected Customer Delivery Date"
+                                  value={displayDate(obj.expectedCustomerDeliveryDate)}
                                   icon={<IoCalendarOutline size={15} />}
                                 />
                               )}
