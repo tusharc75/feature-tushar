@@ -19,6 +19,7 @@ import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_rental_quotation_fields } from 'src/components/RentalManagment/helper';
 
 const Quotation = ({
   rentalManagementData,
@@ -73,8 +74,9 @@ const Quotation = ({
   }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async () => {
-    var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
-    let newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
+    // var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
+    var data = await await fetch_rental_quotation_fields(quotationData?.currency, false);
+    let newColumns = generateColumns(renderedFrom, data?.filter(d => d?.isRead), null, false, rentalManagementData?.currency);
 
     let coloum: any = [
       {
