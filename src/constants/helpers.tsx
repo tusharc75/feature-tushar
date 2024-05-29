@@ -2043,6 +2043,12 @@ export const RENTAL_STATUS = {
 };
 
 export const PURCHASE_REQUISITION_STATUS = {
+  new: 'New',
+  converted: 'Converted'
+};
+
+export const DEMAND_ORDER_STATUS = {
+  new: 'New',
   converted: 'Converted'
 };
 
