@@ -166,7 +166,6 @@ const DemandOrder = () => {
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'error', error });
       })
       .finally(() => {
         setTimeout(() => {
