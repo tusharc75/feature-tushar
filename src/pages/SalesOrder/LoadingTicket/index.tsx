@@ -4,6 +4,7 @@ import { map, startCase, uniq } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import { useData } from "src/StateProvider/Provider";
 import axiosInstance from "src/axios/axiosInstance";
 import { fetch_child_resource_fields } from "src/components/ChildResourceField";
 import CustomReactTable, { useColumns, useTableReducer } from "src/components/CustomReactTable";
@@ -12,11 +13,12 @@ import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import CustomMessageDialog from "src/components/MessageDialog";
 import { DetailsPageHeader } from "src/components/PageHeaders";
-import { CHILD_RESOURCE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, deliveryTicket, salesOrder } from "src/constants/helpers";
+import { CHILD_RESOURCE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, MATERIAL_TYPE, deliveryTicket, salesOrder } from "src/constants/helpers";
 import { salesOrderActions, salesOrderMessage } from "src/constants/messageHelpers";
 import ManageDeliveryTicket from "src/pages/DeliveryTicket/ManageDeliveryTicket";
 
 const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
+
 	const renderedFrom = `${routes.salesOrder.title}_LoadingTicket`;
 	const toastConfig = useContext(CustomToastContext);
 
@@ -27,6 +29,10 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 	const { state, dispatch } = useTableReducer();
 	const { selectedRecords } = state;
 	const { generateColumns } = useColumns();
+
+	const {
+		state: { user, permissions }
+	}: any = useData();
 
 	useEffect(() => {
 		fetchFields();
@@ -90,14 +96,16 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 				accessor: 'description',
 				Header: 'Description',
 				width: 200,
-				Cell: ({ row }) => <p title={row.original?.description}>{row.original?.description}</p>
+				Cell: ({ row }) => {
+					return row.original['description'] ? <div><p className="text-truncate">{row.original.description}</p></div> : <NoDataCell />;
+				}
 			},
 			{
 				accessor: 'loadingTicket',
 				Header: 'Loading Ticket',
 				Cell: ({ row }) =>
 					row?.original?.loadingTicket ? (
-						<div style={{ display: 'flex', alignItems: 'center' }}>
+						<div>
 							<h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
 							<Box ml={1}>
 								<IconButton
@@ -124,17 +132,22 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 						<NoDataCell />
 					)
 			},
-			{
-				accessor: 'leadTime',
-				Header: 'Lead Time (Days)',
-				Cell: ({ row }) => <p>{row.original['leadTime'] ? row.original['leadTime'] : 0}</p>,
-				Footer: (info) => {
-					let rows = info.table.getExpandedRowModel().rows;
-					const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-						.reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-					return <>{total}</>;
-				}
-			}
+			...(permissions?.leadTimeMaster
+				? [
+					{
+						accessor: 'leadTime',
+						Header: 'Lead Time (Days)',
+						Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
+						Footer: (info) => {
+							let rows = info.table.getExpandedRowModel().rows;
+							const total = rows
+								?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+								.reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+							return <>{total}</>;
+						}
+					}
+				]
+				: [])
 		];
 		coloum = [...coloum, ...newColumns];
 		setColumns(coloum);
@@ -156,21 +169,11 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 		const response = await axiosInstance().get(`${salesOrder.api}/material/${salesOrderData._id}`);
 		material = response?.data?.data?.material;
 
-		const rows = material.filter((e) => e.parentId === null);
+		const rows = material.filter((e) => e.parentId === null && MATERIAL_TYPE.product);
 		rows.forEach((parent, i) => {
 			parent.index = i + 1;
-			parent.detail = `${parent.type === 'product'
-				? parent.productDetail?.productName
-				: parent.type === 'service'
-					? parent.serviceDetail?.serviceName
-					: parent.packageDetail?.packageName
-				}`;
-			parent.description =
-				parent.type === 'product'
-					? parent?.productDetail?.productDescription
-					: parent.type === 'package'
-						? parent?.packageDetail?.packageDescription
-						: parent?.serviceDetail?.serviceDescription;
+			parent.detail = parent.productDetail?.productName;
+			parent.description = parent?.productDetail?.productDescription;
 			parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
 			parent.qty = parent.qty;
 			parent.uniqueId = parent._id;
@@ -188,9 +191,7 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 			}
 		});
 
-		if (
-			rows.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length > 0
-		) {
+		if (rows.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered).length) {
 			setNextStep(true);
 		}
 
