@@ -49,7 +49,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [leadTimeDialog, setLeadTimeDialog] = useState({ open: false, data: null });
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
-  const [costFields,setCostFields] = useState(null);
+  const [costFields, setCostFields] = useState(null);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -107,16 +107,16 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           <div style={{ display: 'flex', alignItems: 'center' }}>
             {
               (row.original?.detail ?
-              <p
-                onClick={() => {
-                  handleOpen(row, table.getRowModel().rows);
-                }}
-                className="link text-truncate"
-                title={row.original?.detail}
-              >
-                { row.original?.detail }
-              </p>
-               : <NoDataCell />)
+                <p
+                  onClick={() => {
+                    handleOpen(row, table.getRowModel().rows);
+                  }}
+                  className="link text-truncate"
+                  title={row.original?.detail}
+                >
+                  {row.original?.detail}
+                </p>
+                : <NoDataCell />)
             }
             {![MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(row?.original?.type) && (
               <Box ml={1} className="d-flex align-items-center">
@@ -136,22 +136,22 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               </Box>
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === MATERIAL_TYPE.service) {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>)}
+              <Box ml={1}>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <OpenInNewIcon fontSize="small" color="primary" />
+                </IconButton>
+              </Box>)}
           </div>
         )
       },
@@ -160,24 +160,24 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
+          return row.original['description'] ? <div><p className="text-truncate">{row.original.description}</p></div> : <NoDataCell />;
         }
       },
       ...(permissions?.leadTimeMaster
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : [])
     ];
     coloum = [...coloum, ...newColumns];
@@ -251,26 +251,25 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
 
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data.material.filter((e) => e.parentId === null);
-    rows = [...rows,...additionalCost];
+    rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
+      parent.detail = `${parent.type === MATERIAL_TYPE.product
+        ? parent.productDetail?.productName
+        : parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.serviceName
           : parent.type === MATERIAL_TYPE.package
-              ? parent.packageDetail?.packageName
-              : parent.detail || ''
-      }`;
+            ? parent.packageDetail?.packageName
+            : parent.detail || ''
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
           : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent.type === MATERIAL_TYPE.service
-            ? parent?.serviceDetail?.serviceDescription || ''
-            : parent.description || '';
+            ? parent?.packageDetail?.packageDescription || ''
+            : parent.type === MATERIAL_TYPE.service
+              ? parent?.serviceDetail?.serviceDescription || ''
+              : parent.description || '';
 
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -291,19 +290,18 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${
-        _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
+        ? _subRow.productDetail?.productName
+        : _subRow.type === MATERIAL_TYPE.service
           ? _subRow.serviceDetail?.serviceName
           : _subRow.packageDetail?.packageName
-      }`;
+        }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.isValid = _subRow['finalPrice_' + salesOrderData?.currency?.toLowerCase()] ? true : false;
@@ -398,7 +396,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         });
         if (saveAndNext) {
           const row = flattenArray(dataRows).find((ele) => ele._id === rows[0]?._id);
-          if(!row?.parentId){
+          if (!row?.parentId) {
             const rowIndex = dataRows.findIndex((d) => d._id === rows[0]?._id);
             setRecordToUpdate(dataRows[rowIndex + 1]);
             if (dataRows[rowIndex + 1]?.type === MATERIAL_TYPE.manualEntry) {
@@ -415,7 +413,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
                 showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
               });
             }
-          }else{
+          } else {
             const allSubRowData = flattenArray(dataRows).filter((ele) => ele.parentId === row.parentId);
             const subRowIdx = allSubRowData?.findIndex((d) => d._id === row?._id);
             setRecordToUpdate(allSubRowData[subRowIdx + 1]);
@@ -476,47 +474,47 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     setDeleting(true);
     const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id)
     const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry)
-    if(products?.length){
+    if (products?.length) {
       axiosInstance()
-      .put(`${salesOrder.api}/material/${salesOrderData?._id}/delete`, { ids: rows })
-      .then(() => {
-        setDeleting(false);
-        fetchData();
-        fetchSalesOrderData();
-        setDeleteData(null);
-        fetchSalesOrderData();
-      })
-      .catch((error) => {
-        setDeleting(false);
-        toastConfig.setToastConfig(error);
-        setDeleteData(null);
-      });
-    }
-    if(cost?.length){
-      axiosInstance()
-      .post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/delete`, { ids: cost })
-      .then(({ data }) => {
-        setDeleting(false);
-        fetchData();
-        fetchSalesOrderData();
-        setDeleteData(null);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        .put(`${salesOrder.api}/material/${salesOrderData?._id}/delete`, { ids: rows })
+        .then(() => {
+          setDeleting(false);
+          fetchData();
+          fetchSalesOrderData();
+          setDeleteData(null);
+          fetchSalesOrderData();
+        })
+        .catch((error) => {
+          setDeleting(false);
+          toastConfig.setToastConfig(error);
+          setDeleteData(null);
         });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-    } 
+    }
+    if (cost?.length) {
+      axiosInstance()
+        .post(`${salesOrder.api}/additionalcost/${salesOrderData._id}/delete`, { ids: cost })
+        .then(({ data }) => {
+          setDeleting(false);
+          fetchData();
+          fetchSalesOrderData();
+          setDeleteData(null);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+    }
   };
 
   const handleOpen = (row, rows) => {
     let showSaveAndNext;
     if (row.depth != 0) {
-        const allRows = rows.filter((ele) => ele.parentId === row.parentId);
-        showSaveAndNext = row?.index < allRows.length - 1 ? true : false;
+      const allRows = rows.filter((ele) => ele.parentId === row.parentId);
+      showSaveAndNext = row?.index < allRows.length - 1 ? true : false;
     } else {
       showSaveAndNext = row?.index < rows?.filter((e) => e?.depth === 0)?.length - 1 && row?.depth === 0 ? true : false;
     }
