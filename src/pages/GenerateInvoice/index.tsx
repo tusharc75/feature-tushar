@@ -1,5 +1,4 @@
-import { Box, Button, Grid, IconButton, Menu, MenuItem, TextField } from '@material-ui/core';
-import { ExpandMore } from '@material-ui/icons';
+import { Box, Grid, IconButton, MenuItem, TextField } from '@material-ui/core';
 import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { Autocomplete } from '@material-ui/lab';
@@ -13,12 +12,12 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import { FIELD_TICKET_STATUS, INVOICE_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import ViewInvoice from '../Invoice/ViewInvoice';
 import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
-import { ListingPageHeader } from 'src/components/PageHeaders';
 
 const GENERATE_RESOURCE = [
   {
@@ -120,7 +119,6 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const response = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
     let data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, selectedResource?.path);
-    console.log({ newColumns, data });
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
