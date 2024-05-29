@@ -42,6 +42,18 @@ export const fetch_rental_technician_fields = async (currency, isOffline) => {
     return data;
 }
 
+export const fetch_rental_quotation_fields = async (currency, isOffline) => {
+    var data;
+    if (isOffline) {
+        data = await findOne(objectStore.resource, CHILD_RESOURCE.quotationProduct);
+    } else {
+        const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.quotationProduct}`);
+        data = response?.data?.data;
+    }
+    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
+    return data;
+}
+
 export const calculatePrice = (rentalManagementData: any = null, arr: any[]) => {
     if (rentalManagementData) {
         const data: any = {};

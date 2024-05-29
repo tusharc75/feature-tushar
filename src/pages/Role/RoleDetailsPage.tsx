@@ -580,7 +580,7 @@ const RoleDetailsPage = () => {
                         <Box mt={2}>
                           <RoleEngine
                             style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
-                            field={field}
+                            field={[...field?.filter(f => !childrenResource?.map(c => c?.name)?.includes(f?.fieldData?.resource)), ...field?.filter(f => childrenResource?.map(c => c?.name)?.includes(f?.fieldData?.resource))?.map(f => ({ ...f, fieldData: { ...f.fieldData, required: false } }))]}
                             resource={childrenResource}
                             setField={setField}
                             setResource={setChildrenResource}

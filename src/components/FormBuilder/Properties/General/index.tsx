@@ -219,6 +219,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                 }
                 onChange={(e: any, value) => {
                   setFieldValue('lookupResource', value && value?.optionValue ? value.optionValue : '');
+                  setFieldValue('preFilters', []);
                 }}
                 renderInput={(params) => (
                   <TextField
@@ -281,6 +282,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
                 }
                 onChange={(e: any, value) => {
                   setFieldValue('dataListId', value && value?.optionValue ? value.optionValue : '');
+                  setFieldValue('preFilters', []);
                 }}
                 renderInput={(params) => (
                   <TextField

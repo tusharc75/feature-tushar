@@ -113,6 +113,8 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
       renderInput={(params) => (
         <TextField
           {...params}
+          margin="dense"
+          size={'small'}
           variant="outlined"
           label="Pre Filters"
           name="preFilters"

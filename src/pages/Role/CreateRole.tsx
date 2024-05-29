@@ -267,7 +267,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                             style={{
                               height: fullScreen || isMobile || isTablet ? `calc(100vh - 200px)` : '500px'
                             }}
-                            field={field}
+                            field={[...field?.filter(f => !childrenResource?.map(c => c?.name)?.includes(f?.fieldData?.resource)), ...field?.filter(f => childrenResource?.map(c => c?.name)?.includes(f?.fieldData?.resource))?.map(f => ({ ...f, fieldData: { ...f.fieldData, required: false } }))]}
                             resource={childrenResource}
                             setField={setField}
                             setResource={setChildrenResource}
