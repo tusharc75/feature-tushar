@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { PURCHASE_REQUISITION_STATUS, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
@@ -97,7 +97,7 @@ const PurchaseRequisition = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {row?.original?.status === 'Converted' ? (
+        {row?.original?.status === PURCHASE_REQUISITION_STATUS.converted ? (
           <HtmlTooltip className="cursor-stop" title="This purchase requisition is already converted into purchase order">
             <IconButton aria-label="Clone" size="small">
               <AutorenewIcon fontSize="small" color="disabled" />
@@ -184,7 +184,6 @@ const PurchaseRequisition = () => {
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = permissions?.purchaseRequisition?.isUpdate;
           finalObject['canDelete'] = permissions?.purchaseRequisition?.isDelete && finalObject?.ownerId === user?.user?._id;
           return finalObject;
         });
@@ -233,7 +232,7 @@ const PurchaseRequisition = () => {
       .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
         _id: convertedPurchaseRequisitionId,
         purchaseOrder: data?._id,
-        status: 'Converted'
+        status: PURCHASE_REQUISITION_STATUS.converted
       })
       .then(({ data }) => {
         fetchData();

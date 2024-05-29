@@ -1,6 +1,5 @@
 import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
 import { Edit, ExpandMore } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -18,17 +17,16 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, checkIsAllowedToEdit, demandOrder, sidebarResource, warehouse } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, DEMAND_ORDER_STATUS, MATERIAL_TYPE, checkIsAllowedToEdit, demandOrder, sidebarResource } from '../../constants/helpers';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Material from './Material';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManageProductionOrder from '../ProductionOrder/ManageProductionOrder';
 
 const DemandOrderDetails = () => {
+
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.demandOrder.title);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -62,7 +60,7 @@ const DemandOrderDetails = () => {
 
   const fetchFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Demand Order');
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.demandOrder}`);
       setFields(response?.data?.data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -75,7 +73,6 @@ const DemandOrderDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
-
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data));
       setDemandOrderData(data);
       setLoading(false);
@@ -107,12 +104,11 @@ const DemandOrderDetails = () => {
   };
 
   const handleConvertSuccess = (data: any) => {
-    closeConvertMenu()
     const value = {
       _id: id,
-      status: 'Converted'
+      status: DEMAND_ORDER_STATUS.converted
     }
-    if (convertDialog.type === 'purchaseOrder') {
+    if (convertDialog.type === sidebarResource.purchaseOrder) {
       value['purchaseOrder'] = data?._id
     } else {
       value['productionOrder'] = data?._id
@@ -122,9 +118,10 @@ const DemandOrderDetails = () => {
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: `${convertDialog.type === 'purchaseOrder' ? sidebarResource.purchaseOrder : sidebarResource.productionOrder} has been created successfully`
+        message: `Converted Successfully`
       });
-    }).catch((err) => {
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
       fetchData();
     });
   };
@@ -137,20 +134,20 @@ const DemandOrderDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {demandOrderData ? (
+            {demandOrderData?.status !== DEMAND_ORDER_STATUS.converted && (
               <>
-                <Button
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  className="btn-outline-v1"
-                  disabled={demandOrderData?.status === 'Converted' ? true : false}
-                  size="small"
-                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-                  onClick={(e) => { setConvertAnchorEl(e.currentTarget) }}
-                  aria-controls="convert-menu"
-                  endIcon={demandOrderData?.status === 'Converted' ? null : <ExpandMore fontSize="small" />}
-                >
-                  {demandOrderData?.status === 'Converted' ? 'Converted' : 'Convert'}
-                </Button>
+                {demandOrderData?.material?.length > 0 &&
+                  <Button
+                    variant={'contained'}
+                    className="btn-outline-v1"
+                    size="small"
+                    onClick={(e) => { setConvertAnchorEl(e.currentTarget) }}
+                    aria-controls="convert-menu"
+                    endIcon={<ExpandMore fontSize="small" />}
+                  >
+                    {'Convert'}
+                  </Button>
+                }
                 <Menu
                   anchorEl={convertAnchorEl}
                   keepMounted
@@ -165,20 +162,21 @@ const DemandOrderDetails = () => {
                 >
                   <MenuItem
                     onClick={() => {
-                      setConvertDialog({ open: true, type: 'purchaseOrder' })
+                      closeConvertMenu()
+                      setConvertDialog({ open: true, type: sidebarResource.purchaseOrder })
                     }}
                   >
                     {routes.purchaseOrder.title}
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
-                      setConvertDialog({ open: true, type: 'productionOrder' })
+                      closeConvertMenu()
+                      setConvertDialog({ open: true, type: sidebarResource.productionOrder })
                     }}
                   >
                     {routes.productionOrder.title}
                   </MenuItem>
                 </Menu>
-
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
                   <Button
                     className="btn-outline-v1"
@@ -189,11 +187,8 @@ const DemandOrderDetails = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-
                 {permissions?.demandOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
             )}
             <ActivityButton
               referenceId={demandOrderData?._id}
@@ -229,8 +224,8 @@ const DemandOrderDetails = () => {
           {demandOrderData && (
             <Material
               demandOrderData={demandOrderData}
-              renderedFrom={`${renderedFrom}_grid-1`}
-              allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate ? true : false}
+              fetchDemadOrderData={fetchData}
+              allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate && demandOrderData?.status !== DEMAND_ORDER_STATUS.converted ? true : false}
             />
           )}
         </TabPanel>
@@ -262,7 +257,7 @@ const DemandOrderDetails = () => {
           }}
         />
       )}
-      {convertDialog.open && convertDialog.type === 'purchaseOrder' && (
+      {convertDialog.open && convertDialog.type === sidebarResource.purchaseOrder && (
         <ManagePurchaseOrder
           isClone={false}
           purchaseOrderId={null}
@@ -279,8 +274,7 @@ const DemandOrderDetails = () => {
           warehouseId={demandOrderData?.warehouse?.optionValue}
         />
       )}
-
-      {convertDialog.open && convertDialog.type === 'productionOrder' && (
+      {convertDialog.open && convertDialog.type === sidebarResource.productionOrder && (
         <ManageProductionOrder
           isClone={false}
           productionOrderId={null}
@@ -288,7 +282,7 @@ const DemandOrderDetails = () => {
           onSuccess={(data) => {
             handleConvertSuccess(data)
           }}
-          referenceData={{warehouse: demandOrderData?.warehouse?.optionValue}}
+          referenceData={{ warehouse: demandOrderData?.warehouse?.optionValue }}
         />
       )}
     </Box>
