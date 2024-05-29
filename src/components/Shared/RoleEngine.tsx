@@ -230,7 +230,7 @@ const RoleEngine = (props: RoleProps) => {
         if (_field.fieldData._id === id) {
           if (!event.target.checked && access === 'isRead' && (_field['isUpdate'] || _field['isCreate'])) {
             // _field[access] = event.target.checked;
-          } else if (!event.target.checked && access === 'isCreate' && _field.fieldData.required) {
+          } else if (!event.target.checked && access === 'isCreate' && _field.fieldData.required ) {
           } else {
             _field[access] = event.target.checked;
           }
