@@ -138,8 +138,8 @@ function PlanningView() {
   }: any = useData();
 
   const history = useHistory();
-  const parsed = queryString.parse(history.location.search);
-  const { }: any = parsed;
+  // const parsed = queryString.parse(history.location.search);
+  // const { }: any = parsed;
 
   const [resourceList, setResourceList] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
@@ -172,7 +172,7 @@ function PlanningView() {
           </Box>
         </Box>
         <Box className={`detail-container-v1`}>
-          <div className="flex justify-end gap-1 absolute top-[25px] right-[25px] max-md:top-[15px] max-md:right-[15px] ">
+          <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px] ">
             <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton size="small" onClick={() => setView('calendar')} disabled={view === 'calendar'}>
@@ -189,15 +189,9 @@ function PlanningView() {
             </HtmlTooltip>
           </div>
           {view === 'calendar' ? (
-            <CalendarView
-              resourceList={resourceList}
-              selectedResource={selectedResource}
-              setSelectedResource={setSelectedResource} />
+            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
           ) : (
-            <ListView
-              resourceList={resourceList}
-              selectedResource={selectedResource}
-              setSelectedResource={setSelectedResource} />
+            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
           )}
         </Box>
       </Box>
