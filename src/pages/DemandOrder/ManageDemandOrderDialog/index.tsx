@@ -12,17 +12,17 @@ import {
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
-  setFieldsInAscendingOrder,
   yupSchema,
   demandOrder,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource,
+  DEMAND_ORDER_STATUS
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
@@ -49,8 +49,9 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
   const fetchFields = async () => {
     try {
       let fieldData;
-      const response: any = await axiosInstance().get('/field?resource=Demand Order');
-      fieldData = response?.data?.data;
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.demandOrder}`);
+
+      fieldData = response?.data?.data?.filter((e) => !['purchaseOrder', 'productionOrder']?.includes(e.fieldData.fieldName));
 
       const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       const fieldsDataForUpdate = fieldData?.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -62,8 +63,9 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
           data = response?.data?.data;
 
           if (isClone) {
-            const { _id, brand, createdBy, entity, history, products, status, demandOrderNumber, updatedBy, ...rest } = data;
+            const { demandOrderNumber, ...rest } = data;
             rest['demandOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+            rest['status'] = DEMAND_ORDER_STATUS.new;
             setCloneHeading(demandOrderNumber);
             setSalesData({
               fields: fieldsDataForCreate,
@@ -80,7 +82,8 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
         } catch (error) {
           toastConfig.setToastConfig(error);
         }
-      } else {
+      } 
+      else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['demandOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
         setSalesData({
@@ -192,14 +195,14 @@ const ManageDemandOrderDialog = ({ isClone, demandOrderId, demandOrderData = nul
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={salesData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                      errors={errors}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      fieldsData={salesData.fields}
+                      size="small"
+                      fullWidth
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
