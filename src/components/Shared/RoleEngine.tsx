@@ -24,10 +24,11 @@ interface RoleProps {
   isDisable?: boolean;
   style?: React.CSSProperties;
   tier?: string;
+  child?: boolean;
 }
 
 const RoleEngine = (props: RoleProps) => {
-  const { field, resource, setField, setResource, isDisable, style, tier = ROLE_TIER.tier1 } = props;
+  const { field, resource, setField, setResource, isDisable, style, tier = ROLE_TIER.tier1, child = false } = props;
 
   const [isReadChecked, setIsReadChecked] = useState(false);
   const [isCreateChecked, setIsCreateChecked] = useState(false);
@@ -230,7 +231,7 @@ const RoleEngine = (props: RoleProps) => {
         if (_field.fieldData._id === id) {
           if (!event.target.checked && access === 'isRead' && (_field['isUpdate'] || _field['isCreate'])) {
             // _field[access] = event.target.checked;
-          } else if (!event.target.checked && access === 'isCreate' && _field.fieldData.required ) {
+          } else if (!event.target.checked && access === 'isCreate' && _field.fieldData.required && !child) {
           } else {
             _field[access] = event.target.checked;
           }
