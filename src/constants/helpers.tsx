@@ -1039,7 +1039,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       else {
         obj[key.fieldName] = value ? value : '';
       }
-    } 
+    }
     else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
@@ -1072,28 +1072,28 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
             obj[fieldName] = dataObj[fieldName] ? dataObj[fieldName] : 0;
           });
       }
-    } 
+    }
     else if (key.type === 'decimal' || key.type === 'percent' || key.type === 'formula') {
       obj[key.fieldName] = dataObj[key.fieldName] || dataObj[key.fieldName] === 0 ? dataObj[key.fieldName] : 0;
-    } 
+    }
     else if (key.type === 'dateTime') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       }
-    } 
+    }
     else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
       }
-    } 
+    }
     else if (key.type === 'lookUpDisplay') {
-    } 
+    }
     else if (key.type === 'description') {
-    } 
+    }
     else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -2054,7 +2054,13 @@ export const RENTAL_STATUS = {
 };
 
 export const PURCHASE_REQUISITION_STATUS = {
-  converted : 'Converted'
+  new: 'New',
+  converted: 'Converted'
+}
+
+export const DEMAND_ORDER_STATUS = {
+  new: 'New',
+  converted: 'Converted'
 }
 
 export const RENTAL_INTERNAL_ASSET_STATUS = {
