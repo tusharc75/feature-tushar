@@ -1089,7 +1089,7 @@ const ReceivingTicket = ({
                         setServiceLogDialog({open: true, data: row?.original});
                       }}
                     >
-                      <VisibilityIcon fontSize="small" color={row?.original?.serviceLog?.length ? 'primary' : 'inherit'} />
+                      <VisibilityIcon fontSize="small"/>
                     </IconButton>
                   </span>
                 </HtmlTooltip>

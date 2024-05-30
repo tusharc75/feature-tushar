@@ -89,6 +89,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     <Dialog
       open={open}
       TransitionComponent={CustomDialogTransition}
+      fullScreen={true}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           onClose();
