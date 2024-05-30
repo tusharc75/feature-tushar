@@ -304,7 +304,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          if(element?.serviceLog) element.serviceLog = !isEmpty(element.serviceLog[0]) ? element.serviceLog : [];
           if(element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
             calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
           }

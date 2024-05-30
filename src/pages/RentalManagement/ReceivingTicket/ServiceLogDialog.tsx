@@ -1,8 +1,8 @@
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { Dialog, Box } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, rentalManagement } from 'src/constants/helpers';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { isEmpty } from 'lodash';
@@ -10,14 +10,29 @@ import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
 
-const ServiceLogDialog = ({ data, open, onClose, renderedFrom}) => {
+const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom}) => {
 
     const { state, dispatch } = useTableReducer();
+    const toastConfig = useContext(CustomToastContext);
 
     useEffect(() => {
-        dispatch({ type: 'initialize', data: data?.serviceLog, count: data?.serviceLog?.length });
-    }, [data]);
+      fetchData();
+    }, [rentalId, id])
+
+    const fetchData = async () => {
+      try{
+        dispatch({ type: 'selection', selectedRecords: [] });
+        dispatch({ type: 'loading', loading: true });
+        const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`);
+        dispatch({ type: 'initialize', data: response?.data?.data, count: response?.data?.data?.length });
+      } catch (e) {
+        toastConfig.setToastConfig(e);
+        dispatch({ type: 'loading', loading: false });
+      }
+    } 
 
     const columns: any = [
         {
@@ -82,7 +97,7 @@ const ServiceLogDialog = ({ data, open, onClose, renderedFrom}) => {
       maxWidth="sm"
       fullWidth
       >
-        <CustomDialogHeader title={`${data?.assetNumber || ''} Service Logs`} onClose={onClose} showRequiredLabel={false}/>
+        <CustomDialogHeader title={`${assetNumber || ''} Service Logs`} onClose={onClose} showRequiredLabel={false}/>
         <CustomDialogContent>
             {columns ? (
                 <CustomReactTable

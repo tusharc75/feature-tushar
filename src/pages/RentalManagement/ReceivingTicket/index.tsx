@@ -607,7 +607,6 @@ const ReceivingTicket = ({
           s.assetNumber = s?.serviceDetail?.serviceName;
           s.startDate = s?.actualStartDate;
           s.endDate = s?.actualEndDate;
-          if(s?.serviceLog) s.serviceLog = !isEmpty(s.serviceLog[0]) ? s.serviceLog : [];
           productAssets.push(s)
         })
       }
@@ -2256,7 +2255,9 @@ const ReceivingTicket = ({
       )}
       {serviceLogDialog.open && (
         <ServiceLogDialog
-          data={serviceLogDialog?.data}
+          rentalId={rentalManagementData?._id}
+          id={serviceLogDialog?.data?.uniqueId}
+          assetNumber={serviceLogDialog?.data?.assetNumber}
           open={serviceLogDialog?.open}
           onClose={() => {
             setServiceLogDialog({open: false, data: null});
