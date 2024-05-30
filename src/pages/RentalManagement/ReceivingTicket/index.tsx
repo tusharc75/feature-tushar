@@ -11,7 +11,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { groupBy, map, startCase, uniq } from 'lodash';
+import { groupBy, isEmpty, map, startCase, uniq } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -70,6 +70,7 @@ import ReturnTicketDialog from './ReturnTicketDialog';
 import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
 import ChangeAssetsDetailsDialog from './ChangeAssetsDetailsDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import ServiceLogDialog from './ServiceLogDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -124,6 +125,7 @@ const ReceivingTicket = ({
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false });
+  const [serviceLogDialog, setServiceLogDialog] = useState(({open: false, data: null}));
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
@@ -605,6 +607,7 @@ const ReceivingTicket = ({
           s.assetNumber = s?.serviceDetail?.serviceName;
           s.startDate = s?.actualStartDate;
           s.endDate = s?.actualEndDate;
+          if(s?.serviceLog) s.serviceLog = !isEmpty(s.serviceLog[0]) ? s.serviceLog : [];
           productAssets.push(s)
         })
       }
@@ -658,7 +661,7 @@ const ReceivingTicket = ({
               [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
                 e.rentalAssetStatus
               )
-          ).length === productAssets.length
+          ).length === productAssets?.filter(p => p.type !== MATERIAL_TYPE.service)?.length
         ) {
           setNextStep(true);
         } else {
@@ -1046,33 +1049,56 @@ const ReceivingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row }) =>
-        allowedToEdit ? (
-          <HtmlTooltip
-            title={
-              row?.original?.isInvoiceCreated && !row?.original?.isAllowedEndDate ? 'Invoice Created - Cannot change Start Date' :
-                row?.original?.isAllowedStartDate === false && row?.original?.isAllowedEndDate === false
-                  ? `Can change the Date after delivered`
-                  : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
-                    ? `Can change the End Date after received`
-                    : !row?.original?.isAllowedStartDate && row?.original?.type === MATERIAL_TYPE.service
-                      ? `Can update Start/End Date after service start/end`
-                      : 'Update - Start Date/End Date'
+      Cell: ({ row }) => {
+        return (
+          <>
+            {
+              allowedToEdit ? (
+                <HtmlTooltip
+                  title={
+                    row?.original?.isInvoiceCreated && !row?.original?.isAllowedEndDate ? 'Invoice Created - Cannot change Start Date' :
+                      row?.original?.isAllowedStartDate === false && row?.original?.isAllowedEndDate === false
+                        ? `Can change the Date after delivered`
+                        : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
+                          ? `Can change the End Date after received`
+                          : !row?.original?.isAllowedStartDate && row?.original?.type === MATERIAL_TYPE.service
+                            ? `Can update Start/End Date after service start/end`
+                            : 'Update - Start Date/End Date'
+                  }
+                >
+                  <span>
+                    <IconButton
+                      size="small"
+                      disabled={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? false : true}
+                      onClick={() => {
+                        setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: row?.original });
+                      }}
+                    >
+                      <Edit fontSize="small" color={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? 'primary' : 'inherit'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              ) : null
             }
-          >
-            <span>
-              <IconButton
-                size="small"
-                disabled={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? false : true}
-                onClick={() => {
-                  setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: row?.original });
-                }}
-              >
-                <Edit fontSize="small" color={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? 'primary' : 'inherit'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        ) : null
+            {
+              row?.original?.type === MATERIAL_TYPE.service &&
+                <HtmlTooltip title={'View Service Logs'}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      disabled={row?.original?.serviceLog?.length ? false : true}
+                      onClick={() => {
+                        setServiceLogDialog({open: true, data: row?.original});
+                      }}
+                    >
+                      <VisibilityIcon fontSize="small" color={row?.original?.serviceLog?.length ? 'primary' : 'inherit'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+            }
+          </>
+        )
+      }
     });
     setColumns(column);
   };
@@ -1449,8 +1475,7 @@ const ReceivingTicket = ({
     if (type) {
       setOkBtnLoading(true);
       data = { ids: selectedRecords?.map(s => s?.uniqueId) }
-      if (type === 'start') data.startDate = new Date();
-      else data.endDate = new Date();
+      data['type'] = type;
     } else {
       if (!openChangeActualDateDialog.data) return;
       setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
@@ -2229,6 +2254,16 @@ const ReceivingTicket = ({
           }}
         />
       )}
+      {serviceLogDialog.open && (
+        <ServiceLogDialog
+          data={serviceLogDialog?.data}
+          open={serviceLogDialog?.open}
+          onClose={() => {
+            setServiceLogDialog({open: false, data: null});
+          }}
+          renderedFrom={renderedFrom}
+        />
+      )}
     </>
   );
 };
@@ -2452,15 +2487,14 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapInUseAssets });
         }
       } else if (action === rentalManagementActions.startService) {
-        if (e?.startDate) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!isEmpty(serviceLogEntry)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
         }
       } else if (action === rentalManagementActions.stopService) {
-        if (!e?.startDate) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!serviceLogEntry) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
-        }
-        else if (e?.endDate) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStopped });
         }
       }
     });

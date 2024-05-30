@@ -28,10 +28,10 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { autoCalculateSpecificFields, calculateActualJobDurationUsingServiceLog } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -304,6 +304,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          if(element?.serviceLog) element.serviceLog = !isEmpty(element.serviceLog[0]) ? element.serviceLog : [];
+          if(element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
+            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+          }
           newMaterial.push({ ...element, ...calValues });
 
           if (element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
@@ -499,14 +503,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     const assetList = selectedRecords?.filter((r) => r?.pricingMethod === 'Per Barrel');
-    let rentalUnitVolum;
+    let rentalUnitVolume;
     if (assetList?.length) {
-      rentalUnitVolum = await axiosInstance().post(
+      rentalUnitVolume= await axiosInstance().post(
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
         assetList?.map((d) => ({ asset: d?._id, fromDate: moment(d?.actualStartDate).format('MM/DD/YYYY'), toDate: moment(endDate).format('MM/DD/YYYY') }))
       );
     }
-
 
     let rows: any = [];
     selectedRecords?.forEach((element) => {
@@ -582,7 +585,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           calValues['pricingMethod'] = 'Per Month';
         }
         else if (element.pricingMethod === 'Per Barrel') {
-          const totalBBLs = rentalUnitVolum?.data?.data
+          const totalBBLs = rentalUnitVolume?.data?.data
             ?.find((r) => r?.asset === element?._id)
             ?.data?.reduce((prevValue, currentValue) => prevValue + currentValue?.DailyEvapBBLs, 0);
 
@@ -595,7 +598,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           childRows.push(
-            ...rentalUnitVolum?.data?.data
+            ...rentalUnitVolume?.data?.data
               ?.find((r) => r?.asset === element?._id)
               ?.data?.map((d) => ({
                 ...d,
@@ -607,6 +610,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           );
         } else {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          if(element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
+            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+          }
         }
         element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
