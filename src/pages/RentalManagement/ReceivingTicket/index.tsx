@@ -1080,12 +1080,11 @@ const ReceivingTicket = ({
               ) : null
             }
             {
-              row?.original?.type === MATERIAL_TYPE.service &&
+              row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length &&
                 <HtmlTooltip title={'View Service Logs'}>
                   <span>
                     <IconButton
                       size="small"
-                      disabled={row?.original?.serviceLog?.length ? false : true}
                       onClick={() => {
                         setServiceLogDialog({open: true, data: row?.original});
                       }}
