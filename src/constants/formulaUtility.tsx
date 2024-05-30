@@ -615,6 +615,8 @@ export const autoCalculateSpecificFields = (inputValues: any, values: any, field
 
 export const calculateActualJobDurationUsingServiceLog = (serviceLogs: any[]) => {
     const logs = serviceLogs?.filter(s => s.endDate);
+
+    if(!logs?.length) return 0;
       
     const dateRanges = logs?.map(log => ({
         start: new Date(log.startDate),
