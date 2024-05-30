@@ -696,7 +696,9 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
             <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
               {isOpen.data?.map((d) => (
                 <Accordion key={d.key} defaultExpanded>
-                  <AccordionSummary expandIcon={<ExpandMore />}>{d.heading}</AccordionSummary>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <h6 className=" text-sm font-semibold">{d.heading}</h6>
+                  </AccordionSummary>
                   <AccordionDetails>
                     <RenderTable data={d.items} />
                   </AccordionDetails>
