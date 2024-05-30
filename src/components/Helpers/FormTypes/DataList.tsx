@@ -53,7 +53,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
           searchKey
         )}`;
         if (_ids?.length > 0) {
-          query = `${query}&_ids=${JSON.stringify(_ids)}`
+          query = `${query}&ids=${JSON.stringify(_ids)}`
         }
         const {
           data: {
