@@ -120,6 +120,7 @@ const Sidebar = ({ filterFieldType, sections, setSections, onAddRemoveField, add
   useDndMonitor({
     onDragEnd: (event) => {
       const { active, over } = event;
+      if (!over) return;
       const activeItemType = active.data.current?.type;
       const overItemType = over.data.current?.type;
       const overIndex = over.data.current?.index;
@@ -154,6 +155,8 @@ const Sidebar = ({ filterFieldType, sections, setSections, onAddRemoveField, add
       // Add new section
       if (activeItemType === 'NewSection' && overItemType === 'Section') {
         addSection(overIndex);
+      } else if (overItemType === 'droppable' && activeItemType === 'NewSection') {
+        addSection(0);
       }
     }
   });
