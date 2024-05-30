@@ -12,6 +12,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [inputValues, setInputValues] = useState('');
+  const [selectedOption, setSelectedOption] = useState(null);
 
   const fetchLookupOptions = async () => {
     const options = await getLookupOption(null, lookupResource);
@@ -56,6 +57,13 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
       fetchOptions(event.target.value);
     }
   };
+
+  useEffect(() => {
+    if (selectedOption) {
+      // setDefaultOptions(uniqBy([...selectedOption, ...defaultOptions], 'optionValue'))
+      setDefaultOptions(selectedOption)
+    }
+  }, [selectedOption])
 
   useEffect(() => {
     if (lookupResource) {
@@ -108,11 +116,14 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
       onChange={(e, val: any) => {
         setFieldValue('preFilters', val ? val.map((val) => val?.optionValue) : []);
         setInputValues('');
+        setSelectedOption(val ? val : [])
       }}
       forcePopupIcon={true}
       renderInput={(params) => (
         <TextField
           {...params}
+          margin="dense"
+          size={'small'}
           variant="outlined"
           label="Pre Filters"
           name="preFilters"

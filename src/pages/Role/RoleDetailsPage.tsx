@@ -586,6 +586,7 @@ const RoleDetailsPage = () => {
                             setResource={setChildrenResource}
                             isDisable={permissions?.role.isUpdate ? (!isEdit ? true : false) : true}
                             tier={ROLE_TIER.tier1}
+                            child={true}
                           />
                         </Box>
                       )}
