@@ -131,7 +131,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     });
 
     const field_option_label = initialData?.fields?.filter(f => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map(field => {
-      return [...field?.option?.map(o => ({[field?.fieldLabel]: o?.optionLabel}))]
+      return [...field?.option?.map(o => ({ [field?.fieldLabel]: o?.optionLabel }))]
     })
 
     const maxLength = Math.max(...field_option_label.map(arr => arr.length));
@@ -163,7 +163,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
 
     utils.book_append_sheet(wb, ws, 'Sheet1');
     utils.book_append_sheet(wb, ws_value, 'Value');
-    writeFile(wb, 'Rental Job Receaving Ticket Asset.xlsx');
+    writeFile(wb, `${routes.serializedAsset.title} Data.xlsx`);
   };
 
   const getValueInImport = (data: any, asset: string, fieldLabel: string, assetData: any[]) => {

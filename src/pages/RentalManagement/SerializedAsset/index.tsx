@@ -423,6 +423,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           data.inventory,
           data.productSerialNumbers,
           data?.nonSerializeAsset,
+          data?.nonSerializedInventory,
           parent,
           transferAssets,
           subleaseProduct,
@@ -430,15 +431,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           bulkAssetCreationProduct,
           offlineAssetErrorLog
         );
+
         parent.assetQty =
           parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
             ? parent.assetQty
-            : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => row.assetQty || 0 + sum, 0) +
+            : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => (row.assetQty || 0) + sum, 0) +
             (parent.type === 'product' ? parent.assetQty : 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).length === 0
             ? parent.assetAssignedQty
-            : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => row.assetAssignedQty || 0 + sum, 0) +
+            : parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type)).reduce((sum, row) => (row.assetAssignedQty || 0) + sum, 0) +
             (parent.type === 'product' ? parent?.subRows.filter((d) => ['asset', 'serialNumber']?.includes(d.type))?.length : 0);
         parent.isValid =
           parent.serializedProduct && !parent.subRows?.find((e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct)
@@ -447,7 +449,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               : false
             : parent.subRows.length !== 0
               ? parent.assetAssignedQty ===
-              parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct).reduce((sum, row) => row.assetQty || 0 + sum, 0) ||
+              parent.subRows.filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct).reduce((sum, row) => (row.assetQty || 0) + sum, 0) ||
               parent.subRows.every((d) => d.isValid)
               : true;
 
@@ -482,6 +484,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     inventory,
     productSerialNumbers,
     nonSerializeAsset,
+    nonSerializedInventory,
     parent,
     transferAssets,
     subleaseProduct,
@@ -598,7 +601,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           : 0;
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter(e => e?._id === _subRow._id)?.length
-        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
+        : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length + nonSerializedInventory?.filter(n => n?._id === _subRow?._id)?.reduce((sum, row) => row?.qty + sum, 0);
       _subRow.realAssetQty = [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(_subRow.type) ? _subRow.qty * parent.realAssetQty : 0;
       _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
@@ -615,6 +618,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         inventory,
         productSerialNumbers,
         nonSerializeAsset,
+        nonSerializedInventory,
         _subRow,
         transferAssets,
         subleaseProduct,
