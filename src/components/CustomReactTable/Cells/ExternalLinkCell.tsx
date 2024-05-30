@@ -9,7 +9,7 @@ export const ExternalLinkCell = ({ value, link }) => {
       <span className="line-clamp-1 min-w-0">{value}</span>
       {link && (
         <Link title={value} to={link} target="_blank" rel="noopener noreferrer" className={'max-h-fit flex-shrink-0'}>
-          <FiExternalLink size={16} className=" text-link align-baseline" />
+          <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
         </Link>
       )}
     </p>

@@ -17,9 +17,9 @@ const getMore = (data) => {
 };
 
 function DropdownCell({ permissions, permissionForLinks, field, original }) {
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
 
-  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleClick = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
     setAnchorEl(event.currentTarget);
   };
 
@@ -86,7 +86,14 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
           )}
           {more?.length > 0 && (
             <>
-              <span className="createdAtTime badge-date cursor-pointer" onClick={handleClick}>
+              <span
+                className="createdAtTime badge-date cursor-pointer"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleClick(e);
+                }}
+                onMouseOver={handleClick}
+              >
                 <span className="hidden">&nbsp;&nbsp;</span>
                 {`+${more?.length} more..`}
               </span>
