@@ -615,43 +615,16 @@ export const autoCalculateSpecificFields = (inputValues: any, values: any, field
 
 export const calculateActualJobDurationUsingServiceLog = (serviceLogs: any[]) => {
     const logs = serviceLogs?.filter(s => s.endDate);
-
     if(!logs?.length) return 0;
-      
-    const dateRanges = logs?.map(log => ({
-        start: new Date(log.startDate),
-        end: new Date(log.endDate)
-    }));
-
-    // Sorting  dateRanges by start date
-    dateRanges.sort((a: any, b: any) => a.start - b.start);
-
-    // Merging overlapping ranges if there are any
-    const mergedRanges = [];
-    let currentRange = dateRanges[0];
-
-    for (let i = 1; i < dateRanges.length; i++) {
-        const range = dateRanges[i];
-        if (currentRange.end >= range.start) { // meaning overlap is there
-            currentRange.end = new Date(Math.max(currentRange.end.getTime(), range.end.getTime()));
-        } else {
-            mergedRanges.push(currentRange);
-            currentRange = range;
+    const uniqueDates = new Set<string>();
+    serviceLogs.forEach(log => {
+        const startDate = new Date(log.startDate);
+        const endDate = new Date(log.endDate);
+        for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
+            uniqueDates.add(date.toISOString().split('T')[0]);
         }
-    }
-    mergedRanges.push(currentRange);
-
-    // Calculating the total unique days
-    const totalDays = mergedRanges.reduce((acc, range) => {
-        const start: any = new Date(range.start);
-        const end: any = new Date(range.end);
-        start.setUTCHours(0, 0, 0, 0); // Normalizing to the start of the day
-        end.setUTCHours(0, 0, 0, 0); // Normalizing to the start of the day
-        const duration = (end - start) / (1000 * 60 * 60 * 24) + 1; // Including the end day
-        return acc + duration;
-    }, 0);
-
-    return totalDays;
+    });
+    return uniqueDates.size;
 }
 
 export const checkFormulaLoop = (fields) => {
