@@ -176,7 +176,6 @@ const RentalManagementDetailsPage = () => {
           } else {
             setVersionNotClonned(false);
           }
-
           for (let i = 0; i < keys.length; i++) {
             if (
               [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
@@ -457,13 +456,12 @@ const RentalManagementDetailsPage = () => {
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                   </Button>
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
-                    versionNotClonned &&
-                    rentalManagementData?.addQuotationStep && (
+                    versionNotClonned && (rentalManagementData?.addQuotationStep ||
+                      user?.user?.brandPolicy?.rentalQuotation
+                    ) && (
                       <Button
-                        disabled={!versionNotClonned}
-                        className="buttonStyleBigScreen"
+                        className="btn-outline-v1"
                         variant="contained"
-                        color="primary"
                         size="small"
                         onClick={() => {
                           setVersionNotClonned(false);
@@ -601,6 +599,7 @@ const RentalManagementDetailsPage = () => {
                       ? true
                       : false
                   }
+                  quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
@@ -622,6 +621,7 @@ const RentalManagementDetailsPage = () => {
                       ? true
                       : false
                   }
+                  quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
                 />
               )}
 
