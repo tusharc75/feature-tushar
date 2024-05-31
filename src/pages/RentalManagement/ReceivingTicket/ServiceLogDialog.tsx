@@ -18,6 +18,8 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     const { state, dispatch } = useTableReducer();
     const toastConfig = useContext(CustomToastContext);
 
+    const { dataRows } = state;
+
     useEffect(() => {
       fetchData();
     }, [rentalId, id])
@@ -31,13 +33,59 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
         toastConfig.setToastConfig(e);
         dispatch({ type: 'loading', loading: false });
       }
-    } 
+    };
+    
+    const onSaveInlineEdit = async (inputField, updatedData) => {
+      if (inputField.hasOwnProperty('startDate')) {
+        dataRows?.forEach((d: any, index: number) => {
+          if(d._id === updatedData._id) {
+            if(updatedData['endDate'] && new Date(updatedData['endDate']) < new Date(inputField['startDate'])) {
+              toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't exceed End Date` });
+              return;
+            } else if( index !== dataRows?.length-1 &&  new Date(dataRows[index+1].endDate) > new Date(inputField['startDate'])) {
+              toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't be less than previous log End Date` });
+              return;
+            }
+          }
+        })
+      } else if (inputField.hasOwnProperty('endDate')) {
+        dataRows?.forEach((d: any, index: number) => {
+          if(d._id === updatedData._id) {
+            if(new Date(updatedData['startDate']) > new Date(inputField['endDate'])) {
+              toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't exceed End Date` });
+              return;
+            } else if( index !== 0 &&  new Date(dataRows[index-1].startDate) < new Date(inputField['endDate'])) {
+              console.log(dataRows[index-1])
+              toastConfig.setToastConfig({ open: true, type: 'error', message: `End Date can't be greater than next log Start Date` });
+              return;
+            }
+          }
+        })
+      }
+      const values: any = { _id: updatedData?._id };
+      Object.keys(inputField)?.map((_key) => {
+        values[_key] = updatedData[_key] ? updatedData[_key] : '';
+      });
+      let data = { ids: [id], type: 'update', ...values };
+      axiosInstance().put(`${rentalManagement.api}/${rentalId}/start-end-date`, data).then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      }).catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    };
 
     const columns: any = [
         {
           accessor: 'startDate',
           Header: 'Start Date',
           disabled: true,
+          editable: true,
+          type: "date",
           Cell: ({ row }) =>
             row?.original?.startDate ? (
               <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
@@ -51,6 +99,8 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
           accessor: 'endDate',
           Header: 'End Date',
           disabled: true,
+          editable: true,
+          type: "date",
           Cell: ({ row }) =>
             row?.original?.endDate ? (
               <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
@@ -114,6 +164,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
                     hideSelection={true}
                     hideAction={true}
                     hideExportTable={true}
+                    onSaveEdit={onSaveInlineEdit}
                 />
                 ) : (
                 <Box p={2} height={500}>

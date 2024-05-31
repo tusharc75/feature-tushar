@@ -71,6 +71,7 @@ import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
 import ChangeAssetsDetailsDialog from './ChangeAssetsDetailsDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import ServiceLogDialog from './ServiceLogDialog';
+import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -141,7 +142,7 @@ const ReceivingTicket = ({
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {} });
   const [assetsData, setAssetsData] = useState([])
   const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
-  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null });
+  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false });
 
   const {
     state: { user, permissions, selectedEntity }
@@ -1052,7 +1053,7 @@ const ReceivingTicket = ({
         return (
           <>
             {
-              allowedToEdit ? (
+              allowedToEdit && row?.original?.type !== MATERIAL_TYPE.service ? (
                 <HtmlTooltip
                   title={
                     row?.original?.isInvoiceCreated && !row?.original?.isAllowedEndDate ? 'Invoice Created - Cannot change Start Date' :
@@ -1060,9 +1061,7 @@ const ReceivingTicket = ({
                         ? `Can change the Date after delivered`
                         : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
                           ? `Can change the End Date after received`
-                          : !row?.original?.isAllowedStartDate && row?.original?.type === MATERIAL_TYPE.service
-                            ? `Can update Start/End Date after service start/end`
-                            : 'Update - Start Date/End Date'
+                          : `Update - Start Date/End Date`
                   }
                 >
                   <span>
@@ -1080,7 +1079,7 @@ const ReceivingTicket = ({
               ) : null
             }
             {
-              row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length &&
+              row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
                 <HtmlTooltip title={'View Service Logs'}>
                   <span>
                     <IconButton
@@ -1093,6 +1092,7 @@ const ReceivingTicket = ({
                     </IconButton>
                   </span>
                 </HtmlTooltip>
+              ) : null
             }
           </>
         )
@@ -1471,9 +1471,10 @@ const ReceivingTicket = ({
   const handleSubmitChangeDates = (values, type: string = '') => {
     let data;
     if (type) {
-      setOkBtnLoading(true);
+      setServiceConfirmationDialog({...serviceConfirmationDialog, loading: true});
       data = { ids: selectedRecords?.map(s => s?.uniqueId) }
       data['type'] = type;
+      data['date'] = values.date;
     } else {
       if (!openChangeActualDateDialog.data) return;
       setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
@@ -1491,15 +1492,13 @@ const ReceivingTicket = ({
         type: 'success'
       });
       setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
-      setOkBtnLoading(false);
-      setServiceConfirmationDialog({ open: false, type: null });
+      setServiceConfirmationDialog({ open: false, type: null, loading: false});
       fetchRecords();
     })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setOkBtnLoading(false);
+        setServiceConfirmationDialog({ open: false, type: null, loading: false});
         setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
-        setServiceConfirmationDialog({ open: false, type: null });
       });
   };
 
@@ -2148,16 +2147,17 @@ const ReceivingTicket = ({
         />
       )}
       {serviceConfirmationDialog.open && (
-        <ConfirmationDialog
+        <StartStopServiceDateDialog
+          data={selectedRecords}
+          type={serviceConfirmationDialog.type}
           open={serviceConfirmationDialog.open}
-          message={`Are you sure you want to ${serviceConfirmationDialog.type} Service?`}
           onClose={() => {
-            setServiceConfirmationDialog({ open: false, type: null });
+            setServiceConfirmationDialog({ open: false, type: null, loading: false });
           }}
-          onOk={() => {
-            handleSubmitChangeDates(null, serviceConfirmationDialog.type);
+          handleSubmit={(val) => {
+            handleSubmitChangeDates(val, serviceConfirmationDialog.type)
           }}
-          okBtnLoading={okBtnLoading}
+          loading={serviceConfirmationDialog.loading}
         />
       )}
       {openChangeActualDateDialog.open && (
