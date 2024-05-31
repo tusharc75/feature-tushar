@@ -1,63 +1,36 @@
-import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core';
-import Add from '@material-ui/icons/Add';
-import DeleteIcon from '@material-ui/icons/Delete';
-import EditIcon from '@material-ui/icons/Edit';
+import { Box, IconButton } from '@material-ui/core';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import _, { camelCase, startCase } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { camelCase, startCase } from 'lodash';
+import { Fragment, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
-import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
-import { flattenArray } from 'src/constants/columns';
-import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
-import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
-import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
-import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, prepareDataForGrid, rentalManagement } from '../../../constants/helpers';
-import { findOne, objectStore } from '../../../constants/indexdbhelper';
+import { CHILD_RESOURCE, MATERIAL_TYPE, prepareDataForGrid } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
-const Material = ({
-  dealId,
-}) => {
-    const renderedFrom = camelCase(`${routes?.deals.title}_material`);
-  const toastConfig = useContext(CustomToastContext);
+const Material = ({ dealId }) => {
+  const renderedFrom = camelCase(`${routes?.deals.title}_material`);
   const {
-    state: { user, permissions }
+    state: { user }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [allFields, setAllFields] = useState(null);
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
-  const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
     fetchFields();
-  }, []);
-
-  useEffect(() => {
     fetchData();
-  }, [allFields]);
+  }, []);
 
 
   const fetchFields = async () => {
     const response = await fetch_child_resource_fields(CHILD_RESOURCE.dealsMaterial, user.user?.brandCurrency, true);
-    setAllFields(JSON.parse(JSON.stringify(response)));
     const newColumns = generateColumns(renderedFrom, response, routes.dealDetail.path, true);
     let column: any = [
       {
@@ -96,38 +69,34 @@ const Material = ({
         Cell: ({ row, table }) => (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <p
-                className="link text-truncate"
-                title={row.original.detail}
-              >
-                {row.original.detail}
+              className="link text-truncate"
+              title={row.original.detail}
+            >
+              {row.original.detail}
             </p>
             <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
+              size="small"
+              onClick={() => {
+                if (row.original.type === MATERIAL_TYPE.product) {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <OpenInNewIcon fontSize="small" color="primary" />
+            </IconButton>
           </div>
         )
       }
     ];
-        setColumns([...column,...newColumns]);
+    setColumns([...column, ...newColumns]);
   };
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-
-      const response = await axiosInstance().get(`${routes.deals.path}/material/${dealId}`);
-      
-      const data = response?.data?.data;
-      const count = response?.data?.data?.count;
+    const response = await axiosInstance().get(`${routes.deals.path}/material/${dealId}`);
     let rows = response?.data?.data?.map((u, i) => {
-          let finalObject: any = prepareDataForGrid(u, user);
+      let finalObject: any = prepareDataForGrid(u, user);
       return {
         ...finalObject,
         index: i + 1,
