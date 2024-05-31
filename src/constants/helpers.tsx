@@ -184,6 +184,13 @@ export const serviceOrderSteps: stepInterface[] = [
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
 ];
 
+export const subcontractAssemblySteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Assign', title: 'Assign', icon: 'assign' },
+  { name: 'Loading', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving', title: 'Receiving', icon: 'ticket' },
+];
+
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
 
@@ -377,7 +384,8 @@ export const sidebarResource = {
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
   units: 'Units',
   resourceDoaRequest: 'Resource Doa Request',
-  workOrderPlanning: 'Work Order Planning'
+  workOrderPlanning: 'Work Order Planning',
+  subcontractAssembly: 'Subcontract Assembly'
 };
 
 export const primaryFields = {
@@ -560,7 +568,8 @@ export const CHILD_RESOURCE = {
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
   dealsMaterial: 'Deals Material',
-  rentalManagementTechnician: 'Rental Management Technician'
+  rentalManagementTechnician: 'Rental Management Technician',
+  subcontractAssemblyMaterial: 'Subcontract Assembly Material',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -1105,21 +1114,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2209,7 +2218,8 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
+  subcontractAssembly: 'subcontractAssembly'
 };
 
 export const LOG_RESOURCE = {
@@ -2864,6 +2874,11 @@ export const FIELD_TICKET_STATUS = {
   submitted: 'Submitted',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
+  closed: 'Closed'
+};
+
+export const SUBCONTRACT_ASSEMBLY_STATUS = {
+  new: 'New',
   closed: 'Closed'
 };
 
