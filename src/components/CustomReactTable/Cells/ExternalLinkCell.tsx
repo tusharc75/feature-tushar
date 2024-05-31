@@ -1,5 +1,3 @@
-import { IconButton } from '@material-ui/core';
-import React from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
 
