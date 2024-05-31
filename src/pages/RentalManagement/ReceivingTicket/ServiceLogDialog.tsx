@@ -24,7 +24,6 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
 
     const fetchData = async () => {
       try{
-        dispatch({ type: 'selection', selectedRecords: [] });
         dispatch({ type: 'loading', loading: true });
         const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`);
         dispatch({ type: 'initialize', data: response?.data?.data, count: response?.data?.data?.length });
@@ -38,6 +37,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
         {
           accessor: 'startDate',
           Header: 'Start Date',
+          disabled: true,
           Cell: ({ row }) =>
             row?.original?.startDate ? (
               <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
@@ -50,6 +50,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
         {
           accessor: 'endDate',
           Header: 'End Date',
+          disabled: true,
           Cell: ({ row }) =>
             row?.original?.endDate ? (
               <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
@@ -62,6 +63,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
         {
             accessor: 'startedBy',
             Header: 'Started By',
+            disabled: true,
             Cell: ({ row }) =>
               !isEmpty(row?.original?.startedBy) ? (
                 <Link className="link text-truncate" title={row?.original?.startedBy?.optionLabel} to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`}>
@@ -74,6 +76,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
         {
             accessor: 'endedBy',
             Header: 'Ended By',
+            disabled: true,
             Cell: ({ row }) =>
               !isEmpty(row?.original?.endedBy) ? (
                 <Link className="link text-truncate" title={row?.original?.endedBy?.optionLabel} to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`}>
@@ -102,7 +105,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
         <CustomDialogContent>
             {columns ? (
                 <CustomReactTable
-                    height={'calc(100vh - 393px)'}
+                    height={'calc(120vh - 393px)'}
                     columns={columns}
                     state={state}
                     dispatch={dispatch}
