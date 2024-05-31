@@ -12,7 +12,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { flattenArray } from 'src/constants/columns';
-import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -44,7 +44,8 @@ const Productpackage = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
-  quotationApproved
+  quotationApproved,
+  quotationStatus
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -851,7 +852,7 @@ const Productpackage = ({
         addButtonMenuItems={addButtonMenuItems()}
         addButtonProps={{
           disabled: !allowedToEdit || quotationApproved,
-          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``
+          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonmenuItems()}

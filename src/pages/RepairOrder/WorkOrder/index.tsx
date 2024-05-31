@@ -614,13 +614,13 @@ const WorkOrder = ({
     });
 
     if (isPostWorkService || (!repairOrderData.addQuotationStep && !user?.brandPolicy?.repairOrderPrice)) {
-      if (rows?.some((e) => e.serviceStatus === WORK_ORDER_STATUS.completed)) {
+      if (rows?.some((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)) {
         setNextStep(true);
       } else {
         setNextStep(false);
       }
     } else {
-      if (repairOrderData.addQuotationStep) {
+      if (repairOrderData.addQuotationStep || user?.brandPolicy?.repairOrderPrice) {
         if (
           data?.material?.filter(
             (e) =>
@@ -634,13 +634,7 @@ const WorkOrder = ({
           setNextStep(true);
         }
       } else {
-        if (
-          (repairOrderData?.type === REPAIR_ORDER_TYPE.internal &&
-            rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)) ||
-          (repairOrderData?.type === REPAIR_ORDER_TYPE.external &&
-            rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)) ||
-          (repairOrderData?.type === REPAIR_ORDER_TYPE.external && user?.brandPolicy?.repairOrderPrice)
-        ) {
+        if (rows?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)) {
           setNextStep(true);
         } else {
           setNextStep(false);
