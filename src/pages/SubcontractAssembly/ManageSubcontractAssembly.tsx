@@ -1,0 +1,233 @@
+import { Box, Button, CircularProgress, Dialog } from "@material-ui/core";
+import { Form, Formik } from "formik";
+import { isEqual } from "lodash";
+import { useContext, useEffect, useState } from "react";
+import { isMobile, isTablet } from "react-device-detect";
+import { useHistory } from 'react-router-dom';
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
+import { useData } from "src/StateProvider/Provider";
+import axiosInstance from "src/axios/axiosInstance";
+import ConfirmationCancelDialog from "src/components/ConfirmCancelDialog";
+import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
+import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
+import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import InputField from "src/components/Helpers/InputField";
+import routes from "src/components/Helpers/Routes";
+import { CustomDialogTransition, GenerateResourceLineNumber, SUBCONTRACT_ASSEMBLY_STATUS, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from "src/constants/helpers";
+
+const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = null }) => {
+
+	const toastConfig = useContext(CustomToastContext);
+	const history = useHistory();
+
+	const {
+		state: { user }
+	}: any = useData();
+
+	const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
+	const [loading, setLoading] = useState(false);
+	const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+	const [submitting, setSubmitting] = useState(false);
+	const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+	const [cloneHeading, setCloneHeading] = useState('');
+
+	useEffect(() => {
+		fetchFields();
+	}, []);
+
+	const fetchFields = async () => {
+		try {
+			let data;
+			const response = await axiosInstance().get(`/field?resource=${sidebarResource.subcontractAssembly}`);
+			data = response?.data?.data;
+			const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+			const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
+			if (id) {
+				let data;
+				const response = await axiosInstance().get(`${routes?.subcontractAssembly?.path}/${id}`);
+				data = response?.data?.data;
+				let fields = fieldsDataForUpdate;
+				let tempData = data;
+				if (isClone) {
+					fields = fieldsDataForCreate;
+					const { subcontractAssemblyNumber, ...rest } = data;
+					rest.subcontractAssemblyNumber = GenerateResourceLineNumber(fieldsDataForCreate);
+					rest.status = SUBCONTRACT_ASSEMBLY_STATUS.new;
+					setCloneHeading(subcontractAssemblyNumber);
+					tempData = rest;
+				}
+				setInitialData({
+					fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
+					values: getObjKeysWithValues(tempData, isClone ? fieldsDataForCreate : fieldsDataForUpdate)
+				});
+			} else {
+				const tempInitialData = getObjKeys('', fieldsDataForCreate);
+				tempInitialData['subcontractAssemblyNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+				if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
+					tempInitialData['currency'] = user.user?.brandCurrency;
+				}
+				setInitialData({
+					fields: fieldsDataForCreate,
+					values: tempInitialData
+				});
+			}
+		} catch (error) {
+			toastConfig.setToastConfig(error);
+		}
+	};
+
+	const handleSubmit = async (values) => {
+		setSubmitting(true);
+		if (id && !isClone) {
+			values._id = id;
+			axiosInstance()
+				.put(`${routes.subcontractAssembly?.path}`, values)
+				.then(({ data }) => {
+					setSubmitting(false);
+					onSuccess();
+					toastConfig.setToastConfig({
+						open: true,
+						type: 'success',
+						message: data.message
+					});
+				})
+				.catch((error) => {
+					setSubmitting(false);
+					toastConfig.setToastConfig(error);
+				});
+		} else {
+			axiosInstance()
+				.post(`${routes.subcontractAssembly?.path}`, values)
+				.then(({ data }) => {
+					setLoading(false);
+					history.push(`${routes.subcontractAssembly.path}/detail/${data?.data?._id}`);
+					setSubmitting(true);
+					toastConfig.setToastConfig({
+						open: true,
+						type: 'success',
+						message: data.message
+					});
+				})
+				.catch((error) => {
+					setLoading(false);
+					setSubmitting(false);
+					toastConfig.setToastConfig(error);
+				});
+		}
+	};
+
+	function validate(values) {
+		const errors = {};
+		return errors;
+	}
+
+	return (
+		<Dialog
+			maxWidth="md"
+			fullScreen={fullScreen}
+			TransitionComponent={CustomDialogTransition}
+			aria-labelledby="customized-dialog-title"
+			open={true}
+			fullWidth
+			onClose={(e, reason) => {
+				if (reason !== 'backdropClick') {
+					setShowConfirmDialog(true);
+				}
+			}}
+		>
+			{initialData.fields.length ? (
+				<Formik
+					validate={validate}
+					initialValues={initialData.values}
+					enableReinitialize={true}
+					validationSchema={yupSchema(initialData.fields)}
+					onSubmit={handleSubmit}
+				>
+					{({ values, errors, setFieldValue, touched, submitForm, setValues }) => (
+						<>
+							<CustomDialogHeader
+								onClose={() => {
+									if (isEqual(initialData.values, values)) onClose();
+									else setShowConfirmDialog(true);
+								}}
+								title={`${id
+									? isClone
+										? `Clone - ${cloneHeading}`
+										: `Update ${initialData.values?.subcontractAssemblyNumber ? `(${initialData.values?.subcontractAssemblyNumber})` : ''}`
+									: `Create ${routes.subcontractAssembly.title}`
+									}`}
+								isMinimized={!fullScreen}
+								onMinimizeMaximize={() => {
+									setFullScreen((prevState) => !prevState);
+								}}
+								showManimizeMaximize={true}
+							/>
+							<CustomDialogContent>
+								<Form autoComplete="off" autoCorrect="off" noValidate>
+									<InputField
+										errors={errors}
+										values={values}
+										setFieldValue={(name, value) => {
+											setFieldValue(name, value);
+										}}
+										touched={touched}
+										fieldsData={initialData.fields}
+										size="small"
+										fullWidth
+									/>
+								</Form>
+							</CustomDialogContent>
+							<CustomDialogFooter>
+								<Button
+									size="small"
+									color="primary"
+									disabled={submitting}
+									onClick={() => {
+										if (isEqual(initialData.values, values)) onClose();
+										else setShowConfirmDialog(true);
+									}}
+								>
+									Cancel
+								</Button>
+								<Button
+									disabled={loading || submitting}
+									variant="contained"
+									color="primary"
+									size="small"
+									type="submit"
+									onClick={submitForm}
+									endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+								>
+									{' '}
+									Save
+								</Button>
+							</CustomDialogFooter>
+							{showConfirmDialog ? (
+								<ConfirmationCancelDialog
+									close={() => setShowConfirmDialog(false)}
+									open={showConfirmDialog}
+									onSave={() => {
+										setShowConfirmDialog(false);
+										submitForm();
+									}}
+									onClose={() => {
+										setShowConfirmDialog(false);
+										onClose();
+									}}
+								/>
+							) : null}
+						</>
+					)}
+				</Formik>
+			) : (
+				<Box p={2} height={500}>
+					<CommonSkeleton lenArray={[...Array(10).keys()]} />
+				</Box>
+			)}
+		</Dialog>
+	)
+}
+
+export default ManageSubcontractAssembly;
