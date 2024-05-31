@@ -11,8 +11,6 @@ export const deleteDisable = 'You do not have permission to Delete';
 export const editDisable = 'You do not have permission to Edit';
 export const childDisable = 'You do not have permission to View Child';
 
-export const quotationApprovedMessage = 'Quotation Approved you can not perform this action';
-
 export const rentalManagementActions = {
     createLoadingTicket: 'Create Loading Ticket',
     deliveredToCustomer: 'Delivered to Customer',
