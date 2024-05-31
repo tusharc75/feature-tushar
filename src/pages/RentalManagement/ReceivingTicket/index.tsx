@@ -168,7 +168,7 @@ const ReceivingTicket = ({
     getColumn();
     fetchRecords();
     fetchPolicy();
-  }, [currentStep]);
+  }, [currentStep, rentalPolicyData]);
 
   const OpenInNewWindow = (url) => {
     window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank');
@@ -2261,6 +2261,7 @@ const ReceivingTicket = ({
           onClose={() => {
             setServiceLogDialog({open: false, data: null});
           }}
+          onSuccess={fetchRecords}
           renderedFrom={renderedFrom}
         />
       )}
