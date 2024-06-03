@@ -46,7 +46,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         <div>
           <p
             className="text-truncate link"
-            title={row?.original?.optionLabel}
+            title={row?.original?.reference?.optionLabel}
             onClick={() => window.open(`${row.original.path}/${row?.original?.reference?.optionValue}`)}
           >
             {row.original?.reference?.optionLabel}
