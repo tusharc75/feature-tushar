@@ -25,7 +25,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
         })
       })
     }
-    if(dates?.length) setMinDate(new Date(Math.max(...dates)));
+    if (dates?.length) setMinDate(new Date(Math.max(...dates)));
   }, [data, type]);
 
   return (
@@ -39,7 +39,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       }}
       maxWidth="sm"
       fullWidth>
-      <Formik initialValues={{type: type, date: minDate? minDate : new Date()}} onSubmit={(values) => { handleSubmit({...values, date: new Date(values.date)?.toISOString()})}}>
+      <Formik initialValues={{ type: type, date: minDate ? minDate : new Date() }} onSubmit={(values) => { handleSubmit({ ...values, date: new Date(values.date)?.toISOString() }) }}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form >
             <CustomDialogHeader title={`Set ${type === 'start' ? 'Start' : 'End'} Date`} onClose={onClose} />

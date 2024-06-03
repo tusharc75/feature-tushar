@@ -126,7 +126,7 @@ const ReceivingTicket = ({
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false });
-  const [serviceLogDialog, setServiceLogDialog] = useState(({open: false, data: null}));
+  const [serviceLogDialog, setServiceLogDialog] = useState(({ open: false, data: null }));
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
@@ -1085,10 +1085,10 @@ const ReceivingTicket = ({
                     <IconButton
                       size="small"
                       onClick={() => {
-                        setServiceLogDialog({open: true, data: row?.original});
+                        setServiceLogDialog({ open: true, data: row?.original });
                       }}
                     >
-                      <VisibilityIcon fontSize="small"/>
+                      <VisibilityIcon fontSize="small" />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
@@ -1471,7 +1471,7 @@ const ReceivingTicket = ({
   const handleSubmitChangeDates = (values, type: string = '') => {
     let data;
     if (type) {
-      setServiceConfirmationDialog({...serviceConfirmationDialog, loading: true});
+      setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
       data = { ids: selectedRecords?.map(s => s?.uniqueId) }
       data['type'] = type;
       data['date'] = values.date;
@@ -1492,12 +1492,12 @@ const ReceivingTicket = ({
         type: 'success'
       });
       setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
-      setServiceConfirmationDialog({ open: false, type: null, loading: false});
+      setServiceConfirmationDialog({ open: false, type: null, loading: false });
       fetchRecords();
     })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setServiceConfirmationDialog({ open: false, type: null, loading: false});
+        setServiceConfirmationDialog({ open: false, type: null, loading: false });
         setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
       });
   };
@@ -1930,7 +1930,7 @@ const ReceivingTicket = ({
       )}
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
-          assetData={selectedRecords?.filter((e) => e.type === 'Asset')}
+          ids={selectedRecords?.filter((e) => e.type === 'Asset')?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={setAssetsData}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null })}
@@ -2259,7 +2259,7 @@ const ReceivingTicket = ({
           assetNumber={serviceLogDialog?.data?.assetNumber}
           open={serviceLogDialog?.open}
           onClose={() => {
-            setServiceLogDialog({open: false, data: null});
+            setServiceLogDialog({ open: false, data: null });
           }}
           onSuccess={fetchRecords}
           renderedFrom={renderedFrom}
