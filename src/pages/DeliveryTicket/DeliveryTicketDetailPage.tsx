@@ -40,7 +40,6 @@ import {
   gridLoadingTimeout,
   prepareDataForGrid,
   rentalManagement,
-  serializedAsset,
   sidebarResource
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
@@ -129,133 +128,18 @@ export default function DeliveryTicketDetail(props) {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}&showHiddenFields=true`);
         data = response?.data?.data;
       }
+
+      let ticketTypeKey;
+      for (let key in DELIVERY_TICKET_REFERENCE_TYPE) {
+        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE[key]) {
+          ticketTypeKey = key;
+          return
+        }
+      }
       data = data.filter((fields: any) => {
-        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.repairJob) {
-          if (
-            [
-              'transferAsset',
-              'rentalJob',
-              'sublease',
-              'salesOrder',
-              'productInventory',
-              'pickupFromType',
-              'deliveryToType',
-              'transferInventory',
-              'repairOrder'
-            ].includes(fields.fieldData.fieldName)
-          ) {
-            return false;
-          }
-        }
-        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset) {
-          if (
-            [
-              'rentalJob',
-              'repairJob',
-              'sublease',
-              'salesOrder',
-              'productInventory',
-              'pickupFromType',
-              'deliveryToType',
-              'transferInventory',
-              'repairOrder'
-            ].includes(fields.fieldData.fieldName)
-          ) {
-            return false;
-          }
-        }
-        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
-          if (
-            [
-              'repairJob',
-              'transferAsset',
-              'sublease',
-              'salesOrder',
-              'productInventory',
-              'pickupFromType',
-              'deliveryToType',
-              'transferInventory',
-              'repairOrder'
-            ].includes(fields.fieldData.fieldName)
-          ) {
-            return false;
-          }
-        }
-        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.salesOrder) {
-          if (
-            [
-              'repairJob',
-              'transferAsset',
-              'sublease',
-              'productInventory',
-              'pickupFromType',
-              'deliveryToType',
-              'transferInventory',
-              'repairOrder'
-            ].includes(fields.fieldData.fieldName)
-          ) {
-            return false;
-          }
-        }
-        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.sublease) {
-          if (
-            [
-              'rentalJob',
-              'repairJob',
-              'transferAsset',
-              'salesOrder',
-              'productInventory',
-              'pickupFromType',
-              'deliveryToType',
-              'transferInventory',
-              'repairOrder'
-            ].includes(fields.fieldData.fieldName)
-          ) {
-            return false;
-          }
-        }
-        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
-          if (
-            [
-              'rentalJob',
-              'repairJob',
-              'transferAsset',
-              'salesOrder',
-              'productInventory',
-              'pickupFromType',
-              'deliveryToType',
-              'sublease',
-              'repairOrder'
-            ].includes(fields.fieldData.fieldName)
-          ) {
-            return false;
-          }
-        }
-        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.repairOrder) {
-          if (
-            [
-              'rentalJob',
-              'repairJob',
-              'transferAsset',
-              'salesOrder',
-              'productInventory',
-              'pickupFromType',
-              'deliveryToType',
-              'sublease',
-              'transferInventory'
-            ].includes(fields.fieldData.fieldName)
-          ) {
-            return false;
-          }
-        }
-        if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE.productionOrder) {
-          if (
-            ['rentalJob', 'repairJob', 'transferAsset', 'salesOrder', 'repairOrder', 'productInventory', 'sublease', 'transferInventory'].includes(
-              fields.fieldData.fieldName
-            )
-          ) {
-            return false;
-          }
+        if ([...Object.keys(DELIVERY_TICKET_REFERENCE_TYPE)?.filter((e) => e !== ticketTypeKey),
+          'pickupFromType', 'deliveryToType'].includes(fields.fieldData.fieldName)) {
+          return false;
         }
         if (fields.fieldData.sectionName.includes('Fields')) {
           return false;
@@ -454,8 +338,8 @@ export default function DeliveryTicketDetail(props) {
       deliveryTicketData?.status === DELIVERY_TICKET_STATUS.new
         ? 'Sign-off - Dispatch'
         : deliveryTicketData?.status === 'In-Transit'
-        ? 'Sign-off - Delivery'
-        : '';
+          ? 'Sign-off - Delivery'
+          : '';
 
     const { type, sign: newSign, name } = signedData;
     const indexOfExistingSignature = signatures.findIndex((sign) => sign.type === type && sign.status === status);
