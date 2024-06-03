@@ -48,6 +48,7 @@ import RentalManagementViews from './RoadMapViews';
 import SerializedAsset from './SerializedAsset';
 import Services from './Services';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const RentalManagementDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -320,19 +321,6 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
-  const openActions = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
-
-  const closeActions = () => {
-    setAnchorEl(null);
-  };
-
-  const handleStatusChange = (o) => {
-    if (o.optionValue && rentalManagementData?.status !== o.optionValue) {
-      updateJobStatus(o.optionValue);
-    }
-  };
 
   const updateProcessStatus = async (processStatus) => {
     if (isOffline) {
@@ -476,13 +464,15 @@ const RentalManagementDetailsPage = () => {
                     [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) &&
                     allowedToEdit && (
                       <Fragment>
-                        <Button
-                          variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                          className={'btn-outline-v1'}
+                        <ButtonWithPulse
+                          variant={'outlined'}
+                          color="default"
+                          size="small"
                           onClick={() => updateJobStatus(RENTAL_STATUS.closed)}
+                          className={'btn-outline-v1'}
                         >
-                          {isMobile && !isTablet ? <CloseIcon /> : 'Close'}
-                        </Button>
+                          Close
+                        </ButtonWithPulse>
                       </Fragment>
                     )}
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
@@ -600,6 +590,7 @@ const RentalManagementDetailsPage = () => {
                       : false
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
+                  fetchRentalManagementData={fetchRentalManagementData}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
@@ -622,6 +613,7 @@ const RentalManagementDetailsPage = () => {
                       : false
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
+                  fetchRentalManagementData={fetchRentalManagementData}
                 />
               )}
 

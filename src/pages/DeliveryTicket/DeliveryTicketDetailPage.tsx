@@ -625,11 +625,8 @@ export default function DeliveryTicketDetail(props) {
                 referenceId={deliveryTicketData?._id}
                 hideDetailButton={true}
                 fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
-                columns={
-                  serializedAssetColumns?.length
-                    ? serializedAssetColumns?.filter((e) => ['assetNumber', 'product', 'productDescription'].includes(e.accessor))
-                    : productColumns?.filter((e) => ['productName', 'productDescription'].includes(e.accessor))
-                }
+                columns={serializedAssetColumns?.length ? serializedAssetColumns : productColumns}
+                defaultColumns={serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']}
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}

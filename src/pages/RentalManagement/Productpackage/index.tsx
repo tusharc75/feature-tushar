@@ -30,7 +30,7 @@ import {
   getNestedSubRows
 } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
+import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AssetAvailability from '../AssetAvailability';
 import AddExistingProductInventory from './AddExistingProductInventory';
@@ -45,7 +45,8 @@ const Productpackage = ({
   stepFullScreen,
   allowedToEdit,
   quotationApproved,
-  quotationStatus
+  quotationStatus,
+  fetchRentalManagementData
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -498,6 +499,9 @@ const Productpackage = ({
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchData();
+        if ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced]?.includes(rentalManagementData?.status)) {
+          fetchRentalManagementData()
+        }
         setAddingProducts(false);
         setPriceDataDialog({ open: false, material: null });
       })
