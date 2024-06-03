@@ -372,6 +372,8 @@ const ManageDeliveryTicket = ({
             tempInitialData['repairOrder'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.productionOrder) {
             tempInitialData['productionOrder'] = referenceData?.referenceId;
+          } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly) {
+            tempInitialData['subcontractAssembly'] = referenceData?.referenceId;
           }
 
           tempInitialData['pickupFromType'] = referenceData?.pickupFromType;

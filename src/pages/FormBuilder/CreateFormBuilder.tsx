@@ -11,7 +11,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import { checkFormulaLoop, checkUniqueValidation } from '../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
+import { isEqual, startCase, toLower } from 'lodash';
 import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
@@ -88,7 +88,7 @@ const CreateFormBuilder = () => {
   const [sectionName, setsectionName] = useState('');
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
   const [steppers, setSteppers] = useState([]);
-  const [sectionNameList,setSectionNameList] = useState([]);
+  const [sectionNameList, setSectionNameList] = useState([]);
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
 
@@ -159,13 +159,13 @@ const CreateFormBuilder = () => {
     }
   };
 
-  const fetchSectionList = async ()=>{
-    await axiosInstance().get(`section-master`).then(({ data: { data } })=>{
-      const sectionList = data?.map((ele)=> ele.sectionName);
+  const fetchSectionList = async () => {
+    await axiosInstance().get(`section-master`).then(({ data: { data } }) => {
+      const sectionList = data?.map((ele) => ele.sectionName);
       setSectionNameList(sectionList);
-    }).catch((error)=>{
+    }).catch((error) => {
       toastConfig.setToastConfig(error);
-    })  
+    })
   }
 
   const handleSave = async () => {
@@ -198,7 +198,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -234,7 +234,7 @@ const CreateFormBuilder = () => {
     }
     setIsUpdating(true);
     if (isNew) {
-      sendData.resource = resourceLabel;
+      sendData.resource = startCase(toLower(resourceLabel));
       sendData.brandId = user.user.brand;
       axiosInstance()
         .post(`/sa-formbuilder`, sendData)

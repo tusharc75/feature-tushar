@@ -17,6 +17,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ManageSubcontractAssembly from "src/pages/SubcontractAssembly/ManageSubcontractAssembly";
+import ImportExportLinks from "src/components/Helpers/ImportExportLinks";
 
 const SubcontractAssembly = () => {
 
@@ -39,7 +40,7 @@ const SubcontractAssembly = () => {
 	}: any = useData();
 
 	const { state, dispatch } = useTableReducer();
-	const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+	const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
 	const [columns, setColumns] = useState(null);
 	const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.subcontractAssembly));
@@ -121,7 +122,7 @@ const SubcontractAssembly = () => {
 				let rows = data?.map((u: any) => {
 					let finalObject: any = prepareDataForGrid(u);
 					finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-					finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+					finalObject['canDelete'] = permissions?.subcontractAssembly?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
 					return {
 						...finalObject
 					};
@@ -224,6 +225,22 @@ const SubcontractAssembly = () => {
 		<section className="main-container-v1">
 			<div className="headerbox-v1">
 				<CustomBreadCrumbs routes={[{ title: routes.subcontractAssembly.title }]} />
+				<ImportExportLinks
+					permissions={permissions.subcontractAssembly}
+					module={routes.subcontractAssembly.title}
+					api={routes.subcontractAssembly.path}
+					afterImportCompleted={() => {
+						fetchData();
+					}}
+					isExportAllOrSomeFeature={true}
+					total={rowCount}
+					recordsToExport={selectedRecords?.length}
+					ids={selectedRecords?.map((obj) => obj._id)}
+					onExportToExcelSuccess={() => {
+						fetchData();
+					}}
+					additionalParams={getQueryString(true)}
+				/>
 			</div>
 			<CustomContainer>
 				<ListingPageHeader
@@ -239,7 +256,7 @@ const SubcontractAssembly = () => {
 					addButtonOnclick={() => {
 						setOpen({ open: true, isClone: false, id: null });
 					}}
-					isAddButtonVisible={permissions?.fieldTicket.isCreate}
+					isAddButtonVisible={permissions?.subcontractAssembly.isCreate}
 				/>
 				{columns ? (
 					<CustomReactTable
@@ -257,7 +274,6 @@ const SubcontractAssembly = () => {
 						<CommonSkeleton lenArray={[...Array(10).keys()]} />
 					</Box>
 				)}
-
 				{showDeleteConfirmBox && (
 					<ConfirmationDialog
 						open={showDeleteConfirmBox}
@@ -270,7 +286,6 @@ const SubcontractAssembly = () => {
 						onOk={handleDelete}
 					/>
 				)}
-
 				{open?.open && (
 					<ManageSubcontractAssembly
 						id={open.id}

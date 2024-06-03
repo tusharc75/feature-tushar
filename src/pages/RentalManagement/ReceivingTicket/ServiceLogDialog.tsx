@@ -52,6 +52,10 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     } else if (inputField.hasOwnProperty('endDate')) {
       for (const [index, d] of dataRows.entries()) {
         if (d._id === updatedData._id) {
+          if(!d.endDate) {
+            toastConfig.setToastConfig({ open: true, type: 'error', message: `Service not stopped yet` });
+            return;
+          }
           if (new Date(updatedData['startDate']) > new Date(inputField['endDate'])) {
             toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't exceed End Date` });
             return;
@@ -119,7 +123,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       disabled: true,
       Cell: ({ row }) =>
         !isEmpty(row?.original?.startedBy) ? (
-          <Link className="link text-truncate" title={row?.original?.startedBy?.optionLabel} to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`}>
+          <Link className="link text-truncate" title={row?.original?.startedBy?.optionLabel} to={`${routes.userDetail.path}/${row?.original?.startedBy?.optionValue}`} target={'_blank'}>
             {row?.original?.startedBy?.optionLabel}
           </Link>
         ) : (
@@ -132,7 +136,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       disabled: true,
       Cell: ({ row }) =>
         !isEmpty(row?.original?.endedBy) ? (
-          <Link className="link text-truncate" title={row?.original?.endedBy?.optionLabel} to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`}>
+          <Link className="link text-truncate" title={row?.original?.endedBy?.optionLabel} to={`${routes.userDetail.path}/${row?.original?.endedBy?.optionValue}`} target={'_blank'}>
             {row?.original?.endedBy?.optionLabel}
           </Link>
         ) : (
