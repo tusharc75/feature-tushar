@@ -810,7 +810,7 @@ const LoadingTicket = ({
     data.referenceId = rentalManagementData._id;
     const assets: any = [];
     selectedRecords?.forEach((element: any) => {
-      const result = rows.filter((f) => f.materialId === element?.product?.optionValue && !f.isCounted);
+      const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
       if (result.length) {
         assets.push({
           _id: element._id,
