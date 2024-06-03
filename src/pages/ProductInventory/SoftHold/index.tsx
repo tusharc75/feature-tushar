@@ -24,13 +24,13 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
     }
   }, [value]);
 
-  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
-    setValue(newValue);
-  };
-
   useEffect(() => {
     softHoldDataFetch();
   }, []);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
 
   const columns = [
     {
