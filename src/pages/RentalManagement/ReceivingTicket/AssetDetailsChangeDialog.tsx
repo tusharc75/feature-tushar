@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset } from '../../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -18,7 +18,7 @@ import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { read, utils, writeFile } from 'xlsx';
 
-export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, assetData, setAssetsData }) {
+export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, ids, setAssetsData }) {
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -31,6 +31,10 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
   }, []);
 
   const fetchFields = async () => {
+
+    const data = await axiosInstance().get(`${serializedAsset.api}?getById=${JSON.stringify((ids))}`);
+    const assetData = data?.data?.data
+
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     let fieldsData = fields?.data?.data;
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));

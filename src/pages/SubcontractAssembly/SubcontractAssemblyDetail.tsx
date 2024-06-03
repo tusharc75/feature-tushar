@@ -21,6 +21,8 @@ import Steps from "src/components/Steps";
 import ContentFullScreen from "src/components/ContentFullScreen";
 import Material from "src/pages/SubcontractAssembly/Material";
 import Assign from "src/pages/SubcontractAssembly/Assign";
+import LoadingTicket from "src/pages/SubcontractAssembly/LoadingTicket";
+import Receaving from "src/pages/SubcontractAssembly/Receaving";
 
 const SubcontractAssemblyDetail = () => {
 	const { id } = useParams();
@@ -167,6 +169,12 @@ const SubcontractAssemblyDetail = () => {
 						)}
 						{currentStep === 1 && subcontractAssemblyData && (
 							<Assign subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} />
+						)}
+						{currentStep === 2 && subcontractAssemblyData && (
+							<LoadingTicket subcontractAssemblyData={subcontractAssemblyData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
+						)}
+						{currentStep === 3 && subcontractAssemblyData && (
+							<Receaving subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} />
 						)}
 					</ContentFullScreen>
 				</TabPanel>

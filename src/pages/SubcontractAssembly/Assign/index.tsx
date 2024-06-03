@@ -10,7 +10,7 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { DetailsPageHeader } from "src/components/PageHeaders";
-import { CHILD_RESOURCE, MATERIAL_TYPE } from "src/constants/helpers";
+import { CHILD_RESOURCE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, MATERIAL_TYPE, deliveryTicket } from "src/constants/helpers";
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -164,6 +164,11 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 		setNextStep(false);
 		dispatch({ type: 'loading', loading: true });
 		dispatch({ type: 'selection', selectedRecords: [] });
+		const result = await axiosInstance().get(
+			`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.subcontarctAssembly}&referenceId=${subcontractAssemblyData._id}&ticketType=${DELIVERY_TICKET_TYPE.delivery}`
+		);
+		const deliveryTicketList = result?.data?.data;
+
 		let data;
 		const response = await axiosInstance().get(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`);
 		data = response?.data?.data?.material;
@@ -173,23 +178,34 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 			parent.detail = parent.productDetail?.productName || '';
 			parent.description = parent.productDetail?.productDescription || '';
 			parent.canDelete = parent.canDelete ?? true;
-			parent.subRows = generateNestedData(data, parent);
+			parent.subRows = generateNestedData(data, parent, deliveryTicketList);
 		});
-		if (rows?.length) {
+
+		if (rows?.length && rows?.every(r => r?.subRows?.length)) {
 			setNextStep(true);
 		}
 		dispatch({ type: 'initialize', data: rows, count: rows?.length });
 		dispatch({ type: 'loading', loading: false });
 	};
 
-	const generateNestedData = (material, parent) => {
+	const generateNestedData = (material, parent, deliveryTicketList) => {
 		const subRows: any = material.filter((e) => e.parentId === parent._id);
 		subRows.forEach((_subRow, j) => {
 			_subRow.index = parent.index + '.' + (j + 1);
 			_subRow.detail = _subRow.productDetail?.productName || '';
 			_subRow.description = _subRow.productDetail?.productDescription || '';
 			_subRow.canDelete = _subRow.canDelete ?? true;
-			_subRow.subRows = generateNestedData(material, _subRow);
+			_subRow.subRows = generateNestedData(material, _subRow, deliveryTicketList);
+		});
+
+		deliveryTicketList.map((obj) => {
+			if (obj.ticketType === DELIVERY_TICKET_TYPE.delivery) {
+				subRows?.map((d, index) => {
+					if (obj?.products?.some((p) => p?.product === d?.materialId && p?.uniqueId === d?._id)) {
+						subRows[index]['canDelete'] = false;
+					}
+				});
+			}
 		});
 		return subRows;
 	};
