@@ -207,6 +207,7 @@ const LoadingTicket = ({
       }
 
       const loadingTicketProducts = [];
+
       deliveryTicketList?.forEach((element) => {
         if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
           element?.products?.forEach((ele) => {
@@ -312,11 +313,13 @@ const LoadingTicket = ({
 
       });
 
+
       if (productSerialNumbers?.length) {
         material?.filter((e) => e?.productDetail?.serializedProduct && e.type === MATERIAL_TYPE.product).forEach((element) => {
           var qty = productSerialNumbers?.filter((e) => e?._id === element?._id)?.length;
           if (qty) {
             const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId && e.uniqueId === element._id);
+            let ticketProductSerialNumbers: any = [];
 
             ticketProduct?.forEach((ele) => {
 
@@ -358,10 +361,11 @@ const LoadingTicket = ({
               obj.loadingTicketId = ele?.loadingTicketId;
               obj.loadingTicketStatus = ele?.loadingTicketStatus;
               obj.startDate = element?.actualStartDate;
-              obj.productSerialNumbers = productSerialNumbers?.filter((e) => e?._id === element?._id)?.
+              obj.productSerialNumbers = productSerialNumbers?.filter((e) => e?._id === element?._id && ele?.serialNumber?.includes(e?.productSerialNumberDetail?._id))?.
                 map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }));
               productAssets.push(obj);
               qty = qty - ele.qty;
+              ticketProductSerialNumbers = [...ticketProductSerialNumbers, ...(ele?.serialNumber || [])]
             });
 
             if (qty > 0) {
@@ -378,8 +382,8 @@ const LoadingTicket = ({
                 productName: element?.productDetail?.productName,
                 warehouse: rentalManagementData?.warehouse?.optionLabel,
                 warehouseId: rentalManagementData?.warehouse?.optionValue,
-                productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)
-                  ?.map((_p) => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber }))
+                productSerialNumbers: productSerialNumbers?.filter((e) => e?._id === element?._id && !ticketProductSerialNumbers?.includes(e?.productSerialNumberDetail?._id))
+                  ?.map((e) => ({ ...e, assetNumber: e?.productSerialNumberDetail?.serialNumber }))
               });
             }
           }
