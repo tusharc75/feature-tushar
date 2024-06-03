@@ -750,7 +750,7 @@ const AddSerializedAsset = ({
       )}
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
-          assetData={selectedRecords}
+          ids={selectedRecords?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
