@@ -190,7 +190,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
             ? field?.option?.filter((o) => o?.optionLabel === data)[0]?.optionValue
             : ''
           : '';
-      } else if (typeof data === 'number' && (field?.type !== 'number' || field?.type != 'decimal')) {
+      } else if (field?.type === 'singleLine') {
         data = `${data}`
       }
       return { index, fieldName: field?.fieldName, value: data };
