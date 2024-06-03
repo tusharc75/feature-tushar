@@ -32,8 +32,16 @@ import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import Technicians from './Technicians';
 
-const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit,
-  quotationApproved, quotationStatus }: any) => {
+const Services = ({
+  rentalManagementData,
+  setNextStep,
+  setNextStepToolTip,
+  renderedFrom,
+  stepFullScreen,
+  allowedToEdit,
+  quotationApproved,
+  quotationStatus,
+  fetchRentalManagementData }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -451,6 +459,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchData();
+        if ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced]?.includes(rentalManagementData?.status)) {
+          fetchRentalManagementData()
+        }
         setSubmitting(false);
       })
       .catch((error) => {

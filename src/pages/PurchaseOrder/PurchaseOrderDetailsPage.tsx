@@ -35,6 +35,7 @@ import ManagePurchaseOrder from './ManagePurchaseOrder';
 import Product from './Product';
 import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -210,9 +211,9 @@ const PurchaseOrderDetailsPage = () => {
               !purchaseOrderData?.deleted &&
               [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                 <Fragment>
-                  <Button variant={'contained'} className={'btn-outline-v1'} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}>
+                  <ButtonWithPulse color="default" variant={'outlined'} className={'btn-outline-v1'} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}>
                     Close
-                  </Button>
+                  </ButtonWithPulse>
                 </Fragment>
               )}
             {purchaseOrderData?.deleted ? null : ![PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status) ? (
