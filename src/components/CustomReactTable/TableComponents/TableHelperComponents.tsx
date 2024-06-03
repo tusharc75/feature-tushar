@@ -632,7 +632,7 @@ export const CellRenderer = ({
               <input
                 type="date"
                 className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
-                value={cellValue ? new Date(cellValue).toISOString().split('T')[0] : ''}
+                value={cellValue && !isNaN(Date.parse(cellValue)) ? new Date(cellValue).toISOString().split('T')[0] : ''}
                 onKeyDown={(e) => {
                   const target = e.target as HTMLInputElement;
                   if (!currentEditingCellPosition) return;
