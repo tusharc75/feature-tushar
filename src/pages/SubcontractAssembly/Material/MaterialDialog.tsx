@@ -15,8 +15,6 @@ import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjK
 
 const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, allFields, handleSaveData, loading }) => {
 
-	const ref = useRef(null);
-
 	const [initialData, setInitialData] = useState({ fields: [], values: {} });
 	const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 	const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -27,18 +25,15 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
 
 	const fetchData = async () => {
 		var data = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyMaterial, subcontractAssemblyData?.currency, true, false);
-
 		let unitOptions: any = [];
 		if (rowData?.[`${rowData.type}Detail`]?.unit) {
 			unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`].unit);
 		}
-
 		data.forEach((element) => {
 			if (element.fieldName === 'unit') {
 				element.option = unitOptions;
 			}
 		});
-
 		setInitialData({
 			fields: data,
 			values: getObjKeysWithValues(rowData, data)
@@ -76,7 +71,7 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
 						<>
 							<CustomDialogHeader
 								onClose={() => {
-									if (isEqual(initialData.values, ref?.current?.values)) onClose();
+									if (isEqual(initialData.values, values)) onClose();
 									else setShowConfirmDialog(true);
 								}}
 								title={`Edit - ${rowData.index} (${rowData?.detail || ''})`}

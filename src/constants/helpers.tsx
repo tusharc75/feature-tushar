@@ -2101,7 +2101,7 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
-  subcontarctAssembly: 'Subcontract Assembly'
+  subcontractAssembly: 'Subcontract Assembly'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {

@@ -12,9 +12,9 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { CHILD_RESOURCE } from "src/constants/helpers";
-import ReceavingCostDialog from "src/pages/SubcontractAssembly/Receaving/ReceavingCostDialog";
+import ReceivingCostDialog from "src/pages/SubcontractAssembly/Receiving/ReceivingCostDialog";
 
-const Receaving = ({ subcontractAssemblyData, stepFullScreen }) => {
+const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receaving`;
 	const toastConfig = useContext(CustomToastContext);
 
@@ -169,7 +169,7 @@ const Receaving = ({ subcontractAssemblyData, stepFullScreen }) => {
 			{columns ? (
 				<Box zIndex={5} width={'100%'}>
 					<CustomReactTable
-						height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+						height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
 						columns={columns}
 						state={state}
 						dispatch={dispatch}
@@ -180,13 +180,13 @@ const Receaving = ({ subcontractAssemblyData, stepFullScreen }) => {
 					/>
 				</Box>
 			) : (
-				<Box p={2} height={300}>
-					<CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+				<Box p={2} height={500}>
+					<CommonSkeleton lenArray={[...Array(10).keys()]} />
 				</Box>
 			)}
 
 			{costDialog.open && (
-				<ReceavingCostDialog
+				<ReceivingCostDialog
 					onClose={() => {
 						setCostDialog({ open: false, _id: null })
 					}}
@@ -201,4 +201,4 @@ const Receaving = ({ subcontractAssemblyData, stepFullScreen }) => {
 	)
 }
 
-export default Receaving;
+export default Receiving;
