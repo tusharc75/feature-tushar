@@ -47,7 +47,7 @@ const AddNonSerializedInventory = ({ onClose, onSuccess, selectedProducts, refer
             warehouseId: d?.warehouse?._id,
             qty:
               type === 'add'
-                ? d?.inventory
+                ? d?.inventory - (nonSerializedInventory?.find((s) => s?.product?.optionValue === selectedProduct && s?.warehouse?.optionValue === d?.warehouse?._id)?.qty || 0)
                 : nonSerializedInventory?.find((s) => s?.product?.optionValue === selectedProduct && s?.warehouse?.optionValue === d?.warehouse?._id)
                   ?.qty || 0,
             inventory: 0
