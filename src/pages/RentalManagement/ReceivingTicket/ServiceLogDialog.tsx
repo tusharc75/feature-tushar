@@ -52,6 +52,10 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     } else if (inputField.hasOwnProperty('endDate')) {
       for (const [index, d] of dataRows.entries()) {
         if (d._id === updatedData._id) {
+          if(!d.endDate) {
+            toastConfig.setToastConfig({ open: true, type: 'error', message: `Service not stopped yet` });
+            return;
+          }
           if (new Date(updatedData['startDate']) > new Date(inputField['endDate'])) {
             toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't exceed End Date` });
             return;
