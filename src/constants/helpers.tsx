@@ -570,6 +570,7 @@ export const CHILD_RESOURCE = {
   dealsMaterial: 'Deals Material',
   rentalManagementTechnician: 'Rental Management Technician',
   subcontractAssemblyMaterial: 'Subcontract Assembly Material',
+  subcontractAssemblyCost: 'Subcontract Assembly Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -2099,7 +2100,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
-  productionOrder: 'Production Order'
+  productionOrder: 'Production Order',
+  subcontarctAssembly: 'Subcontract Assembly'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
