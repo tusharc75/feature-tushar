@@ -131,7 +131,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 		setNextStep(false);
 
 		const result = await axiosInstance().get(
-			`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.subcontarctAssembly}&referenceId=${subcontractAssemblyData._id}&ticketType=${DELIVERY_TICKET_TYPE.delivery}`
+			`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly}&referenceId=${subcontractAssemblyData._id}&ticketType=${DELIVERY_TICKET_TYPE.delivery}`
 		);
 		const deliveryTicketList = result?.data?.data;
 
@@ -140,13 +140,13 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 		material = response?.data?.data?.material;
 
 		const rows = material.filter((e) => e.parentId != null && MATERIAL_TYPE.product);
-		rows.forEach((_r, i) => {
-			_r.index = i + 1;
-			_r.detail = _r.productDetail?.productName;
-			_r.description = _r?.productDetail?.productDescription;
-			_r.qty = _r.qty;
-			_r.uniqueId = _r._id;
-			_r.parent = material?.find(m => m?.parentId === null && m?._id === _r?.parentId)?.productDetail?.productName || '';
+		rows.forEach((obj, i) => {
+			obj.index = i + 1;
+			obj.detail = obj.productDetail?.productName;
+			obj.description = obj?.productDetail?.productDescription;
+			obj.qty = obj.qty;
+			obj.uniqueId = obj._id;
+			obj.parent = material?.find(m => m?.parentId === null && m?._id === obj?.parentId)?.productDetail?.productName || '';
 		});
 
 		deliveryTicketList.map((obj) => {
@@ -160,6 +160,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 				});
 			}
 		});
+
 		if (rows.every((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) {
 			setNextStep(true);
 		}
@@ -274,9 +275,9 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 					hasXpadding
 				/>
 				{columns ? (
-					<Box zIndex={5} width={'100%'} mt={3}>
+					<Box zIndex={5}>
 						<CustomReactTable
-							height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 395px)'}
+							height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
 							columns={columns}
 							state={state}
 							dispatch={dispatch}
@@ -290,21 +291,19 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 						<CommonSkeleton lenArray={[...Array(10).keys()]} />
 					</Box>
 				)}
-
 				{showTicketDialog.open && (
 					<ManageDeliveryTicket
 						ticketType={DELIVERY_TICKET_TYPE.delivery}
-						referenceType={DELIVERY_TICKET_REFERENCE_TYPE.subcontarctAssembly}
+						referenceType={DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly}
 						referenceData={showTicketDialog.data}
 						onClose={() => setShowTicketDialog({ open: false, data: {} })}
-						products={selectedRecords?.filter((e) => e.type === 'product')?.map((e) => { return { ...e, _id: e.materialId } })}
+						products={selectedRecords?.map((e) => { return { ...e, _id: e.materialId } })}
 						onSuccess={() => {
 							setShowTicketDialog({ open: false, data: {} });
 							fetchData();
 						}}
 					/>
 				)}
-
 				{openMessageDialog.open && (
 					<CustomMessageDialog
 						open={openMessageDialog.open}

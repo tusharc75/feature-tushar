@@ -178,7 +178,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       Cell: ({ row }) =>
         <div>
           {row?.original?.reference ? (
-            row?.original?.referenceType === 'Purchase Order' ? (
+            row?.original?.referenceType === sidebarResource.purchaseOrder ? (
               <Link
                 className="link"
                 target="_blank"
@@ -187,7 +187,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               >
                 {row?.original?.reference}
               </Link>
-            ) : row?.original?.referenceType === 'Transfer Inventory' ? (
+            ) : row?.original?.referenceType === sidebarResource.transferInventory ? (
               <Link
                 className="link"
                 target="_blank"
@@ -196,7 +196,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               >
                 {row?.original?.reference}
               </Link>
-            ) : row?.original?.referenceType === 'Transfer Asset' ? (
+            ) : row?.original?.referenceType === sidebarResource.transferAsset ? (
               <Link
                 className="link"
                 target="_blank"
@@ -205,7 +205,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               >
                 {row?.original?.reference}
               </Link>
-            ) : row?.original?.referenceType === 'Sales Order' ? (
+            ) : row?.original?.referenceType === sidebarResource.salesOrder ? (
               <Link
                 className="link"
                 target="_blank"
@@ -214,7 +214,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               >
                 {row?.original?.reference}
               </Link>
-            ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
+            ) : row?.original?.referenceType === sidebarResource.bulkAssetCreation ? (
               <Link
                 className="link"
                 target="_blank"
@@ -223,7 +223,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               >
                 {row?.original?.reference}
               </Link>
-            ) : row?.original?.referenceType === 'Serialized Asset' ? (
+            ) : row?.original?.referenceType === sidebarResource.serializedAsset ? (
               <Link
                 className="link"
                 target="_blank"
@@ -241,7 +241,7 @@ const History = ({ product, warehouse, storageLocation }) => {
               >
                 {row?.original?.reference}
               </Link>
-            ) : row?.original?.referenceType === 'Work Order' ? (
+            ) : row?.original?.referenceType === sidebarResource.workOrder ? (
               <Link
                 className="link"
                 target="_blank"
@@ -259,10 +259,19 @@ const History = ({ product, warehouse, storageLocation }) => {
               >
                 {row?.original?.reference}
               </Link>
+            ) : row?.original?.referenceType === sidebarResource.subcontractAssembly ? (
+              <Link
+                className="link"
+                target="_blank"
+                title={row?.original?.reference}
+                to={`${routes.subcontractAssemblyDetail.path}/${row?.original?.referenceId}`}
+              >
+                {row?.original?.reference}
+              </Link>
             ) : (
               row?.original?.reference
             )
-          ) : row?.original?.referenceType === 'Product Inventory' ? (
+          ) : row?.original?.referenceType === sidebarResource.productInventory ? (
             <h5 className="text-truncate">Manual Entry</h5>
           ) : (
             <NoDataCell />

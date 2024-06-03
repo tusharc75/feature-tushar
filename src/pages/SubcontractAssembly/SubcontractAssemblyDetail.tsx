@@ -22,7 +22,7 @@ import ContentFullScreen from "src/components/ContentFullScreen";
 import Material from "src/pages/SubcontractAssembly/Material";
 import Assign from "src/pages/SubcontractAssembly/Assign";
 import LoadingTicket from "src/pages/SubcontractAssembly/LoadingTicket";
-import Receaving from "src/pages/SubcontractAssembly/Receaving";
+import Receiving from "src/pages/SubcontractAssembly/Receiving"
 
 const SubcontractAssemblyDetail = () => {
 	const { id } = useParams();
@@ -174,7 +174,7 @@ const SubcontractAssemblyDetail = () => {
 							<LoadingTicket subcontractAssemblyData={subcontractAssemblyData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
 						)}
 						{currentStep === 3 && subcontractAssemblyData && (
-							<Receaving subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} />
+							<Receiving subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} />
 						)}
 					</ContentFullScreen>
 				</TabPanel>

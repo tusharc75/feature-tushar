@@ -184,7 +184,6 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 				>
 					Add Existing Products
 				</MenuItem>
-
 			</>
 		);
 	};
@@ -283,7 +282,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 			{columns ? (
 				<Box zIndex={5} width={'100%'}>
 					<CustomReactTable
-						height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
+						height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
 						columns={columns}
 						state={state}
 						dispatch={dispatch}
@@ -293,22 +292,19 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 					/>
 				</Box>
 			) : (
-				<Box p={2} height={300}>
-					<CommonSkeleton lenArray={[...Array(3).keys()]} xs={12} sm={12} md={12} lg={12} />
+				<Box p={2} height={500}>
+					<CommonSkeleton lenArray={[...Array(10).keys()]} />
 				</Box>
 			)}
-
 			{open.open && open.type === MATERIAL_TYPE.product && (
 				<AssignProductDialog
 					handleCloseDialog={() => setOpen({ open: false, type: '' })}
 					onSuccess={(products) => {
 						addMaterial(products);
 					}}
-					serialized={true}
 					isSubmitting={isSubmitting}
 				/>
 			)}
-
 			{deleteData && (
 				<ConfirmationDialog
 					open={true}
@@ -318,7 +314,6 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 					okBtnLoading={isDeleting}
 				/>
 			)}
-
 			{openMaterialDialog.open && (
 				<MaterialDialog
 					onClose={() => {

@@ -122,7 +122,7 @@ const SubcontractAssembly = () => {
 				let rows = data?.map((u: any) => {
 					let finalObject: any = prepareDataForGrid(u);
 					finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-					finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+					finalObject['canDelete'] = permissions?.subcontractAssembly?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
 					return {
 						...finalObject
 					};
@@ -256,7 +256,7 @@ const SubcontractAssembly = () => {
 					addButtonOnclick={() => {
 						setOpen({ open: true, isClone: false, id: null });
 					}}
-					isAddButtonVisible={permissions?.fieldTicket.isCreate}
+					isAddButtonVisible={permissions?.subcontractAssembly.isCreate}
 				/>
 				{columns ? (
 					<CustomReactTable
@@ -274,7 +274,6 @@ const SubcontractAssembly = () => {
 						<CommonSkeleton lenArray={[...Array(10).keys()]} />
 					</Box>
 				)}
-
 				{showDeleteConfirmBox && (
 					<ConfirmationDialog
 						open={showDeleteConfirmBox}
@@ -287,7 +286,6 @@ const SubcontractAssembly = () => {
 						onOk={handleDelete}
 					/>
 				)}
-
 				{open?.open && (
 					<ManageSubcontractAssembly
 						id={open.id}
