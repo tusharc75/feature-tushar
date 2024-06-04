@@ -7,11 +7,15 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
 
-const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading }) => {
+const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, staticMinDate= null , staticMaxDate= null }) => {
 
   const [minDate, setMinDate] = useState(null);
 
   useEffect(() => {
+    if(staticMinDate) {
+      setMinDate(new Date(staticMinDate));
+      return;
+    }
     const dates = [];
     if (type === 'stop') {
       data?.forEach((d: any) => {
@@ -39,7 +43,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       }}
       maxWidth="sm"
       fullWidth>
-      <Formik initialValues={{ type: type, date: minDate ? minDate : new Date() }} onSubmit={(values) => { handleSubmit({ ...values, date: new Date(values.date)?.toISOString() }) }}>
+      <Formik initialValues={{ type: type, date: minDate ? minDate : staticMaxDate ? new Date(staticMaxDate) : new Date() }} onSubmit={(values) => { handleSubmit({ ...values, date: new Date(values.date)?.toISOString() }) }}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form >
             <CustomDialogHeader title={`Set ${type === 'start' ? 'Start' : 'End'} Date`} onClose={onClose} />
@@ -61,6 +65,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         setFieldValue('date', date);
                       }}
                       {...(minDate ? { minDate: minDate } : {})}
+                      {...(staticMaxDate ? { maxDate: new Date(staticMaxDate) } : {})}
                     />
                   </Grid>
                 </Grid>

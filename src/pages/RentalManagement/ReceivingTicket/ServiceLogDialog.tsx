@@ -1,5 +1,5 @@
-import { useContext, useEffect } from 'react';
-import { Dialog, Box } from '@material-ui/core';
+import { useContext, useEffect, useState } from 'react';
+import { Dialog, Box, IconButton } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { CustomDialogTransition, dateFormat, gridLoadingTimeout, rentalManagement } from 'src/constants/helpers';
@@ -12,11 +12,16 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Edit } from '@material-ui/icons';
+import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 
 const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess }) => {
 
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
+
+  const [editDateDialog, setEditDateDialog] = useState({ open: false, type: null, loading: false, minDate: null, maxDate: null, _id: null });
 
   const { dataRows } = state;
 
@@ -52,7 +57,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     } else if (inputField.hasOwnProperty('endDate')) {
       for (const [index, d] of dataRows.entries()) {
         if (d._id === updatedData._id) {
-          if(!d.endDate) {
+          if (!d.endDate) {
             toastConfig.setToastConfig({ open: true, type: 'error', message: `Service not stopped yet` });
             return;
           }
@@ -91,31 +96,87 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       accessor: 'startDate',
       Header: 'Start Date',
       disabled: true,
-      editable: true,
-      type: "date",
-      Cell: ({ row }) =>
-        row?.original?.startDate ? (
-          <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
-            {moment(row?.original?.startDate)?.format(dateFormat)}
-          </h5>
-        ) : (
-          <NoDataCell />
+      Cell: ({ row }) => {
+        return (
+          <>
+            {
+              row?.original?.startDate ? (
+                <>
+                  <div>
+                    <h5 className="text-truncate" title={`${moment(row?.original?.startDate)?.format(dateFormat)}`}>
+                      {moment(row?.original?.startDate)?.format(dateFormat)}
+                    </h5>
+                    <HtmlTooltip title={'Edit Start Date'}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            let date = null;
+                            dataRows?.forEach((d: any, index: number) => {
+                              if (d._id === row.original._id) {
+                                if (index !== dataRows?.length - 1) {
+                                  date = dataRows[index + 1]?.endDate;
+                                }
+                              }
+                            })
+                            setEditDateDialog({ open: true, type: 'start', loading: false, minDate: date ? new Date(date) : null, maxDate: row?.original?.endDate ? new Date(row?.original?.endDate) : null, _id: row?.original?._id });
+                          }}
+                        >
+                          <Edit fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  </div>
+                </>
+              ) : (
+                <NoDataCell />
+              )}
+          </>
         )
+      }
     },
     {
       accessor: 'endDate',
       Header: 'End Date',
       disabled: true,
-      editable: true,
-      type: "date",
-      Cell: ({ row }) =>
-        row?.original?.endDate ? (
-          <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
-            {moment(row?.original?.endDate)?.format(dateFormat)}
-          </h5>
-        ) : (
-          <NoDataCell />
+      Cell: ({ row }) => {
+        return (
+          <>
+            {
+              row?.original?.endDate ? (
+                <>
+                  <div>
+                    <h5 className="text-truncate" title={`${moment(row?.original?.endDate)?.format(dateFormat)}`}>
+                      {moment(row?.original?.endDate)?.format(dateFormat)}
+                    </h5>
+                    <HtmlTooltip title={'Edit End Date'}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          onClick={() => {
+                            let date = null;
+                            dataRows?.forEach((d: any, index: number) => {
+                              if (d._id === row.original._id) {
+                                if (index !== 0) {
+                                  date = dataRows[index - 1]?.startDate;
+                                }
+                              }
+                            })
+                            setEditDateDialog({ open: true, type: 'stop', loading: false, minDate: new Date(row?.original?.startDate), maxDate: date ? new Date(date) : null, _id: row?.original?._id });
+                          }}
+                        >
+                          <Edit fontSize="small" color={'primary'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  </div>
+                </>
+              ) : (
+                <NoDataCell />
+              )}
+          </>
         )
+      }
     },
     {
       accessor: 'startedBy',
@@ -145,6 +206,25 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     }
   ];
 
+  const handleSubmitChangeDates = (values) => {
+    setEditDateDialog({ ...editDateDialog, loading: true });
+    let data = { ids: [id], serviceLogId: editDateDialog?._id, ...values };
+
+    axiosInstance().put(`${rentalManagement.api}/${rentalId}/start-end-date`, data).then((response) => {
+      toastConfig.setToastConfig({
+        open: true,
+        message: response?.data?.message,
+        type: 'success'
+      });
+      setEditDateDialog({ open: false, type: null, loading: false, minDate: null, maxDate: null, _id: null });
+      fetchData();
+    })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setEditDateDialog({ open: false, type: null, loading: false, minDate: null, maxDate: null, _id: null });
+      });
+  };
+
   return (
     <Dialog
       open={open}
@@ -171,12 +251,26 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
             hideSelection={true}
             hideAction={true}
             hideExportTable={true}
-            onSaveEdit={onSaveInlineEdit}
+          // onSaveEdit={onSaveInlineEdit}
           />
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
+        )}
+        {editDateDialog.open && (
+          <StartStopServiceDateDialog
+            data={[]}
+            type={editDateDialog.type}
+            open={editDateDialog.open}
+            onClose={() => {
+              setEditDateDialog({ open: false, type: null, loading: false, minDate: null, maxDate: null, _id: null });
+            }}
+            handleSubmit={handleSubmitChangeDates}
+            loading={editDateDialog.loading}
+            staticMinDate={editDateDialog.minDate}
+            staticMaxDate={editDateDialog.maxDate}
+          />
         )}
       </CustomDialogContent>
     </Dialog>
