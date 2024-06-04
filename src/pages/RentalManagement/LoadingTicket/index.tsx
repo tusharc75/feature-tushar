@@ -45,7 +45,6 @@ import {
   rentalManagement,
   serializedAsset,
   sidebarResource,
-  warehouse
 } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
@@ -777,8 +776,12 @@ const LoadingTicket = ({
       data['isPickupFromDisable'] = true;
       data['isDeliveryToDisable'] = true;
 
-      data['wellName'] = rentalManagementData?.wellName?.optionValue;
-
+      if (rentalManagementData?.padName?.optionValue) {
+        data['padName'] = rentalManagementData?.padName?.optionValue;
+      }
+      if (rentalManagementData?.wellName?.optionValue) {
+        data['wellName'] = rentalManagementData?.wellName?.optionValue;
+      }
       if (rentalManagementData?.wellNumber) {
         if (rentalManagementData?.wellNumber?.optionValue) {
           data['wellNumber'] = rentalManagementData?.wellNumber?.optionValue;
@@ -786,12 +789,12 @@ const LoadingTicket = ({
           data['wellNumber'] = rentalManagementData?.wellNumber?.map((e) => e?.optionValue);
         }
       }
-
-      data['afeNumber'] = rentalManagementData?.afeNumber;
+      if (rentalManagementData?.afeNumber) {
+        data['afeNumber'] = rentalManagementData?.afeNumber;
+      }
       if (rentalManagementData?.processor?.optionValue) {
         data['processor'] = rentalManagementData?.processor?.optionValue;
       }
-      //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
       setShowTicketDialog({ open: true, data: data });
     }
   };
