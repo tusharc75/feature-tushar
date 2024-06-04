@@ -20,7 +20,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
   const [renderedFrom, setRenderedFrom] = useState('');
   const [columns, setColumns] = useState(null);
 
-  const { page, limit, filters, sorting } = state;
+  const { page, limit, filters, sorting, search } = state;
 
   const fetchGridColumns = async () => {
     axiosInstance()
@@ -44,7 +44,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
     if (selectedResource) {
       fetchData();
     }
-  }, [selectedResource, page, filters, limit, sorting]);
+  }, [selectedResource, page, filters, limit, sorting, search]);
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
@@ -67,6 +67,9 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (search) {
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     return deepFilter;
   };

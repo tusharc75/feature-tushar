@@ -125,7 +125,7 @@ const PLANNING_RESOURCE = [
     key: 'product',
     resource: sidebarResource.product,
     title: routes.product.title,
-    path: routes.product.path,
+    path: routes.productDetail.path,
     fieldName: 'productName',
     start: 'estimateStartDate',
     end: 'estimateEndDate'
