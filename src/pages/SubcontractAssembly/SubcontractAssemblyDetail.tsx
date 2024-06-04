@@ -23,6 +23,8 @@ import Material from "src/pages/SubcontractAssembly/Material";
 import Assign from "src/pages/SubcontractAssembly/Assign";
 import LoadingTicket from "src/pages/SubcontractAssembly/LoadingTicket";
 import Receiving from "src/pages/SubcontractAssembly/Receiving"
+import { Skeleton } from "@material-ui/lab";
+import ButtonWithPulse from "src/components/ButtonWithPulse";
 
 const SubcontractAssemblyDetail = () => {
 	const { id } = useParams();
@@ -43,6 +45,7 @@ const SubcontractAssemblyDetail = () => {
 	const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
 	const [nextStep, setNextStep] = useState(false);
 	const [stepFullScreen, setStepFullScreen] = useState(false);
+	const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
 
 	useEffect(() => {
 		if (id) {
@@ -153,12 +156,33 @@ const SubcontractAssemblyDetail = () => {
 				</Box>
 				<Box className="controls-v1">
 					<Box className="control-buttons-v1">
-						{allowedToEdit && (
-							<Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
-								{isMobile && !isTablet ? <Edit /> : 'Edit'}
-							</Button>
+						{subcontractAssemblyData ? (
+							<>
+								{permissions?.subcontractAssembly?.isUpdate &&
+									[SUBCONTRACT_ASSEMBLY_STATUS.inProgress].includes(subcontractAssemblyData?.status) && subcontractAssemblyData?.material?.filter(m => !m?.parentId)?.every(d => d?.receivedQty > 0) && (
+										<ButtonWithPulse
+											variant={'outlined'}
+											color="default"
+											size="small"
+											onClick={() => {
+												setShowClosedConfirmBox(true);
+											}}
+											className={'btn-outline-v1'}
+										>
+											Close
+										</ButtonWithPulse>
+									)}
+
+								{permissions?.subcontractAssembly?.isUpdate && allowedToEdit && ![SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status) && (
+									<Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
+										{isMobile && !isTablet ? <Edit /> : 'Edit'}
+									</Button>
+								)}
+								{allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+							</>
+						) : (
+							<Skeleton variant="text" width="150px" height="32px" />
 						)}
-						{allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
 						<ActivityButton
 							referenceId={subcontractAssemblyData?._id}
 							resource={ACTIVITY_RESOURCE.subcontractAssembly}
@@ -193,7 +217,7 @@ const SubcontractAssemblyDetail = () => {
 					/>
 					<ContentFullScreen title={subcontractAssemblySteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
 						{currentStep === 0 && subcontractAssemblyData && (
-							<Material subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} handleChangeStatus={handleChangeStatus} />
+							<Material subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} handleChangeStatus={handleChangeStatus} fetchParentData={fetchData} />
 						)}
 						{currentStep === 1 && subcontractAssemblyData && (
 							<Assign subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} />
@@ -202,7 +226,7 @@ const SubcontractAssemblyDetail = () => {
 							<LoadingTicket subcontractAssemblyData={subcontractAssemblyData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
 						)}
 						{currentStep === 3 && subcontractAssemblyData && (
-							<Receiving subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} />
+							<Receiving subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} fetchParentData={fetchData} />
 						)}
 					</ContentFullScreen>
 				</TabPanel>
@@ -226,6 +250,20 @@ const SubcontractAssemblyDetail = () => {
 					onSuccess={() => {
 						closeUpdateDialog();
 						fetchData();
+					}}
+				/>
+			)}
+
+			{showClosedConfirmBox && (
+				<ConfirmationDialog
+					open={showClosedConfirmBox}
+					message={`Are you sure you want to close ?`}
+					onClose={() => {
+						setShowClosedConfirmBox(false);
+					}}
+					onOk={() => {
+						handleChangeStatus(SUBCONTRACT_ASSEMBLY_STATUS.closed);
+						setShowClosedConfirmBox(false);
 					}}
 				/>
 			)}
