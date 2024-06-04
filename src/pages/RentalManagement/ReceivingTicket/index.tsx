@@ -1414,8 +1414,6 @@ const ReceivingTicket = ({
     }
   };
 
-  console.log(selectedRecords);
-
   const handelCancleTickets = async () => {
     setOkBtnLoading(true);
     try {
