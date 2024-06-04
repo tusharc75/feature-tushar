@@ -602,7 +602,7 @@ const ReceivingTicket = ({
       if (rentalPolicyData?.showServiceOnFieldStep) {
         material?.filter(m => m.type === MATERIAL_TYPE.service)?.forEach((s: any) => {
           s.uniqueId = s._id;
-          s._id = s?.materialId;
+          s.materialId = s?.materialId;
           s.description = s?.serviceDetail?.serviceDescription || '';
           s.displayType = startCase(MATERIAL_TYPE.service);
           s.assetNumber = s?.serviceDetail?.serviceName;
