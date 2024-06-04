@@ -14,12 +14,11 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
+import { MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { fetch_rental_quotation_fields } from 'src/components/RentalManagment/helper';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const Quotation = ({
   rentalManagementData,
@@ -30,7 +29,8 @@ const Quotation = ({
   fetchQuotationData,
   quotationData,
   currentVersion,
-  setCurrentVersion
+  setCurrentVersion,
+  setNextStepToolTip
 }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_quotation`;
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -58,6 +58,17 @@ const Quotation = ({
   }, []);
 
   useEffect(() => {
+    if (material?.filter((e) => !e.parentId).some((d) =>
+      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+    )) {
+      setNextStepToolTip(rentalManagementMessage.validPrice)
+    }
+
+  }, [material]);
+
+  useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
       fetchFields();
       fetchProductInventory();
@@ -71,13 +82,17 @@ const Quotation = ({
     if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
       setNextStep(true);
     }
+
+
+
   }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async () => {
-    // var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
     var data = await await fetch_rental_quotation_fields(quotationData?.currency, false);
+    data?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
     let newColumns = generateColumns(renderedFrom, data?.filter(d => d?.isRead), null, false, rentalManagementData?.currency);
-
     let coloum: any = [
       {
         accessor: 'index',
@@ -199,7 +214,6 @@ const Quotation = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    // setNextStep(true)
     return orderBy(subRows, ['order'], ['asc']);
   };
 
