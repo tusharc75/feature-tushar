@@ -45,6 +45,16 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
 		handleSaveData(rows);
 	}
 
+	function validate(values) {
+		const errors = {};
+		if (rowData && rowData.hideSelection) {
+			if (values.qty != rowData.qty) {
+				errors['qty'] = 'The quantity can not change after received.';
+			}
+		}
+		return errors;
+	}
+
 	return (
 		<Dialog
 			maxWidth="md"
@@ -61,10 +71,11 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
 		>
 			{initialData.fields.length ? (
 				<Formik
-					validate={() => { }}
+					validate={validate}
 					initialValues={initialData.values}
 					enableReinitialize={true}
 					validationSchema={yupSchema(initialData.fields)}
+					validateOnMount
 					onSubmit={handleSubmit}
 				>
 					{({ values, errors, setFieldValue, touched, submitForm, setValues }) => (

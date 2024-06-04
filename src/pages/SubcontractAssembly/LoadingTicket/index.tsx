@@ -40,7 +40,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 			{
 				accessor: 'index',
 				Header: 'Index',
-				width: 100,
+				width: 70,
 				sticky: 'left',
 				disableFilters: false,
 				Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
@@ -147,6 +147,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 			obj.qty = obj.qty;
 			obj.uniqueId = obj._id;
 			obj.parent = material?.find(m => m?.parentId === null && m?._id === obj?.parentId)?.productDetail?.productName || '';
+			obj.parentId = null
 		});
 
 		deliveryTicketList.map((obj) => {
@@ -177,7 +178,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 				if (e.hasOwnProperty('loadingTicketId')) {
 					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingAlreadyCreated });
 				}
-			} else if (action === subcontractAssemblyActions.deliverLoadingTicket) {
+			} else if (action === subcontractAssemblyActions.deliveredLoadingTicket) {
 				if (!e.hasOwnProperty('loadingTicketId')) {
 					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingNotCreated });
 				} else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
@@ -252,13 +253,13 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 				</MenuItem>
 				<MenuItem
 					onClick={() => {
-						if (!validateAction(subcontractAssemblyActions.deliverLoadingTicket)) {
+						if (!validateAction(subcontractAssemblyActions.deliveredLoadingTicket)) {
 							handelDeliverTickets()
 						}
 					}}
 					disabled={selectedRecords.length === 0}
 				>
-					Deliver Loading Ticket
+					Delivered Loading Ticket
 				</MenuItem>
 			</>
 		);

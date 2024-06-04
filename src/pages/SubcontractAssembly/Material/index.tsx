@@ -166,6 +166,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 			parent.detail = parent.productDetail?.productName || '';
 			parent.description = parent.productDetail?.productDescription || '';
 			parent.canDelete = parent.canDelete ?? true;
+			parent.hideSelection = parent?.receivedQty > 0 || false;
 		});
 		if (rows?.length) {
 			setNextStep(true);
@@ -277,7 +278,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 						addButtonMenuItems={<AddButtonMenuItems />}
 						isActionButtonVisible={true}
 						actionButtonMenuItems={<ActionButtonMenuItms />}
-						actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+						actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
 						hasXpadding
 					/>
 				</>
