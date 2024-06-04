@@ -374,7 +374,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
 
       element[i].onclick = () => {
         const event = events.filter((event) => event.title === element[i].innerText)[0];
-        const path = selectedResource.path;
+        let path = selectedResource.path;
+        if(selectedResource.resource === sidebarResource.serializedAsset){
+          path = routes[`${camelCase(event.resource)}Detail`]?.path
+        }
         window.open(`${path}/${event.id}`);
       };
     }

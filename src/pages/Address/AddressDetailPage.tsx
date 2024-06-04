@@ -13,7 +13,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { GoogleMap, Marker } from '@react-google-maps/api';
+import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const AddressDetailPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -29,6 +30,7 @@ const AddressDetailPage = () => {
   const [addressFields, setAddressFields] = useState([]);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.address]);
+  const [themeColor] = useAppTheme();
 
   useEffect(() => {
     if (id) {
@@ -36,6 +38,98 @@ const AddressDetailPage = () => {
       fetchAddressData();
     }
   }, [id]);
+
+  const mapDarkTheme: GoogleMapProps['options']['styles'] = [
+    { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#ffffff' }] }, // Changed text color to white
+    {
+      featureType: 'administrative.locality',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#ffffff' }] // Changed text color to white
+    },
+    {
+      featureType: 'poi',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#ffffff' }] // Changed text color to white
+    },
+    {
+      featureType: 'poi.park',
+      elementType: 'geometry',
+      stylers: [{ color: '#263c3f' }]
+    },
+    {
+      featureType: 'poi.park',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#ffffff' }] // Changed text color to white
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry',
+      stylers: [{ color: '#38414e' }]
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry.stroke',
+      stylers: [{ color: '#212a37' }]
+    },
+    {
+      featureType: 'road',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#ffffff' }] // Changed text color to white
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry',
+      stylers: [{ color: '#746855' }]
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry.stroke',
+      stylers: [{ color: '#1f2835' }]
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#ffffff' }] // Changed text color to white
+    },
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [{ color: '#17263c' }]
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#ffffff' }] // Changed text color to white
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.stroke',
+      stylers: [{ color: '#17263c' }]
+    },
+    { featureType: 'transit', stylers: [{ visibility: 'on' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'on' }] },
+  ];
+
+  const mapLightTheme: GoogleMapProps['options']['styles'] = [
+    {
+      featureType: 'water',
+      stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
+    },
+    { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
+    {
+      featureType: 'road',
+      stylers: [{ saturation: -100 }, { lightness: 45 }]
+    },
+    {
+      featureType: 'road.highway',
+      stylers: [{ visibility: 'simplified' }]
+    },
+
+    { featureType: 'transit', stylers: [{ visibility: 'on' }] },
+    { featureType: 'poi', stylers: [{ visibility: 'on' }] }
+  ];
 
   const fetchAddressData = async () => {
     setLoading(true);
@@ -142,10 +236,12 @@ const AddressDetailPage = () => {
             {(addressData?.latitude && addressData?.longitude) && (
               <Box height={400} width={'100%'} borderRadius={4} overflow="hidden" marginTop={2}>
                 <GoogleMap
+                  key={themeColor}
                   options={{
                     mapTypeId: google.maps.MapTypeId.ROADMAP,
                     streetViewControl: true,
-                    gestureHandling: 'cooperative'
+                    gestureHandling: 'cooperative',
+                    styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme,
                   }}
                   mapContainerStyle={{
                     height: '100%',
