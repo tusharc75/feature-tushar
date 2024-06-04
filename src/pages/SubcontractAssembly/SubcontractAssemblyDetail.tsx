@@ -17,7 +17,7 @@ import routes from "src/components/Helpers/Routes";
 import { ACTIVITY_RESOURCE, SUBCONTRACT_ASSEMBLY_STATUS, checkIsAllowedToEdit, sidebarResource, subcontractAssemblySteps } from "src/constants/helpers";
 import ManageSubcontractAssembly from "src/pages/SubcontractAssembly/ManageSubcontractAssembly";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import Steps from "src/components/Steps";
+import Steps, { getIndex } from "src/components/Steps";
 import ContentFullScreen from "src/components/ContentFullScreen";
 import Material from "src/pages/SubcontractAssembly/Material";
 import Assign from "src/pages/SubcontractAssembly/Assign";
@@ -28,7 +28,6 @@ const SubcontractAssemblyDetail = () => {
 	const { id } = useParams();
 	const history = useHistory();
 	const toastConfig = useContext(CustomToastContext);
-	const renderedFrom = camelCase(routes?.subcontractAssembly?.title);
 	const {
 		state: { permissions, user }
 	}: any = useData();
@@ -73,11 +72,11 @@ const SubcontractAssemblyDetail = () => {
 			setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
 			setAllowedToDelete(permissions?.subcontractAssembly?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
 			setSubcontractAssemblyData(data);
-			// if (data?.status === PURCHASE_ORDER_STATUS.closed) {
-			// 	setCurrentStep(purchaseOrderSteps?.length - 1);
-			// } else {
-			// setCurrentStep(getIndex(data?.processStatus, purchaseOrderSteps));
-			// }
+			if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
+				setCurrentStep(subcontractAssemblySteps?.length - 1);
+			} else {
+				setCurrentStep(getIndex(data?.processStatus, subcontractAssemblySteps));
+			}
 			setLoading(false);
 		} catch (error) {
 			toastConfig.setToastConfig(error);
@@ -115,6 +114,35 @@ const SubcontractAssemblyDetail = () => {
 		} else {
 			setShowConfirmBox(false);
 		}
+	};
+
+	const handleChangeStatus = async (status) => {
+		await axiosInstance()
+			.patch(`${routes.subcontractAssembly.path}/status/${subcontractAssemblyData._id}`, { status })
+			.then(({ data }) => {
+				toastConfig.setToastConfig({
+					open: true,
+					type: 'success',
+					message: data?.message
+				});
+				fetchData();
+			})
+			.catch((err) => {
+				toastConfig.setToastConfig(err);
+			});
+	};
+
+	useEffect(() => {
+		if (currentStep !== null && currentStep >= 0) {
+			updateProcessStatus(subcontractAssemblySteps[currentStep]?.name);
+		}
+	}, [currentStep]);
+
+	const updateProcessStatus = async (processStatus) => {
+		axiosInstance()
+			.put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
+			.then(({ data }) => { })
+			.catch((error) => { toastConfig.setToastConfig(error); });
 	};
 
 	return (
@@ -165,7 +193,7 @@ const SubcontractAssemblyDetail = () => {
 					/>
 					<ContentFullScreen title={subcontractAssemblySteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
 						{currentStep === 0 && subcontractAssemblyData && (
-							<Material subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} />
+							<Material subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} handleChangeStatus={handleChangeStatus} />
 						)}
 						{currentStep === 1 && subcontractAssemblyData && (
 							<Assign subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} />
