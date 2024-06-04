@@ -372,14 +372,37 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
       spanElement.textContent = content;
       element[i].appendChild(spanElement);
 
-      element[i].onclick = () => {
-        const event = events.filter((event) => event.title === element[i].innerText)[0];
-        let path = selectedResource.path;
-        if(selectedResource.resource === sidebarResource.serializedAsset){
-          path = routes[`${camelCase(event.resource)}Detail`]?.path
-        }
-        window.open(`${path}/${event.id}`);
+      element[i].onclick = (clickEvent) => {
+        const data = events.filter((event) => event.title === element[i].innerText)[0];
+        handleClick(data, clickEvent);
+        // let path = selectedResource.path;
+        // if(selectedResource.resource === sidebarResource.serializedAsset){
+        //   path = routes[`${camelCase(event.resource)}Detail`]?.path
+        // }
+        // window.open(`${path}/${event.id}`);
       };
+    }
+  };
+
+  const handleClick = (data, event) => {
+    if (selectedResource.resource === sidebarResource.product) {
+      setAnchor(event.target);
+      if (data?.type) {
+        const newData: OnSelectDataType[] = data.data;
+        setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
+      }
+    } else {
+      if (data.resource) {
+        const resource = resourceList?.find((r) => r.resource === event.resource);
+        window.open(`${resource.path}/${event.id}`);
+      } else {
+        window.open(`${selectedResource.path}/${event.id}`);
+      }
+      let path = selectedResource.path;
+      if (selectedResource.resource === sidebarResource.serializedAsset) {
+        path = routes[`${camelCase(event.resource)}Detail`]?.path;
+      }
+      window.open(`${path}/${event.id}`);
     }
   };
 
