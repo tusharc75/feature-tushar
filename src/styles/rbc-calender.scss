@@ -81,7 +81,7 @@
 .rbc-today {
   background-color: rgba(242, 252, 252, 1);
 }
-.rbc-current {
+.rbc-now {
   a {
     background: var(--new_theme_color) !important;
     border-radius: 50%;
@@ -127,7 +127,9 @@
 }
 .rbc-toolbar button {
   cursor: pointer;
-  transition: color 0.4s, background 0.4s;
+  transition:
+    color 0.4s,
+    background 0.4s;
   background: var(--white);
   color: #5e5e5e;
   border-color: #c4c4c4;
