@@ -2597,7 +2597,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
   { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },
-  { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' }
+  { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' },
+  { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' }
 ];
 
 export const COLOUR_MASTER = {
