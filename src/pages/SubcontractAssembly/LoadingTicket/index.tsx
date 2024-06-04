@@ -42,7 +42,6 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 				Header: 'Index',
 				width: 70,
 				sticky: 'left',
-				disableFilters: false,
 				Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
 				Footer: () => {
 					return <>Total</>;
