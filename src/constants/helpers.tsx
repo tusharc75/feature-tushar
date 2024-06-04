@@ -2881,6 +2881,7 @@ export const FIELD_TICKET_STATUS = {
 
 export const SUBCONTRACT_ASSEMBLY_STATUS = {
   new: 'New',
+  inProgress: 'In-Progress',
   closed: 'Closed'
 };
 
