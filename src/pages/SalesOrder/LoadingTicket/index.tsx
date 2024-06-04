@@ -207,7 +207,7 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 				if (e.hasOwnProperty('loadingTicketId')) {
 					errorMessages.push({ index: e.index, message: salesOrderMessage.loadingAlreadyCreated });
 				}
-			} else if (action === salesOrderActions.deliverLoadingTicket) {
+			} else if (action === salesOrderActions.deliveredLoadingTicket) {
 				if (!e.hasOwnProperty('loadingTicketId')) {
 					errorMessages.push({ index: e.index, message: salesOrderMessage.loadingNotCreated });
 				} else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
@@ -282,12 +282,12 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 				</MenuItem>
 				<MenuItem
 					onClick={() => {
-						if (!validateAction(salesOrderActions.deliverLoadingTicket)) {
+						if (!validateAction(salesOrderActions.deliveredLoadingTicket)) {
 							handelProcessTickets()
 						}
 					}}
 				>
-					Deliver Loading Ticket
+					Delivered Loading Ticket
 				</MenuItem>
 			</>
 		);

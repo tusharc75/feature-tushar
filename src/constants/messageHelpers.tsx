@@ -121,7 +121,7 @@ export const transferInventoryMessage = {
 
 export const salesOrderActions = {
     createLoadingTicket: 'Create Loading Ticket',
-    deliverLoadingTicket: 'Deliver Loading Ticket',
+    deliveredLoadingTicket: 'Delivered Loading Ticket',
 }
 
 export const salesOrderMessage = {
@@ -132,7 +132,7 @@ export const salesOrderMessage = {
 
 export const subcontractAssemblyActions = {
     createLoadingTicket: 'Create Loading Ticket',
-    deliverLoadingTicket: 'Deliver Loading Ticket',
+    deliveredLoadingTicket: 'Delivered Loading Ticket',
 }
 
 export const subcontractAssemblyMessage = {
