@@ -335,6 +335,9 @@ const ManageDeliveryTicket = ({
             }
             tempInitialData['products'].push(obj);
           });
+          if (fieldsDataForUpdate.find((d) => d.fieldName === 'padName') && referenceData?.padName) {
+            tempInitialData['padName'] = referenceData?.padName;
+          }
           if (fieldsDataForUpdate.find((d) => d.fieldName === 'wellName') && referenceData?.wellName) {
             tempInitialData['wellName'] = referenceData?.wellName;
           }
