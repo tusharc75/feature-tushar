@@ -131,12 +131,12 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 							<IconButton
 								size="small"
 								aria-label="Edit"
-								disabled={!allowedToEdit}
+								disabled={!allowedToEdit || row?.original?.loadingTicketId}
 								onClick={() => {
 									setOpenMaterialDialog({ open: true, data: row?.original })
 								}}
 							>
-								<EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+								<EditIcon fontSize="small" color={!allowedToEdit || row?.original?.loadingTicketId ? 'disabled' : 'primary'} />
 							</IconButton>
 						</HtmlTooltip>
 						<HtmlTooltip title={'Delete'}>
@@ -144,13 +144,13 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 								<IconButton
 									size="small"
 									aria-label="Delete"
-									disabled={!allowedToEdit || !row?.original?.canDelete}
+									disabled={!allowedToEdit || !row?.original?.canDelete || row?.original?.loadingTicketId}
 									onClick={() => {
 										const obj: any = [{ id: row.original._id, materialId: row.original?.materialId }];
 										setDeleteData(obj);
 									}}
 								>
-									<DeleteIcon fontSize="small" color={!allowedToEdit || !row?.original?.canDelete ? 'disabled' : 'error'} />
+									<DeleteIcon fontSize="small" color={!allowedToEdit || !row?.original?.canDelete || row?.original?.loadingTicketId ? 'disabled' : 'error'} />
 								</IconButton>
 							</span>
 						</HtmlTooltip>
@@ -203,7 +203,7 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 			if (obj.ticketType === DELIVERY_TICKET_TYPE.delivery) {
 				subRows?.map((d, index) => {
 					if (obj?.products?.some((p) => p?.product === d?.materialId && p?.uniqueId === d?._id)) {
-						subRows[index]['canDelete'] = false;
+						subRows[index]['loadingTicketId'] = obj?._id;
 					}
 				});
 			}
@@ -216,7 +216,7 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 			<>
 				<HtmlTooltip title={''}>
 					<MenuItem
-						disabled={isSubmitting || !selectedRecords.some((ele) => !ele?.parentId)}
+						disabled={isSubmitting || !selectedRecords.some((ele) => !ele?.parentId) || selectedRecords?.some(r => r?.receivedQty > 0)}
 						onClick={() => {
 							setOpen({ open: true, type: MATERIAL_TYPE.product })
 						}}

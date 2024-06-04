@@ -45,7 +45,9 @@ const ViewCost = ({ data, onClose, subcontractAssemblyData }) => {
 						showManimizeMaximize={true}
 						showRequiredLabel={false}
 					/>
-					<DetailsPage data={data} fields={fields} />
+					<Box p={2}>
+						<DetailsPage data={data} fields={fields} />
+					</Box>
 				</Box>
 			) : (
 				<Box p={2} height={500}>
