@@ -396,13 +396,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
         const resource = resourceList?.find((r) => r.resource === event.resource);
         window.open(`${resource.path}/${event.id}`);
       } else {
-        window.open(`${selectedResource.path}/${event.id}`);
+        let path = selectedResource.path;
+        if (selectedResource.resource === sidebarResource.serializedAsset) {
+          path = routes[`${camelCase(event.resource)}Detail`]?.path;
+        }
+        window.open(`${path}/${event.id}`);
       }
-      let path = selectedResource.path;
-      if (selectedResource.resource === sidebarResource.serializedAsset) {
-        path = routes[`${camelCase(event.resource)}Detail`]?.path;
-      }
-      window.open(`${path}/${event.id}`);
     }
   };
 
