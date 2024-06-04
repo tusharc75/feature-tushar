@@ -102,7 +102,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
             {
               row?.original?.startDate ? (
                 <>
-                  <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h5 className="text-truncate" title={`${moment(row?.original?.startDate)?.format(dateFormat)}`}>
                       {moment(row?.original?.startDate)?.format(dateFormat)}
                     </h5>
@@ -145,7 +145,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
             {
               row?.original?.endDate ? (
                 <>
-                  <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h5 className="text-truncate" title={`${moment(row?.original?.endDate)?.format(dateFormat)}`}>
                       {moment(row?.original?.endDate)?.format(dateFormat)}
                     </h5>
