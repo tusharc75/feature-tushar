@@ -493,11 +493,7 @@ const RentalManagementDetailsPage = () => {
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
                     ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
-                    !(
-                      [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                        quotationData?.versions[currentVersion]?.status
-                      ) && ['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name)
-                    ) && (
+                    (
                       <Fragment>
                         <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Edit'}>
                           <span>

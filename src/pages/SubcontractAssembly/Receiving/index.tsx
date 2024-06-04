@@ -12,12 +12,13 @@ import HtmlTooltip from "src/components/CustomTooltipTitle";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
-import { CHILD_RESOURCE } from "src/constants/helpers";
+import { CHILD_RESOURCE, sidebarResource } from "src/constants/helpers";
 import ReceivingCostDialog from "src/pages/SubcontractAssembly/Receiving/ReceivingCostDialog";
 import ViewCost from "src/pages/SubcontractAssembly/Receiving/ViewCost";
 import History from '../../ProductInventory/LedgerHistory';
+import { DetailsPageHeader } from "src/components/PageHeaders";
 
-const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
+const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receaving`;
 	const toastConfig = useContext(CustomToastContext);
 
@@ -182,6 +183,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 		axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/cost`, { cost: value, _id: costDialog?._id })
 			.then((res) => {
 				fetchData()
+				fetchParentData()
 				setIsSubmitting(false)
 				setCostDialog({ open: false, _id: null })
 			}).catch((error) => {
@@ -190,8 +192,17 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 			})
 	}
 
+	const previewDownloadProps = {
+		fileName: `${routes.subcontractAssembly.title}-${subcontractAssemblyData?.subcontractAssemblyNumber}`,
+		resource: sidebarResource.subcontractAssembly,
+		referenceId: subcontractAssemblyData._id,
+		columns: columns,
+		isSendEmail: false
+	};
+
 	return (
 		<>
+			<DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
 
 			{columns ? (
 				<Box zIndex={5} width={'100%'}>
