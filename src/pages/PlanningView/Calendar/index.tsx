@@ -400,7 +400,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
         if (selectedResource.resource === sidebarResource.serializedAsset) {
           path = routes[`${camelCase(event.resource)}Detail`]?.path;
         }
-        window.open(`${path}/${event.id}`);
+        window.open(`${path}/${data.id}`);
       }
     }
   };
