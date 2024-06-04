@@ -624,6 +624,7 @@ const RentalManagementDetailsPage = () => {
                   quotationData={quotationData}
                   currentVersion={currentVersion}
                   setCurrentVersion={setCurrentVersion}
+                  setNextStepToolTip={setNextStepToolTip}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Serialized Asset' && rentalManagementData && (
