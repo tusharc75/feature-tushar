@@ -20,7 +20,7 @@ import AssignProductDialog from "src/components/AssignRolesDialog/AssignProductD
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from "src/pages/SubcontractAssembly/Material/MaterialDialog";
 
-const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus }) => {
+const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
 	const toastConfig = useContext(CustomToastContext);
 
@@ -229,6 +229,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 					handleChangeStatus(SUBCONTRACT_ASSEMBLY_STATUS.inProgress);
 				}
 				fetchMaterial();
+				fetchParentData()
 				setOpen({ open: false, type: '' });
 				setIsSubmitting(false);
 			})
@@ -248,6 +249,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 			}
 			setDeleting(false);
 			fetchMaterial();
+			fetchParentData()
 			setDeleteData(null);
 		} catch (error) {
 			setDeleting(false);
