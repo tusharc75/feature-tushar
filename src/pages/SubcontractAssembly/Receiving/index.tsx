@@ -1,5 +1,6 @@
 import { Box, IconButton } from "@material-ui/core";
-import { History, OpenInNew, AddCircleOutline } from "@material-ui/icons";
+import { OpenInNew, AddCircleOutline, Visibility } from "@material-ui/icons";
+import HistoryIcon from "@material-ui/icons/History";
 import { camelCase } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
@@ -13,6 +14,8 @@ import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { CHILD_RESOURCE } from "src/constants/helpers";
 import ReceivingCostDialog from "src/pages/SubcontractAssembly/Receiving/ReceivingCostDialog";
+import ViewCost from "src/pages/SubcontractAssembly/Receiving/ViewCost";
+import History from '../../ProductInventory/LedgerHistory';
 
 const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receaving`;
@@ -24,6 +27,8 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 	const [columns, setColumns] = useState(null);
 	const [costDialog, setCostDialog] = useState({ open: false, _id: null })
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [viewCost, setViewCost] = useState({ open: false, data: null })
+	const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
 
 	useEffect(() => {
 		fetchFields();
@@ -99,7 +104,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 			Cell: ({ row }) => {
 				return (
 					<>
-						{row?.original?.status != 'Received' && (
+						{row?.original?.receivedQty <= 0 && (
 							<HtmlTooltip title={'Receive'}>
 								<IconButton
 									size="small"
@@ -112,16 +117,37 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 								</IconButton>
 							</HtmlTooltip>
 						)}
-						{row?.original?.status === 'Received' && (
+						{row?.original?.receivedQty > 0 && (
 							<HtmlTooltip title={'View History'}>
 								<span>
 									<IconButton
 										size="small"
 										aria-label="history"
 										onClick={() => {
+											setHistoryDialog({
+												open: true,
+												_id: row?.original?._id,
+												product: row?.original?.materialId,
+												productName: row?.original?.productDetail?.productName
+											});
 										}}
 									>
-										<History fontSize="small" color={'primary'} />
+										<HistoryIcon fontSize="small" color={'primary'} />
+									</IconButton>
+								</span>
+							</HtmlTooltip>
+						)}
+						{row?.original?.receivedQty > 0 && (
+							<HtmlTooltip title={'View Cost'}>
+								<span>
+									<IconButton
+										size="small"
+										aria-label="cost"
+										onClick={() => {
+											setViewCost({ open: true, data: row?.original?.cost })
+										}}
+									>
+										<Visibility fontSize="small" color={'primary'} />
 									</IconButton>
 								</span>
 							</HtmlTooltip>
@@ -144,15 +170,16 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 			parent.index = i + 1;
 			parent.detail = parent.productDetail?.productName || '';
 			parent.description = parent.productDetail?.productDescription || '';
+			parent.receivedQty = parent?.receivedQty || 0;
 			parent.canDelete = parent.canDelete ?? true;
 		});
 		dispatch({ type: 'initialize', data: rows, count: rows?.length });
 		dispatch({ type: 'loading', loading: false });
 	};
 
-	const handleUpdateStatus = (value) => {
+	const handleUpdateCost = (value) => {
 		setIsSubmitting(true)
-		axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/status`, { ...value, _id: costDialog?._id })
+		axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/cost`, { cost: value, _id: costDialog?._id })
 			.then((res) => {
 				fetchData()
 				setIsSubmitting(false)
@@ -191,10 +218,30 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen }) => {
 						setCostDialog({ open: false, _id: null })
 					}}
 					onSuccess={(val) => {
-						handleUpdateStatus(val)
+						handleUpdateCost(val)
 					}}
 					subcontractAssemblyData={subcontractAssemblyData}
 					isSubmitting={isSubmitting}
+				/>
+			)}
+
+			{historyDialog.open && (
+				<History
+					handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
+					productName={historyDialog.productName}
+					referenceId={subcontractAssemblyData?._id}
+					uniqueId={historyDialog._id}
+					product={historyDialog.product}
+				/>
+			)}
+
+			{viewCost.open && (
+				<ViewCost
+					data={viewCost.data}
+					onClose={() => {
+						setViewCost({ open: false, data: null })
+					}}
+					subcontractAssemblyData={subcontractAssemblyData}
 				/>
 			)}
 		</>

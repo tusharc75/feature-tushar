@@ -10,7 +10,7 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { DetailsPageHeader } from "src/components/PageHeaders";
-import { CHILD_RESOURCE, MATERIAL_TYPE } from "src/constants/helpers";
+import { CHILD_RESOURCE, MATERIAL_TYPE, SUBCONTRACT_ASSEMBLY_STATUS } from "src/constants/helpers";
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
@@ -20,7 +20,7 @@ import AssignProductDialog from "src/components/AssignRolesDialog/AssignProductD
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from "src/pages/SubcontractAssembly/Material/MaterialDialog";
 
-const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep }) => {
+const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
 	const toastConfig = useContext(CustomToastContext);
 
@@ -224,6 +224,9 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 		await axiosInstance()
 			.post(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`, { material })
 			.then(() => {
+				if (subcontractAssemblyData?.status === SUBCONTRACT_ASSEMBLY_STATUS.new) {
+					handleChangeStatus(SUBCONTRACT_ASSEMBLY_STATUS.inProgress);
+				}
 				fetchMaterial();
 				setOpen({ open: false, type: '' });
 				setIsSubmitting(false);
