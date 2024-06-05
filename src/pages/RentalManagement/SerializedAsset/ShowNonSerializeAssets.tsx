@@ -48,7 +48,7 @@ const ShowNonSerializeAssets = ({ data, onClose, title = `Non-${routes.serialize
           <Table aria-label="customized table">
             <TableHead>
               <TableRow>
-                <TableCell>Index </TableCell>
+                <TableCell>Index</TableCell>
                 <TableCell align="left">Serial Number</TableCell>
               </TableRow>
             </TableHead>
