@@ -33,9 +33,11 @@ import Dialog from '@material-ui/core/Dialog';
 import CustomReactTable, { useTableReducer, useColumns } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import WarningIcon from '@material-ui/icons/Warning';
+import PadData from 'src/pages/Report/PadData';
 
 
 let cancelTokenSource = null;
@@ -81,6 +83,7 @@ const Report = () => {
     const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
 
     const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
+    const [showPadData, setShowPadData] = React.useState({ open: false, data: [] })
     const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
 
     const fetchGridColumns = async () => {
@@ -159,8 +162,9 @@ const Report = () => {
                     }
                 })
                 columns = [...newColumns]
-            }
-            else {
+            } else if (type === 'historical-report') {
+                columns = [...newColumns, ActionsRenderer]
+            } else {
                 columns = [...newColumns]
             }
             setResourceColumns(filterFields);
@@ -411,19 +415,38 @@ const Report = () => {
         disableSortBy: true,
         canDrag: false,
         Cell: ({ row }) => (
-            <HtmlTooltip title={'View History'}>
-                <span>
-                    <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        onClick={() => {
-                            setShowPriceHistory({ open: true, product: row?.original?._id, productName: row?.original?.productName });
-                        }}
-                    >
-                        <HistoryIcon fontSize="small" color="primary" />
-                    </IconButton>
-                </span>
-            </HtmlTooltip>
+            <>
+                {type === 'inventory-evaluation' && (
+                    <HtmlTooltip title={'View History'}>
+                        <span>
+                            <IconButton
+                                size="small"
+                                aria-label="Delete"
+                                onClick={() => {
+                                    setShowPriceHistory({ open: true, product: row?.original?._id, productName: row?.original?.productName });
+                                }}
+                            >
+                                <HistoryIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </span>
+                    </HtmlTooltip>
+                )}
+                {type === 'historical-report' && row?.original['startDate'] && (
+                    <HtmlTooltip title={'View Pad Wise Data'}>
+                        <span>
+                            <IconButton
+                                size="small"
+                                aria-label="View Pad Wise Data"
+                                onClick={() => {
+                                    setShowPadData({ open: true, data: row?.original?.padData || [] })
+                                }}
+                            >
+                                <VisibilityIcon fontSize="small" color="primary" />
+                            </IconButton>
+                        </span>
+                    </HtmlTooltip>
+                )}
+            </>
         )
     };
 
@@ -831,6 +854,15 @@ const Report = () => {
                         setShowPriceHistory({ open: false, product: '', productName: '' });
                     }}
                     showPricefilter={showPricefilter}
+                />
+            )}
+            {showPadData.open && (
+                <PadData
+                    handleClose={() => {
+                        setShowPadData({ open: false, data: [] })
+                    }}
+                    columns={columns}
+                    data={showPadData.data}
                 />
             )}
         </MuiPickersUtilsProvider>
