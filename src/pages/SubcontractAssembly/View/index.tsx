@@ -218,21 +218,21 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
         position: { x: xPosition, y: index * 100 },
         style: customNodeStyles.product
       });
-      materials?.forEach((material, index) => {
-      if(material.parentId){
-        let ticket=loadingTicket.filter((d:any)=>{
-          d.products[0]?.product===material.materialId;
-        })
-
-        flowEdge.push({
-        id: `${ticket._id}-${material?._id}-edge`,
-        source: ticket._id,
-        target: material?._id,
-        arrowHeadType: 'arrow'
-      });
-      }
-    })
     });
+    materials?.forEach((material, index) => {
+    if(material.parentId){
+      let ticket=loadingTicket.filter((d:any)=>{
+        d.products[0]?.product===material.materialId;
+      })
+
+      flowEdge.push({
+      id: `${ticket._id}-${material?._id}-edge`,
+      source: ticket._id,
+      target: material?._id,
+      arrowHeadType: 'arrow'
+    });
+    }
+  })
 
     setFlowData([...flow, ...flowEdge]);
     setLoading(false);
