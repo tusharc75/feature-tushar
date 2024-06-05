@@ -163,6 +163,20 @@ const Report = () => {
                 })
                 columns = [...newColumns]
             } else if (type === 'historical-report') {
+                newColumns?.forEach((e) => {
+                    if (['startDate']?.includes(e.accessor)) {
+                        e.cell = ({ row }) => <div>
+                            {row?.original?.startDate ?
+                                <h5
+                                    title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
+                                    {moment(row?.original?.startDate)?.format(dateFormat)}
+                                </h5>
+                                :
+                                'Total'
+                            }
+                        </div>
+                    }
+                })
                 columns = [...newColumns, ActionsRenderer]
             } else {
                 columns = [...newColumns]
@@ -438,7 +452,7 @@ const Report = () => {
                                 size="small"
                                 aria-label="View Pad Wise Data"
                                 onClick={() => {
-                                    setShowPadData({ open: true, data: row?.original?.padData || [] })
+                                    setShowPadData({ open: true, data: row?.original || [] })
                                 }}
                             >
                                 <VisibilityIcon fontSize="small" color="primary" />
@@ -839,6 +853,11 @@ const Report = () => {
                                 reportSave={true}
                                 setSelectedReportView={setSelectedReportView}
                                 selectedReportView={selectedReportView}
+                                setWholeRowsCellColor={(rowData) => {
+                                    if (!rowData?.startDate && type === 'historical-report') return 'isService';
+                                    return '';
+                                }}
+                                isClientSideGrid={type === 'historical-report' ? true : false}
                             />
                         ) : <Box p={2} height={500}>
                             <CommonSkeleton lenArray={[...Array(10).keys()]} />
