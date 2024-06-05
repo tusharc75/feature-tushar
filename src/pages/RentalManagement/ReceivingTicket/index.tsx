@@ -1088,7 +1088,7 @@ const ReceivingTicket = ({
                         setServiceLogDialog({ open: true, data: row?.original });
                       }}
                     >
-                      <VisibilityIcon fontSize="small" />
+                      <VisibilityIcon fontSize="small" color='primary'/>
                     </IconButton>
                   </span>
                 </HtmlTooltip>
