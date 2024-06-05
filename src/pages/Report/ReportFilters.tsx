@@ -502,7 +502,7 @@ const ReportFilters = (props: FiltersProps) => {
                 <React.Fragment key={field._id}>
                   {field.fieldName !== 'all' && field.type !== 'date' && (
                     <div>
-                      {field?.type==='dropDown' && field?.lookupResource ? (
+                      {field?.lookup ? (
                        <AsyncDropdown
                         resource={field.lookupResource}
                         errors={error}
