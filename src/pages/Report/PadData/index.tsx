@@ -4,7 +4,6 @@ import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomReactTable, { useTableReducer } from "src/components/CustomReactTable";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
-import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { CustomDialogTransition } from "src/constants/helpers";
 
@@ -59,7 +58,7 @@ const PadData = ({ handleClose, column, data }) => {
 							hideSelection={true}
 							hideAction={true}
 							setWholeRowsCellColor={(rowData) => {
-								if (!rowData?.padName) return 'isService';
+								if (!rowData?.padName) return 'footerRow';
 								return '';
 							}}
 						/>

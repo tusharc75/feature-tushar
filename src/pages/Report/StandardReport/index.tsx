@@ -854,7 +854,7 @@ const Report = () => {
                                 setSelectedReportView={setSelectedReportView}
                                 selectedReportView={selectedReportView}
                                 setWholeRowsCellColor={(rowData) => {
-                                    if (!rowData?.startDate && type === 'historical-report') return 'isService';
+                                    if (!rowData?.startDate && type === 'historical-report') return 'footerRow';
                                     return '';
                                 }}
                                 isClientSideGrid={type === 'historical-report' ? true : false}
