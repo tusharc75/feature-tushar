@@ -25,6 +25,8 @@ import LoadingTicket from "src/pages/SubcontractAssembly/LoadingTicket";
 import Receiving from "src/pages/SubcontractAssembly/Receiving"
 import { Skeleton } from "@material-ui/lab";
 import ButtonWithPulse from "src/components/ButtonWithPulse";
+import { RiFlowChart } from "react-icons/ri";
+import SubcontractAssemblyView from './View';
 
 const SubcontractAssemblyDetail = () => {
 	const { id } = useParams();
@@ -195,6 +197,12 @@ const SubcontractAssemblyDetail = () => {
 				<CustomTabs value={tabValue} onChange={handleMainTabChange}>
 					<CustomTab value={0}>Header</CustomTab>
 					<CustomTab value={1}>Details</CustomTab>
+					{!(isMobile && !isTablet) && (
+            <CustomTab value={2}>
+              <RiFlowChart className="mr-1" fontSize="inherit" />
+              Views
+            </CustomTab>
+          )}
 				</CustomTabs>
 				<TabPanel value={tabValue} index={0}>
 					{loading || !fields?.length ? (
@@ -230,7 +238,9 @@ const SubcontractAssemblyDetail = () => {
 						)}
 					</ContentFullScreen>
 				</TabPanel>
-
+				<TabPanel value={tabValue} index={2}>
+          {subcontractAssemblyData && <SubcontractAssemblyView subcontractAssemblyData={subcontractAssemblyData} />}
+        </TabPanel>
 			</Box>
 			{showConfirmBox && (
 				<ConfirmationDialog

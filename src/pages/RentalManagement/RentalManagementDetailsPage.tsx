@@ -149,7 +149,7 @@ const RentalManagementDetailsPage = () => {
           `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
         )
         .then(({ data: { data } }) => {
-          if (data.length > 0) {
+          if (data.length > 0 && permissions?.invoice?.isRead) {
             setDisplayProgressiveBillingTab(true);
           }
         })
@@ -691,18 +691,16 @@ const RentalManagementDetailsPage = () => {
             />
           </TabPanel>
           <TabPanel value={tabValue} index={3}>
-            <Box>
-              {displayProgressiveBillingTab ? (
-                <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={allowedToEdit} />
-              ) : (
-                <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
-              )}
-            </Box>
+            <ProgressiveBilling
+              rentalId={id}
+              rentalManagementData={rentalManagementData}
+              allowCreateInvoice={allowedToEdit} />
           </TabPanel>
           <TabPanel value={tabValue} index={4}>
-            <Box>
-              <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
-            </Box>
+            <RentalManagementViews
+              rentalName={rentalManagementData?.rentalJobName}
+              rentalId={id}
+              status={rentalManagementData?.status} />
           </TabPanel>
         </Box>
         {showConfirmBox && (
