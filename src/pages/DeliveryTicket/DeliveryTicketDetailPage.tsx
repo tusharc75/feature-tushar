@@ -133,7 +133,7 @@ export default function DeliveryTicketDetail(props) {
       for (let key in DELIVERY_TICKET_REFERENCE_TYPE) {
         if (ticket?.type === DELIVERY_TICKET_REFERENCE_TYPE[key]) {
           ticketTypeKey = key;
-          return
+          break;
         }
       }
       data = data.filter((fields: any) => {

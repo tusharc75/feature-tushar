@@ -61,7 +61,7 @@ export const rentalManagementMessage = {
     ticketNotForLost: `Ticket cannot be created for lost assets`,
     onlySubleaseAsset: "Only Sublease assets can be selected for this action",
     notSubleaseAsset: "Sublease assets cannot be selected for this action",
-    productsCanNotReplace: 'Product(s) cannot be replaced',
+    productsCanNotReplace: 'Product(s)/Service(s) cannot be replaced',
     loadingDeliveredForReplace: 'Loading Ticket must be delivered to replace assets',
     onlyReplaceInUse: 'Only In-Use assets can be replaced',
     cancelInTransitLineItems: 'Only In-Transit tickets can be cancelled',
