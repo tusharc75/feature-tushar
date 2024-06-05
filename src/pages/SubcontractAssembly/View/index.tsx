@@ -8,7 +8,7 @@ import { MdZoomOutMap } from 'react-icons/md';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { lowerFirst } from 'lodash';
+import { DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE,deliveryTicket} from 'src/constants/helpers';
 
 const customNodeStyles = {
   subcontractAssembly: {
@@ -16,41 +16,21 @@ const customNodeStyles = {
     background: '#E6E8F5',
     borderColor: '#9789F0'
   },
-  package: {
-    name: 'Package',
-    background: '#DFFBF5',
-    borderColor: '#66CDB7'
-  },
   product: {
     name: 'Product',
     background: '#E2F8FF',
     borderColor: '#8BCBDF'
   },
-  service: {
-    name: 'Service',
-    background: '#EDFFE1',
-    borderColor: '#86DB71'
+  loadingTicket: {
+    name: 'Loading Ticket',
+    background: '#e6c6e6',
+    borderColor: '#b38fb3'
   },
-  demandOrder: {
-    name: 'Demand Order',
-    background: '#fad8b6',
-    borderColor: '#ff8000'
+  receivingTicket: {
+    name: 'Receiving Ticket',
+    background: '#cfdb7f',
+    borderColor: '#aeb86e'
   },
-  productionOrder: {
-    name: 'Production Order',
-    background: '#fcecc0',
-    borderColor: '#ffbb00'
-  },
-  purchaseRequisition: {
-    name: 'Purchase Requisition',
-    background: '#f0c9f5',
-    borderColor: '#e200ff'
-  }
-  // decline: {
-  //   name: 'Approver-Declined',
-  //   background: '#FFEAEA',
-  //   borderColor: '#FFA0A0'
-  // }
 };
 
 const IrtTicketView = ({ subcontractAssemblyData }) => {
@@ -68,6 +48,13 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
     setLoading(true);
     const res: any = await axiosInstance().get(`${routes?.subcontractAssembly?.path}/${subcontractAssemblyData?._id}/material`);
     const materials = res?.data?.data?.material;
+
+    const result = await axiosInstance().get(
+			`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly}&referenceId=${subcontractAssemblyData._id}&ticketType=${DELIVERY_TICKET_TYPE.delivery}`
+		);
+		const deliveryTicketList = result?.data?.data;
+    const loadingTicket = deliveryTicketList?.filter((item) => item.ticketType === DELIVERY_TICKET_TYPE.delivery);
+
 
     var xPosition = 0;
     var flow: any = [
@@ -98,14 +85,7 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
     let staringPosition = xPosition;
     let lastIndex = 0;
     const materialWithPostition: any = {};
-    const materialWithProcurement: any = {};
     materials?.forEach((material, index) => {
-      if (material?.procurementType)
-        materialWithProcurement[material?.procurementType] = {
-          procurementType: material?.procurementType,
-          procurement: material?.procurement,
-          procurementId: material?.procurementId
-        };
       const isChild = material?.parentId;
       if (isChild) {
         const parentPosition = materialWithPostition[material?.parentId];
@@ -126,6 +106,99 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
           ref_type: material?.type,
           ref_id: material?.materialId,
           label: (
+           <HtmlTooltip
+              arrow
+              placement="top"
+              title={material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
+            >
+              <div>
+                <Typography variant="body2">
+                  {material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
+                </Typography>
+                <Typography variant="subtitle2">
+                  {material?.productDetail?.productName}
+                </Typography>
+              </div>
+            </HtmlTooltip>
+          )
+        },
+        position: { x: xPosition, y: index * 100 },
+        style:
+          customNodeStyles.product
+      });
+
+      flowEdge.push({
+        id: `${material?.parentId}-${material?._id}-edge`,
+        source: material?.parentId ? material?.parentId : subcontractAssemblyData?._id,
+        target: material?._id,
+        arrowHeadType: 'arrow'
+      });
+    });
+
+    if (loadingTicket?.length) xPosition += 300;
+    loadingTicket?.forEach((obj:any, index) => {
+      flow.push({
+        id: obj?._id,
+        type: 'default',
+        className: 'dark-node',
+        sourcePosition: 'right',
+        targetPosition: 'left',
+        data: {
+          ref_type: obj?.ticketType,
+          ref_id: obj?._id,
+          label: (
+            <HtmlTooltip
+                arrow
+                placement="top"
+                title={
+                  <>
+                    <p>
+                      From: <b>{obj?.pickupFrom?.optionLabel}</b>
+                    </p>
+                    <p>
+                      To: <b>{obj?.deliveryTo?.optionLabel}</b>
+                    </p>
+                  </>
+                }
+              >
+              <div style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                <Typography variant="body2">
+                  {obj.ticketName}
+                </Typography>
+                <Typography variant="subtitle2">
+                  {obj.ticketType} Ticket
+                </Typography>
+              </div>
+            </HtmlTooltip>
+          )
+        },
+        position: { x: xPosition, y: index * 100 },
+        style:
+          obj?.ticketType === "Delivery" ? customNodeStyles.loadingTicket : ""
+      });
+      flowEdge.push({
+        id: `${obj?.products[0].uniqueId}-${obj?._id}-edge`,
+        source: obj?.products[0].uniqueId,
+        target: obj?._id,
+        arrowHeadType: 'arrow'
+      });
+    })
+
+    let rows = materials?.filter((d: any) =>{
+      !d.parentId && d.receivedQty>0;
+    });
+    if(rows?.length)xPosition += 300;
+    rows?.forEach((material, index) => {
+      flow.push({
+        id: material?._id,
+        type: 'default',
+        className: 'dark-node',
+        sourcePosition: 'right',
+        targetPosition: 'left',
+        data: {
+          ref_type: material?.type,
+          ref_id: material?.materialId,
+          label: (
             <HtmlTooltip
               arrow
               placement="top"
@@ -136,58 +209,29 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
                   {material?.type === 'product' ? 'Product' : material?.type === 'package' ? 'Package' : 'Service'}
                 </Typography>
                 <Typography variant="subtitle2">
-                  {material?.productDetail?.productName || material?.packageDetail?.packageName || material?.serviceDetail?.serviceName}
+                  {material?.productDetail?.productName}
                 </Typography>
               </div>
             </HtmlTooltip>
           )
         },
         position: { x: xPosition, y: index * 100 },
-        style:
-          material?.type === 'product' ? customNodeStyles.product : material?.type === 'package' ? customNodeStyles.package : customNodeStyles.service
+        style: customNodeStyles.product
       });
+      materials?.forEach((material, index) => {
+      if(material.parentId){
+        let ticket=loadingTicket.filter((d:any)=>{
+          d.products[0]?.product===material.materialId;
+        })
 
-      flowEdge.push({
-        id: `${material?.parentId}-${material?._id}-edge`,
-        source: material?.parentId ? material?.parentId : subcontractAssemblyData?._id,
+        flowEdge.push({
+        id: `${ticket._id}-${material?._id}-edge`,
+        source: ticket._id,
         target: material?._id,
         arrowHeadType: 'arrow'
       });
-    });
-    xPosition = lastIndex;
-    if (Object.keys(materialWithProcurement).length) xPosition += 300;
-    Object.keys(materialWithProcurement)?.forEach((key, index) => {
-      flow.push({
-        id: materialWithProcurement[key]?.procurementId,
-        type: 'default',
-        className: 'dark-node',
-        sourcePosition: 'right',
-        targetPosition: 'left',
-        data: {
-          ref_type: lowerFirst(key)?.replace(/\s/g, ''),
-          ref_id: materialWithProcurement[key]?.procurementId,
-          label: (
-            <HtmlTooltip arrow placement="top" title={key}>
-              <div>
-                <Typography variant="body2">{key}</Typography>
-                <Typography variant="subtitle2">{materialWithProcurement[key]?.procurement?.optionLabel}</Typography>
-              </div>
-            </HtmlTooltip>
-          )
-        },
-        position: { x: xPosition, y: index * 100 },
-        style: customNodeStyles[lowerFirst(key)?.replace(/\s/g, '')]
-      });
-    });
-    materials?.forEach((material, index) => {
-      if (material?.procurementType) {
-        flowEdge.push({
-          id: `${material?._id}-${materialWithProcurement[material?.procurementType]?.procurementId}-edge`,
-          arrowHeadType: 'arrow',
-          source: material?._id,
-          target: materialWithProcurement[material?.procurementType]?.procurementId
-        });
       }
+    })
     });
 
     setFlowData([...flow, ...flowEdge]);
@@ -201,18 +245,10 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
   const onElementClick = (event, element) => {
     if (element?.data?.ref_type === 'product') {
       history.push(`${routes.productDetail.path}/${element?.data?.ref_id}`);
-    } else if (element?.data?.ref_type === 'package') {
-      history.push(`${routes.packagesDetail.path}/${element?.data?.ref_id}`);
-    } else if (element?.data?.ref_type === 'service') {
-      history.push(`${routes.serviceMasterDetail.path}/${element?.data?.ref_id}`);
     } else if (element?.data?.ref_type === 'subcontractAssembly') {
       history.push(`${routes.subcontractAssemblyDetail.path}/${element?.data?.ref_id}`);
-    } else if (element?.data?.ref_type === 'demandOrder') {
-      history.push(`${routes.demandOrderDetail.path}/${element?.data?.ref_id}`);
-    } else if (element?.data?.ref_type === 'productionOrder') {
-      history.push(`${routes.productionOrderDetail.path}/${element?.data?.ref_id}`);
-    } else if (element?.data?.ref_type === 'purchaseRequisition') {
-      history.push(`${routes.purchaseRequisitionDetail.path}/${element?.data?.ref_id}`);
+    } else if (element?.data.ref_type === 'Delivery') {
+      history.push(`${routes.deliveryTicketDetail.path}/${element.data.ref_id}`);
     }
   };
 
