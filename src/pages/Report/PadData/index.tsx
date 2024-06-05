@@ -9,6 +9,7 @@ import routes from "src/components/Helpers/Routes";
 import { CustomDialogTransition } from "src/constants/helpers";
 
 const PadData = ({ handleClose, column, data }) => {
+
 	const { state, dispatch } = useTableReducer();
 
 	const [columns, setColumns] = useState(null)
@@ -22,31 +23,27 @@ const PadData = ({ handleClose, column, data }) => {
 		setColumns([{
 			accessor: 'padName',
 			Header: 'Pad Name',
-			width: 180,
-			show: true,
-			disabled: false,
+			width: 200,
 			Cell: ({ row }) => (
 				<div>
 					{row?.original?.padName?.optionLabel ? (
-						<p className="link text-truncate" onClick={() => {
-							window.open(`${routes.padMasterDetail.path}/${row?.original?.padName?.optionValue}`)
-						}}>{row?.original?.padName?.optionLabel}</p>
-					) : (
-						<NoDataCell />
-					)}
-
+						<p className="link text-truncate"
+							onClick={() => {
+								window.open(`${routes.padMasterDetail.path}/${row?.original?.padName?.optionValue}`)
+							}}>{row?.original?.padName?.optionLabel}</p>
+					) : 'Total'}
 				</div>
 			),
 		}, ...column])
 	}
 
 	const fetchRecords = () => {
-		dispatch({ type: 'initialize', data: data, count: data?.length });
+		dispatch({ type: 'initialize', data: [...(data?.padData || []), data], count: (data?.padData?.length + 1) });
 	}
 
 	return (
 		<Dialog fullScreen TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
-			<CustomDialogHeader title={`Pad Data`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
+			<CustomDialogHeader title={`Pad Wise Data`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
 			<CustomDialogContent isFooterPresent={false}>
 				<Grid item xs={12} md={12} sm={12} className="mt-3">
 					{columns ? (
@@ -57,9 +54,14 @@ const PadData = ({ handleClose, column, data }) => {
 							dispatch={dispatch}
 							renderedFrom={'historical-report_pad_data'}
 							isClientSideGrid={true}
+							showArrangeView={false}
 							refreshGrid={fetchRecords}
 							hideSelection={true}
 							hideAction={true}
+							setWholeRowsCellColor={(rowData) => {
+								if (!rowData?.padName) return 'isService';
+								return '';
+							}}
 						/>
 					) : (
 						<Box p={2} height={500}>
