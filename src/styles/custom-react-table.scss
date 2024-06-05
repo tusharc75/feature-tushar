@@ -51,6 +51,13 @@ $isAppliedBillDark: #234623;
     }
   }
 
+  &.footerRow {
+    & * {
+      font-size: 14px !important;
+      font-weight: 700 !important;
+    }
+  }
+
   &.error {
     background: var(--error-bg);
   }
@@ -216,14 +223,6 @@ $isAppliedBillDark: #234623;
         //border-right: 1px solid $isTransferAsset;
       }
 
-      .isService {
-        background: #fffaef;
-        border-bottom: 1px solid #fffaef;
-        [data-mode='dark'] & {
-          background-color: #23233d;
-        }
-      }
-
       // background-color: #fff;
       overflow: hidden;
 
@@ -309,13 +308,6 @@ $isAppliedBillDark: #234623;
           background: $isTransferAsset;
           [data-mode='dark'] & {
             background-color: $isTransferAssetDark;
-          }
-        }
-
-        td.isService {
-          background: #fffaef;
-          [data-mode='dark'] & {
-            background-color: #23233d;
           }
         }
 
