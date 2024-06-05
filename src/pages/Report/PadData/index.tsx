@@ -1,17 +1,41 @@
 import { Box, Dialog, Grid } from "@material-ui/core";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomReactTable, { useTableReducer } from "src/components/CustomReactTable";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import NoDataCell from "src/components/Helpers/NoDataCell";
 import { CustomDialogTransition } from "src/constants/helpers";
 
-const PadData = ({ handleClose, columns, data }) => {
+const PadData = ({ handleClose, column, data }) => {
 	const { state, dispatch } = useTableReducer();
 
+	const [columns, setColumns] = useState(null)
+
 	useEffect(() => {
+		fetchColumns()
 		fetchRecords()
 	}, [data])
+
+	const fetchColumns = () => {
+		setColumns([{
+			accessor: 'padName',
+			Header: 'Pad Name',
+			width: 180,
+			show: true,
+			disabled: false,
+			Cell: ({ row }) => (
+				<div>
+					{row?.original?.padName?.optionLabel ? (
+						<p>{row?.original?.padName?.optionLabel}</p>
+					) : (
+						<NoDataCell />
+					)}
+
+				</div>
+			),
+		}, ...column])
+	}
 
 	const fetchRecords = () => {
 		dispatch({ type: 'initialize', data: data, count: data?.length });

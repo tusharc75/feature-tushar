@@ -861,7 +861,7 @@ const Report = () => {
                     handleClose={() => {
                         setShowPadData({ open: false, data: [] })
                     }}
-                    columns={columns}
+                    column={columns}
                     data={showPadData.data}
                 />
             )}
