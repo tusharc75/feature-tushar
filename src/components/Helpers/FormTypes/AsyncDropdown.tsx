@@ -22,14 +22,13 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
     state: { selectedEntity }
   } = useData();
   const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState({ loading: false, resource: null });
+  const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const { setToastConfig } = useContext(CustomToastContext);
 
   const fetchOptions = useCallback(
-    debounce(async (resource: string, searchKey: string = '', page: number = 0) => {
+    debounce(async ( searchKey: string = '', page: number = 0) => {
       try {
-        const lookupResourceName = resource;
         if (searchKey !== '') {
           page = 0;
           setCurrentPage(0);
@@ -38,7 +37,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
           setCurrentPage(0);
           setOptions([]);
         }
-        let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&entity=${selectedEntity}&search=${searchKey}`;
+        let query = `sa-field/options?resource=${resource}&limit=25&page=${page}&entity=${selectedEntity}&search=${searchKey}`;
         const response = await axiosInstance().get(query);
         let data = response?.data?.data;
 
@@ -48,7 +47,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
         if (page > 0 && data?.length > 0) {
           setCurrentPage(page);
         }
-        setLoading({ loading: false, resource: null });
+        setLoading(false);
       } catch (error) {
         setToastConfig(error);
       }
@@ -63,15 +62,15 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
         fullWidth
         onOpen={() => {
           setOptions([]);
-          setLoading({ loading: true, resource: resource });
-          fetchOptions(resource, '', 0);
+          setLoading(true);
+          fetchOptions('', 0);
         }}
         onInputChange={(event, value, reason) => {
           if (reason === 'input') {
-            fetchOptions(resource, value);
+            fetchOptions(value);
           }
         }}
-        loading={loading.loading}
+        loading={loading}
         options={options}
         autoHighlight
         value={value}
@@ -90,7 +89,7 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
               ...params.InputProps,
               endAdornment: (
                 <>
-                  {loading.loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
                   {params.InputProps.endAdornment}
                 </>
               )
@@ -103,8 +102,8 @@ const AsyncDropDown = ({ resource, multiple, errors, touched, value, fieldLabel,
         ListboxProps={{
           onScroll: (e: any) => {
             if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
-              setLoading({ loading: true, resource: resource });
-              fetchOptions(resource, '', currentPage + 1);
+              setLoading(true);
+              fetchOptions('', currentPage + 1);
             }
           }
         }}
