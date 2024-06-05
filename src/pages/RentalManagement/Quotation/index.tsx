@@ -44,6 +44,7 @@ const Quotation = ({
   const [showQuotationSummaryDialog, setShowQuotationSummaryDialog] = useState(false);
   const [showAllVersionStatus, setShowAllVersionStatus] = useState(false);
   const [material, setMaterial] = useState([]);
+  const [allFields, setAllFields] = useState(null);
 
   const { state, dispatch } = useTableReducer();
   const { generateColumns } = useColumns();
@@ -92,6 +93,7 @@ const Quotation = ({
     data?.forEach((e) => {
       e.isColumnEditable = false;
     });
+    setAllFields(JSON.parse(JSON.stringify(data)));
     let newColumns = generateColumns(renderedFrom, data?.filter(d => d?.isRead), null, false, rentalManagementData?.currency);
     let coloum: any = [
       {
@@ -310,17 +312,19 @@ const Quotation = ({
     <>
       {allowedToEdit && (
         <>
-          <Button
-            onClick={() => {
-              setShowQuotationSummaryDialog(true);
-            }}
-            variant="outlined"
-            size="small"
-            startIcon={<GiReceiveMoney />}
-            color="primary"
-          >
-            Summary
-          </Button>
+          {allFields?.some(f => f?.fieldName === "finalPrice" && f?.isRead) && (
+            <Button
+              onClick={() => {
+                setShowQuotationSummaryDialog(true);
+              }}
+              variant="outlined"
+              size="small"
+              startIcon={<GiReceiveMoney />}
+              color="primary"
+            >
+              Summary
+            </Button>
+          )}
           <Button
             variant={isMobile ? 'text' : 'outlined'}
             color="primary"
