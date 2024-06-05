@@ -14,12 +14,11 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
+import { MATERIAL_TYPE, QUOTATION_STATUS, quotation, sidebarResource } from '../../../constants/helpers';
 import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
-import PreviewDownload from 'src/components/PreviewDownload';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { fetch_rental_quotation_fields } from 'src/components/RentalManagment/helper';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const Quotation = ({
   rentalManagementData,
@@ -30,7 +29,8 @@ const Quotation = ({
   fetchQuotationData,
   quotationData,
   currentVersion,
-  setCurrentVersion
+  setCurrentVersion,
+  setNextStepToolTip
 }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_quotation`;
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -58,6 +58,17 @@ const Quotation = ({
   }, []);
 
   useEffect(() => {
+    if (material?.filter((e) => !e.parentId).some((d) =>
+      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
+      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
+      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
+    )) {
+      setNextStepToolTip(rentalManagementMessage.validPrice)
+    }
+
+  }, [material]);
+
+  useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
       fetchFields();
       fetchProductInventory();
@@ -71,13 +82,17 @@ const Quotation = ({
     if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
       setNextStep(true);
     }
+
+
+
   }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async () => {
-    // var data = await await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
     var data = await await fetch_rental_quotation_fields(quotationData?.currency, false);
+    data?.forEach((e) => {
+      e.isColumnEditable = false;
+    });
     let newColumns = generateColumns(renderedFrom, data?.filter(d => d?.isRead), null, false, rentalManagementData?.currency);
-
     let coloum: any = [
       {
         accessor: 'index',
@@ -105,12 +120,12 @@ const Quotation = ({
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -170,23 +185,22 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${
-        _subRow.type === 'serializedAsset'
-          ? _subRow?.serializedAssetDetail?.assetNumber
-          : _subRow.type === 'product'
+      _subRow.detail = `${_subRow.type === 'serializedAsset'
+        ? _subRow?.serializedAssetDetail?.assetNumber
+        : _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName
-      }`;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName
+        }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = parent?.qty * _subRow.qty;
       _subRow.isValid = _subRow['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -200,7 +214,6 @@ const Quotation = ({
     if (parent.type === 'package') {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
-    // setNextStep(true)
     return orderBy(subRows, ['order'], ['asc']);
   };
 
@@ -230,25 +243,24 @@ const Quotation = ({
     const rows = [...rowsMaterial, ...additionalCostData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === 'serializedAsset'
-          ? parent.serializedAssetDetail?.assetNumber
-          : parent.type === 'product'
+      parent.detail = `${parent.type === 'serializedAsset'
+        ? parent.serializedAssetDetail?.assetNumber
+        : parent.type === 'product'
           ? parent.productDetail?.productName
           : parent.type === 'service'
-          ? parent.serviceDetail?.serviceName
-          : parent.type === 'package'
-          ? parent.packageDetail?.packageName
-          : parent.detail
-      }`;
+            ? parent.serviceDetail?.serviceName
+            : parent.type === 'package'
+              ? parent.packageDetail?.packageName
+              : parent.detail
+        }`;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : parent?.description;
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : parent?.description;
       parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
@@ -333,7 +345,7 @@ const Quotation = ({
         {allowedToEdit && (
           <>
             {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-            quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+              quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
               <Button
                 disabled={material
                   .filter((e) => e.parentId === null)

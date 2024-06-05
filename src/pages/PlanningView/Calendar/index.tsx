@@ -393,12 +393,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
       }
     } else {
       if (data.resource) {
-        const resource = resourceList?.find((r) => r.resource === event.resource);
-        window.open(`${resource.path}/${event.id}`);
+        const resource = resourceList?.find((r) => r.resource === data.resource);
+        window.open(`${resource.path}/${data.id}`);
       } else {
         let path = selectedResource.path;
         if (selectedResource.resource === sidebarResource.serializedAsset) {
-          path = routes[`${camelCase(event.resource)}Detail`]?.path;
+          path = routes[`${camelCase(data.resource)}Detail`]?.path;
         }
         window.open(`${path}/${data.id}`);
       }
@@ -700,10 +700,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 }
               } else {
                 if (data.resource) {
-                  const resource = resourceList?.find((r) => r.resource === event.resource);
-                  window.open(`${resource.path}/${event.id}`);
+                  const resource = resourceList?.find((r) => r.resource === data.resource);
+                  window.open(`${resource.path}/${data.id}`);
                 } else {
-                  window.open(`${selectedResource.path}/${event.id}`);
+                  window.open(`${selectedResource.path}/${data.id}`);
                 }
               }
             }}
