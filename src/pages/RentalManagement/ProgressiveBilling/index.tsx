@@ -202,7 +202,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
 
   return (
     <>
-      {allowCreateInvoice && (
+      {allowCreateInvoice && permissions?.invoice?.isCreate && (
         <Box display="flex" justifyContent="flex-end">
           <Box display="flex" alignItems="center" pt={2} pr={2}>
             <Button variant="contained" color="primary" size="small" onClick={() => setCreateBillDialog({ open: true })} aria-controls="action-menu">
