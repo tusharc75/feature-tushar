@@ -227,6 +227,10 @@ const ChartTypes = ({
       });
   };
 
+  console.log(chart);
+
+  console.log(chartData);
+
   return (
     <Grid item xs={12} md={fullScreen ? 12 : chart.column}>
       {chart.graphType === 'Custom' ? (
@@ -401,7 +405,7 @@ const ChartTypes = ({
                             mode: 'index',
                             callbacks: {
                               label: function (context) {
-                                let label = chart?.chartType === 'Bar' ? context.dataset.label : context.label || context.dataset.label || '';
+                                let label = (chart?.chartType === 'Bar' && chart?.stack) ? context.dataset.label : context.label || context.dataset.label || '';
                                 if (label) {
                                   label += ': ';
                                 }
