@@ -141,10 +141,8 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                 errors['assetIds'] = `Selected ${routes.serializedAsset.title} & Serial Numbers must be equal to reject quantity`;
                 errors['serialNumber'] = `Selected ${routes.serializedAsset.title} & Serial Numbers must be equal to reject quantity`;
               }
-            }
-            else if (tempProduct?.assetQty) {
-              const actualInventoryQty = removeActualReceivedQty - tempProduct?.assetQty;
-              if ((removeActualReceivedQty - actualInventoryQty) !== d?.assetIds?.length) {
+            } else if (tempProduct?.assetQty) {
+              if (removeActualReceivedQty !== d?.assetIds?.length) {
                 errors['assetIds'] = `Selected ${routes.serializedAsset.title} must be equal to reject quantity`;
               }
             }
