@@ -123,48 +123,6 @@ const Details = (props: DetailProps) => {
   }, [fields, data]);
 
   /**
-   * DOWNLOAD FILE
-   * @param fileName
-   */
-  const downloadFile = (fileName) => {
-    setDownloadProgress(0);
-    setDownloading(true);
-    axiosInstance()
-      .get(`user/download?fileName=${fileName}`, {
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          setDownloadProgress(percentCompleted);
-
-          if (percentCompleted === 100) {
-            setToastConfig({
-              message: 'File Downloaded Successfully',
-              open: true,
-              type: 'success'
-            });
-            setTimeout(() => {
-              setDownloadProgress(0);
-              setDownloading(false);
-            }, 2000);
-          }
-        }
-      })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => setDownloading(false), 2000);
-      })
-      .catch((err) => {
-        setToastConfig(err);
-        setDownloading(false);
-      });
-  };
-
-  /**
    * NORMAILIZE ALL THE VALUES AS A SIMPLE TEXT FROM OBJECTS AND ID's
    * @param values
    * @param input
@@ -503,31 +461,6 @@ const Details = (props: DetailProps) => {
       })}
       {dialogData && dialogData.open && <CarouselDialog index={dialogData.index} close={() => setDialogData(null)} images={dialogData.images} />}
     </div>
-  );
-};
-
-const DownloadComponent = ({ isDownloading, downloadProgress, downloadFile, filename }) => {
-  return isDownloading ? (
-    <Box display="flex" alignItems="center">
-      {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
-
-      <Box marginLeft={1} position="relative" display="inline-flex">
-        <CircularProgress size={30} variant="determinate" value={downloadProgress} />
-        <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
-          <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
-        </Box>
-      </Box>
-    </Box>
-  ) : (
-    <IconButton
-      title={`Download ${filename}`}
-      disabled={isDownloading}
-      size="small"
-      style={{ padding: 3, width: 30, height: 30 }}
-      onClick={() => downloadFile(filename)}
-    >
-      <GetApp fontSize="small" />
-    </IconButton>
   );
 };
 
