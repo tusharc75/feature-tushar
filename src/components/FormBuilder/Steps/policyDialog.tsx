@@ -313,7 +313,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                     }}
                     value={
                       field?.type === 'multiselect'
-                        ? fieldOptions.filter((opt) => value[`${field.fieldName}`].some((val) => val === opt.optionValue))
+                        ? fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                         : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
                     }
                     multiple={field?.type === 'multiselect'}
