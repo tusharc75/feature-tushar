@@ -2693,7 +2693,7 @@ const FormTypes = (props) => {
         <div className="flex items-center gap-2">
           <label htmlFor="multiple-images-button">
             <Button disabled={readingImage} variant="contained" color="primary" component="span" size={'small'}>
-              Upload
+              Upload image(s)
             </Button>
           </label>
           <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
