@@ -24,6 +24,8 @@ import { Slide } from '@material-ui/core';
 import { camelCase, isArray, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { v4 as uuid } from 'uuid';
+import mimeDb from 'mime-db';
+import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -188,7 +190,7 @@ export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Assign', title: 'Assign', icon: 'assign' },
   { name: 'Loading', title: 'Loading', icon: 'ticket' },
-  { name: 'Receiving', title: 'Receiving', icon: 'ticket' },
+  { name: 'Receiving', title: 'Receiving', icon: 'ticket' }
 ];
 
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
@@ -570,7 +572,7 @@ export const CHILD_RESOURCE = {
   dealsMaterial: 'Deals Material',
   rentalManagementTechnician: 'Rental Management Technician',
   subcontractAssemblyMaterial: 'Subcontract Assembly Material',
-  subcontractAssemblyCost: 'Subcontract Assembly Cost',
+  subcontractAssemblyCost: 'Subcontract Assembly Cost'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -985,7 +987,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'decimal') {
       obj[key.fieldName] = value && value !== '' ? parseFloat(value) : 0;
     } else if (key.type === 'lookUpDisplay') {
-    } else if (key.type === 'counter') {
+    } else if (key.type === 'counter' || key.type === 'multiFileUpload' || key.type === 'multiImageUpload') {
       obj[key.fieldName] = [];
     } else if (key.type === 'description') {
     } else {
@@ -1115,21 +1117,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -3313,3 +3315,28 @@ export const colSpans = [
   'col-span-11',
   'col-span-12'
 ];
+
+export const getFileIconSrc = (file) => {
+  if (!file) return FileIcon;
+  if (typeof file === 'string') {
+    let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    console.log({ file, ext: mimeDb[file], extension, data });
+    if (data && data?.icon) return data.icon;
+  }
+  if (mimeDb[file]) {
+    let extension = `.${mimeDb[file].extensions[0]}`;
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    if (data && data?.icon) return data.icon;
+  }
+  if (file?.contentType) {
+    let extension = `.${mimeDb[file.contentType].extensions[0]}`;
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    if (data && data?.icon) return data.icon;
+  } else if (file) {
+    let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    if (data && data?.icon) return data.icon;
+  }
+  return FileIcon;
+};
