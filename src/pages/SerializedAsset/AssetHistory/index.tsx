@@ -37,6 +37,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       Header: 'Reference',
       disableFilters: true,
       disableSortBy: false,
+      disabled: true,
       Cell: ({ row }) => (
         <div>
           {row.original.reference ? (
@@ -195,11 +196,13 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     {
       accessor: 'type',
       Header: 'Type',
+      disabled: true,
       Cell: ({ row }) => (row.original?.type ? <div>{row.original?.type}</div> : <NoDataCell />)
     },
     {
       accessor: 'date',
       Header: 'Date & Time',
+      disabled: true,
       disableFilters: true,
       disableSortBy: false,
       Cell: ({ row }) =>

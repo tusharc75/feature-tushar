@@ -253,6 +253,8 @@ import Units from './pages/Units';
 import UnitDetail from './pages/Units/UnitDetail';
 import WorkOrderPlanning from './pages/WorkOrderPlanning';
 import ResourceDoaRequest from './pages/ResourceDoaRequest';
+import SubcontractAssembly from 'src/pages/SubcontractAssembly';
+import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
 
 
 var notificationInterval: any = null;
@@ -308,7 +310,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -1079,10 +1081,10 @@ function App() {
               <GenerateInvoice resourceRendered="sublease" />
             </PrivateRoute>
             <PrivateRoute exact path={routes.dataList.path}>
-              <DataList/>
+              <DataList />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.dataList.path}/:id`}>
-              <DataListDetail/>
+              <DataListDetail />
             </PrivateRoute>
             <PrivateRoute exact path={routes.userDownloadRequest.path}>
               <UserDownloadRequest />
@@ -1122,6 +1124,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={routes.resourceDoaRequest.path}>
               <ResourceDoaRequest />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.subcontractAssembly.path}>
+              <SubcontractAssembly />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.subcontractAssemblyDetail.path}/:id`}>
+              <SubcontractAssemblyDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

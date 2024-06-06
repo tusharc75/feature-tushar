@@ -316,6 +316,10 @@ export default function useColumns() {
       } else if (field?.dataList) {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          dataList: true,
+          ...(Boolean(field?.isColumnEditable) ? { dataListId: field?.dataListId } : ''),
+          ...(Boolean(field?.isColumnEditable) ? { option: [] } : {}),
           accessorFn: (original) => {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
@@ -344,7 +348,7 @@ export default function useColumns() {
           ...commonFieldData,
           cell: ({ row }) =>
             row?.original?.[field?.fieldName] ? (
-              <h5 className="[display:flex_!important] [flex-wrap:nowrap_!important] items-center" title={`${row?.original?.[field?.fieldName]}`}>
+              <h5 className="items-center [display:flex_!important] [flex-wrap:nowrap_!important]" title={`${row?.original?.[field?.fieldName]}`}>
                 <span title={row?.original?.[field?.fieldName]} className="text-truncate">
                   {row?.original?.[field?.fieldName]}
                 </span>

@@ -3,7 +3,7 @@ import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
@@ -12,8 +12,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
-import { CHILD_RESOURCE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, gridLoadingTimeout, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
@@ -23,7 +22,10 @@ import routes from '../../../components/Helpers/Routes';
 import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
-const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
+const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
+
+  const renderedFrom = `${camelCase(routes?.demandOrder.title)}_material`;
+
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
@@ -113,7 +115,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
                   <HtmlTooltip title="Add Product">
                     <IconButton
                       onClick={() => {
-                        setAddDialog({ open: true, type: 'product', parentId: row.original?._id });
+                        setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
                       }}
                       size="small"
                     >
@@ -127,7 +129,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'product') {
+                  if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
@@ -197,8 +199,8 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       let rows = data.material.filter((e) => e.parentId === null);
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-        parent.description = parent.type === 'product' ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
+        parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+        parent.description = parent.type === MATERIAL_TYPE.product ? parent?.productDetail?.productDescription : parent?.packageDetail?.packageDescription;
         parent.qty = parent.qty;
         parent.qtyDisplay = parent.qty;
         parent.subRows = generateNestedData(data.material, parent);
@@ -222,17 +224,17 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
-          : _subRow.type === 'package'
-          ? _subRow.packageDetail?.packageName
-          : _subRow.serviceDetail?.serviceName;
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : _subRow.serviceDetail?.serviceName;
       _subRow.description =
-        _subRow.type === 'product'
+        _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.qtyDisplay = parent.qtyDisplay * _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
@@ -262,6 +264,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
+        fetchDemadOrderData()
         setSubmitting(false);
       })
       .catch((error) => {
@@ -277,6 +280,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
+        fetchDemadOrderData()
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -299,6 +303,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
         toastConfig.setToastConfig(error);
       });
   };
+
   const onMaterialEdit = (row, rows) => {
     setMaterialEdit({
       open: true,
@@ -329,6 +334,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           message: data.message
         });
         fetchData();
+        fetchDemadOrderData()
         setDeleteData(null);
       })
       .catch((error) => {
@@ -343,14 +349,14 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
       <>
         <MenuItem
           onClick={() => {
-            setAddDialog({ open: true, type: 'product', parentId: null });
+            setAddDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
           }}
         >
           Add Existing Products
         </MenuItem>
         <MenuItem
           onClick={() => {
-            setAddDialog({ open: true, type: 'package', parentId: null });
+            setAddDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
           }}
         >
           Add Existing Packages
@@ -398,22 +404,18 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
 
   return (
     <Fragment>
-      {allowedToEdit && (
-        <>
-          <DetailsPageHeader
-            isAddButtonVisible={true}
-            addButtonMenuItems={addButtonMenuItems()}
-            isActionButtonVisible={true}
-            actionButtonMenuItems={actionButtonMenuItems()}
-            actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
-            previewDownloadProps={previewDownloadProps}
-            hasXpadding={false}
-          />
-        </>
-      )}
+      <DetailsPageHeader
+        isAddButtonVisible={allowedToEdit}
+        addButtonMenuItems={addButtonMenuItems()}
+        isActionButtonVisible={allowedToEdit}
+        actionButtonMenuItems={actionButtonMenuItems()}
+        actionButtonProps={{ disabled: selectedRecords?.filter((e) => !e.hideSelection)?.length > 0 ? false : true }}
+        previewDownloadProps={previewDownloadProps}
+        hasXpadding={false}
+      />
       {columns ? (
         <>
-          <Box py="6px" zIndex={5} width={'100%'}>
+          <Box zIndex={5} width={'100%'}>
             <CustomReactTable
               height={'calc(100vh - 345px)'}
               columns={columns}
@@ -457,7 +459,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           showSaveAndNext={materialEdit.showSaveAndNext}
         />
       )}
-      {addDialog.open && addDialog.type === 'product' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
         <AssignProductDialog
           handleCloseDialog={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {
@@ -466,7 +468,7 @@ const Material = ({ demandOrderData, renderedFrom, allowedToEdit }) => {
           isSubmitting={isSubmitting}
         />
       )}
-      {addDialog.open && addDialog.type === 'package' && (
+      {addDialog.open && addDialog.type === MATERIAL_TYPE.package && (
         <AssignPackageDialog
           handleClose={() => setAddDialog({ open: false, type: '', parentId: null })}
           onSuccess={(rows) => {

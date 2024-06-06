@@ -51,6 +51,12 @@ export const resourcePolicy = [
                 fieldLabel: "Hide Complete/Skip/Revert Service",
                 type: "checkBox",
                 defaultValue: false
+            },
+            {
+                fieldName: "showTransferAssets",
+                fieldLabel: "Show Transfer Assets",
+                type: "checkBox",
+                defaultValue: false
             }
         ]
     },
@@ -97,5 +103,33 @@ export const resourcePolicy = [
                 defaultValue: []
             },
         ]
-    }
+    },
+    {
+        resource: sidebarResource.workOrder,
+        policy: [
+            {
+                fieldName: "showBom",
+                fieldLabel: "Show BOM",
+                type: "checkBox",
+                defaultValue: false
+            }
+        ]
+    },
+    {
+        resource: sidebarResource.rentalManagement,
+        policy: [
+            {
+                fieldName: "showServiceOnFieldStep",
+                fieldLabel: "Show Service On-Field Step",
+                type: "checkBox",
+                defaultValue: false
+            },
+            {
+                fieldName: "hideAssetChangeStatus",
+                fieldLabel: "Hide Asset Change Status",
+                type: "checkBox",
+                defaultValue: false
+            }
+        ]
+    },
 ]

@@ -97,6 +97,7 @@ export const jobProcessSteps: stepInterface[] = [
 export const salesOrderProcessSteps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
   { name: 'Process', title: 'Process', icon: 'process' },
+  { name: 'Loading', title: 'Loading', icon: 'ticket' },
   { name: 'Invoice', title: 'Invoice', icon: 'invoice' }
 ];
 
@@ -181,6 +182,13 @@ export const serviceOrderSteps: stepInterface[] = [
   // { name: 'Technician Dispatch', title: 'Dispatch', icon: 'dispatch' },
   // { name: 'Invoice', title: 'Invoice', icon: 'invoice' },
   { name: 'Field Ticket Invoice', title: 'Invoices', icon: 'invoice' }
+];
+
+export const subcontractAssemblySteps: stepInterface[] = [
+  { name: 'Add', title: 'Add', icon: 'add' },
+  { name: 'Assign', title: 'Assign', icon: 'assign' },
+  { name: 'Loading', title: 'Loading', icon: 'ticket' },
+  { name: 'Receiving', title: 'Receiving', icon: 'ticket' },
 ];
 
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
@@ -376,7 +384,8 @@ export const sidebarResource = {
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
   units: 'Units',
   resourceDoaRequest: 'Resource Doa Request',
-  workOrderPlanning: 'Work Order Planning'
+  workOrderPlanning: 'Work Order Planning',
+  subcontractAssembly: 'Subcontract Assembly'
 };
 
 export const primaryFields = {
@@ -554,11 +563,14 @@ export const CHILD_RESOURCE = {
   serializedAssetsCertification: 'Serialized Assets Certificate',
   invoiceCreditMemo: 'Invoice Credit Memo',
   workOrderProduct: 'Work Order Product',
+  workOrderCost: 'Work Order Cost',
   payrollHoliday: 'Payroll Holiday',
   payrollPayTypes: 'Payroll Pay Types',
   payrollPaidTimeOff: 'Payroll Paid Time Off',
   dealsMaterial: 'Deals Material',
-  rentalManagementTechnician: 'Rental Management Technician'
+  rentalManagementTechnician: 'Rental Management Technician',
+  subcontractAssemblyMaterial: 'Subcontract Assembly Material',
+  subcontractAssemblyCost: 'Subcontract Assembly Cost',
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -973,7 +985,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'decimal') {
       obj[key.fieldName] = value && value !== '' ? parseFloat(value) : 0;
     } else if (key.type === 'lookUpDisplay') {
-    } else if (key.type === 'counter') {
+    } else if (key.type === 'counter' || key.type === 'multiFileUpload' || key.type === 'multiImageUpload') {
       obj[key.fieldName] = [];
     } else if (key.type === 'description') {
     } else {
@@ -983,7 +995,7 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
   return obj;
 };
 
-export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, defaultCurrentDate: boolean = false) => {
+export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boolean = false, user: any = null) => {
   const obj = {};
 
   const filterValues = (data: object | any) => (typeof data === 'string' ? data : typeof data === 'object' ? data?.optionValue : '');
@@ -1013,19 +1025,26 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[`${key.fieldName}_dataList`] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
       }
     } else if (key.type === 'multiSelect') {
-      const values =
+      let values =
         dataObj[key.fieldName] && dataObj[key.fieldName].length
           ? typeof dataObj[key.fieldName] === 'string'
             ? [dataObj[key.fieldName]]
             : dataObj[key.fieldName].map((val: any) => filterValues(val))
           : [];
+      if (isClone && key.fieldName === 'collaborator') {
+        values = values?.filter((e) => e !== user?.user?._id);
+      }
       obj[key.fieldName] = values;
     } else if (key.type === 'dropDown') {
       const value =
         dataObj[key.fieldName] && Array.isArray(dataObj[key.fieldName]) && dataObj[key.fieldName]?.length
           ? dataObj[key.fieldName][0]
           : filterValues(dataObj[key.fieldName]);
-      obj[key.fieldName] = value ? value : '';
+      if (isClone && key.fieldName === 'owner') {
+        obj[key.fieldName] = user?.user?._id;
+      } else {
+        obj[key.fieldName] = value ? value : '';
+      }
     } else if (key.type === 'converter' || key.type === 'currencyAmount' || key.isConverter === true) {
       if (key.type !== 'currencyAmount' && (key.type === 'converter' || key.isConverter === true)) {
         key.displayUnits &&
@@ -1065,16 +1084,12 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
-      } else if (defaultCurrentDate) {
-        obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'date') {
       if (isClone) {
         obj[key.fieldName] = new Date();
       } else if (dataObj[key.fieldName]) {
         obj[key.fieldName] = dataObj[key.fieldName];
-      } else if (defaultCurrentDate) {
-        obj[key.fieldName] = new Date();
       }
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
@@ -1100,21 +1115,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -2037,6 +2052,16 @@ export const RENTAL_STATUS = {
   closed: 'Closed'
 };
 
+export const PURCHASE_REQUISITION_STATUS = {
+  new: 'New',
+  converted: 'Converted'
+};
+
+export const DEMAND_ORDER_STATUS = {
+  new: 'New',
+  converted: 'Converted'
+};
+
 export const RENTAL_INTERNAL_ASSET_STATUS = {
   reserved: 'Reserved',
   inUse: 'In-Use',
@@ -2075,7 +2100,8 @@ export const DELIVERY_TICKET_REFERENCE_TYPE = {
   sublease: 'Sublease',
   transferInventory: 'Transfer Inventory',
   repairOrder: 'Repair Order',
-  productionOrder: 'Production Order'
+  productionOrder: 'Production Order',
+  subcontractAssembly: 'Subcontract Assembly'
 };
 
 export const DELIVERY_FROM_TO_TYPE = {
@@ -2194,7 +2220,8 @@ export const ACTIVITY_RESOURCE = {
   user: 'user',
   marketSegment: 'marketSegment',
   budget: 'budget',
-  irtTicket: 'irtTicket'
+  irtTicket: 'irtTicket',
+  subcontractAssembly: 'subcontractAssembly'
 };
 
 export const LOG_RESOURCE = {
@@ -2570,7 +2597,8 @@ export const PDF_RESOURCE_LIST = [
   { title: sidebarResource.fieldTicket, value: sidebarResource.fieldTicket, key: 'fieldTicket' },
   { title: sidebarResource.job, value: sidebarResource.job, key: 'job' },
   { title: sidebarResource.purchaseRequisition, value: sidebarResource.purchaseRequisition, key: 'purchaseRequisition' },
-  { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' }
+  { title: sidebarResource.planning, value: sidebarResource.planning, key: 'planning' },
+  { title: sidebarResource.subcontractAssembly, value: sidebarResource.subcontractAssembly, key: 'subcontractAssembly' }
 ];
 
 export const COLOUR_MASTER = {
@@ -2849,6 +2877,12 @@ export const FIELD_TICKET_STATUS = {
   submitted: 'Submitted',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
+  closed: 'Closed'
+};
+
+export const SUBCONTRACT_ASSEMBLY_STATUS = {
+  new: 'New',
+  inProgress: 'In-Progress',
   closed: 'Closed'
 };
 
@@ -3219,9 +3253,9 @@ export function reorder<T>(list: T[], startIndex: number, endIndex: number) {
 }
 
 export function groupByKey<T>(arr: T[] = [], keyGetter: ((d: T) => string) | string) {
-  let result = [];
+  let result = {};
   result = arr.reduce((r, a) => {
-    const key = typeof keyGetter === 'string' ? keyGetter : keyGetter(a);
+    const key = typeof keyGetter === 'string' ? a[keyGetter] : keyGetter(a);
     if (r[key]) {
       r[key].push(a);
     } else {
@@ -3262,3 +3296,20 @@ export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
   });
   return obj;
 };
+export function generateId() {
+  return Date.now() + Math.floor(Math.random() * (999999 - 100000 + 1)) + 100000;
+}
+export const colSpans = [
+  'col-span-1',
+  'col-span-2',
+  'col-span-3',
+  'col-span-4',
+  'col-span-5',
+  'col-span-6',
+  'col-span-7',
+  'col-span-8',
+  'col-span-9',
+  'col-span-10',
+  'col-span-11',
+  'col-span-12'
+];

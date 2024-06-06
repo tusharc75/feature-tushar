@@ -20,6 +20,7 @@ import { HiOutlineWrenchScrewdriver } from 'react-icons/hi2';
 import { MdOutlineDynamicForm, MdOutlineEventAvailable } from 'react-icons/md';
 import { RiShieldUserLine } from 'react-icons/ri';
 import { SiCivicrm } from 'react-icons/si';
+import { DynamicIcon } from 'src/assets/IconGenerator';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
 export const groupByKey = (arr = [], keyGetter) => {
@@ -34,12 +35,20 @@ export const groupByKey = (arr = [], keyGetter) => {
 };
 
 // CREATE LIST FROM OBJECT SEPATATED BY KEY SECTIONNAME AND ASSGIN ICON, DESCRIPTOIN, AND COLOR
-export const assignIconAndText = (groupedData) => {
+export const assignIconAndText = (groupedData, brandSectionMaster) => {
   let dataList = [];
   let index = 0;
   for (const [key, values] of Object.entries(groupedData)) {
     if (key !== '') {
       let obj: any = { ...setDataBySectionName(key, index) };
+      const section = brandSectionMaster?.find((e) => e?.sectionName === key);
+      if (section && section.description !== '') {
+        obj.text = section.description;
+      }
+      if (section?.iconName !== undefined && section.iconName) {
+        obj.icon = section.iconName;
+        obj.sideBarIcon = DynamicIcon(section.iconName);
+      }
       obj.head = key;
       obj.items = values;
       dataList.push(obj);
@@ -50,7 +59,7 @@ export const assignIconAndText = (groupedData) => {
 };
 
 // CHECK SECTION NAME AND RETURN ICON, COLOR, AND DESCRIPTION
-export const setDataBySectionName = (secName, index = 0) => {
+export const setDataBySectionName = (secName, index = 0, className = '') => {
   const colorAccessor = getColors(index);
   const iconColour = colorAccessor.icon || ['#FFA800', '#E35200'];
 
@@ -63,7 +72,7 @@ export const setDataBySectionName = (secName, index = 0) => {
 
   let icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
   let text = '';
-  let sideBarIcon = <ServiceManagementIcon size={20} />;
+  let sideBarIcon = <ServiceManagementIcon size={20} className={className} />;
   const color = '#ffffff';
   const gradient = colorAccessor.gradient || ['#FFA800', '#E35200'];
 
@@ -71,135 +80,135 @@ export const setDataBySectionName = (secName, index = 0) => {
     case compareName(['CRM +', 'Sales Management'], secName): {
       text = 'Create Leads, Convert Opportunities and Manage Contracts Effectively';
       icon = <DashboardIcons.CRM colors={iconColour} />;
-      sideBarIcon = <SiCivicrm size={18} />;
+      sideBarIcon = <SiCivicrm size={18} className={className} />;
       break;
     }
     case compareName(['Production Order Management'], secName): {
       text = 'Speed-up shop floor operations and manage technicians and parts issued effectively';
       icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
-      sideBarIcon = <ServiceManagementIcon size={20} />;
+      sideBarIcon = <ServiceManagementIcon size={20} className={className} />;
       break;
     }
     case compareName(['eCommerce', 'eCommerce Operations Management'], secName): {
       text = 'Simplify your Customer Journey and Reduce Execution Time significantly';
       icon = <DashboardIcons.ECOMMERCE colors={iconColour} />;
-      sideBarIcon = <BiCart size={20} />;
+      sideBarIcon = <BiCart size={20} className={className} />;
       break;
     }
     case compareName(['Inventory Management'], secName): {
       text = 'Manage Inventory Smartly';
       icon = <DashboardIcons.INVENTORY_MANAGEMENT colors={iconColour} />;
-      sideBarIcon = <ServiceManagementIcon size={20} />;
+      sideBarIcon = <ServiceManagementIcon size={20} className={className} />;
       break;
     }
     case compareName(['Rental Operations Management', 'Rental Jobs Management'], secName): {
       text = 'Fulfill Rental Orders Faster';
       icon = <DashboardIcons.ROM colors={iconColour} />;
-      sideBarIcon = <RentalOperationManagementIcon size={20} />;
+      sideBarIcon = <RentalOperationManagementIcon size={20} className={className} />;
       break;
     }
     case compareName(['ROM'], secName): {
       text = 'Fulfill Rental Orders Faster';
       icon = <DashboardIcons.ROM colors={iconColour} />;
-      sideBarIcon = <FaRegRegistered size={20} />;
+      sideBarIcon = <FaRegRegistered size={20} className={className} />;
       break;
     }
     case compareName(['Field Service Operations'], secName): {
       text = 'Fulfill Service Orders Faster';
       icon = <DashboardIcons.FIELD_SERVICE_OPERATION colors={iconColour} />;
-      sideBarIcon = <FieldServiceOperationIcon size={20} />;
+      sideBarIcon = <FieldServiceOperationIcon size={20} className={className} />;
       break;
     }
     case compareName(['Repair & Maintenance Management'], secName): {
       text = 'Repair & Maintain your product and services at ease';
       icon = <DashboardIcons.REPAIR_AND_MAINTENANCE_MANAGEMENT colors={iconColour} />;
-      sideBarIcon = <HiOutlineWrenchScrewdriver size={18} />;
+      sideBarIcon = <HiOutlineWrenchScrewdriver size={18} className={className} />;
       break;
     }
     case compareName(['Admin Portal'], secName): {
       text = 'Build your own Template, Manage Roles and Entities';
       icon = <DashboardIcons.ADMIN_PORTAL colors={iconColour} />;
-      sideBarIcon = <RiShieldUserLine size={20} />;
+      sideBarIcon = <RiShieldUserLine size={20} className={className} />;
       break;
     }
     case compareName(['Accounts'], secName): {
       text = 'Customer and Supplier Account Management at your fingertips';
       icon = <DashboardIcons.ACCOUNTS colors={iconColour} />;
-      sideBarIcon = <FaRegUser size={20} />;
+      sideBarIcon = <FaRegUser size={20} className={className} />;
       break;
     }
     case compareName(['Product Setup'], secName): {
       text = 'Product and Category Setup';
       icon = <DashboardIcons.PRODUCT_SETUP colors={iconColour} />;
-      sideBarIcon = <ProductSetup size={20} />;
+      sideBarIcon = <ProductSetup size={20} className={className} />;
       break;
     }
     case compareName(['Dynamic Forms'], secName): {
       text = 'Setup Dynamic Forms & Templates';
       icon = <DashboardIcons.FORM_ICON colors={iconColour} />;
-      sideBarIcon = <MdOutlineDynamicForm size={20} />;
+      sideBarIcon = <MdOutlineDynamicForm size={20} className={className} />;
       break;
     }
     case compareName(['Service Operations Management', 'Field Service Management'], secName): {
       text = 'Deploy, Track and Bill for field services efficiently';
       icon = <DashboardIcons.SERVICE_OPERATION_MANAGEMENT colors={iconColour} />;
-      sideBarIcon = <ServiceOperationManagementIcon size={20} />;
+      sideBarIcon = <ServiceOperationManagementIcon size={20} className={className} />;
       break;
     }
     case compareName(['Purchasing Management'], secName): {
       text = 'Manage working capital effectively';
       icon = <DashboardIcons.PURCHASING_MANAGEMENT colors={iconColour} />;
-      sideBarIcon = <PurchasingManagementIcon size={20} />;
+      sideBarIcon = <PurchasingManagementIcon size={20} className={className} />;
       break;
     }
     case compareName(['Planning & Forecasting', 'Forecasting & Planning'], secName): {
       text = 'Plan and Schedule your workforce productively';
       icon = <DashboardIcons.PLANNING_FORECASTING colors={iconColour} />;
-      sideBarIcon = <MdOutlineEventAvailable size={20} />;
+      sideBarIcon = <MdOutlineEventAvailable size={20} className={className} />;
       break;
     }
     case compareName(['Brand Admin'], secName): {
-      sideBarIcon = <FaRegUserCircle size={20} />;
+      sideBarIcon = <FaRegUserCircle size={20} className={className} />;
       break;
     }
     case compareName(['Master Data'], secName): {
-      sideBarIcon = <AiOutlineDatabase size={20} />;
+      sideBarIcon = <AiOutlineDatabase size={20} className={className} />;
       break;
     }
     case compareName(['Rental Management'], secName): {
-      sideBarIcon = <FaRegRegistered size={20} />;
+      sideBarIcon = <FaRegRegistered size={20} className={className} />;
       break;
     }
     case compareName(['Service Management'], secName): {
-      sideBarIcon = <ServiceManagementIcon size={18} />;
+      sideBarIcon = <ServiceManagementIcon size={18} className={className} />;
       break;
     }
     case compareName(['Setups & Administration'], secName): {
-      sideBarIcon = <BiCog size={20} />;
+      sideBarIcon = <BiCog size={20} className={className} />;
       break;
     }
     case compareName(['Activities', 'Collaboration Tools'], secName): {
-      sideBarIcon = <CollaborationToolsIcon size={20} />;
+      sideBarIcon = <CollaborationToolsIcon size={20} className={className} />;
       break;
     }
     case compareName(['Fleet Management'], secName): {
-      sideBarIcon = <FleetManagementIcon size={20} />;
+      sideBarIcon = <FleetManagementIcon size={20} className={className} />;
       icon = <DashboardIcons.FLEET_MANAGEMENT colors={iconColour} />;
       text = 'Optimize and Deploy your Asset Fleet simply';
       break;
     }
     case compareName(['iot'], secName): {
-      sideBarIcon = <IOT size={20} />;
+      sideBarIcon = <IOT size={20} className={className} />;
       icon = <DashboardIcons.IOT colors={iconColour} />;
       break;
     }
     case compareName(['hiii', 'Custom Forms'], secName): {
-      sideBarIcon = <CustomForms size={18} />;
+      sideBarIcon = <CustomForms size={18} className={className} />;
       icon = <DashboardIcons.CUSTOM_FORMS colors={iconColour} />;
       break;
     }
     case compareName(['Forecasting & Planning'], secName): {
-      sideBarIcon = <ForeCastingAndPlanning size={18} />;
+      sideBarIcon = <ForeCastingAndPlanning size={18} className={className} />;
       icon = <DashboardIcons.FORECASTING_AND_PLANNING colors={iconColour} />;
       break;
     }

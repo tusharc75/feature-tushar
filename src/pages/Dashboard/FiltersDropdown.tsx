@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, IconButton, Popover, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { debounce, isEmpty } from 'lodash';
-import React, { useCallback, useContext, useState } from 'react';
+import { isEmpty } from 'lodash';
+import React, { useContext, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -10,8 +10,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
-import { sidebarResource } from 'src/constants/helpers';
 import SaveFilterDialog from './SaveFilterDialog';
+import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 interface Props {
   filters: { key: string; title: string; multiple?: boolean; defaultValue?: number }[];
   anchorEl: any;
@@ -29,9 +29,6 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
   const {
     state: { selectedEntity }
   } = useData();
-  const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState({ loading: false, resource: null });
-  const [currentPage, setCurrentPage] = useState(0);
   const [inputValues, setInputValues] = useState({});
   const [selectedKpiFilter, setSelectedKpiFilter] = useState(null);
   const [isFilterDeleteConfirm, setIsFilterDeleteConfirm] = useState({ open: false, ids: null });
@@ -73,44 +70,6 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
       setInputValues({});
     }
   }, [selectedKpiFilter]);
-
-  const fetchOptions = useCallback(
-    debounce(async (resource: string, searchKey: string = '', page: number = 0, key: string = '') => {
-      try {
-        const lookupResourceName = resource;
-        if (searchKey !== '') {
-          page = 0;
-          setCurrentPage(0);
-        }
-        if (page === 0) {
-          setCurrentPage(0);
-          setOptions([]);
-        }
-        let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&entity=${selectedEntity}&search=${searchKey}`;
-        const response = await axiosInstance().get(query);
-        let data = response?.data?.data;
-
-        if (resource === sidebarResource.marketSegment) {
-          if (key === 'marketSegment') {
-            data = data.filter((d) => !d.parentMarketSegment);
-          } else if (key === 'subMarketSegment') {
-            data = data.filter((d) => d.parentMarketSegment);
-          }
-        }
-
-        setOptions((currentOptions) => {
-          return page === 0 ? [...data] : [...currentOptions, ...data];
-        });
-        if (page > 0 && data?.length > 0) {
-          setCurrentPage(page);
-        }
-        setLoading({ loading: false, resource: null });
-      } catch (error) {
-        setToastConfig(error);
-      }
-    }, 1000),
-    []
-  );
 
   const handleChange = (key: string, val: any) => {
     if (key === 'marketSegment') {
@@ -189,57 +148,19 @@ const FiltersDropdown = ({ filterOptions, filters, anchorEl, closeAnchor, values
           {filters?.map((filter: any, index) => (
             <div key={index}>
               {filter?.resource ? (
-                <Autocomplete
-                  size="small"
+                <AsyncDropDown
+                  resource={filter?.resource}
                   multiple={filter?.multiple}
-                  fullWidth
-                  onOpen={() => {
-                    setOptions([]);
-                    setLoading({ loading: true, resource: filter?.resource });
-                    fetchOptions(filter?.resource, '', 0, filter.key);
-                  }}
-                  onInputChange={(event, value, reason) => {
-                    if (reason === 'input') {
-                      setInputValues((prevValues) => ({ ...prevValues, [filter?.key]: value }));
-                      fetchOptions(filter?.resource, value);
-                    }
-                  }}
-                  loading={loading.loading && loading.resource === filter?.resource}
-                  options={options}
-                  autoHighlight
+                  errors={false}
+                  touched={false}
                   value={values[filter?.key] ? values[filter?.key] : filter?.multiple ? [] : {}}
-                  getOptionLabel={(option: any) => option?.optionLabel}
-                  getOptionSelected={(option, val) => option?.optionValue === val?.optionValue}
-                  onChange={(_, val) => {
+                  fieldLabel={routes[filter.key] ? routes[filter.key]?.title : filter.title}
+                  onChange={(e, val) => {
                     handleChange(filter.key, val);
                     setInputValues((prevValues) => ({ ...prevValues, [filter.key]: val }));
                   }}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={routes[filter.key] ? routes[filter.key]?.title : filter.title}
-                      InputProps={{
-                        ...params.InputProps,
-                        endAdornment: (
-                          <>
-                            {loading.loading && loading.resource === filter?.resource ? <CircularProgress color="inherit" size={20} /> : null}
-                            {params.InputProps.endAdornment}
-                          </>
-                        )
-                      }}
-                      margin="none"
-                      size={'small'}
-                      variant="outlined"
-                    />
-                  )}
-                  ListboxProps={{
-                    onScroll: (e: any) => {
-                      if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
-                        setLoading({ loading: true, resource: filter?.resource });
-                        fetchOptions(filter?.resource, '', currentPage + 1);
-                      }
-                    }
-                  }}
+                  fieldName={''}
+                  required={false}
                 />
               ) : filter?.key in filterOptions ? (
                 <Autocomplete

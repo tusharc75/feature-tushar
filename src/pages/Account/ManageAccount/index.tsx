@@ -64,7 +64,7 @@ export default function ManageAccountDialog(props) {
             setAccountData({
               fields: newFields,
               initialValues: dataToClone.data
-                ? getObjKeysWithValues(dataToClone.data, newFields)
+                ? getObjKeysWithValues(dataToClone.data, newFields, true, user) 
                 : getObjKeys("", newFields),
             });
             setFormValues(dataToClone.data

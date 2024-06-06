@@ -245,7 +245,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     let fieldsData = fields?.data?.data;
     let statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option;
     setStatusOptions(statusOptions);
-    fieldsData = fieldsData?.filter((ele) => ['singleLine', 'multiLine', 'number', 'decimal', 'date']?.includes(ele.fieldData?.type))?.map((e) => {
+    fieldsData = fieldsData?.filter((ele) => !ele.fieldData?.primaryField)?.map((e) => {
       return {
         optionLabel: e?.fieldData?.fieldLabel,
         optionValue: e?.fieldData?.fieldName,

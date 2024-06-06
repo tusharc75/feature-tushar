@@ -44,6 +44,7 @@ const RoleDetailsPage = () => {
   const [showAssignUserDialog, setShowAssignUserDialog] = useState(false);
   const [field, setField] = useState([]);
   const [resource, setResource] = useState([]);
+  const [childrenResource, setChildrenResource] = useState([]);
   const [roleUsers, setRoleUsers] = useState([]);
   const [isEdit, setIsEdit] = useState(false);
   const [values, setValues] = useState({
@@ -237,6 +238,7 @@ const RoleDetailsPage = () => {
       setRoleData(data);
       setValues({ name: data.name, description: data.description, tier: data?.tier || ROLE_TIER?.tier1 });
       setResource(data.resource);
+      setChildrenResource(data.childrenResource);
       setField(data.field);
       const current = {
         name: data.name,
@@ -574,6 +576,20 @@ const RoleDetailsPage = () => {
                         isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
                         tier={values?.tier}
                       />
+                      {childrenResource?.length && (
+                        <Box mt={2}>
+                          <RoleEngine
+                            style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
+                            field={field}
+                            resource={childrenResource}
+                            setField={setField}
+                            setResource={setChildrenResource}
+                            isDisable={permissions?.role.isUpdate ? (!isEdit ? true : false) : true}
+                            tier={ROLE_TIER.tier1}
+                            child={true}
+                          />
+                        </Box>
+                      )}
                       {isPolicyTableVisible() && (
                         <PolicyResources
                           policyResources={policyResources}
@@ -833,10 +849,10 @@ const RoleDetailsPage = () => {
               roleDeleteRec
                 ? `Are you sure you want to delete this Role ?`
                 : userDeleteRec
-                ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
-                : entityDeleteRec
-                ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
-                : ''
+                  ? `Are you sure you want to unassign ${userDeleteRec.firstName} from this Role?`
+                  : entityDeleteRec
+                    ? `Are you sure you want to unassign ${entityDeleteRec.entityName} from this Role?`
+                    : ''
             }
             onClose={() => {
               setShowConfirmBox(false);

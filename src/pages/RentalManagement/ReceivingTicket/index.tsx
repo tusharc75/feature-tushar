@@ -11,7 +11,7 @@ import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { groupBy, map, uniq } from 'lodash';
+import { groupBy, isEmpty, map, startCase, uniq } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -68,6 +68,10 @@ import ChangeActualDateDialog from './ChangeActualDateDialog';
 import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
 import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
+import ChangeAssetsDetailsDialog from './ChangeAssetsDetailsDialog';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import ServiceLogDialog from './ServiceLogDialog';
+import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -92,7 +96,8 @@ const ReceivingTicket = ({
   isProcessor,
   allowUpdateStatus,
   stepFullScreen,
-  checkProgressiveBilling
+  checkProgressiveBilling,
+  rentalPolicyData
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -121,6 +126,7 @@ const ReceivingTicket = ({
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false });
+  const [serviceLogDialog, setServiceLogDialog] = useState(({ open: false, data: null }));
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
@@ -135,6 +141,8 @@ const ReceivingTicket = ({
   const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {} });
   const [assetsData, setAssetsData] = useState([])
+  const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
+  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false });
 
   const {
     state: { user, permissions, selectedEntity }
@@ -160,7 +168,7 @@ const ReceivingTicket = ({
     getColumn();
     fetchRecords();
     fetchPolicy();
-  }, [currentStep]);
+  }, [currentStep, rentalPolicyData]);
 
   const OpenInNewWindow = (url) => {
     window.open(`${url}?referenceType=${rentalManagementData?.rentalJobName}&referenceId=${rentalManagementData?._id}`, '_blank');
@@ -182,6 +190,7 @@ const ReceivingTicket = ({
       var productSerialNumbers: any = [];
       var consumeProducts: any = [];
       var transactionData: any = [];
+      var nonSerializedInventory: any = [];
 
       var invoiceData: any = [];
 
@@ -226,7 +235,9 @@ const ReceivingTicket = ({
               replaceAsset: d?.replaceAsset
                 ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
                 : '',
-              description: d?.product?.productDescription
+              description: d?.product?.productDescription,
+              wellNumber: d?.inventory?.wellNumber,
+              position: d?.inventory?.position
             };
           })
           .map((u) => ({
@@ -259,6 +270,7 @@ const ReceivingTicket = ({
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
         consumeProducts = productResponse?.data?.data?.consumeProducts;
         productSerialNumbers = productResponse?.data?.data?.productSerialNumbers;
+        nonSerializedInventory = productResponse?.data?.data?.nonSerializedInventory;
 
         const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
         invoiceData = invoiceResponse?.data?.data?.material || [];
@@ -299,7 +311,8 @@ const ReceivingTicket = ({
               ...ele,
               loadingTicketId: element._id,
               loadingTicket: element?.ticketName,
-              loadingTicketStatus: element?.status
+              loadingTicketStatus: element?.status,
+              warehouse: element?.pickupFrom
             });
           });
         }
@@ -309,7 +322,8 @@ const ReceivingTicket = ({
               ...ele,
               returnTicketId: element._id,
               returnTicket: element?.ticketName,
-              returnTicketStatus: element?.status
+              returnTicketStatus: element?.status,
+              warehouse: element?.deliveryTo
             });
           });
         }
@@ -325,35 +339,52 @@ const ReceivingTicket = ({
         }
       });
 
-      products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'));
+      products = uniqueProduct(material?.filter((e) => e.consumableType !== 'Internal'), nonSerializedInventory);
+
       products?.forEach((element) => {
         var qty = element.qty;
 
-        const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+        var ticketProduct: any = [];
+        if (element?.warehouse) {
+          ticketProduct = loadingTicketProducts?.filter((e) => e.uniqueId === element._id && e.product === element.materialId
+            && e?.warehouse?.optionValue === element?.warehouse?.optionValue);
+        }
+        else {
+          ticketProduct = loadingTicketProducts?.filter((e) => e.uniqueId === element._id && e.product === element.materialId);
+        }
+
         ticketProduct?.forEach((ele) => {
-          const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+
+          var returnTicket: any = []
+          if (ele?.warehouse) {
+            returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty
+              && e.uniqueId === element._id && e.product === element.materialId && !e.isCount
+              && e?.warehouse?.optionValue === ele?.warehouse?.optionValue);
+          }
+          else {
+            returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty
+              && e.uniqueId === element._id && e.product === element.materialId && !e.isCount);
+          }
 
           var consumeQty = 0;
 
-          consumeProducts
-            ?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)
-            ?.forEach((e) => {
-              consumeQty = consumeQty + e.qty;
-            });
+          consumeProducts?.filter((e) => e.product === element.materialId && e.loadingTicketId === ele.loadingTicketId)?.forEach((e) => {
+            consumeQty = consumeQty + e.qty;
+          });
 
           const obj: any = {};
+          obj._id = element?.materialId + '_' + ele.loadingTicketId;
+          obj.materialId = element?.materialId;
           obj.uniqueId = element._id;
           obj.serialized = element?.productDetail?.serializedProduct;
-          obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
-          obj.materialId = element?.productDetail?._id;
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.description =
-            element.type === 'service'
+            element.type === MATERIAL_TYPE.service
               ? element?.serviceDetail?.serviceDescription || ''
-              : element.type === 'product'
+              : element.type === MATERIAL_TYPE.product
                 ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
+                : element.type === MATERIAL_TYPE.package
                   ? element?.packageDetail?.packageDescription || ''
                   : '';
           obj.qty = ele.qty;
@@ -362,11 +393,10 @@ const ReceivingTicket = ({
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
-          obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
-          obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
+          obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
+          obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
           obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.parentId = element?.parentId;
-          obj.parentName = element?.parentName;
           obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
             ? ele.qty === consumeQty
               ? RENTAL_INTERNAL_ASSET_STATUS.consumed
@@ -401,28 +431,28 @@ const ReceivingTicket = ({
 
         if (qty > 0) {
           const obj: any = {};
-          obj._id = element.materialId;
+          obj._id = `${element.materialId}_${productAssets?.length + 1}`;
+          obj.uniqueId = element?._id;
           obj.materialId = element?.materialId;
           obj.type = 'Product';
           obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
           obj.description =
-            element.type === 'service'
+            element.type === MATERIAL_TYPE.service
               ? element?.serviceDetail?.serviceDescription || ''
-              : element.type === 'product'
+              : element.type === MATERIAL_TYPE.product
                 ? element?.productDetail?.productDescription || ''
-                : element.type === 'package'
+                : element.type === MATERIAL_TYPE.package
                   ? element?.packageDetail?.packageDescription || ''
                   : '';
           obj.qty = qty;
           obj.parentId = element?.parentId;
-          obj.parentName = element?.parentName;
           obj.consumeQty = 0;
           obj.returnQty = 0;
           obj.assetNumber = element?.productDetail?.productName;
           obj.productName = element?.productDetail?.productName;
           obj.productId = element?.productDetail?._id;
-          obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
-          obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
+          obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
+          obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
           obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.rentalAssetStatus = element?.productDetail?.serializedProduct ? element?.status : '';
@@ -441,10 +471,13 @@ const ReceivingTicket = ({
           var qty = productSerialNumbers?.filter((e) => e?._id === element?._id)?.length;
 
           if (qty) {
-            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId);
+            const ticketProduct = loadingTicketProducts?.filter((e) => e.product === element.materialId && e.uniqueId === element._id);
             ticketProduct?.forEach((ele) => {
-              const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
-              const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty && e.product === element.materialId && !e.isCount);
+
+              const returnTicket = returnTicketProducts?.find((e) => e.qty <= ele.qty
+                && e.uniqueId === element._id && e.product === element.materialId && !e.isCount);
+              const receiveTicket = receiveTicketProducts?.find((e) => e.qty <= ele.qty
+                && e.uniqueId === element._id && e.product === element.materialId && !e.isCount);
 
               var consumeQty = 0;
               consumeProducts
@@ -461,11 +494,11 @@ const ReceivingTicket = ({
               obj.type = 'Product';
               obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
               obj.description =
-                element.type === 'service'
+                element.type === MATERIAL_TYPE.service
                   ? element?.serviceDetail?.serviceDescription || ''
-                  : element.type === 'product'
+                  : element.type === MATERIAL_TYPE.product
                     ? element?.productDetail?.productDescription || ''
-                    : element.type === 'package'
+                    : element.type === MATERIAL_TYPE.package
                       ? element?.packageDetail?.packageDescription || ''
                       : '';
               obj.qty = ele.qty;
@@ -476,18 +509,15 @@ const ReceivingTicket = ({
               obj.productId = element?.productDetail?._id;
               obj.warehouse = rentalManagementData?.warehouse?.optionLabel;
               obj.warehouseId = rentalManagementData?.warehouse?.optionValue;
-              obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
               obj.parentId = element?.parentId;
-              obj.parentName = element?.parentName;
-              obj.rentalAssetStatus = !element?.productDetail?.serializedProduct
-                ? ele.qty === consumeQty
+              obj.status = ASSET_STATUS.notApplied;
+              obj.rentalAssetStatus =
+                ele.qty === consumeQty
                   ? RENTAL_INTERNAL_ASSET_STATUS.consumed
                   : consumeQty < ele.qty && consumeQty > 0
                     ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
                     : ele.qty === (returnTicket?.qty || 0)
-                      ? 'Returned'
-                      : element?.status
-                : element?.status;
+                      ? 'Returned' : element?.status;
               obj.startDate = element?.actualStartDate;
               obj.endDate = element?.actualEndDate;
               obj.manualStartDate = element?.manualStartDate;
@@ -521,13 +551,12 @@ const ReceivingTicket = ({
               productAssets.push({
                 _id: element?._id,
                 materialId: element?.materialId,
-                uniqueId: element?.uniqueId,
+                uniqueId: element?._id,
                 type: 'Product',
                 displayType: 'Product (Serialized)',
                 qty: qty,
                 description: element?.productDetail?.productDescription || '',
                 parentId: element?.parentId,
-                parentName: element?.parentName,
                 consumeQty: 0,
                 returnQty: 0,
                 assetNumber: element?.productDetail?.productName,
@@ -536,7 +565,7 @@ const ReceivingTicket = ({
                 warehouse: rentalManagementData?.warehouse?.optionLabel,
                 warehouseId: rentalManagementData?.warehouse?.optionValue,
                 productSerialNumbers: productSerialNumbers?.filter((p) => p?._id === element?._id)?.map(_p => ({ ..._p, assetNumber: _p?.productSerialNumberDetail?.serialNumber })),
-                status: element?.productDetail?.serializedProduct === true ? element?.status : 'N/A',
+                status: ASSET_STATUS.notApplied,
                 rentalAssetStatus: element?.productDetail?.serializedProduct ? element?.status : '',
                 currentLocation:
                   element?.currentLocation?.optionValue ||
@@ -570,9 +599,34 @@ const ReceivingTicket = ({
         });
       });
 
+      if (rentalPolicyData?.showServiceOnFieldStep) {
+        material?.filter(m => m.type === MATERIAL_TYPE.service)?.forEach((s: any) => {
+          s.uniqueId = s._id;
+          s.materialId = s?.materialId;
+          s.description = s?.serviceDetail?.serviceDescription || '';
+          s.displayType = startCase(MATERIAL_TYPE.service);
+          s.assetNumber = s?.serviceDetail?.serviceName;
+          s.startDate = s?.actualStartDate;
+          s.endDate = s?.actualEndDate;
+          productAssets.push(s)
+        })
+      }
+
       productAssets.forEach((d) => {
-        d['parentName'] = d?.hasOwnProperty('parentName') && d?.parentName !== '' ? d?.parentName : d?.productName;
-        d['parentId'] = d?.hasOwnProperty('parentId') && d?.parentId !== '' ? d?.parentId : d?.productId;
+        if (d.type === 'Asset') {
+          const parentId = material?.find((e) => e._id === d.uniqueId)?.parentId;
+          if (parentId) {
+            const parent = material?.find((e) => e._id === parentId);
+            if (parent) {
+              d['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+            }
+          }
+        } else if (d?.parentId) {
+          const parent = material?.find((e) => e._id === d?.parentId);
+          if (parent) {
+            d['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+          }
+        }
         d['isChecked'] = false;
         d['hideSelection'] = [ASSET_STATUS.lost].includes(d.status) || d?.manualStatus === ASSET_STATUS.reserved ? true : false;
 
@@ -591,7 +645,8 @@ const ReceivingTicket = ({
         } else {
           setNextStepToolTip(rentalManagementMessage.receivingCreateToProceed);
         }
-      } else {
+      }
+      else {
         if (
           productAssets.filter(
             (e) =>
@@ -606,7 +661,7 @@ const ReceivingTicket = ({
               [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
                 e.rentalAssetStatus
               )
-          ).length === productAssets.length
+          ).length === productAssets?.filter(p => p.type !== MATERIAL_TYPE.service)?.length
         ) {
           setNextStep(true);
         } else {
@@ -622,7 +677,7 @@ const ReceivingTicket = ({
         e.index = index + 1;
       });
 
-      dispatch({ type: 'initialize', data: productAssets, count: productAssets.length });
+      dispatch({ type: 'initialize', data: productAssets, count: productAssets?.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -644,7 +699,7 @@ const ReceivingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber']
+          fieldNames: ['serialNumber', 'position', 'wellNumber']
         }
       ]
     });
@@ -679,13 +734,14 @@ const ReceivingTicket = ({
                 <LocalShippingIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
             )}
-            {row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue && (
-              <HtmlTooltip title="This asset will be shipped from different facility">
-                <IconButton size="small">
-                  <HelpIcon fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
-            )}
+            {row?.original?.warehouseId && row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
+              (!row?.original?.returnTicketId && !row?.original?.receivingTicketId) && (
+                <HtmlTooltip title="Will be returned to different facility">
+                  <IconButton size="small">
+                    <HelpIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </HtmlTooltip>
+              )}
             {row?.original?.isReplaced && (
               <HtmlTooltip
                 title={`This Asset has been Replaced by ${row?.original?.replaceAsset} (Due to following reason-"${row?.original?.replaceReason}")`}
@@ -706,10 +762,8 @@ const ReceivingTicket = ({
             <IconButton
               size="small"
               onClick={() => {
-                window.open(
-                  `${row?.original?.type === 'Asset' ? routes.serializedAssetDetail.path : routes.productDetail.path}/${row?.original?._id?.split('_')[0]
-                  }`
-                );
+                const basePath = row.original.type === 'Asset' ? routes.serializedAssetDetail.path : row.original.type === MATERIAL_TYPE.service ? routes.serviceMasterDetail.path : routes.productDetail.path;
+                window.open(`${basePath}/${row?.original?._id?.split('_')[0]}`);
               }}
             >
               <OpenInNewIcon fontSize="small" color="primary" />
@@ -774,7 +828,7 @@ const ReceivingTicket = ({
         accessor: 'parentName',
         Header: 'Parent',
         disabled: true,
-        Cell: ({ row }) => (row?.original?.parentId ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+        Cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
       },
       {
         accessor: 'qty',
@@ -786,6 +840,11 @@ const ReceivingTicket = ({
         accessor: 'serialNumber',
         Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
         Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+      }] : []),
+      ...(assetFields?.find((f) => f.fieldName === 'position') ? [{
+        accessor: 'position',
+        Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
+        Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
       }] : []),
       {
         accessor: 'productName',
@@ -907,6 +966,19 @@ const ReceivingTicket = ({
         Header: 'Asset Status',
         Cell: ({ row }) => (row?.original?.status ? <h5 className="text-truncate">{row?.original?.status}</h5> : <NoDataCell />)
       },
+      ...(assetFields?.find((f) => f.fieldName === 'wellNumber') ? [{
+        accessor: 'wellNumber',
+        Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
+        Cell: ({ row }) =>
+          <DropdownCell
+            permissions={permissions}
+            permissionForLinks={{}}
+            field={{
+              fieldName: 'wellNumber',
+              lookupResource: sidebarResource.wellNumber
+            }}
+            original={row?.original} />
+      }] : []),
       {
         accessor: 'manualStartDate',
         Header: 'Start Date',
@@ -960,7 +1032,7 @@ const ReceivingTicket = ({
         Header: 'Rental Asset Status',
         Cell: ({ row }) => (row?.original?.rentalAssetStatus ? <h5 className="text-truncate">{row?.original?.rentalAssetStatus}</h5> : <NoDataCell />)
       }
-    ];
+    ]
     if (user?.user?.brandPolicy?.rentalReceivingStepConsume) {
       column.push({
         accessor: 'consumeQty',
@@ -977,31 +1049,54 @@ const ReceivingTicket = ({
       disableFilters: true,
       disableSortBy: true,
       canDrag: false,
-      Cell: ({ row }) =>
-        allowedToEdit ? (
-          <HtmlTooltip
-            title={
-              row?.original?.isInvoiceCreated && !row?.original?.isAllowedEndDate ? 'Invoice Created - Cannot change Start Date' :
-                row?.original?.isAllowedStartDate === false && row?.original?.isAllowedEndDate === false
-                  ? `Can change the Date after delivered`
-                  : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
-                    ? `Can change the End Date after received`
-                    : 'Update - Start Date/End Date'
+      Cell: ({ row }) => {
+        return (
+          <>
+            {
+              allowedToEdit && row?.original?.type !== MATERIAL_TYPE.service ? (
+                <HtmlTooltip
+                  title={
+                    row?.original?.isInvoiceCreated && !row?.original?.isAllowedEndDate ? 'Invoice Created - Cannot change Start Date' :
+                      row?.original?.isAllowedStartDate === false && row?.original?.isAllowedEndDate === false
+                        ? `Can change the Date after delivered`
+                        : row?.original?.isAllowedEndDate === false && row?.original?.isAllowedStartDate !== true
+                          ? `Can change the End Date after received`
+                          : `Update - Start Date/End Date`
+                  }
+                >
+                  <span>
+                    <IconButton
+                      size="small"
+                      disabled={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? false : true}
+                      onClick={() => {
+                        setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: row?.original });
+                      }}
+                    >
+                      <Edit fontSize="small" color={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? 'primary' : 'inherit'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              ) : null
             }
-          >
-            <span>
-              <IconButton
-                size="small"
-                disabled={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? false : true}
-                onClick={() => {
-                  setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: row?.original });
-                }}
-              >
-                <Edit fontSize="small" color={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? 'primary' : 'inherit'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        ) : null
+            {
+              row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
+                <HtmlTooltip title={'View Service Logs'}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setServiceLogDialog({ open: true, data: row?.original });
+                      }}
+                    >
+                      <VisibilityIcon fontSize="small" color='primary'/>
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              ) : null
+            }
+          </>
+        )
+      }
     });
     setColumns(column);
   };
@@ -1034,15 +1129,26 @@ const ReceivingTicket = ({
         data['isDeliveryToDisable'] = true;
       }
     } else {
-      data['deliveryTo'] = rentalManagementData?.warehouse?.optionValue;
-      data['deliveryToAddress'] = rentalManagementData?.warehouse?.address;
+      if (selectedRecords[0].warehouseId && ticketType === DELIVERY_TICKET_TYPE.return) {
+        data['deliveryTo'] = selectedRecords[0].warehouseId;
+        data['deliveryToAddress'] = selectedRecords[0].currentLocation;
+        data['isDeliveryToDisable'] = true;
+      }
+      else {
+        data['deliveryTo'] = rentalManagementData?.warehouse?.optionValue;
+        data['deliveryToAddress'] = rentalManagementData?.warehouse?.address;
+      }
     }
     data['startDate'] = rentalManagementData?.estimateStartDate;
     data['endDate'] = rentalManagementData?.estimateStartDate;
     data['isPickupFromDisable'] = true;
 
-    data['wellName'] = rentalManagementData?.wellName?.optionValue;
-
+    if (rentalManagementData?.padName?.optionValue) {
+      data['padName'] = rentalManagementData?.padName?.optionValue;
+    }
+    if (rentalManagementData?.wellName?.optionValue) {
+      data['wellName'] = rentalManagementData?.wellName?.optionValue;
+    }
     if (rentalManagementData?.wellNumber) {
       if (rentalManagementData?.wellNumber?.optionValue) {
         data['wellNumber'] = rentalManagementData?.wellNumber?.optionValue;
@@ -1050,12 +1156,12 @@ const ReceivingTicket = ({
         data['wellNumber'] = rentalManagementData?.wellNumber?.map((e) => e?.optionValue);
       }
     }
-
-    data['afeNumber'] = rentalManagementData?.afeNumber;
+    if (rentalManagementData?.afeNumber) {
+      data['afeNumber'] = rentalManagementData?.afeNumber;
+    }
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-    //data['status'] = DELIVERY_TICKET_STATUS.inTransit;
 
     const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
@@ -1366,32 +1472,36 @@ const ReceivingTicket = ({
     }
   };
 
-  const handleSubmitChangeDates = (values) => {
-    if (!openChangeActualDateDialog.data) return;
-    setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
-    const data: any = {
-      _id: openChangeActualDateDialog?.data?.uniqueId,
-      asset: openChangeActualDateDialog?.data?._id?.split('_')[0]
-    };
-    if (values.manualStartDate) {
-      data.startDate = values.manualStartDate;
+  const handleSubmitChangeDates = (values, type: string = '') => {
+    let data;
+    if (type) {
+      setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
+      data = { ids: selectedRecords?.map(s => s?.uniqueId) }
+      data['type'] = type;
+      data['date'] = values.date;
+    } else {
+      if (!openChangeActualDateDialog.data) return;
+      setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
+      data = {
+        ids: [openChangeActualDateDialog?.data?.uniqueId],
+        asset: openChangeActualDateDialog?.data?._id?.split('_')[0]
+      };
+      if (values.manualStartDate) data.startDate = values.manualStartDate;
+      if (values.manualEndDate) data.endDate = values.manualEndDate;
     }
-    if (values.manualEndDate) {
-      data.endDate = values.manualEndDate;
-    }
-    axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
-      .then(() => {
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Dates Updated Successfully',
-          type: 'success'
-        });
-        setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
-        fetchRecords();
-      })
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data).then((response) => {
+      toastConfig.setToastConfig({
+        open: true,
+        message: response?.data?.message,
+        type: 'success'
+      });
+      setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+      setServiceConfirmationDialog({ open: false, type: null, loading: false });
+      fetchRecords();
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        setServiceConfirmationDialog({ open: false, type: null, loading: false });
         setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
       });
   };
@@ -1557,7 +1667,7 @@ const ReceivingTicket = ({
         >
           {downlodingFile ? 'Please wait...' : 'Preview'}
         </Button>
-        {allowedToEdit && (
+        {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <Button
             variant={'outlined'}
             color="primary"
@@ -1634,10 +1744,15 @@ const ReceivingTicket = ({
               setShowConformationCancleTicket,
               setShowConformationConsume,
               setShowConformationConsumeMultiple,
+              setOpenAssetsDetailsChangeDialog,
               dataRows,
               user,
               setOpenDateDialog,
-              currentStep
+              currentStep,
+              columns,
+              rentalManagementData,
+              setServiceConfirmationDialog,
+              rentalPolicyData
             }}
           />
         }
@@ -1819,7 +1934,7 @@ const ReceivingTicket = ({
       )}
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
-          assetData={selectedRecords?.filter((e) => e.type === 'Asset')}
+          ids={selectedRecords?.filter((e) => e.type === 'Asset')?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={setAssetsData}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null })}
@@ -1890,6 +2005,7 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
+
       {statusToUpdate.open && (
         <Dialog
           open
@@ -2034,6 +2150,20 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
+      {serviceConfirmationDialog.open && (
+        <StartStopServiceDateDialog
+          data={selectedRecords}
+          type={serviceConfirmationDialog.type}
+          open={serviceConfirmationDialog.open}
+          onClose={() => {
+            setServiceConfirmationDialog({ open: false, type: null, loading: false });
+          }}
+          handleSubmit={(val) => {
+            handleSubmitChangeDates(val, serviceConfirmationDialog.type)
+          }}
+          loading={serviceConfirmationDialog.loading}
+        />
+      )}
       {openChangeActualDateDialog.open && (
         <ChangeActualDateDialog
           data={openChangeActualDateDialog.data}
@@ -2115,6 +2245,30 @@ const ReceivingTicket = ({
           }}
         />
       )}
+      {openAssetsDetailsChangeDialog && (
+        <ChangeAssetsDetailsDialog
+          handleClose={() => setOpenAssetsDetailsChangeDialog(false)}
+          wellNumberOptions={rentalManagementData?.wellNumber}
+          assets={selectedRecords?.filter((ele) => ele.type === 'Asset')?.map((e) => e._id)}
+          handleSucess={() => {
+            setOpenAssetsDetailsChangeDialog(false)
+            fetchRecords();
+          }}
+        />
+      )}
+      {serviceLogDialog.open && (
+        <ServiceLogDialog
+          rentalId={rentalManagementData?._id}
+          id={serviceLogDialog?.data?.uniqueId}
+          assetNumber={serviceLogDialog?.data?.assetNumber}
+          open={serviceLogDialog?.open}
+          onClose={() => {
+            setServiceLogDialog({ open: false, data: null });
+          }}
+          onSuccess={fetchRecords}
+          renderedFrom={renderedFrom}
+        />
+      )}
     </>
   );
 };
@@ -2139,11 +2293,17 @@ const ActionButtonMenuItems = ({
   setShowConformationCancleTicket,
   setShowConformationConsume,
   setShowConformationConsumeMultiple,
+  setOpenAssetsDetailsChangeDialog,
   dataRows,
   user,
   setOpenDateDialog,
-  currentStep
+  currentStep,
+  columns,
+  rentalManagementData,
+  setServiceConfirmationDialog,
+  rentalPolicyData
 }) => {
+
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
       return false;
@@ -2153,6 +2313,7 @@ const ActionButtonMenuItems = ({
       return false;
     }
   };
+
 
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -2329,6 +2490,16 @@ const ActionButtonMenuItems = ({
         } else if ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) {
         } else {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapInUseAssets });
+        }
+      } else if (action === rentalManagementActions.startService) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!isEmpty(serviceLogEntry)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
+        }
+      } else if (action === rentalManagementActions.stopService) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!serviceLogEntry) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
         }
       }
     });
@@ -2521,6 +2692,7 @@ const ActionButtonMenuItems = ({
               </MenuItem>
             ) : null}
             <MenuItem
+              disabled={!checkUniqWarehouse()}
               onClick={() => {
                 if (!validateAction(rentalManagementActions.createReturnTicket)) {
                   if (selectedRecords?.every((e) => e.type === 'Asset')) {
@@ -2704,6 +2876,36 @@ const ActionButtonMenuItems = ({
             {`Revert Consumed Qty`}
           </MenuItem>
         )}
+      {selectedRecords?.length > 0
+        && columns?.some((col) => col.accessor === 'wellNumber')
+        && rentalManagementData?.wellNumber?.length > 0
+        && selectedRecords?.filter((e) => e.type === 'Asset')?.length === selectedRecords?.length && (
+          <MenuItem onClick={() => {
+            setOpenAssetsDetailsChangeDialog(true);
+          }}>
+            Change Well Number
+          </MenuItem>
+        )}
+      {rentalPolicyData?.showServiceOnFieldStep && selectedRecords?.every((e) => e.type === MATERIAL_TYPE.service) &&
+        <>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(rentalManagementActions.startService)) {
+                setServiceConfirmationDialog({ open: true, type: 'start' })
+              }
+            }}
+          >
+            Start Service(s)
+          </MenuItem>
+          <MenuItem onClick={() => {
+            if (!validateAction(rentalManagementActions.stopService)) {
+              setServiceConfirmationDialog({ open: true, type: 'stop' })
+            }
+          }}
+          >
+            Stop Service(s)
+          </MenuItem>
+        </>}
     </>
   );
 };

@@ -30,7 +30,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 
-const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionId = null, referenceData = null, renderedFrom = '' }) => {
+const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionId = null, referenceData = null, isRedirectTodetailPage = true }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -80,7 +80,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             setCloneHeading(quotationNumber);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate)
+              values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
             });
             setLoading(false);
           } else {
@@ -119,7 +119,6 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
               initialData[key] = referenceData[key];
             }
           }
-
         }
         setInitialData({
           fields: fieldsDataForCreate,
@@ -177,7 +176,9 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                 toastConfig.setToastConfig(error);
               });
           } else {
-            if (renderedFrom !== routes.projectSales.title) history.push(`${routes.quotationDetail.path}/${data._id}`);
+            if (isRedirectTodetailPage) {
+              history.push(`${routes.quotationDetail.path}/${data._id}`);
+            }
             setLoading(false);
             onSuccess(data);
             toastConfig.setToastConfig({

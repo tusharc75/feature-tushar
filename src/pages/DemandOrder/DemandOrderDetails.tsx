@@ -1,6 +1,5 @@
-import { Box, Button, Grid } from '@material-ui/core';
-import { Edit } from '@material-ui/icons';
-import { Skeleton } from '@material-ui/lab';
+import { Box, Button, Grid, Menu, MenuItem } from '@material-ui/core';
+import { Edit, ExpandMore } from '@material-ui/icons';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -18,15 +17,16 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, demandOrder, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, DEMAND_ORDER_STATUS, MATERIAL_TYPE, checkIsAllowedToEdit, demandOrder, sidebarResource } from '../../constants/helpers';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Material from './Material';
+import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
+import ManageProductionOrder from '../ProductionOrder/ManageProductionOrder';
 
 const DemandOrderDetails = () => {
+
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.demandOrder.title);
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -43,6 +43,8 @@ const DemandOrderDetails = () => {
   const [fields, setFields] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [convertAnchorEl, setConvertAnchorEl] = useState(null);
+  const [convertDialog, setConvertDialog] = useState({ open: false, type: '' })
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -58,7 +60,7 @@ const DemandOrderDetails = () => {
 
   const fetchFields = async () => {
     try {
-      const response: any = await axiosInstance().get('/field?resource=Demand Order');
+      const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.demandOrder}`);
       setFields(response?.data?.data);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -71,7 +73,6 @@ const DemandOrderDetails = () => {
       let data;
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
-     
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data));
       setDemandOrderData(data);
       setLoading(false);
@@ -98,6 +99,33 @@ const DemandOrderDetails = () => {
       });
   };
 
+  const closeConvertMenu = () => {
+    setConvertAnchorEl(null);
+  };
+
+  const handleConvertSuccess = (data: any) => {
+    const value = {
+      _id: id,
+      status: DEMAND_ORDER_STATUS.converted
+    }
+    if (convertDialog.type === sidebarResource.purchaseOrder) {
+      value['purchaseOrder'] = data?._id
+    } else {
+      value['productionOrder'] = data?._id
+    }
+    axiosInstance().put(`${routes?.demandOrder?.path}/update-converted`, value).then(({ data }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Converted Successfully`
+      });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+      fetchData();
+    });
+  };
+
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -106,8 +134,49 @@ const DemandOrderDetails = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {demandOrderData ? (
+            {demandOrderData?.status !== DEMAND_ORDER_STATUS.converted && (
               <>
+                {demandOrderData?.material?.length > 0 &&
+                  <Button
+                    variant={'contained'}
+                    className="btn-outline-v1"
+                    size="small"
+                    onClick={(e) => { setConvertAnchorEl(e.currentTarget) }}
+                    aria-controls="convert-menu"
+                    endIcon={<ExpandMore fontSize="small" />}
+                  >
+                    {'Convert'}
+                  </Button>
+                }
+                <Menu
+                  anchorEl={convertAnchorEl}
+                  keepMounted
+                  getContentAnchorEl={null}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left'
+                  }}
+                  id="convert-menu"
+                  open={Boolean(convertAnchorEl)}
+                  onClose={closeConvertMenu}
+                >
+                  <MenuItem
+                    onClick={() => {
+                      closeConvertMenu()
+                      setConvertDialog({ open: true, type: sidebarResource.purchaseOrder })
+                    }}
+                  >
+                    {routes.purchaseOrder.title}
+                  </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      closeConvertMenu()
+                      setConvertDialog({ open: true, type: sidebarResource.productionOrder })
+                    }}
+                  >
+                    {routes.productionOrder.title}
+                  </MenuItem>
+                </Menu>
                 {permissions?.demandOrder?.isUpdate && allowedToEdit && (
                   <Button
                     className="btn-outline-v1"
@@ -118,11 +187,8 @@ const DemandOrderDetails = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-
                 {permissions?.demandOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
-            ) : (
-              <Skeleton variant="text" width="150px" height="32px" />
             )}
             <ActivityButton
               referenceId={demandOrderData?._id}
@@ -158,8 +224,8 @@ const DemandOrderDetails = () => {
           {demandOrderData && (
             <Material
               demandOrderData={demandOrderData}
-              renderedFrom={`${renderedFrom}_grid-1`}
-              allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate ? true : false}
+              fetchDemadOrderData={fetchData}
+              allowedToEdit={allowedToEdit && permissions?.demandOrder?.isUpdate && demandOrderData?.status !== DEMAND_ORDER_STATUS.converted ? true : false}
             />
           )}
         </TabPanel>
@@ -189,6 +255,34 @@ const DemandOrderDetails = () => {
             fetchData();
             setOpenUpdateDialog(false);
           }}
+        />
+      )}
+      {convertDialog.open && convertDialog.type === sidebarResource.purchaseOrder && (
+        <ManagePurchaseOrder
+          isClone={false}
+          purchaseOrderId={null}
+          onClose={() => setConvertDialog({ open: false, type: '' })}
+          onSuccess={(data: any) => {
+            handleConvertSuccess(data)
+          }}
+          products={demandOrderData?.material?.filter((item: any) => item?.type == MATERIAL_TYPE.product)?.map((e) => {
+            return { ...e, product: e.materialId };
+          })}
+          services={demandOrderData?.material?.filter((item: any) => item?.type == MATERIAL_TYPE.service)?.map((e) => {
+            return { ...e, service: e.materialId };
+          })}
+          warehouseId={demandOrderData?.warehouse?.optionValue}
+        />
+      )}
+      {convertDialog.open && convertDialog.type === sidebarResource.productionOrder && (
+        <ManageProductionOrder
+          isClone={false}
+          productionOrderId={null}
+          onClose={() => setConvertDialog({ open: false, type: '' })}
+          onSuccess={(data) => {
+            handleConvertSuccess(data)
+          }}
+          referenceData={{ warehouse: demandOrderData?.warehouse?.optionValue }}
         />
       )}
     </Box>

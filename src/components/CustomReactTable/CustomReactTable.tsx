@@ -1,3 +1,5 @@
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { restrictToHorizontalAxis } from '@dnd-kit/modifiers';
 import { useMediaQuery } from '@material-ui/core';
 import {
   ExpandedState,
@@ -15,21 +17,19 @@ import {
 } from '@tanstack/react-table';
 import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
-import { DndProvider } from 'react-dnd';
-import { HTML5Backend } from 'react-dnd-html5-backend';
-import { TouchBackend } from 'react-dnd-touch-backend';
+import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
 import { useData } from 'src/StateProvider/Provider';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
-import { useDebounce } from 'src/hooks';
+import { useDebounce, useDndSensors } from 'src/hooks';
 import xlsx from 'xlsx-js-style';
 import { dateTimeFormat, gridPageSizes } from '../../constants/helpers';
 import GridHeader from './GridHeader';
 import { fuzzyFilter, serverFilter } from './ReactTableHelpers';
 import Pagination from './TableComponents/Pagination';
 import TableComponent from './TableComponents/Table';
+import { DraggableHeader } from './TableComponents/TableHelperComponents';
 import { useCreateColumns } from './hooks/useCreateColumns';
 import type { TInitialState } from './hooks/useTableReducer';
 import {
@@ -43,8 +43,6 @@ import {
   updateGridHiddenColumns,
   useSkipper
 } from './utils';
-import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
-import { isEmpty } from 'lodash';
 
 let exportTimeout;
 
@@ -129,6 +127,7 @@ const CustomReactTable = ({
   const [sortedColumns, setSortedColumns] = useState([]);
   const [getsorting, setSorting] = useState([]);
   const [exportTableView, setExportTableView] = useState(false);
+  const [activeHeader, setActiveHeader] = useState(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
 
   const { setSavedFilters } = useContext(FiltersContext);
@@ -141,23 +140,14 @@ const CustomReactTable = ({
   }, [newColumns]);
 
   // Column DND
-  function reorder(draggedColumnId: string, targetColumnId: string, columnOrder: string[]) {
+  function reorder(draggedColumnId: string, targetColumnId: string) {
     const newColumnOrder = columnOrder.toSpliced(
       columnOrder.indexOf(targetColumnId),
       0,
       columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string
     );
-    const dragItem = newColumns.find((col) => col?.id === draggedColumnId || col?.accessor === draggedColumnId);
-
     const stickyColumns = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection }).stickyColumns;
-
-    if (stickyColumns.includes(dragItem?.id)) return;
-
-    const newBaseColumns = [...baseColumns].sort(
-      (a, b) => columnOrder.findIndex((d) => d === a.accessor) - columnOrder.findIndex((d) => d === b.accessor)
-    );
-
-    const newcolumnOrderToSave = newBaseColumns?.filter((o) => !stickyColumns?.includes(o?.id))?.map((o) => o?.id);
+    const newcolumnOrderToSave = newColumnOrder?.filter((o) => !stickyColumns?.includes(o));
 
     updateGridHiddenColumns({
       renderedFrom,
@@ -165,6 +155,7 @@ const CustomReactTable = ({
       columnOrder: newcolumnOrderToSave
     });
     dispatch({ type: 'setColumnOrder', columnOrder: newColumnOrder });
+    table.setColumnOrder(newColumnOrder);
     return [...columnOrder];
   }
 
@@ -204,7 +195,7 @@ const CustomReactTable = ({
         }
       });
       dispatch({ type: 'filter', filters: tempResult, loading: isClientSideGrid ? false : true });
-      if(!isClientSideGrid) setSavedFilters(prev => ({ ...prev, [resource]: tempResult }));
+      if (!isClientSideGrid) setSavedFilters((prev) => ({ ...prev, [resource]: tempResult }));
     }
   };
 
@@ -480,8 +471,22 @@ const CustomReactTable = ({
     }, 0);
   };
 
+  const onDragEnd = (event: DragEndEvent) => {
+    setActiveHeader(null);
+    if (!event.over) return;
+    const { active, over } = event;
+    if (active.id === over.id) return;
+    reorder(active.id as string, over.id as string);
+    // table.setColumnOrder(newColumnOrder);
+  };
+  const onDragStart = (event: DragStartEvent) => {
+    if (!event?.active) return;
+    setActiveHeader(event.active.data.current.props);
+  };
+
+  const sensors = useDndSensors();
   return (
-    <DndProvider backend={isMobile || isTablet ? TouchBackend : HTML5Backend}>
+    <DndContext onDragEnd={onDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToHorizontalAxis]}>
       {exportTableView && (
         <div className="hidden [&_.hide-in-export]:!hidden">
           <TableComponent
@@ -496,7 +501,6 @@ const CustomReactTable = ({
             cellValue={cellValue}
             resetField={resetField}
             isClientSideGrid={isClientSideGrid}
-            reorder={reorder}
             loading={loading}
             exportTableView={true}
             error={error}
@@ -506,7 +510,6 @@ const CustomReactTable = ({
           />
         </div>
       )}
-
       <div className="react-table-v8 ">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
@@ -542,7 +545,6 @@ const CustomReactTable = ({
                 cellValue={cellValue}
                 resetField={resetField}
                 isClientSideGrid={isClientSideGrid}
-                reorder={reorder}
                 loading={loading}
                 error={error}
                 height={height}
@@ -592,7 +594,14 @@ const CustomReactTable = ({
           )}
         </div>
       </div>
-    </DndProvider>
+      <DragOverlay>
+        {activeHeader && (
+          <span className="react-table-v8 block overflow-hidden max-h-[45px] [&_.drag-handle]:!cursor-grabbing">
+            <DraggableHeader overlayMode={true} {...activeHeader} />
+          </span>
+        )}
+      </DragOverlay>
+    </DndContext>
   );
 };
 export default CustomReactTable;

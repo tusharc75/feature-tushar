@@ -1210,6 +1210,14 @@ const routes = {
     title: storedRoutes && storedRoutes.resourceDoaRequest && storedRoutes.resourceDoaRequest.title ? storedRoutes.resourceDoaRequest?.title : sidebarResource.resourceDoaRequest,
     path: '/resource-doa-request'
   },
+  subcontractAssembly: {
+    title: storedRoutes && storedRoutes.subcontractAssembly && storedRoutes.subcontractAssembly.title ? storedRoutes.subcontractAssembly?.title : sidebarResource.subcontractAssembly,
+    path: '/subcontract-assembly'
+  },
+  subcontractAssemblyDetail: {
+    title: storedRoutes && storedRoutes.subcontractAssembly && storedRoutes.subcontractAssembly.title ? storedRoutes.subcontractAssembly?.title : sidebarResource.subcontractAssembly,
+    path: '/subcontract-assembly/detail'
+  },
 };
 
 export default routes;

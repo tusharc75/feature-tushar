@@ -13,7 +13,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
-import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -32,7 +32,16 @@ import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import Technicians from './Technicians';
 
-const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }: any) => {
+const Services = ({
+  rentalManagementData,
+  setNextStep,
+  setNextStepToolTip,
+  renderedFrom,
+  stepFullScreen,
+  allowedToEdit,
+  quotationApproved,
+  quotationStatus,
+  fetchRentalManagementData }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -81,7 +90,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
 
   const createColumns = () => {
     setColumns(null);
-    const data = [...allFields];
+    const data = [...allFields]?.filter(f => f?.isRead);
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
@@ -450,6 +459,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchData();
+        if ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced]?.includes(rentalManagementData?.status)) {
+          fetchRentalManagementData()
+        }
         setSubmitting(false);
       })
       .catch((error) => {
@@ -612,7 +624,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         isAddButtonVisible={true}
         addButtonMenuItems={addButtonMenuItems()}
         addButtonProps={{
-          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``,
+          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``,
           disabled: !allowedToEdit || quotationApproved
         }}
         isActionButtonVisible={true}

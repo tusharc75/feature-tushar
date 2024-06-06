@@ -1,10 +1,10 @@
-import { Draggable } from '@hello-pangea/dnd';
-import { Box, Grid, IconButton, ThemeOptions, Typography, makeStyles } from '@material-ui/core';
+import { useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { Box, IconButton, ThemeOptions, Typography, makeStyles } from '@material-ui/core';
 import { Delete, Edit } from '@material-ui/icons';
 import RenderIcon from './RenderIcon';
 import { IFormDataType } from './builderHelpers';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
+import { colSpans } from 'src/constants/helpers';
 
 const useClasses = makeStyles((theme: ThemeOptions) => ({
   paper: {
@@ -48,44 +48,27 @@ const DashboardItem = ({ id, formData, handleEdit, handleRemove, selectedData, i
   const classes = useClasses();
 
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
-    id: formData._id,
+    id: formData.uniqueId,
     data: {
       type: 'formData',
       index
     }
   });
 
-  const isEditing = selectedData?.uniqueId === id;
+  const isEditing = Boolean(selectedData) && selectedData?.uniqueId === id;
   const CHART_TYPE = formData.chartType || formData.graphType;
 
-  const style = {
-    opacity: isDragging ? 0.5 : undefined,
+  const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
     transition
   };
 
-  const colSpans = [
-    'col-span-1',
-    'col-span-2',
-    'col-span-3',
-    'col-span-4',
-    'col-span-5',
-    'col-span-6',
-    'col-span-7',
-    'col-span-8',
-    'col-span-9',
-    'col-span-10',
-    'col-span-11',
-    'col-span-12'
-  ];
-
   return (
-    <li ref={setNodeRef} {...attributes} {...listeners} className={colSpans[formData.column - 1]} style={style}>
+    <li ref={setNodeRef} {...attributes} {...listeners} className={`${colSpans[formData.column - 1]}  list-none`} style={style}>
       <Box
-        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] `}
-        style={{
-          backgroundColor: isEditing ? 'var(--dark-primary,#dedede)' : 'var(--dark-secondary, white)'
-        }}
+        className={`${classes.paper} [border:1px_solid_var(--common-border-color)] ${
+          isEditing || isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,_white)]'
+        }`}
       >
         <Box>
           <Typography className={classes.title}>{formData.chartTitle}</Typography>

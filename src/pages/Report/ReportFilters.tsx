@@ -24,6 +24,7 @@ import { dateFormat } from '../../constants/helpers';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmDialog from '../../components/Helpers/ConfirmationDialog';
 import axiosInstance from '../../axios/axiosInstance';
+import AsyncDropdown from "src/components/Helpers/FormTypes/AsyncDropdown";
 import moment from 'moment';
 
 interface FiltersProps {
@@ -206,7 +207,11 @@ const ReportFilters = (props: FiltersProps) => {
     };
 
     if (Array.isArray(value)) {
-      newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
+      if(!fieldProps.lookup){
+        newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
+      }else{
+        newData.value = value;
+      }
       setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
     } else {
       newData.value = value;
@@ -497,7 +502,22 @@ const ReportFilters = (props: FiltersProps) => {
                 <React.Fragment key={field._id}>
                   {field.fieldName !== 'all' && field.type !== 'date' && (
                     <div>
-                      <FormTypes
+                      {field?.lookup ? (
+                       <AsyncDropdown
+                        resource={field.lookupResource}
+                        errors={error}
+                        touched={error}
+                        multiple={reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? false : true : true}
+                        value= {formValues[field.fieldName]}
+                        onChange = {(_, value) => {
+                          handleSelectFilter(field?.type, field?.fieldName, value);
+                        }}
+                        fieldName={field.fieldName}
+                        fieldLabel={field.fieldLabel}
+                        required={reportConfig?.defaultColumn ? field?.required : false}
+                       />
+                      ): (
+                       <FormTypes
                         values={formValues}
                         errors={error}
                         touched={error}
@@ -515,6 +535,7 @@ const ReportFilters = (props: FiltersProps) => {
                         size="small"
                         fromFilter={true}
                       />
+                         )}
                     </div>
                   )}
                   {field.type === 'date' && (

@@ -1,4 +1,3 @@
-import { DragDropContext, Draggable, DraggableProvidedDragHandleProps, DropResult, Droppable } from '@hello-pangea/dnd';
 import {
   Box,
   Button,
@@ -20,7 +19,7 @@ import {
 import { DragHandle } from '@material-ui/icons';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
-import React, { Dispatch, useEffect } from 'react';
+import React, { Dispatch, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -28,6 +27,11 @@ import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
 import { TActios, TInitialState } from '../hooks/useTableReducer';
+
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useDndSensors } from 'src/hooks';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -64,6 +68,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
   const [error, setError] = React.useState(null);
   const [reportName, setReportName] = React.useState(selectedReportView ? selectedReportView.name : '');
   const [isSubmitting, setSubmitting] = React.useState(false);
+  const [activeItem, setActiveItem] = useState(null);
 
   const toastConfig = React.useContext(CustomToastContext);
 
@@ -204,28 +209,27 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
     }
   };
 
-  const moveItem = React.useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
-      const dragIndex = result.source.index;
-      const dropIndex = result.destination?.index;
+  const moveItem = (event: DragEndEvent) => {
+    setActiveItem(null);
+    if (!event.over || event.active.id === event.over.id) return;
+    const { active, over } = event;
+    const dragIndex = active.data.current?.index;
+    const dropIndex = over.data.current?.index;
 
-      const dragCard = sortedColumns[dragIndex];
-      const hoverCard = sortedColumns[dropIndex];
+    const dragCard = sortedColumns[dragIndex];
+    const hoverCard = sortedColumns[dropIndex];
 
-      if (dragCard?.accessor === 'action' || dragCard?.accessor === 'selection' || dragCard?.lockPosition) return;
-      if (hoverCard?.accessor === 'action' || hoverCard?.accessor === 'selection' || hoverCard?.lockPosition) return;
+    if (dragCard?.accessor === 'action' || dragCard?.accessor === 'selection' || dragCard?.lockPosition) return;
+    if (hoverCard?.accessor === 'action' || hoverCard?.accessor === 'selection' || hoverCard?.lockPosition) return;
 
-      const columnsForGrid = update(sortedColumns, {
-        $splice: [
-          [dragIndex, 1],
-          [dropIndex, 0, dragCard]
-        ]
-      });
-      setSortedColumns([...columnsForGrid]);
-    },
-    [sortedColumns]
-  );
+    const columnsForGrid = update(sortedColumns, {
+      $splice: [
+        [dragIndex, 1],
+        [dropIndex, 0, dragCard]
+      ]
+    });
+    setSortedColumns([...columnsForGrid]);
+  };
 
   useEffect(() => {
     if (!searchVal) return;
@@ -235,6 +239,13 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
     });
     setSearchedColumns(matchedColumns);
   }, [searchVal]);
+
+  const sensors = useDndSensors();
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!event?.active) return;
+    setActiveItem(event.active.data.current.props);
+  };
 
   return (
     <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet)}>
@@ -269,11 +280,11 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
         <List
           disablePadding
           subheader={
-            <Box className="flex items-center flex-wrap sm:gap-2">
+            <Box className="flex flex-wrap items-center sm:gap-2">
               <ListSubheader disableGutters disableSticky>
                 Toggle and Drag & Drop to arrange
               </ListSubheader>
-              <div className="sm:ml-auto sm:w-1/2 w-full">
+              <div className="w-full sm:ml-auto sm:w-1/2">
                 <TextField
                   type="search"
                   fullWidth
@@ -307,34 +318,22 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
 
           {!searchVal ? (
             <>
-              <DragDropContext onDragEnd={moveItem}>
-                <Droppable droppableId="arrangeView">
-                  {(provided) => (
-                    <ul className="list-none" {...provided.droppableProps} ref={provided.innerRef}>
-                      {sortedColumns.map((column, index) => (
-                        <Draggable key={column.accessor} draggableId={column.accessor} index={index} isDragDisabled={column.disabled}>
-                          {(provided, snapshot) => (
-                            <li
-                              {...provided.draggableProps}
-                              ref={provided.innerRef}
-                              className={`${snapshot.isDragging ? ' bg-[var(--dark-secondary,#ebebeb)]' : ''} transition-colors`}
-                            >
-                              <RenderListItem
-                                key={column.accessor}
-                                dragHandleProps={provided.dragHandleProps}
-                                column={column}
-                                handleToggle={handleToggle}
-                                index={index}
-                              />
-                            </li>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </ul>
+              <DndContext onDragEnd={moveItem} sensors={sensors} onDragStart={onDragStart}>
+                <ul className="list-none">
+                  <SortableContext items={sortedColumns.map((d) => d.accessor)}>
+                    {sortedColumns.map((column, index) => (
+                      <RenderListItem key={column.accessor} column={column} handleToggle={handleToggle} index={index} />
+                    ))}
+                  </SortableContext>
+                </ul>
+                <DragOverlay>
+                  {activeItem && (
+                    <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
+                      <RenderListItem {...activeItem} />
+                    </span>
                   )}
-                </Droppable>
-              </DragDropContext>
+                </DragOverlay>
+              </DndContext>
             </>
           ) : searchedColumns.length > 0 ? (
             searchedColumns.map(
@@ -395,33 +394,53 @@ interface ItemProps {
   column: any;
   handleToggle: any;
   index: number;
-  dragHandleProps: DraggableProvidedDragHandleProps;
 }
 
 const RenderListItem = (props: ItemProps) => {
-  const { column, handleToggle, index, dragHandleProps } = props;
+  const { column, handleToggle, index } = props;
+
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+    id: column.accessor,
+    data: {
+      type: 'Column',
+      index,
+      props: { column, handleToggle, index }
+    },
+    disabled: column.disabled
+  });
+
+  const style = {
+    transform: CSS.Translate.toString(transform),
+    transition
+  };
 
   return ['left', 'right']?.includes(column?.sticky) || ['selection', 'expander'].includes(column.accessor) ? (
     <div className="d-none"></div>
   ) : (
-    <div
-      className={`p-[8px_17px_8px_0] flex items-center [border-bottom:1px_solid_var(--common-border-color)] ${
-        index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-      } ${column.disabled ? ' opacity-65 pointer-events-none' : ''}`}
+    <li
+      ref={setNodeRef}
+      style={style}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,#fff)]'} transition-colors`}
     >
-      <ListItemIcon className={` pl-2`} {...dragHandleProps}>
-        <DragHandle />
-      </ListItemIcon>
-      <ListItemText id={column.accessor} primary={column.Header || startCase(column?.accessor)} />
-      <Switch
-        size="small"
-        disabled={column.disabled}
-        checked={column.isVisible}
-        onChange={(e) => {
-          handleToggle(column, e);
-        }}
-      />
-    </div>
+      <div
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
+          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+        } ${column.disabled ? ' pointer-events-none opacity-65' : ''}`}
+      >
+        <ListItemIcon className={` cursor-grab pl-2 ${isDragging ? ' cursor-grabbing' : ''}`} {...attributes} {...listeners}>
+          <DragHandle />
+        </ListItemIcon>
+        <ListItemText id={column.accessor} primary={column.Header || startCase(column?.accessor)} />
+        <Switch
+          size="small"
+          disabled={column.disabled}
+          checked={column.isVisible}
+          onChange={(e) => {
+            handleToggle(column, e);
+          }}
+        />
+      </div>
+    </li>
   );
 };
 

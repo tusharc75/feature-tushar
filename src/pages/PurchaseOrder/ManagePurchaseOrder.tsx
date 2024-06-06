@@ -37,7 +37,8 @@ const ManagePurchaseOrder = ({
   currency = null,
   rentalManagementId = null,
   warehouseId = null,
-  refrenceData = null
+  refrenceData = null,
+  isRedirectTodetailPage = true
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -74,15 +75,10 @@ const ManagePurchaseOrder = ({
                 const { _id, createdBy, updatedBy, serialNumber, purchaseOrderNumber, ...rest } = data;
                 rest['status'] = PURCHASE_ORDER_STATUS.open;
                 rest['purchaseOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
-                if (fieldsDataForCreate?.filter((e) => e.fieldName === 'purchaseOrderDate').length) {
-                  rest['purchaseOrderDate'] = new Date();
-                }
-                if (fieldsDataForCreate?.filter((e) => e.fieldName === 'deliveryDate').length) {
-                  rest['deliveryDate'] = new Date();
-                }
+
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
                 });
                 setCloneHeading(purchaseOrderNumber);
                 setLoading(false);
@@ -114,6 +110,11 @@ const ManagePurchaseOrder = ({
           }
           if (currency) {
             createValues['currency'] = currency;
+          }
+          else {
+            if (fieldsDataForCreate?.find((e) => e.fieldName === 'currency')) {
+              createValues['currency'] = user.user?.brandCurrency;
+            }
           }
           if (refrenceData) {
             if (fieldsDataForCreate.some((e) => e.fieldName === 'wellName')) {
@@ -155,27 +156,24 @@ const ManagePurchaseOrder = ({
           setLoading(false);
           toastConfig.setToastConfig(error);
         });
-    } else {
+    }
+    else {
       if (products?.length) {
         values.products = products;
       }
       if (services?.length) {
         values.services = services;
       }
-      axiosInstance()
-        .post(`${purchaseOrder.api}`, values)
-        .then(({ data: { data } }) => {
-          setLoading(false);
-          if (products?.length || services?.length) {
-            onSuccess(data);
-          } else {
-            history.push(`${purchaseOrder.api}/detail/${data._id}`);
-          }
-        })
-        .catch((error) => {
-          setLoading(false);
-          toastConfig.setToastConfig(error);
-        });
+      axiosInstance().post(`${purchaseOrder.api}`, values).then(({ data: { data } }) => {
+        setLoading(false);
+        if (isRedirectTodetailPage) {
+          history.push(`${purchaseOrder.api}/detail/${data._id}`);
+        }
+        onSuccess(data);
+      }).catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
     }
   };
 

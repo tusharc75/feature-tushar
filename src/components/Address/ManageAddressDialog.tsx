@@ -1,7 +1,7 @@
 import { useState, useEffect, Fragment, useContext, useCallback } from 'react';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
-import { GoogleMap, Marker } from '@react-google-maps/api';
+import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -19,13 +19,14 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, referenceData = null }) => {
 
   const {
     state: { user }
   }: any = useData();
-
+  const [themeColor] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -38,6 +39,98 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
   const formikRef = {
     current: null
   };
+
+  const mapDarkTheme: GoogleMapProps['options']['styles'] = [
+    { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+    { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+    { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+    {
+      featureType: 'administrative.locality',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#d59563' }]
+    },
+    {
+      featureType: 'poi',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#d59563' }]
+    },
+    {
+      featureType: 'poi.park',
+      elementType: 'geometry',
+      stylers: [{ color: '#263c3f' }]
+    },
+    {
+      featureType: 'poi.park',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#6b9a76' }]
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry',
+      stylers: [{ color: '#38414e' }]
+    },
+    {
+      featureType: 'road',
+      elementType: 'geometry.stroke',
+      stylers: [{ color: '#212a37' }]
+    },
+    {
+      featureType: 'road',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#9ca5b3' }]
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry',
+      stylers: [{ color: '#746855' }]
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'geometry.stroke',
+      stylers: [{ color: '#1f2835' }]
+    },
+    {
+      featureType: 'road.highway',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#f3d19c' }]
+    },
+    {
+      featureType: 'water',
+      elementType: 'geometry',
+      stylers: [{ color: '#17263c' }]
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.fill',
+      stylers: [{ color: '#515c6d' }]
+    },
+    {
+      featureType: 'water',
+      elementType: 'labels.text.stroke',
+      stylers: [{ color: '#17263c' }]
+    },
+    // { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    // { featureType: 'poi', stylers: [{ visibility: 'off' }] }
+  ];
+
+  const mapLightTheme: GoogleMapProps['options']['styles'] = [
+    {
+      featureType: 'water',
+      stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
+    },
+    { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
+    {
+      featureType: 'road',
+      stylers: [{ saturation: -100 }, { lightness: 45 }]
+    },
+    {
+      featureType: 'road.highway',
+      stylers: [{ visibility: 'simplified' }]
+    },
+  
+    // { featureType: 'transit', stylers: [{ visibility: 'off' }] },
+    // { featureType: 'poi', stylers: [{ visibility: 'off' }] }
+  ];
 
   useEffect(() => {
     if (initialData.fields.length > 0) {
@@ -344,10 +437,12 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                   <p>Drag or click to select new coordinates</p>
                   <Box height={400} width={'100%'} borderRadius={4} overflow="hidden">
                     <GoogleMap
+                      key={themeColor}
                       onClick={(position) => onCordChange(position.latLng)}
                       options={{
                         mapTypeId: google.maps.MapTypeId.ROADMAP,
-                        gestureHandling: 'cooperative'
+                        gestureHandling: 'cooperative',
+                        styles: themeColor === 'dark' ? mapDarkTheme : mapLightTheme,
                       }}
                       mapContainerStyle={{
                         height: '100%',
