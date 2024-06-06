@@ -547,7 +547,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }
         }
 
-        let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
+        let priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
 
         const priceField = allFields?.find((e) => e.fieldName === 'price');
 
