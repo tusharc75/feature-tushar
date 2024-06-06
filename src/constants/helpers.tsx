@@ -3321,7 +3321,6 @@ export const getFileIconSrc = (file) => {
   if (typeof file === 'string') {
     let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
     let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
-    console.log({ file, ext: mimeDb[file], extension, data });
     if (data && data?.icon) return data.icon;
   }
   if (mimeDb[file]) {
