@@ -112,19 +112,24 @@ const FieldList = {
     type: 'url',
     icon: 'far fa-calendar-check'
   },
+  IMAGEUPLOAD: {
+    label: 'Image Upload',
+    type: 'imageUpload',
+    icon: 'far fa-calendar-check'
+  },
+  MULTIIMAGEUPLOAD: {
+    label: 'Multi Image Upload',
+    type: 'multiImageUpload',
+    icon: 'far fa-calendar-check'
+  },
   FILEUPLOAD: {
     label: 'File Upload',
     type: 'fileUpload',
     icon: 'far fa-calendar-check'
   },
   MULTIFILEUPLOAD: {
-    label: ' Multiple File Upload',
+    label: 'Multi File Upload',
     type: 'multiFileUpload',
-    icon: 'far fa-calendar-check'
-  },
-  IMAGEUPLOAD: {
-    label: 'Image Upload',
-    type: 'imageUpload',
     icon: 'far fa-calendar-check'
   },
   NAME: {
@@ -150,11 +155,6 @@ const FieldList = {
   COLORPICKER: {
     label: 'Color Picker',
     type: 'colorPicker',
-    icon: 'far fa-calendar-check'
-  },
-  MULTIIMAGEUPLOAD: {
-    label: 'Multi Image Upload',
-    type: 'multiImageUpload',
     icon: 'far fa-calendar-check'
   },
   RICHTEXTEDITOR: {

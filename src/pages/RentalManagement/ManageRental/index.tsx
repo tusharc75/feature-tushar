@@ -84,7 +84,7 @@ const ManageRentalManagementDialog = ({
             const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data;
             rest['status'] = RENTAL_STATUS.new;
             rest['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-            fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
+            fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName));
             setCloneHeading(rentalJobName);
             setRentalData({
               fields: fieldsDataForCreate,
@@ -100,10 +100,10 @@ const ManageRentalManagementDialog = ({
                 }
               });
             }
-            if (data?.actualStartDate === '') {
+            if (data?.actualStartDate === '' || !data?.actualStartDate) {
               fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualStartDate'].includes(obj.fieldName));
             }
-            if (data?.actualEndDate === '') {
+            if (data?.actualEndDate === '' || !data?.actualEndDate) {
               fieldsDataForUpdate = fieldsDataForUpdate?.filter((obj) => !['actualEndDate'].includes(obj.fieldName));
             }
             setRentalData({
@@ -116,7 +116,7 @@ const ManageRentalManagementDialog = ({
           toastConfig.setToastConfig(error);
         }
       } else {
-        fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate'].includes(obj.fieldName));
+        fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName));
         let initialData = getObjKeys('', fieldsDataForCreate);
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           initialData['currency'] = user.user?.brandCurrency;
@@ -124,8 +124,6 @@ const ManageRentalManagementDialog = ({
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'estimateEndDate')) {
           initialData['estimateEndDate'] = null;
         }
-        initialData['actualStartDate'] = '';
-        initialData['actualEndDate'] = '';
         initialData['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
         if (referenceData) {
           if (fieldsDataForCreate?.some((e) => e.fieldName === 'warehouse')) {
