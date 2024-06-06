@@ -53,6 +53,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
+  const [isApplingDate, setIsApplingDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
@@ -304,7 +305,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          if(element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
+          if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
             calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
           }
           newMaterial.push({ ...element, ...calValues });
@@ -469,6 +470,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   };
 
   const handleApplyDate = async () => {
+    setIsApplingDate(true)
+    dispatch({ type: 'loading', loading: true });
     let tempValues: any = { actualEndDate: endDate };
     const childRows: any = [];
     var inUseStandByDays = [];
@@ -504,7 +507,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     const assetList = selectedRecords?.filter((r) => r?.pricingMethod === 'Per Barrel');
     let rentalUnitVolume;
     if (assetList?.length) {
-      rentalUnitVolume= await axiosInstance().post(
+      rentalUnitVolume = await axiosInstance().post(
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
         assetList?.map((d) => ({ asset: d?._id, fromDate: moment(d?.actualStartDate).format('MM/DD/YYYY'), toDate: moment(endDate).format('MM/DD/YYYY') }))
       );
@@ -609,7 +612,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           );
         } else {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          if(element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
+          if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
             calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
           }
         }
@@ -626,6 +629,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
       return [...prevRowsApplied, ...rows, ...childRows];
     });
+    setIsApplingDate(false)
     setAppliedDate(true);
   };
 
@@ -768,7 +772,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                             <Button
                               variant="contained"
                               color="primary"
-                              disabled={
+                              disabled={isApplingDate ||
                                 !Boolean(
                                   selectedRecords && selectedRecords?.length && (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
