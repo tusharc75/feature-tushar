@@ -401,7 +401,7 @@ const ChartTypes = ({
                             mode: 'index',
                             callbacks: {
                               label: function (context) {
-                                let label = context.dataset.label || context.label || '';
+                                let label = chart?.chartType === 'Bar' ? context.dataset.label : context.label || context.dataset.label || '';
                                 if (label) {
                                   label += ': ';
                                 }
