@@ -25,6 +25,7 @@ import { displayDate, displayDateTime, getUniqueCurrencies } from '../../constan
 import HtmlTooltip from '../CustomTooltipTitle';
 import CarouselDialog from '../CarouselDialog';
 import { camelCase } from 'lodash';
+import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -168,11 +169,13 @@ const Details = (props: DetailProps) => {
    * @param input
    * @returns text
    */
-  const normalizeValues = (values, input) => {
+  const normalizeValues = (values, input): string | any[] => {
     let text = '';
     if ((input.type === 'multiSelect' || input.type === 'dropDown') && input?.dataList) {
       if (input.type === 'multiSelect') {
-        const value = values[`${input?.fieldName}_dataList`]?.length ? values[`${input?.fieldName}_dataList`]?.map((d) => d.optionLabel).join(', ') : ''
+        const value = values[`${input?.fieldName}_dataList`]?.length
+          ? values[`${input?.fieldName}_dataList`]?.map((d) => d.optionLabel).join(', ')
+          : '';
         text = value ? value : '-';
       } else {
         const value = values[`${input?.fieldName}_dataList`]?.optionLabel;
@@ -206,11 +209,11 @@ const Details = (props: DetailProps) => {
     } else if (input.type === 'currencyNumber') {
       const currency = user?.user?.brandCurrency || 'USD';
       const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
-      text = `${currencySymbol}${formatAmountWithCurrency(currency, (values[input.fieldName] || 0))?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`
+      text = `${currencySymbol}${formatAmountWithCurrency(currency, values[input.fieldName] || 0)?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`;
     } else if (input.type === 'currencyAmount') {
       const currency = user?.user?.brandCurrency || 'USD';
       const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
-      text = `${currencySymbol}${formatAmountWithCurrency(currency, (values[`${input.fieldName}_${currency?.toLowerCase()}`] || 0))?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`
+      text = `${currencySymbol}${formatAmountWithCurrency(currency, values[`${input.fieldName}_${currency?.toLowerCase()}`] || 0)?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`;
     } else if (input.type === 'switch') {
       text = values[input.fieldName] ? 'Inactive' : 'Active';
     } else if (input.type === 'checkBox') {
@@ -255,7 +258,8 @@ const Details = (props: DetailProps) => {
   };
 
   // DYNAMIC GRID COLUMN SIZE
-  const dynamicSize = (size, type) => (type === 'imageUpload' || type === 'fileUpload' ? 12 : size);
+  const dynamicSize = (size, type) =>
+    type === 'imageUpload' || type === 'fileUpload' || type === 'multiFileUpload' || type === 'multiImageUpload' ? 12 : size;
 
   /**
    * Render Link  or Typography component
@@ -301,8 +305,8 @@ const Details = (props: DetailProps) => {
         );
       }
     } else {
-      return fieldData.type === 'multiImageUpload' ? (
-        val[fieldData.fieldName] && (
+      if (fieldData.type === 'multiImageUpload' && val[fieldData.fieldName]) {
+        return (
           <div className={classes.imageListContainer}>
             <ImageList className={classes.imageList} cols={2.5}>
               {val[fieldData.fieldName].map((item, i) => (
@@ -319,47 +323,58 @@ const Details = (props: DetailProps) => {
               ))}
             </ImageList>
           </div>
-        )
-      ) : fieldData.type === 'colorPicker' ? (
-        <Box display="flex" alignItems="center">
-          <Box width={16} height={16} borderRadius={'50%'} bgcolor={value} />
-          <Typography variant="body2" className={classes.fieldText}>
-            {value}
-          </Typography>
-        </Box>
-      ) : fieldData.type === 'signature' ? (
-        <Box display="flex" alignItems="center">
-          <Box
-            position="relative"
-            sx={{
-              width: 50,
-              height: 50,
-              borderRadius: '8px',
-              marginRight: '10px',
-              padding: '5px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            {value ? (
-              <img
-                src={value}
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement;
-                  const newItem = document.createElement('p');
-                  newItem.innerHTML = '--';
-                  target.parentNode.replaceChild(newItem, target);
-                }}
-                className='max-w-[50px] max-h-[50px] w-full block h-auto dark:[filter:invert(100%)]'
-                alt="Signature"
-              />
-            ) : (
-              '-'
-            )}
+        );
+      }
+      if (fieldData.type === 'multiFileUpload') {
+        const attachemnts = Array.isArray(value) ? value.map((d) => ({ ...d, name: d.fileName, url: d.fileName })) : [];
+        return <AttachmentThumbnail attachments={attachemnts} canEdit={false} handleDeleteAttachment={() => { }} />;
+      }
+      if (fieldData.type === 'colorPicker') {
+        return (
+          <Box display="flex" alignItems="center">
+            <Box width={16} height={16} borderRadius={'50%'} bgcolor={value} />
+            <Typography variant="body2" className={classes.fieldText}>
+              {value}
+            </Typography>
           </Box>
-        </Box>
-      ) : (
+        );
+      }
+      if (fieldData.type === 'signature') {
+        return (
+          <Box display="flex" alignItems="center">
+            <Box
+              position="relative"
+              sx={{
+                width: 50,
+                height: 50,
+                borderRadius: '8px',
+                marginRight: '10px',
+                padding: '5px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {value ? (
+                <img
+                  src={value}
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    const newItem = document.createElement('p');
+                    newItem.innerHTML = '--';
+                    target.parentNode.replaceChild(newItem, target);
+                  }}
+                  className="block h-auto max-h-[50px] w-full max-w-[50px] dark:[filter:invert(100%)]"
+                  alt="Signature"
+                />
+              ) : (
+                '-'
+              )}
+            </Box>
+          </Box>
+        );
+      }
+      return (
         <Typography title={value === '-' ? '' : value} className={classes.fieldText} variant="body2">
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
@@ -475,7 +490,7 @@ const Details = (props: DetailProps) => {
                           )}
                         </Grid>
                       </Grid>
-                      {field.fieldData.type !== 'imageUpload' && field.fieldData.type !== 'fileUpload'}
+                      {/* {field.fieldData.type !== 'imageUpload' && field.fieldData.type !== 'fileUpload'} */}
                     </Grid>
                   ))}
                 </Grid>

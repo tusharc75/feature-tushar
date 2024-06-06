@@ -24,6 +24,8 @@ import { Slide } from '@material-ui/core';
 import { camelCase, isArray, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { v4 as uuid } from 'uuid';
+import mimeDb from 'mime-db';
+import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -188,7 +190,7 @@ export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
   { name: 'Assign', title: 'Assign', icon: 'assign' },
   { name: 'Loading', title: 'Loading', icon: 'ticket' },
-  { name: 'Receiving', title: 'Receiving', icon: 'ticket' },
+  { name: 'Receiving', title: 'Receiving', icon: 'ticket' }
 ];
 
 //export const WORKORDER_TECHNICIAN_SERVICE_STATUS = ['Backlog', 'Pending', 'In-Progress', 'Completed', 'In-Progress By Other'];
@@ -570,7 +572,7 @@ export const CHILD_RESOURCE = {
   dealsMaterial: 'Deals Material',
   rentalManagementTechnician: 'Rental Management Technician',
   subcontractAssemblyMaterial: 'Subcontract Assembly Material',
-  subcontractAssemblyCost: 'Subcontract Assembly Cost',
+  subcontractAssemblyCost: 'Subcontract Assembly Cost'
 };
 
 export const sidebarResourceObjectFromValues = () => {
@@ -3313,3 +3315,27 @@ export const colSpans = [
   'col-span-11',
   'col-span-12'
 ];
+
+export const getFileIconSrc = (file) => {
+  if (!file) return FileIcon;
+  if (typeof file === 'string') {
+    let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    if (data && data?.icon) return data.icon;
+  }
+  if (mimeDb[file]) {
+    let extension = `.${mimeDb[file].extensions[0]}`;
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    if (data && data?.icon) return data.icon;
+  }
+  if (file?.contentType) {
+    let extension = `.${mimeDb[file.contentType].extensions[0]}`;
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    if (data && data?.icon) return data.icon;
+  } else if (file) {
+    let extension = file.substring(file.lastIndexOf('.')).toLowerCase();
+    let data = fileIcons.find((o) => o.extensions.indexOf(extension) >= 0);
+    if (data && data?.icon) return data.icon;
+  }
+  return FileIcon;
+};
