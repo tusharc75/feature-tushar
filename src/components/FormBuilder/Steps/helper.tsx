@@ -95,6 +95,11 @@ export const resourcePolicy = [
                     type: "multiselect"
                 },
                 {
+                    fieldName: "fieldsReset",
+                    fieldLabel: "Fields Reset",
+                    type: "multiselect"
+                },
+                {
                     fieldName: "sumDecimalField",
                     fieldLabel: "Sum(Decimal Field)",
                     type: "checkBox",
