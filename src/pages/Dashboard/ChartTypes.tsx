@@ -398,18 +398,18 @@ const ChartTypes = ({
                         ...((chart?.currency || chart?.percentage) &&
                         {
                           tooltip: {
+                            mode: 'index',
                             callbacks: {
                               label: function (context) {
-                                let label = context.label || context.dataset.label || '';
+                                let label = context.dataset.label || context.label || '';
                                 if (label) {
                                   label += ': ';
                                 }
-                                if (chart?.currency) {
+                                if (chart?.currency) { 
                                   if (context.parsed.y !== null) {
                                     label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
                                   }
-                                }
-                                else if (chart?.percentage) {
+                                } else if (chart?.percentage) {
                                   label += `${context.parsed}%`;
                                 }
                                 return label;
