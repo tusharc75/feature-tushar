@@ -475,7 +475,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
         {selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 &&
           <MenuItem
             onClick={() => {
-              setAssignSerialNumbersDialog({ open: true, data: selectedRecords?.filter(s => s.type !== 'serialNumber') });
+              setAssignSerialNumbersDialog({ open: true, data: selectedRecords?.filter(s => s.type !== 'serialNumber' && s?.serializedProduct) });
             }}
           >
             {`Assign Serial Numbers`}
