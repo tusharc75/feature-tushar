@@ -395,7 +395,7 @@ const ChartTypes = ({
                     }}
                     options={{
                       plugins: {
-                        ...((chart?.currency || chart?.percentage) &&
+                        ...((chart?.currency || chart?.percentage || chart?.chartType === 'Bar') &&
                         {
                           tooltip: {
                             mode: 'index',
@@ -405,12 +405,12 @@ const ChartTypes = ({
                                 if (label) {
                                   label += ': ';
                                 }
-                                if (chart?.currency) { 
-                                  if (context.parsed.y !== null) {
-                                    label += formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace;
-                                  }
-                                } else if (chart?.percentage) {
+                                if (chart?.percentage) {
                                   label += `${context.parsed}%`;
+                                } else {
+                                  if (context.parsed.y !== null) {
+                                    label +=  chart?.currency ? formatAmountWithCurrency((globalFilters.currency || currency), Number(context.parsed.y) ? context.parsed.y : '00').fullFormatAmountWithoutSpace : context.parsed.y;
+                                  }
                                 }
                                 return label;
                               }
