@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import { GetApp, Image, InfoOutlined, InsertDriveFile } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import { FcApproval } from 'react-icons/fc';
-import { formatAmountWithCurrency, getObjKeysWithValues } from '../../constants/helpers';
+import { formatAmountWithCurrency, getFileIconSrc, getObjKeysWithValues } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -26,6 +26,7 @@ import HtmlTooltip from '../CustomTooltipTitle';
 import CarouselDialog from '../CarouselDialog';
 import { camelCase } from 'lodash';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
+import { PreviewFile } from 'src/components/PreviewFile';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -257,9 +258,10 @@ const Details = (props: DetailProps) => {
     setFormsData(customData);
   };
 
+  const isTypeFile = (type: string) => type === 'imageUpload' || type === 'fileUpload' || type === 'multiFileUpload' || type === 'multiImageUpload';
+
   // DYNAMIC GRID COLUMN SIZE
-  const dynamicSize = (size, type) =>
-    type === 'imageUpload' || type === 'fileUpload' || type === 'multiFileUpload' || type === 'multiImageUpload' ? 12 : size;
+  const dynamicSize = (size, type) => (isTypeFile(type) ? 12 : size);
 
   /**
    * Render Link  or Typography component
@@ -306,6 +308,8 @@ const Details = (props: DetailProps) => {
       }
     } else {
       if (fieldData.type === 'multiImageUpload' && val[fieldData.fieldName]) {
+        const files = Array.isArray(value) ? value : [];
+        if (files.length === 0) return '-';
         return (
           <div className={classes.imageListContainer}>
             <ImageList className={classes.imageList} cols={2.5}>
@@ -325,9 +329,50 @@ const Details = (props: DetailProps) => {
           </div>
         );
       }
+      if (fieldData.type === 'fileUpload') {
+        const Icon = getFileIconSrc(value || '');
+        if (value === '-') return value;
+        return (
+          <div className="flex items-center gap-2">
+            <Icon />
+            <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
+              <span className={`text-truncate tooltip-asdfkljashdfkjas`}>{value}</span>
+            </Typography>
+            <DownloadComponent downloadFile={downloadFile} downloadProgress={downloadProgress} filename={value} isDownloading={isDownloading} />
+          </div>
+        );
+      }
       if (fieldData.type === 'multiFileUpload') {
-        const attachemnts = Array.isArray(value) ? value.map((d) => ({ ...d, name: d.fileName, url: d.fileName })) : [];
-        return <AttachmentThumbnail attachments={attachemnts} canEdit={false} handleDeleteAttachment={() => { }} />;
+        const files = Array.isArray(value) ? value : [];
+        if (files.length > 0) {
+          return (
+            <div className="space-y-2">
+              {files.map((d) => {
+                const Icon = getFileIconSrc(d.fileName || '');
+                return (
+                  <div className="flex gap-2" key={d.fileName}>
+                    <Icon />
+                    <Typography className={classes.fieldText} variant="body2">
+                      {d.fileName}
+                    </Typography>
+                    <DownloadComponent
+                      downloadFile={downloadFile}
+                      downloadProgress={downloadProgress}
+                      filename={d.fileName}
+                      isDownloading={isDownloading}
+                    />
+                    <PreviewFile fileName={d.fileName} />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+        return (
+          <Typography className={classes.fieldText} variant="body2">
+            -
+          </Typography>
+        );
       }
       if (fieldData.type === 'colorPicker') {
         return (
@@ -375,7 +420,7 @@ const Details = (props: DetailProps) => {
         );
       }
       return (
-        <Typography title={value === '-' ? '' : value} className={classes.fieldText} variant="body2">
+        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
               <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank" rel="noopener noreferrer">
@@ -420,7 +465,7 @@ const Details = (props: DetailProps) => {
                       <Grid
                         container
                         alignItems="center"
-                        style={{ border: field.fieldData.type === 'imageUpload' ? 0 : '1px solid var(--dark-mode-border-color, #EDEDED)' }}
+                        style={{ border: isTypeFile(field.fieldData.type) ? 0 : '1px solid var(--dark-mode-border-color, #EDEDED)' }}
                       >
                         <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>
                           <div
@@ -429,7 +474,7 @@ const Details = (props: DetailProps) => {
                           >
                             <h4
                               title={field.fieldData.fieldLabel}
-                              style={{ paddingLeft: field.fieldData.type === 'imageUpload' && 0 }}
+                              style={{ paddingLeft: isTypeFile(field.fieldData.type) && 0 }}
                               className={`text-truncate `}
                             >
                               {field.fieldData.fieldLabel}
@@ -451,41 +496,7 @@ const Details = (props: DetailProps) => {
                             </Box>
                           ) : (
                             <Box display="flex" alignItems="center" className="formdata-text-v1">
-                              {field.fieldData.type === 'fileUpload' && initialVals[field.fieldData.fieldName] ? <InsertDriveFile /> : null}{' '}
                               {renderData(initialVals, field.fieldData)}
-                              {field.fieldData.type === 'fileUpload'
-                                ? initialVals[field.fieldData.fieldName] &&
-                                (isDownloading ? (
-                                  <Box display="flex" alignItems="center">
-                                    {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
-
-                                    <Box marginLeft={1} position="relative" display="inline-flex">
-                                      <CircularProgress size={30} variant="determinate" value={downloadProgress} />
-                                      <Box
-                                        top={0}
-                                        left={0}
-                                        bottom={0}
-                                        right={0}
-                                        position="absolute"
-                                        display="flex"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                      >
-                                        <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
-                                      </Box>
-                                    </Box>
-                                  </Box>
-                                ) : (
-                                  <IconButton
-                                    title={`Download ${initialVals[field.fieldData.fieldName]}`}
-                                    disabled={isDownloading}
-                                    size="small"
-                                    onClick={() => downloadFile(normalizeValues(initialVals, field.fieldData))}
-                                  >
-                                    <GetApp />
-                                  </IconButton>
-                                ))
-                                : null}{' '}
                             </Box>
                           )}
                         </Grid>
@@ -501,6 +512,31 @@ const Details = (props: DetailProps) => {
       })}
       {dialogData && dialogData.open && <CarouselDialog index={dialogData.index} close={() => setDialogData(null)} images={dialogData.images} />}
     </div>
+  );
+};
+
+const DownloadComponent = ({ isDownloading, downloadProgress, downloadFile, filename }) => {
+  return isDownloading ? (
+    <Box display="flex" alignItems="center">
+      {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
+
+      <Box marginLeft={1} position="relative" display="inline-flex">
+        <CircularProgress size={30} variant="determinate" value={downloadProgress} />
+        <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
+          <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
+        </Box>
+      </Box>
+    </Box>
+  ) : (
+    <IconButton
+      title={`Download ${filename}`}
+      disabled={isDownloading}
+      size="small"
+      style={{ padding: 3, width: 30, height: 30 }}
+      onClick={() => downloadFile(filename)}
+    >
+      <GetApp fontSize="small" />
+    </IconButton>
   );
 };
 
