@@ -220,26 +220,23 @@ const ReceivingTicket = ({
       } else {
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
-        productAssets = productAssets
-          .map((d) => {
-            return {
-              ...d.inventory,
-              uniqueId: d._id,
-              rentalAssetStatus: d.status,
-              startDate: d.actualStartDate || d.startDate,
-              endDate: d.actualEndDate || d.endDate,
-              manualStartDate: d.manualStartDate,
-              manualEndDate: d.manualEndDate,
-              isReplaced: d.isReplaced,
-              replaceReason: d.replaceReason,
-              replaceAsset: d?.replaceAsset
-                ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
-                : '',
-              description: d?.product?.productDescription,
-              wellNumber: d?.inventory?.wellNumber,
-              position: d?.inventory?.position
-            };
-          })
+        productAssets = productAssets.map((d) => {
+          return {
+            ...d.inventory,
+            uniqueId: d._id,
+            rentalAssetStatus: d.status,
+            startDate: d.actualStartDate || d.startDate,
+            endDate: d.actualEndDate || d.endDate,
+            manualStartDate: d.manualStartDate,
+            manualEndDate: d.manualEndDate,
+            isReplaced: d?.isReplaced,
+            replaceReason: d?.replaceReason,
+            replaceAsset: d?.replaceAsset?.optionLabel,
+            description: d?.product?.productDescription,
+            wellNumber: d?.inventory?.wellNumber,
+            position: d?.inventory?.position
+          };
+        })
           .map((u) => ({
             ...u,
             type: 'Asset',
@@ -1088,7 +1085,7 @@ const ReceivingTicket = ({
                         setServiceLogDialog({ open: true, data: row?.original });
                       }}
                     >
-                      <VisibilityIcon fontSize="small" color='primary'/>
+                      <VisibilityIcon fontSize="small" color='primary' />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
@@ -2445,13 +2442,16 @@ const ActionButtonMenuItems = ({
       } else if (action === rentalManagementActions.cancelReceivingReturnTicket) {
         if (!e.hasOwnProperty('receivingTicketId') && !e.hasOwnProperty('returnTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingReturnNotCreated });
-        } else if (
+        }
+        else if (
           ![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.receivingTicketStatus) &&
           ![DELIVERY_TICKET_STATUS.inTransit, DELIVERY_TICKET_STATUS.delivered]?.includes(e?.returnTicketStatus)
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.inTransitDeliveredLoadingTicket });
         } else if (e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
-          if (![ASSET_STATUS.underReview]?.includes(e?.status) && e?.type === 'Asset') {
+          if (!e?.isReplaced && e?.type === 'Asset') {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketCanNotCancelledForReplaceedAssets });
+          } else if (![ASSET_STATUS.underReview]?.includes(e?.status) && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
           } else if (![RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return, 'Returned']?.includes(e?.rentalAssetStatus)) {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.rentalStatusCompleteCancelReceiving });

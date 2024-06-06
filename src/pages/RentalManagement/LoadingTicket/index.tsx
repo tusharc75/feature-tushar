@@ -160,14 +160,12 @@ const LoadingTicket = ({
         const response = await axiosInstance().get(`${rentalManagement.api}/${rentalManagementData._id}/inventory`);
         productAssets = response?.data?.data;
 
-        productAssets = productAssets?.filter((e) => e.replace != true).map((d) => ({
+        productAssets = productAssets.map((d) => ({
           ...d.inventory,
           uniqueId: d._id,
-          isReplaced: d.isReplaced,
-          replaceReason: d.replaceReason,
-          replaceAsset: d?.replaceAsset
-            ? productAssets?.find((ele) => ele?.inventory?._id === d?.replaceAsset)?.inventory?.assetNumber || d?.replaceAsset
-            : '',
+          isReplaced: d?.isReplaced,
+          replaceReason: d?.replaceReason,
+          replaceAsset: d?.replaceAsset?.optionLabel,
           rentalAssetStatus: d?.status,
           startDate: d?.startDate,
           description: d?.product?.productDescription,
