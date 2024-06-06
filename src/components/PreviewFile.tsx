@@ -112,6 +112,8 @@ export const PreviewFile = ({ fileName, component = 'IconButton', showDownload =
     return createElement(component, props, children);
   };
 
+  if (!fileName) return null;
+
   return (
     <div>
       {showDownload && (
