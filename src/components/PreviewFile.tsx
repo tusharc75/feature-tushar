@@ -1,23 +1,31 @@
-import { Dialog, IconButton } from '@material-ui/core';
+import { CircularProgress, Dialog, Icon, IconButton, MenuItem } from '@material-ui/core';
+import { GetApp } from '@material-ui/icons';
 import PreviewIcon from '@material-ui/icons/Visibility';
-import { useContext, useState } from 'react';
+import { createElement, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
 const validExtensions = imageExtensions.concat(pdfExtensions);
 
-export const PreviewFile = ({ fileName }) => {
+export type PreviewFileProps = {
+  fileName: string;
+  component?: 'IconButton' | 'MenuItem' | keyof HTMLElementTagNameMap;
+  showDownload?: boolean;
+};
+
+export const PreviewFile = ({ fileName, component = 'IconButton', showDownload = false }: PreviewFileProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [downloadProgress, setDownloadProgress] = useState(-1);
   const [downloading, setDownloading] = useState(false);
   const [imageDialogData, setImageDialogData] = useState({ open: false, url: '', fileName });
 
-  const downloadFile = async (fileName, setDialogUrl = false): Promise<any> => {
+  const downloadFile = async (fileName, setDialogUrl = false, showDownload = false): Promise<any> => {
     if (!fileName) return;
     toastConfig.setToastConfig({
       open: true,
@@ -34,11 +42,13 @@ export const PreviewFile = ({ fileName }) => {
           let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
           setDownloadProgress(percentCompleted);
           if (percentCompleted === 100) {
-            toastConfig.setToastConfig({
-              message: 'File Downloaded Successfully',
-              open: true,
-              type: 'success'
-            });
+            if (!setDialogUrl) {
+              toastConfig.setToastConfig({
+                message: 'File Downloaded Successfully',
+                open: true,
+                type: 'success'
+              });
+            }
             setTimeout(() => {
               setDownloadProgress(-1);
               setDownloading?.(false);
@@ -49,6 +59,14 @@ export const PreviewFile = ({ fileName }) => {
       setDownloading(false);
       if (setDialogUrl) {
         setImageDialogData({ open: true, url: URL.createObjectURL(new Blob([data])), fileName });
+      }
+      if (showDownload) {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
       } else {
         return data;
       }
@@ -84,20 +102,65 @@ export const PreviewFile = ({ fileName }) => {
     }
   };
 
-  if (!validExtensions.includes(extension)) return null;
+  const RenderButton = ({ children, ...props }) => {
+    if (component === 'IconButton') {
+      return createElement(IconButton, { ...props, size: 'small', style: { width: 30, height: 30, padding: 3 } }, children);
+    }
+    if (component === 'MenuItem') {
+      return createElement(MenuItem, props, children);
+    }
+    return createElement(component, props, children);
+  };
 
   return (
     <div>
-      <IconButton disabled={downloading} size="small" style={{ width: 30, height: 30, padding: 3 }} onClick={handleClick}>
-        <PreviewIcon fontSize="small" color="primary" />
-      </IconButton>
+      {showDownload && (
+        <HtmlTooltip title={'Download'} leaveTouchDelay={0} leaveDelay={0}>
+          <RenderButton disabled={downloading} onClick={() => downloadFile(fileName, false, showDownload)}>
+            {component === 'IconButton' ? (
+              downloading ? (
+                `${downloadProgress}%`
+              ) : (
+                <GetApp fontSize="small" />
+              )
+            ) : downloading ? (
+              `Downloading - ${downloadProgress}%`
+            ) : (
+              'Download'
+            )}
+          </RenderButton>
+        </HtmlTooltip>
+      )}
+      {validExtensions.includes(extension) && (
+        <HtmlTooltip title={`Preview ${pdfExtensions.includes(extension) ? 'PDF' : 'image'}`} leaveTouchDelay={0} leaveDelay={0}>
+          <RenderButton disabled={downloading} onClick={handleClick}>
+            {component === 'IconButton' ? (
+              <PreviewIcon fontSize="small" color="primary" />
+            ) : (
+              `Preview ${pdfExtensions.includes(extension) ? 'PDF' : 'image'}`
+            )}
+          </RenderButton>
+        </HtmlTooltip>
+      )}
       {imageDialogData.open && (
         <ViewImage
           downloadProgress={downloadProgress}
           imageDialogData={imageDialogData}
-          close={() => setImageDialogData({ open: false, image: '', fileName })}
+          close={() => setImageDialogData({ open: false, url: '', fileName })}
         />
       )}
+      {/* {showDownload && downloading && (
+        <div className="flex items-center">
+          {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
+
+          <div className="relative ml-1 inline-flex">
+            <CircularProgress size={30} variant="determinate" value={downloadProgress} />
+            <div className="absolute inset-0 bottom-0 left-0 right-0 top-0 flex items-center justify-center">
+              <p>{downloadProgress}%</p>
+            </div>
+          </div>
+        </div>
+      )} */}
     </div>
   );
 };

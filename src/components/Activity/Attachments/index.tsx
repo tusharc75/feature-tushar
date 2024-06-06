@@ -31,6 +31,7 @@ import ManageAttachment from './ManageAttachment';
 import type { TNestedTree } from './helper';
 import { sortFileStructure, unflatten } from './helper';
 import mime from 'mime';
+import { PreviewFile } from 'src/components/PreviewFile';
 
 export default function Attachments({ relatedTo, handleActivityRefresh, onSetCount }) {
   const [open, setOpen] = useState({ open: false, type: 'file', parentFolder: null, purpose: 'add' });
@@ -91,7 +92,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
 
   const folderIconButtons = (attachment) => {
     return (
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-2">
         <HtmlTooltip title={'Create File'}>
           <IconButton
             size="small"
@@ -150,7 +151,7 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
 
   const fileIconButtons = (attachment) => {
     return permissions['attachment']?.isUpdate || permissions['attachment']?.isDelete ? (
-      <div className="flex gap-2 items-center">
+      <div className="flex items-center gap-2">
         <HtmlTooltip title={'Send Email'}>
           <IconButton
             size="small"
@@ -258,24 +259,29 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
   };
 
   const handleMail = (data) => {
-    const attachments: any = []
-    Promise.all(data?.file.map(async file => {
-      await axiosInstance().get(`user/download?fileName=${file?.url}`, { responseType: 'blob' }).then(({ data }) => {
-        let reader = new FileReader();
-        reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
-        reader.onloadend = function () {
-          let base64data: any = reader.result;
-          attachments.push({
-            base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
-            contentType: base64data.split(';')[0].split(':')[1],
-            extension: `.${file.url.split('.')?.pop()}`,
-            name: file.name
+    const attachments: any = [];
+    Promise.all(
+      data?.file.map(async (file) => {
+        await axiosInstance()
+          .get(`user/download?fileName=${file?.url}`, { responseType: 'blob' })
+          .then(({ data }) => {
+            let reader = new FileReader();
+            reader.readAsDataURL(new Blob([data], { type: mime.getType(file.url.split('.')?.pop()) }));
+            reader.onloadend = function () {
+              let base64data: any = reader.result;
+              attachments.push({
+                base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+                contentType: base64data.split(';')[0].split(':')[1],
+                extension: `.${file.url.split('.')?.pop()}`,
+                name: file.name
+              });
+            };
           })
-        };
-      }).catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-    })).finally(() => {
+          .catch((err) => {
+            toastConfig.setToastConfig(err);
+          });
+      })
+    ).finally(() => {
       setEmailAttachment(attachments);
       setSendMail(true);
     });
@@ -517,6 +523,11 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               {permissions['attachment']?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
               <MenuItem onClick={handleDownload}>Download</MenuItem>
               {permissions['attachment']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
+              {attachmentData && (
+                <span onClick={handleCloseMenu}>
+                  <PreviewFile fileName={attachmentData?.file[0]?.url} component="MenuItem" />
+                </span>
+              )}
             </Menu>
 
             <Dialog
@@ -629,14 +640,14 @@ const RenderFolder: React.FC<TFolderPRops> = ({ iconButtons, node, childNodes })
           <div className="icon">
             <FolderOpenIcon className="max-w-[18px] text-[ar(--dark-primary-text,#2A3042)]" />
           </div>
-          <h6 className=" font-medium text-[14px] leading-[17px] text-[var(--dark-primary-text,#2A3042)] flex-grow line-clamp-1">
+          <h6 className=" line-clamp-1 flex-grow text-[14px] font-medium leading-[17px] text-[var(--dark-primary-text,#2A3042)]">
             <span>{` ${node?.name} ${childrenLength ? `(${childrenLength})` : ''}`}</span>
           </h6>
           {iconButtons(node)}
         </div>
         <div className="ml-[27px]">
           <p
-            className="text-[0.8rem] mt-2 text-[var(--dark-secondary-text,#7b898e)] line-clamp-1 "
+            className="mt-2 line-clamp-1 text-[0.8rem] text-[var(--dark-secondary-text,#7b898e)] "
             title={` Created: ${node?.createdBy?.user?.concatedName} ${moment(node?.createdBy?.date).format(dateTimeFormat)}`}
           >
             Created: {node?.createdBy?.user?.concatedName} {moment(node?.createdBy?.date).format(dateTimeFormat)}
@@ -645,7 +656,7 @@ const RenderFolder: React.FC<TFolderPRops> = ({ iconButtons, node, childNodes })
       </div>
       {childNodes ? (
         <Collapse in={open} unmountOnExit>
-          <div className="pl-4 mt-[14px]">{childNodes}</div>
+          <div className="mt-[14px] pl-4">{childNodes}</div>
         </Collapse>
       ) : null}
     </div>
@@ -671,14 +682,14 @@ const RenderFiles: React.FC<TFilePRops> = ({ iconButtons, node, onFileClick, rel
           <div className="icon">
             <AiOutlineFile size={18} />
           </div>
-          <h6 className=" font-medium text-[14px] leading-[17px] text-[var(--dark-primary-text,#2A3042)] flex-grow line-clamp-1">
+          <h6 className=" line-clamp-1 flex-grow text-[14px] font-medium leading-[17px] text-[var(--dark-primary-text,#2A3042)]">
             <span>{node?.name ?? ''}</span>
           </h6>
           {iconButtons(node)}
         </div>
         <div className="ml-[27px]">
           <p
-            className="text-[0.8rem] my-2 text-[var(--dark-secondary-text,#7b898e)]  line-clamp-1"
+            className="my-2 line-clamp-1 text-[0.8rem]  text-[var(--dark-secondary-text,#7b898e)]"
             title={`Created: ${node?.createdBy?.user?.concatedName} ${moment(node?.createdBy?.date).format(dateTimeFormat)}`}
           >
             Created: {node?.createdBy?.user?.concatedName} {moment(node?.createdBy?.date).format(dateTimeFormat)}

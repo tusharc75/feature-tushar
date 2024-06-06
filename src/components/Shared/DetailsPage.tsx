@@ -338,7 +338,7 @@ const Details = (props: DetailProps) => {
             <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
               <span className={`text-truncate tooltip-asdfkljashdfkjas`}>{value}</span>
             </Typography>
-            <DownloadComponent downloadFile={downloadFile} downloadProgress={downloadProgress} filename={value} isDownloading={isDownloading} />
+            <PreviewFile fileName={value} showDownload />
           </div>
         );
       }
@@ -355,13 +355,7 @@ const Details = (props: DetailProps) => {
                     <Typography className={classes.fieldText} variant="body2">
                       {d.fileName}
                     </Typography>
-                    <DownloadComponent
-                      downloadFile={downloadFile}
-                      downloadProgress={downloadProgress}
-                      filename={d.fileName}
-                      isDownloading={isDownloading}
-                    />
-                    <PreviewFile fileName={d.fileName} />
+                    <PreviewFile fileName={d.fileName} showDownload />
                   </div>
                 );
               })}
@@ -468,10 +462,7 @@ const Details = (props: DetailProps) => {
                         style={{ border: isTypeFile(field.fieldData.type) ? 0 : '1px solid var(--dark-mode-border-color, #EDEDED)' }}
                       >
                         <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>
-                          <div
-                            className="d-flex align-items-center formdata-title-v1"
-                            style={{ borderRight: field.fieldData.type === 'imageUpload' && 0 }}
-                          >
+                          <div className="d-flex align-items-center formdata-title-v1" style={{ borderRight: isTypeFile(field.fieldData.type) && 0 }}>
                             <h4
                               title={field.fieldData.fieldLabel}
                               style={{ paddingLeft: isTypeFile(field.fieldData.type) && 0 }}
