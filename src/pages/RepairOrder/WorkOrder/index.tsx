@@ -600,7 +600,7 @@ const WorkOrder = ({
         parent.serviceStatus = parent.workOrderStatus;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent.workOrderStatus === WORK_ORDER_STATUS.new) {
+      if (parent.subRows?.every((e) => e.type === MATERIAL_TYPE.service && e.status === WORKORDER_SERVICE_STATUS.pending)) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
@@ -960,11 +960,11 @@ const WorkOrder = ({
     const ids = selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canComplete)?.map((e) => e?.workOrder?._id);
     const data: any = { status: WORK_ORDER_STATUS.completed, ids: ids };
     axiosInstance().put(`${workOrder.api}/update-multiple-status`, data)
-      .then(({ data: { data } }) => {
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: data
+          message: data.message
         });
         fetchData();
         setSubmitting(false);
@@ -1163,8 +1163,8 @@ const WorkOrder = ({
             Revert Service
           </MenuItem>
         )}
-        {selectedRecords?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canComplete)
-          &&
+        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0
+          && selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canComplete) &&
           <MenuItem
             onClick={() => {
               setShowCloseReopenConfirmation({ open: true, type: 'Close' });
@@ -1172,8 +1172,8 @@ const WorkOrder = ({
           >
             Close Work Order(s)
           </MenuItem>}
-        {selectedRecords?.every((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.workOrderStatus === WORK_ORDER_STATUS.completed)
-          &&
+        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0
+          && selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canReopen) &&
           <MenuItem
             onClick={() => {
               setShowCloseReopenConfirmation({ open: true, type: 'Re-Open' });
