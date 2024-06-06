@@ -540,7 +540,6 @@ const Report = () => {
             });
     };
 
-
     const getQueryString = (isExport = false) => {
         if (!isExport) {
             setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
@@ -565,7 +564,6 @@ const Report = () => {
                 const keys = selectedData ? Object.keys(selectedData) : [];
                 const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
                 const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-
                 let filterById = idFilter.map((key) => {
                     if (key === 'warehouse') {
                         if (!isExport) {
@@ -576,7 +574,7 @@ const Report = () => {
                         }
                     }
                     if (!Array.isArray(selectedData[key].value)) {
-                        return { field: key, term: selectedData[key].value }
+                        return { field: key, term: selectedData[key].value.optionValue }
                     }
                     return {
                         field: key,
