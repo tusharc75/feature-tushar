@@ -176,7 +176,6 @@ export default function useColumns() {
 
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
-    console.log(fields);
     const _fields = fields?.map((e) => e?.fieldData || e);
     _fields.forEach((field) => {
       let commonFieldData: any = {

@@ -954,8 +954,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             </MenuItem>
           </>
         ) : null}
-        {selectedRecords.length &&
-          nonSerializedInventory?.filter((e) => selectedRecords?.map((ele) => ele?._id)?.includes(e?._id))?.some((e) => e?.qty > 0) && (
+        {selectedRecords?.filter((e) => !e.status)?.length > 0 &&
+          nonSerializedInventory?.filter((e) => selectedRecords?.filter((e) => !e.status)?.map((ele) => ele?._id)?.includes(e?._id))?.some((e) => e?.qty > 0) && (
             <MenuItem
               onClick={() => {
                 setAddNonSerializedInventoryDialog({ open: true, type: 'remove' });

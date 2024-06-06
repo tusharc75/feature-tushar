@@ -64,6 +64,7 @@ export const rentalManagementMessage = {
     productsCanNotReplace: 'Product(s)/Service(s) cannot be replaced',
     loadingDeliveredForReplace: 'Loading Ticket must be delivered to replace assets',
     onlyReplaceInUse: 'Only In-Use assets can be replaced',
+    ticketCanNotCancelledForReplaceedAssets: 'Ticket cannot cancelled for replaced assets',
     cancelInTransitLineItems: 'Only In-Transit tickets can be cancelled',
     statusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
     rentalStatusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
