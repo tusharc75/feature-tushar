@@ -3,7 +3,14 @@ import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { Avatar, Box } from '@material-ui/core';
-import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies, sidebarResourceObjectFromValues } from 'src/constants/helpers';
+import {
+  dateFormat,
+  dateTimeFormat,
+  formatAmountWithCurrency,
+  getFileIconSrc,
+  getUniqueCurrencies,
+  sidebarResourceObjectFromValues
+} from 'src/constants/helpers';
 import routes from '../../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
@@ -167,7 +174,7 @@ export default function useColumns() {
     let gridMetaData = getGridMetaDataFromLocalStorage();
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
-
+    console.log(fields);
     const _fields = fields?.map((e) => e?.fieldData || e);
     _fields.forEach((field) => {
       let commonFieldData: any = {
@@ -369,6 +376,28 @@ export default function useColumns() {
               </Avatar>
             </div>
           )
+        });
+      } else if (field?.type === 'multiFileUpload') {
+        column.push({
+          ...commonFieldData,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => {
+            let fileIcons = [];
+            if (Array.isArray(row.original?.multiFileUpload)) {
+              fileIcons = row.original?.multiFileUpload.map((d) => {
+                const Icon = getFileIconSrc(d.fileName || '');
+                return (
+                  <span title={d.fileName} className="min-w-[20px] basis-[20px]">
+                    <Icon />
+                  </span>
+                );
+              });
+            }
+            if (row.original?.multiFileUpload) return <div className="flex overflow-hidden">{fileIcons}</div>;
+            return <NoDataCell />;
+          }
         });
       } else if (field?.type === 'date') {
         column.push({
