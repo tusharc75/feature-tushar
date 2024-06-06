@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset } from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset, getObjKeys } from '../../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -25,6 +25,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [decimalFields, setDecimalFields] = useState([]);
+  const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
     fetchFields();
@@ -37,6 +38,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
 
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     let fieldsData = fields?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(fieldsData)));
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
     let fieldsDataForUpdate = fieldsData.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
     let values = {};
@@ -68,6 +70,10 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
   const handleSubmit = (values) => {
     setSubmitting(true);
     const data = [];
+    let fieldsDataReset = [];
+    if (statusPolicy?.fieldsReset?.length) {
+      fieldsDataReset = allFields.filter((d) => statusPolicy?.fieldsReset?.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData);
+    }
     values?.assetData?.forEach((ele) => {
       const obj: any = { _id: ele._id }
       statusPolicy?.fields?.forEach((fieldName) => {
@@ -78,7 +84,11 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
           obj[fieldName] = ele[fieldName]
         }
       })
-      data.push(obj)
+      let resetValues = {};
+      if (fieldsDataReset?.length) {
+        resetValues = getObjKeys('', fieldsDataReset)
+      }
+      data.push({ ...obj, ...resetValues })
     })
     setAssetsData(data)
     onSuccess(data);
