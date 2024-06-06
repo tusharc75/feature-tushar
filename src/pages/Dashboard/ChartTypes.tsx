@@ -227,8 +227,6 @@ const ChartTypes = ({
       });
   };
 
-  console.log(chartData);
-
   return (
     <Grid item xs={12} md={fullScreen ? 12 : chart.column}>
       {chart.graphType === 'Custom' ? (
