@@ -306,7 +306,6 @@ const Details = (props: DetailProps) => {
       }
     } else {
       if (fieldData.type === 'multiImageUpload' && val[fieldData.fieldName]) {
-        console.log({ img: val[fieldData.fieldName], val, value });
         return (
           <div className={classes.imageListContainer}>
             <ImageList className={classes.imageList} cols={2.5}>
@@ -328,7 +327,7 @@ const Details = (props: DetailProps) => {
       }
       if (fieldData.type === 'multiFileUpload') {
         const attachemnts = Array.isArray(value) ? value.map((d) => ({ ...d, name: d.fileName, url: d.fileName })) : [];
-        return <AttachmentThumbnail attachments={attachemnts} canEdit={false} handleDeleteAttachment={() => {}} />;
+        return <AttachmentThumbnail attachments={attachemnts} canEdit={false} handleDeleteAttachment={() => { }} />;
       }
       if (fieldData.type === 'colorPicker') {
         return (
@@ -456,36 +455,36 @@ const Details = (props: DetailProps) => {
                               {renderData(initialVals, field.fieldData)}
                               {field.fieldData.type === 'fileUpload'
                                 ? initialVals[field.fieldData.fieldName] &&
-                                  (isDownloading ? (
-                                    <Box display="flex" alignItems="center">
-                                      {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
+                                (isDownloading ? (
+                                  <Box display="flex" alignItems="center">
+                                    {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
 
-                                      <Box marginLeft={1} position="relative" display="inline-flex">
-                                        <CircularProgress size={30} variant="determinate" value={downloadProgress} />
-                                        <Box
-                                          top={0}
-                                          left={0}
-                                          bottom={0}
-                                          right={0}
-                                          position="absolute"
-                                          display="flex"
-                                          alignItems="center"
-                                          justifyContent="center"
-                                        >
-                                          <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
-                                        </Box>
+                                    <Box marginLeft={1} position="relative" display="inline-flex">
+                                      <CircularProgress size={30} variant="determinate" value={downloadProgress} />
+                                      <Box
+                                        top={0}
+                                        left={0}
+                                        bottom={0}
+                                        right={0}
+                                        position="absolute"
+                                        display="flex"
+                                        alignItems="center"
+                                        justifyContent="center"
+                                      >
+                                        <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
                                       </Box>
                                     </Box>
-                                  ) : (
-                                    <IconButton
-                                      title={`Download ${initialVals[field.fieldData.fieldName]}`}
-                                      disabled={isDownloading}
-                                      size="small"
-                                      onClick={() => downloadFile(normalizeValues(initialVals, field.fieldData))}
-                                    >
-                                      <GetApp />
-                                    </IconButton>
-                                  ))
+                                  </Box>
+                                ) : (
+                                  <IconButton
+                                    title={`Download ${initialVals[field.fieldData.fieldName]}`}
+                                    disabled={isDownloading}
+                                    size="small"
+                                    onClick={() => downloadFile(normalizeValues(initialVals, field.fieldData))}
+                                  >
+                                    <GetApp />
+                                  </IconButton>
+                                ))
                                 : null}{' '}
                             </Box>
                           )}
