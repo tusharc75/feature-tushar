@@ -24,7 +24,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
-import { ASSET_STATUS, INVENTORY_OWNER_TYPE, MATERIAL_TYPE, TRANSFER_ASSET_STATUS, rentalManagement, sidebarResource, treeToFlatArray } from '../../../constants/helpers';
+import { ASSET_STATUS, INVENTORY_OWNER_TYPE, MATERIAL_TYPE, RENTAL_INTERNAL_ASSET_STATUS, TRANSFER_ASSET_STATUS, rentalManagement, sidebarResource, treeToFlatArray } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import ManageBulkAssetCreation from '../../BulkAssetCreation/ManageBulkAssetCreation';
 import ManagePurchaseOrder from '../../PurchaseOrder/ManagePurchaseOrder';
@@ -569,7 +569,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         status: e?.status,
         warehouse: rentalManagementData?.warehouse?.optionValue,
         isValid: true,
-        canRemove: e?.status === 'Reserved' ? true : false
+        canRemove: e?.status === RENTAL_INTERNAL_ASSET_STATUS.reserved ? true : false
       });
     });
 
