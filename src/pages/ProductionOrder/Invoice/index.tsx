@@ -8,11 +8,11 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { CHILD_RESOURCE, MATERIAL_TYPE, WORK_ORDER_STATUS, productionOrder, sidebarResource } from '../../../constants/helpers';
 import { orderBy, startCase } from 'lodash';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { isMobile, isTablet } from 'react-device-detect';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
@@ -60,9 +60,8 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         width: 200,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original?.detail}</h5>
-            <Box ml={1}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -75,9 +74,8 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
-            </Box>
           </div>
         )
       },
@@ -97,7 +95,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
       width: 200,
       Cell: ({ row }) =>
         row.original.workOrder ? (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
             <IconButton
               size="small"
@@ -105,7 +103,7 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
                 window.open(`${routes.workOrderDetail.path}/${row.original?.workOrder?._id}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color={'primary'} />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           </div>
         ) : (

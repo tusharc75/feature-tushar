@@ -1,7 +1,6 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -14,11 +13,11 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CHILD_RESOURCE, bulkAssetCreation, prepareDataForGrid } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import BulkAssetCreationQtyDialog from './BulkAssetCreationQtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, handleUpdateData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -69,7 +68,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
           Header: ele?.fieldLabel,
           disabled: true,
           Cell: ({ row }) => (
-            <div className="d-flex gap-2 align-items-center">
+            <div className="flex items-center gap-2">
               {(row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) && allowedToEdit ? (
                 <h5
                   className="link text-truncate"
@@ -84,17 +83,15 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
                 <h5 className="text-truncate">{row?.original?.productName}</h5>
               )}
               {row?.original?.productId && allowedToEdit && (
-                <HtmlTooltip title="Details">
-                  <IconButton
-                    size="small"
-                    aria-label="Details"
-                    onClick={() => {
-                      window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </HtmlTooltip>
+                <IconButton
+                  size="small"
+                  aria-label="Details"
+                  onClick={() => {
+                    window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               )}
             </div>
           )

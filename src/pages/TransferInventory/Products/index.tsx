@@ -1,7 +1,5 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
-import AddBoxOutlinedIcon from '@material-ui/icons/AddBoxOutlined';
 import DeleteIcon from '@material-ui/icons/Delete';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import React, { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -29,6 +27,7 @@ import ProductQtyDialog from './ProductQtyDialog';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -101,7 +100,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
           primaryField: true,
           Header: 'Details',
           Cell: ({ row }) => (
-            <div>
+            <div className="flex items-center gap-2">
               {row.original?.canDelete && row.original.type === MATERIAL_TYPE.product ? (
                 <p
                   className="link text-truncate"
@@ -116,16 +115,14 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
                 <p className="text-truncate">{row.original?.productName}</p>
               )}
               {row.original.type === MATERIAL_TYPE.product &&
-                <Box ml={1}>
                   <IconButton
                     size="small"
                     onClick={() => {
                       window.open(`/product/detail/${row.original.product}`);
                     }}
                   >
-                    <OpenInNewIcon fontSize="small" color="primary" />
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
-                </Box>
               }
             </div>
           )

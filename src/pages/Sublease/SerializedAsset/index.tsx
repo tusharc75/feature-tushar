@@ -1,9 +1,9 @@
 import { Box, Button, Grid, IconButton, MenuItem } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FiExternalLink } from 'react-icons/fi';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
@@ -16,7 +16,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
-import { ASSET_STATUS, CHILD_RESOURCE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, deliveryTicket, sublease, treeToFlatArray } from 'src/constants/helpers';
+import { ASSET_STATUS, CHILD_RESOURCE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, MATERIAL_TYPE, deliveryTicket, sublease, treeToFlatArray } from 'src/constants/helpers';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 
 function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowedToEdit, stepFullScreen, renderedFrom }) {
@@ -71,7 +71,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="flex items-center gap-2">
             <p className="text-truncate" title={row.original.detail}>
               {row.original.detail}
             </p>
@@ -79,9 +79,9 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'service') {
+                  if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else if (row.original.type === 'asset') {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
@@ -90,7 +90,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             }
           </div>

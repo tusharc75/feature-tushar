@@ -19,7 +19,6 @@ import { flattenArray } from 'src/constants/columns';
 import { Autocomplete } from '@material-ui/lab';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Technicians from './Technicians';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice, calculateRowsField } from 'src/components/RentalManagment/helper';
 import MaterialQtyDialog from './MaterialQtyDialog';
@@ -35,6 +34,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
@@ -145,7 +145,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           sticky: isMobile || isTablet ? 'none' : 'left',
           primaryField: true,
           cell: ({ row, table }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               {!allowedToEdit || fieldTicketData?.quotation ? (
                 <p>{row?.original[e?.fieldName]}</p>
               ) : (
@@ -159,16 +159,14 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
                   {row?.original[e?.fieldName]}
                 </p>
               )}
-              <Box ml={1} flexShrink={0}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           )
         });
@@ -191,18 +189,16 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         width: 200,
         cell: ({ row }) =>
           row?.original?.service ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               <p> {row.original?.service}</p>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original?.serviceId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -364,8 +360,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       let updatedData;
       const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...(result?.data || []), ...material];
-      else updatedData = {...result?.data, material: [...(result?.data?.material || []), ...material]};
-      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, {...result, data: updatedData});
+      else updatedData = { ...result?.data, material: [...(result?.data?.material || []), ...material] };
+      await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       setConsumablesDialog(false);
       fetchData();
       setSubmitting(false);
@@ -464,20 +460,20 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           await deleteOne(objectStore.fieldTicketMaterial, id);
         });
 
-         const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
-         const alreadyOfflineDataSyncStoredRows = result?.data?.material || result?.data || [];
-         let updatedData;
-         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
-         else updatedData = {...result?.data, material: alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id))}; 
-         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
-         //for onlineSync
-         const deleteData = {
-           "cost": [],
-           "material": materialIdsToDelete,
-           "fieldTicketId": fieldTicketData?._id
-         }
-         let id = Math.floor(Math.random() * 1000000).toString();
-         await insertUpdate(objectStore.offlineDataSync, id, { type: 'fieldTicketMaterialDelete', data: deleteData, _id: id })
+        const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
+        const alreadyOfflineDataSyncStoredRows = result?.data?.material || result?.data || [];
+        let updatedData;
+        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
+        else updatedData = { ...result?.data, material: alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id)) };
+        await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
+        //for onlineSync
+        const deleteData = {
+          "cost": [],
+          "material": materialIdsToDelete,
+          "fieldTicketId": fieldTicketData?._id
+        }
+        let id = Math.floor(Math.random() * 1000000).toString();
+        await insertUpdate(objectStore.offlineDataSync, id, { type: 'fieldTicketMaterialDelete', data: deleteData, _id: id })
       } else {
         const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: rows });
         toastConfig.setToastConfig({
@@ -517,7 +513,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         }
         let updatedData;
         if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows];
-        else updatedData = {...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows]}; 
+        else updatedData = { ...result?.data, cost: [...alreadyOfflineDataSyncStoredRows, ...toAddOfflineDataSyncStoreRows] };
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
       } else {
         const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material`, { material: rows });

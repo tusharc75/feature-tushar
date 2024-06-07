@@ -2,7 +2,6 @@ import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcApproval } from 'react-icons/fc';
@@ -26,6 +25,7 @@ import { flattenArray } from 'src/constants/columns';
 import { product, serviceMaster } from 'src/constants/helpers';
 import AssignStepDialog from './AssignStepDialog/Index';
 import FrequencyDialog from './FrequencyDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 interface Props {
   renderedFrom: string;
@@ -107,7 +107,7 @@ const ServiceMaster = (props: Props) => {
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) =>
           row?.original?.detail ? (
-            <div className="d-flex gap-2 align-items-center">
+            <div className="flex items-center gap-2">
               <p className="text-truncate">{row.original.detail}</p>
               <IconButton
                 size="small"
@@ -119,7 +119,7 @@ const ServiceMaster = (props: Props) => {
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </div>
           ) : (
@@ -152,14 +152,14 @@ const ServiceMaster = (props: Props) => {
       },
       ...(serviceColumns && serviceColumns?.some((column) => column?.fieldData?.fieldName === 'frequency')
         ? [
-            {
-              accessor: 'frequency',
-              Header: 'Frequency',
-              width: 150,
-              minWidth: 150,
-              Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'frequency',
+            Header: 'Frequency',
+            width: 150,
+            minWidth: 150,
+            Cell: ({ row }) => (row.original?.frequency ? <p>{row.original?.frequency}</p> : <NoDataCell />)
+          }
+        ]
         : []),
       {
         accessor: 'stepName',

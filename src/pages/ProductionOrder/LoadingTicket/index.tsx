@@ -1,7 +1,6 @@
 import { IconButton, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import Grid from '@material-ui/core/Grid/Grid';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { map, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -26,6 +25,7 @@ import {
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -151,7 +151,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         width: 200,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original?.detail}</h5>
             <Box ml={1}>
               <IconButton
@@ -160,7 +160,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                   window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </Box>
           </div>
@@ -180,7 +180,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
         width: 200,
         Cell: ({ row }) =>
           row?.original?.loadingTicket ? (
-            <div style={{ display: 'flex' }}>
+            <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
               <Box ml={1}>
                 <IconButton
@@ -189,7 +189,7 @@ const LoadingTicket = ({ productionOrderData, setNextStep, stepFullScreen, rende
                     window.open(`${routes.deliveryTicketDetail.path}/${row.original.loadingTicketId}`);
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color="primary" />
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
               </Box>
             </div>
