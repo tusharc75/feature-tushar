@@ -28,14 +28,14 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { autoCalculateSpecificFields, calculateActualJobDurationUsingServiceLog } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { FiExternalLink } from 'react-icons/fi';
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
@@ -53,6 +53,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
+  const [isApplingDate, setIsApplingDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
@@ -79,7 +80,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     });
     setAllFields(JSON.parse(JSON.stringify(data)));
 
-    let newColumns = generateColumns(renderedFrom, data, null, false, rentalManagementData?.currency);
+    let newColumns = generateColumns(renderedFrom, data?.filter(d => d?.isRead), null, false, rentalManagementData?.currency);
 
     let coloum: any = [
       {
@@ -127,13 +128,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         minWidth: 300,
         width: 300,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-1">
             <p>{row.original.detail}</p>
-            <Box ml={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
-              </span>
-            </Box>
+            <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+              {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
+            </span>
             {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
               <IconButton
                 size="small"
@@ -149,7 +148,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>
@@ -164,16 +163,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         }
       }
     ];
-
     newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'));
-
-    const pricingMethodColumn = newColumns?.find((obj) => obj.accessor === 'pricingMethod');
-    if (pricingMethodColumn) {
-      pricingMethodColumn.Cell = ({ row }) => pricingMethodRenderer(row);
-    }
-
+    newColumns?.forEach((e) => {
+      if (e.accessor === 'pricingMethod') {
+        e.Cell = ({ row }) => pricingMethodRenderer(row);
+      }
+    })
     coloum = [...coloum, ...newColumns];
-
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
@@ -199,7 +195,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         </>
       )
     });
-
     setColumns(coloum);
   };
 
@@ -304,6 +299,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
+            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+          }
           newMaterial.push({ ...element, ...calValues });
 
           if (element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
@@ -466,6 +464,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   };
 
   const handleApplyDate = async () => {
+    setIsApplingDate(true)
+    dispatch({ type: 'loading', loading: true });
     let tempValues: any = { actualEndDate: endDate };
     const childRows: any = [];
     var inUseStandByDays = [];
@@ -499,14 +499,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 
     const assetList = selectedRecords?.filter((r) => r?.pricingMethod === 'Per Barrel');
-    let rentalUnitVolum;
+    let rentalUnitVolume;
     if (assetList?.length) {
-      rentalUnitVolum = await axiosInstance().post(
+      rentalUnitVolume = await axiosInstance().post(
         `${routes.rentalManagement.path}/${rentalManagementData?._id}/inventory/rental-unit-volume-utilization`,
         assetList?.map((d) => ({ asset: d?._id, fromDate: moment(d?.actualStartDate).format('MM/DD/YYYY'), toDate: moment(endDate).format('MM/DD/YYYY') }))
       );
     }
-
 
     let rows: any = [];
     selectedRecords?.forEach((element) => {
@@ -542,7 +541,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }
         }
 
-        let priceFieldName = Object.keys(element).find((d) => d.includes('price_'));
+        let priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
 
         const priceField = allFields?.find((e) => e.fieldName === 'price');
 
@@ -582,7 +581,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           calValues['pricingMethod'] = 'Per Month';
         }
         else if (element.pricingMethod === 'Per Barrel') {
-          const totalBBLs = rentalUnitVolum?.data?.data
+          const totalBBLs = rentalUnitVolume?.data?.data
             ?.find((r) => r?.asset === element?._id)
             ?.data?.reduce((prevValue, currentValue) => prevValue + currentValue?.DailyEvapBBLs, 0);
 
@@ -595,7 +594,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           childRows.push(
-            ...rentalUnitVolum?.data?.data
+            ...rentalUnitVolume?.data?.data
               ?.find((r) => r?.asset === element?._id)
               ?.data?.map((d) => ({
                 ...d,
@@ -607,6 +606,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           );
         } else {
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+          if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
+            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+          }
         }
         element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
@@ -621,6 +623,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
       return [...prevRowsApplied, ...rows, ...childRows];
     });
+    setIsApplingDate(false)
     setAppliedDate(true);
   };
 
@@ -763,7 +766,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                             <Button
                               variant="contained"
                               color="primary"
-                              disabled={
+                              disabled={isApplingDate ||
                                 !Boolean(
                                   selectedRecords && selectedRecords?.length && (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )

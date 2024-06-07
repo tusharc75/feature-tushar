@@ -1,7 +1,7 @@
 
 import { objectStore, insertUpdate, findOne, findAll, clearAll, deleteMany } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
-import { ASSET_STATUS, rentalManagement } from '../../constants/helpers';
+import { ASSET_STATUS, MATERIAL_TYPE, rentalManagement, warehouse } from '../../constants/helpers';
 
 export const rentalJobOfflineUpdate = async (ids) => {
     try {
@@ -124,14 +124,13 @@ export const removeAssetsInRental = async (id, assets) => {
     }
 }
 
-export const uniqueProduct = (material) => {
+export const uniqueProduct = (material, nonSerializedInventory) => {
     const result: any = []
-    material.filter((e) => !e?.productDetail?.serializedProduct && e.type === "product")?.forEach((ele) => {
-        if (result.filter((e) => e.materialId === ele.materialId).length) {
-            result.forEach(element => {
-                if (element.materialId === ele.materialId) {
-                    element.qty += getNestedQty(material, ele)
-                }
+    material.filter((e) => !e?.productDetail?.serializedProduct && e.type === MATERIAL_TYPE.product)?.forEach((ele) => {
+        const warehouseProduct = nonSerializedInventory?.filter((e) => e._id === ele._id);
+        if (warehouseProduct?.length) {
+            warehouseProduct.forEach(element => {
+                result.push({ ...ele, qty: element.qty, warehouse: element.warehouse })
             });
         }
         else {
@@ -151,14 +150,14 @@ export const getNestedQty = (material, parent) => {
     }
 }
 
-export const rentalJobClearOffline = async (ids: any []= []) => {
-    if(!ids.length) {
+export const rentalJobClearOffline = async (ids: any[] = []) => {
+    if (!ids.length) {
         clearAll(objectStore.rentalManagement);
         clearAll(objectStore.deliveryTicket);
     } else {
         const deliveryTickets = await findAll(objectStore.deliveryTicket);
         const deliveryTicketIdsToDelete = deliveryTickets?.filter((d: any) => ids?.includes(d?.rentalJob?.optionValue))?.map((d: any) => d._id);
         deleteMany(objectStore.rentalManagement, ids);
-        deleteMany(objectStore.deliveryTicket, deliveryTicketIdsToDelete);   
-    }  
+        deleteMany(objectStore.deliveryTicket, deliveryTicketIdsToDelete);
+    }
 }

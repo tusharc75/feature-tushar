@@ -15,11 +15,13 @@ import ArrangeView from './ArrangeView';
 import { AddOutlined } from '@material-ui/icons';
 import { useData } from 'src/StateProvider/Provider';
 import { useHistory } from 'react-router-dom';
+import SectionMaster from './sectionMaster';
 
 const FormBuilder = () => {
   const renderedFrom = 'form-builder';
   const toastConfig = useContext(CustomToastContext);
   const [arrangeViewOpen, setArrangeViewOpen] = useState(false);
+  const [openSectionMaster, setOpenSectionMaster] = useState(false);
   const [resource, setResource] = useState([]);
   const [columns, setColumns] = useState([]);
   const { state, dispatch } = useTableReducer();
@@ -64,6 +66,20 @@ const FormBuilder = () => {
         Header: 'Resource',
         width: 120,
         Cell: ({ row }) => (row?.original?.resource ? <p className="text-truncate">{row?.original?.resource}</p> : <NoDataCell />)
+      },
+      {
+        accessor: 'childResource',
+        Header: 'Child Resource',
+        width: 100,
+        accessorFn: (data) => (data?.childResource ? 'Yes' : 'No'),
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.childResource ? 'Yes' : 'No'}</p>
+      },
+      {
+        accessor: 'dynamicResource',
+        Header: 'Dynamic Resource',
+        width: 100,
+        accessorFn: (data) => (data?.dynamicResource ? 'Yes' : 'No'),
+        Cell: ({ row }) => <p className="text-truncate">{row?.original?.dynamicResource ? 'Yes' : 'No'}</p>
       }
     ];
     setColumns(columns);
@@ -100,18 +116,20 @@ const FormBuilder = () => {
 
   const RightSideContents = () => {
     return (
-      <>{permissions.formBuilder?.isCreate &&
-        <Button
-          variant="contained"
-          color='primary'
-          size='small'
-          onClick={() => {
-            history.push('/form-builder/0')
-          }}
-          startIcon={<AddOutlined />}
-        >
-          Add
-        </Button>}
+      <>
+        {permissions.formBuilder?.isCreate && (
+          <Button
+            variant="contained"
+            color="primary"
+            size="small"
+            onClick={() => {
+              history.push('/form-builder/0');
+            }}
+            startIcon={<AddOutlined />}
+          >
+            Add
+          </Button>
+        )}
         <Button
           variant="outlined"
           className={'btn-outline-v1'}
@@ -120,6 +138,15 @@ const FormBuilder = () => {
           }}
         >
           Change Resource Order
+        </Button>
+        <Button
+          variant="outlined"
+          className={'btn-outline-v1'}
+          onClick={() => {
+            setOpenSectionMaster(true);
+          }}
+        >
+          Sections
         </Button>
       </>
     );
@@ -133,6 +160,7 @@ const FormBuilder = () => {
       <CustomContainer>
         <ListingPageHeader rightSideContents={<RightSideContents />} isActionButtonVisible={false} isAddButtonVisible={false} />
         {arrangeViewOpen && <ArrangeView open={arrangeViewOpen} close={closeHandler} resourceData={resource} />}
+        {openSectionMaster && <SectionMaster close={() => setOpenSectionMaster(false)} />}
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}

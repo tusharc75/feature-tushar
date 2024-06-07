@@ -1,18 +1,19 @@
-import { DragDropContext, DropResult, Droppable } from '@hello-pangea/dnd';
-import { Box, Button, CircularProgress, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress } from '@material-ui/core';
 import { makeStyles } from '@material-ui/styles';
-import update from 'immutability-helper';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { MobileExportIcon, MobileImportIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
-import { ECOM_SECTIONS, addItemAtIndex } from 'src/constants/helpers';
+import { addItemAtIndex, changeItemIndex } from 'src/constants/helpers';
 import { v4 as uuid } from 'uuid';
-import DragBox from './DragBox';
-import DropBox from './DropBox';
+
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent, MouseSensor, TouchSensor, useSensor, useSensors } from '@dnd-kit/core';
+import DropContainer, { SingleSection } from './DropContainer';
+import Sidebar, { SidebarItem } from './Sidebar';
+import { useDndSensors } from 'src/hooks';
 
 const useClasses = makeStyles(() => ({
   root: {
@@ -37,6 +38,8 @@ const EcommerceHome = () => {
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const toastConfig = useContext(CustomToastContext);
+  const [activeSection, setActiveSection] = useState(null);
+  const [activeSidebarItem, setActiveSidebarItem] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -87,44 +90,6 @@ const EcommerceHome = () => {
     setFormData((prevState) => prevState.filter((i) => (i._id ? i._id !== id : i.name !== id)));
   };
 
-  const findCard = React.useCallback(
-    (id: string) => {
-      const card = formData.find((c) => (c?._id ? c?._id === id : c?.name === id));
-      return {
-        card,
-        index: formData.indexOf(card)
-      };
-    },
-    [formData]
-  );
-
-  const moveCard = React.useCallback(
-    (result: DropResult) => {
-      if (!result.destination) return;
-      const { draggableId, destination, source } = result;
-      const dropIndex = destination?.index;
-      const sourceIndex = source.index;
-
-      if (source.droppableId === 'field') {
-        let draggedField = Array.from(ECOM_SECTIONS).find((s) => s._id === draggableId);
-        const newData = addItemAtIndex(formData, { ...draggedField, _id: uuid() }, destination.index);
-        setFormData(newData);
-        return;
-      } else {
-        const card = formData[source.index];
-        setFormData(
-          update(formData, {
-            $splice: [
-              [sourceIndex, 1],
-              [dropIndex, 0, card]
-            ]
-          })
-        );
-      }
-    },
-    [formData, setFormData]
-  );
-
   const handleImport = (event) => {
     if (event.target.files && event.target.files.length) {
       toastConfig.setToastConfig({
@@ -159,6 +124,51 @@ const EcommerceHome = () => {
     link.setAttribute('download', `page_structure.json`);
     document.body.appendChild(link);
     link.click();
+  };
+
+  const sensors = useDndSensors();
+
+  const onDragStart = (event: DragStartEvent) => {
+    if (!event.active) return;
+    const activeElementType = event.active.data?.current?.type;
+    const activeElementProps = event.active.data?.current?.props;
+
+    if (activeElementType === 'SidebarItem') {
+      setActiveSidebarItem(activeElementProps);
+    }
+    if (activeElementType === 'Section') {
+      setActiveSection(activeElementProps);
+    }
+  };
+
+  const onDragEnd = (event: DragEndEvent) => {
+    setActiveSidebarItem(null);
+    setActiveSection(null);
+    if (!event.over) return;
+    const { active, over } = event;
+    if (active.id === over.id) return;
+    const activeItemType = active.data.current?.type;
+    const overItemType = over.data.current?.type;
+    let newFormData = [...formData];
+
+    if (activeItemType === 'SidebarItem') {
+      let draggedItem = active.data.current.props.item;
+      draggedItem = { ...draggedItem, _id: uuid() };
+      if (overItemType === 'EmptySection') {
+        newFormData.push(draggedItem);
+        setFormData(newFormData);
+      }
+      if (overItemType === 'Section') {
+        const overIndex = over.data.current.index;
+        setFormData(addItemAtIndex(newFormData, draggedItem, overIndex));
+      }
+    }
+    if (activeItemType === 'Section' && overItemType === 'Section') {
+      const draggedItem = active.data.current.props.itemData;
+      const activeIndex = active.data.current.index;
+      const overIndex = over.data.current.index;
+      setFormData(changeItemIndex(newFormData, draggedItem, activeIndex, overIndex));
+    }
   };
 
   return (
@@ -211,46 +221,24 @@ const EcommerceHome = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <DragDropContext onDragEnd={moveCard}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={5} md={4} lg={3}>
-              <Box
-                bgcolor="var(--dark-secondary, #f5f5f5)"
-                p={3}
-                style={{ maxHeight: 'calc(100vh - 200px)', height: '100%', overflow: 'auto' }}
-                border={'1px solid var(--common-border-color)'}
-              >
-                <Droppable droppableId="field" isDropDisabled={true}>
-                  {(provided) => (
-                    <ul className="list-none grid gap-2" {...provided.droppableProps} ref={provided.innerRef}>
-                      {ECOM_SECTIONS?.map((i, index) => {
-                        return <DragBox key={index} item={i} index={index} />;
-                      })}
-                      {provided.placeholder}
-                    </ul>
-                  )}
-                </Droppable>
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={7} md={8} lg={9}>
+        <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+          <div className="grid gap-2 grid-cols-1 md:grid-cols-[250px_1fr] lg:grid-cols-[300px_1fr]">
+            <Sidebar />
+            <div className="container-with-border p-4">
               {loading ? (
                 <Box height="100%" width="100%" display="flex" justifyContent="center" alignItems="center">
                   <CircularProgress size={30} color="inherit" />
                 </Box>
               ) : (
-                <Box
-                  border={1}
-                  p={2}
-                  bgcolor="var(--dark-secondary, #f5f5f5)"
-                  borderColor="var(--common-border-color)"
-                  className={classes.screenHeightAuto}
-                >
-                  <DropBox formData={formData} setFormData={setFormData} handleRemove={handleRemove} findCard={findCard} moveCard={moveCard} />
-                </Box>
+                <DropContainer formData={formData} setFormData={setFormData} handleRemove={handleRemove} />
               )}
-            </Grid>
-          </Grid>
-        </DragDropContext>
+            </div>
+          </div>
+          <span className=" [&_.drag-handle]:!cursor-grabbing">
+            <DragOverlay dropAnimation={null}>{activeSidebarItem && <SidebarItem {...activeSidebarItem} />}</DragOverlay>
+            <DragOverlay>{activeSection && <SingleSection {...activeSection} />}</DragOverlay>
+          </span>
+        </DndContext>
       </Box>
     </Box>
   );

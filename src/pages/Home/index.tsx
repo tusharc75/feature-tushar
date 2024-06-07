@@ -14,8 +14,9 @@ import DashboardModal from 'src/components/DashboardModal';
 import routes from 'src/components/Helpers/Routes';
 import { isSectionVisible } from 'src/components/Sidebar/utils';
 import Chart from './Chart';
-import { assignIconAndText, groupByKey } from './helpers';
+import { assignIconAndText, getColors, groupByKey } from './helpers';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { DynamicIcon } from 'src/assets/IconGenerator';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -31,9 +32,8 @@ function Dashboard() {
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    let arr = [];
     let allData = [];
-    // let allData = user && [...user?.role.sideBar];
+
     let entityData;
     if (user?.entity && user.entity.length) {
       entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
@@ -41,17 +41,17 @@ function Dashboard() {
     if (entityData?.resource) {
       allData = entityData.resource;
     }
+
     allData = allData?.filter((e) => isSectionVisible(e));
     allData?.forEach((u) => {
       u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
       u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
       u['resourceLabelLowerCase'] = u?.homePageLabel?.toLowerCase() || u?.resourceLabel?.toLowerCase() || u?.name?.toLowerCase();
-      !arr.includes(u.sectionName) && arr.push(u.sectionName);
     });
 
     const groupedData = groupByKey(allData, (section) => section.sectionName);
     setObjBySectionName(groupedData);
-    const data = assignIconAndText(groupedData);
+    const data = assignIconAndText(groupedData, user?.role?.brandSectionMaster || []);
     setSections(data);
   }, [user, selectedEntity]);
 
@@ -70,8 +70,7 @@ function Dashboard() {
         <div className={styles.main}>
           <div className={styles.leftContainer}>
             <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
-            {!isOffline &&
-              <Chart />}
+            {!isOffline && <Chart />}
           </div>
           <div className={styles.rightContainer}>
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
@@ -96,7 +95,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
   return (
     <div className={styles.cardSection}>
       <div className={styles.cardContainer}>
-        {sections.map((section) => {
+        {sections.map((section, index) => {
           if (
             section.head === 'Setups' ||
             section.head === 'Setups & Administration' ||
@@ -104,6 +103,20 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
             section.head === 'Activities'
           ) {
             return <Fragment key={section.head}></Fragment>;
+          }
+          let icon = section.icon;
+          const iconColors = getColors(index).icon;
+          if (typeof icon === 'string' && icon) {
+            icon = (
+              <span
+                className=" as custom flex aspect-square h-full items-center justify-center rounded-md text-white"
+                style={{
+                  background: `linear-gradient(129deg, ${iconColors[0]} 0%, ${iconColors[1]} 100%)`
+                }}
+              >
+                {DynamicIcon(icon, { size: 28 })}
+              </span>
+            );
           }
           return (
             <DashBoardCardShell
@@ -113,11 +126,14 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
               background={section.color}
               gradientColors={section.gradient}
               aria-label={`open ${section.head}`}
-              onClick={() => section.items.length > 0 && setModalContent({ items: section.items, title: section.head, icon: section.icon })}
+              onClick={() =>
+                section.items.length > 0 &&
+                setModalContent({ items: section.items, title: section.head, icon: <span className="[&_.custom_svg]:!size-[15px]">{icon}</span> })
+              }
             >
               <div className={styles.cardContent}>
                 <div className={styles.cardTop}>
-                  <div className={styles.cardIcon}>{section.icon}</div>
+                  <div className={styles.cardIcon}>{icon}</div>
                   <div className={styles.cardArrow}>
                     <HiArrowRight />
                   </div>

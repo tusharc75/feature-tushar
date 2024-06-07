@@ -211,7 +211,11 @@ html {
 body {
   font-size: 0.8rem;
   // background-color: var(--aliceblue) !important;
-  font-family: 'Poppins', sans-serif, Nunito Sans, sans-serif !important;
+  font-family:
+    'Poppins',
+    sans-serif,
+    Nunito Sans,
+    sans-serif !important;
   .normal-case {
     text-transform: none !important;
   }
@@ -219,9 +223,17 @@ body {
 
 .poppins {
   & * {
-    font-family: 'Poppins', sans-serif, Nunito Sans, sans-serif !important;
+    font-family:
+      'Poppins',
+      sans-serif,
+      Nunito Sans,
+      sans-serif !important;
   }
-  font-family: 'Poppins', sans-serif, Nunito Sans, sans-serif !important;
+  font-family:
+    'Poppins',
+    sans-serif,
+    Nunito Sans,
+    sans-serif !important;
 }
 
 body > iframe {
@@ -2077,7 +2089,10 @@ svg.MuiSvgIcon-root {
     height: 38px;
     border-radius: 3px;
     border: 2px solid var(--primary);
-    transition: background 0.4s, color 0.4s, opacity 0.4s;
+    transition:
+      background 0.4s,
+      color 0.4s,
+      opacity 0.4s;
     position: absolute;
     z-index: 1;
     top: 3px;
@@ -2433,12 +2448,16 @@ svg.MuiSvgIcon-root {
 
         & span {
           color: #59a4a1;
-          transition: color 0.4s, fill 0.3s;
+          transition:
+            color 0.4s,
+            fill 0.3s;
         }
 
         & svg {
           fill: #59a4a1;
-          transition: color 0.4s, fill 0.3s;
+          transition:
+            color 0.4s,
+            fill 0.3s;
           margin-left: 10px;
         }
 
@@ -2635,12 +2654,16 @@ svg.MuiSvgIcon-root {
 
         & span {
           color: #59a4a1;
-          transition: color 0.4s, fill 0.3s;
+          transition:
+            color 0.4s,
+            fill 0.3s;
         }
 
         & svg {
           fill: #59a4a1;
-          transition: color 0.4s, fill 0.3s;
+          transition:
+            color 0.4s,
+            fill 0.3s;
           margin-left: 10px;
         }
 
@@ -3326,7 +3349,7 @@ body {
 }
 
 .formdata-text-v1 {
-  & :is(h1, h2, h3, h4, h5, span) {
+  & :is(h1, h2, h3, h4, h5, span:not(.tooltip-asdfkljashdfkjas)) {
     padding: 7px 10px;
     font-size: 0.9rem;
     color: #5e5e5e;
@@ -3340,9 +3363,9 @@ body {
     }
   }
   & a > * {
-    color: var(--link);
+    color: var(--link) !important;
     [data-mode='dark'] & {
-      color: var(--link);
+      color: var(--link) !important;
     }
   }
 }

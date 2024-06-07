@@ -12,17 +12,13 @@ interface ViewProps {
   selectedData?: IFormDataType | null;
 }
 
-function disableSortingStrategy() {
-  return null;
-}
-
 const View = ({ formData, setFormData, handleEdit, handleRemove, selectedData }: ViewProps) => {
   return (
     <>
       {formData.length > 0 && (
         <>
-          <SortableContext items={formData?.map((d) => d._id) || []} strategy={disableSortingStrategy}>
-            <ul className="list-none overflow-y-auto max-h-[75vh] grid gap-3 grid-cols-12">
+          <SortableContext items={formData.map((d) => d.uniqueId) || []} strategy={() => null}>
+            <ul className="grid max-h-[75vh] list-none grid-cols-12 gap-3 overflow-y-auto">
               {formData.map((form: IFormDataType, index) => (
                 <DashboardItem
                   key={form.chartTitle + ' ' + index}

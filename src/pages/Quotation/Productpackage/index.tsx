@@ -637,6 +637,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
       data.supplier = [];
       data.customer = [quotationData?.customerAccount?.optionValue];
       data.warehouse = [quotationData?.warehouse?.optionValue];
+      data.address = quotationData?.shippingAddress?.optionValue ? [quotationData?.shippingAddress?.optionValue] : [];
       return new Promise((resolve, reject) => {
         axiosInstance()
           .post(pricingCondition.api + `/calculatePrice`, data)

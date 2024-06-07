@@ -71,7 +71,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
           } = await axiosInstance().get(`/entity/${entityId}`);
           const { entityName, ...rest } = data;
           setCloneHeading(entityName);
-          tempData = getObjKeysWithValues({ ...rest }, fieldsData);
+          tempData = getObjKeysWithValues({ ...rest }, fieldsData, true, user);
         }
 
         setInitialData({

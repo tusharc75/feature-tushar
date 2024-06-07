@@ -36,7 +36,7 @@ interface Props {
 
 const ManageTransferAsset: FC<Props> = (props) => {
   const {
-    state: { selectedEntity, permissions }
+    state: { user }
   }: any = useData();
   const {
     isClone = false,
@@ -67,7 +67,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
     axiosInstance()
       .get('/field?resource=Transfer Asset')
       .then(({ data: { data } }) => {
-        data = data.filter((obj) => obj?.fieldData?.fieldName !== 'rentalJob');
+        data = data.filter((e) => !['rentalJob', 'repairOrder']?.includes(e?.fieldData?.fieldName));
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -90,7 +90,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                 setCloneHeading(transferAssetNumber);
                 setInitialData({
                   fields: setFieldsInAscendingOrder(fieldsDataForCreate),
-                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate)
+                  values: getObjKeysWithValues(oldValues, fieldsDataForCreate, true, user)
                 });
               } else {
                 if (data?.canEdit === false) {
@@ -123,25 +123,36 @@ const ManageTransferAsset: FC<Props> = (props) => {
           let createValues: any = getObjKeys('', fieldsDataForCreate);
           setAllFields(fieldsDataForCreate);
           createValues.transferAssetNumber = GenerateResourceLineNumber(fieldsDataForCreate);
-          if (referenceType === 'Rental Job' && referenceData) {
+          if (referenceType && referenceData) {
             for (const key in referenceData) {
               if (referenceData[key] && fieldsDataForCreate?.some((e) => e.fieldName === key)) {
                 createValues[key] = referenceData[key];
               }
             }
-            fieldsDataForCreate?.forEach((e) => {
-              if (e.fieldName === 'transfertoPlant') {
-                const plantAddress = e?.option?.filter((e) => e.optionValue === referenceData?.transfertoPlant);
-                if (plantAddress.length) {
-                  createValues['plantShipTo'] = plantAddress[0].address;
+            if (referenceType === 'Rental Job') {
+              fieldsDataForCreate?.forEach((e) => {
+                if (e.fieldName === 'transfertoPlant') {
+                  const plantAddress = e?.option?.filter((e) => e.optionValue === referenceData?.transfertoPlant);
+                  if (plantAddress.length) {
+                    createValues['plantShipTo'] = plantAddress[0].address;
+                  }
                 }
-              }
-              if (['transferFromPlant', 'transfertoPlant', 'plantShipTo', 'transferType']?.includes(e.fieldName)) {
-                e.disableOnEdit = true;
-                e.isUneditable = true;
-              }
-            });
-            createValues['rentalJob'] = referenceId;
+                if (['transferFromPlant', 'transfertoPlant', 'plantShipTo', 'transferType']?.includes(e.fieldName)) {
+                  e.disableOnEdit = true;
+                  e.isUneditable = true;
+                }
+              });
+              createValues['rentalJob'] = referenceId;
+            }
+            if (referenceType === 'Repair Order') {
+              fieldsDataForCreate?.forEach((e) => {
+                if (['transferFromPlant', 'transferType']?.includes(e.fieldName)) {
+                  e.disableOnEdit = true;
+                  e.isUneditable = true;
+                }
+              });
+              createValues['repairOrder'] = referenceId;
+            }
           }
           setInitialData({
             fields: setFieldsInAscendingOrder(fieldsDataForCreate),

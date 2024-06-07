@@ -16,7 +16,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, PURCHASE_REQUISITION_STATUS, checkIsAllowedToEdit, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -26,7 +26,7 @@ import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
 
 const PurchaseRequisitionDetail = () => {
-  const renderedFrom = camelCase(routes?.purchaseRequisition.title);
+
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -39,13 +39,13 @@ const PurchaseRequisitionDetail = () => {
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [tabValue, setTabValue] = useState(0);
-  const [showOrderDialog, setOrderDialog] = useState({ open: false, products: [], services: [] });
+  const [showOrderDialog, setOrderDialog] = useState({ open: false });
   const [nextStep, setNextStep] = useState(true);
+  const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [prevStep, setPrevStep] = useState(true);
   const [currentStep, setCurrentStep] = useState(null);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [stepList, setStepList] = useState(purchaseRequisitionSteps);
-  const [stepNames, setStepNames] = useState(purchaseRequisitionSteps.map((item) => item.name));
   const [DOAData, setDOAData] = useState(null);
   const {
     state: { permissions, user }
@@ -60,7 +60,7 @@ const PurchaseRequisitionDetail = () => {
 
   const fetchFields = async () => {
     axiosInstance()
-      .get('/field?resource=Purchase Requisition')
+      .get(`/field?resource=${sidebarResource.purchaseRequisition}`)
       .then(({ data }) => {
         setFields(data.data?.filter((field) => field.isRead));
       })
@@ -72,10 +72,8 @@ const PurchaseRequisitionDetail = () => {
   const updateDOASetup = (doaSetup) => {
     if (doaSetup) {
       setStepList(purchaseRequisitionSteps);
-      setStepNames(purchaseRequisitionSteps?.map((item) => item.name));
     } else {
       setStepList(purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA'));
-      setStepNames(purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA').map((item) => item.name));
     }
   };
 
@@ -85,15 +83,13 @@ const PurchaseRequisitionDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.purchaseRequisition.path}/${id}`);
-     
+
       var tempStepList = purchaseRequisitionSteps;
       if (!data?.doaSetup) {
         tempStepList = purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA');
       }
       setStepList(tempStepList);
-      setStepNames(tempStepList?.map((item) => item.name));
-
-      setCurrentStep(getIndex(data?.processStatus, purchaseRequisitionSteps));
+      setCurrentStep(getIndex(data?.processStatus, stepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setPurchaseRequisitionData(data);
@@ -146,32 +142,22 @@ const PurchaseRequisitionDetail = () => {
     setTabValue(newValue);
   };
 
-  const handleManagePuchhaseOrderDialog = () => {
-    const products = purchaseRequisitionData?.material?.filter((item: any) => item?.type == 'product');
-    const services = purchaseRequisitionData?.material?.filter((item: any) => item?.type == 'service');
-    setOrderDialog({ open: true, products: products, services: services });
-  };
-
   const handleConvertSuccess = (data: any) => {
-    setOrderDialog({ open: false, products: [], services: [] });
-    axiosInstance()
-      .put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
-        _id: id,
-        purchaseOrder: data?._id,
-        status: 'Converted'
-      })
-      .then(({ data }) => {
-        fetchData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `${sidebarResource.purchaseOrder} has been created successfully`
-        });
-      })
-      .catch((err) => {
-        fetchData();
-        // setShowConfirmBox(false);
+    setOrderDialog({ open: false });
+    axiosInstance().put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
+      _id: id,
+      purchaseOrder: data?._id,
+      status: PURCHASE_REQUISITION_STATUS.converted
+    }).then(({ data }) => {
+      fetchData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `${sidebarResource.purchaseOrder} has been created successfully`
       });
+    }).catch((err) => {
+      fetchData();
+    });
   };
 
   return (
@@ -183,15 +169,19 @@ const PurchaseRequisitionDetail = () => {
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
             <>
-              <Button
-                variant={isMobile && !isTablet ? 'text' : 'contained'}
-                disabled={purchaseRequisitionData?.status === 'Converted' ? true : false}
-                className="btn-outline-v1"
-                onClick={handleManagePuchhaseOrderDialog}
-                style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
-              >
-                {purchaseRequisitionData?.status === 'Converted' ? 'Converted' : 'Convert'}
-              </Button>
+              {purchaseRequisitionData?.material?.length > 0 &&
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  disabled={purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? true : false}
+                  className="btn-outline-v1"
+                  onClick={() => {
+                    setOrderDialog({ open: true });
+                  }}
+                  style={isMobile && !isTablet ? { color: '#43aeaa' } : {}}
+                >
+                  {purchaseRequisitionData?.status === PURCHASE_REQUISITION_STATUS.converted ? PURCHASE_REQUISITION_STATUS.converted : 'Convert'}
+                </Button>
+              }
               {permissions?.purchaseRequisition?.isUpdate && allowedToEdit && (
                 <Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
@@ -237,7 +227,7 @@ const PurchaseRequisitionDetail = () => {
               </Grid>
             ) : (
               <>
-                {stepNames[currentStep] === 'DOA' && (
+                {stepList[currentStep]?.name === 'DOA' && (
                   <Box
                     style={{
                       marginLeft: 'auto',
@@ -252,45 +242,52 @@ const PurchaseRequisitionDetail = () => {
                   <Steps
                     isNextStep={false}
                     nextStep={nextStep}
+                    nextStepToolTip={nextStepToolTip}
                     steps={stepList}
                     currentStep={currentStep}
                     setCurrentStep={setCurrentStep}
-                    isStepEnded={false}
                     isPrevStep={prevStep}
                     setStepFullScreen={() => setStepFullScreen(true)}
+                    isStepEnded={[PURCHASE_REQUISITION_STATUS.converted].includes(purchaseRequisitionData?.status)}
                   />
                   <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
-                    {stepNames[currentStep] === 'Add' && purchaseRequisitionData && (
+                    {stepList[currentStep]?.name === 'Add' && purchaseRequisitionData && (
                       <Material
                         allowedToEdit={allowedToEdit}
                         allowedToAddMaterial={true}
                         purchaseRequisitionData={purchaseRequisitionData}
+                        fetchpurchaseRequisitionData={fetchData}
                         updateDOASetup={updateDOASetup}
-                        currentStep={stepNames[currentStep]}
+                        currentStep={stepList[currentStep]?.name}
                         setNextStep={setNextStep}
                         setPrevStep={setPrevStep}
+                        setNextStepToolTip={setNextStepToolTip}
                       />
                     )}
-                    {stepNames[currentStep] === 'DOA' && purchaseRequisitionData && (
+                    {stepList[currentStep]?.name === 'DOA' && purchaseRequisitionData && (
                       <Material
                         allowedToEdit={allowedToEdit}
                         allowedToAddMaterial={false}
                         purchaseRequisitionData={purchaseRequisitionData}
-                        currentStep={stepNames[currentStep]}
+                        fetchpurchaseRequisitionData={fetchData}
+                        currentStep={stepList[currentStep]?.name}
                         DOAData={DOAData}
                         fetchParentData={fetchData}
                         setNextStep={setNextStep}
                         setPrevStep={setPrevStep}
+                        setNextStepToolTip={setNextStepToolTip}
                       />
                     )}
-                    {stepNames[currentStep] === 'END' && purchaseRequisitionData && (
+                    {stepList[currentStep]?.name === 'End' && purchaseRequisitionData && (
                       <Material
                         allowedToEdit={allowedToEdit}
                         allowedToAddMaterial={false}
                         purchaseRequisitionData={purchaseRequisitionData}
-                        currentStep={stepNames[currentStep]}
+                        fetchpurchaseRequisitionData={fetchData}
+                        currentStep={stepList[currentStep]?.name}
                         setNextStep={setNextStep}
                         setPrevStep={setPrevStep}
+                        setNextStepToolTip={setNextStepToolTip}
                       />
                     )}
                   </ContentFullScreen>
@@ -304,15 +301,15 @@ const PurchaseRequisitionDetail = () => {
         <ManagePurchaseOrder
           isClone={false}
           purchaseOrderId={null}
-          onClose={() => setOrderDialog((prevState) => ({ ...prevState, open: false }))}
+          onClose={() => setOrderDialog({ open: false })}
           onSuccess={(data: any) => {
             handleConvertSuccess(data);
           }}
-          products={showOrderDialog?.products?.map((e) => {
-            return { product: e._id, unit: e.unit, qty: e.qty };
+          products={purchaseRequisitionData?.material?.filter((item: any) => item?.type == MATERIAL_TYPE.product)?.map((e) => {
+            return { ...e, product: e.materialId };
           })}
-          services={showOrderDialog?.services?.map((e) => {
-            return { service: e._id, unit: e.unit, qty: e.qty };
+          services={purchaseRequisitionData?.material?.filter((item: any) => item?.type == MATERIAL_TYPE.service)?.map((e) => {
+            return { ...e, service: e.materialId };
           })}
           currency={purchaseRequisitionData.currency}
           warehouseId={purchaseRequisitionData?.warehouse?.optionValue}

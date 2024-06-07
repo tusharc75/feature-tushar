@@ -30,6 +30,8 @@ import BulkEditDialog from './BulkEditDialog';
 import ProductDialog from './ProductDialog';
 import SupplierAskPrice from './SupplierAskPrice';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
+import NoDataCell from '../Helpers/NoDataCell';
+import { Link } from 'react-router-dom';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -142,8 +144,30 @@ const ProductBuilder = (props) => {
           });
           fields = [...fields, ...ele.fields];
         });
-
-        let newColumns = generateColumns(routes.product.title, fields, routes.product.path, false, currency);
+        let newColumns = generateColumns(routes.product.title, fields, null, false, currency);
+        newColumns.forEach(column => {
+          if(column?.accessor === 'productName'){
+            column.cell = ({ row }) => (
+              <span>
+                {row?.original?.['productName'] ? (
+                  <>
+                    <Link
+                      className="link text-truncate"
+                      title={row?.original?.['productName']}
+                      to={`${routes.productDetail.path}/${row?.original?.productId}`}
+                      target={'_blank'}
+                      rel="noopener noreferrer"
+                    >
+                      {row?.original?.['productName']}
+                    </Link>
+                  </>
+                ) : (
+                  <NoDataCell />
+                )}
+              </span>
+            )
+          }
+        });
         columns = [...columns, ...newColumns];
 
         if (stage && stage === 'product') {

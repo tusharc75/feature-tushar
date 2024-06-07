@@ -49,7 +49,7 @@ const ManageStorageLocation = ({ isClone = false, storageLocationId = null, onCl
                 const { _id, createdBy, updatedBy, storageLocation, ...rest } = data;
                 setInitialData({
                   fields: fieldsDataForCreate,
-                  values: getObjKeysWithValues(rest, fieldsDataForCreate)
+                  values: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
                 });
                 setLoading(false);
               } else {

@@ -242,6 +242,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
             qty: 1
           })
         })
+        if(finalObject?.subRows?.length) finalObject.canDelete = false;
         return {
           ...finalObject
         };
@@ -474,7 +475,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
         {selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 &&
           <MenuItem
             onClick={() => {
-              setAssignSerialNumbersDialog({ open: true, data: selectedRecords });
+              setAssignSerialNumbersDialog({ open: true, data: selectedRecords?.filter(s => s.type !== 'serialNumber' && s?.serializedProduct) });
             }}
           >
             {`Assign Serial Numbers`}
@@ -484,6 +485,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
           onClick={() => {
             setShowConfirmBox({ open: true, data: selectedRecords });
           }}
+          disabled={selectedRecords?.some(s => !s.canDelete)}
         >
           {`Delete`}
         </MenuItem>

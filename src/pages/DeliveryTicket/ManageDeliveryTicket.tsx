@@ -317,7 +317,7 @@ const ManageDeliveryTicket = ({
             if (ele?.uniqueId) {
               obj.uniqueId = ele.uniqueId;
             }
-            if(ele?.assetData){
+            if (ele?.assetData) {
               obj.assetData = ele.assetData;
             }
             tempInitialData['assets'].push(obj);
@@ -335,6 +335,9 @@ const ManageDeliveryTicket = ({
             }
             tempInitialData['products'].push(obj);
           });
+          if (fieldsDataForUpdate.find((d) => d.fieldName === 'padName') && referenceData?.padName) {
+            tempInitialData['padName'] = referenceData?.padName;
+          }
           if (fieldsDataForUpdate.find((d) => d.fieldName === 'wellName') && referenceData?.wellName) {
             tempInitialData['wellName'] = referenceData?.wellName;
           }
@@ -359,7 +362,7 @@ const ManageDeliveryTicket = ({
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob) {
             tempInitialData['rentalJob'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.salesOrder) {
-            tempInitialData['salesOrder'] = referenceData?._id;
+            tempInitialData['salesOrder'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.repairJob) {
             tempInitialData['repairJob'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset) {
@@ -372,6 +375,8 @@ const ManageDeliveryTicket = ({
             tempInitialData['repairOrder'] = referenceData?.referenceId;
           } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.productionOrder) {
             tempInitialData['productionOrder'] = referenceData?.referenceId;
+          } else if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly) {
+            tempInitialData['subcontractAssembly'] = referenceData?.referenceId;
           }
 
           tempInitialData['pickupFromType'] = referenceData?.pickupFromType;

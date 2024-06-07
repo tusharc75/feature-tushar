@@ -22,17 +22,20 @@ import MaterialDialog from './materialDialog';
 import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import RequestButton from 'src/pages/DoaSetupNew/RequestButton';
+import { rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const Material = ({
   allowedToEdit,
   allowedToAddMaterial,
   purchaseRequisitionData,
+  fetchpurchaseRequisitionData,
   updateDOASetup = null,
   currentStep,
   DOAData = null,
   fetchParentData = null,
   setNextStep,
-  setPrevStep
+  setPrevStep,
+  setNextStepToolTip
 }) => {
   const renderedFrom = `${camelCase(routes?.purchaseRequisition.title)}_Material`;
 
@@ -59,13 +62,16 @@ const Material = ({
     fetchFields();
   }, []);
 
+  useEffect(() => {
+    fetchData();
+  }, [allFields]);
+
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(
       CHILD_RESOURCE.purchaseRequisitionDetail,
       purchaseRequisitionData?.currency,
       allowedToEdit && allowedToAddMaterial
     );
-    setAllFields(data);
     const newColumns = generateColumns(renderedFrom, data, null, false, purchaseRequisitionData?.currency);
     let coloum: any = [
       {
@@ -185,7 +191,7 @@ const Material = ({
       )
     });
     setColumns(coloum);
-    fetchData();
+    setAllFields(data);
   };
 
   const fetchData = async () => {
@@ -196,6 +202,7 @@ const Material = ({
       setPrevStep(false);
     }
     var data: any = [];
+    var nextStepMessage = null;
     const response = await axiosInstance().get(`${routes.purchaseRequisition.path}/material/${purchaseRequisitionData._id}`);
     data = response?.data?.data;
 
@@ -204,6 +211,8 @@ const Material = ({
     costData?.forEach((e) => {
       e.type = MATERIAL_TYPE.manualEntry;
     });
+
+    const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
 
     let rows = data.material.filter((e) => e.parentId === null);
     rows = [...rows, ...costData];
@@ -221,7 +230,18 @@ const Material = ({
           : parent.type === MATERIAL_TYPE.service
           ? parent.serviceDetail?.serviceDescription
           : parent.description;
+      parent.isValid = parent['finalPrice_' + purchaseRequisitionData?.currency?.toLowerCase()] ? true : !isPriceRequired;
+      if (!parent.isValid) {
+        nextStepMessage = rentalManagementMessage.validPrice;
+      }
     });
+    if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+      setNextStep(false);
+      setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage);
+    } else {
+      setNextStep(true);
+      setNextStepToolTip(null);
+    }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
     if (updateDOASetup) {
@@ -309,6 +329,7 @@ const Material = ({
           message: data.message
         });
         fetchData();
+        fetchpurchaseRequisitionData()
         setSubmitting(false);
       })
       .catch((error) => {
@@ -324,6 +345,7 @@ const Material = ({
       .then(({ data }) => {
         setUpdating(false);
         fetchData();
+        fetchpurchaseRequisitionData()
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -370,6 +392,7 @@ const Material = ({
             message: data.message
           });
           fetchData();
+          fetchpurchaseRequisitionData()
           setDeleteData(null);
         })
         .catch((error) => {
@@ -389,6 +412,7 @@ const Material = ({
             message: data.message
           });
           fetchData();
+          fetchpurchaseRequisitionData()
           setDeleteData(null);
         })
         .catch((error) => {
@@ -516,6 +540,7 @@ const Material = ({
             isClientSideGrid={true}
             onSaveEdit={onSaveInlineEdit}
             expander={true}
+            setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
           />
         </Box>
       ) : (

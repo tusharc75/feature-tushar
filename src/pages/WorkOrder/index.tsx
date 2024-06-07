@@ -40,7 +40,7 @@ const WorkOrder = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const history = useHistory();
+
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.workOrder));
   const { generateColumns } = useColumns();
   const [renderCount, setRenderCount] = useState(0);
@@ -53,7 +53,7 @@ const WorkOrder = () => {
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
-
+  const [alloweToCreate, setAlloweToCreate] = useState(false);
 
   useEffect(() => {
     fetchGridColumns();
@@ -77,8 +77,12 @@ const WorkOrder = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}&view=true`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.workOrder}&view=true`);
     data = response?.data?.data;
+    const typeFieldOption = data?.find((e) => e.fieldData.fieldName === 'type')?.fieldData?.option
+    if (typeFieldOption?.find((e) => e?.default)?.optionValue === WORK_ORDER_TYPE.productionOrder) {
+      setAlloweToCreate(true)
+    }
     const newColumns = generateColumns(renderedFrom, data, routes.workOrderDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
@@ -282,18 +286,16 @@ const WorkOrder = () => {
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={permissions?.workOrder?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
-          // addButtonOnclick
-          isAddButtonVisible={false}
+          addButtonOnclick={() => {
+            setShowManageWorkOrder({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.workOrder?.isCreate && alloweToCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

@@ -12,7 +12,8 @@ import {
   setFieldsInAscendingOrder,
   serializedAsset,
   GenerateResourceLineNumber,
-  WORK_ORDER_STATUS
+  WORK_ORDER_STATUS,
+  WORK_ORDER_TYPE,
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema, workOrder, sidebarResource } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
@@ -52,7 +53,7 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
       const response = await axiosInstance().get(`/field?resource=${sidebarResource['workOrder']}`);
       data = response?.data?.data;
 
-      data = data?.filter((e) => !['productionOrder', 'repairOrder', 'serviceProcessStatus'].includes(e?.fieldData?.fieldName));
+      data = data?.filter((e) => !['productionOrder', 'repairOrder', 'repairJob', 'serviceProcessStatus'].includes(e?.fieldData?.fieldName));
 
       let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
       if (serializedAssetFieldIndex > -1) {
@@ -75,11 +76,9 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
           const { _id, createdBy, updatedBy, workOrderNumber, status, ...rest } = data;
           rest['workOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
           rest['status'] = WORK_ORDER_STATUS.new;
-          rest['estimateCompleteDate'] = new Date();
-          rest['createDate'] = new Date();
           setInitialData({
             fields: fieldsDataForUpdate,
-            values: getObjKeysWithValues(rest, fieldsDataForUpdate)
+            values: getObjKeysWithValues(rest, fieldsDataForUpdate, true, user)
           });
         } else {
           setInitialData({
@@ -144,10 +143,6 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
     }
   };
 
-  function validate(values) {
-    const errors = {};
-    return errors;
-  }
 
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
@@ -186,7 +181,6 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           onSubmit={handleSubmit}
-          validate={validate}
         >
           {({ values, errors, setFieldValue, touched, submitForm }) => (
             <Fragment>
@@ -252,7 +246,8 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                     <FormTypes
                                       {...field}
                                       fieldData={field}
-                                      disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit)}
+                                      disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit
+                                        || values['type'] === WORK_ORDER_TYPE.productionOrder)}
                                       values={values}
                                       errors={errors}
                                       touched={touched}

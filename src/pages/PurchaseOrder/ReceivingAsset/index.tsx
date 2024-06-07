@@ -2,7 +2,6 @@ import { Button, Grid, IconButton } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import { Cancel } from '@material-ui/icons';
 import HistoryIcon from '@material-ui/icons/History';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import TrackChangesIcon from '@material-ui/icons/TrackChanges';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -23,6 +22,7 @@ import Logs from './Logs';
 import Receive from './Receive';
 import Reject from './Reject';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -99,7 +99,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
       disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => (
-        <div className="d-flex gap-2 align-items-center">
+        <div className="flex items-center gap-2">
           <p className="text-truncate">{row.original.detail}</p>
           {[MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset].includes(row.original.type) && (
             <IconButton
@@ -114,7 +114,7 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
                 }
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           )}
         </div>

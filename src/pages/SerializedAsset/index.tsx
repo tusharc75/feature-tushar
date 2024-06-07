@@ -66,6 +66,8 @@ const SerializedAsset = () => {
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
   const [subleaseAsset, setSubleaseAsset] = useState(false);
+  const [showScrapAsset, setShowScrapAsset] = useState(false);
+
   const [openSupplierAccountDialog, setOpenSupplierAccountDialog] = useState(false);
   const [warehouse, setWarehouse] = useState(history.location?.state?.warehouse);
   const [fromPurchaseOrder, setFromPurchaseOrder] = useState({
@@ -102,6 +104,7 @@ const SerializedAsset = () => {
     productCategory,
     productFilter,
     subleaseAsset,
+    showScrapAsset,
     showFilteredRecordsOnly
   ]);
 
@@ -263,19 +266,19 @@ const SerializedAsset = () => {
           </span>
         </HtmlTooltip>
         {permissions?.iotChart?.isRead && (
-        <HtmlTooltip title="View IOT Data">
-          <span>
-            <IconButton
-              size="small"
-              onClick={() => {
-                        history.push(`${routes.iotChart.path}/${row?.original?._id}`);
-                    }}
-                    >
-              <VisibilityIcon fontSize="small" color="primary" />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      )}
+          <HtmlTooltip title="View IOT Data">
+            <span>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  history.push(`${routes.iotChart.path}/${row?.original?._id}`);
+                }}
+              >
+                <VisibilityIcon fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        )}
       </>
     )
   };
@@ -292,14 +295,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-            ![
-              ASSET_STATUS.new,
-              ASSET_STATUS.available,
-              ASSET_STATUS.lost,
-              ASSET_STATUS.customerPossession,
-              ASSET_STATUS.onPO,
-              ASSET_STATUS.scrap
-            ]?.includes(u?.status)
+              ![
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.lost,
+                ASSET_STATUS.customerPossession,
+                ASSET_STATUS.onPO,
+                ASSET_STATUS.scrap
+              ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -320,6 +323,13 @@ const SerializedAsset = () => {
     let deepFilter = !isExport ? `?page=${page}&limit=${limit}` : '?';
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (showScrapAsset) {
+      deepFilter = `${deepFilter}&showScrapAsset=true`;
+    }
+    else {
+      deepFilter = `${deepFilter}&hideScrapAsset=true`;
+    }
 
     if (warehouse?.optionValue) {
       filterByIds.push({ field: 'warehouse', term: warehouse?.optionValue });
@@ -473,7 +483,6 @@ const SerializedAsset = () => {
           additionalParams={getQueryString(true)}
         />
       </div>
-
       <CustomContainer>
         <ListingPageHeader
           leftSideContents={
@@ -496,13 +505,14 @@ const SerializedAsset = () => {
                 selectedWarehouse,
                 setSelectedWarehouse,
                 subleaseAsset,
-                setSubleaseAsset
+                setSubleaseAsset,
+                showScrapAsset,
+                setShowScrapAsset
               }}
             />
           }
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={
@@ -559,9 +569,8 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
-            deleteRecord?._id ? deleteRecord?.assetNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -618,7 +627,9 @@ const LeftSideContent = ({
   selectedWarehouse,
   setSelectedWarehouse,
   subleaseAsset,
-  setSubleaseAsset
+  setSubleaseAsset,
+  showScrapAsset,
+  setShowScrapAsset
 }) => {
   return (
     <>
@@ -739,6 +750,20 @@ const LeftSideContent = ({
               label="Sublease Assets"
             />
           )}
+          <FormControlLabel
+            control={
+              <Checkbox
+                name="showScrapAsset"
+                checked={showScrapAsset}
+                onChange={(e) => {
+                  setShowScrapAsset(e.target.checked);
+                }}
+                color="primary"
+              />
+            }
+            style={{ color: 'var(--dark-primary-text, var(--primary))', marginLeft: '-11px' }}
+            label={`Scrap ${routes.serializedAsset.title}`}
+          />
         </Fragment>
       )}
     </>

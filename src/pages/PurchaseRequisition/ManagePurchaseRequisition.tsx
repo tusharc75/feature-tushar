@@ -12,7 +12,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, PURCHASE_ORDER_STATUS, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema, GenerateResourceLineNumber } from '../../constants/helpers';
@@ -37,10 +37,13 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
   const fetchFields = async () => {
     try {
       let data;
-      const response = await axiosInstance().get('/field?resource=Purchase Requisition');
+      const response = await axiosInstance().get(`/field?resource=${sidebarResource.purchaseRequisition}`);
       data = response?.data?.data;
+
+      data = data.filter((f) => f?.fieldData.fieldName !== 'purchaseOrder');
+
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+      let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
       if (id) {
         axiosInstance()
@@ -52,12 +55,13 @@ const ManagePurchaseRequisition = ({ onClose, onSuccess, isClone = false, id = n
               fields = fieldsDataForCreate;
               const { purchaseRequisitionNumber, ...rest } = data;
               rest['purchaseRequisitionNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+              rest['status'] = 'New';
               setCloneHeading(purchaseRequisitionNumber);
               tempData = rest;
             }
             setInitialData({
               fields: fields,
-              values: getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {

@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core'
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -12,7 +11,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
 import { flattenArray } from 'src/constants/columns';
-import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -30,12 +29,13 @@ import {
   getNestedSubRows
 } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
+import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AssetAvailability from '../AssetAvailability';
 import AddExistingProductInventory from './AddExistingProductInventory';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Productpackage = ({
   rentalManagementData,
@@ -44,7 +44,9 @@ const Productpackage = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
-  quotationApproved
+  quotationApproved,
+  quotationStatus,
+  fetchRentalManagementData
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -104,7 +106,7 @@ const Productpackage = ({
 
   const createColumns = () => {
     setColumns(null);
-    const data = [...allFields];
+    const data = [...allFields]?.filter((f) => f?.isRead);
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
@@ -165,9 +167,9 @@ const Productpackage = ({
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-1">
             {isOffline || !allowedToEdit || quotationApproved ? (
-              <p> {row.original.detail}</p>
+              <p>{row.original.detail}</p>
             ) : (
               <p
                 onClick={() => {
@@ -180,21 +182,22 @@ const Productpackage = ({
               </p>
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (
-              <Box ml={1} className="d-flex align-items-center">
+              <Fragment>
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
                 {!isOffline && allowedToEdit && !quotationApproved && (
-                  <HtmlTooltip title="Add ">
+                  <HtmlTooltip title="Add">
                     <IconButton
                       onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
                       size="small"
+                      color="primary"
                     >
-                      <Add color="disabled" fontSize="small" />
+                      <Add fontSize="small" style={{ fontSize: 17 }} />
                     </IconButton>
                   </HtmlTooltip>
                 )}
-              </Box>
+              </Fragment>
             )}
             {!isOffline && row.original.type !== MATERIAL_TYPE.manualEntry && (
               <IconButton
@@ -211,7 +214,7 @@ const Productpackage = ({
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>
@@ -255,7 +258,13 @@ const Productpackage = ({
               row.original.hideSelection ? (
                 <HtmlTooltip
                   title={
-                    row.original?.assetQty ? (row?.original?.productDetail?.serializedProduct ? 'Asset is already assigned' : 'Serial Number is already assigned') : row.original?.status ? rentalManagementMessage.loadingAlreadyCreated : ''
+                    row.original?.assetQty
+                      ? row?.original?.productDetail?.serializedProduct
+                        ? 'Assets/Serial Numbers is already assigned'
+                        : 'Inventory/Serial Numbers is already assigned'
+                      : row.original?.status
+                        ? rentalManagementMessage.loadingAlreadyCreated
+                        : ''
                   }
                 >
                   <span>
@@ -300,6 +309,7 @@ const Productpackage = ({
     var additionalCosts: any = [];
     var inventory: any = [];
     var nonSerializeAsset: any = [];
+    var productSerialNumbers: any = [];
     var nextStepMessage = null;
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -316,7 +326,9 @@ const Productpackage = ({
       setMaterial(JSON.parse(JSON.stringify(data.material)));
       inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
+      productSerialNumbers = data.productSerialNumbers;
     }
+
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
     let products = rows.filter((e) => e.type === MATERIAL_TYPE.product && !e?.isConsumbale);
     let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service');
@@ -328,16 +340,17 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.manualEntry
-            ? parent.detail
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
-        }`;
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.manualEntry
+              ? parent.detail
+              : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -353,11 +366,12 @@ const Productpackage = ({
         nextStepMessage = rentalManagementMessage.validPrice;
       }
       parent.assetQty = parent.serializedProduct
-        ? inventory?.filter((e) => e._id === parent._id).length
-        : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-      parent.hideSelection = parent?.assetQty > 0 ||
-        data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
+        ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
+        : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
+          data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+      parent.hideSelection =
+        parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
+      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired);
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage;
       }
@@ -374,18 +388,19 @@ const Productpackage = ({
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, parent, isPriceRequired) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.product
+              ? _subRow.productDetail?.productName
+              : ''
+      } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -398,10 +413,10 @@ const Productpackage = ({
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
       _subRow.assetQty = _subRow.serializedProduct
-        ? inventory?.filter((e) => e._id === _subRow._id).length
+        ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, isPriceRequired);
+      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, productSerialNumbers, _subRow, isPriceRequired);
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
@@ -489,6 +504,9 @@ const Productpackage = ({
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchData();
+        if ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced]?.includes(rentalManagementData?.status)) {
+          fetchRentalManagementData();
+        }
         setAddingProducts(false);
         setPriceDataDialog({ open: false, material: null });
       })
@@ -757,7 +775,7 @@ const Productpackage = ({
         >
           {`Add Existing ${routes.serializedAsset.title}`}
         </MenuItem>
-        {costFields?.length > 0 && (
+        {costFields?.filter((f) => f?.isRead)?.length > 0 && (
           <MenuItem
             onClick={() => {
               setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
@@ -843,7 +861,7 @@ const Productpackage = ({
         addButtonMenuItems={addButtonMenuItems()}
         addButtonProps={{
           disabled: !allowedToEdit || quotationApproved,
-          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``
+          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonmenuItems()}

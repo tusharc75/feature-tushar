@@ -27,7 +27,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onClose, onSuccess }) => {
+const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onClose, onSuccess, referenceData = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -73,7 +73,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
             setCloneHeading(productionOrderNumber);
             setInitialData({
               fields: fieldsDataForCreate,
-              values: getObjKeysWithValues(rest, fieldsDataForCreate, true)
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
             });
             setLoading(false);
           } else {
@@ -89,6 +89,19 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
         initialData['productionOrderNumber'] = GenerateResourceLineNumber(fieldsDataForCreate);
+
+        if (referenceData) {
+          Object.keys(referenceData)?.forEach((key) => {
+            if (fieldsDataForCreate?.find((i) => i.fieldName === key)) {
+              initialData[key] = referenceData[key];
+            }
+            const field = fieldsDataForCreate?.find((f) => f?.fieldName === key);
+              if (field) {
+                field.disableOnEdit = true;
+                field.isUneditable = true;
+              }
+          });
+        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData
@@ -129,6 +142,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
             message: message
           });
           history.push(`${routes.productionOrderDetail.path}/${data?._id}`);
+          onSuccess(data)
           setLoading(false);
         })
         .catch((error) => {

@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 import { startCase } from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -13,7 +12,7 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
-import { ownerAndColaborator, quotationApprovedMessage, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { ownerAndColaborator, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManagePackageDialog from 'src/pages/Packages/ManagePackageDialog';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -27,12 +26,23 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
+import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import Technicians from './Technicians';
+import { FiExternalLink } from 'react-icons/fi';
 
-const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen, allowedToEdit, quotationApproved }: any) => {
+const Services = ({
+  rentalManagementData,
+  setNextStep,
+  setNextStepToolTip,
+  renderedFrom,
+  stepFullScreen,
+  allowedToEdit,
+  quotationApproved,
+  quotationStatus,
+  fetchRentalManagementData
+}: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -81,7 +91,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
 
   const createColumns = () => {
     setColumns(null);
-    const data = [...allFields];
+    const data = [...allFields]?.filter((f) => f?.isRead);
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
@@ -142,7 +152,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-1">
             {isOffline || !allowedToEdit || quotationApproved ? (
               <p> {row.original.detail}</p>
             ) : (
@@ -156,24 +166,20 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                 {row.original.detail}
               </p>
             )}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-                {!isOffline && allowedToEdit && !quotationApproved && (
-                  <HtmlTooltip title="Add Existing Service">
-                    <IconButton
-                      onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
-                      size="small"
-                      color="primary"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-              </Box>
-            }
+            <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+              {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+            </span>
+            {!isOffline && allowedToEdit && !quotationApproved && (
+              <HtmlTooltip title="Add Existing Service">
+                <IconButton
+                  onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
+                  size="small"
+                  color="primary"
+                >
+                  <Add color="disabled" fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             {!isOffline && (
               <IconButton
                 size="small"
@@ -189,7 +195,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>
@@ -450,6 +456,9 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchData();
+        if ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced]?.includes(rentalManagementData?.status)) {
+          fetchRentalManagementData();
+        }
         setSubmitting(false);
       })
       .catch((error) => {
@@ -612,7 +621,7 @@ const Services = ({ rentalManagementData, setNextStep, setNextStepToolTip, rende
         isAddButtonVisible={true}
         addButtonMenuItems={addButtonMenuItems()}
         addButtonProps={{
-          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? quotationApprovedMessage : ``,
+          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``,
           disabled: !allowedToEdit || quotationApproved
         }}
         isActionButtonVisible={true}

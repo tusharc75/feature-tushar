@@ -1,17 +1,33 @@
-import React, { useEffect, useCallback, useMemo, useState, useContext } from 'react';
-import { Calendar, View, momentLocalizer } from 'react-big-calendar';
-import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
-import './calendarView.scss';
-import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
-import moment from 'moment';
-import { Checkbox, TextField, Box, CircularProgress, Popover, Typography, TableContainer, Table, TableHead, Paper, TableCell, TableRow, TableBody } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
+import {
+  Box,
+  Checkbox,
+  CircularProgress,
+  Popover,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField
+} from '@material-ui/core';
+import { ExpandMore } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
+import { camelCase, groupBy } from 'lodash';
+import moment from 'moment';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { Calendar, View, momentLocalizer } from 'react-big-calendar';
+import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
+import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { sidebarResource } from 'src/constants/helpers';
-import { useAppTheme } from 'src/constants/AppConfig';
+import axiosInstance from 'src/axios/axiosInstance';
+import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/CustomAccordion';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { Link } from 'react-router-dom';
+import { useAppTheme } from 'src/constants/AppConfig';
+import { sidebarResource } from 'src/constants/helpers';
+import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
+import './calendarView.scss';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 const localizer = momentLocalizer(moment);
@@ -70,7 +86,7 @@ const PRODUCT_FILTERS = [
     label: 'Plant',
     value: 'Warehouse',
     key: 'warehouse'
-  },
+  }
 ];
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
@@ -247,8 +263,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 start: new Date(d['date']),
                 end: new Date(d['date']),
                 allDay: true,
-                resource: selectedResource.resource,
-              })
+                resource: selectedResource.resource
+              });
             }
             if (d?.available) {
               otherData.push({
@@ -256,8 +272,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 start: new Date(d['date']),
                 end: new Date(d['date']),
                 allDay: true,
-                resource: selectedResource.resource,
-              })
+                resource: selectedResource.resource
+              });
             }
             if (d?.reserved?.length) {
               otherData.push({
@@ -267,8 +283,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 allDay: true,
                 resource: selectedResource.resource,
                 type: 'reserved',
-                data: d?.reserved,
-              })
+                data: d?.reserved
+              });
             }
             if (d?.debit?.length) {
               const debitQty = d?.debit.reduce((sum, row) => Number(row.qty) + sum, 0);
@@ -281,7 +297,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 type: 'debit',
                 data: d?.debit,
                 isRedAlert: debitQty > d?.available ? true : false
-              })
+              });
             }
             if (d?.credit?.length) {
               otherData.push({
@@ -291,8 +307,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 allDay: true,
                 resource: selectedResource.resource,
                 type: 'credit',
-                data: d?.credit,
-              })
+                data: d?.credit
+              });
             }
             if (d?.repair) {
               otherData.push({
@@ -300,8 +316,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 start: new Date(d['date']),
                 end: new Date(d['date']),
                 allDay: true,
-                resource: selectedResource.resource,
-              })
+                resource: selectedResource.resource
+              });
             }
           }
           return {
@@ -317,7 +333,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -356,11 +372,36 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
       spanElement.textContent = content;
       element[i].appendChild(spanElement);
 
-      element[i].onclick = () => {
-        const event = events.filter((event) => event.title === element[i].innerText)[0];
-        const path = selectedResource.path;
-        window.open(`${path}/${event.id}`);
+      element[i].onclick = (clickEvent) => {
+        const data = events.filter((event) => event.title === element[i].innerText)[0];
+        handleClick(data, clickEvent);
+        // let path = selectedResource.path;
+        // if(selectedResource.resource === sidebarResource.serializedAsset){
+        //   path = routes[`${camelCase(event.resource)}Detail`]?.path
+        // }
+        // window.open(`${path}/${event.id}`);
       };
+    }
+  };
+
+  const handleClick = (data, event) => {
+    if (selectedResource.resource === sidebarResource.product) {
+      setAnchor(event.target);
+      if (data?.type) {
+        const newData: OnSelectDataType[] = data.data;
+        setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
+      }
+    } else {
+      if (data.resource) {
+        const resource = resourceList?.find((r) => r.resource === data.resource);
+        window.open(`${resource.path}/${data.id}`);
+      } else {
+        let path = selectedResource.path;
+        if (selectedResource.resource === sidebarResource.serializedAsset) {
+          path = routes[`${camelCase(data.resource)}Detail`]?.path;
+        }
+        window.open(`${path}/${data.id}`);
+      }
     }
   };
 
@@ -399,21 +440,24 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
   }, [view]);
 
   const updateData = (event, start, end) => {
-    axiosInstance().put(`/planning-view/change-date`, {
-      _id: event.id,
-      startDate: start.toISOString(),
-      endDate: end.toISOString(),
-      resource: event.resource
-    }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put(`/planning-view/change-date`, {
+        _id: event.id,
+        startDate: start.toISOString(),
+        endDate: end.toISOString(),
+        resource: event.resource
+      })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-      fetchData();
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const moveEvent = ({ event, start, end }) => {
@@ -473,15 +517,12 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     if (obj?.resource === sidebarResource.product) {
       if (obj?.type === 'credit') {
         backgroundColor = 'var(--success-light) ';
-      }
-      else if (obj?.type === 'reserved') {
+      } else if (obj?.type === 'reserved') {
         backgroundColor = 'var(--warning-light)';
-      }
-      else if (obj?.type === 'debit' && obj?.isRedAlert) {
+      } else if (obj?.type === 'debit' && obj?.isRedAlert) {
         backgroundColor = 'var(--danger-light)';
         color = 'white';
-      }
-      else if (obj?.type === 'debit') {
+      } else if (obj?.type === 'debit') {
         backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
       }
     }
@@ -536,11 +577,23 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
     );
   };
 
+  const mapObjectToList = (obj: { [key: string]: OnSelectDataType[] }) => {
+    const data: { items: OnSelectDataType[]; key: string; heading: string }[] = [];
+    for (const key in obj) {
+      data.push({
+        items: obj[key],
+        key: key,
+        heading: routes[camelCase(key)].title || key
+      });
+    }
+    return data;
+  };
+
   return (
     <>
       <div>
         <Box display="flex" flexDirection="column">
-          <div className="flex gap-2 pr-[66px] flex-wrap">
+          <div className="flex flex-wrap gap-2 pr-[66px]">
             <Autocomplete
               options={resourceList}
               getOptionLabel={(option) => (option && option?.title) || ''}
@@ -635,7 +688,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
                 style
               };
             }}
-
             onNavigate={(date) => {
               onNavigate(date);
             }}
@@ -643,77 +695,105 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
               if (selectedResource.resource === sidebarResource.product) {
                 setAnchor(event.nativeEvent.target);
                 if (data?.type) {
-                  setOpen({ open: true, data: data.data, type: data?.type })
+                  const newData: OnSelectDataType[] = data.data;
+                  setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
                 }
-              }
-              else {
+              } else {
                 if (data.resource) {
-                  const resource = resourceList?.find((r) => r.resource === event.resource);
-                  window.open(`${resource.path}/${event.id}`);
+                  const resource = resourceList?.find((r) => r.resource === data.resource);
+                  window.open(`${resource.path}/${data.id}`);
                 } else {
-                  window.open(`${selectedResource.path}/${event.id}`);
+                  window.open(`${selectedResource.path}/${data.id}`);
                 }
               }
             }}
           />
         )}
-        {isOpen.open &&
+        {isOpen.open && (
           <Popover
             open={isOpen.open}
             anchorEl={anchor}
             onClose={() => {
-              setOpen({ open: false, data: [], type: "" })
-            }}
-            anchorOrigin={{
-              vertical: 'bottom',
-              horizontal: 'left',
+              setOpen({ open: false, data: [], type: '' });
             }}
             style={{ minWidth: '300px' }}
           >
-            <Box >
-              <TableContainer component={Paper}>
-                <Table aria-label="simple table">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>Job</TableCell>
-                      <TableCell>Qty</TableCell>
-                      <TableCell>{routes.warehouse.title}</TableCell>
-                      <TableCell>{routes.customerAccount.title}</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {isOpen.data.map((row) => (
-                      <TableRow key={row.referenceId}  >
-                        <TableCell component="th" scope="row">
-                          <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.resourceLabel}
-                            to={`${routes.rentalManagementDetail.path}/${row?.referenceId}`}
-                          >
-                            {row.resourceLabel}
-                          </Link>
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {row.qty}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {row?.warehouse?.optionLabel}
-                        </TableCell>
-                        <TableCell component="th" scope="row">
-                          {row?.customerAccount?.optionLabel}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+            <Box className="max-h-[600px] space-y-2  overflow-y-auto overflow-x-hidden p-2">
+              {isOpen.data?.map((d) => (
+                <Accordion key={d.key} defaultExpanded>
+                  <AccordionSummary expandIcon={<ExpandMore />}>
+                    <h6 className=" text-sm font-semibold">{d.heading}</h6>
+                  </AccordionSummary>
+                  <AccordionDetails>
+                    <RenderTable data={d.items} />
+                  </AccordionDetails>
+                </Accordion>
+              ))}
             </Box>
-          </Popover >
-        }
+          </Popover>
+        )}
       </div>
     </>
   );
 }
 
 export default CalendarView;
+
+const RenderTable = ({ data }) => {
+  return (
+    <TableContainer>
+      <Table className="min-w-[530px]" aria-label="simple table" size="small">
+        <TableHead>
+          <TableRow>
+            <TableCell>Number</TableCell>
+            <TableCell>Qty</TableCell>
+            <TableCell>{routes.warehouse.title}</TableCell>
+            <TableCell>{routes.customerAccount.title}</TableCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {data.map((row) => (
+            <TableRow key={row.referenceId}>
+              <TableCell component="th" scope="row">
+                <p
+                  onClick={() => {
+                    if (row?.resource === sidebarResource.rentalManagement) {
+                      window.open(`${routes.rentalManagementDetail.path}/${row.referenceId}`);
+                    } else if (row?.resource === sidebarResource.purchaseOrder) {
+                      window.open(`${routes.purchaseOrderDetail.path}/${row.referenceId}`);
+                    } else if (row?.resource === sidebarResource.purchaseRequisition) {
+                      window.open(`${routes.purchaseRequisitionDetail.path}/${row.referenceId}`);
+                    } else if (row?.resource === sidebarResource.productionOrder) {
+                      window.open(`${routes.productionOrderDetail.path}/${row.referenceId}`);
+                    } else if (row?.resource === sidebarResource.demandOrder) {
+                      window.open(`${routes.demandOrderDetail.path}/${row.referenceId}`);
+                    } else if (row?.resource === sidebarResource.repairOrder) {
+                      window.open(`${routes.repairOrderDetail.path}/${row.referenceId}`);
+                    } else if (row?.resource === sidebarResource.repairJob) {
+                      window.open(`${routes.repairJobDetail.path}/${row.referenceId}`);
+                    } else if (row?.resource === sidebarResource.salesOrder) {
+                      window.open(`${routes.salesOrderDetail.path}/${row.referenceId}`);
+                    }
+                  }}
+                  className="link text-truncate"
+                  title={row?.resourceLabel}
+                >
+                  {row.resourceLabel}
+                </p>
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {row.qty}
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {row?.warehouse?.optionLabel}
+              </TableCell>
+              <TableCell component="th" scope="row">
+                {row?.customerAccount?.optionLabel ? row?.customerAccount?.optionLabel : <NoDataCell />}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </TableContainer>
+  );
+};

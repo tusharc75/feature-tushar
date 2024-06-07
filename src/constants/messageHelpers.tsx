@@ -11,8 +11,6 @@ export const deleteDisable = 'You do not have permission to Delete';
 export const editDisable = 'You do not have permission to Edit';
 export const childDisable = 'You do not have permission to View Child';
 
-export const quotationApprovedMessage = 'Quotation Approved you can not perform this action';
-
 export const rentalManagementActions = {
     createLoadingTicket: 'Create Loading Ticket',
     deliveredToCustomer: 'Delivered to Customer',
@@ -28,7 +26,9 @@ export const rentalManagementActions = {
     createRepairJob: 'Create Repair Job',
     createRepairOrder: 'Create Repair Order',
     transferToAnotherRental: 'Transfer to another Rental',
-    swapInUseAssets: 'Swap In-Use Assets'
+    swapInUseAssets: 'Swap In-Use Assets',
+    startService: 'Start Service',
+    stopService: 'Stop Service'
 };
 
 export const rentalManagementMessage = {
@@ -61,9 +61,10 @@ export const rentalManagementMessage = {
     ticketNotForLost: `Ticket cannot be created for lost assets`,
     onlySubleaseAsset: "Only Sublease assets can be selected for this action",
     notSubleaseAsset: "Sublease assets cannot be selected for this action",
-    productsCanNotReplace: 'Product(s) cannot be replaced',
+    productsCanNotReplace: 'Product(s)/Service(s) cannot be replaced',
     loadingDeliveredForReplace: 'Loading Ticket must be delivered to replace assets',
     onlyReplaceInUse: 'Only In-Use assets can be replaced',
+    ticketCanNotCancelledForReplaceedAssets: 'Ticket cannot cancelled for replaced assets',
     cancelInTransitLineItems: 'Only In-Transit tickets can be cancelled',
     statusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
     rentalStatusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
@@ -77,6 +78,8 @@ export const rentalManagementMessage = {
     onlySwapAssets: 'Only Assets can be swapped',
     onlySwapInUseAssets: 'Only In-Use assets can be swapped',
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
+    serviceAlreadyStarted: 'Service already in progress',
+    serviceNotstarted: 'Service not started yet',
 };
 
 export const subleaseActions = {
@@ -115,4 +118,26 @@ export const subleaseMessage = {
 
 export const transferInventoryMessage = {
     assignSerialNumbers: 'Assign Serial Numbers to proceed',
+}
+
+export const salesOrderActions = {
+    createLoadingTicket: 'Create Loading Ticket',
+    deliveredLoadingTicket: 'Delivered Loading Ticket',
+}
+
+export const salesOrderMessage = {
+    loadingAlreadyCreated: 'Loading Ticket is already created',
+    loadingNotCreated: 'Loading Ticket is not created',
+    loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+}
+
+export const subcontractAssemblyActions = {
+    createLoadingTicket: 'Create Loading Ticket',
+    deliveredLoadingTicket: 'Delivered Loading Ticket',
+}
+
+export const subcontractAssemblyMessage = {
+    loadingAlreadyCreated: 'Loading Ticket is already created',
+    loadingNotCreated: 'Loading Ticket is not created',
+    loadingAlreadyDelivered: 'Loading Ticket is already delivered',
 }

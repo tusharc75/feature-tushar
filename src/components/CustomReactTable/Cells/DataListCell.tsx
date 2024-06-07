@@ -25,13 +25,13 @@ function DataListCell({ field, original }) {
   const optionLabel = isArray(original?.[field?.fieldName])
     ? original?.[field?.fieldName][0]?.optionLabel
     : isObject(original?.[field?.fieldName])
-    ? original?.[field?.fieldName]?.optionLabel
-    : original?.[field?.fieldName];
+      ? original?.[field?.fieldName]?.optionLabel
+      : original?.[field?.fieldName];
 
   const more = isArray(original?.[field?.fieldName]) ? getMore(original?.[field?.fieldName]) : original[`rest${joinedFieldName}`];
 
   return (
-    <div>
+    <div className="d-flex">
       {optionLabel ? (
         <>
           <h5 className="text-truncate" title={optionLabel}>

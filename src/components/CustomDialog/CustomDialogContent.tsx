@@ -48,7 +48,7 @@ function CustomDialogContent({ children, style = {}, isFooterPresent = true, ...
           isFooterPresent
             ? 'max-h-[calc(var(--vh)-110px)] max-[560px]:max-h-[calc(var(--vh)-99px)]'
             : 'max-h-[calc(var(--vh)-55px)] max-[560px]:max-h-[calc(var(--vh)-45px)]'
-        } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''}`}
+        } overscroll-contain ${isTablet || isMobile ? 'min-h-[250px]' : ''} truncate-autocomplete`}
         style={
           {
             ...style,

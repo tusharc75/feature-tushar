@@ -11,7 +11,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import { checkFormulaLoop, checkUniqueValidation } from '../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
+import { isEqual, startCase, toLower } from 'lodash';
 import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
@@ -88,25 +88,14 @@ const CreateFormBuilder = () => {
   const [sectionName, setsectionName] = useState('');
   const [openHistoryDialog, setOpenHistoryDialog] = useState(false);
   const [steppers, setSteppers] = useState([]);
+  const [sectionNameList, setSectionNameList] = useState([]);
 
   const [isNew, setIsNew] = useState(resource === '0' ? true : false);
-
 
   const [tabValue, setTabValue] = useState(0);
   const handleMainTabChange = (event: React.ChangeEvent<{}>, value: any) => {
     setTabValue(value);
   };
-
-  const sectionNameList = [
-    'Sales Management',
-    'eCommerce',
-    'Inventory Management',
-    'Rental Operations Management',
-    'Repair & Maintenance Management',
-    'Purchasing Management',
-    'Planning & Forecasting',
-    'Collaboration Tools'
-  ];
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
@@ -142,6 +131,7 @@ const CreateFormBuilder = () => {
 
   useEffect(() => {
     fetchBrandResourceData();
+    fetchSectionList();
   }, []);
 
   const fetchBrandResourceData = async () => {
@@ -152,8 +142,7 @@ const CreateFormBuilder = () => {
       setHomePageLabel('');
       setOriSection([]);
       setSteppers([]);
-    }
-    else {
+    } else {
       axiosInstance()
         .get(`/sa-formbuilder/resourcedata/` + resource)
         .then(({ data: { data } }) => {
@@ -169,6 +158,15 @@ const CreateFormBuilder = () => {
         });
     }
   };
+
+  const fetchSectionList = async () => {
+    await axiosInstance().get(`section-master`).then(({ data: { data } }) => {
+      const sectionList = data?.map((ele) => ele.sectionName);
+      setSectionNameList(sectionList);
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    })
+  }
 
   const handleSave = async () => {
     if (resourceLabel === '') {
@@ -236,23 +234,24 @@ const CreateFormBuilder = () => {
     }
     setIsUpdating(true);
     if (isNew) {
-      sendData.resource = resourceLabel;
+      sendData.resource = startCase(toLower(resourceLabel));
       sendData.brandId = user.user.brand;
-      axiosInstance().post(`/sa-formbuilder`, sendData).then(({ data: { message } }) => {
-        setIsUpdating(false);
-        history.push('/form-builder')
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: message
-        });
-      })
+      axiosInstance()
+        .post(`/sa-formbuilder`, sendData)
+        .then(({ data: { message } }) => {
+          setIsUpdating(false);
+          history.push('/form-builder');
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+        })
         .catch((error) => {
           setIsUpdating(false);
           toastConfig.setToastConfig(error);
         });
-    }
-    else {
+    } else {
       axiosInstance()
         .put(`/sa-formbuilder/resourcedata`, sendData)
         .then(({ data: { message } }) => {
@@ -407,14 +406,7 @@ const CreateFormBuilder = () => {
                       autoSelect
                       options={sectionNameList}
                       getOptionLabel={(option) => option}
-                      renderInput={(params) => <TextField
-                        {...params}
-                        label="Section Name"
-                        variant="outlined"
-                        required
-                        margin="dense"
-                        fullWidth />
-                      }
+                      renderInput={(params) => <TextField {...params} label="Section Name" variant="outlined" required margin="dense" fullWidth />}
                       value={sectionName}
                       onChange={(e, value) => {
                         setsectionName(value);

@@ -11,6 +11,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(0);
   const [inputValues, setInputValues] = useState('');
+  const [selectedOption, setSelectedOption] = useState(null);
 
   useEffect(() => {
     if (values[`${name}_dataList`] && values[name]) {
@@ -27,8 +28,18 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
     delete values[`${name}_dataList`]
   }, []);
 
+  useEffect(() => {
+    if (selectedOption) {
+      if (type === 'multiSelect') {
+        setDefaultOptions(selectedOption)
+      } else {
+        setDefaultOptions([selectedOption])
+      }
+    }
+  }, [selectedOption])
+
   const fetchOptions = useCallback(
-    debounce(async (searchKey: string = '', page: number = 0) => {
+    debounce(async (searchKey: string = '', page: number = 0, _ids = []) => {
       try {
         if (searchKey !== '') {
           page = 0;
@@ -41,6 +52,9 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
         let query = `${routes?.dataList?.path}/data-list-items/${fieldData?.dataListId}?limit=25&page=${page}&search=${encodeURIComponent(
           searchKey
         )}`;
+        if (_ids?.length > 0) {
+          query = `${query}&ids=${JSON.stringify(_ids)}`
+        }
         const {
           data: {
             data: { data }
@@ -61,10 +75,18 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
     []
   );
 
+  useEffect(() => {
+    if (fieldData?.preFilters?.length > 0) {
+      fetchOptions('', 0, fieldData?.preFilters)
+    }
+  }, [fieldData])
+
   const handleInputChangeMulti = (event, value, reason) => {
     if (reason === 'input') {
       setInputValues(event.target.value);
-      fetchOptions(event.target.value);
+      if (fieldData?.preFilters?.length === 0) {
+        fetchOptions(event.target.value);
+      }
     }
   };
 
@@ -83,8 +105,10 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
               <Autocomplete
                 {...rest}
                 onOpen={() => {
-                  setLoading(true);
-                  fetchOptions();
+                  if (fieldData?.preFilters?.length === 0) {
+                    setLoading(true);
+                    fetchOptions();
+                  }
                 }}
                 inputValue={inputValues}
                 onInputChange={handleInputChangeMulti}
@@ -105,6 +129,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                 onChange={(e, val: any) => {
                   setFieldValue(name, val ? val.map((val) => val?.optionValue) : []);
+                  setSelectedOption(val ? val : [])
                   setInputValues('');
                 }}
                 forcePopupIcon={true}
@@ -131,7 +156,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                 )}
                 ListboxProps={{
                   onScroll: (e) => {
-                    if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
+                    if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight && fieldData?.preFilters?.length === 0) {
                       setLoading(true);
                       fetchOptions('', currentPage + 1);
                     }
@@ -142,13 +167,15 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
               <Autocomplete
                 {...rest}
                 onInputChange={(event, value, reason) => {
-                  if (reason === 'input') {
+                  if (reason === 'input' && fieldData?.preFilters?.length === 0) {
                     fetchOptions(value);
                   }
                 }}
                 onOpen={() => {
-                  setLoading(true);
-                  fetchOptions();
+                  if (fieldData?.preFilters?.length === 0) {
+                    setLoading(true);
+                    fetchOptions();
+                  }
                 }}
                 options={uniqBy([...options, ...defaultOptions], 'optionValue')}
                 disabled={fieldData?.isUneditable || rest?.disabled}
@@ -159,6 +186,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                 value={uniqBy([...options, ...defaultOptions], 'optionValue').find((data: any) => data.optionValue === values[name]) || ''}
                 onChange={(e, val) => {
                   setFieldValue(name, val ? val?.optionValue : '');
+                  setSelectedOption(val ? val : null)
                 }}
                 selectOnFocus
                 clearOnBlur
@@ -188,7 +216,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                 )}
                 ListboxProps={{
                   onScroll: (e) => {
-                    if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
+                    if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight && fieldData?.preFilters?.length === 0) {
                       setLoading(true);
                       fetchOptions('', currentPage + 1);
                     }

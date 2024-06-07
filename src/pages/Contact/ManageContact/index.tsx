@@ -15,6 +15,7 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
+import { useData } from 'src/StateProvider/Provider';
 
 export default function ManageContactDialog({
   contactResource,
@@ -28,6 +29,9 @@ export default function ManageContactDialog({
 }) {
 
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user }
+  }: any = useData();
   const [contactData, setContactData] = useState<any>({
     fields: [],
     initialValues: {}
@@ -67,7 +71,7 @@ export default function ManageContactDialog({
           setCloneHeading(`${firstName ?? ''} ${middleName ?? ''} ${lastName ?? ''}`);
           setContactData({
             fields: fieldsDataForCreate,
-            initialValues: getObjKeysWithValues(rest, fieldsDataForCreate)
+            initialValues: getObjKeysWithValues(rest, fieldsDataForCreate, true, user)
           });
           setLoading(false);
         } else {

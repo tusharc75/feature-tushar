@@ -318,7 +318,7 @@ export default function QuotationAccordionInProjectSales({
             onNewQuotationAdd(data?._id);
           }}
           referenceData={{ customerAccount: accountId }}
-          renderedFrom={routes.projectSales.title}
+          isRedirectTodetailPage={false}
         />
       )}
     </>

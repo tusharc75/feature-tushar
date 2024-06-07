@@ -118,7 +118,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         setCompleteSteps(tempData?.steps || []);
         setInitialData({
           fields: fields,
-          values: getObjKeysWithValues(tempData, fields)
+          values: isClone ? { ...getObjKeysWithValues(tempData, fields, true, user) } : getObjKeysWithValues(tempData, fields)
         });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);

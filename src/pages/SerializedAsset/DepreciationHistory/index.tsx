@@ -55,6 +55,7 @@ const DepreciationHistory = ({ id }) => {
                 Header: 'Date',
                 disableFilters: true,
                 disableSortBy: false,
+                disabled: true,
                 Cell: ({ row }) => (
                     row.original?.date ? (
                         <div>
@@ -68,6 +69,7 @@ const DepreciationHistory = ({ id }) => {
             {
                 accessor: 'amount',
                 Header: 'Depreciation Amount',
+                disabled: true,
                 Cell: ({ row }) => (
                     row.original?.amount ? (
                         <div>
@@ -81,6 +83,7 @@ const DepreciationHistory = ({ id }) => {
             {
                 accessor: 'netBookValue',
                 Header: 'Net Book Value',
+                disabled: true,
                 Cell: ({ row }) => (
                     row.original?.netBookValue ? (
                         <div>

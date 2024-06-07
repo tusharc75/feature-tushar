@@ -9,6 +9,7 @@ import {
   getObjKeysWithValues,
   opportunity,
   setFieldsInAscendingOrder,
+  GenerateResourceLineNumber,
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -73,10 +74,11 @@ export default function ManageOpportunityDialog({
         opportunityData = opportunityData?.data?.data;
         if (isClone) {
           const { opportunityName, ...rest } = opportunityData;
+          rest['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
           setCloneHeading(opportunityName);
           setInitialData({
             fields: fieldsDataForUpdate,
-            values: { ...getObjKeysWithValues(rest, fieldsDataForUpdate) }
+            values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
           });
         }
         else {
@@ -87,6 +89,7 @@ export default function ManageOpportunityDialog({
         }
       } else {
         let initialData = { ...getObjKeys('', fieldsDataForCreate) };
+        initialData['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate); 
         setInitialData({
           fields: fieldsDataForCreate,
           values: initialData

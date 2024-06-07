@@ -14,15 +14,15 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { demandOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { DEMAND_ORDER_STATUS, demandOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import axios, { CancelTokenSource } from 'axios';
 
 const DemandOrder = () => {
-  const renderedFrom = camelCase(routes?.demandOrder.title);
 
+  const renderedFrom = camelCase(routes?.demandOrder.title);
   const toastConfig = useContext(CustomToastContext);
 
   const types = [
@@ -36,7 +36,6 @@ const DemandOrder = () => {
     }
   ];
 
-  const history = useHistory();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -65,7 +64,7 @@ const DemandOrder = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=Demand Order`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.demandOrder}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.demandOrderDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
@@ -101,20 +100,19 @@ const DemandOrder = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {permissions?.demandOrder?.isDelete && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color="error" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
+        <HtmlTooltip title="Delete">
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            disabled={!row?.original?.canDelete}
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon color={row?.original?.canDelete ? "error" : "disabled"} />
+          </IconButton>
+        </HtmlTooltip>
       </>
     )
   };
@@ -156,17 +154,16 @@ const DemandOrder = () => {
       .get(`${demandOrder.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u, user);
+          let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.demandOrder?.isUpdate;
-          finalObject['canDelete'] = permissions?.demandOrder?.isDelete;
+          finalObject['canDelete'] = permissions?.demandOrder?.isDelete && finalObject?.ownerId === user?.user?._id &&
+            finalObject?.status !== DEMAND_ORDER_STATUS.converted;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'error', error });
       })
       .finally(() => {
         setTimeout(() => {
@@ -213,6 +210,7 @@ const DemandOrder = () => {
           onClick={() => {
             setShowDeleteConfirmBox(true);
           }}
+          disabled={selectedRecords?.every((e) => e?.canDelete) ? false : true}
         >
           {`Delete (${selectedRecords?.length})`}
         </MenuItem>

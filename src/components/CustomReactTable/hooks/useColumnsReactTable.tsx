@@ -3,7 +3,14 @@ import { Link } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { Avatar, Box } from '@material-ui/core';
-import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies, sidebarResourceObjectFromValues } from 'src/constants/helpers';
+import {
+  dateFormat,
+  dateTimeFormat,
+  formatAmountWithCurrency,
+  getFileIconSrc,
+  getUniqueCurrencies,
+  sidebarResourceObjectFromValues
+} from 'src/constants/helpers';
 import routes from '../../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
@@ -15,6 +22,8 @@ import { find, isArray, isObject, result } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
 import { getGridMetaDataFromLocalStorage } from '../utils';
 import DataListCell from '../Cells/DataListCell';
+import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
+import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -169,7 +178,6 @@ export default function useColumns() {
 
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
-
     const _fields = fields?.map((e) => e?.fieldData || e);
     _fields.forEach((field) => {
       let commonFieldData: any = {
@@ -316,6 +324,10 @@ export default function useColumns() {
       } else if (field?.dataList) {
         column.push({
           ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          dataList: true,
+          ...(Boolean(field?.isColumnEditable) ? { dataListId: field?.dataListId } : ''),
+          ...(Boolean(field?.isColumnEditable) ? { option: [] } : {}),
           accessorFn: (original) => {
             return isArray(original?.[field?.fieldName])
               ? original?.[field?.fieldName][0]?.optionLabel
@@ -344,7 +356,7 @@ export default function useColumns() {
           ...commonFieldData,
           cell: ({ row }) =>
             row?.original?.[field?.fieldName] ? (
-              <h5 className="[display:flex_!important] [flex-wrap:nowrap_!important] items-center" title={`${row?.original?.[field?.fieldName]}`}>
+              <h5 className="items-center [display:flex_!important] [flex-wrap:nowrap_!important]" title={`${row?.original?.[field?.fieldName]}`}>
                 <span title={row?.original?.[field?.fieldName]} className="text-truncate">
                   {row?.original?.[field?.fieldName]}
                 </span>
@@ -367,6 +379,38 @@ export default function useColumns() {
               </Avatar>
             </div>
           )
+        });
+      } else if (field?.type === 'multiFileUpload') {
+        column.push({
+          ...commonFieldData,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => {
+            return <MultiFileCell data={row.original?.multiFileUpload} />;
+          }
+        });
+      } else if (field?.type === 'fileUpload') {
+        column.push({
+          ...commonFieldData,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => {
+            if (!row.original?.fileUpload) return <NoDataCell />;
+            return <MultiFileCell data={[{ fileName: row.original?.fileUpload, size: '' }]} />;
+          }
+        });
+      } else if (field?.type === 'multiImageUpload') {
+        column.push({
+          ...commonFieldData,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => {
+            if (!row.original.multiImageUpload) return <NoDataCell />;
+            return <MultiImageCell images={row.original?.multiImageUpload?.split(' , ') || []} />;
+          }
         });
       } else if (field?.type === 'date') {
         column.push({

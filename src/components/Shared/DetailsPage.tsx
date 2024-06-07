@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import { GetApp, Image, InfoOutlined, InsertDriveFile } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import { FcApproval } from 'react-icons/fc';
-import { formatAmountWithCurrency, getObjKeysWithValues } from '../../constants/helpers';
+import { formatAmountWithCurrency, getFileIconSrc, getObjKeysWithValues } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -25,6 +25,8 @@ import { displayDate, displayDateTime, getUniqueCurrencies } from '../../constan
 import HtmlTooltip from '../CustomTooltipTitle';
 import CarouselDialog from '../CarouselDialog';
 import { camelCase } from 'lodash';
+import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
+import { PreviewFile } from 'src/components/PreviewFile';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -121,58 +123,18 @@ const Details = (props: DetailProps) => {
   }, [fields, data]);
 
   /**
-   * DOWNLOAD FILE
-   * @param fileName
-   */
-  const downloadFile = (fileName) => {
-    setDownloadProgress(0);
-    setDownloading(true);
-    axiosInstance()
-      .get(`user/download?fileName=${fileName}`, {
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          setDownloadProgress(percentCompleted);
-
-          if (percentCompleted === 100) {
-            setToastConfig({
-              message: 'File Downloaded Successfully',
-              open: true,
-              type: 'success'
-            });
-            setTimeout(() => {
-              setDownloadProgress(0);
-              setDownloading(false);
-            }, 2000);
-          }
-        }
-      })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
-        setTimeout(() => setDownloading(false), 2000);
-      })
-      .catch((err) => {
-        setToastConfig(err);
-        setDownloading(false);
-      });
-  };
-
-  /**
    * NORMAILIZE ALL THE VALUES AS A SIMPLE TEXT FROM OBJECTS AND ID's
    * @param values
    * @param input
    * @returns text
    */
-  const normalizeValues = (values, input) => {
+  const normalizeValues = (values, input): string | any[] => {
     let text = '';
-    if((input.type === 'multiSelect' || input.type === 'dropDown') && input?.dataList){
-      if(input.type === 'multiSelect'){
-        const value = values[`${input?.fieldName}_dataList`]?.length ? values[`${input?.fieldName}_dataList`]?.map((d) => d.optionLabel).join(', ') : ''
+    if ((input.type === 'multiSelect' || input.type === 'dropDown') && input?.dataList) {
+      if (input.type === 'multiSelect') {
+        const value = values[`${input?.fieldName}_dataList`]?.length
+          ? values[`${input?.fieldName}_dataList`]?.map((d) => d.optionLabel).join(', ')
+          : '';
         text = value ? value : '-';
       } else {
         const value = values[`${input?.fieldName}_dataList`]?.optionLabel;
@@ -206,7 +168,11 @@ const Details = (props: DetailProps) => {
     } else if (input.type === 'currencyNumber') {
       const currency = user?.user?.brandCurrency || 'USD';
       const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
-      text = `${currencySymbol}${formatAmountWithCurrency(currency, (values[input.fieldName] || 0))?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`
+      text = `${currencySymbol}${formatAmountWithCurrency(currency, values[input.fieldName] || 0)?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`;
+    } else if (input.type === 'currencyAmount') {
+      const currency = user?.user?.brandCurrency || 'USD';
+      const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
+      text = `${currencySymbol}${formatAmountWithCurrency(currency, values[`${input.fieldName}_${currency?.toLowerCase()}`] || 0)?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`;
     } else if (input.type === 'switch') {
       text = values[input.fieldName] ? 'Inactive' : 'Active';
     } else if (input.type === 'checkBox') {
@@ -250,8 +216,10 @@ const Details = (props: DetailProps) => {
     setFormsData(customData);
   };
 
+  const isTypeFile = (type: string) => type === 'imageUpload' || type === 'fileUpload' || type === 'multiFileUpload' || type === 'multiImageUpload';
+
   // DYNAMIC GRID COLUMN SIZE
-  const dynamicSize = (size, type) => (type === 'imageUpload' || type === 'fileUpload' ? 12 : size);
+  const dynamicSize = (size, type) => (isTypeFile(type) ? 12 : size);
 
   /**
    * Render Link  or Typography component
@@ -266,7 +234,7 @@ const Details = (props: DetailProps) => {
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (
                   <React.Fragment key={_val.optionValue}>
-                    <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`} target="_blank" rel="noopener noreferrer">
+                    <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`} target="_blank" className='link' rel="noopener noreferrer">
                       <span className={`text-truncate link`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
@@ -297,8 +265,10 @@ const Details = (props: DetailProps) => {
         );
       }
     } else {
-      return fieldData.type === 'multiImageUpload' ? (
-        val[fieldData.fieldName] && (
+      if (fieldData.type === 'multiImageUpload' && val[fieldData.fieldName]) {
+        const files = Array.isArray(value) ? value : [];
+        if (files.length === 0) return '-';
+        return (
           <div className={classes.imageListContainer}>
             <ImageList className={classes.imageList} cols={2.5}>
               {val[fieldData.fieldName].map((item, i) => (
@@ -315,48 +285,94 @@ const Details = (props: DetailProps) => {
               ))}
             </ImageList>
           </div>
-        )
-      ) : fieldData.type === 'colorPicker' ? (
-        <Box display="flex" alignItems="center">
-          <Box width={16} height={16} borderRadius={'50%'} bgcolor={value} />
-          <Typography variant="body2" className={classes.fieldText}>
-            {value}
+        );
+      }
+      if (fieldData.type === 'fileUpload') {
+        const Icon = getFileIconSrc(value || '');
+        if (value === '-' || Array.isArray(value)) return value;
+        return (
+          <div className="flex items-center gap-2">
+            <Icon />
+            <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
+              <span className={`text-truncate tooltip-asdfkljashdfkjas text-gray-500 dark:text-gray-400`}>{value}</span>
+            </Typography>
+            <PreviewFile fileName={value} showDownload />
+          </div>
+        );
+      }
+      if (fieldData.type === 'multiFileUpload') {
+        const files = Array.isArray(value) ? value : [];
+        if (files.length > 0) {
+          return (
+            <div className="space-y-2">
+              {files.map((d) => {
+                const Icon = getFileIconSrc(d.fileName || '');
+                return (
+                  <div className="flex gap-2" key={d.fileName}>
+                    <Icon />
+                    <Typography className={classes.fieldText} variant="body2">
+                      <span className={`text-truncate tooltip-asdfkljashdfkjas text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
+                    </Typography>
+                    <PreviewFile fileName={d.fileName} showDownload />
+                  </div>
+                );
+              })}
+            </div>
+          );
+        }
+        return (
+          <Typography className={classes.fieldText} variant="body2">
+            -
           </Typography>
-        </Box>
-      ) : fieldData.type === 'signature' ? (
-        <Box display="flex" alignItems="center">
-          <Box
-            position="relative"
-            sx={{
-              width: 50,
-              height: 50,
-              borderRadius: '8px',
-              marginRight: '10px',
-              padding: '5px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center'
-            }}
-          >
-            {value ? (
-              <img
-                src={value}
-                onError={(e) => {
-                  const target = e.currentTarget as HTMLImageElement;
-                  const newItem = document.createElement('p');
-                  newItem.innerHTML = '--';
-                  target.parentNode.replaceChild(newItem, target);
-                }}
-                className='max-w-[50px] max-h-[50px] w-full block h-auto dark:[filter:invert(100%)]'
-                alt="Signature"
-              />
-            ) : (
-              '-'
-            )}
+        );
+      }
+      if (fieldData.type === 'colorPicker') {
+        return (
+          <Box display="flex" alignItems="center">
+            <Box width={16} height={16} borderRadius={'50%'} bgcolor={value} />
+            <Typography variant="body2" className={classes.fieldText}>
+              {value}
+            </Typography>
           </Box>
-        </Box>
-      ) : (
-        <Typography title={value === '-' ? '' : value} className={classes.fieldText} variant="body2">
+        );
+      }
+      if (fieldData.type === 'signature') {
+        return (
+          <Box display="flex" alignItems="center">
+            <Box
+              position="relative"
+              sx={{
+                width: 50,
+                height: 50,
+                borderRadius: '8px',
+                marginRight: '10px',
+                padding: '5px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              {value ? (
+                <img
+                  src={value}
+                  onError={(e) => {
+                    const target = e.currentTarget as HTMLImageElement;
+                    const newItem = document.createElement('p');
+                    newItem.innerHTML = '--';
+                    target.parentNode.replaceChild(newItem, target);
+                  }}
+                  className="block h-auto max-h-[50px] w-full max-w-[50px] dark:[filter:invert(100%)]"
+                  alt="Signature"
+                />
+              ) : (
+                '-'
+              )}
+            </Box>
+          </Box>
+        );
+      }
+      return (
+        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
               <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank" rel="noopener noreferrer">
@@ -401,16 +417,13 @@ const Details = (props: DetailProps) => {
                       <Grid
                         container
                         alignItems="center"
-                        style={{ border: field.fieldData.type === 'imageUpload' ? 0 : '1px solid var(--dark-mode-border-color, #EDEDED)' }}
+                        style={{ border: isTypeFile(field.fieldData.type) ? 0 : '1px solid var(--dark-mode-border-color, #EDEDED)' }}
                       >
                         <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>
-                          <div
-                            className="d-flex align-items-center formdata-title-v1"
-                            style={{ borderRight: field.fieldData.type === 'imageUpload' && 0 }}
-                          >
+                          <div className="d-flex align-items-center formdata-title-v1" style={{ borderRight: isTypeFile(field.fieldData.type) && 0 }}>
                             <h4
                               title={field.fieldData.fieldLabel}
-                              style={{ paddingLeft: field.fieldData.type === 'imageUpload' && 0 }}
+                              style={{ paddingLeft: isTypeFile(field.fieldData.type) && 0 }}
                               className={`text-truncate `}
                             >
                               {field.fieldData.fieldLabel}
@@ -432,46 +445,12 @@ const Details = (props: DetailProps) => {
                             </Box>
                           ) : (
                             <Box display="flex" alignItems="center" className="formdata-text-v1">
-                              {field.fieldData.type === 'fileUpload' && initialVals[field.fieldData.fieldName] ? <InsertDriveFile /> : null}{' '}
                               {renderData(initialVals, field.fieldData)}
-                              {field.fieldData.type === 'fileUpload'
-                                ? initialVals[field.fieldData.fieldName] &&
-                                (isDownloading ? (
-                                  <Box display="flex" alignItems="center">
-                                    {downloadProgress === 100 ? 'Downloaded' : 'Downloading'}
-
-                                    <Box marginLeft={1} position="relative" display="inline-flex">
-                                      <CircularProgress size={30} variant="determinate" value={downloadProgress} />
-                                      <Box
-                                        top={0}
-                                        left={0}
-                                        bottom={0}
-                                        right={0}
-                                        position="absolute"
-                                        display="flex"
-                                        alignItems="center"
-                                        justifyContent="center"
-                                      >
-                                        <Typography variant="caption" component="div" color="textSecondary">{`${downloadProgress}%`}</Typography>
-                                      </Box>
-                                    </Box>
-                                  </Box>
-                                ) : (
-                                  <IconButton
-                                    title={`Download ${initialVals[field.fieldData.fieldName]}`}
-                                    disabled={isDownloading}
-                                    size="small"
-                                    onClick={() => downloadFile(normalizeValues(initialVals, field.fieldData))}
-                                  >
-                                    <GetApp />
-                                  </IconButton>
-                                ))
-                                : null}{' '}
                             </Box>
                           )}
                         </Grid>
                       </Grid>
-                      {field.fieldData.type !== 'imageUpload' && field.fieldData.type !== 'fileUpload'}
+                      {/* {field.fieldData.type !== 'imageUpload' && field.fieldData.type !== 'fileUpload'} */}
                     </Grid>
                   ))}
                 </Grid>

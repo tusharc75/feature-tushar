@@ -1,61 +1,28 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Box, Button, Chip, CircularProgress, Dialog, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
+import { useEffect, useRef, useState } from 'react';
+import { Box, Button, Chip, Dialog, FormControl, Grid, InputLabel, MenuItem, Select, TextField } from '@material-ui/core';
 import { BiFilterAlt } from 'react-icons/bi';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { debounce, isArray, isEmpty } from 'lodash';
+import { isArray, isEmpty } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
-import axiosInstance from 'src/axios/axiosInstance';
 import CloseIcon from '@material-ui/icons/Close';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import { dateFormat } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import { ThemeButton } from './Buttons';
+import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 
 const CustomFilter = ({ field, setFilterQuery }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const [formValues, setFormValues] = useState({});
 
-  const [options, setOptions] = useState([]);
-  const [loading, setLoading] = useState({ loading: false, resource: null });
   const [statusTimeFrame, setStatusTimeFrame] = useState<any>({});
   const [betweenDate, setBetweenDate] = useState(null);
   const [chipData, setChipData] = useState([]);
-  const [inputValues, setInputValues] = useState({});
-  const [currentPage, setCurrentPage] = useState(0);
-
-  const fetchOptions = useCallback(
-    debounce(async (resource: string, searchKey: string = '', page: number = 0) => {
-      try {
-        const lookupResourceName = resource;
-        if (searchKey !== '') {
-          page = 0;
-          setCurrentPage(0);
-        }
-        if (page === 0) {
-          setCurrentPage(0);
-          setOptions([]);
-        }
-        let query = `sa-field/options?resource=${lookupResourceName}&limit=25&page=${page}&search=${searchKey}`;
-        const response = await axiosInstance().get(query);
-        setOptions((currentOptions) => {
-          return page === 0 ? [...response.data.data] : [...currentOptions, ...response.data.data];
-        });
-        if (page > 0 && response.data.data?.length > 0) {
-          setCurrentPage(page);
-        }
-        setLoading({ loading: false, resource: null });
-      } catch (error) {
-        console.error(error);
-      }
-    }, 1000),
-    []
-  );
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);
@@ -93,14 +60,12 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           });
           const dateValue =
             fromDate && toDate
-              ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${
-                  toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
-                }`
+              ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
+              }`
               : fromDate || toDate
-              ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${
-                  toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''
+                ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''
                 }`
-              : null;
+                : null;
           chipData.push({
             title: col?.fieldLabel,
             name: fieldName,
@@ -321,8 +286,8 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                                   betweenDate && betweenDate[`from_${field.fieldName}`]
                                     ? betweenDate[`from_${field.fieldName}`]
                                     : formValues[`from_${field.fieldName}`]
-                                    ? formValues[`from_${field.fieldName}`]
-                                    : new Date()
+                                      ? formValues[`from_${field.fieldName}`]
+                                      : new Date()
                                 }
                               />
                             </Grid>
@@ -346,59 +311,18 @@ const CustomFilter = ({ field, setFilterQuery }) => {
                           </Grid>
                         ) : (
                           <Grid item xs={12} sm={6} md={6} key={`${i}${field?.fieldName}`}>
-                            <Autocomplete
-                              multiple
-                              inputValue={inputValues[field?.fieldName] || ''}
-                              onOpen={() => {
-                                setOptions([]);
-                                setLoading({ loading: true, resource: field?.resource });
-                                fetchOptions(field?.resource, '');
-                              }}
-                              onInputChange={(event, value, reason) => {
-                                if (reason === 'input') {
-                                  setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: value }));
-                                  fetchOptions(field?.resource, value);
-                                }
-                              }}
-                              disableCloseOnSelect
-                              options={options}
-                              fullWidth
-                              loading={loading.loading && loading.resource === field?.resource}
-                              getOptionLabel={(option: any) => option.optionLabel ?? ''}
-                              getOptionSelected={(option: any, value: any) => option?.optionValue === value?.optionValue}
+                            <AsyncDropDown
+                              resource={field?.resource}
+                              multiple={true}
+                              errors={false}
+                              touched={false}
                               value={!isEmpty(formValues) && formValues[field?.fieldName] ? formValues[field?.fieldName] : []}
+                              fieldLabel={field?.fieldLabel}
                               onChange={(e, val) => {
                                 handleSelectFilter(field?.fieldName, val);
-                                setInputValues((prevValues) => ({ ...prevValues, [field?.fieldName]: '' }));
                               }}
-                              size="small"
-                              renderInput={(params) => (
-                                <TextField
-                                  {...params}
-                                  label={field?.fieldLabel}
-                                  variant="outlined"
-                                  name={field?.fieldName}
-                                  InputProps={{
-                                    ...params.InputProps,
-                                    endAdornment: (
-                                      <>
-                                        {loading.loading && loading.resource === field?.resource ? (
-                                          <CircularProgress color="inherit" size={20} />
-                                        ) : null}
-                                        {params.InputProps.endAdornment}
-                                      </>
-                                    )
-                                  }}
-                                />
-                              )}
-                              ListboxProps={{
-                                onScroll: (e) => {
-                                  if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
-                                    setLoading({ loading: true, resource: field?.resource });
-                                    fetchOptions(field?.resource, '', currentPage + 1);
-                                  }
-                                }
-                              }}
+                              fieldName={field?.fieldName}
+                              required={false}
                             />
                           </Grid>
                         )}

@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset, getObjKeys } from '../../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -10,29 +10,35 @@ import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFoo
 import axiosInstance from 'src/axios/axiosInstance';
 import { FieldArray, Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress, Typography } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
+import { read, utils, writeFile } from 'xlsx';
 
-export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, assetData, setAssetsData }) {
-
+export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, ids, setAssetsData, staticLookUpFilters = {} }) {
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [decimalFields, setDecimalFields] = useState([]);
+  const [allFields, setAllFields] = useState([]);
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   const fetchFields = async () => {
+
+    const data = await axiosInstance().get(`${serializedAsset.api}?getById=${JSON.stringify((ids))}`);
+    const assetData = data?.data?.data
+
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     let fieldsData = fields?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(fieldsData)));
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
     let fieldsDataForUpdate = fieldsData.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
     let values = {};
@@ -43,18 +49,23 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       if (statusPolicy?.sumDecimalField) {
         fieldsDataForUpdate?.forEach((e) => {
           if (e?.type === 'decimal') {
-            decimalField.push(e.fieldName)
+            decimalField.push(e.fieldName);
             initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
             initialValues[e.fieldName] = 0;
           }
-        })
+        });
       }
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
       tempAssetData.push(initialValues);
     }
     values['assetData'] = tempAssetData;
-    setDecimalFields(decimalField)
+    setDecimalFields(decimalField);
+    fieldsDataForUpdate?.forEach((element) => {
+      if (element?.lookup && staticLookUpFilters[element?.fieldName] && isArray(staticLookUpFilters[element?.fieldName])) {
+        element.option = element.option?.filter((ele) => staticLookUpFilters[element?.fieldName]?.includes(ele.optionValue));
+      }
+    })
     setInitialData({
       fields: fieldsDataForUpdate,
       values: values
@@ -64,6 +75,10 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
   const handleSubmit = (values) => {
     setSubmitting(true);
     const data = [];
+    let fieldsDataReset = [];
+    if (statusPolicy?.fieldsReset?.length) {
+      fieldsDataReset = allFields.filter((d) => statusPolicy?.fieldsReset?.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData);
+    }
     values?.assetData?.forEach((ele) => {
       const obj: any = { _id: ele._id }
       statusPolicy?.fields?.forEach((fieldName) => {
@@ -74,10 +89,14 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
           obj[fieldName] = ele[fieldName]
         }
       })
-      data.push(obj)
+      let resetValues = {};
+      if (fieldsDataReset?.length) {
+        resetValues = getObjKeys('', fieldsDataReset)
+      }
+      data.push({ ...obj, ...resetValues })
     })
     setAssetsData(data)
-    onSuccess();
+    onSuccess(data);
     setSubmitting(false);
   };
 
@@ -95,9 +114,133 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       });
       if (Object.keys(assetErrors).length > 0) {
         errors.assetData[index] = { ...assetErrors };
-      }   
+      }
     });
     return errors?.assetData?.length ? errors : {};
+  };
+
+  const getValueInExport = (data: any, field: any) => {
+    if (field?.type === 'multiSelect') {
+      data = field?.option
+        ?.filter((o) => data.includes(o?.optionValue))
+        ?.map((d) => d?.optionLabel)
+        ?.join('—');
+    } else if (field?.type === 'dropDown') {
+      data = field?.option?.find((o) => o?.optionValue === data)?.optionLabel;
+    }
+    return data;
+  };
+
+  const handleExport = (values) => {
+    const { assetData } = values;
+    const fieldNames = initialData?.fields?.map((f) => f?.fieldName);
+
+    const json_data = assetData?.map((_data) => {
+      const dynamicFields = fieldNames?.reduce((acc, f) => {
+        const field = initialData?.fields?.find((_f) => _f?.fieldName === f);
+        const _key = field?.fieldLabel;
+        acc[_key] = getValueInExport(_data[f], field);
+        return acc;
+      }, {});
+
+      return {
+        'Asset Number': _data?.assetNumber || '',
+        ...dynamicFields
+      };
+    });
+
+    const field_option_label = initialData?.fields?.filter(f => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map(field => {
+      return [...field?.option?.map(o => ({ [field?.fieldLabel]: o?.optionLabel }))]
+    })
+
+    const maxLength = Math.max(...field_option_label.map(arr => arr.length));
+    const json_data_value = [];
+
+    for (let i = 0; i < maxLength; i++) {
+      const mergedObject = {};
+      for (const arr of field_option_label) {
+        if (arr[i]) {
+          Object.assign(mergedObject, arr[i]);
+        }
+      }
+      json_data_value.push(mergedObject);
+    }
+
+    const header1 = ['Asset Number', ...initialData?.fields?.map((f) => f?.fieldLabel)];
+
+    const header2 = initialData?.fields?.filter(f => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map(f => f?.fieldLabel)
+
+    const ws = utils.json_to_sheet(json_data);
+    const ws_value = utils.json_to_sheet(json_data_value);
+    if (header1.length) {
+      utils.sheet_add_aoa(ws, [header1]);
+    }
+    if (header2.length) {
+      utils.sheet_add_aoa(ws_value, [header2]);
+    }
+    const wb = utils.book_new();
+
+    utils.book_append_sheet(wb, ws, 'Sheet1');
+    utils.book_append_sheet(wb, ws_value, 'Value');
+    writeFile(wb, `${routes.serializedAsset.title} Data.xlsx`);
+  };
+
+  const getValueInImport = (data: any, asset: string, fieldLabel: string, assetData: any[]) => {
+    const index = assetData?.findIndex((a) => a?.assetNumber === asset);
+    const field = initialData?.fields?.find((f) => f?.fieldLabel === fieldLabel);
+    if (index > -1 && field) {
+      if (field?.type === 'multiSelect') {
+        let value = [];
+        const _data = data?.split('—');
+        _data?.forEach((d) => {
+          const option = field?.option?.find((o) => o?.optionLabel === d);
+          if (option) {
+            value.push(option?.optionValue);
+          }
+        });
+        data = value;
+      } else if (field?.type === 'dropDown') {
+        data = data
+          ? field?.option?.filter((o) => o?.optionLabel === data)?.length > 0
+            ? field?.option?.filter((o) => o?.optionLabel === data)[0]?.optionValue
+            : ''
+          : '';
+      } else if (field?.type === 'singleLine') {
+        data = `${data}`
+      }
+      return { index, fieldName: field?.fieldName, value: data };
+    } else {
+      return null;
+    }
+  };
+
+  const handleImport = (setFieldValue: any, values: any) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const files = e.target.files,
+      f = files[0];
+    let reader = new FileReader();
+    reader.onload = function (e) {
+      const data = e.target.result;
+      let readedData = read(data, { type: 'binary' });
+      const wsname = readedData.SheetNames[0];
+      const ws = readedData.Sheets[wsname];
+      const parsedData = utils.sheet_to_json(ws, { header: 1 });
+
+      if (parsedData.length > 1) {
+        let header = parsedData.slice(0, 1)[0];
+        let row = parsedData.slice(1, parsedData.length);
+        row.forEach((item: any[]) => {
+          item?.forEach((_d, i) => {
+            if (i != 0) {
+              const { index, fieldName, value } = getValueInImport(_d, item[0], header[i], values?.assetData);
+              setFieldValue(`assetData.${index}.${fieldName}`, value);
+            }
+          });
+        });
+      }
+    };
+    reader.readAsBinaryString(f);
+    e.target.value = null;
   };
 
   return (
@@ -132,6 +275,28 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
                   <Box className="form-box">
+                    <Box mb={1} display="flex" justifyContent="flex-end">
+                      <Box mr={2}>
+                        <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }} onClick={() => handleExport(values)}>
+                          Export
+                        </Typography>
+                      </Box>
+                      <Box mr={1}>
+                        <input
+                          accept="json"
+                          style={{ display: 'none' }}
+                          onChange={handleImport(setFieldValue, values)}
+                          id="import-file"
+                          multiple={false}
+                          type="file"
+                        />
+                        <label htmlFor="import-file">
+                          <Typography className="cursor-pointer" style={{ color: 'var(--primary)' }}>
+                            Import
+                          </Typography>
+                        </label>
+                      </Box>
+                    </Box>
                     <FieldArray
                       name="assetData"
                       render={(arrayHelpers) => (

@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
-import { unionBy, uniqBy } from 'lodash';
+import { isArray, unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -143,7 +143,6 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       });
       const unitOptions: any = arrayToDropwdownOption(unit);
       const pricingMethodOptions: any = arrayToDropwdownOption(pricingMethod);
-
       data.forEach((element) => {
         if (element.fieldName === 'unit') {
           element.option = unitOptions;
@@ -153,6 +152,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         }
         if (element.fieldName === 'pricingCondition') {
           element.option = [];
+        }
+        if (element.fieldName === 'wellNumber' && isArray(rentalManagementData?.wellNumber)) {
+          element.option = element.option?.filter((ele) => rentalManagementData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
         }
         element.required = false;
         element.isFormula = false;
@@ -189,32 +191,17 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingMethod') {
           element.option = pricingMethodOptions;
         }
-        // if (element.fieldName === "qty" && rowData?.serializedProduct === false && rowData?.hideSelection) {
-        //   element.isUneditable = true;
-        // }
+        if (element.fieldName === 'wellNumber' && isArray(rentalManagementData?.wellNumber)) {
+          element.option = element.option?.filter((ele) => rentalManagementData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
+        }
       });
       if (rowData?.actualStartDate === '' || rowData?.actualStartDate === '') {
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }
-
-      // let initialValues = getObjKeysWithValues(rowData, data);
-      // const priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
-
-      // if (rowData[priceFieldName]) {
-      //   getPricing({ ...initialValues, [priceFieldName]: rowData[priceFieldName] }).then((price: any) => {
-      //     const result = autoCalculateSpecificFields({ [priceFieldName]: price, [priceFieldName]: rowData[priceFieldName] }, initialValues, data);
-      //     initialValues = { ...initialValues, ...result };
-      //     setInitialData({
-      //       fields: data,
-      //       values: initialValues
-      //     });
-      //   });
-      // } else {
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data)
       });
-      // }
     }
     EvaluteproductFields(data);
     setFetchingData(false);
@@ -240,9 +227,9 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       });
     }
 
-    const sections = uniq(map(fields, 'sectionName'));
+    const sections = uniq(map(fields?.filter(f => f?.isRead), 'sectionName'));
     const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name);
+      let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
@@ -454,7 +441,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           innerRef={ref}
           enableReinitialize={true}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields)}
+          validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
           validateOnMount
           validate={validate}
           onSubmit={handleSubmit}

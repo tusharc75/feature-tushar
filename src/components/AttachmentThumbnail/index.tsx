@@ -177,9 +177,9 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
               const Icon = getFileIconSrc(attachment?.contentType ? attachment?.contentType : attachment.url ? attachment.url : attachment);
               return (
                 <Fragment key={i}>
-                  <div className="w-[138px] max-w-[138px] basis-[138px] flex-grow group border border-[var(--common-border-color)] min-h-[153px] relative rounded-[4px] p-[var(--gutter)] [--gutter:18px]">
+                  <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
                     <div className="front  group-hover:hidden">
-                      <div className="mx-auto h-[79px] mb-[11px] text-center">
+                      <div className="mx-auto mb-[11px] h-[79px] text-center">
                         {/* <img
                           src={}
                           className={`object-contain mx-auto block h-full w-full max-w-full`}
@@ -192,12 +192,12 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           ? attachment?.name
                             ? attachment?.name
                             : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            : attachment.substring(attachment.lastIndexOf('/') + 1)
+                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                              : attachment.substring(attachment.lastIndexOf('/') + 1)
                           : 'attachment'}
                       </p>
                     </div>
-                    <div className="back group-hover:opacity-100 opacity-0 absolute inset-0 p-[var(--gutter)] flex flex-col justify-between">
+                    <div className="back absolute inset-0 flex flex-col justify-between p-[var(--gutter)] opacity-0 group-hover:opacity-100">
                       <p
                         className=" line-clamp-4 text-[14px] text-[var(--text-primary)]"
                         title={
@@ -205,8 +205,8 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                             ? attachment?.name
                               ? attachment?.name
                               : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                                ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                                : attachment?.substring(attachment.lastIndexOf('/') + 1)
                             : 'attachment'
                         }
                       >
@@ -214,13 +214,17 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                           ? attachment?.name
                             ? attachment?.name
                             : attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
-                            : attachment?.substring(attachment.lastIndexOf('/') + 1)
+                              ? attachment?.url?.substring(attachment.url.lastIndexOf('/') + 1)
+                              : attachment?.substring(attachment.lastIndexOf('/') + 1)
                           : 'attachment'}
                       </p>
                       <div className="flex justify-between">
                         <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
-                          <IconButton size={'small'} onClick={(event) => downloadFile(event, attachment)} style={{ paddingBottom: '1px' }}>
+                          <IconButton
+                            size={'small'}
+                            onClick={(event) => downloadFile(event, attachment)}
+                            style={{ paddingBottom: 3, width: 30, height: 30 }}
+                          >
                             {<GetAppIcon />}
                           </IconButton>
                         </HtmlTooltip>
@@ -231,6 +235,7 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                               onClick={(e) => {
                                 viewPdf(e, attachment.url);
                               }}
+                              style={{ paddingBottom: 3, width: 30, height: 30 }}
                             >
                               <PreviewIcon color="primary" />
                             </IconButton>
@@ -244,13 +249,14 @@ const AttachmentThumbnail = ({ attachments, handleDeleteAttachment, canEdit }) =
                                 setShowConfirmationDialog(true);
                                 setAttachemnetToDelete(attachment);
                               }}
+                              style={{ paddingBottom: 3, width: 30, height: 30 }}
                             >
                               {<DeleteIcon color="error" />}
                             </IconButton>
                           </HtmlTooltip>
                         ) : (
                           <HtmlTooltip className="cursor-stop" title={"You don't have permissions to delete attachment"} enterTouchDelay={0}>
-                            <IconButton size={'small'}>
+                            <IconButton size={'small'} style={{ paddingBottom: 3, width: 30, height: 30 }}>
                               <DeleteIcon color="disabled" />
                             </IconButton>
                           </HtmlTooltip>

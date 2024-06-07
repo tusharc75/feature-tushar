@@ -1,13 +1,10 @@
 import { Box, Button, Grid, Menu, MenuItem, MenuItemProps, Typography, useMediaQuery } from '@material-ui/core';
-import { Delete, ExpandMore } from '@material-ui/icons';
-import EditIcon from '@material-ui/icons/Edit';
+import { ExpandMore } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import queryString from 'query-string';
 import { Fragment, ReactNode, useContext, useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FaDoorClosed, FaWpforms, FaDoorOpen } from 'react-icons/fa';
-import { IoHandRightSharp } from 'react-icons/io5';
-import { RiFileShredFill } from 'react-icons/ri';
 import { VscVersions } from 'react-icons/vsc';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -25,6 +22,7 @@ import DetailsPage from 'src/components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   ASSET_STATUS,
+  CHILD_RESOURCE,
   MATERIAL_SUB_TYPE,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
@@ -39,11 +37,12 @@ import ManageWorkOrder from './ManageWorkOrder';
 import Service from './Service';
 import Versions from './Versions';
 import View from './View';
-import { TbProgressCheck } from 'react-icons/tb';
 import { FaCircleChevronDown } from 'react-icons/fa6';
 import ManageRepairJob from '../RepairJob/ManageRepairJob';
 import Step from '../DynamicForm/Step';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import WorkOrderCostDialog from './WorkOrderCostDialog';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -94,7 +93,6 @@ const WorkOrderDetails = () => {
   const [completed, setCompleted] = useState(false);
 
   const [showConfirmBoxScrap, setShowConfirmBoxScrap] = useState(false);
-  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   const [showConfirmVersion, setShowConfirmVersion] = useState({ open: false, withData: 0 });
   const [versionDialog, setVersionDialog] = useState(false);
@@ -105,6 +103,9 @@ const WorkOrderDetails = () => {
 
   const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [openTotalCostDialog, setOpenTotalCostDialog] = useState(false)
+
+  const [workOrderCostFields, setWorkOrderCostFields] = useState(null)
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -154,7 +155,13 @@ const WorkOrderDetails = () => {
 
   useEffect(() => {
     getResourceFields();
+    getWorkOrderCostFields()
   }, []);
+
+  const getWorkOrderCostFields = async () => {
+    let workOrderCost = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderCost, workOrderData?.currency || user.user?.brandCurrency, true);
+    setWorkOrderCostFields(workOrderCost)
+  };
 
   const getResourceFields = () => {
     axiosInstance()
@@ -172,7 +179,6 @@ const WorkOrderDetails = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/${id}`)
       .then(({ data: { data } }) => {
-        
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.workOrder, data) && permissions?.workOrder?.isUpdate ? true : false);
         setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
@@ -227,30 +233,36 @@ const WorkOrderDetails = () => {
     }
   };
 
-  const updateJobStatus = (status, assetStatus = null) => {
+  const updateStatus = (status, assetStatus = null, workOrderCost = null) => {
+    setIsSubmitting(true);
     const data: any = { status: status };
     if (assetStatus) {
       data.assetStatus = assetStatus;
     }
-    axiosInstance()
-      .patch(`${workOrder.api}/status/${id}`, data)
+    if (workOrderCost) {
+      data.workOrderCost = workOrderCost;
+    }
+    axiosInstance().patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
+        setOpenTotalCostDialog(false)
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
           message: data
         });
         fetchWorkOrderData();
+        setIsSubmitting(false);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
   };
 
   const reOpenWorkOrder = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .put(`${workOrder.api}/re-open`, { _id: id })
+      .put(`${workOrder.api}/re-open`, { ids: [id] })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -265,14 +277,6 @@ const WorkOrderDetails = () => {
         toastConfig.setToastConfig(error);
         setIsSubmitting(false);
       });
-  };
-
-  const openAddActions = (event) => {
-    setAddAnchorEl(event.currentTarget);
-  };
-
-  const closeAddActions = () => {
-    setAddAnchorEl(null);
   };
 
   const createVersion = (withData) => {
@@ -334,16 +338,15 @@ const WorkOrderDetails = () => {
       type: 'menuItem',
       isVisible:
         permissions?.repairJob?.isCreate &&
-        allowedToEdit &&
-        workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
-        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-        !workOrderData?.currentRepairJob
+          allowedToEdit &&
+          workOrderData?.type === WORK_ORDER_TYPE.repairOrder &&
+          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+          !workOrderData?.currentRepairJob
           ? true
           : false,
       children: `Create ${routes?.repairJob.title}`,
       tooltip: `Create ${routes?.repairJob.title}`,
       onClick: () => setShowManageRepairJobDialog({ open: true })
-      // iconForMobile: <RiFileShredFill />
     },
     {
       type: 'menuItem',
@@ -355,7 +358,6 @@ const WorkOrderDetails = () => {
       children: `Receive Asset From Supplier`,
       tooltip: `Receive Asset From Supplier`,
       onClick: () => setRepairJobReceiveConfirmation(true)
-      // iconForMobile: <RiFileShredFill />
     },
     {
       id: 'Scrap Asset',
@@ -366,13 +368,12 @@ const WorkOrderDetails = () => {
       children: `${ASSET_STATUS.scrap} Asset`,
       tooltip: `${ASSET_STATUS.scrap} Asset`,
       onClick: () => setShowConfirmBoxScrap(true)
-      // iconForMobile: <RiFileShredFill />
     },
     {
       id: 'In-Progress',
       type: 'menuItem',
       isVisible: Boolean(allowedToEdit && !workOrderData?.currentRepairJob && workOrderData?.status === WORK_ORDER_STATUS.onHold),
-      onClick: () => updateJobStatus(WORK_ORDER_STATUS.inProgress),
+      onClick: () => updateStatus(WORK_ORDER_STATUS.inProgress),
       tooltip: `Change Status ${WORK_ORDER_STATUS.inProgress}`,
       children: WORK_ORDER_STATUS.inProgress
     },
@@ -380,7 +381,7 @@ const WorkOrderDetails = () => {
       id: 'On-hold',
       type: 'menuItem',
       isVisible: Boolean(allowedToEdit && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)),
-      onClick: () => updateJobStatus(WORK_ORDER_STATUS.onHold),
+      onClick: () => updateStatus(WORK_ORDER_STATUS.onHold),
       tooltip: `Change Status ${WORK_ORDER_STATUS.onHold}`,
       children: WORK_ORDER_STATUS.onHold
     },
@@ -388,8 +389,9 @@ const WorkOrderDetails = () => {
       id: 'Close',
       type: 'button',
       ripple: true,
-      isVisible: Boolean(allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed),
-      onClick: () => updateJobStatus(WORK_ORDER_STATUS.completed),
+      isVisible: Boolean(allowedToEdit && workOrderData?.canComplete),
+      onClick: () => workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length
+        ? setOpenTotalCostDialog(true) : updateStatus(WORK_ORDER_STATUS.completed),
       iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
       name: 'Close'
@@ -405,39 +407,20 @@ const WorkOrderDetails = () => {
       tooltip: 'Re-Open Work Order',
       name: 'Re-Open'
     },
-    // {
-    //   id: 'Create Version',
-    //   type: 'button',
-    //   visibleAs: 'menuItem',
-    //   isVisible: Boolean(
-    //     allowedToEdit &&
-    //       ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-    //       !workOrderData?.currentRepairJob &&
-    //       !workOrderData?.deleted &&
-    //       workOrderData?.canCreateWorkOrderVersion
-    //   ),
-    //   onClick: (e) => openAddActions(e),
-    //   iconForMobile: false,
-    //   endIcon: <ExpandMore fontSize="small" />,
-    //   tooltip: 'Create Version',
-    //   name: 'Create Version'
-    // },
-
     {
       type: 'menuItem',
       id: 'Create Version Without Existing Data',
       tooltip: 'Create Version',
       onClick: () => {
-        closeAddActions();
         setShowConfirmVersion({ open: true, withData: 0 });
       },
       children: 'Create Version Without Existing Data',
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       )
     },
     {
@@ -446,15 +429,14 @@ const WorkOrderDetails = () => {
       children: 'Create Version With Existing Data',
       tooltip: 'Create Version',
       onClick: () => {
-        closeAddActions();
         setShowConfirmVersion({ open: true, withData: 1 });
       },
       isVisible: Boolean(
         allowedToEdit &&
-          ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
-          !workOrderData?.currentRepairJob &&
-          !workOrderData?.deleted &&
-          workOrderData?.canCreateWorkOrderVersion
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(workOrderData?.status) &&
+        !workOrderData?.currentRepairJob &&
+        !workOrderData?.deleted &&
+        workOrderData?.canCreateWorkOrderVersion
       ),
       disabled: false
     },
@@ -530,7 +512,7 @@ const WorkOrderDetails = () => {
           <CustomTab value={0}>Header</CustomTab>
           <CustomTab value={1}>Services</CustomTab>
           {!user?.user?.brandPolicy?.workOrderConsumableHide && <CustomTab value={2}>Products/Consumables</CustomTab>}
-          {user?.user?.brandPolicy?.workOrderBom && <CustomTab value={3}>BOM</CustomTab>}
+          {workOrderData?.type === WORK_ORDER_TYPE.productionOrder && resourceData?.policy?.showBom && <CustomTab value={3}>BOM</CustomTab>}
           <CustomTab value={4}>Drawings</CustomTab>
           {!(isMobile && !isTablet) && <CustomTab value={5}>Views</CustomTab>}
           {resourceData && resourceData?.steps?.length && <CustomTab value={6}>Associations</CustomTab>}
@@ -544,36 +526,41 @@ const WorkOrderDetails = () => {
                 <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
             )}
-            <Box pt={2}>
-              <Grid container spacing={2}>
-                <Grid item xs={12} sm={6} md={6} xl={6}>
-                  <div style={{ overflow: 'hidden' }} className="single-form-v1">
-                    <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
-                      <Box display="flex" alignItems="center">
-                        <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
-                          {`Consumable Information`}
-                        </Typography>
-                      </Box>
-                    </Box>
-                    {totalConsumablesCost !== null ? (
-                      <Box className="formdata-v1" display="flex">
-                        <Box style={{ width: '100%' }}>
-                          <Box display="flex" justifyContent="space-between">
-                            <Typography className="table-head-v1">Total Consumables Cost</Typography>
-
-                            <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
-                              {`${totalConsumablesCost}`}
-                            </Typography>
-                          </Box>
+            {workOrderCostFields?.length && workOrderData?.workOrderCost ?
+              <Box pt={2}>
+                <DetailsPage data={workOrderData?.workOrderCost} fields={workOrderCostFields?.map((e) => { return { fieldData: e } })} />
+              </Box>
+              :
+              <Box pt={2}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={6} xl={6}>
+                    <div style={{ overflow: 'hidden' }} className="single-form-v1">
+                      <Box display={'flex'} justifyContent="space-between" className={'form-head-v1'}>
+                        <Box display="flex" alignItems="center">
+                          <Typography style={{ fontWeight: '600' }} className="form-label-style-v1" variant="subtitle2">
+                            {`Consumable Information`}
+                          </Typography>
                         </Box>
                       </Box>
-                    ) : (
-                      <CommonSkeleton lenArray={[...Array(2).keys()]} />
-                    )}
-                  </div>
+                      {totalConsumablesCost !== null ? (
+                        <Box className="formdata-v1" display="flex">
+                          <Box style={{ width: '100%' }}>
+                            <Box display="flex" justifyContent="space-between">
+                              <Typography className="table-head-v1">Total Consumables Cost</Typography>
+                              <Typography className="table-data-v1" style={{ borderTopWidth: '1px' }}>
+                                {`${totalConsumablesCost}`}
+                              </Typography>
+                            </Box>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <CommonSkeleton lenArray={[...Array(2).keys()]} />
+                      )}
+                    </div>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </Box>
+              </Box>
+            }
           </Box>
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
@@ -665,11 +652,10 @@ const WorkOrderDetails = () => {
           }}
           onOk={() => {
             setShowConfirmBoxScrap(false);
-            updateJobStatus(WORK_ORDER_STATUS.completed, ASSET_STATUS.scrap);
+            updateStatus(WORK_ORDER_STATUS.completed, ASSET_STATUS.scrap);
           }}
         />
       )}
-
       {showConfirmVersion.open && (
         <ConfirmationDialog
           open={showConfirmVersion.open}
@@ -683,7 +669,6 @@ const WorkOrderDetails = () => {
           }}
         />
       )}
-
       {openUpdateDialog && (
         <ManageWorkOrder
           workOrderId={id}
@@ -716,6 +701,18 @@ const WorkOrderDetails = () => {
             warehouse: workOrderData?.warehouse?.optionValue,
             workOrder: workOrderData?._id
           }}
+        />
+      )}
+      {openTotalCostDialog && (
+        <WorkOrderCostDialog
+          id={id}
+          workOrderCostFields={workOrderCostFields}
+          currency={workOrderData?.currency || user.user?.brandCurrency}
+          onClose={() => setOpenTotalCostDialog(false)}
+          onSuccess={(data) => {
+            updateStatus(WORK_ORDER_STATUS.completed, null, data)
+          }}
+          isSubmitting={isSubmitting}
         />
       )}
       {repairJobReceiveConfirmation && (

@@ -1600,8 +1600,8 @@ const FormTypes = (props) => {
                                   e.target.value === ''
                                     ? 0
                                     : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                                    ? e.target.value.replace(/,/g, '')
-                                    : parseFloat(e.target.value.replace(/,/g, ''))
+                                      ? e.target.value.replace(/,/g, '')
+                                      : parseFloat(e.target.value.replace(/,/g, ''))
                                 );
                               }
                             }
@@ -2347,7 +2347,7 @@ const FormTypes = (props) => {
       </Fragment>
     ) : type === 'fileUpload' ? (
       <Fragment>
-        <Box display="flex" alignItems="center" pb={(isTooltip && Boolean(tooltipMessage)) || label !== '' ? 1 : 0}>
+        <Box display="flex" alignItems="center" pb={(isTooltip && Boolean(tooltipMessage)) || label !== '' ? 0 : 0}>
           <Typography color="textSecondary">{label}</Typography>
           {isTooltip && Boolean(tooltipMessage) && (
             <Fragment>
@@ -2360,7 +2360,7 @@ const FormTypes = (props) => {
             </Fragment>
           )}
         </Box>
-        <Box display="flex" alignItems="center">
+        <Box>
           <input
             disabled={isFileUploading || !canEdit}
             id={name}
@@ -2372,46 +2372,42 @@ const FormTypes = (props) => {
             accept={accept || documentUploadSupportExtensions}
             multiple={isMultipleUpload}
           />
-          <label htmlFor={name}>
-            <Button
-              disabled={isFileUploading || !canEdit}
-              variant="contained"
-              color="primary"
-              size="small"
-              component="span"
-              className="normal-case"
-              startIcon={isFileUploading && <CircularProgress size={15} />}
-            >
-              {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
-            </Button>
-          </label>
-          {showErrorMessage ? (
-            <>
-              <Box ml={1} />
-              <Box flex="1" className="text-truncate">
-                <Typography variant="body2" className="text-truncate" color={'error'}>
-                  {touched[name] && Boolean(errors[name]) ? errors[name] || 'No file choosen' : null}
-                </Typography>
-              </Box>
-            </>
-          ) : null}
+          <div className="flex items-center gap-2">
+            <label htmlFor={name}>
+              <Button
+                disabled={isFileUploading || !canEdit}
+                variant="contained"
+                color="primary"
+                size="small"
+                component="span"
+                className="normal-case"
+                startIcon={isFileUploading && <CircularProgress size={15} />}
+              >
+                {isFileUploading ? 'Uploading File' : required ? 'Upload File *' : 'Upload File'}
+              </Button>
+            </label>
+
+            <Typography variant="body2" className="text-truncate" color={showErrorMessage ? 'error' : 'textPrimary'}>
+              {showErrorMessage && touched[name] && Boolean(errors[name]) ? errors[name] || '' : ''}
+              {!values[name] && 'No file chosen'}
+            </Typography>
+          </div>
           {doNotShowUploadedFile ? null : (
-            <>
-              <Box ml={1} />
+            <div className="flex items-center">
               <Box flex="1" className="text-truncate">
                 <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
                   {isFileUploading
                     ? `Uploading... ${fileUploadProgress}%`
                     : values[name]
-                    ? values[name]
-                    : touched[name] && Boolean(errors[name])
-                    ? errors[name]
-                    : 'No file choosen'}
+                      ? values[name]
+                      : touched[name] && Boolean(errors[name])
+                        ? errors[name]
+                        : ''}
                 </Typography>
               </Box>
               {values[name] ? (
                 <IconButton
-                  disabled={Boolean(!values[name])}
+                  disabled={Boolean(!values[name]) || isFileUploading}
                   title="Remove File"
                   size="small"
                   aria-label="delete picture"
@@ -2421,13 +2417,13 @@ const FormTypes = (props) => {
                   <DeleteIcon color="error" />
                 </IconButton>
               ) : null}
-            </>
+            </div>
           )}
         </Box>
       </Fragment>
     ) : type === 'multiFileUpload' ? (
       <Fragment>
-        <Box display="flex" alignItems="center" pb={(isTooltip && Boolean(tooltipMessage)) || label !== '' ? 1 : 0}>
+        <Box display="flex" alignItems="center" pb={(isTooltip && Boolean(tooltipMessage)) || label !== '' ? 0 : 0}>
           <Typography color="textSecondary">{label}</Typography>
           {isTooltip && Boolean(tooltipMessage) && (
             <Fragment>
@@ -2454,19 +2450,24 @@ const FormTypes = (props) => {
                 accept={accept || documentUploadSupportExtensions}
                 multiple={true}
               />
-              <label htmlFor={name}>
-                <Button
-                  disabled={isFileUploading || !canEdit}
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  component="span"
-                  className="normal-case"
-                  startIcon={isFileUploading && <CircularProgress size={15} />}
-                >
-                  {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
-                </Button>
-              </label>
+              <div className="flex items-center gap-2">
+                <label htmlFor={name}>
+                  <Button
+                    disabled={isFileUploading || !canEdit}
+                    variant="contained"
+                    color="primary"
+                    size="small"
+                    component="span"
+                    className="normal-case"
+                    startIcon={isFileUploading && <CircularProgress size={15} />}
+                  >
+                    {isFileUploading ? 'Uploading File(s)' : required ? 'Upload File(s) *' : 'Upload File(s)'}
+                  </Button>
+                </label>
+                <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
+                  {values[name]?.length > 0 ? '' : 'No file(s) choosen'}
+                </Typography>
+              </div>
               {showErrorMessage ? (
                 <>
                   <Box ml={1} />
@@ -2482,7 +2483,7 @@ const FormTypes = (props) => {
               <>
                 {values[name].map((item, i) => (
                   <>
-                    <Grid item xs={10} sm={10} md={10}>
+                    <div className="w-[calc(100%-60px)] flex-grow">
                       <Box ml={1} />
                       <Box flex="1" className="text-truncate">
                         <Typography
@@ -2493,8 +2494,8 @@ const FormTypes = (props) => {
                           {item?.fileName}
                         </Typography>
                       </Box>
-                    </Grid>
-                    <Grid item xs={2} sm={2} md={2}>
+                    </div>
+                    <div style={{ maxWidth: 50 }}>
                       <IconButton
                         disabled={Boolean(!values[name])}
                         title="Remove File"
@@ -2510,7 +2511,7 @@ const FormTypes = (props) => {
                       >
                         <DeleteIcon color="error" />
                       </IconButton>
-                    </Grid>
+                    </div>
                   </>
                 ))}
 
@@ -2530,10 +2531,10 @@ const FormTypes = (props) => {
                     {isFileUploading
                       ? `Uploading... ${fileUploadProgress}%`
                       : values[name]
-                      ? values[name]
-                      : touched[name] && Boolean(errors[name])
-                      ? errors[name]
-                      : 'No file choosen'}
+                        ? values[name]
+                        : touched[name] && Boolean(errors[name])
+                          ? errors[name]
+                          : 'No file choosen'}
                   </Typography>
                 </Box>
                 {values[name] ? (
@@ -2689,13 +2690,17 @@ const FormTypes = (props) => {
       >
         <Typography color="textSecondary">{label}</Typography>
         <input accept="image/*" style={{ display: 'none' }} id="multiple-images-button" multiple={false} type="file" onChange={readImageFile} />
-        <label htmlFor="multiple-images-button">
-          <Button disabled={readingImage} variant="contained" color="primary" component="span" size={'small'}>
-            Upload
-          </Button>
-        </label>
+        <div className="flex items-center gap-2">
+          <label htmlFor="multiple-images-button">
+            <Button disabled={readingImage} variant="contained" color="primary" component="span" size={'small'}>
+              Upload image(s)
+            </Button>
+          </label>
+          <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
+            {values[name]?.length > 0 ? '' : 'No Images'}
+          </Typography>
+        </div>
         <Box mt={1}>
-          <Typography color="textSecondary">{values[name]?.length > 0 ? 'Images Preview' : 'No Images'}</Typography>
           <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
             <ImageList style={{ flexWrap: 'nowrap', transform: 'translateZ(0)' }}>
               {values[name]
@@ -2763,7 +2768,7 @@ const FormTypes = (props) => {
     ) : type === 'counter' ? (
       <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
     ) : type === 'description' ? (
-      <Description label={label} fieldData={fieldData}/>
+      <Description label={label} fieldData={fieldData} />
     ) : null
   ) : null;
 };
