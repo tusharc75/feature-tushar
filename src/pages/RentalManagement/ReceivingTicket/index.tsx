@@ -9,7 +9,6 @@ import Edit from '@material-ui/icons/Edit';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { groupBy, isEmpty, map, startCase, uniq } from 'lodash';
 import moment from 'moment';
@@ -72,6 +71,7 @@ import ChangeAssetsDetailsDialog from './ChangeAssetsDetailsDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import ServiceLogDialog from './ServiceLogDialog';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -760,7 +760,7 @@ const ReceivingTicket = ({
         Header: 'Details',
         disabled: true,
         Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="flex items-center gap-2">
             <p className="text-truncate">{row?.original?.assetNumber}</p>
             <IconButton
               size="small"
@@ -769,7 +769,7 @@ const ReceivingTicket = ({
                 window.open(`${basePath}/${row?.original?._id?.split('_')[0]}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
             </IconButton>
             {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
@@ -854,18 +854,16 @@ const ReceivingTicket = ({
         Header: productFields?.find((f) => f.fieldName === 'productName')?.fieldLabel || 'Product',
         Cell: ({ row }) =>
           row?.original?.productName ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.productName}</h5>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -881,14 +879,17 @@ const ReceivingTicket = ({
         Header: 'Plant',
         Cell: ({ row }) =>
           row?.original?.warehouse ? (
-            <Link
-              className="link text-truncate"
-              target="_blank"
-              title={row?.original?.warehouse}
-              to={`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`}
-            >
-              {row?.original?.warehouse}
-            </Link>
+            <div className="flex items-center gap-2">
+              <h5 className="text-truncate">{row?.original?.warehouse}</h5>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
           ) : (
             <NoDataCell />
           )
@@ -898,18 +899,16 @@ const ReceivingTicket = ({
         Header: 'Loading Ticket',
         Cell: ({ row }) =>
           row?.original?.loadingTicket ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -920,18 +919,16 @@ const ReceivingTicket = ({
         Header: 'Receiving Ticket',
         Cell: ({ row }) =>
           row?.original?.receivingTicket ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.receivingTicket}</h5>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.receivingTicketId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -942,18 +939,16 @@ const ReceivingTicket = ({
         Header: 'Return Ticket',
         Cell: ({ row }) =>
           row?.original?.returnTicket ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.returnTicket}</h5>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.returnTicketId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.returnTicketId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />

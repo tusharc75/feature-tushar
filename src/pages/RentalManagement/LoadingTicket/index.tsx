@@ -7,7 +7,6 @@ import Edit from '@material-ui/icons/Edit';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { groupBy, isEqual, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
@@ -54,6 +53,7 @@ import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
 import { getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from './../rentalOfflineHelper';
 import DateDialog from './DateDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import { FiExternalLink } from 'react-icons/fi';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -539,7 +539,7 @@ const LoadingTicket = ({
       Header: 'Details',
       disabled: true,
       Cell: ({ row }) => (
-        <div className="d-flex gap-2 align-items-center">
+        <div className="flex items-center gap-2">
           <h5 className="text-truncate" title={row?.original?.assetNumber}>
             {row?.original?.assetNumber}
           </h5>
@@ -553,7 +553,7 @@ const LoadingTicket = ({
               }
             }}
           >
-            <OpenInNewIcon fontSize="small" color={'primary'} />
+            <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
           </IconButton>
           {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
             (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
@@ -597,18 +597,16 @@ const LoadingTicket = ({
       Header: 'Loading Ticket',
       Cell: ({ row }) =>
         row?.original?.loadingTicket ? (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         ) : (
           <NoDataCell />
@@ -635,19 +633,17 @@ const LoadingTicket = ({
       Header: findHeader(columnHeader?.productFields, 'productName'),
       Cell: ({ row }) =>
         row?.original?.productName ? (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row?.original?.productName}</h5>
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-          </div>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div >
         ) : (
           <NoDataCell />
         )
@@ -662,14 +658,17 @@ const LoadingTicket = ({
       Header: 'Plant',
       Cell: ({ row }) =>
         row?.original?.warehouse ? (
-          <Link
-            className="link text-truncate"
-            target="_blank"
-            title={row?.original?.warehouse}
-            to={`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`}
-          >
-            {row?.original?.warehouse}
-          </Link>
+          <div className="flex items-center gap-2">
+            <h5 className="text-truncate">{row?.original?.warehouse}</h5>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.warehouseDetail.path}/${row?.original?.warehouseId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
         ) : (
           <NoDataCell />
         )

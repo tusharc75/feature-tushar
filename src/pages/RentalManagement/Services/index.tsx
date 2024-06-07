@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem, TextField } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 import { startCase } from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
@@ -27,10 +26,11 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { calculatePrice, calculateRowsField, fetch_rental_product_fields, getNestedSubRows } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { MATERIAL_TYPE, rentalManagement } from '../../../constants/helpers';
+import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import Technicians from './Technicians';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Services = ({
   rentalManagementData,
@@ -151,7 +151,7 @@ const Services = ({
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-1">
             {isOffline || !allowedToEdit || quotationApproved ? (
               <p> {row.original.detail}</p>
             ) : (
@@ -165,24 +165,20 @@ const Services = ({
                 {row.original.detail}
               </p>
             )}
-            {
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-                {!isOffline && allowedToEdit && !quotationApproved && (
-                  <HtmlTooltip title="Add Existing Service">
-                    <IconButton
-                      onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
-                      size="small"
-                      color="primary"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-              </Box>
-            }
+            <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+              {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+            </span>
+            {!isOffline && allowedToEdit && !quotationApproved && (
+              <HtmlTooltip title="Add Existing Service">
+                <IconButton
+                  onClick={() => setAddExistingProductDialog({ open: true, type: 'service', parentId: row.original?._id })}
+                  size="small"
+                  color="primary"
+                >
+                  <Add color="disabled" fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
             {!isOffline && (
               <IconButton
                 size="small"
@@ -198,7 +194,7 @@ const Services = ({
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>

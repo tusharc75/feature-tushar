@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../../components/Helpers/CommonSkeleton';
 import routes from '../../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
+import { prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -18,13 +18,12 @@ import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmploye
 import { displayDate } from 'src/constants/helpers';
 import { Add } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
 import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
 import { camelCase } from 'lodash';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
 
@@ -102,9 +101,9 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         Header: 'Name',
         width: 250,
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {isOffline || !allowedToEdit || data?.length === 0 ? (
-              <p> {row.original.technicianName}</p>
+              <p>{row.original.technicianName}</p>
             ) : (
               <p
                 onClick={() => {
@@ -117,14 +116,14 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
               </p>
             )}
             {!isOffline && (
-              <Box ml={1} className="d-flex align-items-center">
+              <Box>
                 <IconButton
                   size="small"
                   onClick={() => {
                     window.open(`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`);
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color="primary" />
+                  <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
                 </IconButton>
               </Box>
             )}
@@ -306,16 +305,16 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       }
       technician.push(element);
     });
-   
-      const priceData = await calculatePrice(rentalManagementData, technician) || [];
-      AddMaterial(technician, priceData);
+
+    const priceData = await calculatePrice(rentalManagementData, technician) || [];
+    AddMaterial(technician, priceData);
   };
 
   const AddMaterial = async (technician, priceData) => {
     const tempMaterial = [...technician];
     tempMaterial.forEach((element) => {
       const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type);
-       if (rateResult.length && rateResult[0].mrp) {
+      if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
         element['pricingCondition'] = rateResult[0].conditionId;
@@ -325,7 +324,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       }
       delete element.materialId
     });
-  
+
     axiosInstance()
       .post(`${rentalManagement.api}/technician`, { technician: tempMaterial })
       .then(({ data }) => {
