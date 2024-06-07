@@ -581,7 +581,7 @@ const RoleDetailsPage = () => {
                           <RoleEngine
                             style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
                             field={field}
-                            resource={childrenResource}
+                            resource={childrenResource?.map((e, index) => { return { ...e, resourceId: index } })}
                             setField={setField}
                             setResource={setChildrenResource}
                             isDisable={permissions?.role.isUpdate ? (!isEdit ? true : false) : true}
