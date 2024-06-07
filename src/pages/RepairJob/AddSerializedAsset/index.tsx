@@ -1,7 +1,6 @@
 import { IconButton, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import { Edit } from '@material-ui/icons';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -21,6 +20,7 @@ import { ASSET_STATUS, CHILD_RESOURCE, REPAIR_JOB_STATUS, repairJob, sidebarReso
 import ManageSerializedAsset from 'src/pages/SerializedAsset/ManageSerializedAsset';
 import AddSerializedAsset from '../../RentalManagement/SerializedAsset/AddSerializedAsset';
 import ManageAssetDialog from './ManageAssetDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, renderedFrom, allowedToEdit, stepFullScreen, alloweOperation }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -109,9 +109,9 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
           sticky: 'none',
           width: 200,
           Cell: ({ row, table }) => (
-            <>
+            <div className="flex items-center gap-2">
               {row.original.assetNumber ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <>
                   {allowedToEdit ? (
                     <p
                       className="link text-truncate"
@@ -131,21 +131,19 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                   ) : (
                     <p className="text-truncate">{row.original.assetNumber}</p>
                   )}
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
-                </div>
+                </>
               ) : (
                 <NoDataCell />
               )}
-            </>
+            </div>
           )
         });
       }
