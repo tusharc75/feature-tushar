@@ -268,7 +268,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                               height: fullScreen || isMobile || isTablet ? `calc(100vh - 200px)` : '500px'
                             }}
                             field={field}
-                            resource={childrenResource}
+                            resource={childrenResource?.map((e, index) => { return { ...e, resourceId: index } })}
                             setField={setField}
                             setResource={setChildrenResource}
                             tier={ROLE_TIER.tier1}
