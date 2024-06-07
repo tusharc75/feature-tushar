@@ -11,7 +11,6 @@ import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { DetailsPageHeader } from "src/components/PageHeaders";
 import { CHILD_RESOURCE, MATERIAL_TYPE, SUBCONTRACT_ASSEMBLY_STATUS } from "src/constants/helpers";
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { ownerAndColaborator } from "src/constants/messageHelpers";
@@ -19,6 +18,7 @@ import axiosInstance from "src/axios/axiosInstance";
 import AssignProductDialog from "src/components/AssignRolesDialog/AssignProductDialog";
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from "src/pages/SubcontractAssembly/Material/MaterialDialog";
+import { FiExternalLink } from "react-icons/fi";
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
@@ -68,9 +68,9 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 				width: 300,
 				disabled: true,
 				sticky: isMobile || isTablet ? 'none' : 'left',
-				Cell: ({ row, table }) => (
-					<div style={{ display: 'flex', alignItems: 'center' }}>
-						{row.original.detail ? (
+				Cell: ({ row }) => (
+					row.original.detail ? (
+						<div className="flex items-center gap-1">
 							<p
 								onClick={() => {
 									setOpenMaterialDialog({ open: true, data: row?.original })
@@ -80,21 +80,18 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 							>
 								{row.original.detail}
 							</p>
-						) : (
-							<NoDataCell />
-						)}
-
-						<Box ml={1} className=" flex-shrink-0">
 							<IconButton
 								size="small"
 								onClick={() => {
 									window.open(`${routes.productDetail.path}/${row.original.materialId}`);
 								}}
 							>
-								<OpenInNewIcon fontSize="small" color="primary" />
+								<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
 							</IconButton>
-						</Box>
-					</div >
+						</div >
+					) : (
+						<NoDataCell />
+					)
 				)
 			},
 			{

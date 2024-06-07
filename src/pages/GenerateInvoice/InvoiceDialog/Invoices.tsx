@@ -12,10 +12,10 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CustomRenderCell from 'src/components/Helpers/CustomRenderCell';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = null }) => {
   const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
@@ -48,7 +48,7 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
         o.show = true;
         o.disabled = true;
         o.cell = ({ row }) => (
-          <div className="!flex items-center">
+          <div className="flex items-center gap-2">
             <span
               className="link"
               onClick={() => {
@@ -57,16 +57,14 @@ const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = nu
             >
               <CustomRenderCell value={row.original?.invoiceNumber} />
             </span>
-            <Box ml={1} className="flex-shrink-0">
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.invoiceDetail.path}/${row.original?._id}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.invoiceDetail.path}/${row.original?._id}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         );
       }

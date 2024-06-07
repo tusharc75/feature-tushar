@@ -13,7 +13,6 @@ import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/compone
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import ConditionDialog from './ConditionDialog';
 import { camelCase, startCase } from 'lodash';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { ExpandMore } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import styles from '../../Leads/Header.module.scss';
@@ -22,6 +21,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { deleteDisable } from 'src/constants/messageHelpers';
+import { FiExternalLink } from 'react-icons/fi';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
   const renderFrom = camelCase(`${routes?.pricingCondition.title}_condition_selected`);
@@ -57,15 +57,14 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${
-            element.materialType === MATERIAL_TYPE.product
-              ? element.productDetail?.productName
-              : element.materialType === MATERIAL_TYPE.service
+          element.detail = `${element.materialType === MATERIAL_TYPE.product
+            ? element.productDetail?.productName
+            : element.materialType === MATERIAL_TYPE.service
               ? element.serviceDetail?.serviceName
               : element.materialType === MATERIAL_TYPE.package
                 ? element.packageDetail?.packageName
                 : element.competencyDetail.competencyName
-          }`;
+            }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -177,7 +176,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       disabled: true,
       Cell: ({ row }) =>
         row?.original?.detail ? (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <h5
               className="link text-truncate"
               onClick={() => {
@@ -186,26 +185,23 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             >
               {row?.original?.detail}
             </h5>
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(
-                    `${
-                      row?.original?.materialType === 'Product'
-                        ? routes.productDetail.path
-                        : row?.original?.materialType === 'Service'
-                          ? routes.serviceMasterDetail.path
-                          : row?.original?.materialType === 'Package'
-                            ? routes.packagesDetail.path
-                            : routes?.competenciesDetail.path  
-                    }/${row?.original?.materialId}`
-                  );
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(
+                  `${row?.original?.materialType === 'Product'
+                    ? routes.productDetail.path
+                    : row?.original?.materialType === 'Service'
+                      ? routes.serviceMasterDetail.path
+                      : row?.original?.materialType === 'Package'
+                        ? routes.packagesDetail.path
+                        : routes?.competenciesDetail.path
+                  }/${row?.original?.materialId}`
+                );
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         ) : (
           <NoDataCell />
@@ -540,9 +536,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${
-            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-          } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+            } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

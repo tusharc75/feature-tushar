@@ -1,6 +1,5 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
@@ -18,6 +17,7 @@ import AssignProductDialog from '../../../components/AssignRolesDialog/AssignPro
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { product } from '../../../constants/helpers';
+import { FiExternalLink } from 'react-icons/fi';
 
 function Parts({ id }) {
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
@@ -83,18 +83,16 @@ function Parts({ id }) {
             Header: ele?.fieldLabel,
             width: 200,
             Cell: ({ row }) => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div className="flex items-center gap-2">
                 <p className="text-truncate">{row.original.productName}</p>
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.productDetail.path}/${row.original._id}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.productDetail.path}/${row.original._id}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               </div>
             )
           });
