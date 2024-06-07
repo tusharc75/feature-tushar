@@ -35,7 +35,7 @@ import { camelCase, isEmpty, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
+import { FiExternalLink } from 'react-icons/fi';
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
@@ -128,13 +128,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         minWidth: 300,
         width: 300,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-1">
             <p>{row.original.detail}</p>
-            <Box ml={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
-              </span>
-            </Box>
+            <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+              {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
+            </span>
             {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
               <IconButton
                 size="small"
@@ -150,7 +148,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>
@@ -165,16 +163,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         }
       }
     ];
-
     newColumns = newColumns?.filter((d) => !d?.accessor?.includes('estimate'));
-
-    const pricingMethodColumn = newColumns?.find((obj) => obj.accessor === 'pricingMethod');
-    if (pricingMethodColumn) {
-      pricingMethodColumn.Cell = ({ row }) => pricingMethodRenderer(row);
-    }
-
+    newColumns?.forEach((e) => {
+      if (e.accessor === 'pricingMethod') {
+        e.Cell = ({ row }) => pricingMethodRenderer(row);
+      }
+    })
     coloum = [...coloum, ...newColumns];
-
     coloum.push({
       accessor: 'action',
       Header: 'Actions',
@@ -200,7 +195,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         </>
       )
     });
-
     setColumns(coloum);
   };
 
