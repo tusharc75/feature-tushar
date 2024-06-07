@@ -1,11 +1,12 @@
 import { Box, Button, IconButton, Menu, MenuItem, Typography, useMediaQuery } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { capitalize, isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
+import { FiExternalLink } from 'react-icons/fi';
+import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';
@@ -33,7 +34,6 @@ import {
   repairOrder,
   sidebarResource
 } from '../../../constants/helpers';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const Quotation = ({
   repairOrderData,
@@ -160,7 +160,7 @@ const Quotation = ({
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {[QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
               quotationInfo?.versions[tempCurrentVersion]?.status
             ) || invoiceStep ? (
@@ -176,24 +176,22 @@ const Quotation = ({
                 {row.original?.detail}
               </p>
             )}
-            <Box pl={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === 'service') {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'serializedAsset') {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -203,22 +201,20 @@ const Quotation = ({
         width: 200,
         primaryField: true,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {row.original?.productName ? (
               <>
                 <p className="text-truncate" title={row.original?.productName}>
                   {row.original?.productName}
                 </p>
-                <Box pl={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.productDetail.path}/${row.original.productId}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               </>
             ) : (
               <NoDataCell />
@@ -344,14 +340,15 @@ const Quotation = ({
 
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'service'
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -620,17 +617,17 @@ const Quotation = ({
           {!isMobileScreen && repairOrderData?.addQuotationStep && (
             <Box display="flex">
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <div className={`d-flex align-items-center justify-content-center spacing-1 text-align-center flex-wrap`}>
                   <FcClock size={25} />
                   <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quotation has been sent to customer</Typography>
                 </div>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <div className={`d-flex align-items-center justify-content-center spacing-1 text-align-center flex-wrap`}>
                   <FcOk size={25} />
                   <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quotation has been accepted by customer</Typography>
                 </div>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <div className={`d-flex align-items-center justify-content-center spacing-1 text-align-center flex-wrap`}>
                   <FcCancel size={25} />
                   <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quotation has been rejected by customer</Typography>
                 </div>
@@ -641,7 +638,7 @@ const Quotation = ({
             <Box display={'flex'} gridGap={8}>
               {repairOrderData?.addQuotationStep &&
                 (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-                  quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
+                quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
                   <Button
                     disabled={material
                       .filter((e) => e.parentId === null)
@@ -671,8 +668,8 @@ const Quotation = ({
                     Accept / Reject
                   </Button>
                 ) : [QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.acceptByCustomer].includes(
-                  quotationData?.versions[currentVersion]?.status
-                ) ? (
+                    quotationData?.versions[currentVersion]?.status
+                  ) ? (
                   <Button
                     onClick={() => {
                       cloneVersion();
@@ -688,19 +685,19 @@ const Quotation = ({
               {![QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                 quotationData?.versions[currentVersion]?.status
               ) && (
-                  <Button
-                    variant="outlined"
-                    color="default"
-                    size="small"
-                    onClick={openActions}
-                    aria-controls="action-menu"
-                    disabled={selectedRecords?.length === 0}
-                    endIcon={<ExpandMore />}
-                    className="new-dropdown-v1"
-                  >
-                    Actions
-                  </Button>
-                )}
+                <Button
+                  variant="outlined"
+                  color="default"
+                  size="small"
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedRecords?.length === 0}
+                  endIcon={<ExpandMore />}
+                  className="new-dropdown-v1"
+                >
+                  Actions
+                </Button>
+              )}
               <Menu
                 anchorEl={anchorEl}
                 keepMounted
@@ -727,17 +724,17 @@ const Quotation = ({
           {isMobileScreen && (
             <Box display="flex" style={{ margin: '0 auto' }}>
               {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <div className={`d-flex align-items-center justify-content-center spacing-1 text-align-center flex-wrap`}>
                   <FcClock size={25} />
                   <Typography style={{ color: '#00acc1', fontWeight: 'bold' }}>Quotation has been sent to customer</Typography>
                 </div>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <div className={`d-flex align-items-center justify-content-center spacing-1 text-align-center flex-wrap`}>
                   <FcOk size={25} />
                   <Typography style={{ color: '#28a745', fontWeight: 'bold' }}>Quotation has been accepted by customer</Typography>
                 </div>
               ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer ? (
-                <div className={`d-flex align-items-center justify-content-center flex-wrap spacing-1 text-align-center`}>
+                <div className={`d-flex align-items-center justify-content-center spacing-1 text-align-center flex-wrap`}>
                   <FcCancel size={25} />
                   <Typography style={{ color: '#dc3545', fontWeight: 'bold' }}>Quotation has been rejected by customer</Typography>
                 </div>
