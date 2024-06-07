@@ -12,9 +12,9 @@ import ConfirmationDialog from "src/components/Helpers/ConfirmationDialog";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import SearchBox from "src/components/Helpers/SearchBox";
-import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid } from "src/constants/helpers";
+import { CustomDialogTransition, MATERIAL_TYPE, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid } from "src/constants/helpers";
 
-const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData, isAddingProducts, handleClose, addProduct }) => {
+const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData, isAddingProducts, handleClose, addMaterial }) => {
 
 	const toastConfig = useContext(CustomToastContext);
 
@@ -43,7 +43,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 	];
 
 	const defaultColumns =
-		type === 'product'
+		type === MATERIAL_TYPE.product
 			? [
 				...qtyColumn,
 				{
@@ -63,10 +63,10 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 
 	const fetchGridColumns = () => {
 		axiosInstance()
-			.get(type === 'product' ? '/field?resource=Product&view=true' : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
+			.get(type === MATERIAL_TYPE.product ? '/field?resource=Product&view=true' : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
 			.then(({ data: { data } }) => {
 				let columns = [];
-				let newColumns = generateColumns(renderedFrom, data, type === 'product' ? routes.productDetail.path : routes.packagesDetail.path);
+				let newColumns = generateColumns(renderedFrom, data, type === MATERIAL_TYPE.product ? routes.productDetail.path : routes.packagesDetail.path);
 				columns = [...newColumns, ...getStaticFields()];
 				setColumns([...defaultColumns, ...columns]);
 			});
@@ -84,7 +84,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 			deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
 		}
 		const updatedFilters = [];
-		if (type === 'package') {
+		if (type === MATERIAL_TYPE.package) {
 			updatedFilters.push({ field: 'packageType', term: 'product' });
 		}
 		// if (type === "product") {
@@ -114,7 +114,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 		dispatch({ type: 'loading', loading: true });
 		const queryString = getQueryString();
 		axiosInstance()
-			.get(`${type === 'product' ? `/rental-management/product-with-inventory` : packages.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
+			.get(`${type === MATERIAL_TYPE.product ? `/rental-management/product-with-inventory` : packages.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
 			.then(({ data: { data, count } }) => {
 				let rows = data.map((u) => {
 					let finalObject = prepareDataForGrid(u);
@@ -200,10 +200,10 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 										size="small"
 										color="primary"
 										onClick={() => {
-											if (type === 'package' && selectedRecords?.some(r => r?.qty > 1)) {
+											if (type === MATERIAL_TYPE.package && selectedRecords?.some(r => r?.qty > 1)) {
 												setShowConfirmationDialog(true)
 											} else {
-												addProduct(selectedRecords)
+												addMaterial(selectedRecords)
 											}
 										}}
 										variant="contained"
@@ -238,7 +238,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 				{showConfirmationDialog && (
 					<ConfirmationDialog
 						open={true}
-						message="You want to Seperate packages for all quantity ?"
+						message="Do you want to seperate package for each quantity ?"
 						onOk={() => {
 							setShowConfirmationDialog(false);
 							const data: any = []
@@ -250,11 +250,11 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 									})
 								}
 							});
-							addProduct(data)
+							addMaterial(data)
 						}}
 						onClose={() => {
 							setShowConfirmationDialog(false);
-							addProduct(selectedRecords)
+							addMaterial(selectedRecords)
 						}}
 					/>
 				)}

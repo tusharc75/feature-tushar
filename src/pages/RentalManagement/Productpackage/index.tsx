@@ -957,7 +957,7 @@ const Productpackage = ({
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          addProduct={handleAdd}
+          addMaterial={handleAdd}
         />
       )}
       {addchildDialog.open && (
