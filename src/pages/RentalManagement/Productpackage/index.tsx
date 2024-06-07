@@ -36,6 +36,7 @@ import AssetAvailability from '../AssetAvailability';
 import AddExistingProductInventory from './AddExistingProductInventory';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Productpackage = ({
   rentalManagementData,
@@ -106,7 +107,7 @@ const Productpackage = ({
 
   const createColumns = () => {
     setColumns(null);
-    const data = [...allFields]?.filter(f => f?.isRead);
+    const data = [...allFields]?.filter((f) => f?.isRead);
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
@@ -167,7 +168,7 @@ const Productpackage = ({
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-1">
             {isOffline || !allowedToEdit || quotationApproved ? (
               <p> {row.original.detail}</p>
             ) : (
@@ -181,26 +182,10 @@ const Productpackage = ({
                 {row.original.detail}
               </p>
             )}
-            {row.original.type !== MATERIAL_TYPE.manualEntry && (
-              <Box ml={1} className="d-flex align-items-center">
-                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-                </span>
-                {!isOffline && allowedToEdit && !quotationApproved && (
-                  <HtmlTooltip title="Add ">
-                    <IconButton
-                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
-                      size="small"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                )}
-              </Box>
-            )}
             {!isOffline && row.original.type !== MATERIAL_TYPE.manualEntry && (
               <IconButton
                 size="small"
+                className="!ml-[2px]"
                 onClick={() => {
                   if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
@@ -213,8 +198,26 @@ const Productpackage = ({
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className=" text-gray-500 dark:text-gray-300" />
               </IconButton>
+            )}
+            {row.original.type !== MATERIAL_TYPE.manualEntry && (
+              <Box className="d-flex align-items-center">
+                <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+                  {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+                </span>
+                {!isOffline && allowedToEdit && !quotationApproved && (
+                  <HtmlTooltip title="Add ">
+                    <IconButton
+                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                      size="small"
+                      color="primary"
+                    >
+                      <Add fontSize="small" style={{ fontSize: 17 }} />
+                    </IconButton>
+                  </HtmlTooltip>
+                )}
+              </Box>
             )}
           </div>
         )
@@ -256,13 +259,14 @@ const Productpackage = ({
             {allowedToEdit || !quotationApproved ? (
               row.original.hideSelection ? (
                 <HtmlTooltip
-                  title={row.original?.assetQty
-                    ? row?.original?.productDetail?.serializedProduct
-                      ? 'Assets/Serial Numbers is already assigned'
-                      : 'Inventory/Serial Numbers is already assigned'
-                    : row.original?.status
-                      ? rentalManagementMessage.loadingAlreadyCreated
-                      : ''
+                  title={
+                    row.original?.assetQty
+                      ? row?.original?.productDetail?.serializedProduct
+                        ? 'Assets/Serial Numbers is already assigned'
+                        : 'Inventory/Serial Numbers is already assigned'
+                      : row.original?.status
+                        ? rentalManagementMessage.loadingAlreadyCreated
+                        : ''
                   }
                 >
                   <span>
@@ -338,16 +342,17 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.manualEntry
-            ? parent.detail
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
-        }`;
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.manualEntry
+              ? parent.detail
+              : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -364,9 +369,10 @@ const Productpackage = ({
       }
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
-        : nonSerializeAsset?.filter((e) => e._id === parent._id).length + data?.nonSerializedInventory?.filter(d => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
-      parent.hideSelection = parent?.assetQty > 0 ||
-        data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
+        : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
+          data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+      parent.hideSelection =
+        parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired);
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage;
@@ -388,14 +394,15 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.product
+              ? _subRow.productDetail?.productName
+              : ''
+      } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -500,7 +507,7 @@ const Productpackage = ({
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchData();
         if ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced]?.includes(rentalManagementData?.status)) {
-          fetchRentalManagementData()
+          fetchRentalManagementData();
         }
         setAddingProducts(false);
         setPriceDataDialog({ open: false, material: null });
@@ -770,7 +777,7 @@ const Productpackage = ({
         >
           {`Add Existing ${routes.serializedAsset.title}`}
         </MenuItem>
-        {costFields?.filter(f => f?.isRead)?.length > 0 && (
+        {costFields?.filter((f) => f?.isRead)?.length > 0 && (
           <MenuItem
             onClick={() => {
               setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
