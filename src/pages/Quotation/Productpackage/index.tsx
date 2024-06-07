@@ -3,7 +3,6 @@ import Add from '@material-ui/icons/Add';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { isArray, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -40,6 +39,7 @@ import PriceRequestDialog from './PriceRequestDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -139,7 +139,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {row.original.type === MATERIAL_TYPE.serializedAsset || !allowedToEdit ? (
               <p>{row.original?.detail}</p>
             ) : (
@@ -154,53 +154,49 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
               </p>
             )}
             {row.original?.subRows?.length ? (
-              <Box ml={1}>
+              <>
                 <span>({row.original?.subRows?.length})</span>
-              </Box>
+              </>
             ) : null}
             {allowedToEdit && ![MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
               quotationData?.type === QUOTATION_TYPE.fieldJob &&
                 row.original.type === MATERIAL_TYPE.product ? null :
-                <Box ml={1}>
-                  <HtmlTooltip title="Add ">
-                    <IconButton
-                      onClick={(event) =>
-                        setAddchildDialog({
-                          open: true,
-                          parentId: row.original?._id,
-                          parentType: row.original.type,
-                          serializedProduct: row.original?.serializedProduct,
-                          top: event.clientY,
-                          bottom: event.clientX
-                        })
-                      }
-                      size="small"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
+                <HtmlTooltip title="Add ">
+                  <IconButton
+                    onClick={(event) =>
+                      setAddchildDialog({
+                        open: true,
+                        parentId: row.original?._id,
+                        parentType: row.original.type,
+                        serializedProduct: row.original?.serializedProduct,
+                        top: event.clientY,
+                        bottom: event.clientX
+                      })
+                    }
+                    size="small"
+                  >
+                    <Add color="disabled" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(
-                      `${row.original.type === MATERIAL_TYPE.serializedAsset
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === MATERIAL_TYPE.product
-                          ? routes.productDetail.path
-                          : row.original.type === MATERIAL_TYPE.package
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
-                      }/${row.original.materialId}`
-                    );
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${row.original.type === MATERIAL_TYPE.serializedAsset
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === MATERIAL_TYPE.product
+                        ? routes.productDetail.path
+                        : row.original.type === MATERIAL_TYPE.package
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
+                    }/${row.original.materialId}`
+                  );
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             )}
           </div>
         )
