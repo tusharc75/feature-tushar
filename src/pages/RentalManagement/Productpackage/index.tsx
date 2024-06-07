@@ -34,7 +34,7 @@ import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AssetAvailability from '../AssetAvailability';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
-import Aaaa from 'src/pages/RentalManagement/Productpackage/Aaaa';
+import AddExistingProductInventory from 'src/pages/RentalManagement/Productpackage/AddExistingProductInventory';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Productpackage = ({
@@ -341,14 +341,14 @@ const Productpackage = ({
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail
-            ? parent.serviceDetail?.serviceName
+        ? parent.serviceDetail
+          ? parent.serviceDetail?.serviceName
+          : parent.packageDetail?.packageName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.manualEntry
+            ? parent.detail
             : parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.manualEntry
-              ? parent.detail
-              : parent.packageDetail?.packageName
         }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
@@ -392,12 +392,12 @@ const Productpackage = ({
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow.packageDetail?.packageName
-            : _subRow.type === MATERIAL_TYPE.product
-              ? _subRow.productDetail?.productName
-              : ''
+        ? _subRow.serviceDetail?.serviceName
+        : _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : ''
         } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
@@ -949,7 +949,7 @@ const Productpackage = ({
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (
-        <Aaaa
+        <AddExistingProductInventory
           type={addExistingProductDialog.type}
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
           rentalManagementData={rentalManagementData}

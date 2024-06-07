@@ -14,7 +14,7 @@ import routes from "src/components/Helpers/Routes";
 import SearchBox from "src/components/Helpers/SearchBox";
 import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid } from "src/constants/helpers";
 
-const Aaaa = ({ type, renderedFrom, rentalManagementData, isAddingProducts, handleClose, addProduct }) => {
+const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData, isAddingProducts, handleClose, addProduct }) => {
 
 	const toastConfig = useContext(CustomToastContext);
 
@@ -240,6 +240,7 @@ const Aaaa = ({ type, renderedFrom, rentalManagementData, isAddingProducts, hand
 						open={true}
 						message="You want to Seperate packages for all quantity ?"
 						onOk={() => {
+							setShowConfirmationDialog(false);
 							const data: any = []
 							selectedRecords?.forEach(r => {
 								for (let i = 0; i < r?.qty; i++) {
@@ -263,4 +264,4 @@ const Aaaa = ({ type, renderedFrom, rentalManagementData, isAddingProducts, hand
 	)
 }
 
-export default Aaaa;
+export default AddExistingProductInventory;
