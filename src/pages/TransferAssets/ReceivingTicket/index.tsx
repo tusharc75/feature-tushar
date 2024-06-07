@@ -23,8 +23,8 @@ import {
 } from 'src/constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import InfoIcon from '@material-ui/icons/Info';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { FiExternalLink } from 'react-icons/fi';
 
 interface ReceivingGridProps {
   permissions: any;
@@ -79,7 +79,7 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
             o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
                 <div
-                  className="d-flex gap-2 align-items-center"
+                className="flex items-center gap-2"
                   style={{
                     backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
@@ -89,16 +89,14 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
                   }}
                 >
                   <p> {row.original?.assetNumber}</p>
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
                   {row?.original?.isReplaced && (
                     <Box>
                       <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
@@ -113,18 +111,16 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
           } else if (o?.accessor === 'product') {
             o.cell = ({ row }) =>
               row?.original?.product ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="flex items-center gap-2">
                   <p> {row.original?.product}</p>
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.productDetail.path}/${row.original?.productId}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
                 </div>
               ) : (
                 <NoDataCell />
