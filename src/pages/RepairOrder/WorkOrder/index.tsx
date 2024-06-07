@@ -2,11 +2,11 @@ import { Box, Grid, IconButton, MenuItem, TextField } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 import { capitalize, map, orderBy, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FiExternalLink } from 'react-icons/fi';
 import { AutoCompleteWorkOrder, PostWorkIcon, PreWorkIcon } from 'src/assets/svg/svgIcons';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
@@ -154,7 +154,7 @@ const WorkOrder = ({
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {row.original.type === 'service' && row?.original?.status !== WORKORDER_SERVICE_STATUS.completed ? (
               <p
                 onClick={() => {
@@ -168,31 +168,9 @@ const WorkOrder = ({
             ) : (
               <p className="text-truncate">{row.original?.detail}</p>
             )}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === MATERIAL_TYPE.service) {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-            {row.original?.subRows?.length ? (
-              <Box ml={1} className="d-flex align-items-center">
-                {`(${row.original?.subRows?.length})`}
-              </Box>
-            ) : null}
+
             {user?.brandPolicy?.servicePrePost && row.original.type === 'service' && (
-              <Box ml={1}>
+              <>
                 {row?.original?.preWork ? (
                   <HtmlTooltip title="Pre Work Service">
                     <span>
@@ -206,8 +184,25 @@ const WorkOrder = ({
                     </span>
                   </HtmlTooltip>
                 )}
-              </Box>
+              </>
             )}
+            {row.original?.subRows?.length ? <span>{`(${row.original?.subRows?.length})`}</span> : null}
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === MATERIAL_TYPE.service) {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.product) {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -217,7 +212,7 @@ const WorkOrder = ({
         width: 200,
         Cell: ({ row }) =>
           row.original['workOrder'] ? (
-            <div className="d-flex gap-2 align-items-center">
+            <div className="d-flex align-items-center gap-2">
               <p className="text-truncate">{row.original['workOrderNumber']}</p>
               <IconButton
                 size="small"
@@ -225,7 +220,7 @@ const WorkOrder = ({
                   window.open(`${routes.workOrderDetail.path}/${row.original['workOrder']._id}`);
                 }}
               >
-                <OpenInNewIcon fontSize="small" color={'primary'} />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </div>
           ) : (
@@ -238,7 +233,7 @@ const WorkOrder = ({
         width: 200,
         Cell: ({ row }) =>
           row.original.productName ? (
-            <div className="d-flex gap-2 align-items-center">
+            <div className="d-flex align-items-center gap-2">
               <p className="text-truncate" title={row.original?.productName}>
                 {row.original.productName}
               </p>
@@ -565,14 +560,15 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent?.serializedAssetDetail?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.assetNumber
+              : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -586,14 +582,15 @@ const WorkOrder = ({
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail?.status
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.status
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+      parent.status = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.status
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.status
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
@@ -602,8 +599,10 @@ const WorkOrder = ({
         parent.serviceStatus = parent.workOrderStatus;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent.subRows?.every((e) => e.type === MATERIAL_TYPE.service && e.status === WORKORDER_SERVICE_STATUS.pending)
-        && ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(parent?.workOrder?.status)) {
+      if (
+        parent.subRows?.every((e) => e.type === MATERIAL_TYPE.service && e.status === WORKORDER_SERVICE_STATUS.pending) &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(parent?.workOrder?.status)
+      ) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
@@ -962,7 +961,8 @@ const WorkOrder = ({
     setSubmitting(true);
     const ids = selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canComplete)?.map((e) => e?.workOrder?._id);
     const data: any = { status: WORK_ORDER_STATUS.completed, ids: ids };
-    axiosInstance().put(`${workOrder.api}/update-multiple-status`, data)
+    axiosInstance()
+      .put(`${workOrder.api}/update-multiple-status`, data)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -981,7 +981,9 @@ const WorkOrder = ({
 
   const reOpenWorkOrders = () => {
     setSubmitting(true);
-    const ids = selectedRecords?.filter((d) => d.type === MATERIAL_TYPE.serializedAsset && d?.workOrderStatus === WORK_ORDER_STATUS.completed)?.map((e) => e?.workOrder?._id);
+    const ids = selectedRecords
+      ?.filter((d) => d.type === MATERIAL_TYPE.serializedAsset && d?.workOrderStatus === WORK_ORDER_STATUS.completed)
+      ?.map((e) => e?.workOrder?._id);
     axiosInstance()
       .put(`${workOrder.api}/re-open`, { ids: ids })
       .then(({ data }) => {
@@ -1006,7 +1008,7 @@ const WorkOrder = ({
       <>
         {allowedToEdit && (
           <Autocomplete
-            className="max-w-[400px] flex-grow min-w-[200px]"
+            className="min-w-[200px] max-w-[400px] flex-grow"
             options={serviceOptions}
             getOptionLabel={(option) => option?.optionLabel || ''}
             size="small"
@@ -1120,7 +1122,8 @@ const WorkOrder = ({
             }}
             disabled={
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder) ? false
+              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
+                ? false
                 : true
             }
           >
@@ -1151,8 +1154,8 @@ const WorkOrder = ({
           <MenuItem
             disabled={
               selectedRecords?.length &&
-                selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
-                !isWorkOrderCompleted(selectedRecords)
+              selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
+              !isWorkOrderCompleted(selectedRecords)
                 ? false
                 : true
             }
@@ -1163,24 +1166,26 @@ const WorkOrder = ({
             Revert Service
           </MenuItem>
         )}
-        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0
-          && selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canComplete) &&
-          <MenuItem
-            onClick={() => {
-              setShowCloseReopenConfirmation({ open: true, type: 'Close' });
-            }}
-          >
-            Close Work Order(s)
-          </MenuItem>}
-        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0
-          && selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canReopen) &&
-          <MenuItem
-            onClick={() => {
-              setShowCloseReopenConfirmation({ open: true, type: 'Re-Open' });
-            }}
-          >
-            Re-Open Work Order(s)
-          </MenuItem>}
+        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canComplete) && (
+            <MenuItem
+              onClick={() => {
+                setShowCloseReopenConfirmation({ open: true, type: 'Close' });
+              }}
+            >
+              Close Work Order(s)
+            </MenuItem>
+          )}
+        {selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length > 0 &&
+          selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canReopen) && (
+            <MenuItem
+              onClick={() => {
+                setShowCloseReopenConfirmation({ open: true, type: 'Re-Open' });
+              }}
+            >
+              Re-Open Work Order(s)
+            </MenuItem>
+          )}
         <MenuItem
           onClick={() => {
             setIsBulkEdit(true);
@@ -1328,12 +1333,13 @@ const WorkOrder = ({
             <ConfirmationDialog
               okBtnLoading={isSubmitting}
               open={showServiceActionConfirmBox.open}
-              message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-                ? 'complete'
-                : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                  ? 'skip'
-                  : 'revert'
-                } this Service(s)`}
+              message={`Are you sure you want to ${
+                showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+                  ? 'complete'
+                  : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                    ? 'skip'
+                    : 'revert'
+              } this Service(s)`}
               onClose={() => {
                 setShowServiceActionConfirmBox({ open: false, action: '' });
               }}
@@ -1372,12 +1378,13 @@ const WorkOrder = ({
                     return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork, parentId: d.workOrder._id };
                   }) || []
               }
-              title={`Arrange Services (${selectedRecords
-                ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
-                ?.map((d) => {
-                  return d.serializedAssetDetail.assetNumber;
-                })[0]
-                })`}
+              title={`Arrange Services (${
+                selectedRecords
+                  ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
+                  ?.map((d) => {
+                    return d.serializedAssetDetail.assetNumber;
+                  })[0]
+              })`}
               handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
               handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}
               loading={isSubmitting}
@@ -1418,10 +1425,9 @@ const WorkOrder = ({
               }}
               onOk={() => {
                 if (showCloseReopenConfirmation.type === 'Close') {
-                  closeWorkOrders()
-                }
-                else {
-                  reOpenWorkOrders()
+                  closeWorkOrders();
+                } else {
+                  reOpenWorkOrders();
                 }
               }}
               okBtnLoading={isSubmitting}

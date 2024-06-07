@@ -1,10 +1,10 @@
 import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { capitalize, sortBy, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FiExternalLink } from 'react-icons/fi';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
@@ -94,7 +94,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {!(allowedToEdit && (row.original.type === 'product' || row.original.type === 'package')) ? (
               <p className="text-truncate"> {row.original.detail}</p>
             ) : (
@@ -109,78 +109,74 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
                 {row.original.detail}
               </p>
             )}
-            <Box ml={1} className="d-flex align-items-center">
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
+            {allowedToEdit && row.original.type !== 'serializedAsset' && (
+              <HtmlTooltip
+                title={
+                  row.original.type === 'package'
+                    ? `Add Existing Product`
+                    : row.subRows?.length !== row.original.qty
+                      ? `Add`
+                      : `Can't add more asset!`
+                }
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
-            <Box ml={1} className="d-flex align-items-center">
+                <IconButton
+                  onClick={(event) => {
+                    if (row.original.qty !== row.subRows?.length && row.original.type === 'product') {
+                      setProducts([
+                        {
+                          parentId: row.original._id,
+                          product: row.original.materialId,
+                          qty: row.original.qty - (row.subRows?.length || 0),
+                          productName: row.original?.detail
+                        }
+                      ]);
+                      setAddchildDialog({
+                        open: true,
+                        parentId: row.original?._id,
+                        top: event.clientY,
+                        bottom: event.clientX,
+                        productId: row?.original?.productDetail._id,
+                        productCategory: row?.original?.productDetail?.productCategory
+                      });
+                    }
+                    if (row.original.type !== 'product') {
+                      setAddExistingProductDialog({
+                        open: true,
+                        type: 'product',
+                        parentId: row.original?._id,
+                        existing: false,
+                        productId: null,
+                        productCategory: null
+                      });
+                    }
+                  }}
+                  size="small"
+                >
+                  <Add color="disabled" fontSize="small" />
+                </IconButton>
+              </HtmlTooltip>
+            )}
+            {row.original?.subRows?.length > 0 && (
               <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
                 {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
               </span>
-              {allowedToEdit && row.original.type !== 'serializedAsset' && (
-                <Box ml={1}>
-                  <HtmlTooltip
-                    title={
-                      row.original.type === 'package'
-                        ? `Add Existing Product`
-                        : row.subRows?.length !== row.original.qty
-                          ? `Add`
-                          : `Can't add more asset!`
-                    }
-                  >
-                    <IconButton
-                      onClick={(event) => {
-                        if (row.original.qty !== row.subRows?.length && row.original.type === 'product') {
-                          setProducts([
-                            {
-                              parentId: row.original._id,
-                              product: row.original.materialId,
-                              qty: row.original.qty - (row.subRows?.length || 0),
-                              productName: row.original?.detail
-                            }
-                          ]);
-                          setAddchildDialog({
-                            open: true,
-                            parentId: row.original?._id,
-                            top: event.clientY,
-                            bottom: event.clientX,
-                            productId: row?.original?.productDetail._id,
-                            productCategory: row?.original?.productDetail?.productCategory
-                          });
-                        }
-                        if (row.original.type !== 'product') {
-                          setAddExistingProductDialog({
-                            open: true,
-                            type: 'product',
-                            parentId: row.original?._id,
-                            existing: false,
-                            productId: null,
-                            productCategory: null
-                          });
-                        }
-                      }}
-                      size="small"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
-              )}
-            </Box>
+            )}
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === 'service') {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'serializedAsset') {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -189,22 +185,20 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
         Header: 'Product',
         width: 200,
         Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="d-flex align-items-center gap-2">
             {row.original?.productName ? (
               row.original?.productId ? (
-                <>
+                <div className="flex items-center gap-2">
                   <p className="text-truncate">{row.original?.productName}</p>
-                  <Box ml={1}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                      }}
-                    >
-                      <OpenInNewIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </Box>
-                </>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
               ) : (
                 row.original?.productName
               )
@@ -296,14 +290,15 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.package
-        ? parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.assetNumber
-            : ''
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.package
+          ? parent.packageDetail?.packageName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail.assetNumber
+              : ''
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -345,14 +340,15 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
     let canDelete = subRows?.find((e) => e.workOrder) ? false : true;
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.package
-        ? _subRow.packageDetail?.packageName
-        : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow.serializedAssetDetail.assetNumber
-            : ''
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.package
+          ? _subRow.packageDetail?.packageName
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.serializedAssetDetail.assetNumber
+              : ''
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription || ''
