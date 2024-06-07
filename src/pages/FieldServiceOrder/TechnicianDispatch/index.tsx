@@ -1,6 +1,5 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendIcon from '@material-ui/icons/Send';
 import moment from 'moment';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -16,6 +15,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { dateTimeFormat, fieldServiceOrder } from '../../../constants/helpers';
 import DispatchMaterial from './DispatchMaterial';
+import { FiExternalLink } from 'react-icons/fi';
 
 const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -47,7 +47,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {row.original?.service?.serviceName}
             <IconButton
               size="small"
@@ -56,7 +56,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
                 window.open(`${routes.serviceMasterDetail.path}/${row.original?.service?._id}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           </div>
         )
@@ -69,7 +69,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {`${row.original?.technician?.firstName} ${row.original?.technician?.lastName} - (${row.original?.technician?.employeeNumber})`}
             <IconButton
               size="small"
@@ -78,7 +78,7 @@ const TechnicianDispatch = ({ serviceOrderData, setNextStep, renderedFrom, stepF
                 window.open(`${routes.employeeMasterDetail.path}/${row.original?.technician?._id}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           </div>
         )

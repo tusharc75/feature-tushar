@@ -11,17 +11,17 @@ import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductD
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { CHILD_RESOURCE, fieldServiceOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, fieldServiceOrder } from '../../../constants/helpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { BiChevronDown } from 'react-icons/bi';
 import { startCase } from 'lodash';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import AddOnDialog from './AddOnDialog';
 import AddIcon from '@material-ui/icons/Add';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -82,7 +82,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {row.original.type === 'Manual Entry' ? (
               <p
                 onClick={() => {
@@ -108,16 +108,16 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
                 size="small"
                 style={{ marginLeft: '10px' }}
                 onClick={() => {
-                  if (row.original.type === 'service') {
+                  if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
                   } else {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>
