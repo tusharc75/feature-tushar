@@ -7,7 +7,7 @@ import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, checkIsAllowedToEdit, dateFormat, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, checkIsAllowedToEdit, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -18,13 +18,12 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { camelCase, startCase } from 'lodash';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import moment from 'moment';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useData } from 'src/StateProvider/Provider';
+import { FiExternalLink } from 'react-icons/fi';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
 
@@ -110,7 +109,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           width: 300,
           sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-1">
               <p className="text-truncate" title={row.original?.detail}>
                 {row.original?.detail}
               </p>
@@ -130,7 +129,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                       }
                     }}
                   >
-                    <OpenInNewIcon fontSize="small" color="primary" />
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
                 </Box>
               )}
