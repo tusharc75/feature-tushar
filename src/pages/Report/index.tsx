@@ -1,6 +1,6 @@
 import React from 'react';
-import { useParams, useHistory } from 'react-router-dom';
-import { Grid, useTheme, Button, Box } from '@material-ui/core';
+import { useParams } from 'react-router-dom';
+import { Grid, Button, Box } from '@material-ui/core';
 import { camelCase, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
@@ -12,11 +12,10 @@ import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { prepareDataForGrid, gridLoadingTimeout, downloadExcel, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
+import { prepareDataForGrid, gridLoadingTimeout, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from './ReportFilters';
-
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import DialogContent from '@material-ui/core/DialogContent';
 import Dialog from '@material-ui/core/Dialog';
@@ -28,6 +27,7 @@ import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 let cancelTokenSource = null;
 
 const Report = () => {
+
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -64,23 +64,24 @@ const Report = () => {
     setLoadingColumns(true);
     const {
       data: { data }
-    }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}`);
+    }: any = await axiosInstance().get(`/field?resource=${resourceStartCase}&view=true`);
 
-    if (resourceStartCase === 'Serialized Asset') {
+    if (resourceStartCase === sidebarResource.serializedAsset) {
       const {
         data: { data: lookupResource }
-      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=Customer Account,Supplier Account`);
+      } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${sidebarResource.customerAccount},${sidebarResource.supplierAccount}`);
       if (lookupResource) {
         data?.forEach((e) => {
           if (e?.fieldData?.fieldName === 'currentOwner') {
-            e.fieldData.lookup = true;
-            e.fieldData.option = [...lookupResource?.[`Customer Account`], ...lookupResource?.[`Supplier Account`]];
+            e.fieldData.lookup = false;
+            e.fieldData.option = [...lookupResource?.[sidebarResource.customerAccount], ...lookupResource?.[sidebarResource.supplierAccount]];
           }
         });
       }
     }
+
     const resourceColumns = [...data];
-    if (resourceStartCase === 'Purchase Order') {
+    if (resourceStartCase === sidebarResource.purchaseOrder) {
       resourceColumns.push({
         fieldData: {
           _id: '630dc2429ec41861052355a9',
@@ -118,7 +119,7 @@ const Report = () => {
       data,
       routes[`${resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase}Detail`].path
     );
-    if (resourceStartCase === 'Quotation') {
+    if (resourceStartCase === sidebarResource.quotation) {
       newColumns.push({
         accessor: 'versionComment',
         Header: 'Version Comment',
@@ -132,7 +133,7 @@ const Report = () => {
       });
     }
     columns = [...newColumns, ...getStaticFields()];
-    if (resourceStartCase === 'Purchase Order') {
+    if (resourceStartCase === sidebarResource.purchaseOrder) {
       columns.splice(1, 0, {
         accessor: 'poAmount',
         Header: 'Purchase Order Amount',
@@ -144,7 +145,7 @@ const Report = () => {
         )
       });
     }
-    if (resourceStartCase === 'Invoice') {
+    if (resourceStartCase === sidebarResource.invoice) {
       const extraColumns = [
         {
           accessor: 'totalPrice',
@@ -171,7 +172,7 @@ const Report = () => {
       ];
       columns = [...columns, ...extraColumns];
     }
-    if (resourceStartCase === 'Work Order') {
+    if (resourceStartCase === sidebarResource.workOrder) {
       columns.push({
         accessor: 'totalConsumablesCost',
         Header: 'Total Consumables Cost',
@@ -216,8 +217,6 @@ const Report = () => {
   }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
   React.useEffect(() => {
-    // const selectedResourceNames = selectedResources?.map((field) => field.fieldName);
-    // const selectedDataNames = Object.keys(selectedData);
     if (!selectedData) return;
     setSelectedData((prevState: any) => {
       const dataKeys = Object.keys(prevState);
@@ -370,46 +369,6 @@ const Report = () => {
     return `?${filterQuery}`;
   };
 
-  // const exportData = () => {
-  //   if (isExporting) return;
-  //   toastConfig.setToastConfig({
-  //     open: true,
-  //     message: 'Please wait exporting data',
-  //     type: 'info'
-  //   });
-  //   let newColumns = columns.map((col) => col.accessor);
-  //   if (colState.length) {
-  //     newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor);
-  //   }
-  //   setExporting(true);
-  //   let filterQuery = getFilter(true);
-  //   let api = null;
-  //   if (resourceCamelCase === 'quotes') {
-  //     api = `/report/quote-builder/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
-  //   } else {
-  //     api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
-  //   }
-
-  //   axiosInstance()
-  //     .get(api, {
-  //       responseType: 'arraybuffer'
-  //     })
-  //     .then((res) => {
-  //       const fileName = res.headers['content-disposition'].split('filename=')[1];
-  //       downloadExcel(res.data, fileName);
-  //       setExporting(false);
-  //       toastConfig.setToastConfig({
-  //         open: true,
-  //         message: 'Successfully Exported',
-  //         type: 'success'
-  //       });
-  //     })
-  //     .catch((err) => {
-  //       setExporting(false);
-  //       toastConfig.setToastConfig(err);
-  //     });
-  // };
-
   const getApi = () => {
     let newColumns = columns.map((col) => col.accessor);
     if (colState.length) {
@@ -422,7 +381,6 @@ const Report = () => {
     } else {
       api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
     }
-
     return api
   };
 
@@ -443,16 +401,16 @@ const Report = () => {
               <Grid container direction="row">
                 <Grid item xs={12} sm={12}>
                   <Grid container justifyContent="flex-end">
-                    {showGrid && (                        
-                        <AsynImportExportMenu
-                          resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
-                          subResource={'report'}
-                          permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
-                          module={''}
-                          api={getApi()}
-                          afterImportCompleted={() => {}}
-                          onlyExport={true}
-                        />
+                    {showGrid && (
+                      <AsynImportExportMenu
+                        resource={sidebarResource[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+                        subResource={'report'}
+                        permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
+                        module={''}
+                        api={getApi()}
+                        afterImportCompleted={() => { }}
+                        onlyExport={true}
+                      />
                     )}
                   </Grid>
                 </Grid>
@@ -496,7 +454,6 @@ const Report = () => {
                 fullWidth
                 onClose={(e, reason) => {
                   if (reason !== 'backdropClick') {
-                    // history.push(routes.reports.path);
                     setShowGrid(true);
                     dispatch({ type: 'onlyFilter', filters: {} });
                   }
@@ -505,7 +462,6 @@ const Report = () => {
                 <CustomDialogHeader
                   title={`Set Filters`}
                   onClose={() => {
-                    // history.push(routes.reports.path);
                     setShowGrid(true);
                     dispatch({ type: 'onlyFilter', filters: {} });
                   }}
