@@ -389,7 +389,7 @@ const WorkOrderDetails = () => {
       id: 'Close',
       type: 'button',
       ripple: true,
-      isVisible: Boolean(allowedToEdit && workOrderData?.canComplete && workOrderData?.status !== WORK_ORDER_STATUS.completed),
+      isVisible: Boolean(allowedToEdit && workOrderData?.canComplete),
       onClick: () => workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length
         ? setOpenTotalCostDialog(true) : updateStatus(WORK_ORDER_STATUS.completed),
       iconForMobile: <FaDoorClosed />,

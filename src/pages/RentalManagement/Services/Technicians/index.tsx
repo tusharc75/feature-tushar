@@ -4,7 +4,7 @@ import CommonSkeleton from '../../../../components/Helpers/CommonSkeleton';
 import routes from '../../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
+import { prepareDataForGrid, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -18,16 +18,14 @@ import AssignEmployeeDialog from 'src/components/AssignRolesDialog/AssignEmploye
 import { displayDate } from 'src/constants/helpers';
 import { Add } from '@material-ui/icons';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomOfflineContext } from '../../../../StateProvider/OfflineContext/OfflineContext';
 import RentalTechnicianQtyDialog from './RentalTechnicianQtyDialog';
 import { camelCase } from 'lodash';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { calculatePrice, fetch_rental_technician_fields } from 'src/components/RentalManagment/helper';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, services }) => {
-
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_technician`;
 
@@ -76,7 +74,12 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         fetchData();
         if (saveAndNext) {
           const rowIndex = dataRows?.findIndex((d) => d._id === rows[0]?._id);
-          setTechnicianEdit({ open: true, data: dataRows[rowIndex + 1], bulkedit: false, showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false });
+          setTechnicianEdit({
+            open: true,
+            data: dataRows[rowIndex + 1],
+            bulkedit: false,
+            showSaveAndNext: rowIndex + 1 < dataRows?.length - 1 ? true : false
+          });
         } else {
           setTechnicianEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
         }
@@ -102,9 +105,9 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         Header: 'Name',
         width: 250,
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {isOffline || !allowedToEdit || data?.length === 0 ? (
-              <p> {row.original.technicianName}</p>
+              <p>{row.original.technicianName}</p>
             ) : (
               <p
                 onClick={() => {
@@ -117,14 +120,14 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
               </p>
             )}
             {!isOffline && (
-              <Box ml={1} className="d-flex align-items-center">
+              <Box>
                 <IconButton
                   size="small"
                   onClick={() => {
                     window.open(`${routes.employeeMasterDetail.path}/${row.original?.technicianId}`);
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color="primary" />
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
               </Box>
             )}
@@ -184,40 +187,49 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
         disableSortBy: true,
         canDrag: false,
         Cell: ({ row, table }) => {
-          return <>
-            {data?.length ?
-              <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  disabled={isOffline || !allowedToEdit ? true : false}
-                  onClick={() => {
-                    openTechnician(row, table.getRowModel().rows);
-                  }}
-                >
-                  <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
-                </IconButton>
-              </HtmlTooltip> : null}
-            {allowedToEdit ? (
-              <HtmlTooltip title={'Delete'}>
-                <span>
+          return (
+            <>
+              {data?.length ? (
+                <HtmlTooltip title={isOffline || !allowedToEdit ? '' : 'Edit'}>
                   <IconButton
                     size="small"
                     aria-label="Details"
+                    disabled={isOffline || !allowedToEdit ? true : false}
                     onClick={() => {
-                      setDeleteData([{ id: row.original._id }]);
+                      openTechnician(row, table.getRowModel().rows);
                     }}
                   >
-                    <DeleteIcon fontSize="small" color={'error'} />
+                    <EditIcon fontSize="small" color={isOffline || !allowedToEdit ? 'disabled' : 'primary'} />
                   </IconButton>
-                </span>
-              </HtmlTooltip>
-            ) : null}
-          </>
+                </HtmlTooltip>
+              ) : null}
+              {allowedToEdit ? (
+                <HtmlTooltip title={'Delete'}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="Details"
+                      onClick={() => {
+                        setDeleteData([{ id: row.original._id }]);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" color={'error'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
+              ) : null}
+            </>
+          );
         }
       }
     ];
-    const newColumns = generateColumns(renderedFrom, data?.filter(f => f?.isRead), null, false, rentalManagementData?.currency);
+    const newColumns = generateColumns(
+      renderedFrom,
+      data?.filter((f) => f?.isRead),
+      null,
+      false,
+      rentalManagementData?.currency
+    );
     setAllFields(data);
     setColumns([...column, ...newColumns]);
   };
@@ -306,26 +318,30 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       }
       technician.push(element);
     });
-   
-      const priceData = await calculatePrice(rentalManagementData, technician) || [];
-      AddMaterial(technician, priceData);
+
+    const priceData = (await calculatePrice(rentalManagementData, technician)) || [];
+    AddMaterial(technician, priceData);
   };
 
   const AddMaterial = async (technician, priceData) => {
     const tempMaterial = [...technician];
     tempMaterial.forEach((element) => {
       const rateResult = priceData?.filter((e) => e.materialId === element.materialId && e.materialType === element.type);
-       if (rateResult.length && rateResult[0].mrp) {
+      if (rateResult.length && rateResult[0].mrp) {
         const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
         element[priceFieldName] = rateResult[0].mrp;
         element['pricingCondition'] = rateResult[0].conditionId;
         element['pricingMethod'] = rateResult[0].pricingMethod?.trim();
-        const calValues = autoCalculateSpecificFields({ [priceFieldName]: rateResult[0].mrp, pricingMethod: element.pricingMethod }, element, allFields);
+        const calValues = autoCalculateSpecificFields(
+          { [priceFieldName]: rateResult[0].mrp, pricingMethod: element.pricingMethod },
+          element,
+          allFields
+        );
         Object.assign(element, calValues);
       }
-      delete element.materialId
+      delete element.materialId;
     });
-  
+
     axiosInstance()
       .post(`${rentalManagement.api}/technician`, { technician: tempMaterial })
       .then(({ data }) => {
@@ -340,7 +356,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   return (
     <>
@@ -452,7 +468,11 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
             setTechnicianEdit({ open: false, data: null, bulkedit: false, showSaveAndNext: false });
             setIsBulkEdit(false);
           }}
-          technicianData={{ ...technicianEdit.data, pricingCondition: technicianEdit.data?.pricingConditionId, competence: technicianEdit.data?.competenceId }}
+          technicianData={{
+            ...technicianEdit.data,
+            pricingCondition: technicianEdit.data?.pricingConditionId,
+            competence: technicianEdit.data?.competenceId
+          }}
           rentalManagementData={rentalManagementData}
           handleUpdate={handleSaveData}
           loadingEdit={isUpdating}
