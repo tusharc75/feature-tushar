@@ -13,12 +13,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CircularProgress, Typography } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
-import { isEqual } from 'lodash';
+import { isArray, isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { read, utils, writeFile } from 'xlsx';
 
-export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, ids, setAssetsData }) {
+export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, ids, setAssetsData, staticLookUpFilters = {} }) {
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -61,6 +61,11 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     }
     values['assetData'] = tempAssetData;
     setDecimalFields(decimalField);
+    fieldsDataForUpdate?.forEach((element) => {
+      if (element?.lookup && staticLookUpFilters[element?.fieldName] && isArray(staticLookUpFilters[element?.fieldName])) {
+        element.option = element.option?.filter((ele) => staticLookUpFilters[element?.fieldName]?.includes(ele.optionValue));
+      }
+    })
     setInitialData({
       fields: fieldsDataForUpdate,
       values: values
