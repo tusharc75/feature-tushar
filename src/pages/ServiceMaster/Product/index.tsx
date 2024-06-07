@@ -16,8 +16,8 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { FiExternalLink } from 'react-icons/fi';
 
 function Product({ id }) {
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -125,7 +125,7 @@ function Product({ id }) {
             width: 100,
             Cell: ({ row }) =>
               row?.original?.productName ? (
-                <div className="d-flex gap-2 align-items-center">
+                <div className="flex items-center gap-2">
                   <p className="text-truncate">{row.original.productName}</p>
                   <IconButton
                     size="small"
@@ -133,7 +133,7 @@ function Product({ id }) {
                       window.open(`${routes.productDetail.path}/${row.original.product}`);
                     }}
                   >
-                    <OpenInNewIcon fontSize="small" color="primary" />
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
                 </div>
               ) : (

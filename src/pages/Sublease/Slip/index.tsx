@@ -6,13 +6,13 @@ import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, MATERIAL_TYPE, SUBLEASE_STATUS, sidebarResource, sublease } from 'src/constants/helpers';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import PreviewDownload from 'src/components/PreviewDownload';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateStatus }) {
   const toastConfig = useContext(CustomToastContext);
@@ -62,7 +62,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
         width: 200,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="flex items-center gap-2">
             <p className="text-truncate" title={row.original.detail}>
               {row.original.detail}
             </p>
@@ -79,7 +79,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             }
           </div>

@@ -1,5 +1,4 @@
 import { Box, Button, IconButton, MenuItem, useMediaQuery } from '@material-ui/core';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { AiFillEdit } from 'react-icons/ai';
@@ -17,6 +16,7 @@ import routes from '../../../components/Helpers/Routes';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { getObjKeysWithValues } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const QuoteBuilder = ({
   quotationData,
@@ -118,35 +118,33 @@ const QuoteBuilder = ({
         width: 300,
         disabled: true,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p className="text-truncate" title={row.original?.detail}>
               {row.original?.detail}
             </p>
             {row.original?.subRows?.length ? (
-              <Box ml={1}>
+              <>
                 <span>({row.original?.subRows?.length})</span>
-              </Box>
+              </>
             ) : null}
             {['product', 'service', 'package', 'serializedAsset']?.includes(row.original.type) && (
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(
-                      `${row.original.type === 'serializedAsset'
-                        ? routes.serializedAssetDetail.path
-                        : row.original.type === 'product'
-                          ? routes.productDetail.path
-                          : row.original.type === 'package'
-                            ? routes.packagesDetail.path
-                            : routes.serviceMasterDetail.path
-                      }/${row.original.materialId}`
-                    );
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(
+                    `${row.original.type === MATERIAL_TYPE.serializedAsset
+                      ? routes.serializedAssetDetail.path
+                      : row.original.type === MATERIAL_TYPE.product
+                        ? routes.productDetail.path
+                        : row.original.type === MATERIAL_TYPE.package
+                          ? routes.packagesDetail.path
+                          : routes.serviceMasterDetail.path
+                    }/${row.original.materialId}`
+                  );
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             )}
           </div>
         )

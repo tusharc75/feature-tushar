@@ -1,6 +1,5 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import InfoIcon from '@material-ui/icons/Info';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { groupBy, map, uniq } from 'lodash';
 import moment from 'moment';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
@@ -31,6 +30,7 @@ import {
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
+import { FiExternalLink } from 'react-icons/fi';
 
 interface LoadingGridProps {
   permissions: any;
@@ -122,7 +122,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
                 <div
-                  className="d-flex gap-2 align-items-center"
+                className="flex items-center gap-2"
                   style={{
                     backgroundColor: row?.original?.isReplaced
                       ? COLOUR_MASTER.replaceAssetColor.background
@@ -132,16 +132,14 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   }}
                 >
                   <p> {row.original?.assetNumber}</p>
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
                   {row?.original?.isReplaced && (
                     <Box>
                       <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
@@ -156,18 +154,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           } else if (o?.accessor === 'product') {
             o.cell = ({ row }) =>
               row?.original?.product ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="flex items-center gap-2">
                   <p> {row.original?.product}</p>
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.productDetail.path}/${row.original?.productId}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
                 </div>
               ) : (
                 <NoDataCell />
@@ -190,18 +186,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             width: 200,
             Cell: ({ row }) =>
               row?.original?.loadingTicket ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="flex items-center gap-2">
                   <p> {row?.original?.loadingTicket}</p>
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.deliveryTicketDetail.path}/${row.original?.loadingTicketId}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
                 </div>
               ) : (
                 <NoDataCell />

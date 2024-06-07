@@ -5,7 +5,6 @@ import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import HelpIcon from '@material-ui/icons/Help';
 import LayersIcon from '@material-ui/icons/Layers';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { groupBy, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -37,6 +36,7 @@ import {
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import RepairProcess from '../RepairProcess';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const SerializedAsset = ({
   repairJobData,
@@ -122,18 +122,16 @@ const SerializedAsset = ({
           Cell: ({ row }) => (
             <>
               {row.original.assetNumber ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="flex items-center gap-2">
                   <p className="text-truncate">{row.original.assetNumber}</p>
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
                 </div>
               ) : (
                 <NoDataCell />
