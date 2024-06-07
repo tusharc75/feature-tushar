@@ -41,7 +41,8 @@ const Services = ({
   allowedToEdit,
   quotationApproved,
   quotationStatus,
-  fetchRentalManagementData }: any) => {
+  fetchRentalManagementData
+}: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -90,7 +91,7 @@ const Services = ({
 
   const createColumns = () => {
     setColumns(null);
-    const data = [...allFields]?.filter(f => f?.isRead);
+    const data = [...allFields]?.filter((f) => f?.isRead);
     if (!allowedToEdit || quotationApproved) {
       data?.forEach((e) => {
         e.isColumnEditable = false;
@@ -194,7 +195,7 @@ const Services = ({
                   }
                 }}
               >
-                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>
@@ -456,7 +457,7 @@ const Services = ({
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
         fetchData();
         if ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced]?.includes(rentalManagementData?.status)) {
-          fetchRentalManagementData()
+          fetchRentalManagementData();
         }
         setSubmitting(false);
       })
