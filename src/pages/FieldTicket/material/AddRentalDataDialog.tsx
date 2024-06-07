@@ -1,5 +1,4 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -14,6 +13,7 @@ import { fetch_rental_product_fields } from 'src/components/RentalManagment/help
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { isMobile, isTablet } from 'react-device-detect';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { FiExternalLink } from 'react-icons/fi';
 
 const AddRentalDataDialog = ({
   onSuccess,
@@ -75,25 +75,23 @@ const AddRentalDataDialog = ({
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {row.original['detail'] ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
-            <Box pl={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original['type'] === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  }
-                  else if (row.original['type'] === MATERIAL_TYPE.serializedAsset) {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  } else if (row.original['type'] === MATERIAL_TYPE.package) {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original['type'] === MATERIAL_TYPE.product) {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                }
+                else if (row.original['type'] === MATERIAL_TYPE.serializedAsset) {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                } else if (row.original['type'] === MATERIAL_TYPE.package) {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
