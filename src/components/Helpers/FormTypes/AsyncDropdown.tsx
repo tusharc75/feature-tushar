@@ -13,7 +13,7 @@ interface Props {
   value: any;
   fieldLabel: string;
   fieldName: string;
-  required?: boolean;
+  required: boolean;
   onChange: (_:React.SyntheticEvent, value: any) => void;
 }
 

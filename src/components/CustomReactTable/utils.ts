@@ -280,7 +280,7 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
   ];
 
   try {
-    const req = await axiosInstance().get(`/field?resource=${resource}&view=true`);
+    const req = await axiosInstance().get(`/field?resource=${resource}`);
     const {
       data: { data }
     } = req;
@@ -434,7 +434,7 @@ export const createFilterModel = (formValues, coloums) => {
             filterModel.set(fieldName, {
               operator: 'OR',
               condition1: {
-                filter: formValues[fieldName]
+                filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
               }
             });
           }
