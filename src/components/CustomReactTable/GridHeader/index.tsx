@@ -91,7 +91,7 @@ const GridHeader = ({
     if (!resource || !showFilters) return;
     const applyDefaultFilter = async () => {
       try {
-        const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`)
+        const responce: any = await axiosInstance().get(`/user-resource-filter?resource=${resource}`);
         const defaultFilter = responce?.data?.data.find((d) => d.default);
         if (defaultFilter) {
           const columns = await fetchFieldOptions({ resource, sidebarResource, toastConfig });
@@ -121,7 +121,7 @@ const GridHeader = ({
   }, [resource]);
 
   return (
-    <div className={`flex items-center justify-between my-[8px] gap-[8px] flex-wrap`}>
+    <div className={`my-[8px] flex flex-wrap items-center justify-between gap-[8px]`}>
       <div className="flex-grow">
         <div className="table-filter-v1">
           <ShowFilteredRecordsOnly
@@ -155,11 +155,11 @@ const GridHeader = ({
           />
         )}
       </div>
-      <div className="buttons flex flex-wrap gap-[8px] justify-between w-full min-[768px]:w-[unset] ml-auto">
+      <div className="buttons ml-auto flex w-full flex-wrap justify-between gap-[8px] min-[768px]:w-[unset]">
         <div className="buttons flex flex-wrap gap-[8px]">
           {isMobileView && !hideSelection && (
             <>
-              <label className="flex items-center gap-2 cursor-pointer ml-[13px]">
+              <label className="ml-[13px] flex cursor-pointer items-center gap-2">
                 <IndeterminateCheckbox
                   {...{
                     checked: table.getIsAllRowsSelected(),
