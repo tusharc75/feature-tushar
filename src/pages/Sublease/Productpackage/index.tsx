@@ -2,7 +2,6 @@ import { Box, Button, CircularProgress, IconButton, MenuItem } from '@material-u
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -23,9 +22,10 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUBLEASE_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUBLEASE_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -62,7 +62,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit&&!isIssued);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit && !isIssued);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(
       renderedFrom,
@@ -88,7 +88,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         width: 300,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {!allowedToEdit ? (
               <p> {row.original.detail}</p>
             ) : (
@@ -102,8 +102,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
                 {row.original.detail}
               </p>
             )}
-            {row.original?.type === 'package' && allowedToEdit && (
-              <Box ml={1} className="d-flex align-items-center">
+            {row.original?.type === MATERIAL_TYPE.package && allowedToEdit && (
+              <>
                 <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
                 <HtmlTooltip title="Add Product">
                   <IconButton
@@ -114,23 +114,21 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
                     <Add color="disabled" fontSize="small" />
                   </IconButton>
                 </HtmlTooltip>
-              </Box>
+              </>
             )}
-            <Box ml={1}>
-              <HtmlTooltip title="Details">
-                <IconButton
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    window.open(
-                      `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
-                    );
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" />
-                </IconButton>
-              </HtmlTooltip>
-            </Box>
+            <HtmlTooltip title="Details">
+              <IconButton
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  window.open(
+                    `${row.original.type === 'product' ? routes.productDetail.path : routes.packagesDetail.path}/${row.original.materialId}`
+                  );
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </HtmlTooltip>
           </div>
         ),
         Footer: () => {
@@ -456,10 +454,10 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     return (
       <>
         {material?.length &&
-        dataRows?.length &&
-        !isIssued &&
-        !dataRows?.some((f) => !f.isValid) &&
-        subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
+          dataRows?.length &&
+          !isIssued &&
+          !dataRows?.some((f) => !f.isValid) &&
+          subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
           <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
             <Button
               variant={'contained'}
