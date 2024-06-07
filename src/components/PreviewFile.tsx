@@ -19,13 +19,19 @@ export type PreviewFileProps = {
   showDownload?: boolean;
 };
 
+function getFileNameFromUrl(url: string) {
+  const filename = decodeURIComponent(new URL(url).pathname.split('/').pop());
+  if (!filename) return ''; // Provide a default filename if necessary
+  return filename;
+}
+
 export const PreviewFile = ({ fileName, component = 'IconButton', showDownload = false }: PreviewFileProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [downloadProgress, setDownloadProgress] = useState(-1);
   const [downloading, setDownloading] = useState(false);
   const [imageDialogData, setImageDialogData] = useState({ open: false, url: '', fileName });
 
-  const downloadFile = async (fileName, setDialogUrl = false, showDownload = false): Promise<any> => {
+  const downloadFile = async (fileName: string, setDialogUrl = false, showDownload = false): Promise<any> => {
     if (!fileName) return;
     toastConfig.setToastConfig({
       open: true,
@@ -36,39 +42,46 @@ export const PreviewFile = ({ fileName, component = 'IconButton', showDownload =
     setDownloading?.(true);
 
     try {
-      const { data } = await axiosInstance().get(`user/download?fileName=${fileName}`, {
-        responseType: 'blob',
-        onDownloadProgress: (progressEvent) => {
-          let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
-          setDownloadProgress(percentCompleted);
-          if (percentCompleted === 100) {
-            if (!setDialogUrl) {
-              toastConfig.setToastConfig({
-                message: 'File Downloaded Successfully',
-                open: true,
-                type: 'success'
-              });
-            }
-            setTimeout(() => {
-              setDownloadProgress(-1);
-              setDownloading?.(false);
-            }, 100);
-          }
+      if (fileName.startsWith('http')) {
+        if (setDialogUrl) {
+          setImageDialogData({ open: true, url: fileName, fileName: getFileNameFromUrl(fileName) });
         }
-      });
-      setDownloading(false);
-      if (setDialogUrl) {
-        setImageDialogData({ open: true, url: URL.createObjectURL(new Blob([data])), fileName });
-      }
-      if (showDownload) {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName);
-        document.body.appendChild(link);
-        link.click();
+        return fileName;
       } else {
-        return data;
+        const { data } = await axiosInstance().get(`user/download?fileName=${fileName}`, {
+          responseType: 'blob',
+          onDownloadProgress: (progressEvent) => {
+            let percentCompleted = Math.floor((progressEvent.loaded * 100) / progressEvent.total);
+            setDownloadProgress(percentCompleted);
+            if (percentCompleted === 100) {
+              if (!setDialogUrl) {
+                toastConfig.setToastConfig({
+                  message: 'File Downloaded Successfully',
+                  open: true,
+                  type: 'success'
+                });
+              }
+              setTimeout(() => {
+                setDownloadProgress(-1);
+                setDownloading?.(false);
+              }, 100);
+            }
+          }
+        });
+        setDownloading(false);
+        if (setDialogUrl) {
+          setImageDialogData({ open: true, url: URL.createObjectURL(new Blob([data])), fileName });
+        }
+        if (showDownload) {
+          const url = window.URL.createObjectURL(new Blob([data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName);
+          document.body.appendChild(link);
+          link.click();
+        } else {
+          return data;
+        }
       }
     } catch (error) {
       setDownloading(false);
@@ -117,7 +130,7 @@ export const PreviewFile = ({ fileName, component = 'IconButton', showDownload =
   return (
     <div>
       {showDownload && (
-        <HtmlTooltip title={'Download'} leaveTouchDelay={0} leaveDelay={0}>
+        <HtmlTooltip title={component === 'IconButton' ? 'Download' : ''} leaveTouchDelay={0} leaveDelay={0}>
           <RenderButton disabled={downloading} onClick={() => downloadFile(fileName, false, showDownload)}>
             {component === 'IconButton' ? (
               downloading ? (
@@ -134,13 +147,9 @@ export const PreviewFile = ({ fileName, component = 'IconButton', showDownload =
         </HtmlTooltip>
       )}
       {validExtensions.includes(extension) && (
-        <HtmlTooltip title={`Preview ${pdfExtensions.includes(extension) ? 'PDF' : 'image'}`} leaveTouchDelay={0} leaveDelay={0}>
+        <HtmlTooltip title={component === 'IconButton' ? `Preview` : ''} leaveTouchDelay={0} leaveDelay={0}>
           <RenderButton disabled={downloading} onClick={handleClick}>
-            {component === 'IconButton' ? (
-              <PreviewIcon fontSize="small" color="primary" />
-            ) : (
-              `Preview ${pdfExtensions.includes(extension) ? 'PDF' : 'image'}`
-            )}
+            {component === 'IconButton' ? <PreviewIcon fontSize="small" color="primary" /> : `Preview `}
           </RenderButton>
         </HtmlTooltip>
       )}
