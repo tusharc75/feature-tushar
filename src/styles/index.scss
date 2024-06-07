@@ -3363,9 +3363,9 @@ body {
     }
   }
   & a > * {
-    color: var(--link);
+    color: var(--link) !important;
     [data-mode='dark'] & {
-      color: var(--link);
+      color: var(--link) !important;
     }
   }
 }
