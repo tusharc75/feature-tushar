@@ -207,9 +207,9 @@ const ReportFilters = (props: FiltersProps) => {
     };
 
     if (Array.isArray(value)) {
-      if(!fieldProps.lookup){
+      if (!fieldProps.lookup) {
         newData.value = resourceOptions[name].options?.filter((d) => value?.includes(d.optionValue));
-      }else{
+      } else {
         newData.value = value;
       }
       setSelectedData((prevState) => ({ ...prevState, [name]: newData }));
@@ -502,40 +502,40 @@ const ReportFilters = (props: FiltersProps) => {
                 <React.Fragment key={field._id}>
                   {field.fieldName !== 'all' && field.type !== 'date' && (
                     <div>
-                      {field?.lookup ? (
-                       <AsyncDropdown
-                        resource={field.lookupResource}
-                        errors={error}
-                        touched={error}
-                        multiple={reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? false : true : true}
-                        value= {formValues[field.fieldName]}
-                        onChange = {(_, value) => {
-                          handleSelectFilter(field?.type, field?.fieldName, value);
-                        }}
-                        fieldName={field.fieldName}
-                        fieldLabel={field.fieldLabel}
-                        required={reportConfig?.defaultColumn ? field?.required : false}
-                       />
-                      ): (
-                       <FormTypes
-                        values={formValues}
-                        errors={error}
-                        touched={error}
-                        label={field.fieldLabel}
-                        name={field.fieldName}
-                        type={field.type === 'dropDown' ?
-                          reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? field.type : 'multiSelect' : 'multiSelect'
-                          : field.type}
-                        options={field.option}
-                        setFieldValue={(name, value) => {
-                          handleSelectFilter(field?.type, name, value);
-                        }}
-                        required={reportConfig?.defaultColumn ? field?.required : false}
-                        fullWidth
-                        size="small"
-                        fromFilter={true}
-                      />
-                         )}
+                      {field?.lookup && field.lookupResource ? (
+                        <AsyncDropdown
+                          resource={field.lookupResource}
+                          errors={error}
+                          touched={error}
+                          multiple={reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? false : true : true}
+                          value={formValues[field.fieldName]}
+                          onChange={(_, value) => {
+                            handleSelectFilter(field?.type, field?.fieldName, value);
+                          }}
+                          fieldName={field.fieldName}
+                          fieldLabel={field.fieldLabel}
+                          required={reportConfig?.defaultColumn ? field?.required : false}
+                        />
+                      ) : (
+                        <FormTypes
+                          values={formValues}
+                          errors={error}
+                          touched={error}
+                          label={field.fieldLabel}
+                          name={field.fieldName}
+                          type={field.type === 'dropDown' ?
+                            reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? field.type : 'multiSelect' : 'multiSelect'
+                            : field.type}
+                          options={field.option}
+                          setFieldValue={(name, value) => {
+                            handleSelectFilter(field?.type, name, value);
+                          }}
+                          required={reportConfig?.defaultColumn ? field?.required : false}
+                          fullWidth
+                          size="small"
+                          fromFilter={true}
+                        />
+                      )}
                     </div>
                   )}
                   {field.type === 'date' && (
