@@ -11,17 +11,14 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
-import { isMobile } from 'react-device-detect';
 import { KeyboardArrowDown } from '@material-ui/icons';
-import { startCase } from 'lodash';
 import { flattenArray } from 'src/constants/columns';
 import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import MaterialDialog from './MaterialDialog';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -69,7 +66,7 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
         disable: true,
         width: 300,
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p
               onClick={() => {
                 setMaterialEdit({
@@ -84,16 +81,14 @@ const Material = ({ jobData, renderedFrom, allowedToEdit, setNextStep }) => {
             >
               {row.original?.detail}
             </p>
-            <Box ml={1}>
               <IconButton
                 size="small"
                 onClick={() => {
                   window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
-            </Box>
           </div>
         )
       }

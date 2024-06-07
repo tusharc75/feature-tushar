@@ -12,6 +12,7 @@ import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { sidebarResource } from 'src/constants/helpers';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { FiExternalLink } from 'react-icons/fi';
 
 const FIELD_TO_FILTER = [
   {
@@ -202,7 +203,7 @@ const MaterialHandling = () => {
                                     aria-label="delete"
                                     size="small"
                                   >
-                                    <OpenInNewIcon fontSize="inherit" style={{ width: '24', height: '24', color: 'var(--new_theme_color)' }} />
+                                    <FiExternalLink fontSize="inherit" style={{ width: '24', height: '24', color: 'var(--new_theme_color)' }} />
                                   </IconButton>
                                 </Box>
                               </Box>

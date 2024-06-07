@@ -1,7 +1,6 @@
 import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, map, startCase, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -23,6 +22,7 @@ import CostDialog from './CostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import RequestButton from 'src/pages/DoaSetupNew/RequestButton';
 import { rentalManagementMessage } from 'src/constants/messageHelpers';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({
   allowedToEdit,
@@ -105,7 +105,7 @@ const Material = ({
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {allowedToEdit && allowedToAddMaterial ? (
               <p
                 onClick={() => {
@@ -126,7 +126,6 @@ const Material = ({
               <p className="text-truncate">{row.original?.detail}</p>
             )}
             {![MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
-              <Box ml={1}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -139,9 +138,8 @@ const Material = ({
                     }
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color="primary" />
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
-              </Box>
             )}
           </div>
         )

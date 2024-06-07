@@ -5,13 +5,13 @@ import routes from '../../../components/Helpers/Routes';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { dateTimeFormat } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { IoMdDownload } from 'react-icons/io';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,9 +44,8 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
         width: 300,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p>{row.original?.detail}</p>
-            <Box ml={1}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -55,9 +54,8 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
                     : window.open(`${routes.truckMaster.path}/${row.original.materialId}`);
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
-            </Box>
           </div>
         )
       },
