@@ -39,7 +39,7 @@ export default function ConfirmationDialogRaw({ onClose, onOk, open, message, ok
       keepMounted
     >
       <DialogTitle id="confirmation-dialog-title" className="text-white">
-        Confirm 
+        Confirm
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
       <DialogActions>

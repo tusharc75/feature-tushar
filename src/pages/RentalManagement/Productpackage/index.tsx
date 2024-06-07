@@ -33,9 +33,9 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AssetAvailability from '../AssetAvailability';
-import AddExistingProductInventory from './AddExistingProductInventory';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
+import Aaaa from 'src/pages/RentalManagement/Productpackage/Aaaa';
 
 const Productpackage = ({
   rentalManagementData,
@@ -946,16 +946,15 @@ const Productpackage = ({
         />
       )}
       {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (
-        <AddExistingProductInventory
+        <Aaaa
+          type={addExistingProductDialog.type}
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
+          rentalManagementData={rentalManagementData}
           isAddingProducts={isAddingProducts}
-          addProductInventory={handleAdd}
-          handleProductInventoryClose={() => {
+          handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
-          productInventory={[]}
-          type={addExistingProductDialog.type}
-          rentalManagementData={rentalManagementData}
+          addProduct={handleAdd}
         />
       )}
       {addchildDialog.open && (
