@@ -22,6 +22,8 @@ import { find, isArray, isObject, result } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
 import { getGridMetaDataFromLocalStorage } from '../utils';
 import DataListCell from '../Cells/DataListCell';
+import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
+import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -383,19 +385,29 @@ export default function useColumns() {
           disableFilters: true,
           disableSortBy: true,
           cell: ({ row }) => {
-            let fileIcons = [];
-            if (Array.isArray(row.original?.multiFileUpload)) {
-              fileIcons = row.original?.multiFileUpload.map((d) => {
-                const Icon = getFileIconSrc(d.fileName || '');
-                return (
-                  <span title={d.fileName} className="min-w-[20px] basis-[20px]">
-                    <Icon />
-                  </span>
-                );
-              });
-            }
-            if (row.original?.multiFileUpload) return <div className="flex overflow-hidden">{fileIcons}</div>;
-            return <NoDataCell />;
+            return <MultiFileCell data={row.original?.multiFileUpload} />;
+          }
+        });
+      } else if (field?.type === 'fileUpload') {
+        column.push({
+          ...commonFieldData,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => {
+            if (!row.original?.fileUpload) return <NoDataCell />;
+            return <MultiFileCell data={[{ fileName: row.original?.fileUpload, size: '' }]} />;
+          }
+        });
+      } else if (field?.type === 'multiImageUpload') {
+        column.push({
+          ...commonFieldData,
+          width: 200,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => {
+            if (!row.original.multiImageUpload) return <NoDataCell />;
+            return <MultiImageCell images={row.original?.multiImageUpload?.split(' , ') || []} />;
           }
         });
       } else if (field?.type === 'date') {

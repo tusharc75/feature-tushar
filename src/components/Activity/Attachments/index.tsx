@@ -521,13 +521,13 @@ export default function Attachments({ relatedTo, handleActivityRefresh, onSetCou
               onClose={handleCloseMenu}
             >
               {permissions['attachment']?.isUpdate ? <MenuItem onClick={handleEdit}>Edit</MenuItem> : null}
-              <MenuItem onClick={handleDownload}>Download</MenuItem>
-              {permissions['attachment']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
               {attachmentData && (
                 <span onClick={handleCloseMenu}>
                   <PreviewFile fileName={attachmentData?.file[0]?.url} component="MenuItem" />
                 </span>
               )}
+              <MenuItem onClick={handleDownload}>Download</MenuItem>
+              {permissions['attachment']?.isDelete ? <MenuItem onClick={handleDelete}>Delete</MenuItem> : null}
             </Menu>
 
             <Dialog
