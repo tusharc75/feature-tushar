@@ -289,12 +289,12 @@ const Details = (props: DetailProps) => {
       }
       if (fieldData.type === 'fileUpload') {
         const Icon = getFileIconSrc(value || '');
-        if (value === '-') return value;
+        if (value === '-' || Array.isArray(value)) return value;
         return (
           <div className="flex items-center gap-2">
             <Icon />
             <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
-              <span className={`text-truncate tooltip-asdfkljashdfkjas`}>{value}</span>
+              <span className={`text-truncate tooltip-asdfkljashdfkjas text-gray-500 dark:text-gray-400`}>{value}</span>
             </Typography>
             <PreviewFile fileName={value} showDownload />
           </div>
@@ -311,7 +311,7 @@ const Details = (props: DetailProps) => {
                   <div className="flex gap-2" key={d.fileName}>
                     <Icon />
                     <Typography className={classes.fieldText} variant="body2">
-                      {d.fileName}
+                      <span className={`text-truncate tooltip-asdfkljashdfkjas text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
                     </Typography>
                     <PreviewFile fileName={d.fileName} showDownload />
                   </div>
