@@ -3,7 +3,6 @@ import Box from '@material-ui/core/Box/Box';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Delete, ExpandMore } from '@material-ui/icons';
 import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import RepeatIcon from '@material-ui/icons/Repeat';
 import WarningIcon from '@material-ui/icons/Warning';
@@ -34,6 +33,7 @@ import AddNonSerializeAssets from './AddNonSerializeAssets';
 import AddSerializedAsset from './AddSerializedAsset';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 import AddNonSerializedInventory from './AddNonSerializedInventory';
+import { FiExternalLink } from 'react-icons/fi';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -132,11 +132,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="flex items-center gap-2">
             <p className="text-truncate" title={row.original.detail}>
               {row.original.detail}
             </p>
-
             {((row.original?.type === 'asset' && row.original?.isNonSerializeAsset) || row?.original?.type === 'serialNumber') ? null : (
               <IconButton
                 size="small"
@@ -152,10 +151,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
-
             {!isOffline && row.original.isPurchaseOrder && (
               <HtmlTooltip title={`${routes.purchaseOrder.title}`}>
                 <IconButton
@@ -168,7 +166,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 </IconButton>
               </HtmlTooltip>
             )}
-
             {row.original.isBulkAssetCreation && (
               <HtmlTooltip title={`${routes.bulkAssetCreation.title}`}>
                 <IconButton
