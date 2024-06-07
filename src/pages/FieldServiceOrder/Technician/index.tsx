@@ -1,6 +1,5 @@
 import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -15,8 +14,9 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, SERVICE_ORDER_STATUS, fieldServiceOrder, warehouse } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, SERVICE_ORDER_STATUS, fieldServiceOrder, warehouse } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Technician = ({
   serviceOrderData,
@@ -85,20 +85,20 @@ const Technician = ({
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {row.original.detail}
             <IconButton
               size="small"
               style={{ marginLeft: '10px' }}
               onClick={() => {
-                if (row.original.type === 'service') {
+                if (row.original.type === MATERIAL_TYPE.service) {
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
                 } else {
                   window.open(`${routes.employeeMasterDetail.path}/${row.original.technician}`);
                 }
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           </div>
         )

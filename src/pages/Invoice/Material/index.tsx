@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem, MenuList, Popover } from '@material-ui/core'
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, isArray, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -27,6 +26,7 @@ import MaterialDialog from './MaterialDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Material`;
@@ -98,7 +98,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         width: 300,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {allowedToEdit ? (
               row.original.detail ?
                 <p
@@ -117,61 +117,58 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
 
             {[MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(row?.original?.type) && (
               <>
-                <Box ml={1} className="d-flex align-items-center">
-                  {row.original?.subRows?.length > 0 && (
-                    <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
-                  )}
-                  <Box pl={1}>
-                    <HtmlTooltip title="Add ">
-                      <IconButton
-                        onClick={(event) => {
-                          if (row.original.type === MATERIAL_TYPE.product && row.original.productDetail.serializedProduct) {
-                            setAddchildDialog({
-                              open: true,
-                              parentId: row.original?._id,
-                              top: event.clientY,
-                              bottom: event.clientX,
-                              isSerializedProduct: true
-                            });
-                            setAssetAssignedProduct([row.original]);
-                          } else {
-                            setAddchildDialog({
-                              open: true,
-                              parentId: row.original?._id,
-                              top: event.clientY,
-                              bottom: event.clientX,
-                              isSerializedProduct: false
-                            });
-                          }
-                        }}
-                        size="small"
-                      >
-                        <Add color="disabled" fontSize="small" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </Box>
+                {row.original?.subRows?.length > 0 && (
+                  <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
+                )}
+                <Box pl={1}>
+                  <HtmlTooltip title="Add ">
+                    <IconButton
+                      onClick={(event) => {
+                        if (row.original.type === MATERIAL_TYPE.product && row.original.productDetail.serializedProduct) {
+                          setAddchildDialog({
+                            open: true,
+                            parentId: row.original?._id,
+                            top: event.clientY,
+                            bottom: event.clientX,
+                            isSerializedProduct: true
+                          });
+                          setAssetAssignedProduct([row.original]);
+                        } else {
+                          setAddchildDialog({
+                            open: true,
+                            parentId: row.original?._id,
+                            top: event.clientY,
+                            bottom: event.clientX,
+                            isSerializedProduct: false
+                          });
+                        }
+                      }}
+                      size="small"
+                    >
+                      <Add color="disabled" fontSize="small" />
+                    </IconButton>
+                  </HtmlTooltip>
                 </Box>
+
               </>
             )}
             {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === MATERIAL_TYPE.service) {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.product) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             )}
           </div>
         )

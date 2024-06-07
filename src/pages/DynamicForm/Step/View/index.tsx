@@ -19,10 +19,10 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import routes from 'src/components/Helpers/Routes';
 import { flattenArray } from 'src/constants/columns';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
+import { FiExternalLink } from 'react-icons/fi';
 
 const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false, referenceData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -69,29 +69,27 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
             width: 300,
             disabled: true,
             sticky: isMobile || isTablet ? 'none' : 'left',
-            Cell: ({ row, table }) => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+            Cell: ({ row }) => (
+              <div className="flex items-center gap-2">
                 <p className="text-truncate" title={row.original.detail}>
                   {row.original.detail}
                 </p>
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (row.original.type === MATERIAL_TYPE.product) {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.service) {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      }
-                      if (row.original.type === MATERIAL_TYPE.package) {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    }
+                    if (row.original.type === MATERIAL_TYPE.package) {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               </div>
             )
           },

@@ -1,9 +1,9 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
+import { FiExternalLink } from 'react-icons/fi';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -129,7 +129,7 @@ const Products = ({ packageId, packageData }) => {
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) =>
           row?.original?.type ? (
-            <div className="d-flex gap-2 align-items-center">
+            <div className="flex items-center gap-2">
               <p className="text-truncate">{row.original.detail}</p>
               <IconButton
                 size="small"
@@ -141,7 +141,7 @@ const Products = ({ packageId, packageData }) => {
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </div>
           ) : (

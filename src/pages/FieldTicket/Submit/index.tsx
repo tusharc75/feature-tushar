@@ -1,6 +1,5 @@
 import { Box, Button, IconButton } from '@material-ui/core';
 import HistoryIcon from '@material-ui/icons/History';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -17,6 +16,7 @@ import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, fieldTicket, sideba
 import ManageSubmit from './ManageSubmit';
 import ViewLogs from './ViewLogs';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
@@ -70,27 +70,25 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p title={row.original.detail}>{row.original.detail}</p>
             {![MATERIAL_TYPE.manualEntry].includes(row.original.type) && (
-              <Box ml={1} className="flex-shrink-0">
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === MATERIAL_TYPE.service) {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.product) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.package) {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             )}
           </div>
         )

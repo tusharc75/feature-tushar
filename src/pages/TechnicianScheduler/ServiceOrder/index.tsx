@@ -9,10 +9,10 @@ import routes from 'src/components/Helpers/Routes';
 import { dateFormat, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import AssignTechnicianDialog from '../Roadmap/AssignTechnicianDialog';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 const TECHNICIAN_RESOURCE = [
   {
@@ -116,18 +116,16 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
             Header: 'Field Service Order',
             width: 200,
             Cell: ({ row }) => (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div className="flex items-center gap-1">
                 <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               </div>
             )
           },
@@ -137,18 +135,16 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
             width: 200,
             Cell: ({ row }) =>
               row.original['fieldTicketNumber'] ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="flex items-center gap-1">
                   <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
-                  <Box ml={1}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
-                      }}
-                    >
-                      <OpenInNewIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                 </div>
               ) : (
                 <NoDataCell />
@@ -163,18 +159,16 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
               width: 200,
               Cell: ({ row }) =>
                 row.original['rentalJobName'] ? (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div className="flex items-center gap-1">
                     <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
-                    <Box ml={1}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
-                        }}
-                      >
-                        <OpenInNewIcon fontSize="small" color="primary" />
-                      </IconButton>
-                    </Box>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
                   </div>
                 ) : (
                   <NoDataCell />
@@ -188,18 +182,16 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         width: 250,
         Cell: ({ row }) =>
           row.original.serviceName && row.original.serviceId ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-1">
               <p title={row.original.serviceName}>{row.original.serviceName}</p>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -223,18 +215,16 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
         width: 250,
         Cell: ({ row }) =>
           row.original['customerAccount'] ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-1">
               <p title={row.original['customerAccount']}>{row.original['customerAccount']}</p>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.customerAccountDetail.path}/${row.original.customerAccountId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />

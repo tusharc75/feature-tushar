@@ -1,7 +1,7 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import { Delete } from '@material-ui/icons';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { FC, Fragment, useContext, useEffect, useState } from 'react';
+import { FiExternalLink } from 'react-icons/fi';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -102,18 +102,16 @@ const AssetsGrid: FC<AssetsGridProps> = ({
           if (o.accessor === 'assetNumber') {
             o.cell = ({ row }) =>
               row?.original?.assetNumber ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="flex items-center gap-2">
                   <p> {row.original?.assetNumber}</p>
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
                 </div>
               ) : (
                 <NoDataCell />
@@ -121,18 +119,16 @@ const AssetsGrid: FC<AssetsGridProps> = ({
           } else if (o.accessor === 'product') {
             o.cell = ({ row }) =>
               row?.original?.product ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="flex items-center gap-2">
                   <p> {row.original?.product}</p>
-                  <Box ml={1}>
                     <IconButton
                       size="small"
                       onClick={() => {
                         window.open(`${routes.productDetail.path}/${row.original?.productId}`);
                       }}
                     >
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                  </Box>
                 </div>
               ) : (
                 <NoDataCell />
