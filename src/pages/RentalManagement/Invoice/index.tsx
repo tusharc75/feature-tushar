@@ -52,7 +52,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
       const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
 
-      fields = [...fields, ...resultCost]?.filter(f => f?.isRead);
+      fields = [...fields, ...resultCost]?.filter((f) => f?.isRead);
 
       fields = [...new Map(fields.map((item) => [item['fieldName'], item])).values()];
 
@@ -123,7 +123,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
                       }
                     }}
                   >
-                    <FiExternalLink size={16} className="text-gray-500 dark:text-gray-300" />
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
                 )}
               </div>
@@ -323,7 +323,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
             columns={columns}
             state={state}
             dispatch={dispatch}
-            setWholeRowsCellColor={() => { }}
+            setWholeRowsCellColor={() => {}}
             refreshGrid={fetchData}
             hideSelection={true}
             hideAction={true}
