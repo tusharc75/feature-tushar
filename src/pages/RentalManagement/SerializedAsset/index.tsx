@@ -569,7 +569,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         status: e?.status,
         warehouse: rentalManagementData?.warehouse?.optionValue,
         isValid: true,
-        canRemove: parent?.status ? false : true
+        canRemove: e?.status === 'Reserved' ? true : false
       });
     });
 
