@@ -787,23 +787,23 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
     const assetProduct = [];
     flatArray.forEach((element) => {
-      if (element.type === 'product' && element.realAssetQty > element.realAssetAssignedQty) {
+      if (element.type === MATERIAL_TYPE.product && element.realAssetQty > element.realAssetAssignedQty) {
         const foundProduct = assetProduct.filter((e) => e.materialId === element.materialId);
         if (foundProduct.length) {
           foundProduct[0].qty += element.realAssetQty - element.realAssetAssignedQty;
         } else {
-          assetProduct.push({
+          const obj = {
             ...element,
             _id: element._id,
             id: element.materialId,
             productName: element.productDetail?.productName,
             qty: element.realAssetQty - element.realAssetAssignedQty
-          });
+          }
+          assetProduct.push(obj);
         }
       }
     });
     setAssetAssignedProduct([...assetProduct]);
-
 
     const nonSerializeAssetProduct = [];
     let flatArrayNonSerializeAsset = treeToFlatArray(selectedRecords, 'subRows').filter(
