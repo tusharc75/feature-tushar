@@ -1,5 +1,4 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, orderBy } from 'lodash';
 import startCase from 'lodash/startCase';
 import { useEffect, useState } from 'react';
@@ -16,6 +15,7 @@ import routes from 'src/components/Helpers/Routes';
 import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
 import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
@@ -72,10 +72,9 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         Header: 'Detail',
         width: 250,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p className="text-truncate">{row.original.detail}</p>
             {[MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package].includes(row?.original?.type) && (
-              <Box ml={1}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -88,9 +87,8 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
                     }
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color="primary" />
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
-              </Box>
             )}
           </div>
         )
