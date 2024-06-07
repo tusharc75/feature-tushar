@@ -234,7 +234,7 @@ const Details = (props: DetailProps) => {
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (
                   <React.Fragment key={_val.optionValue}>
-                    <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`} target="_blank" rel="noopener noreferrer">
+                    <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`} target="_blank" className='link' rel="noopener noreferrer">
                       <span className={`text-truncate link`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
