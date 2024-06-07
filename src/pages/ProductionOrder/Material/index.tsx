@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -26,6 +25,7 @@ import routes from '../../../components/Helpers/Routes';
 import { CHILD_RESOURCE, MATERIAL_TYPE, PRODUCTION_ORDER_STATUS, asyncForEach, productionOrder, sidebarResource } from '../../../constants/helpers';
 import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -83,7 +83,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
         width: 200,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {allowedToEdit ? (
               <h5
                 onClick={() => {
@@ -133,7 +133,7 @@ const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScre
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </Box>
           </div>

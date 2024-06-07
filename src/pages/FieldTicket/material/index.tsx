@@ -1,7 +1,6 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -31,6 +30,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
 import Add from '@material-ui/icons/Add';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
@@ -94,7 +94,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {isOffline ? <p> {row.original.detail}</p> : !allowedToEdit || fieldTicketData?.quotation ? (
               <p> {row.original.detail}</p>
             ) : row.original.detail ? (
@@ -111,7 +111,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
               <NoDataCell />
             )}
             {row.original.type === MATERIAL_TYPE.package && (
-              <Box ml={1} className="d-flex align-items-center">
+              <>
                 <span>
                   {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
                 </span>
@@ -129,27 +129,25 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
                     </HtmlTooltip>
                   </Box>
                 )}
-              </Box>
+              </>
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && !isOffline && (
-              <Box ml={1} className=" flex-shrink-0">
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === MATERIAL_TYPE.service) {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.product) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                      window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.package) {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             )
             }
           </div >

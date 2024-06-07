@@ -1,6 +1,5 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { isEmpty, map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -14,7 +13,6 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import GridDeleteIcon from 'src/components/Helpers/GridDeleteIcon';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -27,6 +25,7 @@ import ServiceDialog from './ServiceDialog';
 import { fetchTaxRate } from './helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -104,7 +103,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row, table }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="flex items-center gap-2">
           {!allowedToEdit ? (
             <p className="text-truncate"> {row.original.detail}</p>
           ) : (
@@ -118,7 +117,6 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
               {row.original.detail}
             </p>
           )}
-          <Box ml={1} />
           {row.original.type === 'Product' && (
             <IconButton
               size="small"
@@ -126,7 +124,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           )}
           {row.original.type === 'Service' && (
@@ -136,7 +134,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 window.open(`${routes.serviceMasterDetail.path}/${row.original?.materialId}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           )}
         </div>

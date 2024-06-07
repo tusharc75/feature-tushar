@@ -1,6 +1,5 @@
 import { IconButton } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -17,6 +16,7 @@ import { fetch_rental_cost_fields, fetch_rental_product_fields } from '../../../
 import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement, sidebarResource } from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from '../Productpackage/AdditionalCostDialog';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFullScreen, allowedToEdit, renderedFrom }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,7 +52,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
       const resultCost = await fetch_rental_cost_fields(rentalManagementData.currency, isOffline);
 
-      fields = [...fields, ...resultCost]?.filter(f => f?.isRead);
+      fields = [...fields, ...resultCost]?.filter((f) => f?.isRead);
 
       fields = [...new Map(fields.map((item) => [item['fieldName'], item])).values()];
 
@@ -106,7 +106,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
           sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) =>
             row.original['type'] ? (
-              <div className="d-flex gap-2 align-items-center">
+              <div className="flex items-center gap-2">
                 <p className="text-truncate">{row.original.detail}</p>
                 {row.original.type !== MATERIAL_TYPE.manualEntry && (
                   <IconButton
@@ -123,7 +123,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
                       }
                     }}
                   >
-                    <OpenInNewIcon fontSize="small" color="primary" />
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
                 )}
               </div>
@@ -323,7 +323,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
             columns={columns}
             state={state}
             dispatch={dispatch}
-            setWholeRowsCellColor={() => { }}
+            setWholeRowsCellColor={() => {}}
             refreshGrid={fetchData}
             hideSelection={true}
             hideAction={true}

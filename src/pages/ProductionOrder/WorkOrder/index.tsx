@@ -1,7 +1,6 @@
 import { Box, Button, IconButton, MenuItem, TextField, Typography, useMediaQuery } from '@material-ui/core';
 import { CheckCircle, CloudUpload, Delete } from '@material-ui/icons';
 import DescriptionIcon from '@material-ui/icons/Description';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SyncIcon from '@material-ui/icons/Sync';
 import { Autocomplete } from '@material-ui/lab';
 import { flatMap, map, orderBy, startCase, uniq } from 'lodash';
@@ -41,6 +40,7 @@ import {
 import UploadDrawingDialog from './UploadDrawingDialog';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
@@ -161,7 +161,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
         width: 200,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original?.detail}</h5>
             <Box ml={1}>
               <IconButton
@@ -176,7 +176,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </Box>
           </div>
@@ -198,7 +198,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
       width: 200,
       Cell: ({ row }) =>
         row.original.workOrder ? (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original.workOrderNumber}</h5>
             <IconButton
               size="small"
@@ -206,7 +206,7 @@ const WorkOrder = ({ productionOrderData, setNextStep, renderedFrom, stepFullScr
                 window.open(`${routes.workOrderDetail.path}/${row.original?.workOrder?._id}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color={'primary'} />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           </div>
         ) : (

@@ -1,6 +1,5 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -25,6 +24,7 @@ import { CHILD_RESOURCE, CustomDialogTransition, INVOICE_STATUS, MATERIAL_TYPE, 
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CreditMemo from '../CreditMemo';
+import { FiExternalLink } from 'react-icons/fi';
 
 const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -106,29 +106,27 @@ const ViewInvoice = ({ invoiceId, onClose, onSuccess, resource }) => {
           width: 300,
           sticky: isMobile || isTablet ? 'none' : 'left',
           Cell: ({ row }) => (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               <p className="text-truncate" title={row.original?.detail}>
                 {row.original?.detail}
               </p>
-              {row.original['type'] !== 'manualEntry' && (
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (row.original.type === MATERIAL_TYPE.service) {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === MATERIAL_TYPE.product) {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                      } else {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
+              {row.original['type'] !== MATERIAL_TYPE.manualEntry && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               )}
             </div>
           )

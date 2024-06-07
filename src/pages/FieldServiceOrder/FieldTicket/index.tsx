@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -22,6 +21,7 @@ import { findAll, findOne, objectStore } from 'src/constants/indexdbhelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { camelCase } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
+import { FiExternalLink } from 'react-icons/fi';
 
 const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource, enableGlobalSearch = true }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -68,7 +68,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
         if (o.accessor === 'fieldTicketNumber') {
           o.cell = ({ row }) =>
             row?.original?.fieldTicketNumber ? (
-              <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div className="flex items-center gap-2">
                 <h5
                   className="link text-truncate"
                   onClick={() => {
@@ -77,16 +77,15 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
                 >
                   {row?.original?.fieldTicketNumber}
                 </h5>
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.fieldTicketDetail.path}/${row?.original?._id}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+
               </div>
             ) : (
               <NoDataCell />
