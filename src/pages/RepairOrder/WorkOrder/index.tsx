@@ -508,7 +508,9 @@ const WorkOrder = ({
     let ids = [];
     if (autoCompleteData && autoCompleteData.length > 0) {
       autoCompleteData.forEach((d) => {
-        if (d?.canAutoCompleteWorkOrder) ids.push(d?.workOrder?._id);
+        if (d?.canAutoCompleteWorkOrder) {
+          ids.push(d?.workOrder?._id);
+        }
       });
     }
     setCompleting(true);
@@ -597,7 +599,10 @@ const WorkOrder = ({
         parent.serviceStatus = parent.workOrderStatus;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent.subRows?.every((e) => e.type === MATERIAL_TYPE.service && e.status === WORKORDER_SERVICE_STATUS.pending)) {
+      if (
+        parent.subRows?.every((e) => e.type === MATERIAL_TYPE.service && e.status === WORKORDER_SERVICE_STATUS.pending) &&
+        ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(parent?.workOrder?.status)
+      ) {
         parent.canAutoCompleteWorkOrder = true;
       }
       parent.canDelete = false;
@@ -1117,9 +1122,7 @@ const WorkOrder = ({
             }}
             disabled={
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e?.canAutoCompleteWorkOrder)?.length ===
-                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-              !isWorkOrderCompleted(selectedRecords)
+              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
                 ? false
                 : true
             }
