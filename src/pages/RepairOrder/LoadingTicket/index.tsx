@@ -1,30 +1,30 @@
-import Box from '@material-ui/core/Box/Box';
-import { useState, useEffect, useContext, Fragment } from 'react';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import routes from '../../../components/Helpers/Routes';
-import Grid from '@material-ui/core/Grid/Grid';
 import { Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import axiosInstance from '../../../axios/axiosInstance';
+import Box from '@material-ui/core/Box/Box';
+import Grid from '@material-ui/core/Grid/Grid';
+import { ExpandMore } from '@material-ui/icons';
+import { map, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { FiExternalLink } from 'react-icons/fi';
+import { useData } from 'src/StateProvider/Provider';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from '../../../axios/axiosInstance';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
+import routes from '../../../components/Helpers/Routes';
 import {
-  deliveryTicket,
-  gridLoadingTimeout,
+  ASSET_STATUS,
+  DELIVERY_FROM_TO_TYPE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
-  DELIVERY_TICKET_REFERENCE_TYPE,
-  DELIVERY_FROM_TO_TYPE,
-  repairOrder,
-  ASSET_STATUS,
+  MATERIAL_TYPE,
   WORK_ORDER_STATUS,
-  MATERIAL_TYPE
+  deliveryTicket,
+  gridLoadingTimeout,
+  repairOrder
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
-import { uniq, map } from 'lodash';
-import { ExpandMore } from '@material-ui/icons';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
-import { useData } from 'src/StateProvider/Provider';
 
 const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -148,7 +148,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       if (d.fieldName === 'assetNumber') {
         cell = ({ row }) =>
           row?.original?.assetNumber ? (
-            <div className="d-flex gap-2 align-items-center">
+            <div className="d-flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.assetNumber}</h5>
               <IconButton
                 size="small"
@@ -156,7 +156,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                   window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`);
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </div>
           ) : (
@@ -166,7 +166,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       if (d.fieldName === 'productName') {
         cell = ({ row }) =>
           row?.original?.productName ? (
-            <div className="d-flex gap-2 align-items-center">
+            <div className="d-flex items-center gap-2">
               <h5 className="text-truncate">{row?.original?.productName}</h5>
               <IconButton
                 size="small"
@@ -174,7 +174,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                   window.open(`${routes.productDetail.path}/${row?.original?.productId}`);
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </div>
           ) : (
@@ -192,7 +192,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       Header: 'Work Order',
       Cell: ({ row }) =>
         row?.original?.workOrder ? (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.workOrder}</h5>
             <IconButton
               size="small"
@@ -200,7 +200,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                 window.open(`${routes.workOrderDetail.path}/${row?.original?.workOrderId}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           </div>
         ) : (
@@ -222,7 +222,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
       Header: 'Loading Ticket',
       Cell: ({ row }) =>
         row?.original?.loadingTicket ? (
-          <div className="d-flex gap-2 align-items-center">
+          <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
             <IconButton
               size="small"
@@ -230,7 +230,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                 window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           </div>
         ) : (
