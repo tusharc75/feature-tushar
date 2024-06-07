@@ -1,7 +1,6 @@
 import { IconButton } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import Grid from '@material-ui/core/Grid/Grid';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -14,6 +13,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Invoice`;
@@ -71,7 +71,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
           width: 300,
           Cell: ({ row }) =>
             row?.original?.type ? (
-              <div className="d-flex gap-2 align-items-center">
+              <div className="flex items-center gap-2">
                {row?.original?.detail ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
                 {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
                   <IconButton
@@ -88,7 +88,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
                       }
                     }}
                   >
-                    <OpenInNewIcon fontSize="small" color="primary" />
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
                 )}
               </div>

@@ -7,10 +7,10 @@ import { CHILD_RESOURCE, MATERIAL_TYPE, salesOrder, sidebarResource } from '../.
 import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { useData } from 'src/StateProvider/Provider';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 
@@ -61,7 +61,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         sticky: isMobile || isTablet ? 'none' : 'left',
         width: 200,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {<p title={row.original?.detail}>{row.original?.detail}</p>}
             <Box ml={1}>
               <IconButton
@@ -76,7 +76,7 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </Box>
           </div>

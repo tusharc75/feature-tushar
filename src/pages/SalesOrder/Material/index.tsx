@@ -3,7 +3,6 @@ import { default as Add } from '@material-ui/icons/Add';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, isArray, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -28,6 +27,7 @@ import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { flattenArray } from 'src/constants/columns';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
@@ -104,7 +104,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         minWidth: 300,
         width: 300,
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {
               (row.original?.detail ?
                 <p
@@ -119,7 +119,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
                 : <NoDataCell />)
             }
             {![MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(row?.original?.type) && (
-              <Box ml={1} className="d-flex align-items-center">
+              <>
                 {row.original?.subRows?.length > 0 && (
                   <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
                 )}
@@ -133,25 +133,24 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
                     </IconButton>
                   </HtmlTooltip>
                 </Box>
-              </Box>
+              </>
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === MATERIAL_TYPE.service) {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.product) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>)}
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            )}
           </div>
         )
       },
