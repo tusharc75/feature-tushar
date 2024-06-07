@@ -485,7 +485,7 @@ export const filtermodelToFormValue = (filtermodel: FilterModel) => {
       formValues[`from_${snakeCase(key)}`] = new Date(value.filter['from']);
       formValues[`to_${snakeCase(key)}`] = new Date(value.filter['to']);
     } else if (value['operator'] === 'OR') {
-      formValues[key] = value['condition1']?.filter.map((e) => e.optionValue);
+      formValues[key] = value.condition1?.filter.map((e) => e.optionValue);
     } else if (value.filter) {
       formValues[key] = value.filter;
     }
