@@ -1187,7 +1187,7 @@ const ReceivingTicket = ({
     if (rentalManagementData?.wellName?.optionValue) {
       data['wellName'] = rentalManagementData?.wellName?.optionValue;
     }
-    if (selectedRecords?.find((e) => e?.wellNumber)) {
+    if (selectedRecords?.find((e) => !isEmpty(e?.wellNumber))) {
       data['wellNumber'] = getUniqueWellNumber(selectedRecords);
     }
     else if (rentalManagementData?.wellNumber) {
