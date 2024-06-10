@@ -10,8 +10,8 @@ import routes from 'src/components/Helpers/Routes';
 import { fieldTicket } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { fetch_child_resource_fields } from '../ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 function Versions({ id, label, childResource, resource, referenceData, versions, renderedFrom, handleClose }) {
   const [fullScreen, setFullScreen] = useState(true);
@@ -65,10 +65,9 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
         sticky: isMobile || isTablet ? 'none' : 'left',
         disabled: true,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p title={row.original.detail}>{row.original.detail}</p>
             {['product', 'service'].includes(row.original.type) && (
-              <Box ml={1}>
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -79,9 +78,8 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
                     }
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color="primary" />
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
-              </Box>
             )}
           </div>
         )
