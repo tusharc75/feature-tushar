@@ -38,13 +38,13 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   useEffect(() => {
     fetchAllColumns();
     fetchUserFilters();
-    if (currentFomValue) {
-      for (const property in currentFomValue) {
-        if (isEmpty(currentFomValue[property])) {
-          delete currentFomValue[property];
-        }
-      }
-    }
+    // if (currentFomValue) {
+    //   for (const property in currentFomValue) {
+    //     if (isEmpty(currentFomValue[property])) {
+    //       delete currentFomValue[property];
+    //     }
+    //   }
+    // }
     if (selectedFilter) {
       setFormValues(selectedFilter?.filterValue || {});
     } else {
