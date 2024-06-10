@@ -71,6 +71,7 @@ import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import ServiceLogDialog from './ServiceLogDialog';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -431,6 +432,9 @@ const ReceivingTicket = ({
             obj.returnTicketId = returnTicket?.returnTicketId;
             obj.returnTicketStatus = returnTicket?.returnTicketStatus;
           }
+
+          obj.wellNumber = getParentWellNumber(material, element?._id)
+
           productAssets.push(obj);
           qty = qty - ele.qty;
         });
@@ -466,6 +470,7 @@ const ReceivingTicket = ({
             element?.currentLocation?.optionValue ||
             rentalManagementData?.shippingAddress?.optionValue ||
             rentalManagementData?.billingAddress?.optionValue;
+          obj.wellNumber = getParentWellNumber(material, element?._id)
 
           productAssets.push(obj);
         }
@@ -556,6 +561,8 @@ const ReceivingTicket = ({
                   obj.receivingTicket = receiveTicket?.receivingTicket;
                   obj.receivingTicketStatus = receiveTicket?.receivingTicketStatus;
                 }
+                obj.wellNumber = getParentWellNumber(material, element?._id)
+
                 productAssets.push(obj);
                 ticketProductSerialNumbers = [...ticketProductSerialNumbers, ...(ele?.serialNumber || [])];
                 qty = qty - ele.qty;
@@ -586,7 +593,8 @@ const ReceivingTicket = ({
                   currentLocation:
                     element?.currentLocation?.optionValue ||
                     rentalManagementData?.shippingAddress?.optionValue ||
-                    rentalManagementData?.billingAddress?.optionValue
+                    rentalManagementData?.billingAddress?.optionValue,
+                  wellNumber: getParentWellNumber(material, element?._id)
                 });
               }
             }
@@ -995,6 +1003,10 @@ const ReceivingTicket = ({
           {
             accessor: 'wellNumber',
             Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
+            accessorFn: (original) => {
+              return isArray(original?.wellNumber) ? original?.wellNumber[0]?.optionLabel : isObject(original?.wellNumber)
+                ? original?.wellNumber?.optionLabel : original?.wellNumber;
+            },
             Cell: ({ row }) => (
               <DropdownCell
                 permissions={permissions}
@@ -1175,7 +1187,10 @@ const ReceivingTicket = ({
     if (rentalManagementData?.wellName?.optionValue) {
       data['wellName'] = rentalManagementData?.wellName?.optionValue;
     }
-    if (rentalManagementData?.wellNumber) {
+    if (selectedRecords?.find((e) => e?.wellNumber)) {
+      data['wellNumber'] = getUniqueWellNumber(selectedRecords);
+    }
+    else if (rentalManagementData?.wellNumber) {
       if (rentalManagementData?.wellNumber?.optionValue) {
         data['wellNumber'] = rentalManagementData?.wellNumber?.optionValue;
       } else {
@@ -1293,7 +1308,7 @@ const ReceivingTicket = ({
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
-            message: `Receiving Successfully`
+            message: `Received Successfully`
           });
           if (
             receivingTicketId?.length &&
