@@ -1,5 +1,4 @@
 import { Box, IconButton } from '@material-ui/core';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -11,6 +10,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { CHILD_RESOURCE, MATERIAL_TYPE, prepareDataForGrid } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ dealId }) => {
   const renderedFrom = camelCase(`${routes?.deals.title}_material`);
@@ -67,7 +67,7 @@ const Material = ({ dealId }) => {
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p
               className="link text-truncate"
               title={row.original.detail}
@@ -82,7 +82,7 @@ const Material = ({ dealId }) => {
                 }
               }}
             >
-              <OpenInNewIcon fontSize="small" color="primary" />
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
             </IconButton>
           </div>
         )

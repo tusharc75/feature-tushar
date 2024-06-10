@@ -2,7 +2,6 @@ import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
@@ -21,6 +20,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import MaterialDialog from './MaterialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
 
@@ -86,7 +86,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
         minWidth: 300,
         width: 300,
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'nowrap' }}>
+          <div className="flex items-center gap-2 flex-nowrap">
             {allowedToEdit ? (
               <p
                 onClick={() => {
@@ -108,10 +108,10 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
             )}
             {allowedToEdit && (
               <>
-                <Box ml={1}>
+                <Box>
                   <span>({row.original?.subRows?.length})</span>
                 </Box>
-                <Box ml={1}>
+                <Box>
                   <HtmlTooltip title="Add Product">
                     <IconButton
                       onClick={() => {
@@ -125,7 +125,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
                 </Box>
               </>
             )}
-            <Box ml={1}>
+            <Box>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -136,7 +136,7 @@ const Material = ({ demandOrderData, fetchDemadOrderData, allowedToEdit }) => {
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </Box>
           </div>

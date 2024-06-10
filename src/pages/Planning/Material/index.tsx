@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -26,6 +25,7 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
@@ -104,7 +104,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {allowedToEdit && row.original.type !== MATERIAL_TYPE.serializedAsset ? (
               <p
                 onClick={() => {
@@ -120,10 +120,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             )}
             {row.original.type === MATERIAL_TYPE.package && allowedToEdit && (
               <>
-                <Box ml={1}>
+                <Box>
                   <span>({row.original?.subRows?.length})</span>
                 </Box>
-                <Box ml={1}>
+                <Box>
                   <HtmlTooltip title="Add Product">
                     <IconButton
                       onClick={() => {
@@ -137,7 +137,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
                 </Box>
               </>
             )}
-            <Box ml={1}>
+            
               <IconButton
                 size="small"
                 onClick={() => {
@@ -152,9 +152,8 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
-            </Box>
           </div>
         )
       },
