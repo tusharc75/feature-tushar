@@ -157,6 +157,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       setPriceMethodListConst(pricingMethodOptions);
       if (!isOffline) {
         await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      } else {
+        setPriceMethodList(pricingMethodOptions);
       }
       data.forEach((element) => {
         if (rowData?.type === MATERIAL_TYPE.serializedAsset) {

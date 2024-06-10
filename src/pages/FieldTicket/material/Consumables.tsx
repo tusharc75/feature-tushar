@@ -351,6 +351,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           productName: d.productName,
           productDescription: d.productDescription,
           productNumber: d.productNumber,
+          unit : d?.unitMain?.length ? d.unitMain : [],
+          pricingMethod : d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
         }
         element.fieldTicketId = fieldTicketData?._id;
         element._id = id;
