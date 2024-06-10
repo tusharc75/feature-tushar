@@ -10,7 +10,7 @@ import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { groupBy, isEmpty, map, startCase, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
