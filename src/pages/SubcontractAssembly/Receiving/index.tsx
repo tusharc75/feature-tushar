@@ -12,7 +12,7 @@ import HtmlTooltip from "src/components/CustomTooltipTitle";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
-import { CHILD_RESOURCE, sidebarResource } from "src/constants/helpers";
+import { CHILD_RESOURCE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, deliveryTicket, sidebarResource } from "src/constants/helpers";
 import ReceivingCostDialog from "src/pages/SubcontractAssembly/Receiving/ReceivingCostDialog";
 import ViewCost from "src/pages/SubcontractAssembly/Receiving/ViewCost";
 import History from '../../ProductInventory/LedgerHistory';
@@ -106,15 +106,16 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 				return (
 					<>
 						{row?.original?.receivedQty <= 0 && (
-							<HtmlTooltip title={'Receive'}>
+							<HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
 								<IconButton
 									size="small"
-									aria-label="Edit"
+									aria-label="Receive"
+									disabled={!row?.original?.canReceive}
 									onClick={() => {
 										setCostDialog({ open: true, _id: row?.original?._id })
 									}}
 								>
-									<AddCircleOutline fontSize="small" color={'primary'} />
+									<AddCircleOutline fontSize="small" color={row?.original?.canReceive ? 'primary' : 'disabled'} />
 								</IconButton>
 							</HtmlTooltip>
 						)}
@@ -166,6 +167,12 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 		let data;
 		const response = await axiosInstance().get(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`);
 		data = response?.data?.data?.material;
+
+		const result = await axiosInstance().get(
+			`${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly}&referenceId=${subcontractAssemblyData._id}&ticketType=${DELIVERY_TICKET_TYPE.delivery}`
+		);
+		const deliveryTicketList = result?.data?.data;
+
 		let rows = data?.filter((d: any) => !d.parentId);
 		rows.forEach((parent, i) => {
 			parent.index = i + 1;
@@ -173,6 +180,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 			parent.description = parent.productDetail?.productDescription || '';
 			parent.receivedQty = parent?.receivedQty || 0;
 			parent.canDelete = parent.canDelete ?? true;
+			parent.canReceive = data?.filter(d => d?.parentId === parent?._id)?.every(d => deliveryTicketList?.filter(dt => dt.ticketType === DELIVERY_TICKET_TYPE.delivery && dt.type === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly && dt.status === DELIVERY_TICKET_STATUS.delivered).some(_d => _d?.products?.map(p => p?.product).includes(d?.materialId) && _d?.products?.map(p => p?.uniqueId)?.includes(d?._id)))
 		});
 		dispatch({ type: 'initialize', data: rows, count: rows?.length });
 		dispatch({ type: 'loading', loading: false });
