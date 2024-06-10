@@ -147,7 +147,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                   </Box>
                 }
                   
-                {values['sorting'] && columns.length && (
+                {values['sorting'] && columns?.length && (
                   <div className="flex flex-wrap gap-2 my-2">
                     <Autocomplete
                       id="sorting"
