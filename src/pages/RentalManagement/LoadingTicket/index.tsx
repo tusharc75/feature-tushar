@@ -8,7 +8,7 @@ import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { groupBy, isArray, isEqual, isObject, map, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isEqual, isObject, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
@@ -803,7 +803,7 @@ const LoadingTicket = ({
         data['wellName'] = rentalManagementData?.wellName?.optionValue;
       }
 
-      if (selectedRecords?.find((e) => e?.wellNumber)) {
+      if (selectedRecords?.find((e) => !isEmpty(e?.wellNumber))) {
         data['wellNumber'] = getUniqueWellNumber(selectedRecords);
       }
       else if (rentalManagementData?.wellNumber) {
