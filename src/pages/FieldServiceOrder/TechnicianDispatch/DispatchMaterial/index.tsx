@@ -6,9 +6,9 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import { FiExternalLink } from 'react-icons/fi';
 
 const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
   const { state, dispatch } = useTableReducer();
@@ -39,7 +39,7 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
       disabled: true,
       sticky: isMobile || isTablet ? 'none' : 'left',
       Cell: ({ row }) => (
-        <div style={{ display: 'flex', alignItems: 'center' }}>
+        <div className="flex items-center gap-2">
           {row.original?.detail}
           <IconButton
             size="small"
@@ -48,7 +48,7 @@ const DispatchMaterial = ({ handleClose, data, handleSubmit }) => {
               window.open(`${routes.productDetail.path}/${row.original?.productId}`);
             }}
           >
-            <OpenInNewIcon fontSize="small" color="primary" />
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
           </IconButton>
         </div>
       )

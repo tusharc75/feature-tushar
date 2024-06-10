@@ -22,7 +22,6 @@ import { CustomDialogTransition, displayDate, gridLoadingTimeout, isObjectEmpty,
 
 import FolderIcon from '@material-ui/icons/Folder';
 import InsertDriveFileOutlinedIcon from '@material-ui/icons/InsertDriveFileOutlined';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import SendIcon from '@material-ui/icons/Send';
 import PreviewIcon from '@material-ui/icons/Visibility';
 import axios, { CancelTokenSource } from 'axios';
@@ -34,6 +33,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import { FiExternalLink } from 'react-icons/fi';
 
 export default function Attachment() {
   const history = useHistory();
@@ -130,12 +130,12 @@ export default function Attachment() {
           {row.original.relatedTo && row.original.relatedTo?.length > 0 ? (
             row.original.relatedTo.map((d) => {
               return (
-                <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
+                <div className="flex items-center gap-2" key={d.name}>
                   <p>{d.name}</p>
-                  <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
-                    <OpenInNewIcon fontSize="small" color="primary" />
+                  <IconButton  size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
-                  <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
+                  <Chip color="primary" label={`${routes[d?.type]?.title}`} />
                 </div>
               );
             })

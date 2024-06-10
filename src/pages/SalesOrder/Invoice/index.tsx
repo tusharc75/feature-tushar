@@ -1,7 +1,6 @@
 import { IconButton } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
 import Grid from '@material-ui/core/Grid/Grid';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, startCase } from 'lodash';
 import { Fragment, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -14,6 +13,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { CHILD_RESOURCE, MATERIAL_TYPE, SALES_ORDER_STATUS, salesOrder, sidebarResource } from '../../../constants/helpers';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen }) => {
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Invoice`;
@@ -74,25 +74,23 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => {
           return row.original?.detail ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               <p title={row.original?.detail}>{row.original?.detail}</p>
               {row.original.type !== MATERIAL_TYPE.manualEntry && (
-                <Box ml={1}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      if (row.original.type === MATERIAL_TYPE.service) {
-                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                      } else if (row.original.type === MATERIAL_TYPE.product) {
-                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                      } else {
-                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                      }
-                    }}
-                  >
-                    <OpenInNewIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </Box>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    if (row.original.type === MATERIAL_TYPE.service) {
+                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                    } else if (row.original.type === MATERIAL_TYPE.product) {
+                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                    } else {
+                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                    }
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               )}
             </div>
           ) : (
@@ -110,19 +108,19 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
       },
       ...(permissions?.leadTimeMaster
         ? [
-            {
-              accessor: 'leadTime',
-              Header: 'Lead Time (Days)',
-              Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
-              Footer: (info) => {
-                let rows = info.table.getExpandedRowModel().rows;
-                const total = rows
-                  ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                  .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-                return <>{total}</>;
-              }
+          {
+            accessor: 'leadTime',
+            Header: 'Lead Time (Days)',
+            Cell: ({ row }) => <div>{row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0}</div>,
+            Footer: (info) => {
+              let rows = info.table.getExpandedRowModel().rows;
+              const total = rows
+                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+              return <>{total}</>;
             }
-          ]
+          }
+        ]
         : [])
     ];
     coloum = [...coloum, ...newColumns];
@@ -152,22 +150,22 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
         parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.manualEntry
-          ? parent?.description
-          : '';
+            ? parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.type === MATERIAL_TYPE.manualEntry
+                ? parent?.description
+                : '';
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
           : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription
-          : parent?.type === MATERIAL_TYPE.manualEntry
-          ? parent?.description
-          : parent?.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceDescription
-          : '';
+            ? parent?.packageDetail?.packageDescription
+            : parent?.type === MATERIAL_TYPE.manualEntry
+              ? parent?.description
+              : parent?.type === MATERIAL_TYPE.service
+                ? parent?.serviceDetail?.serviceDescription
+                : '';
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.qty = parent.qty;
@@ -186,14 +184,14 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
           : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName;
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow?.serviceDetail?.serviceDescription;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.qty = `${parent.qty * _subRow.qty} `;

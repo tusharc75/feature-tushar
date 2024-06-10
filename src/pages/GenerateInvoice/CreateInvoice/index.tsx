@@ -25,10 +25,10 @@ import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from 'src/con
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { camelCase, startCase } from 'lodash';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling }) => {
 
@@ -108,19 +108,17 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         Header: 'Field Ticket',
         disabled: true,
         Cell: ({ row }) =>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p className="text-truncate">{row.original.fieldTicketNumber}</p>
             {permissions?.fieldTicket?.isRead &&
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.fieldTicketDetail.path}/${row.original.fieldTicketId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             }
           </div>
       }] : []),
@@ -131,14 +129,12 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
         width: 300,
         disabled: true,
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p>{row.original.detail}</p>
-            <Box ml={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
-              </span>
-            </Box>
-            {row.original.type !== 'manualEntry' && (
+            <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+              {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : ''}
+            </span>
+            {row.original.type !== MATERIAL_TYPE.manualEntry && (
               <IconButton
                 size="small"
                 onClick={() => {
@@ -153,7 +149,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>
@@ -298,7 +294,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
 
   const handleApplyDate = async () => {
     let tempValues: any = { actualEndDate: endDate };
-    let newEndDate=  moment(endDate).toISOString()
+    let newEndDate = moment(endDate).toISOString()
     const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
     const invoicedProducts = invoiceResponse?.data?.data?.material;
 

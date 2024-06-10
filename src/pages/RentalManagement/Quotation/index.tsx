@@ -1,5 +1,4 @@
 import { Box, Button, IconButton, Typography, useMediaQuery } from '@material-ui/core';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { camelCase, orderBy, startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { FcCancel, FcClock, FcOk } from 'react-icons/fc';
@@ -19,6 +18,7 @@ import { GiReceiveMoney } from 'react-icons/gi';
 import { VscVersions } from 'react-icons/vsc';
 import { fetch_rental_quotation_fields } from 'src/components/RentalManagment/helper';
 import { rentalManagementMessage } from 'src/constants/messageHelpers';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Quotation = ({
   rentalManagementData,
@@ -141,29 +141,27 @@ const Quotation = ({
         disabled: true,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-1">
             <p title={row.original.detail}>{row.original.detail}</p>
-            <Box ml={1} mr={1} className="d-flex align-items-center">
-              <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
-                {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
-              </span>
-            </Box>
-            {['service', 'product', 'package', 'serializedAsset']?.includes(row.original.type) && (
+            <span title={`There are ${row.original?.subRows?.length} product(s) in this ${row.original?.type}`}>
+              {row.original?.subRows?.length ? `(${row.original?.subRows?.length})` : null}
+            </span>
+            {![MATERIAL_TYPE.manualEntry]?.includes(row.original.type) && (
               <IconButton
                 size="small"
                 onClick={() => {
-                  if (row.original.type === 'service') {
+                  if (row.original.type === MATERIAL_TYPE.service) {
                     window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
                     window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'serializedAsset') {
+                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
                     window.open(`${routes.serializedAssetDetail.path}/${row.original.inventory}`);
-                  } else if (row.original.type === 'package') {
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
                     window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
                   }
                 }}
               >
-                <OpenInNewIcon fontSize="small" color="primary" />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             )}
           </div>

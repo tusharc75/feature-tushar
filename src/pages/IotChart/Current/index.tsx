@@ -67,14 +67,9 @@ export default function Current({ deviceTemplate, assetId }) {
   const fetchErrorData = async () => {
     setErrorData(null);
     axiosInstance()
-      .get(`/report/iot-alerts?asset=${assetId}`)
+      .get(`/report/iot-alerts?asset=${assetId}&page=0&limit=25`)
       .then(({ data: { data } }) => {
-        setErrorData(
-          data
-            ?.sort((a, b) => moment(b.time).diff(moment(a.time)))
-            ?.filter((e) => e?.message)
-            ?.slice(0, 10)
-        );
+        setErrorData(data?.filter((e) => e?.message));
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

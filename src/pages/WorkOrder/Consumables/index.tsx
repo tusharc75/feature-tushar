@@ -19,7 +19,6 @@ import HistoryIcon from '@material-ui/icons/History';
 import { useData } from 'src/StateProvider/Provider';
 import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { BiChevronDown } from 'react-icons/bi';
 import UpdateProductDialog from './UpdateProductDialog';
 import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
@@ -28,6 +27,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { camelCase } from 'lodash';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Consumables = ({
   isCreate,
@@ -126,7 +126,7 @@ const Consumables = ({
           primaryField: true,
           Cell: ({ row }) => {
             return row.original[e?.fieldName] ? (
-              <div className="d-flex gap-2 align-items-center">
+              <div className="flex items-center gap-2">
                 {hasChildFields && allowedToEdit ? (
                   <p
                     className={'link text-truncate'}
@@ -148,7 +148,7 @@ const Consumables = ({
                     window.open(`${routes.productDetail.path}/${row.original?.productId}`);
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color={'primary'} />
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
               </div>
             ) : (
@@ -174,7 +174,7 @@ const Consumables = ({
         width: 250,
         Cell: ({ row }) =>
           row?.original?.service ? (
-            <div className="d-flex gap-2 align-items-center">
+            <div className="flex items-center gap-2">
               <p className="text-truncate">{row.original.service}</p>
               <IconButton
                 size="small"
@@ -182,7 +182,7 @@ const Consumables = ({
                   window.open(`${routes.serviceMasterDetail.path}/${row.original.serviceId}`);
                 }}
               >
-                <OpenInNewIcon fontSize="small" color={'primary'} />
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
               </IconButton>
             </div>
           ) : (

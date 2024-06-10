@@ -1,7 +1,6 @@
 import { Box, Grid, IconButton, MenuItem } from '@material-ui/core';
 import AddIcon from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -20,9 +19,10 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CHILD_RESOURCE, fieldServiceOrder } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, fieldServiceOrder } from '../../../constants/helpers';
 import ServiceOrderQty from './ServiceOrderQty';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit }: any) => {
   const toastConfig = useContext(CustomToastContext);
@@ -83,7 +83,7 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p
               onClick={() => {
                 setIsProductEdit({
@@ -98,39 +98,35 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
             >
               {row.original.detail}
             </p>
-            {row.original.type === 'package' && (
+            {row.original.type === MATERIAL_TYPE.package && (
               <>
-                <Box ml={1}>
-                  <HtmlTooltip title="Add Product">
-                    <IconButton
-                      onClick={() => {
-                        setAddExistingProductDialog({ open: true, type: 'product', parentId: row.original?._id });
-                      }}
-                      size="small"
-                    >
-                      <AddIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
+                <HtmlTooltip title="Add Product">
+                  <IconButton
+                    onClick={() => {
+                      setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.product, parentId: row.original?._id });
+                    }}
+                    size="small"
+                  >
+                    <AddIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </HtmlTooltip>
               </>
             )}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                style={{ marginLeft: '10px' }}
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            <IconButton
+              size="small"
+              style={{ marginLeft: '10px' }}
+              onClick={() => {
+                if (row.original.type === MATERIAL_TYPE.service) {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.product) {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       }
@@ -199,16 +195,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         parent.type === 'product'
           ? parent?.productDetail?.productName
           : parent.type === 'service'
-          ? parent?.serviceDetail?.serviceName
-          : parent?.packageDetail?.packageName;
+            ? parent?.serviceDetail?.serviceName
+            : parent?.packageDetail?.packageName;
       parent.description =
         parent.type === 'service'
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === 'product'
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === 'package'
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === 'package'
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.canDelete = technician.some((d) => d._id === parent._id) ? false : true;
       parent.estimateStartDate = parent.estimateStartDate ? parent.estimateStartDate : serviceOrderData?.estimateStartDate;
       parent.estimateEndDate = parent.estimateEndDate ? parent.estimateEndDate : serviceOrderData?.estimateEndDate;
@@ -231,16 +227,16 @@ const Services = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
         _subRow.type === 'product'
           ? _subRow?.productDetail?.productName
           : _subRow.type === 'service'
-          ? _subRow?.serviceDetail?.serviceName
-          : _subRow?.packageDetail?.packageName;
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow?.packageDetail?.packageName;
       _subRow.description =
         _subRow.type === 'service'
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === 'product'
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === 'package'
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === 'package'
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.canDelete = technician.some((d) => d.service.optionValue === _subRow._id) ? false : true;
       _subRow.estimateStartDate = _subRow.estimateStartDate ? _subRow.estimateStartDate : serviceOrderData?.estimateStartDate;
       _subRow.estimateEndDate = _subRow.estimateEndDate ? _subRow.estimateEndDate : serviceOrderData?.estimateEndDate;

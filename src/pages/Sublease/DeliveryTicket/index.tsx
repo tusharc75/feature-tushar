@@ -1,6 +1,5 @@
 import { IconButton, MenuItem } from '@material-ui/core';
 import Box from '@material-ui/core/Box/Box';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { map, startCase, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -23,6 +22,7 @@ import {
   sublease
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
+import { FiExternalLink } from 'react-icons/fi';
 
 const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNextStepToolTip, stepFullScreen, renderedFrom, allowedToEdit }) => {
   const { state, dispatch } = useTableReducer();
@@ -60,18 +60,16 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         width: 200,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             <p className="text-truncate">{row.original?.detail}</p>
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -81,18 +79,16 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         width: 200,
         Cell: ({ row }) =>
           row?.original?.productName ? (
-            <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               <p className="text-truncate">{row?.original?.productName}</p>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -118,18 +114,16 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         width: 200,
         Cell: ({ row }) =>
           row?.original[`LoadingTicket`] ? (
-            <div style={{ display: 'flex' }}>
+            <div className="flex items-center gap-2">
               <p className="text-truncate">{row?.original[`LoadingTicket`]}</p>
-              <Box ml={1}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.deliveryTicketDetail.path}/${row.original[`LoadingTicketId`]}`);
-                  }}
-                >
-                  <OpenInNewIcon fontSize="small" color="primary" />
-                </IconButton>
-              </Box>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${routes.deliveryTicketDetail.path}/${row.original[`LoadingTicketId`]}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -150,18 +144,16 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
             width: 200,
             Cell: ({ row }) =>
               row?.original[`ReceivingTicket`] ? (
-                <div style={{ display: 'flex' }}>
+                <div className="flex items-center gap-2">
                   <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
-                  <Box ml={1}>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
-                      }}
-                    >
-                      <OpenInNewIcon fontSize="small" color="primary" />
-                    </IconButton>
-                  </Box>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                 </div>
               ) : (
                 <NoDataCell />

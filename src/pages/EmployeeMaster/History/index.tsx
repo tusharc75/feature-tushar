@@ -8,11 +8,11 @@ import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/compone
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { camelCase } from 'lodash';
 import { dateFormat, employeeMaster, sidebarResource } from 'src/constants/helpers';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { Autocomplete } from '@material-ui/lab';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { FiExternalLink } from 'react-icons/fi';
 
 const TECHNICIAN_RESOURCE = [
   {
@@ -58,18 +58,16 @@ const History = ({ id }) => {
       Cell: ({ row }) => (
         <>
           {row?.original?.reference?.optionValue ? (
-            <div>
+            <div className="flex items-center gap-2">
               <div>{row?.original?.reference?.optionLabel}</div>
-              <Box ml={1}>
                 <IconButton
                   size="small"
                   onClick={() => {
                     window.open(`${selectedResource.path}/${row?.original?.reference?.optionValue}`);
                   }}
                 >
-                  <OpenInNewIcon fontSize="small" color="primary" />
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
-              </Box>
             </div>
           ) : (
             <NoDataCell />
