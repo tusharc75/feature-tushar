@@ -238,7 +238,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 				{showConfirmationDialog && (
 					<ConfirmationDialog
 						open={true}
-						message="Do you want to seperate package for each quantity ?"
+						message="Do you want to separate package for each quantity ?"
 						onOk={() => {
 							setShowConfirmationDialog(false);
 							const data: any = []
