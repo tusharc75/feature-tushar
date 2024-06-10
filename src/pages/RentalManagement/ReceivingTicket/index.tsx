@@ -2511,7 +2511,7 @@ const ActionButtonMenuItems = ({
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.inTransitDeliveredLoadingTicket });
         } else if (e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
-          if (!e?.isReplaced && e?.type === 'Asset') {
+          if (e?.isReplaced && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketCanNotCancelledForReplaceedAssets });
           } else if (![ASSET_STATUS.underReview]?.includes(e?.status) && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
