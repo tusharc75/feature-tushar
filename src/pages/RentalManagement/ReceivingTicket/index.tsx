@@ -10,7 +10,7 @@ import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { groupBy, isEmpty, map, startCase, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isObject, map, startCase, uniq } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -1187,7 +1187,7 @@ const ReceivingTicket = ({
     if (rentalManagementData?.wellName?.optionValue) {
       data['wellName'] = rentalManagementData?.wellName?.optionValue;
     }
-    if (selectedRecords?.find((e) => e?.wellNumber)) {
+    if (selectedRecords?.find((e) => !isEmpty(e?.wellNumber))) {
       data['wellNumber'] = getUniqueWellNumber(selectedRecords);
     }
     else if (rentalManagementData?.wellNumber) {
@@ -2511,7 +2511,7 @@ const ActionButtonMenuItems = ({
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.inTransitDeliveredLoadingTicket });
         } else if (e?.receivingTicketStatus === DELIVERY_TICKET_STATUS.delivered || e?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
-          if (!e?.isReplaced && e?.type === 'Asset') {
+          if (e?.isReplaced && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.ticketCanNotCancelledForReplaceedAssets });
           } else if (![ASSET_STATUS.underReview]?.includes(e?.status) && e?.type === 'Asset') {
             errorMessages.push({ index: e.index, message: rentalManagementMessage.statusURForCancelReceiving });
