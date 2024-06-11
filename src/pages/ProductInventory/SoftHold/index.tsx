@@ -7,7 +7,7 @@ import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import routes from '../../../components/Helpers/Routes';
-import { CustomDialogTransition, productInventory } from '../../../constants/helpers';
+import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
@@ -37,6 +37,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
       accessor: 'referenceNumber',
       Header: 'Reference Number',
       width: 120,
+      disabled: true,
       Cell: ({ row }) => (
         <div>
           <p
@@ -52,6 +53,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
     {
       accessor: 'inventory',
       Header: 'Inventory',
+      disabled: true,
       width: 120,
       Cell: ({ row }) => <div>{row.original?.qty}</div>
     }
@@ -66,16 +68,15 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         const result = [];
         data?.forEach((e) => {
           result.push({
-            path:
-              e.referenceType === 'Sales Order'
-                ? routes.salesOrderDetail.path
-                : e.referenceType === 'Transfer Inventory'
-                  ? routes.transferInventoryDetail.path
-                  : e.referenceType === 'Transfer Asset'
-                    ? routes.transferAssetDetail.path
-                    : e.referenceType === 'Work Order'
-                      ? routes.workOrderDetail.path
-                      : '',
+            path: e.referenceType === sidebarResource.salesOrder
+              ? routes.salesOrderDetail.path
+              : e.referenceType === sidebarResource.transferInventory
+                ? routes.transferInventoryDetail.path
+                : e.referenceType === sidebarResource.transferAsset
+                  ? routes.transferAssetDetail.path
+                  : e.referenceType === sidebarResource.workOrder
+                    ? routes.workOrderDetail.path
+                    : '',
             ...e
           });
         });
