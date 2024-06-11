@@ -61,15 +61,15 @@ export default function CustomMessageDialog({
         {getMessageList(errorMessages)?.map((d) => (
           <div
             key={d.message}
-            className="grid grid-cols-[1fr_5fr] gap-[20px]  shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] px-[15px] py-[12px] md:px-[20px] rounded-lg"
+            className="grid grid-cols-[1fr_5fr] gap-[20px]  rounded-lg px-[15px] py-[12px] shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] md:px-[20px]"
             style={{ border: '1px solid var(--common-border-color)' }}
           >
             <div title={d?.indexes?.toString()} className="cursor-help">
-              <p className="text-[13px] mb-[8px]">Index</p>
-              <h6 className="text-[16px]">{d?.indexes?.toString()}</h6>
+              <p className="mb-[8px] text-[13px]">Index</p>
+              <h6 className="text-[16px]">{d?.indexes?.join(', ')}</h6>
             </div>
             <div title={d?.message} className=" cursor-help">
-              <p className="text-[13px] mb-[8px]">Message</p>
+              <p className="mb-[8px] text-[13px]">Message</p>
               <p className="text-[16px]">{d?.message}</p>
             </div>
           </div>
