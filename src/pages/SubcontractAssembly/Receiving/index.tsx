@@ -236,6 +236,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 					onSuccess={(val) => {
 						handleUpdateCost(val)
 					}}
+					_id={costDialog._id}
 					subcontractAssemblyData={subcontractAssemblyData}
 					isSubmitting={isSubmitting}
 				/>

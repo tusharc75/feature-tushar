@@ -19,7 +19,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import routes from 'src/components/Helpers/Routes';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
-export default function ReceavingCostDialog({ onClose, onSuccess, subcontractAssemblyData, isSubmitting }) {
+export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontractAssemblyData, isSubmitting }) {
 
 	const toastConfig = useContext(CustomToastContext);
 	const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -33,7 +33,7 @@ export default function ReceavingCostDialog({ onClose, onSuccess, subcontractAss
 	const fetchData = async () => {
 		var fields = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyCost, subcontractAssemblyData?.currency, true, false);
 
-		axiosInstance().get(`${routes.subcontractAssembly.path}/total-consumables-cost/${subcontractAssemblyData?._id}`).then(({ data: { data } }) => {
+		axiosInstance().get(`${routes.subcontractAssembly.path}/total-consumables-cost/${subcontractAssemblyData?._id}/${_id}`).then(({ data: { data } }) => {
 			const tempInitialData = getObjKeys('', fields);
 			const calValues = autoCalculateSpecificFields({ [`consumableCost_${subcontractAssemblyData?.currency.toLowerCase()}`]: data?.totalConsumablesCost }, tempInitialData, fields);
 			Object.assign(tempInitialData, calValues);
