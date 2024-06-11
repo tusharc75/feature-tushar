@@ -164,7 +164,7 @@ const InventoryProduct = () => {
             show: true,
             Cell: ({ row }) =>
               row?.original?.softHold ? (
-                <div style={{ display: 'flex', alignItems: 'center' }}>
+                <div className="flex items-center gap-2">
                   <h5 className="text-truncate">{row?.original?.softHold}</h5>
                   <HtmlTooltip title={`Soft Hold History`}>
                     <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
@@ -303,10 +303,13 @@ const InventoryProduct = () => {
         .get(`${productInventory.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
-            let finalObject = prepareDataForGrid(u);
+            let finalObject: any = prepareDataForGrid(u);
             finalObject['productId'] = u._id;
             finalObject['plantId'] = plantId;
             finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
+            if (finalObject['availableInventory'] < 0 && u?.inventory) {
+              finalObject['availableInventory'] = 0;
+            }
             return {
               ...finalObject
             };
