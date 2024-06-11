@@ -73,6 +73,7 @@ import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 
+
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -749,6 +750,11 @@ const ReceivingTicket = ({
             }}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>
+            {row?.original?.loadingTicketId && (
+              <HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
+                <LocalShippingIcon fontSize="small" color={'primary'} />
+              </HtmlTooltip>
+            )}
             {row?.original?.receivingTicketId && (
               <HtmlTooltip title={`Receiving Ticket ${row?.original?.receivingTicketStatus}`}>
                 <LocalShippingIcon fontSize="small" color={'primary'} />
@@ -2902,9 +2908,7 @@ const ActionButtonMenuItems = ({
           </>
         )}
       {selectedRecords?.filter(
-        (f) =>
-          f.type === 'Product' &&
-          f.hasOwnProperty('loadingTicketId') &&
+        (f) => f.type === 'Product' && !f?.serialized && f.hasOwnProperty('loadingTicketId') &&
           f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
           Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
       ).length === selectedRecords.length &&
