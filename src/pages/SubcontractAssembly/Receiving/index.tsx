@@ -1,5 +1,5 @@
 import { Box, IconButton } from "@material-ui/core";
-import { OpenInNew, AddCircleOutline, Visibility } from "@material-ui/icons";
+import { AddCircleOutline, Visibility } from "@material-ui/icons";
 import HistoryIcon from "@material-ui/icons/History";
 import { camelCase } from "lodash";
 import { useContext, useEffect, useState } from "react";
@@ -17,6 +17,7 @@ import ReceivingCostDialog from "src/pages/SubcontractAssembly/Receiving/Receivi
 import ViewCost from "src/pages/SubcontractAssembly/Receiving/ViewCost";
 import History from '../../ProductInventory/LedgerHistory';
 import { DetailsPageHeader } from "src/components/PageHeaders";
+import { FiExternalLink } from "react-icons/fi";
 
 const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receaving`;
@@ -57,29 +58,25 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 				width: 300,
 				disabled: true,
 				sticky: isMobile || isTablet ? 'none' : 'left',
-				Cell: ({ row, table }) => (
-					<div style={{ display: 'flex', alignItems: 'center' }}>
+				Cell: ({ row }) => (
+					<div className="flex items-center gap-2">
 						{row.original.detail ? (
-							<p
-								className="text-truncate"
-								title={row.original.detail}
-							>
-								{row.original.detail}
-							</p>
+							<>
+								<p className="text-truncate" title={row.original.detail} 	>
+									{row.original.detail}
+								</p>
+								<IconButton
+									size="small"
+									onClick={() => {
+										window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+									}}
+								>
+									<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+								</IconButton>
+							</>
 						) : (
 							<NoDataCell />
 						)}
-
-						<Box ml={1} className=" flex-shrink-0">
-							<IconButton
-								size="small"
-								onClick={() => {
-									window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-								}}
-							>
-								<OpenInNew fontSize="small" color="primary" />
-							</IconButton>
-						</Box>
 					</div >
 				)
 			},

@@ -71,7 +71,7 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 				sticky: isMobile || isTablet ? 'none' : 'left',
 				Cell: ({ row }) => (
 					row.original.detail ?
-						<div className="flex items-center gap-1">
+						<div className="flex items-center gap-2">
 							{row.original.parentId ?
 								<p
 									onClick={() => {
