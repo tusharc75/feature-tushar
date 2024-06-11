@@ -20,6 +20,7 @@ import CommonSkeleton from '../../Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
 import { createFilterModel, fetchFieldOptions } from '../utils';
+import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -320,6 +321,22 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                         </Fragment>
                       ) : (
                         <Grid item xs={12} sm={6} md={6}>
+                    {field?.lookup && field.lookupResource ? (
+                        <AsyncDropdown
+                          key={field?._id}
+                          resource={field.lookupResource}
+                          errors={{}}
+                          touched={{}}
+                          multiple={true}
+                          value={formValues[field.fieldName] ?? []}
+                          onChange={(_, value) => {
+                            handleSelectFilter(field?.fieldName, value);
+                          }}
+                          fieldName={field.fieldName}
+                          fieldLabel={field.fieldLabel}
+                          required={false}
+                        />
+                      ) : (
                           <FormTypes
                             disabled={false}
                             values={formValues}
@@ -335,6 +352,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                             size="small"
                             fromFilter={true}
                           />
+                      )}
                         </Grid>
                       )}
                     </Fragment>

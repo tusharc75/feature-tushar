@@ -70,7 +70,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 				sticky: isMobile || isTablet ? 'none' : 'left',
 				Cell: ({ row }) => (
 					row.original.detail ? (
-						<div className="flex items-center gap-1">
+						<div className="flex items-center gap-2">
 							<p
 								onClick={() => {
 									setOpenMaterialDialog({ open: true, data: row?.original })
