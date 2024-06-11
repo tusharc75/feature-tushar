@@ -73,7 +73,6 @@ import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 
-
 const useStyles = makeStyles((theme) => ({
   root: {
     width: '100%',
@@ -434,7 +433,7 @@ const ReceivingTicket = ({
             obj.returnTicketStatus = returnTicket?.returnTicketStatus;
           }
 
-          obj.wellNumber = getParentWellNumber(material, element?._id)
+          obj.wellNumber = getParentWellNumber(material, element?._id);
 
           productAssets.push(obj);
           qty = qty - ele.qty;
@@ -471,7 +470,7 @@ const ReceivingTicket = ({
             element?.currentLocation?.optionValue ||
             rentalManagementData?.shippingAddress?.optionValue ||
             rentalManagementData?.billingAddress?.optionValue;
-          obj.wellNumber = getParentWellNumber(material, element?._id)
+          obj.wellNumber = getParentWellNumber(material, element?._id);
 
           productAssets.push(obj);
         }
@@ -562,7 +561,7 @@ const ReceivingTicket = ({
                   obj.receivingTicket = receiveTicket?.receivingTicket;
                   obj.receivingTicketStatus = receiveTicket?.receivingTicketStatus;
                 }
-                obj.wellNumber = getParentWellNumber(material, element?._id)
+                obj.wellNumber = getParentWellNumber(material, element?._id);
 
                 productAssets.push(obj);
                 ticketProductSerialNumbers = [...ticketProductSerialNumbers, ...(ele?.serialNumber || [])];
@@ -750,19 +749,19 @@ const ReceivingTicket = ({
             }}
           >
             <h5 className="text-truncate">{row?.original?.index}</h5>
-            {row?.original?.loadingTicketId && (
+            {row?.original?.loadingTicketId && !row?.original?.receivingTicketId && !row?.original?.returnTicketId && (
               <HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
                 <LocalShippingIcon fontSize="small" color={'primary'} />
               </HtmlTooltip>
             )}
             {row?.original?.receivingTicketId && (
               <HtmlTooltip title={`Receiving Ticket ${row?.original?.receivingTicketStatus}`}>
-                <LocalShippingIcon fontSize="small" color={'primary'} />
+                <LocalShippingIcon fontSize="small" color={'primary'} className="[transform:scaleX(-1)_!important]" />
               </HtmlTooltip>
             )}
             {row?.original?.returnTicketId && (
               <HtmlTooltip title={`Return Ticket ${row?.original?.returnTicketStatus}`}>
-                <LocalShippingIcon fontSize="small" color={'primary'} />
+                <LocalShippingIcon fontSize="small" color={'primary'} className="[transform:scaleX(-1)_!important]" />
               </HtmlTooltip>
             )}
             {row?.original?.warehouseId &&
@@ -1010,8 +1009,11 @@ const ReceivingTicket = ({
             accessor: 'wellNumber',
             Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
             accessorFn: (original) => {
-              return isArray(original?.wellNumber) ? original?.wellNumber[0]?.optionLabel : isObject(original?.wellNumber)
-                ? original?.wellNumber?.optionLabel : original?.wellNumber;
+              return isArray(original?.wellNumber)
+                ? original?.wellNumber[0]?.optionLabel
+                : isObject(original?.wellNumber)
+                  ? original?.wellNumber?.optionLabel
+                  : original?.wellNumber;
             },
             Cell: ({ row }) => (
               <DropdownCell
@@ -1195,8 +1197,7 @@ const ReceivingTicket = ({
     }
     if (selectedRecords?.find((e) => !isEmpty(e?.wellNumber))) {
       data['wellNumber'] = getUniqueWellNumber(selectedRecords);
-    }
-    else if (rentalManagementData?.wellNumber) {
+    } else if (rentalManagementData?.wellNumber) {
       if (rentalManagementData?.wellNumber?.optionValue) {
         data['wellNumber'] = rentalManagementData?.wellNumber?.optionValue;
       } else {
@@ -2908,7 +2909,10 @@ const ActionButtonMenuItems = ({
           </>
         )}
       {selectedRecords?.filter(
-        (f) => f.type === 'Product' && !f?.serialized && f.hasOwnProperty('loadingTicketId') &&
+        (f) =>
+          f.type === 'Product' &&
+          !f?.serialized &&
+          f.hasOwnProperty('loadingTicketId') &&
           f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered &&
           Number(f?.consumeQty) + Number(f?.returnQty) < Number(f?.qty)
       ).length === selectedRecords.length &&

@@ -123,16 +123,14 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
                 {row.original?.subRows?.length > 0 && (
                   <span title={`There are ${row.original?.subRows?.length} product(s) in this package`}>({row.original?.subRows?.length})</span>
                 )}
-                <Box pl={1}>
-                  <HtmlTooltip title="Add ">
-                    <IconButton
-                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
-                      size="small"
-                    >
-                      <Add color="disabled" fontSize="small" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
+                <HtmlTooltip title="Add">
+                  <IconButton
+                    onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                    size="small"
+                  >
+                    <Add color="disabled" fontSize="small" />
+                  </IconButton>
+                </HtmlTooltip>
               </>
             )}
             {row.original.type !== MATERIAL_TYPE.manualEntry && (

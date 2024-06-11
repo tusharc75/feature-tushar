@@ -1,8 +1,8 @@
 import { Box, IconButton, MenuItem } from "@material-ui/core";
-import { OpenInNew } from "@material-ui/icons";
 import { map, uniq } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
+import { FiExternalLink } from "react-icons/fi";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
 import { fetch_child_resource_fields } from "src/components/ChildResourceField";
@@ -54,18 +54,16 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 				sticky: isMobile || isTablet ? 'none' : 'left',
 				width: 200,
 				Cell: ({ row }) => (
-					<div style={{ display: 'flex', alignItems: 'center' }}>
-						{<p title={row.original?.detail}>{row.original?.detail}</p>}
-						<Box ml={1}>
-							<IconButton
-								size="small"
-								onClick={() => {
-									window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-								}}
-							>
-								<OpenInNew fontSize="small" color="primary" />
-							</IconButton>
-						</Box>
+					<div className="flex items-center gap-2">
+						<p title={row.original?.detail}>{row.original?.detail}</p>
+						<IconButton
+							size="small"
+							onClick={() => {
+								window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+							}}
+						>
+							<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+						</IconButton>
 					</div>
 				)
 			},
@@ -90,18 +88,16 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 				Header: 'Loading Ticket',
 				Cell: ({ row }) =>
 					row?.original?.loadingTicket ? (
-						<div>
+						<div className="flex items-center gap-2">
 							<h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
-							<Box ml={1}>
-								<IconButton
-									size="small"
-									onClick={() => {
-										window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
-									}}
-								>
-									<OpenInNew fontSize="small" color="primary" />
-								</IconButton>
-							</Box>
+							<IconButton
+								size="small"
+								onClick={() => {
+									window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
+								}}
+							>
+								<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+							</IconButton>
 						</div>
 					) : (
 						<NoDataCell />
