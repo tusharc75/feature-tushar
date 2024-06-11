@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext, Fragment} from 'react';
+import React, { useState, useEffect, useContext, Fragment } from 'react';
 import { Box, IconButton } from '@material-ui/core';
 import { isMobile } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -19,7 +19,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
   }: any = useData();
   const [columns, setColumns] = useState(null);
   const { state, dispatch } = useTableReducer();
-  const { page, limit,search, filters, sorting, selectedRecords } = state;
+  const { page, limit, search, filters, sorting, selectedRecords } = state;
 
   useEffect(() => {
     fetchGridColumns();
@@ -63,22 +63,22 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
     canDrag: false,
     Cell: ({ row }) => (
       <>
-   <HtmlTooltip title={row?.original?.inventory ? 'Pickup' : 'No inventory'}>
-     <span>
-        <IconButton
-          size="small"
-          disabled={!row?.original?.inventory || row?.original?.inventory === 0}
-          aria-label="Pickup"
-          onClick={() => {
-            setAssignHistoryProductQty(row?.original);
-          }}
-          color={row?.original?.inventory ? 'primary' : 'inherit'}
-        >
-          <AddToPhotosOutlinedIcon fontSize="small" color={'primary'} />
-        </IconButton>
-      </span>
-    </HtmlTooltip>
-       </>
+        <HtmlTooltip title={row?.original?.inventory ? 'Pickup' : 'No inventory'}>
+          <span>
+            <IconButton
+              size="small"
+              disabled={!row?.original?.inventory || row?.original?.inventory === 0}
+              aria-label="Pickup"
+              onClick={() => {
+                setAssignHistoryProductQty(row?.original);
+              }}
+              color={row?.original?.inventory ? 'primary' : 'inherit'}
+            >
+              <AddToPhotosOutlinedIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
+      </>
     )
   };
 
@@ -122,7 +122,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
   const fetchProducts = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    let api = `${cageManagement.api}?wareHouse=${plantId}${queryString}`;
+    let api = `${cageManagement.api}?warehouse=${plantId}${queryString}`;
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
@@ -146,22 +146,22 @@ const ProductGridLayout = ({ renderedFrom, setAssignHistoryProductQty, plantId, 
 
   return (
     <Fragment>
-       {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchProducts}
-            showOnlyShowFilteredRecordSwitch={false}
-            showFilters={false}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchProducts}
+          showOnlyShowFilteredRecordSwitch={false}
+          showFilters={false}
+        />
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Fragment>
   );
 };

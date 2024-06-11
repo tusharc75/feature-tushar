@@ -215,7 +215,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
       }
     }
 
-    if (type === 'add') {
+    if (type === 'add' && !user?.user?.brandPolicy?.hideProductInventoryCost) {
       if (parseFloat(values.price) <= 0 || values.price === '') {
         errors['price'] = 'Please enter valid cost';
       }
@@ -240,7 +240,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
         errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
       }
     }
-    
+
     if (lockDate) {
       if (!moment(values['customDate']).isSameOrAfter(moment(lockDate))) {
         errors['customDate'] = `Date entered prior to the locked date`;
@@ -374,7 +374,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
                         />
                       </ListItem>
                     </List>
-                    {type === 'add' ? (
+                    {type === 'add' && !user?.user?.brandPolicy?.hideProductInventoryCost ? (
                       <Box m={1}>
                         <TextField
                           margin="dense"
