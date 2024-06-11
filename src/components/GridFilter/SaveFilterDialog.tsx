@@ -51,10 +51,18 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
   });
 
   const handleSubmit = (values) => {
+    const updatedFilterValue = filterValue;
+    const colNames = Object.keys(filterValue);
+    for (const col of columns) {
+      const fieldName = col.fieldName
+       if(colNames.includes(fieldName) && col.lookup){
+        updatedFilterValue[fieldName] = filterValue[fieldName]?.map((e)=> e.optionValue);
+       }
+    }
     const data = {
       title: values?.title,
       resource: resource,
-      filterValue: filterValue,
+      filterValue: updatedFilterValue,
       default: values.default,
       sorting: values.sorting || false,
       sortBy: values.sortBy,
