@@ -219,6 +219,23 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 						Add Consumables
 					</MenuItem>
 				</HtmlTooltip>
+				<HtmlTooltip title={`Delete selected records`}>
+					<MenuItem
+						disabled={selectedRecords.some((e) => !e.canDelete || e.loadingTicketId || !e.parentId) || !allowedToEdit}
+						onClick={() => {
+							const dataToDelete: any = selectedRecords?.map(s => {
+								return ({
+									id: s._id,
+									materialId: s?.materialId
+								}
+								)
+							});
+							setDeleteData(dataToDelete);
+						}}
+					>
+						{`Delete (${selectedRecords?.length})`}
+					</MenuItem>
+				</HtmlTooltip>
 			</>
 		);
 	};
@@ -321,7 +338,7 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 					isSubmitting={isSubmitting}
 				/>
 			)}
-			{deleteData && (
+			{deleteData?.length && (
 				<ConfirmationDialog
 					open={true}
 					message={`Are you sure you want to delete the record(s)?`}
