@@ -18,8 +18,8 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
   const { state, dispatch } = useTableReducer();
 
   useEffect(() => {
-    if(tabs?.length){
-      const rows = softHoldData?.filter((e)=> e.referenceType===tabs[value]) || []
+    if (tabs?.length) {
+      const rows = softHoldData?.filter((e) => e.referenceType === tabs[value]) || []
       dispatch({ type: 'update', data: rows });
     }
   }, [value]);
@@ -59,7 +59,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
 
   const softHoldDataFetch = () => {
     axiosInstance()
-      .get(`${productInventory.api}/soft-hold/${data.productId}?wareHouse=${warehouse}`)
+      .get(`${productInventory.api}/soft-hold/${data.productId}?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         var unique = uniq(map(data, 'referenceType'));
         setTabs(unique);
@@ -80,7 +80,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
           });
         });
         setSoftHoldData(result);
-        const rows = result?.filter((e)=> e.referenceType===unique[value]) || []
+        const rows = result?.filter((e) => e.referenceType === unique[value]) || []
         dispatch({ type: 'initialize', data: rows, count: rows.length });
       });
   };
