@@ -56,7 +56,11 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
     for (const col of columns) {
       const fieldName = col.fieldName
        if(colNames.includes(fieldName) && col.lookup){
-        updatedFilterValue[fieldName] = filterValue[fieldName]?.map((e)=> e.optionValue);
+        if(updatedFilterValue[fieldName]?.length){
+          updatedFilterValue[fieldName] = filterValue[fieldName]?.map((e)=> e.optionValue);
+        }else{
+          delete updatedFilterValue[fieldName];
+        }
        }
     }
     const data = {
