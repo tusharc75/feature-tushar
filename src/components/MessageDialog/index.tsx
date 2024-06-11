@@ -2,6 +2,8 @@ import { Error } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import DashboardModal from '../DashboardModal';
+import { Button, Collapse } from '@material-ui/core';
+import { useState } from 'react';
 
 interface ErrorMessages {
   index?: number;
@@ -19,6 +21,7 @@ export default function CustomMessageDialog({
   onClose: () => void;
   forwardText?: string;
 }) {
+  const [expanded, setExpanded] = useState({});
   const getMessageList = (message) => {
     const errorMessages: any = [];
     message?.forEach((m) => {
@@ -58,23 +61,35 @@ export default function CustomMessageDialog({
       id="confirmation-dialog"
     >
       <div className="grid gap-2">
-        {getMessageList(errorMessages)?.map((d) => (
-          <div
-            key={d.message}
-            className="grid grid-cols-[1fr_5fr] gap-[20px]  shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] px-[15px] py-[12px] md:px-[20px] rounded-lg"
-            style={{ border: '1px solid var(--common-border-color)' }}
-          >
-            <div title={d?.indexes?.toString()} className="cursor-help">
-              <p className="text-[13px] mb-[8px]">Index</p>
-              <h6 className="text-[16px]">{d?.indexes?.toString()}</h6>
-            </div>
-            <div title={d?.message} className=" cursor-help">
-              <p className="text-[13px] mb-[8px]">Message</p>
-              <p className="text-[16px]">{d?.message}</p>
-            </div>
-          </div>
-        ))}
+        {getMessageList(errorMessages)?.map((d, index) => <RenderSingleMessage key={`${d?.indexes?.join(', ')}${d.message}`} index={index} d={d} />)}
       </div>
     </DashboardModal>
   );
 }
+
+const RenderSingleMessage = ({ d, index }) => {
+  const [expanded, setExpanded] = useState(false);
+  const indexesString = d?.indexes?.join(', ');
+
+  return (
+    <div
+      key={`${index}${d.message}`}
+      className="grid grid-cols-[1fr_5fr] gap-[20px]  rounded-lg px-[15px] py-[12px] shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] md:px-[20px]"
+      style={{ border: '1px solid var(--common-border-color)' }}
+    >
+      <div title={d?.indexes?.toString()} className="cursor-help">
+        <p className="mb-[8px] text-[13px]">Index</p>
+        <h6 className={`overflow-hidden text-[16px] ${expanded ? '' : 'max-h-[46px]'}`}>{indexesString}</h6>
+        {indexesString.length > 20 && (
+          <Button size="small" onClick={() => setExpanded((prev) => !prev)}>
+            {expanded ? 'Hide' : 'More..'}
+          </Button>
+        )}
+      </div>
+      <div title={d?.message} className=" cursor-help">
+        <p className="mb-[8px] text-[13px]">Message</p>
+        <p className="text-[16px]">{d?.message}</p>
+      </div>
+    </div>
+  );
+};
