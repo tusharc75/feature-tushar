@@ -3,7 +3,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import DashboardModal from '../DashboardModal';
 import { Button, Collapse } from '@material-ui/core';
-import { useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 interface ErrorMessages {
   index?: number;
@@ -61,7 +61,7 @@ export default function CustomMessageDialog({
       id="confirmation-dialog"
     >
       <div className="grid gap-2">
-        {getMessageList(errorMessages)?.map((d, index) => <RenderSingleMessage key={`${d?.indexes?.join(', ')}${d.message}`} index={index} d={d} />)}
+        {getMessageList(errorMessages)?.map((d, index) => <RenderSingleMessage key={`${d?.indexes?.toString()}${d.message}`} index={index} d={d} />)}
       </div>
     </DashboardModal>
   );
@@ -69,7 +69,17 @@ export default function CustomMessageDialog({
 
 const RenderSingleMessage = ({ d, index }) => {
   const [expanded, setExpanded] = useState(false);
+  const itemRef = useRef<HTMLSpanElement>(null);
+  const [itemHeight, setItemHeight] = useState(46);
   const indexesString = d?.indexes?.join(', ');
+
+  useLayoutEffect(() => {
+    if (itemRef?.current) {
+      setItemHeight(itemRef?.current?.offsetHeight);
+    } else {
+      setItemHeight(46);
+    }
+  }, []);
 
   return (
     <div
@@ -79,8 +89,13 @@ const RenderSingleMessage = ({ d, index }) => {
     >
       <div title={d?.indexes?.toString()} className="cursor-help">
         <p className="mb-[8px] text-[13px]">Index</p>
-        <h6 className={`overflow-hidden text-[16px] ${expanded ? '' : 'max-h-[46px]'}`}>{indexesString}</h6>
-        {indexesString.length > 20 && (
+        <h6
+          className={`overflow-hidden text-[16px] transition-all duration-300`}
+          style={{ maxHeight: expanded ? itemHeight : itemHeight < 46 ? itemHeight : 46 }}
+        >
+          <span ref={itemRef}>{indexesString}</span>
+        </h6>
+        {itemHeight > 46 && (
           <Button size="small" onClick={() => setExpanded((prev) => !prev)}>
             {expanded ? 'Hide' : 'More..'}
           </Button>
