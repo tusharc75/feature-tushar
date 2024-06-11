@@ -74,6 +74,7 @@ const SerialNumber = ({ product, warehouse }) => {
     {
       accessor: 'serialNumber',
       Header: 'Serial Number',
+      disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.serialNumber ? (
@@ -90,6 +91,7 @@ const SerialNumber = ({ product, warehouse }) => {
       accessor: 'warehouse',
       Header: routes.warehouse.title,
       disableFilters: true,
+      disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.warehouse ? (
@@ -105,6 +107,7 @@ const SerialNumber = ({ product, warehouse }) => {
     {
       accessor: 'status',
       Header: 'Status',
+      disabled: true,
       Cell: ({ row }) => (
         <h5 className="text-truncate" title={row?.original?.status}>
           {row?.original?.status}
@@ -115,6 +118,7 @@ const SerialNumber = ({ product, warehouse }) => {
       accessor: 'createdBy',
       Header: 'Created By',
       disableFilters: true,
+      disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.createdBy ? (

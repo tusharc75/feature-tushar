@@ -26,6 +26,7 @@ import { stepIconInterface } from 'src/components/Steps/icons';
 import { v4 as uuid } from 'uuid';
 import mimeDb from 'mime-db';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
+import axiosInstance from 'src/axios/axiosInstance';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -3339,3 +3340,14 @@ export const getFileIconSrc = (file) => {
   }
   return FileIcon;
 };
+
+export const checkIfSynching = async (setToFalse= false) => {
+  try {
+    let api = `user/update-synching-status`;
+    if(setToFalse) {
+      api += `?setToFalse=true`
+    }
+    const { data } = await axiosInstance().post(api);
+    return data?.data;
+  } catch (error) { }
+}

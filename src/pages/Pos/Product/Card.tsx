@@ -34,7 +34,7 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal, produc
     const fetchProducts = () => {
         setProducts([]);
         setLoading(true);
-        let api = searchVal ? `/pos?wareHouse=${plantId}&page=0&limit=${limit}&search=${searchVal}` : `/pos?wareHouse=${plantId}&page=0&limit=${limit}`;
+        let api = searchVal ? `/pos?warehouse=${plantId}&page=0&limit=${limit}&search=${searchVal}` : `/pos?warehouse=${plantId}&page=0&limit=${limit}`;
         const filterById = [];
         if (productCategory && productCategory !== '') {
             filterById.push({ field: 'productCategory', term: productCategory });
@@ -54,7 +54,7 @@ const ProductCardLayout = ({ setAssignCartProductQty, plantId, searchVal, produc
 
     const fetchMoreData = () => {
         setTimeout(() => {
-            let api = searchVal ? `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}&search=${searchVal}` : `/pos?wareHouse=${plantId}&page=${page}&limit=${limit}`;
+            let api = searchVal ? `/pos?warehouse=${plantId}&page=${page}&limit=${limit}&search=${searchVal}` : `/pos?warehouse=${plantId}&page=${page}&limit=${limit}`;
             const filterById = [];
             if (productCategory && productCategory !== '') {
                 filterById.push({ field: 'productCategory', term: productCategory });
