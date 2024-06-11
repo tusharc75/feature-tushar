@@ -57,6 +57,14 @@ const ManageSubcontractAssembly = ({ onClose, onSuccess, isClone = false, id = n
 					rest.status = SUBCONTRACT_ASSEMBLY_STATUS.new;
 					setCloneHeading(subcontractAssemblyNumber);
 					tempData = rest;
+				} else {
+					if (data?.canEdit === false) {
+						fieldsDataForUpdate?.forEach((e) => {
+							if (['warehouse', 'supplierAccount']?.includes(e?.fieldName)) {
+								e.isUneditable = true;
+							}
+						});
+					}
 				}
 				setInitialData({
 					fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,

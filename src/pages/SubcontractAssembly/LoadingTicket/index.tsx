@@ -161,7 +161,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 			}
 		});
 
-		if (rows.every((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) {
+		if (rows.some((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) {
 			setNextStep(true);
 		}
 
