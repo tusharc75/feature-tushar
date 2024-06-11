@@ -77,10 +77,10 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
                   : e.referenceType === sidebarResource.workOrder
                     ? routes.workOrderDetail.path
                     : '',
-                      inventory: e?.qty,
-                      referenceNumber: e?.reference?.optionLabel,
-                      referenceNumberId: e?.reference?.optionValue,
-                      referenceType: e?.referenceType
+            inventory: e?.qty,
+            referenceNumber: e?.reference?.optionLabel,
+            referenceNumberId: e?.reference?.optionValue,
+            referenceType: e?.referenceType
           });
         });
         setSoftHoldData(result);

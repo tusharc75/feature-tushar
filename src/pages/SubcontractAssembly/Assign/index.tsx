@@ -72,7 +72,7 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 				Cell: ({ row }) => (
 					row.original.detail ?
 						<div className="flex items-center gap-2">
-							{row.original.parentId ?
+							{row.original.parentId && !row?.original?.loadingTicketId ?
 								<p
 									onClick={() => {
 										setOpenMaterialDialog({ open: true, data: row?.original })
