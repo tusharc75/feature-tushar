@@ -42,10 +42,10 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         <div>
           <p
             className="text-truncate link"
-            title={row?.original?.reference?.optionLabel}
-            onClick={() => window.open(`${row.original.path}/${row?.original?.reference?.optionValue}`)}
+            title={row?.original?.referenceNumber}
+            onClick={() => window.open(`${row.original.path}/${row?.original?.referenceNumberId}`)}
           >
-            {row.original?.reference?.optionLabel}
+            {row.original?.referenceNumber}
           </p>
         </div>
       )
@@ -55,7 +55,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
       Header: 'Inventory',
       disabled: true,
       width: 120,
-      Cell: ({ row }) => <div>{row.original?.qty}</div>
+      Cell: ({ row }) => <div>{row.original?.inventory}</div>
     }
   ];
 
@@ -77,7 +77,10 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
                   : e.referenceType === sidebarResource.workOrder
                     ? routes.workOrderDetail.path
                     : '',
-            ...e
+                      inventory: e?.qty,
+                      referenceNumber: e?.reference?.optionLabel,
+                      referenceNumberId: e?.reference?.optionValue,
+                      referenceType: e?.referenceType
           });
         });
         setSoftHoldData(result);
