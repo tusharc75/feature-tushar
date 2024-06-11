@@ -316,6 +316,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           serviceName: d.serviceName,
           serviceDescription: d.serviceDescription,
           competencyType: { optionLabel: d.competencyType, optionValue: d.competencyTypeId },
+          unit : d?.unitMain?.length ? d.unitMain : [],
+          pricingMethod : d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
         }
         element.fieldTicketId = fieldTicketData?._id;
         material.push(element);
