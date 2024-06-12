@@ -160,7 +160,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
     }
   };
 
-  const updateChildrenResource = (resource, access, checked)=>{
+  const updateChildResource = (resource, access, checked)=>{
     const toUpdateResource = [...childrenResource];
     toUpdateResource?.forEach((_childResource)=>{
        if(_childResource.parentResource===resource){
@@ -266,7 +266,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                           }}
                           field={field}
                           resource={resource}
-                          updateChildResource={updateChildrenResource}
+                          updateChildResource={updateChildResource}
                           setField={setField}
                           setResource={setResource}
                           tier={values?.tier}
