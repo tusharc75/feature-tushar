@@ -31,7 +31,7 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 
 	const [columns, setColumns] = useState(null);
 	const [allFields, setAllFields] = useState([]);
-	const [open, setOpen] = useState({ open: false, type: '' })
+	const [openProductDialog, setOpenProductDialog] = useState({ open: false })
 	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [deleteData, setDeleteData] = useState(null);
 	const [isDeleting, setDeleting] = useState(false);
@@ -72,7 +72,7 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 				Cell: ({ row }) => (
 					row.original.detail ?
 						<div className="flex items-center gap-2">
-							{row.original.parentId && !row?.original?.loadingTicketId ?
+							{row.original.parentId && !row?.original?.loadingTicketId && allowedToEdit ?
 								<p
 									onClick={() => {
 										setOpenMaterialDialog({ open: true, data: row?.original })
@@ -122,16 +122,16 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 			Cell: ({ row, table }) => {
 				return (row?.original?.parentId &&
 					<>
-						<HtmlTooltip title={allowedToEdit ? 'Edit' : ownerAndColaborator}>
+						<HtmlTooltip title={'Edit'}>
 							<IconButton
 								size="small"
 								aria-label="Edit"
-								disabled={!allowedToEdit || row?.original?.loadingTicketId}
+								disabled={!row?.original?.canDelete}
 								onClick={() => {
 									setOpenMaterialDialog({ open: true, data: row?.original })
 								}}
 							>
-								<EditIcon fontSize="small" color={!allowedToEdit || row?.original?.loadingTicketId ? 'disabled' : 'primary'} />
+								<EditIcon fontSize="small" color={row?.original?.canDelete ? 'primary' : 'disabled'} />
 							</IconButton>
 						</HtmlTooltip>
 						<HtmlTooltip title={'Delete'}>
@@ -139,13 +139,13 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 								<IconButton
 									size="small"
 									aria-label="Delete"
-									disabled={!allowedToEdit || !row?.original?.canDelete || row?.original?.loadingTicketId}
+									disabled={!row?.original?.canDelete}
 									onClick={() => {
 										const obj: any = [{ id: row.original._id, materialId: row.original?.materialId }];
 										setDeleteData(obj);
 									}}
 								>
-									<DeleteIcon fontSize="small" color={!allowedToEdit || !row?.original?.canDelete || row?.original?.loadingTicketId ? 'disabled' : 'error'} />
+									<DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
 								</IconButton>
 							</span>
 						</HtmlTooltip>
@@ -173,7 +173,7 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 			parent.index = i + 1;
 			parent.detail = parent.productDetail?.productName || '';
 			parent.description = parent.productDetail?.productDescription || '';
-			parent.canDelete = parent.canDelete ?? true;
+			parent.canDelete = false;
 			parent.subRows = generateNestedData(data, parent, deliveryTicketList);
 		});
 
@@ -190,15 +190,15 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 			_subRow.index = parent.index + '.' + (j + 1);
 			_subRow.detail = _subRow.productDetail?.productName || '';
 			_subRow.description = _subRow.productDetail?.productDescription || '';
-			_subRow.canDelete = _subRow.canDelete ?? true;
+			_subRow.canDelete = true;
 			_subRow.subRows = generateNestedData(material, _subRow, deliveryTicketList);
 		});
-
 		deliveryTicketList.map((obj) => {
 			if (obj.ticketType === DELIVERY_TICKET_TYPE.delivery) {
 				subRows?.map((d, index) => {
 					if (obj?.products?.some((p) => p?.product === d?.materialId && p?.uniqueId === d?._id)) {
 						subRows[index]['loadingTicketId'] = obj?._id;
+						subRows[index]['canDelete'] = false;
 					}
 				});
 			}
@@ -209,33 +209,28 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 	const ActionButtonMenuItms = () => {
 		return (
 			<>
-				<HtmlTooltip title={''}>
-					<MenuItem
-						disabled={isSubmitting || !selectedRecords.some((ele) => !ele?.parentId) || selectedRecords?.some(r => r?.receivedQty > 0)}
-						onClick={() => {
-							setOpen({ open: true, type: MATERIAL_TYPE.product })
-						}}
-					>
-						Add Consumables
-					</MenuItem>
-				</HtmlTooltip>
-				<HtmlTooltip title={`Delete selected records`}>
-					<MenuItem
-						disabled={selectedRecords.some((e) => !e.canDelete || e.loadingTicketId || !e.parentId) || !allowedToEdit}
-						onClick={() => {
-							const dataToDelete: any = selectedRecords?.map(s => {
-								return ({
-									id: s._id,
-									materialId: s?.materialId
-								}
-								)
-							});
-							setDeleteData(dataToDelete);
-						}}
-					>
-						{`Delete (${selectedRecords?.length})`}
-					</MenuItem>
-				</HtmlTooltip>
+				<MenuItem
+					disabled={selectedRecords.filter((e) => !e.parentId)?.length && selectedRecords.filter((e) => !e.parentId).every((e) => !e?.receivedQty) ? false : true}
+					onClick={() => {
+						setOpenProductDialog({ open: true })
+					}}
+				>
+					Add Consumables
+				</MenuItem>
+				<MenuItem
+					disabled={selectedRecords.filter((e) => e.parentId)?.length && selectedRecords.filter((e) => e.parentId)?.every((e) => e.canDelete) ? false : true}
+					onClick={() => {
+						const dataToDelete: any = selectedRecords.filter((e) => e.parentId)?.map(s => {
+							return ({
+								id: s._id,
+								materialId: s?.materialId
+							})
+						});
+						setDeleteData(dataToDelete);
+					}}
+				>
+					Delete
+				</MenuItem>
 			</>
 		);
 	};
@@ -247,19 +242,18 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 			rows.forEach((d) => {
 				const element: any = {};
 				element.materialId = d._id;
-				element.type = open.type;
+				element.type = MATERIAL_TYPE.product;
 				element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
 				element.qty = d.qty ? parseFloat(d.qty) : 1;
 				element.parentId = r?._id;
 				material.push(element);
 			});
 		});
-
 		await axiosInstance()
 			.post(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`, { material })
 			.then(() => {
 				fetchMaterial();
-				setOpen({ open: false, type: '' });
+				setOpenProductDialog({ open: false });
 				setIsSubmitting(false);
 			})
 			.catch((error) => {
@@ -300,17 +294,13 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 
 	return (
 		<>
-			{allowedToEdit && (
-				<>
-					<DetailsPageHeader
-						isAddButtonVisible={false}
-						isActionButtonVisible={true}
-						actionButtonMenuItems={<ActionButtonMenuItms />}
-						actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-						hasXpadding
-					/>
-				</>
-			)}
+			<DetailsPageHeader
+				isAddButtonVisible={false}
+				isActionButtonVisible={allowedToEdit}
+				actionButtonMenuItems={<ActionButtonMenuItms />}
+				actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
+				hasXpadding
+			/>
 			{columns ? (
 				<Box zIndex={5} >
 					<CustomReactTable
@@ -322,6 +312,8 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 						isClientSideGrid={true}
 						refreshGrid={fetchMaterial}
 						expander={true}
+						hideSelection={!allowedToEdit}
+						hideAction={!allowedToEdit}
 					/>
 				</Box>
 			) : (
@@ -329,9 +321,9 @@ const Assign = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNex
 					<CommonSkeleton lenArray={[...Array(10).keys()]} />
 				</Box>
 			)}
-			{open.open && open.type === MATERIAL_TYPE.product && (
+			{openProductDialog.open && (
 				<AssignProductDialog
-					handleCloseDialog={() => setOpen({ open: false, type: '' })}
+					handleCloseDialog={() => setOpenProductDialog({ open: false })}
 					onSuccess={(products) => {
 						addMaterial(products);
 					}}

@@ -16,7 +16,8 @@ import { CHILD_RESOURCE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, 
 import { subcontractAssemblyActions, subcontractAssemblyMessage } from "src/constants/messageHelpers";
 import ManageDeliveryTicket from "src/pages/DeliveryTicket/ManageDeliveryTicket";
 
-const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen }) => {
+const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, allowedToEdit }) => {
+
 	const renderedFrom = `${routes.subcontractAssembly.title}_LoadingTicket`;
 	const toastConfig = useContext(CustomToastContext);
 
@@ -265,7 +266,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 			<>
 				<DetailsPageHeader
 					isAddButtonVisible={false}
-					isActionButtonVisible={true}
+					isActionButtonVisible={allowedToEdit}
 					actionButtonMenuItems={actionButtonMenuItems()}
 					actionButtonProps={{ disabled: selectedRecords.length === 0 }}
 					hasXpadding
@@ -280,6 +281,8 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 							renderedFrom={renderedFrom}
 							isClientSideGrid={true}
 							refreshGrid={fetchData}
+							hideSelection={!allowedToEdit}
+							hideAction={!allowedToEdit}
 						/>
 					</Box>
 				) : (

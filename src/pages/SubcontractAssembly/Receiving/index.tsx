@@ -19,8 +19,9 @@ import History from '../../ProductInventory/LedgerHistory';
 import { DetailsPageHeader } from "src/components/PageHeaders";
 import { FiExternalLink } from "react-icons/fi";
 
-const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData }) => {
-	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receaving`;
+const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, allowedToEdit }) => {
+
+	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receiving`;
 	const toastConfig = useContext(CustomToastContext);
 
 	const { state, dispatch } = useTableReducer();
@@ -101,18 +102,18 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 			canDrag: false,
 			Cell: ({ row }) => {
 				return (
-					<>
+					<div className="flex items-center gap-2">
 						{row?.original?.receivedQty <= 0 && (
 							<HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
 								<IconButton
 									size="small"
 									aria-label="Receive"
-									disabled={!row?.original?.canReceive}
+									disabled={row?.original?.canReceive && allowedToEdit ? false : true}
 									onClick={() => {
 										setCostDialog({ open: true, _id: row?.original?._id })
 									}}
 								>
-									<AddCircleOutline fontSize="small" color={row?.original?.canReceive ? 'primary' : 'disabled'} />
+									<AddCircleOutline fontSize="small" color={row?.original?.canReceive && allowedToEdit ? 'primary' : 'disabled'} />
 								</IconButton>
 							</HtmlTooltip>
 						)}
@@ -151,7 +152,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 								</span>
 							</HtmlTooltip>
 						)}
-					</>
+					</div>
 				);
 			}
 		});
@@ -176,16 +177,19 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 			parent.detail = parent.productDetail?.productName || '';
 			parent.description = parent.productDetail?.productDescription || '';
 			parent.receivedQty = parent?.receivedQty || 0;
-			parent.canDelete = parent.canDelete ?? true;
-			parent.canReceive = data?.filter(d => d?.parentId === parent?._id)?.every(d => deliveryTicketList?.filter(dt => dt.ticketType === DELIVERY_TICKET_TYPE.delivery && dt.type === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly && dt.status === DELIVERY_TICKET_STATUS.delivered).some(_d => _d?.products?.map(p => p?.product).includes(d?.materialId) && _d?.products?.map(p => p?.uniqueId)?.includes(d?._id)))
+			parent.canReceive = data?.filter(d => d?.parentId === parent?._id)?.every(d =>
+				deliveryTicketList?.filter(dt => dt.ticketType === DELIVERY_TICKET_TYPE.delivery
+					&& dt.status === DELIVERY_TICKET_STATUS.delivered).some(_d => _d?.products?.map(p => p?.product).includes(d?.materialId) && _d?.products?.map(p => p?.uniqueId)?.includes(d?._id)))
 		});
+
 		dispatch({ type: 'initialize', data: rows, count: rows?.length });
 		dispatch({ type: 'loading', loading: false });
 	};
 
-	const handleUpdateCost = (value) => {
+	const handleReceived = (value) => {
 		setIsSubmitting(true)
-		axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/cost`, { cost: value, _id: costDialog?._id })
+		axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/received`,
+			{ cost: value, _id: costDialog?._id })
 			.then((res) => {
 				fetchData()
 				fetchParentData()
@@ -207,8 +211,12 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 
 	return (
 		<>
-			<DetailsPageHeader isAddButtonVisible={false} isActionButtonVisible={false} previewDownloadProps={previewDownloadProps} hasXpadding />
-
+			<DetailsPageHeader
+				isAddButtonVisible={false}
+				isActionButtonVisible={false}
+				previewDownloadProps={previewDownloadProps}
+				hasXpadding
+			/>
 			{columns ? (
 				<Box zIndex={5} width={'100%'}>
 					<CustomReactTable
@@ -227,21 +235,19 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 					<CommonSkeleton lenArray={[...Array(10).keys()]} />
 				</Box>
 			)}
-
 			{costDialog.open && (
 				<ReceivingCostDialog
 					onClose={() => {
 						setCostDialog({ open: false, _id: null })
 					}}
 					onSuccess={(val) => {
-						handleUpdateCost(val)
+						handleReceived(val)
 					}}
 					_id={costDialog._id}
 					subcontractAssemblyData={subcontractAssemblyData}
 					isSubmitting={isSubmitting}
 				/>
 			)}
-
 			{historyDialog.open && (
 				<History
 					handleClose={() => setHistoryDialog({ open: false, _id: '', product: '', productName: '' })}
@@ -251,7 +257,6 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData })
 					product={historyDialog.product}
 				/>
 			)}
-
 			{viewCost.open && (
 				<ViewCost
 					data={viewCost.data}
