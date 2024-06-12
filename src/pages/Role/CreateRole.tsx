@@ -160,6 +160,16 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
     }
   };
 
+  const updateChildrenResource = (resource, access, checked)=>{
+    const toUpdateResource = [...childrenResource];
+    toUpdateResource?.forEach((_childResource)=>{
+       if(_childResource.parentResource===resource){
+        _childResource[access] = checked;
+       }
+    })
+    setChildrenResource(toUpdateResource);
+  }
+
   return (
     <Dialog
       open={open}
@@ -256,6 +266,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                           }}
                           field={field}
                           resource={resource}
+                          updateChildResource={updateChildrenResource}
                           setField={setField}
                           setResource={setResource}
                           tier={values?.tier}
