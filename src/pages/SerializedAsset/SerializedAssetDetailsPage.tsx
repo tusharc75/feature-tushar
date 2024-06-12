@@ -342,7 +342,10 @@ const SerializedAssetDetailsPage = () => {
       ]
 
       let tempStatus = [];
-      if (systemStatus?.includes(assetDetails.status)) {
+      if ([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(assetDetails.status)) {
+        tempStatus = [];
+      }
+      else if (systemStatus?.includes(assetDetails.status)) {
         tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
       }
       else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
@@ -350,7 +353,7 @@ const SerializedAssetDetailsPage = () => {
         ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
       }
       else if ([ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(assetDetails.status)) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ...otherStatus];
+        tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ...otherStatus];
       }
       else if (assetDetails.status === ASSET_STATUS.scrap) {
         tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
