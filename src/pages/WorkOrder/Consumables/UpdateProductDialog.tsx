@@ -12,7 +12,6 @@ import { uniq, map, orderBy } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit, workOrderData }) => {
