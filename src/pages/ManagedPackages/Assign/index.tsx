@@ -1,5 +1,5 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
-import { camelCase, isEmpty, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { FiExternalLink } from 'react-icons/fi';
@@ -56,7 +56,7 @@ const Assign = ({ managedPackagesData }) => {
         let index = 1;
         data?.forEach((parent) => {
           let row: any = {};
-          if (!isEmpty(parent?.package)) {
+          if (parent?.package?.optionValue) {
             if (!packages.has(parent?.package?.optionValue)) {
               row.index = index;
               row._id = parent?.package?.optionValue;
