@@ -14,7 +14,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, serviceMaster } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, serviceMaster } from '../../constants/helpers';
 import ConfigureFields from './Fields';
 import ManageServiceMaster from './ManageServiceMaster';
 import Product from './Product';
@@ -148,7 +148,7 @@ const ServiceMasterDetailsPage = () => {
                 <Box mb={2} mt={2}>
                   <Grid container spacing={2}>
                     <Grid item xs={6}>
-                      <LeadTime referenceType={'service'} referenceId={id} />
+                      <LeadTime referenceType={MATERIAL_TYPE.service} referenceId={id} referenceLabel={serviceMasterDetailData?.serviceName} />
                     </Grid>
                   </Grid>
                 </Box>

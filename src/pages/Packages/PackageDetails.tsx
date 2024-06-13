@@ -18,7 +18,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, packages } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, packages } from 'src/constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import Packages from './Packages';
 import Products from './Products';
@@ -159,7 +159,7 @@ const PackageDetails = () => {
               <Box mb={2} mt={2}>
                 <Grid container spacing={2}>
                   <Grid item xs={12} sm={6} md={6}>
-                    <LeadTime referenceType={'package'} referenceId={id} />
+                    <LeadTime referenceType={MATERIAL_TYPE.package} referenceId={id} referenceLabel={packageData?.packageName} />
                   </Grid>
                 </Grid>
               </Box>

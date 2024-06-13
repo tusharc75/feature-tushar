@@ -644,6 +644,31 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     );
   };
 
+  const handleSaveLeadTime = (data) => {
+    setSubmitting(true)
+    const value = {
+      leadTime: data?.steps || [],
+      _id: leadTimeDialog?.data?._id
+    };
+
+    axiosInstance()
+      .put(`${salesOrder.api}/material/${salesOrderData?._id}/lead-time`, value)
+      .then(({ data }) => {
+        fetchData()
+        setLeadTimeDialog({ open: false, data: null });
+        setSubmitting(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((err) => {
+        setSubmitting(false)
+        toastConfig.setToastConfig(err);
+      });
+  }
+
   return (
     <Fragment>
       <DetailsPageHeader
@@ -757,14 +782,14 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
-          onSuccess={() => {
-            setLeadTimeDialog({ open: false, data: null });
-            fetchData();
+          onSuccess={(data) => {
+            handleSaveLeadTime(data)
           }}
           referenceType={sidebarResource.salesOrder}
-          referenceId={salesOrderData._id}
+          referenceId={null}
           referenceData={leadTimeDialog?.data}
-          title={leadTimeDialog?.data?.productDetail?.productName || leadTimeDialog?.data?.serviceDetail?.serviceName || leadTimeDialog?.data?.packageDetail?.packageName}
+          referenceLabel={leadTimeDialog?.data?.productDetail?.productName || leadTimeDialog?.data?.serviceDetail?.serviceName || leadTimeDialog?.data?.packageDetail?.packageName}
+          loading={isSubmitting}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
