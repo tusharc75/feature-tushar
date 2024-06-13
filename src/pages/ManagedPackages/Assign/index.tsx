@@ -14,7 +14,9 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import { MATERIAL_TYPE } from 'src/constants/helpers';
-import { Link } from 'react-router-dom';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { Delete } from '@material-ui/icons';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const Assign = ({ managedPackagesData }) => {
 
@@ -29,6 +31,9 @@ const Assign = ({ managedPackagesData }) => {
 
   const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
   const [isAssetAdding, setIsAssetAdding] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [deleteRecord, setDeleteRecord] = useState(null);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
 
@@ -36,8 +41,6 @@ const Assign = ({ managedPackagesData }) => {
     fetchColumns();
     fetchData();
   }, []);
-
-  console.log(assignAssetDialog.products);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -48,24 +51,46 @@ const Assign = ({ managedPackagesData }) => {
     axiosInstance()
       .get(`/managed-packages/${managedPackagesData?.package?.optionValue}/serialized-products`)
       .then(({ data: { data } }) => {
-        let rows = data;
-        rows.forEach((parent, i) => {
-          parent.index = i + 1;
-          parent.type = MATERIAL_TYPE.product;
-          parent.detail = parent?.productName;
-          parent.description = parent?.productDescription;
-          parent.productNumber = parent?.productNumber;
-          parent.productCategory = parent?.productCategory?.optionLabel;
-          parent.parentId = null;
-          parent.qty = parent.qty;
-          parent.assetQty = assets?.filter((i: any) => {
-            if (i?.package) {
-              return i.product.optionValue === parent._id && i.package === parent?.package?.optionValue;
-            } else {
-              return i.product.optionValue === parent._id; 
+        const rows = [];
+        const packages = new Set();
+        let index = 1;
+        data?.forEach((parent) => {
+          let row: any = {};
+          if (!isEmpty(parent?.package)) {
+            if (!packages.has(parent?.package?.optionValue)) {
+              row.index = index;
+              row._id = parent?.package?.optionValue;
+              row.type = MATERIAL_TYPE.package;
+              row.detail = parent.package.optionLabel;
+              row.qty = parent?.package?.qty;
+              row.subRows = generateNestedData(data, assets, row);
+              packages.add(row._id);
+              row.parentId = null;
+              rows.push(row);
+              index++;
             }
-          }).length || 0;
-          parent.subRows = generateNestedData(assets, parent);
+          } else {
+            row = { ...parent };
+            row.index = index;
+            row.productId = parent?._id;
+            row.type = MATERIAL_TYPE.product;
+            row.detail = parent?.productName;
+            row.description = parent?.productDescription;
+            row.productNumber = parent?.productNumber;
+            row.productCategory = parent?.productCategory?.optionLabel;
+            row.qty = parent?.qty;
+            row.assetQty = assets?.filter((i: any) => {
+              if (i?.package) {
+                return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
+              } else {
+                return i.product.optionValue === row.productId && !row?.package;
+              }
+            })?.length || 0;
+            row.subRows = generateNestedData([], assets, row);
+            row.parentId = null;
+            rows.push(row);
+            index++;
+          }
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
@@ -75,26 +100,49 @@ const Assign = ({ managedPackagesData }) => {
       });
   };
 
-  console.log(selectedRecords);
-
-  const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => {
-      if(e?.package) {
-        return e.product.optionValue === parent._id && e?.package === parent?.package?.optionValue
-      } else {
-        return e.product.optionValue === parent._id;
-      }
-    });
-    subRows.forEach((_subRow, j) => {
-      _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.type = 'asset';
-      _subRow.detail = _subRow?.assetNumber;
-      _subRow.description = _subRow?.description;
-      _subRow.productCategory = _subRow?.productCategory?.optionLabel;
-      _subRow.position = _subRow?.position;
-      _subRow.parentId = _subRow?.product?.optionValue;
-      _subRow.qty = parent.qty;
-    });
+  const generateNestedData = (material, assets, parent) => {
+    let subRows: any;
+    if (parent.type === MATERIAL_TYPE.package) {
+      subRows = material?.filter((e) => e?.package?.optionValue === parent?._id);
+      subRows.forEach((_subRow, j) => {
+        _subRow.index = parent.index + '.' + (j + 1);
+        _subRow.productId = _subRow._id;
+        _subRow._id = parent._id + _subRow._id;
+        _subRow.type = MATERIAL_TYPE.product;
+        _subRow.detail = _subRow?.productName;
+        _subRow.description = _subRow?.productDescription;
+        _subRow.productNumber = _subRow?.productNumber;
+        _subRow.productCategory = _subRow?.productCategory?.optionLabel;
+        _subRow.qty = parent.qty * _subRow.qty;
+        _subRow.parentId = parent?._id;
+        _subRow.assetQty = assets?.filter((i: any) => {
+          if (i?.package) {
+            return i.product.optionValue === _subRow.productId && i.package === _subRow?.package?.optionValue;
+          } else {
+            return i.product.optionValue === _subRow.productId && !_subRow?.package;
+          }
+        })?.length || 0;
+        _subRow.subRows = generateNestedData([], assets, _subRow);
+      });
+    } else {
+      subRows = assets.filter((e) => {
+        if (e?.package) {
+          return e.product.optionValue === parent.productId && e?.package === parent?.package?.optionValue
+        } else {
+          return e.product.optionValue === parent.productId && !parent?.package;
+        }
+      });
+      subRows.forEach((_subRow, j) => {
+        _subRow.index = parent.index + '.' + (j + 1);
+        _subRow.type = MATERIAL_TYPE.serializedAsset;
+        _subRow.detail = _subRow?.assetNumber;
+        _subRow.description = _subRow?.description;
+        _subRow.productCategory = _subRow?.productCategory?.optionLabel;
+        _subRow.position = _subRow?.position;
+        _subRow.parentId = _subRow?.product?.optionValue;
+        _subRow.qty = parent.qty;
+      });
+    }
     return subRows;
   };
 
@@ -143,9 +191,11 @@ const Assign = ({ managedPackagesData }) => {
                 size="small"
                 onClick={() => {
                   if (row?.original?.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original._id}`);
+                    window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                  } else if (row?.original?.type === MATERIAL_TYPE.package) {
+                    window.open(`${routes.packagesDetail.path}/${row.original._id}`);
                   } else {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.asset}`);
                   }
                 }}
               >
@@ -200,39 +250,66 @@ const Assign = ({ managedPackagesData }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
         }
       },
-      {
-        accessor: 'package',
-        Header: 'Parent Package',
-        width: 200,
-        Cell: ({ row }) => {
-          return (
-            <>
-              {row.original.type === MATERIAL_TYPE.product ? row.original['package'] ?
-                <Link className="link text-truncate" title={row?.original?.package?.optionLabel} to={`${routes.packagesDetail.path}/${row?.original?.package?.optionValue}`}>
-                  {row?.original?.package?.optionLabel}
-                </Link>
-                :
-                <Link className="link text-truncate" title={managedPackagesData?.package?.optionLabel} to={`${routes.packagesDetail.path}/${managedPackagesData?.package?.optionValue}`}>
-                  {managedPackagesData?.package?.optionLabel}
-                </Link> :
-                <NoDataCell />
-              }
-            </>
-          );
-        }
-      }
     ];
-    setColumns([...coloum]);
+    setColumns([...coloum, ActionsRenderer]);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.managedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <Delete color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  };
+
+  const handleDelete = () => {
+    setIsSubmitting(true);
+    let ids = [];
+    if (deleteRecord) {
+      ids.push(deleteRecord._id);
+    } else {
+      ids = selectedRecords?.map((d) => d._id);
+    }
+    axiosInstance()
+      .put(`/managed-packages/${managedPackagesData?._id}/remove-assets`, { ids: ids })
+      .then(() => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        setToastConfig(error);
+        setIsSubmitting(false);
+      });
   };
 
   const handleAssignAssets = (data) => {
     setIsAssetAdding(true);
     axiosInstance()
-      .post(`managed-packages/${managedPackagesData?._id}/assign-assets`, {
-        assets: data?.map((e) => {
-          return { product: e.product, asset: e.asset, ...(e?.package ? { package: e?.package } : {}) };
-        })
-      })
+      .post(`managed-packages/${managedPackagesData?._id}/assign-assets`, { assets: data })
       .then(() => {
         setAssignAssetDialog({ open: false, products: [] });
         setIsAssetAdding(false);
@@ -254,22 +331,46 @@ const Assign = ({ managedPackagesData }) => {
   const actionButtonMenuItems = () => {
     return (
       <>
-        {permissions?.serializedAsset?.isRead &&
+        {permissions?.managedPackages?.isUpdate &&
           <MenuItem
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
-              const products = [];
+              const productsMap = new Map();
               selectedRecords
                 .filter((i) => i.type === MATERIAL_TYPE.product)
                 ?.forEach((e) => {
-                  if (e?.qty - e?.assetQty > 0) {
-                    products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail, ...(!isEmpty(e?.package) ? { package: e?.package?.optionValue } : {}) });
+                  let diff = e?.qty - e?.assetQty;
+                  if (diff > 0) {
+                    if (productsMap.has(e.productId)) {
+                      const existingProduct = productsMap.get(e.productId);
+                      existingProduct.qty += diff;
+                      if (e?.package?.optionValue) {
+                        existingProduct.packages = [...existingProduct.packages, e.package.optionValue]
+                      }
+                    } else {
+                      const productDetail = {
+                        product: e.productId,
+                        qty: diff,
+                        productName: e?.detail,
+                        packages: e?.package?.optionValue ? [e?.package?.optionValue] : []
+                      }
+                      productsMap.set(e.productId, productDetail);
+                    }
                   }
                 });
+              const products = Array.from(productsMap.values());
               setAssignAssetDialog({ open: true, products: products });
             }}
           >
             {`Assign ${routes.serializedAsset.title}`}
+          </MenuItem>
+        }
+        {permissions?.managedPackages?.isUpdate &&
+          <MenuItem
+            disabled={selectedRecords?.some((e) => e.type !== MATERIAL_TYPE.serializedAsset)}
+            onClick={() => { setShowDeleteConfirmBox(true) }}
+          >
+            {`Delete (${selectedRecords?.length})`}
           </MenuItem>
         }
       </>
@@ -282,7 +383,7 @@ const Assign = ({ managedPackagesData }) => {
         isAddButtonVisible={false}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}
-        actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+        actionButtonProps={{ disabled: !selectedRecords.length }}
         hasXpadding
       />
       {columns ? (
@@ -303,11 +404,24 @@ const Assign = ({ managedPackagesData }) => {
       )}
       {assignAssetDialog.open && (
         <AssignSerializedAssetDialog
-          ids={flattenArray(dataRows)?.filter((e) => e.type === 'asset')?.map((e) => e._id)}
+          reference={'managedPackages'}
+          ids={flattenArray(dataRows)?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id)}
           handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
           handleSucess={handleAssignAssets}
           isAssigning={isAssetAdding}
           selectedProducts={assignAssetDialog.products}
+        />
+      )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete asset(s) ${deleteRecord?.detail || ''} ?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
         />
       )}
     </>
