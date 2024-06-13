@@ -128,22 +128,18 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 						<NoDataCell />
 					)
 			},
-			...(permissions?.leadTimeMaster
-				? [
-					{
-						accessor: 'leadTime',
-						Header: 'Lead Time (Days)',
-						Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
-						Footer: (info) => {
-							let rows = info.table.getExpandedRowModel().rows;
-							const total = rows
-								?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-								.reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-							return <>{total}</>;
-						}
-					}
-				]
-				: [])
+			{
+				accessor: 'leadTime',
+				Header: 'Lead Time (Days)',
+				Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
+				Footer: (info) => {
+					let rows = info.table.getExpandedRowModel().rows;
+					const total = rows
+						?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+						.reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+					return <>{total}</>;
+				}
+			},
 		];
 		coloum = [...coloum, ...newColumns];
 		setColumns(coloum);

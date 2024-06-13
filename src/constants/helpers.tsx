@@ -328,7 +328,6 @@ export const sidebarResource = {
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
   quotation: 'Quotation',
   serviceMaster: 'Service Master',
-  leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
   fieldServiceOrder: 'Field Service Order',
@@ -477,7 +476,6 @@ export const RESOURCE_LABEL = {
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
   quotation: 'Quotation',
   serviceMaster: 'Service Master',
-  leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
   fieldServiceOrder: 'Field Service Order',
@@ -906,12 +904,6 @@ export const serviceMaster = {
   route: '/service-master',
   permission: 'Service Master',
   resource: 'Service Master'
-};
-export const leadTimeMaster = {
-  api: '/lead-time-master',
-  route: '/lead-time-master',
-  permission: 'Lead Time Master',
-  resource: 'Lead Time Master'
 };
 
 export const workOrder = {
@@ -2240,7 +2232,6 @@ export const LOG_RESOURCE = {
   zone: sidebarResource.zone,
   eCommercePolicy: sidebarResource.eCommercePolicy,
   productAuction: sidebarResource.productAuction,
-  leadTimeMaster: sidebarResource.leadTimeMaster,
   irtTicket: sidebarResource.irtTicket,
   purchaseOrder: sidebarResource.purchaseOrder,
   rentalManagement: sidebarResource.rentalManagement,
@@ -3341,10 +3332,10 @@ export const getFileIconSrc = (file) => {
   return FileIcon;
 };
 
-export const checkIfSynching = async (setToFalse= false) => {
+export const checkIfSynching = async (setToFalse = false) => {
   try {
     let api = `user/update-synching-status`;
-    if(setToFalse) {
+    if (setToFalse) {
       api += `?setToFalse=true`
     }
     const { data } = await axiosInstance().post(api);
