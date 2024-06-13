@@ -21,7 +21,6 @@ import HtmlTooltip from '../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
-import LeadTimeMaster from '../../components/LeadTime';
 import CreateProduct from '../../components/Product/CreateProduct';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
@@ -38,6 +37,7 @@ import ProductRepairType from './RepairType';
 import ServiceMaster from './ServiceMaster';
 import ServicePackage from './ServicePackage';
 import NonSerializedAssetProductInventory from './inventory';
+import LeadTime from 'src/components/LeadTime';
 
 const minHeight = '250px';
 
@@ -510,11 +510,9 @@ const ProductDetailsPage = () => {
                           <CostDetails product={id} productData={productData} minHeight={minHeight} />
                         </Grid>
                       )}
-                      {permissions?.leadTimeMaster?.isRead && (
-                        <Grid item xs={12} sm={6} md={4} xl={3}>
-                          <LeadTimeMaster Id={id} type={'product'} minHeight={minHeight} />
-                        </Grid>
-                      )}
+                      <Grid item xs={12} sm={6} md={4} xl={3}>
+                        <LeadTime referenceType={'product'} referenceId={id} />
+                      </Grid>
                     </Grid>
                   </Grid>
                 </Box>

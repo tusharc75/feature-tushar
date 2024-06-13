@@ -21,13 +21,13 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder } from '../../../constants/helpers';
-import LeadTimeDialog from './LeadTimeDialog';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder, sidebarResource } from '../../../constants/helpers';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { flattenArray } from 'src/constants/columns';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 
 const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
@@ -160,22 +160,18 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           return row.original['description'] ? <div><p className="text-truncate">{row.original.description}</p></div> : <NoDataCell />;
         }
       },
-      ...(permissions?.leadTimeMaster
-        ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows
-                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
-            }
-          }
-        ]
-        : [])
+      {
+        accessor: 'leadTime',
+        Header: 'Lead Time (Days)',
+        Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
+        Footer: (info) => {
+          let rows = info.table.getExpandedRowModel().rows;
+          const total = rows
+            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+          return <>{total}</>;
+        }
+      },
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -200,7 +196,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
               <EditIcon fontSize="small" color="primary" />
             </IconButton>
           </HtmlTooltip>
-          {permissions?.leadTimeMaster && row.original.type !== MATERIAL_TYPE.manualEntry && (
+          {row.original.type !== MATERIAL_TYPE.manualEntry && (
             <HtmlTooltip title={'Lead Time'} placement="top" enterTouchDelay={0} arrow>
               <IconButton
                 size="small"
@@ -757,16 +753,18 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         </Popover>
       )}
       {leadTimeDialog.open && (
-        <LeadTimeDialog
-          salesOrderId={salesOrderData._id}
-          data={leadTimeDialog?.data}
+        <ManageLeadTime
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
-          handleSucess={() => {
+          onSuccess={() => {
             setLeadTimeDialog({ open: false, data: null });
             fetchData();
           }}
+          referenceType={sidebarResource.salesOrder}
+          referenceId={salesOrderData._id}
+          referenceData={leadTimeDialog?.data}
+          title={leadTimeDialog?.data?.productDetail?.productName || leadTimeDialog?.data?.serviceDetail?.serviceName || leadTimeDialog?.data?.packageDetail?.packageName}
         />
       )}
       {addDialog.open && addDialog.type === MATERIAL_TYPE.product && (
