@@ -18,6 +18,7 @@ import AssignProductDialog from "src/components/AssignRolesDialog/AssignProductD
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from "src/pages/SubcontractAssembly/Material/MaterialDialog";
 import { FiExternalLink } from "react-icons/fi";
+import Consumables from "src/pages/SubcontractAssembly/Material/Consumables";
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
@@ -161,7 +162,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 		let rows = data?.filter((d: any) => !d.parentId);
 		rows.forEach((parent, i) => {
 			parent.index = i + 1;
-			parent.detail = parent.productDetail?.productName || '';
+			parent.detail = `${i+1}_${parent.productDetail?.productName}` || '';
 			parent.description = parent.productDetail?.productDescription || '';
 			parent.canDelete = data?.some((e) => e.parentId === parent._id) ? false : true;
 			parent.hideSelection = parent?.receivedQty > 0 || false;
@@ -296,6 +297,15 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 					<CommonSkeleton lenArray={[...Array(10).keys()]} />
 				</Box>
 			)}
+			<Box mt={3}>
+        <Consumables
+          allowedToEdit={allowedToEdit}
+          products={dataRows}
+          subcontractAssemblyData={subcontractAssemblyData}
+          fetchMaterial={fetchMaterial}
+          stepFullScreen={stepFullScreen}
+        />
+      </Box>
 			{open.open && open.type === MATERIAL_TYPE.product && (
 				<AssignProductDialog
 					handleCloseDialog={() => setOpen({ open: false, type: '' })}
