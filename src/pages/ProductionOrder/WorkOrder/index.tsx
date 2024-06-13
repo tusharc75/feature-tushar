@@ -16,7 +16,6 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import ManageServiceMaster from 'src/pages/ServiceMaster/ManageServiceMaster';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 import AssignUserDialog from 'src/pages/WorkOrder/Service/AssignUserDialog';

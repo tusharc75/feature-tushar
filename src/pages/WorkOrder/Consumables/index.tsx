@@ -21,7 +21,6 @@ import History from '../../ProductInventory/LedgerHistory';
 import FormatListBulletedIcon from '@material-ui/icons/FormatListBulleted';
 import { BiChevronDown } from 'react-icons/bi';
 import UpdateProductDialog from './UpdateProductDialog';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import EditIcon from '@material-ui/icons/Edit';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
