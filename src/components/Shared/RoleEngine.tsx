@@ -25,10 +25,11 @@ interface RoleProps {
   style?: React.CSSProperties;
   tier?: string;
   child?: boolean;
+  updateChildResource?: (resource: string, access: string, checked: boolean)=> void
 }
 
 const RoleEngine = (props: RoleProps) => {
-  const { field, resource, setField, setResource, isDisable, style, tier = ROLE_TIER.tier1, child = false } = props;
+  const { field, resource, setField, setResource, isDisable, style, tier = ROLE_TIER.tier1, child = false, updateChildResource = null } = props;
 
   const [isReadChecked, setIsReadChecked] = useState(false);
   const [isCreateChecked, setIsCreateChecked] = useState(false);
@@ -189,6 +190,9 @@ const RoleEngine = (props: RoleProps) => {
           if (access === 'isRead' && isCreateUpdateSelected) {
           } else {
             _resource[access] = event.target.checked;
+            if(!_resource?.parentResource){
+              updateChildResource(_resource.name, access, event.target.checked);
+            }
           }
           if (event.target.checked) {
             _resource['isRead'] = event.target.checked;
