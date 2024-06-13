@@ -13,7 +13,6 @@ import { DetailsPageHeader } from "src/components/PageHeaders";
 import { CHILD_RESOURCE, MATERIAL_TYPE, SUBCONTRACT_ASSEMBLY_STATUS } from "src/constants/helpers";
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { ownerAndColaborator } from "src/constants/messageHelpers";
 import axiosInstance from "src/axios/axiosInstance";
 import AssignProductDialog from "src/components/AssignRolesDialog/AssignProductDialog";
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -71,15 +70,18 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 				Cell: ({ row }) => (
 					row.original.detail ? (
 						<div className="flex items-center gap-2">
-							<p
-								onClick={() => {
-									setOpenMaterialDialog({ open: true, data: row?.original })
-								}}
-								className="link text-truncate"
-								title={row.original.detail}
-							>
-								{row.original.detail}
-							</p>
+							{allowedToEdit ?
+								<p
+									onClick={() => {
+										setOpenMaterialDialog({ open: true, data: row?.original })
+									}}
+									className="link text-truncate"
+									title={row.original.detail}
+								>
+									{row.original.detail}
+								</p> : <p className="text-truncate" title={row.original.detail}	>
+									{row.original.detail}
+								</p>}
 							<IconButton
 								size="small"
 								onClick={() => {
@@ -116,30 +118,29 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 			Cell: ({ row, table }) => {
 				return (
 					<>
-						<HtmlTooltip title={allowedToEdit ? 'Edit' : ownerAndColaborator}>
+						<HtmlTooltip title={'Edit'}>
 							<IconButton
 								size="small"
 								aria-label="Edit"
-								disabled={!allowedToEdit}
 								onClick={() => {
 									setOpenMaterialDialog({ open: true, data: row?.original })
 								}}
 							>
-								<EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+								<EditIcon fontSize="small" color={'primary'} />
 							</IconButton>
 						</HtmlTooltip>
-						<HtmlTooltip title={row?.original?.canDelete ? 'Delete' : ''}>
+						<HtmlTooltip title={'Delete'}>
 							<span>
 								<IconButton
 									size="small"
 									aria-label="Delete"
-									disabled={!allowedToEdit || !row?.original?.canDelete}
+									disabled={!row?.original?.canDelete}
 									onClick={() => {
 										const obj: any = [{ id: row.original._id, materialId: row.original?.materialId }];
 										setDeleteData(obj);
 									}}
 								>
-									<DeleteIcon fontSize="small" color={!allowedToEdit || !row?.original?.canDelete ? 'disabled' : 'error'} />
+									<DeleteIcon fontSize="small" color={!row?.original?.canDelete ? 'disabled' : 'error'} />
 								</IconButton>
 							</span>
 						</HtmlTooltip>
@@ -162,7 +163,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 			parent.index = i + 1;
 			parent.detail = parent.productDetail?.productName || '';
 			parent.description = parent.productDetail?.productDescription || '';
-			parent.canDelete = parent.canDelete ?? true;
+			parent.canDelete = data?.some((e) => e.parentId === parent._id) ? false : true;
 			parent.hideSelection = parent?.receivedQty > 0 || false;
 		});
 		if (rows?.length) {
@@ -189,20 +190,18 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 	const ActionButtonMenuItms = () => {
 		return (
 			<>
-				<HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
-					<MenuItem
-						disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
-						onClick={() => {
-							const obj: any = [];
-							selectedRecords?.forEach((ele) => {
-								obj.push({ id: ele._id, materialId: ele.materialId });
-							});
-							setDeleteData(obj);
-						}}
-					>
-						Delete
-					</MenuItem>
-				</HtmlTooltip>
+				<MenuItem
+					disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+					onClick={() => {
+						const obj: any = [];
+						selectedRecords?.forEach((ele) => {
+							obj.push({ id: ele._id, materialId: ele.materialId });
+						});
+						setDeleteData(obj);
+					}}
+				>
+					Delete
+				</MenuItem>
 			</>
 		);
 	};
@@ -270,18 +269,14 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 
 	return (
 		<>
-			{allowedToEdit && (
-				<>
-					<DetailsPageHeader
-						isAddButtonVisible={true}
-						addButtonMenuItems={<AddButtonMenuItems />}
-						isActionButtonVisible={true}
-						actionButtonMenuItems={<ActionButtonMenuItms />}
-						actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
-						hasXpadding
-					/>
-				</>
-			)}
+			<DetailsPageHeader
+				isAddButtonVisible={allowedToEdit}
+				addButtonMenuItems={<AddButtonMenuItems />}
+				isActionButtonVisible={allowedToEdit}
+				actionButtonMenuItems={<ActionButtonMenuItms />}
+				actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+				hasXpadding
+			/>
 			{columns ? (
 				<Box zIndex={5} width={'100%'}>
 					<CustomReactTable
@@ -292,6 +287,8 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 						renderedFrom={renderedFrom}
 						isClientSideGrid={true}
 						refreshGrid={fetchMaterial}
+						hideSelection={!allowedToEdit}
+						hideAction={!allowedToEdit}
 					/>
 				</Box>
 			) : (

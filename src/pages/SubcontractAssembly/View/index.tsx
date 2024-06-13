@@ -176,12 +176,14 @@ const IrtTicketView = ({ subcontractAssemblyData }) => {
         style:
           obj?.ticketType === "Delivery" ? customNodeStyles.loadingTicket : ""
       });
-      flowEdge.push({
-        id: `${obj?.products[0].uniqueId}-${obj?._id}-edge`,
-        source: obj?.products[0].uniqueId,
-        target: obj?._id,
-        arrowHeadType: 'arrow'
-      });
+      obj?.products?.forEach((p:any) => {
+        flowEdge.push({
+          id: `${p.uniqueId}-${obj?._id}-edge`,
+          source: p.uniqueId,
+          target: obj?._id,
+          arrowHeadType: 'arrow'
+        });
+      })
     })
 
     let rows = materials?.filter((d: any) =>{
