@@ -292,7 +292,7 @@ const Assign = ({ managedPackagesData }) => {
       ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`/managed-packages/${managedPackagesData?._id}/remove-assets`, { ids: ids })
+      .put(`/managed-packages/${managedPackagesData?._id}/assets`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -309,7 +309,7 @@ const Assign = ({ managedPackagesData }) => {
   const handleAssignAssets = (data) => {
     setIsAssetAdding(true);
     axiosInstance()
-      .post(`managed-packages/${managedPackagesData?._id}/assign-assets`, { assets: data })
+      .post(`managed-packages/${managedPackagesData?._id}/assets`, { assets: data })
       .then(() => {
         setAssignAssetDialog({ open: false, products: [] });
         setIsAssetAdding(false);
