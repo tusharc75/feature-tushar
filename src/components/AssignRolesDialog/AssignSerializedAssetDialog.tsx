@@ -13,7 +13,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignSerializedAssetDialog = ({ reference= null, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [] }) => {
+const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleClose, handleSucess, ids, isAssigning, selectedProducts = [] }) => {
   const renderedFrom = `${routes.serializedAsset.title}_${reference}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
