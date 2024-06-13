@@ -2,7 +2,6 @@ import { Box, Button, Grid, useMediaQuery } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
-
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
@@ -14,13 +13,13 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
-import LeadTimeMaster from '../../components/LeadTime';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { ACTIVITY_RESOURCE, serviceMaster } from '../../constants/helpers';
 import ConfigureFields from './Fields';
 import ManageServiceMaster from './ManageServiceMaster';
 import Product from './Product';
 import Steps from './Steps';
+import LeadTime from 'src/components/LeadTime';
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -150,7 +149,7 @@ const ServiceMasterDetailsPage = () => {
                   <Box mb={2} mt={2}>
                     <Grid container spacing={2}>
                       <Grid item xs={6}>
-                        <LeadTimeMaster Id={id} type={'service'} />
+                        <LeadTime referenceType={'service'} referenceId={id} />
                       </Grid>
                     </Grid>
                   </Box>

@@ -201,22 +201,18 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           </div>
         )
       },
-      ...(permissions?.leadTimeMaster
-        ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div> {(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)} </div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows
-                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <div>{total}</div>;
-            }
-          }
-        ]
-        : []),
+      {
+        accessor: 'leadTime',
+        Header: 'Lead Time (Days)',
+        Cell: ({ row }) => <div> {(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)} </div>,
+        Footer: (info) => {
+          let rows = info.table.getExpandedRowModel().rows;
+          const total = rows
+            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+          return <div>{total}</div>;
+        }
+      },
       {
         accessor: 'description',
         Header: 'Description',
