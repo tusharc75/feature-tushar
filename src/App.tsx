@@ -255,6 +255,8 @@ import WorkOrderPlanning from './pages/WorkOrderPlanning';
 import ResourceDoaRequest from './pages/ResourceDoaRequest';
 import SubcontractAssembly from 'src/pages/SubcontractAssembly';
 import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
+import ManagedPackages from 'src/pages/ManagedPackages';
+import ManagedPackagedDetail from 'src/pages/ManagedPackages/ManagedPackagesDetail';
 
 
 var notificationInterval: any = null;
@@ -1130,6 +1132,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.subcontractAssemblyDetail.path}/:id`}>
               <SubcontractAssemblyDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={routes.managedPackages.path}>
+              <ManagedPackages />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.managedPackagesDetail.path}/:id`}>
+              <ManagedPackagedDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
