@@ -683,20 +683,6 @@ const routes = {
         : RESOURCE_LABEL.serviceMaster,
     path: '/service-master/detail'
   },
-  leadTimeMaster: {
-    title:
-      storedRoutes && storedRoutes.leadTimeMaster && storedRoutes.leadTimeMaster.title
-        ? storedRoutes.leadTimeMaster?.title
-        : RESOURCE_LABEL.leadTimeMaster,
-    path: '/lead-time-master'
-  },
-  leadTimeMasterDetail: {
-    title:
-      storedRoutes && storedRoutes.leadTimeMaster && storedRoutes.leadTimeMaster.title
-        ? storedRoutes.leadTimeMaster?.title
-        : RESOURCE_LABEL.leadTimeMaster,
-    path: '/lead-time-master/detail'
-  },
   repairOrder: {
     title: storedRoutes && storedRoutes.repairOrder && storedRoutes.repairOrder.title ? storedRoutes.repairOrder?.title : RESOURCE_LABEL.repairOrder,
     path: '/repair-order'

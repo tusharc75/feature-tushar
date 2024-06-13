@@ -144,8 +144,6 @@ import Quotation from './pages/Quotation';
 import QuotationDetails from './pages/Quotation/QuotationDetails';
 import ServiceMaster from './pages/ServiceMaster';
 import ServiceMasterDetailsPage from './pages/ServiceMaster/ServiceMasterDetailsPage';
-import LeadTimeMaster from './pages/LeadTimeMaster';
-import LeadTimeMasterDetails from './pages/LeadTimeMaster/LeadTimeMasterDetails';
 import CustomReport from './pages/ReportCustom';
 import CustomReports from './pages/ReportCustom/CustomReport';
 import RepairOrder from './pages/RepairOrder';
@@ -826,12 +824,6 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.serviceMasterDetail.path}/:id`}>
               <ServiceMasterDetailsPage />
-            </PrivateRoute>
-            <PrivateRoute exact path={routes.leadTimeMaster.path}>
-              <LeadTimeMaster />
-            </PrivateRoute>
-            <PrivateRoute exact path={`${routes.leadTimeMasterDetail.path}/:id`}>
-              <LeadTimeMasterDetails />
             </PrivateRoute>
             <PrivateRoute exact path={routes.repairOrder.path}>
               <RepairOrder />
