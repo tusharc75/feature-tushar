@@ -3,6 +3,7 @@ import { AddCircleOutline } from "@material-ui/icons";
 import { useEffect, useState } from "react";
 import ManageLeadTime from './ManageLeadTime'
 import axiosInstance from "src/axios/axiosInstance";
+import { startCase } from "lodash";
 
 const LeadTime = ({ referenceType, referenceId }) => {
 
@@ -133,6 +134,7 @@ const LeadTime = ({ referenceType, referenceId }) => {
 					referenceType={referenceType}
 					referenceId={referenceId}
 					referenceData={leadTimeData}
+					title={startCase(referenceType)}
 				/>
 			)}
 		</>

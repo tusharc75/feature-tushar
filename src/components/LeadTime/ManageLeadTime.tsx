@@ -2,23 +2,30 @@ import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typ
 import { AddCircleOutline, RemoveCircleOutline } from "@material-ui/icons";
 import { Autocomplete } from "@material-ui/lab";
 import { FieldArray, Form, Formik } from "formik";
-import { startCase } from "lodash";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
+import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomButton from "src/components/Helpers/CustomButton";
-import { CustomDialogTransition, leadTimeStatusDropdown } from "src/constants/helpers";
+import { CustomDialogTransition, leadTimeStatusDropdown, quotation, salesOrder, sidebarResource } from "src/constants/helpers";
 
-const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, referenceData }) => {
+const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, referenceData, title }) => {
+	const toastConfig = useContext(CustomToastContext);
+
 	const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 	const [initialValues, setInitialValues] = useState({ steps: [] });
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	useEffect(() => {
-		setInitialValues({ steps: referenceData?.steps })
+		if (referenceType === sidebarResource.salesOrder || referenceType === sidebarResource.quotation) {
+			console.log('referenceData', referenceData)
+			setInitialValues({ steps: referenceData?.leadTimeData })
+		} else {
+			setInitialValues({ steps: referenceData?.steps })
+		}
 	}, [referenceData])
 
 	const addRemove = (values, type, index = 0) => {
@@ -33,15 +40,64 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 
 	const handleSubmit = (values) => {
 		setIsSubmitting(true)
-		axiosInstance().post('/lead-time', {
-			steps: values?.steps,
-			leadTimeDays: values?.steps?.reduce((acc, curr) => acc + (parseInt(curr.days) || 0), 0),
-			referenceType: referenceType,
-			referenceId: referenceId
-		}).then((res) => {
-			setIsSubmitting(false)
-			onSuccess()
-		})
+		if (referenceType === 'product' || referenceType === 'package' || referenceType === 'service') {
+			axiosInstance().post('/lead-time', {
+				steps: values?.steps,
+				leadTimeDays: values?.steps?.reduce((acc, curr) => acc + (parseInt(curr.days) || 0), 0),
+				referenceType: referenceType,
+				referenceId: referenceId
+			}).then((res) => {
+				setIsSubmitting(false)
+				onSuccess()
+			})
+		} else if (referenceType === sidebarResource.salesOrder) {
+			const value = {
+				leadTime: values?.steps || [],
+				_id: referenceData?._id
+			};
+
+			axiosInstance()
+				.put(`${salesOrder.api}/material/${referenceId}/lead-time`, value)
+				.then(({ data }) => {
+					setIsSubmitting(false);
+					onSuccess();
+					toastConfig.setToastConfig({
+						open: true,
+						type: 'success',
+						message: data.message
+					});
+				})
+				.catch((err) => {
+					setIsSubmitting(false);
+					toastConfig.setToastConfig(err);
+				});
+		} else if (sidebarResource.quotation) {
+			const value = {
+				leadTime: values?.steps || [],
+				_id: referenceData?._id
+			};
+			let api = '';
+			if (referenceData?.type === 'Manual Entry') {
+				api = `${quotation.api}/additionalcost/${referenceId}/${referenceData?.versionId}/lead-time`
+			} else {
+				api = `${quotation.api}/productpackage/${referenceId}/${referenceData?.versionId}/lead-time`
+			}
+			axiosInstance()
+				.put(api, value)
+				.then((res) => {
+					setIsSubmitting(false);
+					onSuccess();
+					toastConfig.setToastConfig({
+						open: true,
+						type: 'success',
+						message: 'Lead time updated successfully'
+					});
+				})
+				.catch((err) => {
+					setIsSubmitting(false);
+					toastConfig.setToastConfig(err);
+				});
+		}
 	}
 
 	const validate = (values) => {
@@ -82,7 +138,7 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 				{({ values, submitForm, touched, errors }) => (
 					<>
 						<CustomDialogHeader
-							title={`${startCase(referenceType)}`}
+							title={title}
 							onClose={onClose}
 							isMinimized={!fullScreen}
 							onMinimizeMaximize={() => {

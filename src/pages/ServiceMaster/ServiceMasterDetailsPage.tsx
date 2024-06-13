@@ -145,15 +145,13 @@ const ServiceMasterDetailsPage = () => {
             ) : (
               <>
                 <DetailsPage data={serviceMasterDetailData} fields={fields} />
-                {permissions?.leadTimeMaster?.isRead && (
-                  <Box mb={2} mt={2}>
-                    <Grid container spacing={2}>
-                      <Grid item xs={6}>
-                        <LeadTime referenceType={'service'} referenceId={id} />
-                      </Grid>
+                <Box mb={2} mt={2}>
+                  <Grid container spacing={2}>
+                    <Grid item xs={6}>
+                      <LeadTime referenceType={'service'} referenceId={id} />
                     </Grid>
-                  </Box>
-                )}
+                  </Grid>
+                </Box>
               </>
             )}
           </Box>
