@@ -5,7 +5,7 @@ import ManageLeadTime from './ManageLeadTime'
 import axiosInstance from "src/axios/axiosInstance";
 import { startCase } from "lodash";
 
-const LeadTime = ({ referenceType, referenceId }) => {
+const LeadTime = ({ referenceType, referenceId, referenceLabel }) => {
 
 	const [leadTimeData, setLeadTimeData] = useState(null)
 	const [loading, setLoading] = useState(false)
@@ -125,6 +125,7 @@ const LeadTime = ({ referenceType, referenceId }) => {
 			{open && (
 				<ManageLeadTime
 					onClose={() => {
+						console.log('leadTimeData', leadTimeData)
 						setOpen(false)
 					}}
 					onSuccess={() => {
@@ -134,7 +135,7 @@ const LeadTime = ({ referenceType, referenceId }) => {
 					referenceType={referenceType}
 					referenceId={referenceId}
 					referenceData={leadTimeData}
-					title={startCase(referenceType)}
+					referenceLabel={`${startCase(referenceType)} - ${referenceLabel}`}
 				/>
 			)}
 		</>

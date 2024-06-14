@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid, IconButton, TextField, Typography } from "@material-ui/core";
+import { Box, Button, Dialog, Grid, IconButton, TextField, Typography } from "@material-ui/core";
 import { AddCircleOutline, RemoveCircleOutline } from "@material-ui/icons";
 import { Autocomplete } from "@material-ui/lab";
 import { FieldArray, Form, Formik } from "formik";
@@ -9,38 +9,41 @@ import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 import CustomButton from "src/components/Helpers/CustomButton";
-import { CustomDialogTransition, leadTimeStatusDropdown, quotation, salesOrder, sidebarResource } from "src/constants/helpers";
+import { CustomDialogTransition, MATERIAL_TYPE, leadTimeStatusDropdown } from "src/constants/helpers";
 
-const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, referenceData, title }) => {
+const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, referenceData, referenceLabel, loading = false }) => {
 	const toastConfig = useContext(CustomToastContext);
 
 	const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-	const [initialValues, setInitialValues] = useState({ steps: [] });
+	const [steps, setSteps] = useState([])
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	useEffect(() => {
-		if (referenceType === sidebarResource.salesOrder || referenceType === sidebarResource.quotation) {
-			console.log('referenceData', referenceData)
-			setInitialValues({ steps: referenceData?.leadTimeData })
+		if (referenceType === MATERIAL_TYPE.product || referenceType === MATERIAL_TYPE.package || referenceType === MATERIAL_TYPE.service) {
+			setSteps(referenceData?.steps || [])
 		} else {
-			setInitialValues({ steps: referenceData?.steps })
+			setSteps(referenceData?.leadTimeData || [])
 		}
 	}, [referenceData])
 
-	const addRemove = (values, type, index = 0) => {
-		let data = values?.steps || []
+	const addRemove = (type, index) => {
+		const newSteps = [...steps]
 		if (type === 'add') {
-			data.push({ leadTimeStatus: '', days: '' })
+			newSteps.splice(index, 0, {
+				leadTimeStatus: '',
+				days: ''
+			});
 		} else {
-			data.splice(index, 1);
+			newSteps.splice(index, 1);
 		}
-		setInitialValues({ steps: [...data] })
+		setSteps([...newSteps])
 	}
 
 	const handleSubmit = (values) => {
-		setIsSubmitting(true)
-		if (referenceType === 'product' || referenceType === 'package' || referenceType === 'service') {
+		if ((referenceType === MATERIAL_TYPE.product || referenceType === MATERIAL_TYPE.package || referenceType === MATERIAL_TYPE.service) && referenceId) {
+			setIsSubmitting(true)
 			axiosInstance().post('/lead-time', {
 				steps: values?.steps,
 				leadTimeDays: values?.steps?.reduce((acc, curr) => acc + (parseInt(curr.days) || 0), 0),
@@ -50,53 +53,8 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 				setIsSubmitting(false)
 				onSuccess()
 			})
-		} else if (referenceType === sidebarResource.salesOrder) {
-			const value = {
-				leadTime: values?.steps || [],
-				_id: referenceData?._id
-			};
-
-			axiosInstance()
-				.put(`${salesOrder.api}/material/${referenceId}/lead-time`, value)
-				.then(({ data }) => {
-					setIsSubmitting(false);
-					onSuccess();
-					toastConfig.setToastConfig({
-						open: true,
-						type: 'success',
-						message: data.message
-					});
-				})
-				.catch((err) => {
-					setIsSubmitting(false);
-					toastConfig.setToastConfig(err);
-				});
-		} else if (sidebarResource.quotation) {
-			const value = {
-				leadTime: values?.steps || [],
-				_id: referenceData?._id
-			};
-			let api = '';
-			if (referenceData?.type === 'Manual Entry') {
-				api = `${quotation.api}/additionalcost/${referenceId}/${referenceData?.versionId}/lead-time`
-			} else {
-				api = `${quotation.api}/productpackage/${referenceId}/${referenceData?.versionId}/lead-time`
-			}
-			axiosInstance()
-				.put(api, value)
-				.then((res) => {
-					setIsSubmitting(false);
-					onSuccess();
-					toastConfig.setToastConfig({
-						open: true,
-						type: 'success',
-						message: 'Lead time updated successfully'
-					});
-				})
-				.catch((err) => {
-					setIsSubmitting(false);
-					toastConfig.setToastConfig(err);
-				});
+		} else {
+			onSuccess(values)
 		}
 	}
 
@@ -134,11 +92,11 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 			}}
 			open={true}
 		>
-			<Formik initialValues={initialValues} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
+			<Formik initialValues={{ steps }} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
 				{({ values, submitForm, touched, errors }) => (
 					<>
 						<CustomDialogHeader
-							title={title}
+							title={referenceLabel}
 							onClose={onClose}
 							isMinimized={!fullScreen}
 							onMinimizeMaximize={() => {
@@ -158,15 +116,17 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 										</Grid>
 										<Grid item xs={2}>
 											<Grid container justifyContent="flex-end">
-												<IconButton
-													size="small"
-													aria-label="setting"
-													onClick={() => {
-														addRemove(values, 'add')
-													}}
-												>
-													<AddCircleOutline fontSize="small" />
-												</IconButton>
+												<HtmlTooltip title="Add">
+													<IconButton
+														size="small"
+														aria-label="add"
+														onClick={() => {
+															addRemove('add', values?.steps?.length)
+														}}
+													>
+														<AddCircleOutline fontSize="small" color="primary" />
+													</IconButton>
+												</HtmlTooltip>
 											</Grid>
 										</Grid>
 									</Grid>
@@ -201,6 +161,7 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 																						name="leadTimeStatus"
 																						size="small"
 																						fullWidth
+																						required
 																						error={
 																							touched?.steps &&
 																							touched?.steps[index]?.leadTimeStatus &&
@@ -228,6 +189,7 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 																				fullWidth
 																				style={{ margin: 0 }}
 																				value={step?.days || ''}
+																				required
 																				onChange={(e) => {
 																					arrayHelpers.replace(index, {
 																						...values?.steps[index],
@@ -250,11 +212,11 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 																		</Grid>
 																		<Grid item xs={2}>
 																			<Grid container justifyContent="flex-end">
-																				<IconButton size="small" aria-label="setting" onClick={() => {
-																					addRemove(values, 'remove', index)
-																				}}>
-																					<RemoveCircleOutline fontSize="small" />
-																				</IconButton>
+																				<HtmlTooltip title="Remove">
+																					<IconButton size="small" aria-label="remove" onClick={() => addRemove('remove', index)}>
+																						<RemoveCircleOutline fontSize="small" color="primary" />
+																					</IconButton>
+																				</HtmlTooltip>
 																			</Grid>
 																		</Grid>
 																	</Grid>
@@ -271,7 +233,7 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 						</CustomDialogContent>
 						<CustomDialogFooter>
 							<Button
-								disabled={isSubmitting}
+								disabled={isSubmitting || loading}
 								type="button"
 								variant="outlined"
 								color="primary"
@@ -281,10 +243,10 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
 								Cancel
 							</Button>
 							<CustomButton
-								loading={isSubmitting}
+								loading={isSubmitting || loading}
 								variant="contained"
 								color="primary"
-								disabled={isSubmitting}
+								disabled={isSubmitting || loading}
 								onClick={submitForm}
 							>
 								Save

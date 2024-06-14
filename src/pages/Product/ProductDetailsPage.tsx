@@ -24,7 +24,7 @@ import routes from '../../components/Helpers/Routes';
 import CreateProduct from '../../components/Product/CreateProduct';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import { extractFieldsForDisplay } from '../../constants/formulaUtility';
-import { ACTIVITY_RESOURCE, product, productInventory, serializedAsset } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, product, productInventory, serializedAsset } from '../../constants/helpers';
 import ManageSerializedAsset from '../SerializedAsset/ManageSerializedAsset';
 import CostDetails from './CostDetails';
 import Digital from './Digital';
@@ -511,7 +511,7 @@ const ProductDetailsPage = () => {
                         </Grid>
                       )}
                       <Grid item xs={12} sm={6} md={4} xl={3}>
-                        <LeadTime referenceType={'product'} referenceId={id} />
+                        <LeadTime referenceType={MATERIAL_TYPE.product} referenceId={id} referenceLabel={productData?.productName} />
                       </Grid>
                     </Grid>
                   </Grid>
