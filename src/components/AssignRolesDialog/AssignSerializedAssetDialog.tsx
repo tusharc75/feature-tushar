@@ -191,7 +191,16 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
         while (qty) {
           const result = selectedRecords?.filter((f) => f.productId === ele.product && !f.isCounted);
           if (result.length) {
-            data.push({ ...ele, asset: result[0]._id });
+            if (reference === 'managedPackages') {
+              if (qty - ele?.packages?.length <= 0) {
+                data.push({ product: ele.product, package: ele?.packages[0], asset: result[0]._id });
+                ele.packages.shift();
+              } else {
+                data.push({ product: ele.product, asset: result[0]._id })
+              }
+            } else {
+              data.push({ ...ele, asset: result[0]._id });
+            }
             result[0].isCounted = true;
           }
           qty--;

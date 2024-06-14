@@ -689,10 +689,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
   const handleAddSerializedAsset = (assets, withTransfer = false, assetsData = null) => {
     var data = [];
-    var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === 'product');
+    var flatArray = treeToFlatArray(selectedRecords, 'subRows').filter((f) => f.type === MATERIAL_TYPE.product);
     flatArray = uniqBy(flatArray, '_id');
     flatArray?.forEach((e: any) => {
-      if (e.type === 'product') {
+      if (e.type === MATERIAL_TYPE.product) {
         let qty = e.realAssetQty - e.realAssetAssignedQty;
         while (qty) {
           const result = assets.filter((f) => f.productId === e.materialId && !f.isCounted);

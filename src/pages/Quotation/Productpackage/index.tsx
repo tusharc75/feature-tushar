@@ -836,6 +836,36 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     );
   };
 
+  const handleSaveLeadTime = (data) => {
+    setSubmitting(true)
+    const value = {
+      leadTime: data?.steps || [],
+      _id: leadTimeDialog?.data?._id
+    };
+    let api = '';
+    if (quotationData?.type === 'Manual Entry') {
+      api = `${quotation.api}/additionalcost/${quotationData?._id}/${versionId}/lead-time`
+    } else {
+      api = `${quotation.api}/productpackage/${quotationData?._id}/${versionId}/lead-time`
+    }
+    axiosInstance()
+      .put(api, value)
+      .then((res) => {
+        setSubmitting(false);
+        setLeadTimeDialog({ open: false, data: null });
+        fetchData()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Lead time updated successfully'
+        });
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(err);
+      });
+  }
+
   return (
     <Fragment>
       <DetailsPageHeader
@@ -985,18 +1015,18 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
-          onSuccess={() => {
-            setLeadTimeDialog({ open: false, data: null });
-            fetchData();
+          onSuccess={(data) => {
+            handleSaveLeadTime(data)
           }}
           referenceType={sidebarResource.quotation}
-          referenceId={quotationData._id}
-          referenceData={{ ...leadTimeDialog?.data, versionId: versionId }}
-          title={leadTimeDialog?.data?.detail ||
+          referenceId={null}
+          referenceData={leadTimeDialog?.data}
+          referenceLabel={leadTimeDialog?.data?.detail ||
             leadTimeDialog?.data?.productDetail?.productName ||
             leadTimeDialog?.data?.serviceDetail?.serviceName ||
             leadTimeDialog?.data?.packageDetail?.packageName ||
             'Lead Time Status'}
+          loading={isSubmitting}
         />
       )}
       {addchildDialog.open && (

@@ -12,7 +12,6 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
@@ -51,7 +50,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
-    if ( (fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) && !isOffline) {
+    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) && !isOffline) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       data?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -91,7 +90,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
       handleUpdateCost(returnData, saveAndNext);
     } else {
       let returnData = [];
-      returnData = [{ ...getObjKeysWithValues(values, allFields)}];
+      returnData = [{ ...getObjKeysWithValues(values, allFields) }];
       handleAddCost(returnData);
     }
   };
@@ -256,7 +255,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
                 >
                   Cancel
                 </Button>
-                { showSaveAndNext && (
+                {showSaveAndNext && (
                   <Button
                     disabled={loadingEdit}
                     variant="contained"

@@ -9,7 +9,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import axiosInstance from 'src/axios/axiosInstance';
-import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';

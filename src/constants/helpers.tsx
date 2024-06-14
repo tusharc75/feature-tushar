@@ -189,7 +189,6 @@ export const serviceOrderSteps: stepInterface[] = [
 
 export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Assign', title: 'Assign', icon: 'assign' },
   { name: 'Loading', title: 'Loading', icon: 'ticket' },
   { name: 'Receiving', title: 'Receiving', icon: 'ticket' }
 ];
@@ -387,7 +386,8 @@ export const sidebarResource = {
   units: 'Units',
   resourceDoaRequest: 'Resource Doa Request',
   workOrderPlanning: 'Work Order Planning',
-  subcontractAssembly: 'Subcontract Assembly'
+  subcontractAssembly: 'Subcontract Assembly',
+  managedPackages: 'Managed Packages'
 };
 
 export const primaryFields = {
@@ -528,7 +528,8 @@ export const RESOURCE_LABEL = {
   userAttendance: 'User Attendance',
   dataList: 'Data List',
   dataListitems: 'Data List Items',
-  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request'
+  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
+  managedPackages : 'Managed Packages'
 };
 
 export const CHILD_RESOURCE = {
