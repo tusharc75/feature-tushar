@@ -20,7 +20,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import Steps, { getIndex } from "src/components/Steps";
 import ContentFullScreen from "src/components/ContentFullScreen";
 import Material from "src/pages/SubcontractAssembly/Material";
-import Assign from "src/pages/SubcontractAssembly/Assign";
 import LoadingTicket from "src/pages/SubcontractAssembly/LoadingTicket";
 import Receiving from "src/pages/SubcontractAssembly/Receiving"
 import { Skeleton } from "@material-ui/lab";
@@ -232,13 +231,6 @@ const SubcontractAssemblyDetail = () => {
 								setNextStep={setNextStep}
 								handleChangeStatus={handleChangeStatus}
 								fetchParentData={fetchData} />
-						)}
-						{currentStep === 1 && subcontractAssemblyData && (
-							<Assign
-								subcontractAssemblyData={subcontractAssemblyData}
-								stepFullScreen={stepFullScreen}
-								allowedToEdit={allowedToEdit}
-								setNextStep={setNextStep} />
 						)}
 						{currentStep === 2 && subcontractAssemblyData && (
 							<LoadingTicket
