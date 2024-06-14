@@ -1204,6 +1204,18 @@ const routes = {
     title: storedRoutes && storedRoutes.subcontractAssembly && storedRoutes.subcontractAssembly.title ? storedRoutes.subcontractAssembly?.title : sidebarResource.subcontractAssembly,
     path: '/subcontract-assembly/detail'
   },
+  managedPackages: {
+    title: storedRoutes && storedRoutes.managedPackages && storedRoutes.managedPackages?.title ? storedRoutes.managedPackages?.title
+      : RESOURCE_LABEL.managedPackages,
+    path: '/managed-packages'
+  },
+  managedPackagesDetail: {
+    title:
+      storedRoutes && storedRoutes.managedPackages && storedRoutes.managedPackages.title
+        ? storedRoutes.managedPackages?.title
+        : RESOURCE_LABEL.managedPackages,
+    path: '/managed-packages/detail'
+  },
 };
 
 export default routes;
