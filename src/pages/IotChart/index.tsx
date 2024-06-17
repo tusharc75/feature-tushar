@@ -33,7 +33,7 @@ function IotChart() {
   }, [search]);
 
   const fetchAssetLocation = () => {
-    let api = `/iot-chart${serializedAsset.api}`;
+    let api = `/iot-chart${serializedAsset.api}-location`;
     if (search) {
       api = `${api}?search=${encodeURIComponent(search)}`;
     }
