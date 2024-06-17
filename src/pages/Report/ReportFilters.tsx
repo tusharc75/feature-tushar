@@ -381,11 +381,13 @@ const ReportFilters = (props: FiltersProps) => {
         break;
     }
     if (timeFrameTemp !== 'custom') {
-      setError((prev) => {
-        delete prev[`from_${field.fieldName}`];
-        delete prev[`to_${field.fieldName}`];
-        return prev;
-      });
+      if (field) {
+        setError((prev) => {
+          delete prev[`from_${field?.fieldName}`];
+          delete prev[`to_${field?.fieldName}`];
+          return prev;
+        });
+    }
     }
   };
 
