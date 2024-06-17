@@ -380,7 +380,7 @@ const ReceivingTicket = ({
             });
 
           const obj: any = {};
-          obj._id = element?.materialId + '_' + ele.loadingTicketId;
+          obj._id = element?._id + '_' + ele.loadingTicketId;
           obj.materialId = element?.materialId;
           obj.uniqueId = element._id;
           obj.serialized = element?.productDetail?.serializedProduct;
