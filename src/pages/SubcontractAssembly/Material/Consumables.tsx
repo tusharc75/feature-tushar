@@ -202,7 +202,6 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
-        parent.parentId = null;
       });
       setAllConsumables(rows)
       if (selectedProductOption?.optionValue !== 'All') {

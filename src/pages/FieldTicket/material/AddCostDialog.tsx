@@ -16,7 +16,7 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { FaDiceOne } from 'react-icons/fa';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
@@ -49,7 +49,12 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
+    let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
+    if(costData) {
+      data = data?.filter((f) => f?.isUpdate);
+    } else {
+      data = data?.filter((f) => f?.isCreate);
+    }
     if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) && !isOffline) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       data?.forEach((e: any) => {

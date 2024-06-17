@@ -15,7 +15,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, FIELD_TICKET_STATUS, MATERIAL_TYPE, fieldTicket, sidebarResource } from 'src/constants/helpers';
 import ManageSubmit from './ManageSubmit';
 import ViewLogs from './ViewLogs';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
@@ -26,6 +26,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
   const [submitDialog, setSubmitDialog] = useState(false);
   const [commentDialog, setCommentDialog] = useState(false);
   const [viewLogsDialog, setViewLogsDialog] = useState(false);
+  const [fieldTicketSubmitFields, setFieldTicketSubmitFields] = useState(null);
 
   const { state, dispatch } = useTableReducer();
   const { generateColumns } = useColumns();
@@ -37,9 +38,12 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
   const fetchFields = async () => {
     setColumns(null);
-    var fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, false);
+    let fieldTicketMaterialFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, false);
+    const fieldTicketSubmitField = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
+    setFieldTicketSubmitFields(fieldTicketSubmitField);
+    fieldTicketMaterialFields = fieldTicketMaterialFields?.filter((f) => f?.isRead);
 
-    const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
+    const newColumns = generateColumns(renderedFrom, fieldTicketMaterialFields, null, false, fieldTicketData?.currency);
     let column: any = [
       {
         accessor: 'index',
@@ -197,7 +201,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
   const RightSideContents = () => {
     return (
       <>
-        {allowedToEdit && (
+        {allowedToEdit && fieldTicketSubmitFields?.some(f => f?.isRead) && (
           <Fragment>
             {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
               <Button
@@ -260,6 +264,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
       {submitDialog && (
         <ManageSubmit
           fieldTicketData={fieldTicketData}
+          fields={fieldTicketSubmitFields}
           onClose={() => {
             setSubmitDialog(false);
           }}
@@ -284,6 +289,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
       {viewLogsDialog && (
         <ViewLogs
+          fields={fieldTicketSubmitFields}
           fieldTicketData={fieldTicketData}
           handleClose={() => {
             setViewLogsDialog(false);
