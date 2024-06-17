@@ -5,11 +5,11 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 const BeaconComponent = forwardRef<HTMLButtonElement, BeaconRenderProps>((props, ref) => {
   return (
     <button
-      className="beacon ralative flex size-12 animate-bounce cursor-pointer items-center justify-center rounded-full border-0 bg-sky-500/70"
+      className="beacon ralative flex size-8 cursor-pointer items-center justify-center rounded-full border-0 bg-sky-500/70"
       ref={ref}
       {...props}
     >
-      {/* <span className="absolute left-0 top-0 h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span> */}
+      <span className="absolute left-0 top-0 h-full w-full animate-ping rounded-full bg-sky-400 opacity-75"></span>
     </button>
   );
 });
