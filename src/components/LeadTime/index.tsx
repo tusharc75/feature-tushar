@@ -125,7 +125,6 @@ const LeadTime = ({ referenceType, referenceId, referenceLabel }) => {
 			{open && (
 				<ManageLeadTime
 					onClose={() => {
-						console.log('leadTimeData', leadTimeData)
 						setOpen(false)
 					}}
 					onSuccess={() => {
