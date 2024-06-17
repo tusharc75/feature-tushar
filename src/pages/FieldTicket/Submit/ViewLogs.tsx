@@ -16,7 +16,7 @@ import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 
-function ViewLogs({ fieldTicketData, handleClose }) {
+function ViewLogs({ fieldTicketData, handleClose, fields }) {
   const renderedFrom = `${routes.fieldTicket.title}_logs`;
 
   const {
@@ -93,7 +93,6 @@ function ViewLogs({ fieldTicketData, handleClose }) {
         }
       }
     ];
-    let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
     fields = fields?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const actionColumn = {

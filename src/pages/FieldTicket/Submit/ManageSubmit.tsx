@@ -30,7 +30,7 @@ const submitValidation = object().shape({
         }),
 });
 
-const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
+const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -46,14 +46,13 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
 
     const fetchFields = async () => {
         try {
-            let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
-            data = data?.filter((f) => f?.isCreate);
-            const tempInitialData = getObjKeys('', data);
-            if (data?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
+            fields = fields?.filter((f) => f?.isRead);
+            const tempInitialData = getObjKeys('', fields);
+            if (fields?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
                 tempInitialData["customerAccount"] = fieldTicketData.customerAccount.optionValue;
             }
             setInitialData({
-                fields: data,
+                fields: fields,
                 values: tempInitialData
             });
         } catch (error) {
