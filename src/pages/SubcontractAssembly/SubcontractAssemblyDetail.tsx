@@ -232,7 +232,7 @@ const SubcontractAssemblyDetail = () => {
 								handleChangeStatus={handleChangeStatus}
 								fetchParentData={fetchData} />
 						)}
-						{currentStep === 2 && subcontractAssemblyData && (
+						{currentStep === 1 && subcontractAssemblyData && (
 							<LoadingTicket
 								subcontractAssemblyData={subcontractAssemblyData}
 								setNextStep={setNextStep}
@@ -240,7 +240,7 @@ const SubcontractAssemblyDetail = () => {
 								allowedToEdit={allowedToEdit}
 							/>
 						)}
-						{currentStep === 3 && subcontractAssemblyData && (
+						{currentStep === 2 && subcontractAssemblyData && (
 							<Receiving
 								subcontractAssemblyData={subcontractAssemblyData}
 								stepFullScreen={stepFullScreen}
