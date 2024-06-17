@@ -333,7 +333,6 @@ const SubcontractAssembly = () => {
           />
         )}
       </CustomContainer>
-      <CustomIntro resource={sidebarResource.subcontractAssembly} steps={steps} />
     </section>
   );
 };
