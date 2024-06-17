@@ -10,7 +10,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { checkFormula } from '../../../constants/formulaUtility';
-import { CustomDialogTransition, columnSize, fieldLabelToFieldName } from '../../../constants/helpers';
+import { CustomDialogTransition, fieldLabelToFieldName, gridSize } from '../../../constants/helpers';
 import FieldList from '../FieldList';
 import General from './General';
 import Setting from './Setting';
@@ -58,7 +58,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         values.dataListId = null;
       }
       if (!values.columnSize) {
-        values.columnSize = columnSize(fieldData?.type);
+        values.columnSize = gridSize(fieldData?.type);
       }
       if (
         !values.isColumnEditable &&
