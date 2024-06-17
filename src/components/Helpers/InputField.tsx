@@ -124,11 +124,7 @@ const InputField = (props) => {
                                 setCurrencySymbol(null);
                               }
                             }
-                            : field.type === 'dropDown'
-                              ? (e, val) => {
-                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                              }
-                              : null
+                            : null
                         }
                         imageOrFileUploadCompletePercentage={
                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
