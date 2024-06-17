@@ -24,7 +24,9 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
 
-const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMaterial, stepFullScreen }) => {
+const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, material, fetchMaterial, stepFullScreen }) => {
+
+
   const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Consumables`;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -37,13 +39,12 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
   const [selectedProductOption, setSelectedProductOption] = useState({ optionLabel: 'All', optionValue: 'All' });
   const [allConsumables, setAllConsumables] = useState([]);
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null });
-  const [isBulkEdit, setIsBulkEdit] = useState(false);
-  const [isUpdating, setUpdating] = useState(false);
   const [isSubmitting, setSubmitting] = useState(false);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
   useEffect(() => {
     setProductOption([
       { optionLabel: 'All', optionValue: 'All' },
@@ -71,7 +72,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
     if (columns) {
       fetchData();
     }
-  }, [columns, tabValue]);
+  }, [columns, material]);
 
   const fetchColumns = async () => {
     var fields = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyMaterial, subcontractAssemblyData?.currency, allowedToEdit);
@@ -91,9 +92,9 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
     ];
 
     let data;
-      const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
-      data = response?.data?.data;
-    
+    const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
+    data = response?.data?.data;
+
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
@@ -143,7 +144,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
     });
 
     const extracolumns: any = [
-      ...newColumns, 
+      ...newColumns,
       {
         accessor: 'action',
         Header: 'Actions',
@@ -175,7 +176,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
                   disabled={!row?.original?.canDelete}
                   onClick={() => {
                     const obj: any = [{ id: row.original._id, materialId: row.original?.materialId }];
-										setDeleteData(obj);
+                    setDeleteData(obj);
                   }}
                 >
                   <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -194,21 +195,18 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
     try {
       dispatch({ type: 'loading', loading: true });
       dispatch({ type: 'selection', selectedRecords: [] });
-      let consumables;
-      const response = await axiosInstance().get(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`);
-      consumables = response?.data?.data?.material;
-      let rows = consumables?.filter((ele:any)=> ele.parentId)
-     
+      let rows = material?.filter((ele: any) => ele.parentId)
       rows?.forEach((parent, i) => {
         parent.index = i + 1;
         parent.canDelete = true;
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
+        parent.parentId = null;
       });
       setAllConsumables(rows)
-      if(selectedProductOption?.optionValue!=='All'){
-        rows = rows?.filter((ele:any)=> ele.parentId===selectedProductOption?.optionValue)
+      if (selectedProductOption?.optionValue !== 'All') {
+        rows = rows?.filter((ele: any) => ele.parentId === selectedProductOption?.optionValue)
       }
       dispatch({ type: 'initialize', data: rows || [], count: rows?.length || 0 });
       dispatch({ type: 'loading', loading: false });
@@ -218,62 +216,62 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
     }
   };
 
-   const addMaterial = async (rows) => {
-		setSubmitting(true);
-		const material: any = [];
-			rows.forEach((d) => {
-				const element: any = {};
-				element.materialId = d._id;
-				element.type = MATERIAL_TYPE.product;
-				element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
-				element.qty = d.qty ? parseFloat(d.qty) : 1;
-				element.parentId = selectedProductOption?.optionValue;
-				material.push(element);
-			});
-		
-		await axiosInstance()
-			.post(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`, { material })
-			.then(() => {
-        fetchData();
-				setConsumablesDialog(false);
-				setSubmitting(false);
-			})
-			.catch((error) => {
-				toastConfig.setToastConfig(error);
-				setSubmitting(false);
-			});
-	};
+  const addMaterial = async (rows) => {
+    setSubmitting(true);
+    const material: any = [];
+    rows.forEach((d) => {
+      const element: any = {};
+      element.materialId = d._id;
+      element.type = MATERIAL_TYPE.product;
+      element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
+      element.qty = d.qty ? parseFloat(d.qty) : 1;
+      element.parentId = selectedProductOption?.optionValue;
+      material.push(element);
+    });
+
+    await axiosInstance()
+      .post(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`, { material })
+      .then(() => {
+        fetchMaterial();
+        setConsumablesDialog(false);
+        setSubmitting(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setSubmitting(false);
+      });
+  };
 
 
-	const handleDelete = async (rows) => {
-		try {
-			setDeleting(true);
-			const material = rows?.map((ele) => ({ id: ele.id, materialId: ele.materialId }));
-			if (material?.length) {
-				await axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/delete`, { ids: material });
-			}
-			setDeleting(false);
-			fetchData();
-			setDeleteData(null);
-		} catch (error) {
-			setDeleting(false);
-			toastConfig.setToastConfig(error);
-			setDeleteData(null);
-		}
-	};
+  const handleDelete = async (rows) => {
+    try {
+      setDeleting(true);
+      const material = rows?.map((ele) => ({ id: ele.id, materialId: ele.materialId }));
+      if (material?.length) {
+        await axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/delete`, { ids: material });
+      }
+      setDeleting(false);
+      fetchMaterial();
+      setDeleteData(null);
+    } catch (error) {
+      setDeleting(false);
+      toastConfig.setToastConfig(error);
+      setDeleteData(null);
+    }
+  };
 
   const handleSaveData = async (rows: any) => {
-		try {
-			setSubmitting(true);
-			await axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`, { material: rows });
-			fetchData();
-			setIsConsumableEdit({ open: false, data: null });
-			setSubmitting(false);
-		} catch (error) {
-			setSubmitting(false);
-			toastConfig.setToastConfig(error);
-		}
-	};
+    try {
+      setSubmitting(true);
+      await axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`, { material: rows });
+      fetchMaterial();
+      setIsConsumableEdit({ open: false, data: null });
+      setSubmitting(false);
+    } catch (error) {
+      setSubmitting(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     dispatch({ type: 'update', data: [] });
@@ -322,35 +320,29 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
                 value = { optionLabel: 'All', optionValue: 'All' };
               }
               let rows = allConsumables;
-              if(value.optionValue!=='All'){
-                rows = allConsumables?.filter((ele)=> ele.parentId===value.optionValue);
+              if (value.optionValue !== 'All') {
+                rows = allConsumables?.filter((ele) => ele.parentId === value.optionValue);
               }
               dispatch({ type: 'update', data: rows });
               setSelectedProductOption(value);
             }}
-            renderInput={(params) => <TextField {...params} label={'Select Product Consumables'} variant="outlined" />}
+            renderInput={(params) => <TextField {...params} label={'Select Product'} variant="outlined" />}
           />
         </Box>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
         <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} />
       </CustomTabs>
-
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-          {allowedToEdit && !subcontractAssemblyData?.quotation && (
-            <>
-              <DetailsPageHeader
-                isAddButtonVisible={selectedProductOption?.optionValue!=='All'}
-                addButtonProps={{ onClick: () => setConsumablesDialog(true) }}
-                isActionButtonVisible={true}
-                actionButtonMenuItems={actionButtonMenuItems()}
-                actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
-                // rightSideContents={rightSideContents()}
-                hasXpadding
-              />
-            </>
-          )}
+          <DetailsPageHeader
+            isAddButtonVisible={selectedProductOption?.optionValue !== 'All'}
+            addButtonProps={{ onClick: () => setConsumablesDialog(true) }}
+            actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+            actionButtonMenuItems={actionButtonMenuItems()}
+            hasXpadding
+            isActionButtonVisible={allowedToEdit}
+          />
           <Grid container spacing={2}>
             <Grid item xs={12} md={12} sm={12}>
               {columns ? (
@@ -363,7 +355,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
                   isClientSideGrid={true}
                   hideSelection={!allowedToEdit}
                   hideAction={!allowedToEdit}
-                  refreshGrid={fetchData}
+                  refreshGrid={fetchMaterial}
                 />
               ) : (
                 <Box p={2} height={300}>
@@ -395,7 +387,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, fetchMa
           handleSaveData={handleSaveData}
           subcontractAssemblyData={subcontractAssemblyData}
           rowData={isConsumableEdit.data}
-          material={[...products,...allConsumables]}
+          material={[...products, ...allConsumables]}
           allFields={allFields}
           loading={isSubmitting}
         />
