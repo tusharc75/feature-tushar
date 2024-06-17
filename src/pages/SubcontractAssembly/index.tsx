@@ -41,7 +41,7 @@ const steps: CustomStep = [
   },
   {
     title: 'Data',
-    content: 'Clicking this button will all the subcontract',
+    content: 'Clicking this button will show all the subcontract',
     placement: 'top' as const,
     target: '.MuiToggleButtonGroup-root > button + button'
   }
