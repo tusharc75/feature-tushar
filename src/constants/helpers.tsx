@@ -27,6 +27,8 @@ import { v4 as uuid } from 'uuid';
 import mimeDb from 'mime-db';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
+import { ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -1111,21 +1113,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -3312,7 +3314,20 @@ export const colSpans = [
   'col-span-9',
   'col-span-10',
   'col-span-11',
-  'col-span-12'
+  'col-span-12',
+
+  'md:col-span-1',
+  'md:col-span-2',
+  'md:col-span-3',
+  'md:col-span-4',
+  'md:col-span-5',
+  'md:col-span-6',
+  'md:col-span-7',
+  'md:col-span-8',
+  'md:col-span-9',
+  'md:col-span-10',
+  'md:col-span-11',
+  'md:col-span-12'
 ];
 
 export const getFileIconSrc = (file) => {
@@ -3343,16 +3358,20 @@ export const checkIfSynching = async (setToFalse = false) => {
   try {
     let api = `user/update-synching-status`;
     if (setToFalse) {
-      api += `?setToFalse=true`
+      api += `?setToFalse=true`;
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) { }
-}
+  } catch (error) {}
+};
 
 export const columnSize = (type) => {
   if (['imageUpload', 'fileUpload', 'multiImageUpload', 'multiFileUpload', 'counter', 'description'].includes(type)) {
-    return 12;
+    return 'col-span-12';
   }
-  return 6;
+  return 'col-span-6';
+};
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
 }
