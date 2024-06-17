@@ -529,7 +529,7 @@ export const RESOURCE_LABEL = {
   dataList: 'Data List',
   dataListitems: 'Data List Items',
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
-  managedPackages : 'Managed Packages'
+  managedPackages: 'Managed Packages'
 };
 
 export const CHILD_RESOURCE = {
@@ -3342,4 +3342,11 @@ export const checkIfSynching = async (setToFalse = false) => {
     const { data } = await axiosInstance().post(api);
     return data?.data;
   } catch (error) { }
+}
+
+export const columnSize = (type) => {
+  if (['imageUpload', 'fileUpload', 'multiImageUpload', 'multiFileUpload', 'counter', 'description'].includes(type)) {
+    return 12;
+  }
+  return 6;
 }

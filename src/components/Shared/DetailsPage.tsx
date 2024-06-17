@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import { GetApp, Image, InfoOutlined, InsertDriveFile } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import { FcApproval } from 'react-icons/fc';
-import { formatAmountWithCurrency, getFileIconSrc, getObjKeysWithValues } from '../../constants/helpers';
+import { columnSize, formatAmountWithCurrency, getFileIconSrc, getObjKeysWithValues } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -411,15 +411,21 @@ const Details = (props: DetailProps) => {
                       key={i}
                       item
                       xs={12}
-                      sm={gridSize ?? dynamicSize(6, field.fieldData.type)}
-                      xl={gridSize ?? dynamicSize(4, field.fieldData.type)}
+                      sm={field.fieldData.columnSize ? field.fieldData.columnSize : columnSize(field.fieldData.type)}
+                      md={field.fieldData.columnSize ? field.fieldData.columnSize : columnSize(field.fieldData.type)}
+                      lg={field.fieldData.columnSize ? field.fieldData.columnSize : columnSize(field.fieldData.type)}
+                      xl={field.fieldData.columnSize ? field.fieldData.columnSize : columnSize(field.fieldData.type)}
                     >
                       <Grid
                         container
                         alignItems="center"
                         style={{ border: isTypeFile(field.fieldData.type) ? 0 : '1px solid var(--dark-mode-border-color, #EDEDED)' }}
                       >
-                        <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>
+                        <Grid
+                          item
+                          xs={dynamicSize(6, field.fieldData.type)}
+                          sm={dynamicSize(5, field.fieldData.type)}
+                        >
                           <div className="d-flex align-items-center formdata-title-v1" style={{ borderRight: isTypeFile(field.fieldData.type) && 0 }}>
                             <h4
                               title={field.fieldData.fieldLabel}
@@ -436,7 +442,11 @@ const Details = (props: DetailProps) => {
                           </div>
                         </Grid>
 
-                        <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(7, field.fieldData.type)}>
+                        <Grid
+                          item
+                          xs={dynamicSize(6, field.fieldData.type)}
+                          sm={dynamicSize(7, field.fieldData.type)}
+                        >
                           {field.fieldData.type === 'imageUpload' ? (
                             <Box marginTop={1} marginBottom={4}>
                               <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>

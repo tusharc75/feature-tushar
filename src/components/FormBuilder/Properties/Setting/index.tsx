@@ -1,4 +1,4 @@
-import { Box, Checkbox, FormControlLabel, Grid, TextField, Typography } from '@material-ui/core';
+import { Box, Checkbox, FormControl, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField, Typography } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
 import { Autocomplete } from '@material-ui/lab';
@@ -169,7 +169,6 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           </Grid>
         </Grid>
       </Box>
-
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
@@ -593,6 +592,25 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         </Grid>
       </Box>
       <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} brandId={brandId} />
+      <Box mt={1}>
+        <FormControl component="fieldset">
+          <FormLabel component="legend">
+            Column Size
+          </FormLabel>
+          <RadioGroup
+            aria-label="columnSize"
+            name="columnSize"
+            value={values['columnSize']}
+            style={{ flexDirection: 'row' }}
+            onChange={(e) => {
+              setFieldValue('columnSize', Number(e?.target?.value));
+            }}
+          >
+            <FormControlLabel value={6} control={<Radio size='small' />} label="Col 6" />
+            <FormControlLabel value={12} control={<Radio size='small' />} label="Col 12" />
+          </RadioGroup>
+        </FormControl>
+      </Box>
     </Box>
   );
 };
