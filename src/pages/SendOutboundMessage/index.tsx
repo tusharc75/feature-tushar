@@ -31,7 +31,6 @@ const SendOutboundMessage = () => {
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
-  const [renderCount, setRenderCount] = useState(0);
   const [manageSendOutBoundMessageDialog, setManageSendOutBoundMessageDialog] = useState(false);
   const [serializedAssetOptions, setSerializedAssetOptions] = useState([]);
   const [selectedSerializedAsset, setSelectedSerializedAsset] = useState(null);
@@ -85,7 +84,7 @@ const SendOutboundMessage = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Serialized Asset`)
+      .get(`/sa-formbuilder/lookup?lookupResource=Serialized Asset&deepFilter=${JSON.stringify([{ field: 'iotUnit', term: true }])}`)
       .then(({ data: { data } }) => {
         setSerializedAssetOptions(data['Serialized Asset']);
       })
@@ -96,11 +95,9 @@ const SendOutboundMessage = () => {
 
 
   useEffect(() => {
-    if (renderCount > 1) {
     const cencelToken = axios.CancelToken.source();
     fetchData(cencelToken);
     return () => cencelToken.cancel();
-    } else setRenderCount((preCount) => preCount + 1);
   }, [search, page, limit, filters, sorting, selectedEntity, selectedSerializedAsset]);
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
