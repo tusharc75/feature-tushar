@@ -65,6 +65,7 @@ const FieldTicketDetail = () => {
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
   const [resourceData, setResourceData] = useState(null);
+  const [steps, setSteps] = useState(fieldTicketSteps);
 
   useEffect(() => {
     if (id) {
@@ -89,6 +90,10 @@ const FieldTicketDetail = () => {
         data = await findOne(objectStore.resource, sidebarResource?.fieldTicket);
       } else {
         const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldTicket}`);
+        const fieldTicketSubmitFields = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.fieldTicketSubmit}`);
+        if (!fieldTicketSubmitFields?.data?.data?.every(f => f.isRead)) {
+          setSteps((prev) => { return prev.filter(p => p.name !== 'Submit') });
+        }
         data = response?.data?.data;
       }
       setFields(data?.filter((field) => field.isRead));
@@ -108,9 +113,9 @@ const FieldTicketDetail = () => {
         data = response?.data?.data;
       }
       if ([FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.readyToInvoice, FIELD_TICKET_STATUS.closed]?.includes(data?.status)) {
-        setCurrentStep(fieldTicketSteps?.length - 1);
+        setCurrentStep(steps?.length - 1);
       } else {
-        setCurrentStep(getIndex(data?.processStatus, fieldTicketSteps));
+        setCurrentStep(getIndex(data?.processStatus, steps));
       }
 
       setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, data));
@@ -171,7 +176,7 @@ const FieldTicketDetail = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0) {
-      updateProcessStatus(fieldTicketSteps[currentStep]?.name);
+      updateProcessStatus(steps[currentStep]?.name);
     }
   }, [currentStep]);
 
@@ -281,13 +286,13 @@ const FieldTicketDetail = () => {
             isNextStep={false}
             nextStep={nextStep}
             isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={isOffline ? fieldTicketSteps.filter(s => s.name === 'Add') : fieldTicketSteps}
+            steps={isOffline ? steps.filter(s => s.name === 'Add') : steps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
           />
-          <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
+          <ContentFullScreen title={steps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && fieldTicketData && (
               <Material
                 fieldTicketData={fieldTicketData}

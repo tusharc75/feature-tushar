@@ -14,7 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { array, object, string } from 'yup';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 
 const submitValidation = object().shape({
     signature: string(),
@@ -46,7 +46,8 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
 
     const fetchFields = async () => {
         try {
-            const data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
+            let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
+            data = data?.filter((f) => f?.isCreate);
             const tempInitialData = getObjKeys('', data);
             if (data?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
                 tempInitialData["customerAccount"] = fieldTicketData.customerAccount.optionValue;
