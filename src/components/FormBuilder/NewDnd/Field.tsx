@@ -8,6 +8,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { checkFieldDependency } from 'src/constants/formulaUtility';
 import FieldList from '../FieldList';
 import { Properties } from '../Properties';
+import { colSpans } from 'src/constants/helpers';
 
 type ItemPorps = {
   section: any;
@@ -151,7 +152,7 @@ const Field = ({
       <div
         style={style}
         ref={setNodeRef}
-        className={`${
+        className={`${colSpans[data.columnSize - 1] || 'col-span-6'} ${
           isPreviewVisible
             ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
             : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'
@@ -167,7 +168,7 @@ const Field = ({
       <div
         style={style}
         ref={setNodeRef}
-        className={`${
+        className={`${colSpans[data.columnSize - 1] || 'col-span-6'} ${
           isDragging || isPreviewVisible
             ? 'bg-[var(--dark-secondary,theme("colors.blue.200"))]'
             : 'border border-[var(--common-border-color)] bg-[white] dark:bg-[hsla(240,27%,14%,100%)]'

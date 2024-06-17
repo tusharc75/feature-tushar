@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Grid, Box, InputAdornment } from '@material-ui/core';
 import FormTypes from './FormTypes';
-import { columnSize, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
 
 const InputField = (props) => {
@@ -93,10 +93,10 @@ const InputField = (props) => {
                       key={field.fieldName}
                       item
                       xs={12}
-                      sm={field?.columnSize ? field?.columnSize : columnSize(field.type)}
-                      md={field?.columnSize ? field?.columnSize : columnSize(field.type)}
-                      lg={field?.columnSize ? field?.columnSize : columnSize(field.type)}
-                      xl={field?.columnSize ? field?.columnSize : columnSize(field.type)}
+                            sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                            md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                            lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                            xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}
                     >
                       <FormTypes
                         {...rest}

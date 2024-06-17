@@ -99,7 +99,7 @@ const SingleSection = ({
   return (
     <>
       {isPreviewVisible && (
-        <div className="min-h-[128px] [border:5px_dashed_var(--common-border-color)] p-2 bg-[var(--dark-secondary,theme('colors.slate.100'))] text-4xl font-bold text-gray-300 dark:text-gray-600 text-center flex justify-center items-center">
+        <div className="flex min-h-[128px] items-center justify-center bg-[var(--dark-secondary,theme('colors.slate.100'))] p-2 text-center text-4xl font-bold text-gray-300 [border:5px_dashed_var(--common-border-color)] dark:text-gray-600">
           Drop
         </div>
       )}
@@ -113,9 +113,9 @@ const SingleSection = ({
         }   transition-all duration-300`}
       >
         <div className={isDragging ? 'opacity-40' : ''}>
-          <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="mb-2 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <IconButton size="small" {...attributes} {...listeners} className="!cursor-grab drag-handle">
+              <IconButton size="small" {...attributes} {...listeners} className="drag-handle !cursor-grab">
                 <DragIndicator fontSize="small" />
               </IconButton>
               <TextField
@@ -141,7 +141,7 @@ const SingleSection = ({
           {section.field.length === 0 ? (
             <div className="text-center">
               {isDropPreviewVisible ? (
-                <div className=" [border:5px_dashed_var(--dark-secondary,theme('colors.cyan.100'))] py-8 text-4xl font-bold text-gray-300 dark:text-gray-600">
+                <div className=" py-8 text-4xl font-bold text-gray-300 [border:5px_dashed_var(--dark-secondary,theme('colors.cyan.100'))] dark:text-gray-600">
                   Drop
                 </div>
               ) : (
@@ -150,7 +150,7 @@ const SingleSection = ({
             </div>
           ) : (
             <>
-              <div className="grid gap-2 grid-cols-2">
+              <div className="grid grid-cols-12 gap-2">
                 <SortableContext items={fieldIdList}>
                   {section.field.map((f, index) => {
                     return (

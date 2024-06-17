@@ -441,7 +441,7 @@ const ReceivingTicket = ({
 
         if (qty > 0) {
           const obj: any = {};
-          obj._id = `${element.materialId}_${productAssets?.length + 1}`;
+          obj._id = `${element._id}_${productAssets?.length + 1}`;
           obj.uniqueId = element?._id;
           obj.materialId = element?.materialId;
           obj.type = 'Product';
@@ -502,7 +502,7 @@ const ReceivingTicket = ({
                   });
 
                 const obj: any = {};
-                obj._id = element?.productDetail?._id + '_' + ele.loadingTicketId;
+                obj._id = element._id + '_' + ele.loadingTicketId;
                 obj.uniqueId = element._id;
                 obj.serialized = element?.productDetail?.serializedProduct;
                 obj.materialId = element?.productDetail?._id;
@@ -794,13 +794,15 @@ const ReceivingTicket = ({
             <IconButton
               size="small"
               onClick={() => {
-                const basePath =
-                  row.original.type === 'Asset'
-                    ? routes.serializedAssetDetail.path
-                    : row.original.type === MATERIAL_TYPE.service
-                      ? routes.serviceMasterDetail.path
-                      : routes.productDetail.path;
-                window.open(`${basePath}/${row?.original?._id?.split('_')[0]}`);
+                if (row.original.type === 'Asset') {
+                  window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`);
+                }
+                else if (row.original.type === MATERIAL_TYPE.service) {
+                  window.open(`${routes.serviceMasterDetail.path}/${row?.original?.materialId}`);
+                }
+                else if (row.original.type === 'Product') {
+                  window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
+                }
               }}
             >
               <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
