@@ -3372,6 +3372,13 @@ export const columnSize = (type) => {
   return 'col-span-6';
 };
 
+export const gridSize = (type) => {
+  if (['imageUpload', 'fileUpload', 'multiImageUpload', 'multiFileUpload', 'counter', 'description'].includes(type)) {
+    return 12;
+  }
+  return 6;
+};
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
