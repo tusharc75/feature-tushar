@@ -2452,6 +2452,12 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: 'Lost Assets',
+    permission: 'serializedAsset',
+    key: 'standardReport',
+    type: 'lostAssets'
+  },
+  {
     title: 'Purchase Order Details',
     permission: 'purchaseOrder',
     key: 'standardReport',
