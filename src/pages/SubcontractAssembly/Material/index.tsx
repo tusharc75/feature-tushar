@@ -35,6 +35,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 	const [deleteData, setDeleteData] = useState(null);
 	const [isDeleting, setDeleting] = useState(false);
 	const [openMaterialDialog, setOpenMaterialDialog] = useState({ open: false, data: null })
+	const [material, setMaterial] = useState([]);
 
 	useEffect(() => {
 		fetchFields();
@@ -159,10 +160,11 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 		let data;
 		const response = await axiosInstance().get(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`);
 		data = response?.data?.data?.material;
+		setMaterial(JSON.parse(JSON.stringify(data)))
 		let rows = data?.filter((d: any) => !d.parentId);
 		rows.forEach((parent, i) => {
 			parent.index = i + 1;
-			parent.detail = `${i+1}_${parent.productDetail?.productName}` || '';
+			parent.detail = parent.productDetail?.productName;
 			parent.description = parent.productDetail?.productDescription || '';
 			parent.canDelete = data?.some((e) => e.parentId === parent._id) ? false : true;
 			parent.hideSelection = parent?.receivedQty > 0 || false;
@@ -281,7 +283,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 			{columns ? (
 				<Box zIndex={5} width={'100%'}>
 					<CustomReactTable
-						height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+						height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
 						columns={columns}
 						state={state}
 						dispatch={dispatch}
@@ -298,14 +300,15 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 				</Box>
 			)}
 			<Box mt={3}>
-        <Consumables
-          allowedToEdit={allowedToEdit}
-          products={dataRows}
-          subcontractAssemblyData={subcontractAssemblyData}
-          fetchMaterial={fetchMaterial}
-          stepFullScreen={stepFullScreen}
-        />
-      </Box>
+				<Consumables
+					allowedToEdit={allowedToEdit}
+					products={dataRows}
+					subcontractAssemblyData={subcontractAssemblyData}
+					fetchMaterial={fetchMaterial}
+					stepFullScreen={stepFullScreen}
+					material={material}
+				/>
+			</Box>
 			{open.open && open.type === MATERIAL_TYPE.product && (
 				<AssignProductDialog
 					handleCloseDialog={() => setOpen({ open: false, type: '' })}
