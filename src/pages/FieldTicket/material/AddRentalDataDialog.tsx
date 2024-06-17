@@ -47,6 +47,7 @@ const AddRentalDataDialog = ({
   const fetchFields = async () => {
     var data = [];
     data = await fetch_rental_product_fields(currency, false);
+    data = data?.filter((f) => f?.isRead);
     setAllFields(JSON.parse(JSON.stringify(data)));
     data?.forEach((e) => {
       e.isColumnEditable = false;
