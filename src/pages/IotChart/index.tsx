@@ -33,10 +33,9 @@ function IotChart() {
   }, [search]);
 
   const fetchAssetLocation = () => {
-    const deepFilter = [{ field: "iotUnit", term: "yes" }]
-    let api = `/iot-chart${serializedAsset.api}-location?deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&filterType=and`;
+    let api = `/iot-chart${serializedAsset.api}`;
     if (search) {
-      api = `${api}&search=${encodeURIComponent(search)}`;
+      api = `${api}?search=${encodeURIComponent(search)}`;
     }
     axiosInstance()
       .get(api)
