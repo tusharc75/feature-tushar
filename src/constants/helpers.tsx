@@ -2003,7 +2003,8 @@ export const ASSET_STATUS = {
   inRepair: 'In-Repair',
   customerPossession: 'Customer Possession',
   onPO: 'On PO',
-  notApplied: 'N/A'
+  notApplied: 'N/A',
+  scrapRequested: 'Scrap Requested'
 };
 
 export const ASSET_NUMBER_TYPE = {
