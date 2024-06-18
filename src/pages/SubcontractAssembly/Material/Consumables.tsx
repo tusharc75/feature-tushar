@@ -49,7 +49,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
       { optionLabel: 'All', optionValue: 'All' },
       ...products?.map((s) => {
         return {
-          optionLabel: s?.detail,
+          optionLabel: s?.productName,
           optionValue: s?._id,
         };
       })
