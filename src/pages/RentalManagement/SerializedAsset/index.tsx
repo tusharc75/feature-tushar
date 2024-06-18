@@ -6,7 +6,7 @@ import LibraryBooksIcon from '@material-ui/icons/LibraryBooks';
 import ReceiptIcon from '@material-ui/icons/Receipt';
 import RepeatIcon from '@material-ui/icons/Repeat';
 import WarningIcon from '@material-ui/icons/Warning';
-import { isArray, startCase, uniqBy } from 'lodash';
+import { isArray, isEmpty, startCase, uniqBy } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -823,6 +823,20 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         const foundProduct = assetProduct.filter((e) => e.materialId === element.materialId);
         if (foundProduct.length) {
           foundProduct[0].qty += element.realAssetQty - element.realAssetAssignedQty;
+          const obj: any = {}
+          if (statusChangeFields?.includes('wellNumber')) {
+            obj.wellNumber = getParentWellNumber(material, element?._id);
+            obj.qty = element.realAssetQty
+          }
+          if (statusChangeFields?.includes('package')) {
+            const parentPackage: any = material?.find((e) => e._id === element.parentId && e.type === MATERIAL_TYPE.package)
+            if (parentPackage) {
+              obj.package = parentPackage?.materialId;
+            }
+          }
+          if (!isEmpty(obj)) {
+            foundProduct[0].assetDefaultData.push(obj)
+          }
         } else {
           const obj = {
             ...element,
@@ -835,6 +849,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             const assetDefaultData: any = {}
             if (statusChangeFields?.includes('wellNumber')) {
               assetDefaultData.wellNumber = getParentWellNumber(material, element?._id)
+              assetDefaultData.qty = obj.qty
             }
             if (statusChangeFields?.includes('package')) {
               const parentPackage: any = material?.find((e) => e._id === element.parentId && e.type === MATERIAL_TYPE.package)
@@ -842,7 +857,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
                 assetDefaultData.package = parentPackage?.materialId
               }
             }
-            obj.assetDefaultData = assetDefaultData;
+            obj.assetDefaultData = [assetDefaultData];
           }
           assetProduct.push(obj);
         }

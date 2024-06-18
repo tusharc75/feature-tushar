@@ -1,4 +1,5 @@
 import { Box, IconButton, MenuItem } from "@material-ui/core";
+import { LocalShipping } from "@material-ui/icons";
 import { map, uniq } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
@@ -7,6 +8,7 @@ import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from "src/axios/axiosInstance";
 import { fetch_child_resource_fields } from "src/components/ChildResourceField";
 import CustomReactTable, { useColumns, useTableReducer } from "src/components/CustomReactTable";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
@@ -37,45 +39,71 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 	const fetchFields = async () => {
 		var data = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyMaterial, subcontractAssemblyData?.currency, true);
 		const newColumns = generateColumns(renderedFrom, data, null, false, subcontractAssemblyData?.currency);
-		let coloum: any = [
+
+		let column: any = [
 			{
 				accessor: 'index',
 				Header: 'Index',
 				width: 70,
 				sticky: 'left',
-				Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+				Cell: ({ row }) => (
+					<div className="d-flex align-items-center gap-2">
+						<p className="text-truncate">{row.original.index}</p>
+						{row?.original?.loadingTicketId && (
+							<HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
+								<LocalShipping fontSize="small" color={'primary'} />
+							</HtmlTooltip>
+						)}
+					</div>
+				),
 				Footer: () => {
 					return <>Total</>;
 				}
 			},
-			{
-				accessor: 'detail',
-				Header: 'Detail',
-				disabled: true,
-				sticky: isMobile || isTablet ? 'none' : 'left',
-				width: 200,
-				Cell: ({ row }) => (
-					<div className="flex items-center gap-2">
-						<p title={row.original?.detail}>{row.original?.detail}</p>
-						<IconButton
-							size="small"
-							onClick={() => {
-								window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-							}}
-						>
-							<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-						</IconButton>
-					</div>
-				)
-			},
-			{
-				accessor: 'description',
-				Header: 'Description',
-				width: 200,
-				Cell: ({ row }) => {
-					return row.original['description'] ? <div><p className="text-truncate">{row.original.description}</p></div> : <NoDataCell />;
-				}
-			},
+		];
+
+		let fields;
+		const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
+		fields = response?.data?.data;
+
+		const productFields = fields?.find((e) => e.resource === 'Product')?.fieldNames || [];
+		productFields?.forEach((e) => {
+			if (e?.fieldName === 'productName') {
+				column.push({
+					accessor: e?.fieldName,
+					Header: e?.fieldLabel,
+					width: 200,
+					disabled: true,
+					sticky: isMobile || isTablet ? 'none' : 'left',
+					primaryField: true,
+					cell: ({ row, table }) => (
+						<div className="flex items-center gap-2">
+							<p>{row?.original[e?.fieldName]}</p>
+							<IconButton
+								size="small"
+								onClick={() => {
+									window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
+								}}
+							>
+								<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+							</IconButton>
+						</div>
+					)
+				});
+			} else {
+				column.push({
+					accessor: e?.fieldName,
+					Header: e?.fieldLabel,
+					width: 200,
+					cell: ({ row }) => {
+						return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
+					}
+				});
+			}
+		});
+
+		const extracolumns: any = [
+			...newColumns,
 			{
 				accessor: 'parent',
 				Header: 'Parent',
@@ -114,9 +142,9 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 						<NoDataCell />
 					)
 			}
-		];
-		coloum = [...coloum, ...newColumns];
-		setColumns(coloum);
+		]
+
+		setColumns([...column, ...extracolumns]);
 	};
 
 	const fetchData = async () => {
@@ -138,8 +166,9 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 		const rows = material.filter((e) => e.parentId != null && MATERIAL_TYPE.product);
 		rows.forEach((obj, i) => {
 			obj.index = i + 1;
-			obj.detail = obj.productDetail?.productName;
-			obj.description = obj?.productDetail?.productDescription;
+			obj.productName = obj?.productDetail?.productName;
+			obj.productDescription = obj?.productDetail?.productDescription;
+			obj.productNumber = obj?.productDetail?.productNumber;
 			obj.qty = obj.qty;
 			obj.uniqueId = obj._id;
 			obj.parent = material?.find(m => m?.parentId === null && m?._id === obj?.parentId)?.productDetail?.productName || '';
