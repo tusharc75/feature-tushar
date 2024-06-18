@@ -44,7 +44,9 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     let values = {};
     let tempAssetData = [];
     const decimalField = [];
-    for (const data of assetData) {
+    let j = 0;
+    let index = null;
+    assetData?.forEach((data, i) => {
       let initialValues = getObjKeysWithValues(data, fieldsDataForUpdate);
       if (statusPolicy?.sumDecimalField) {
         fieldsDataForUpdate?.forEach((e) => {
@@ -59,21 +61,32 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       initialValues['assetNumber'] = data?.assetNumber;
 
       const assetDefaultData = productsDefaultData?.find((e) => e.materialId === data?.product?.optionValue)?.assetDefaultData;
-      if (assetDefaultData) {
-        for (const key in assetDefaultData) {
-          const field = fieldsDataForUpdate?.find((e) => e.fieldName === key);
-          if (assetDefaultData[key] && field) {
-            if (field?.type === 'multiSelect' && isString(assetDefaultData[key])) {
-              initialValues[key] = [assetDefaultData[key]];
-            }
-            else {
-              initialValues[key] = assetDefaultData[key];
+      if (!index) {
+        index = assetDefaultData?.length > 0 ? assetDefaultData[0]?.qty : null
+      }
+      if (index === i) {
+        j = j + 1;
+        index = index + assetDefaultData[j]?.qty
+      }
+      if (assetDefaultData?.length > 0) {
+        if (j <= assetDefaultData?.length && assetDefaultData[j]) {
+          for (const key in assetDefaultData[j]) {
+            if (key != 'qty') {
+              const field = fieldsDataForUpdate?.find((e) => e.fieldName === key);
+              if (assetDefaultData[j][key] && field) {
+                if (field?.type === 'multiSelect' && isString(assetDefaultData[j][key])) {
+                  initialValues[key] = [assetDefaultData[j][key]];
+                }
+                else {
+                  initialValues[key] = assetDefaultData[j][key];
+                }
+              }
             }
           }
         }
       }
       tempAssetData.push(initialValues);
-    }
+    });
     values['assetData'] = tempAssetData;
     setDecimalFields(decimalField);
     fieldsDataForUpdate?.forEach((element) => {
