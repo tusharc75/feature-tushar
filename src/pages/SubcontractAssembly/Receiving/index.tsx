@@ -1,5 +1,5 @@
 import { Box, IconButton } from "@material-ui/core";
-import { AddCircleOutline, LocalShipping, Visibility } from "@material-ui/icons";
+import { AddCircleOutline, Visibility } from "@material-ui/icons";
 import HistoryIcon from "@material-ui/icons/History";
 import { camelCase } from "lodash";
 import { useContext, useEffect, useState } from "react";
