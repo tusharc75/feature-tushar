@@ -338,11 +338,11 @@ const SerializedAssetDetailsPage = () => {
 
       const systemStatus = [ASSET_STATUS.reserved, ASSET_STATUS.readyToShip, ASSET_STATUS.inTransit, ASSET_STATUS.inUse
         , ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered, ASSET_STATUS.customer, ASSET_STATUS.supplier
-        , ASSET_STATUS.returned, ASSET_STATUS.repair, ASSET_STATUS.inRepair, ASSET_STATUS.customerPossession
+        , ASSET_STATUS.returned, ASSET_STATUS.repair, ASSET_STATUS.inRepair, ASSET_STATUS.customerPossession, ASSET_STATUS.scrapRequested
       ]
 
       let tempStatus = [];
-      if ([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable]?.includes(assetDetails.status)) {
+      if ([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.scrapRequested]?.includes(assetDetails.status)) {
         tempStatus = [];
       }
       else if (systemStatus?.includes(assetDetails.status)) {
