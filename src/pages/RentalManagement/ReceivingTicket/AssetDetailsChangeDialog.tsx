@@ -46,7 +46,12 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     const decimalField = [];
     let j = 0;
     let index = null;
+    let product = assetData?.length > 0 ? assetData[0]?.product?.optionValue : ''
     assetData?.forEach((data, i) => {
+      if (product !== data?.product?.optionValue) {
+        j = 0;
+        index = null
+      }
       let initialValues = getObjKeysWithValues(data, fieldsDataForUpdate);
       if (statusPolicy?.sumDecimalField) {
         fieldsDataForUpdate?.forEach((e) => {
@@ -59,7 +64,6 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       }
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
-
       const assetDefaultData = productsDefaultData?.find((e) => e.materialId === data?.product?.optionValue)?.assetDefaultData;
       if (!index) {
         index = assetDefaultData?.length > 0 ? assetDefaultData[0]?.qty : null
@@ -68,6 +72,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
         j = j + 1;
         index = index + assetDefaultData[j]?.qty
       }
+
       if (assetDefaultData?.length > 0) {
         if (j <= assetDefaultData?.length && assetDefaultData[j]) {
           for (const key in assetDefaultData[j]) {
