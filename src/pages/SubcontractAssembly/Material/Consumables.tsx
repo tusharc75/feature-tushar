@@ -150,16 +150,16 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
         canDrag: false,
         Cell: ({ row }: any) => (
           <>
-            <HtmlTooltip title={allowedToEdit ? 'Edit' : ''}>
+            <HtmlTooltip title={row?.original?.canEdit ? 'Edit' : ''}>
               <IconButton
                 size="small"
                 aria-label="Delete"
-                disabled={!allowedToEdit}
+                disabled={!row?.original?.canEdit}
                 onClick={() => {
                   setIsConsumableEdit({ open: true, data: row?.original })
                 }}
               >
-                <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                <EditIcon fontSize="small" color={row?.original?.canEdit ? 'primary' : 'disabled'} />
               </IconButton>
             </HtmlTooltip>
             <HtmlTooltip title={'Delete'}>
@@ -196,6 +196,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
+        parent.canEdit = !material?.some((ele:any)=> ele._id===parent.parentId && ele.receivedQty>0)
       });
       setAllConsumables(rows)
       if (selectedProductOption?.optionValue !== 'All') {
