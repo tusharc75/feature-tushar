@@ -24,8 +24,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
 
-const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, material, fetchMaterial, stepFullScreen }) => {
-
+const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, material, fetchMaterial, stepFullScreen, productFields }) => {
 
   const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Consumables`;
   const toastConfig = useContext(CustomToastContext);
@@ -91,11 +90,6 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
       }
     ];
 
-    let data;
-    const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
-    data = response?.data?.data;
-
-    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
     productFields?.forEach((e) => {
       if (e?.fieldName === 'productName') {
         column.push({

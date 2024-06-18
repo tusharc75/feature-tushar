@@ -1,5 +1,5 @@
 import { Box, IconButton } from "@material-ui/core";
-import { AddCircleOutline, Visibility } from "@material-ui/icons";
+import { AddCircleOutline, LocalShipping, Visibility } from "@material-ui/icons";
 import HistoryIcon from "@material-ui/icons/History";
 import { camelCase } from "lodash";
 import { useContext, useEffect, useState } from "react";
@@ -41,122 +41,145 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
 	const fetchFields = async () => {
 		var data = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyMaterial, subcontractAssemblyData?.currency, true);
 		const newColumns = generateColumns(renderedFrom, data, null, false, subcontractAssemblyData?.currency);
+
 		let column: any = [
 			{
 				accessor: 'index',
 				Header: 'Index',
 				width: 70,
 				sticky: 'left',
-				Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+				Cell: ({ row }) => (
+					<div className="d-flex align-items-center gap-2">
+						<p className="text-truncate">{row.original.index}</p>
+						{row?.original?.receivedQty <= 0 && (
+							<HtmlTooltip title={`Loading Ticket Delivered`}>
+								<LocalShipping fontSize="small" color={'primary'} />
+							</HtmlTooltip>
+						)}
+						{row?.original?.receivedQty > 0 && (
+							<HtmlTooltip title={`Receiving Ticket Received`}>
+								<LocalShipping fontSize="small" color={'primary'} className="[transform:scaleX(-1)_!important]" />
+							</HtmlTooltip>
+						)
+						}
+					</div >
+				),
 				Footer: () => {
 					return <>Total</>;
 				}
-			},
-			{
-				accessor: 'detail',
-				Header: 'Details',
-				minWidth: 300,
-				width: 300,
-				disabled: true,
-				sticky: isMobile || isTablet ? 'none' : 'left',
-				Cell: ({ row }) => (
-					<div className="flex items-center gap-2">
-						{row.original.detail ? (
-							<>
-								<p className="text-truncate" title={row.original.detail} 	>
-									{row.original.detail}
-								</p>
-								<IconButton
-									size="small"
-									onClick={() => {
-										window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-									}}
-								>
-									<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-								</IconButton>
-							</>
-						) : (
-							<NoDataCell />
-						)}
-					</div >
-				)
-			},
-			{
-				accessor: 'description',
-				Header: 'Description',
-				width: 200,
-				Cell: ({ row }) => {
-					return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
-				}
-			},
-		];
-		column = [...column, ...newColumns];
-		column.push({
-			accessor: 'action',
-			Header: 'Actions',
-			minWidth: 100,
-			width: 100,
-			sticky: 'right',
-			disableFilters: true,
-			disableSortBy: true,
-			canDrag: false,
-			Cell: ({ row }) => {
-				return (
-					<div className="flex items-center gap-2">
-						{row?.original?.receivedQty <= 0 && (
-							<HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
-								<IconButton
-									size="small"
-									aria-label="Receive"
-									disabled={row?.original?.canReceive && allowedToEdit ? false : true}
-									onClick={() => {
-										setCostDialog({ open: true, _id: row?.original?._id })
-									}}
-								>
-									<AddCircleOutline fontSize="small" color={row?.original?.canReceive && allowedToEdit ? 'primary' : 'disabled'} />
-								</IconButton>
-							</HtmlTooltip>
-						)}
-						{row?.original?.receivedQty > 0 && (
-							<HtmlTooltip title={'View History'}>
-								<span>
-									<IconButton
-										size="small"
-										aria-label="history"
-										onClick={() => {
-											setHistoryDialog({
-												open: true,
-												_id: row?.original?._id,
-												product: row?.original?.materialId,
-												productName: row?.original?.productDetail?.productName
-											});
-										}}
-									>
-										<HistoryIcon fontSize="small" color={'primary'} />
-									</IconButton>
-								</span>
-							</HtmlTooltip>
-						)}
-						{row?.original?.receivedQty > 0 && (
-							<HtmlTooltip title={'View Cost'}>
-								<span>
-									<IconButton
-										size="small"
-										aria-label="cost"
-										onClick={() => {
-											setViewCost({ open: true, data: row?.original?.cost })
-										}}
-									>
-										<Visibility fontSize="small" color={'primary'} />
-									</IconButton>
-								</span>
-							</HtmlTooltip>
-						)}
-					</div>
-				);
 			}
+		];
+
+		let fields;
+		const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
+		fields = response?.data?.data;
+
+		const productFields = fields?.find((e) => e.resource === 'Product')?.fieldNames || [];
+		productFields?.forEach((e) => {
+			if (e?.fieldName === 'productName') {
+				column.push({
+					accessor: e?.fieldName,
+					Header: e?.fieldLabel,
+					width: 200,
+					disabled: true,
+					sticky: isMobile || isTablet ? 'none' : 'left',
+			primaryField: true,
+			cell: ({ row, table }) => (
+				<div className="flex items-center gap-2">
+							<p>{row?.original[e?.fieldName]}</p>
+							<IconButton
+								size="small"
+								onClick={() => {
+									window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
+								}}
+							>
+								<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+							</IconButton>
+						</div>
+					)
 		});
-		setColumns(column);
+	} else {
+		column.push({
+			accessor: e?.fieldName,
+			Header: e?.fieldLabel,
+			width: 200,
+					cell: ({ row }) => {
+						return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
+					}
+				});
+	}
+});
+
+		const extracolumns: any = [
+			...newColumns,
+			{
+				accessor: 'action',
+				Header: 'Actions',
+				minWidth: 100,
+				width: 100,
+				sticky: 'right',
+				disableFilters: true,
+				disableSortBy: true,
+				canDrag: false,
+				Cell: ({ row }) => {
+					return (
+						<div className="flex items-center gap-2">
+							{row?.original?.receivedQty <= 0 && (
+								<HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
+									<IconButton
+										size="small"
+										aria-label="Receive"
+										disabled={row?.original?.canReceive && allowedToEdit ? false : true}
+										onClick={() => {
+											setCostDialog({ open: true, _id: row?.original?._id })
+										}}
+									>
+										<AddCircleOutline fontSize="small" color={row?.original?.canReceive && allowedToEdit ? 'primary' : 'disabled'} />
+									</IconButton>
+								</HtmlTooltip>
+							)}
+							{row?.original?.receivedQty > 0 && (
+								<HtmlTooltip title={'View History'}>
+									<span>
+										<IconButton
+											size="small"
+											aria-label="history"
+											onClick={() => {
+												setHistoryDialog({
+													open: true,
+													_id: row?.original?._id,
+													product: row?.original?.materialId,
+													productName: row?.original?.productDetail?.productName
+												});
+											}}
+										>
+											<HistoryIcon fontSize="small" color={'primary'} />
+										</IconButton>
+									</span>
+								</HtmlTooltip>
+							)}
+							{row?.original?.receivedQty > 0 && (
+								<HtmlTooltip title={'View Cost'}>
+									<span>
+										<IconButton
+											size="small"
+											aria-label="cost"
+											onClick={() => {
+												setViewCost({ open: true, data: row?.original?.cost })
+											}}
+										>
+											<Visibility fontSize="small" color={'primary'} />
+										</IconButton>
+									</span>
+								</HtmlTooltip>
+							)}
+						</div>
+					);
+				}
+			}
+		]
+
+		setColumns([...column, ...extracolumns]);
 	};
 
 	const fetchData = async () => {
@@ -174,8 +197,9 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
 		let rows = data?.filter((d: any) => !d.parentId);
 		rows.forEach((parent, i) => {
 			parent.index = i + 1;
-			parent.detail = parent.productDetail?.productName || '';
-			parent.description = parent.productDetail?.productDescription || '';
+			parent.productName = parent?.productDetail?.productName;
+			parent.productDescription = parent?.productDetail?.productDescription;
+			parent.productNumber = parent?.productDetail?.productNumber;
 			parent.receivedQty = parent?.receivedQty || 0;
 			parent.canReceive = data?.filter(d => d?.parentId === parent?._id)?.every(d =>
 				deliveryTicketList?.filter(dt => dt.ticketType === DELIVERY_TICKET_TYPE.delivery
