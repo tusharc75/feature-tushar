@@ -1,5 +1,5 @@
 import { Box, IconButton } from "@material-ui/core";
-import { AddCircleOutline, LocalShipping, Visibility } from "@material-ui/icons";
+import { AddCircleOutline, Visibility } from "@material-ui/icons";
 import HistoryIcon from "@material-ui/icons/History";
 import { camelCase } from "lodash";
 import { useContext, useEffect, useState } from "react";
@@ -49,20 +49,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
 				width: 70,
 				sticky: 'left',
 				Cell: ({ row }) => (
-					<div className="d-flex align-items-center gap-2">
-						<p className="text-truncate">{row.original.index}</p>
-						{row?.original?.receivedQty <= 0 && (
-							<HtmlTooltip title={`Loading Ticket Delivered`}>
-								<LocalShipping fontSize="small" color={'primary'} />
-							</HtmlTooltip>
-						)}
-						{row?.original?.receivedQty > 0 && (
-							<HtmlTooltip title={`Receiving Ticket Received`}>
-								<LocalShipping fontSize="small" color={'primary'} className="[transform:scaleX(-1)_!important]" />
-							</HtmlTooltip>
-						)
-						}
-					</div >
+					<p className="text-truncate">{row.original.index}</p>
 				),
 				Footer: () => {
 					return <>Total</>;
