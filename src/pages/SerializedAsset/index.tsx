@@ -265,13 +265,13 @@ const SerializedAsset = () => {
             </IconButton>
           </span>
         </HtmlTooltip>
-        {permissions?.iotChart?.isRead && (
+        {permissions?.iotChart?.isRead && row?.original?.iotUnit && (
           <HtmlTooltip title="View IOT Data">
             <span>
               <IconButton
                 size="small"
                 onClick={() => {
-                  history.push(`${routes.iotChart.path}/${row?.original?._id}`);
+                  history.push(`${routes.iotChartDetail.path}/${row?.original?._id}`);
                 }}
               >
                 <VisibilityIcon fontSize="small" color="primary" />
@@ -816,7 +816,8 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRepair);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter((o) => ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
+              ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -828,7 +829,8 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter((o) => ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
+              ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -840,7 +842,8 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.scrap);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter((o) => ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
+              ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -851,7 +854,8 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.lost);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
+            ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
           >
             {`Status Change - ${ASSET_STATUS.lost}`}
           </MenuItem>

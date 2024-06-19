@@ -278,34 +278,31 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         priceData = await calculatePrice(rentalManagementData, material);
       }
 
-      selectedProducts
-        .filter((d) => !selectedProducts.some((obj) => obj._id === d.parentId))
-        .forEach((element) => {
-          const rateResult = priceData?.filter(
-            (e) =>
-              e.materialId === element.materialId &&
-              e.materialType === element.type &&
-              e.unit === (values['unit'] || element.unit) &&
-              e.pricingMethod === (values['pricingMethod'] || element.pricingMethod)
-          );
+      selectedProducts?.filter((d) => !selectedProducts.some((obj) => obj._id === d.parentId))?.forEach((element) => {
+        const rateResult = priceData?.filter((e) =>
+          e.materialId === element.materialId &&
+          e.materialType === element.type &&
+          e.unit === (values['unit'] || element.unit) &&
+          e.pricingMethod === (values['pricingMethod'] || element.pricingMethod)
+        );
 
-          const tempRate = {};
-          if (rateResult.length && rateResult[0].mrp) {
-            tempRate[priceFieldName] = rateResult[0].mrp;
-          }
+        const tempRate = {};
+        if (rateResult.length && rateResult[0].mrp) {
+          tempRate[priceFieldName] = rateResult[0].mrp;
+        }
 
-          const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll);
-          rows.push({ ...element, ...calValues });
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll);
+        rows.push({ ...element, ...calValues });
 
-          const child: any = resetValueZero(material, allFields, element._id);
-          rows = [...rows, ...child];
-          if (element.parentId) {
-            var parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId);
-            const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id);
-            parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency);
-            rows = [...rows, ...parent];
-          }
-        });
+        const child: any = resetValueZero(material, allFields, element._id);
+        rows = [...rows, ...child];
+        if (element.parentId) {
+          var parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId);
+          const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id);
+          parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency);
+          rows = [...rows, ...parent];
+        }
+      });
 
       //Code for Bulk Update Only Product in Packages
       let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some((f) => f._id === ele.parentId));

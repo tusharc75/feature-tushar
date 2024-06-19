@@ -21,7 +21,7 @@ import moment from 'moment';
 import { bulkUpdate, calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 interface EditDialogProps {
@@ -95,7 +95,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setFetchingData(true);
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true, isOffline);
+    let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true, isOffline);
+    data = data?.filter((f) => f?.isRead);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];
@@ -157,6 +158,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       setPriceMethodListConst(pricingMethodOptions);
       if (!isOffline) {
         await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      } else {
+        setPriceMethodList(pricingMethodOptions);
       }
       data.forEach((element) => {
         if (rowData?.type === MATERIAL_TYPE.serializedAsset) {

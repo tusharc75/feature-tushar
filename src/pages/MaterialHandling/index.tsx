@@ -8,7 +8,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import Request from './Request';
 import RefreshIcon from '@material-ui/icons/Refresh';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { sidebarResource } from 'src/constants/helpers';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';

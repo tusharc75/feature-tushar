@@ -7,7 +7,7 @@ import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import routes from '../../../components/Helpers/Routes';
-import { CustomDialogTransition, productInventory } from '../../../constants/helpers';
+import { CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
@@ -18,8 +18,8 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
   const { state, dispatch } = useTableReducer();
 
   useEffect(() => {
-    if(tabs?.length){
-      const rows = softHoldData?.filter((e)=> e.referenceType===tabs[value]) || []
+    if (tabs?.length) {
+      const rows = softHoldData?.filter((e) => e.referenceType === tabs[value]) || []
       dispatch({ type: 'update', data: rows });
     }
   }, [value]);
@@ -37,14 +37,15 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
       accessor: 'referenceNumber',
       Header: 'Reference Number',
       width: 120,
+      disabled: true,
       Cell: ({ row }) => (
         <div>
           <p
             className="text-truncate link"
-            title={row?.original?.reference?.optionLabel}
-            onClick={() => window.open(`${row.original.path}/${row?.original?.reference?.optionValue}`)}
+            title={row?.original?.referenceNumber}
+            onClick={() => window.open(`${row.original.path}/${row?.original?.referenceNumberId}`)}
           >
-            {row.original?.reference?.optionLabel}
+            {row.original?.referenceNumber}
           </p>
         </div>
       )
@@ -52,35 +53,38 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
     {
       accessor: 'inventory',
       Header: 'Inventory',
+      disabled: true,
       width: 120,
-      Cell: ({ row }) => <div>{row.original?.qty}</div>
+      Cell: ({ row }) => <div>{row.original?.inventory}</div>
     }
   ];
 
   const softHoldDataFetch = () => {
     axiosInstance()
-      .get(`${productInventory.api}/soft-hold/${data.productId}?wareHouse=${warehouse}`)
+      .get(`${productInventory.api}/soft-hold/${data.productId}?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         var unique = uniq(map(data, 'referenceType'));
         setTabs(unique);
         const result = [];
         data?.forEach((e) => {
           result.push({
-            path:
-              e.referenceType === 'Sales Order'
-                ? routes.salesOrderDetail.path
-                : e.referenceType === 'Transfer Inventory'
-                  ? routes.transferInventoryDetail.path
-                  : e.referenceType === 'Transfer Asset'
-                    ? routes.transferAssetDetail.path
-                    : e.referenceType === 'Work Order'
-                      ? routes.workOrderDetail.path
-                      : '',
-            ...e
+            path: e.referenceType === sidebarResource.salesOrder
+              ? routes.salesOrderDetail.path
+              : e.referenceType === sidebarResource.transferInventory
+                ? routes.transferInventoryDetail.path
+                : e.referenceType === sidebarResource.transferAsset
+                  ? routes.transferAssetDetail.path
+                  : e.referenceType === sidebarResource.workOrder
+                    ? routes.workOrderDetail.path
+                    : '',
+            inventory: e?.qty,
+            referenceNumber: e?.reference?.optionLabel,
+            referenceNumberId: e?.reference?.optionValue,
+            referenceType: e?.referenceType
           });
         });
         setSoftHoldData(result);
-        const rows = result?.filter((e)=> e.referenceType===unique[value]) || []
+        const rows = result?.filter((e) => e.referenceType === unique[value]) || []
         dispatch({ type: 'initialize', data: rows, count: rows.length });
       });
   };

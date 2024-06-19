@@ -16,7 +16,7 @@ import { Link } from 'react-router-dom';
 import { GetApp, Image, InfoOutlined, InsertDriveFile } from '@material-ui/icons';
 import { kebabCase } from 'lodash';
 import { FcApproval } from 'react-icons/fc';
-import { formatAmountWithCurrency, getFileIconSrc, getObjKeysWithValues } from '../../constants/helpers';
+import { cn, colSpans, columnSize, formatAmountWithCurrency, getFileIconSrc, getObjKeysWithValues } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -92,14 +92,12 @@ interface DetailProps {
 }
 
 const Details = (props: DetailProps) => {
-  const { setToastConfig } = useContext(CustomToastContext);
   const classes = useStyles();
   const {
     state: { permissions, user }
   }: any = useData();
   const { data, fields, gridSize, containerPadding, fullHeight = false } = props;
-  const [isDownloading, setDownloading] = useState(false);
-  const [downloadProgress, setDownloadProgress] = useState(0);
+
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [dialogData, setDialogData] = useState<any>(null);
@@ -216,10 +214,7 @@ const Details = (props: DetailProps) => {
     setFormsData(customData);
   };
 
-  const isTypeFile = (type: string) => type === 'imageUpload' || type === 'fileUpload' || type === 'multiFileUpload' || type === 'multiImageUpload';
-
-  // DYNAMIC GRID COLUMN SIZE
-  const dynamicSize = (size, type) => (isTypeFile(type) ? 12 : size);
+  const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload'].includes(type);
 
   /**
    * Render Link  or Typography component
@@ -234,7 +229,12 @@ const Details = (props: DetailProps) => {
               data[fieldData.fieldName].length ? (
                 data[fieldData.fieldName].map((_val: any, i) => (
                   <React.Fragment key={_val.optionValue}>
-                    <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`} target="_blank" className='link' rel="noopener noreferrer">
+                    <Link
+                      to={`/${kebabCase(fieldData.lookupResource)}/detail/${_val.optionValue}`}
+                      target="_blank"
+                      className="link"
+                      rel="noopener noreferrer"
+                    >
                       <span className={`text-truncate link`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
@@ -405,22 +405,24 @@ const Details = (props: DetailProps) => {
                     {form.name}
                   </h3>
                 </div>
-                <Grid container className="formdata-v1">
+                <div className="formdata-v1 grid grid-cols-12">
                   {form.sectionFields.map((field, i) => (
-                    <Grid
+                    <div
+                      className={cn(
+                        `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
+                        'col-span-12'
+                      )}
                       key={i}
-                      item
-                      xs={12}
-                      sm={gridSize ?? dynamicSize(6, field.fieldData.type)}
-                      xl={gridSize ?? dynamicSize(4, field.fieldData.type)}
                     >
-                      <Grid
-                        container
-                        alignItems="center"
-                        style={{ border: isTypeFile(field.fieldData.type) ? 0 : '1px solid var(--dark-mode-border-color, #EDEDED)' }}
+                      <div
+                        className={cn(
+                          isTypeFile(field.fieldData.type) && 'flex-wrap',
+                          'flex items-center',
+                          isTypeFile(field.fieldData.type) || '[border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                        )}
                       >
-                        <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(5, field.fieldData.type)}>
-                          <div className="d-flex align-items-center formdata-title-v1" style={{ borderRight: isTypeFile(field.fieldData.type) && 0 }}>
+                        <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
+                          <div className={cn('d-flex align-items-center formdata-title-v1', isTypeFile(field.fieldData.type) && '!border-r-0')}>
                             <h4
                               title={field.fieldData.fieldLabel}
                               style={{ paddingLeft: isTypeFile(field.fieldData.type) && 0 }}
@@ -434,9 +436,9 @@ const Details = (props: DetailProps) => {
                               </HtmlTooltip>
                             )}
                           </div>
-                        </Grid>
+                        </div>
 
-                        <Grid item xs={dynamicSize(6, field.fieldData.type)} sm={dynamicSize(7, field.fieldData.type)}>
+                        <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
                           {field.fieldData.type === 'imageUpload' ? (
                             <Box marginTop={1} marginBottom={4}>
                               <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
@@ -448,12 +450,12 @@ const Details = (props: DetailProps) => {
                               {renderData(initialVals, field.fieldData)}
                             </Box>
                           )}
-                        </Grid>
-                      </Grid>
+                        </div>
+                      </div>
                       {/* {field.fieldData.type !== 'imageUpload' && field.fieldData.type !== 'fileUpload'} */}
-                    </Grid>
+                    </div>
                   ))}
-                </Grid>
+                </div>
               </div>
             </React.Fragment>
           )

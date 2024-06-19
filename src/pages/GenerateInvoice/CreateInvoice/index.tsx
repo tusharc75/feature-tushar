@@ -21,7 +21,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
-import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { camelCase, startCase } from 'lodash';

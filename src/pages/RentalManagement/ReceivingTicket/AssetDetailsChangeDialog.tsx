@@ -13,12 +13,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CircularProgress, Typography } from '@material-ui/core';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
-import { isArray, isEqual } from 'lodash';
+import { isArray, isEqual, isString } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { read, utils, writeFile } from 'xlsx';
 
-export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, ids, setAssetsData, staticLookUpFilters = {} }) {
+export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, ids, setAssetsData, staticLookUpFilters = {}, productsDefaultData = [] }) {
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -44,7 +44,14 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     let values = {};
     let tempAssetData = [];
     const decimalField = [];
-    for (const data of assetData) {
+    let j = 0;
+    let index = null;
+    let product = assetData?.length > 0 ? assetData[0]?.product?.optionValue : ''
+    assetData?.forEach((data, i) => {
+      if (product !== data?.product?.optionValue) {
+        j = 0;
+        index = null
+      }
       let initialValues = getObjKeysWithValues(data, fieldsDataForUpdate);
       if (statusPolicy?.sumDecimalField) {
         fieldsDataForUpdate?.forEach((e) => {
@@ -57,8 +64,34 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       }
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
+      const assetDefaultData = productsDefaultData?.find((e) => e.materialId === data?.product?.optionValue)?.assetDefaultData;
+      if (!index) {
+        index = assetDefaultData?.length > 0 ? assetDefaultData[0]?.qty : null
+      }
+      if (index === i) {
+        j = j + 1;
+        index = index + assetDefaultData[j]?.qty
+      }
+
+      if (assetDefaultData?.length > 0) {
+        if (j <= assetDefaultData?.length && assetDefaultData[j]) {
+          for (const key in assetDefaultData[j]) {
+            if (key != 'qty') {
+              const field = fieldsDataForUpdate?.find((e) => e.fieldName === key);
+              if (assetDefaultData[j][key] && field) {
+                if (field?.type === 'multiSelect' && isString(assetDefaultData[j][key])) {
+                  initialValues[key] = [assetDefaultData[j][key]];
+                }
+                else {
+                  initialValues[key] = assetDefaultData[j][key];
+                }
+              }
+            }
+          }
+        }
+      }
       tempAssetData.push(initialValues);
-    }
+    });
     values['assetData'] = tempAssetData;
     setDecimalFields(decimalField);
     fieldsDataForUpdate?.forEach((element) => {

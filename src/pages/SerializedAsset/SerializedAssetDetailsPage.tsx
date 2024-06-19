@@ -338,11 +338,14 @@ const SerializedAssetDetailsPage = () => {
 
       const systemStatus = [ASSET_STATUS.reserved, ASSET_STATUS.readyToShip, ASSET_STATUS.inTransit, ASSET_STATUS.inUse
         , ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.delivered, ASSET_STATUS.customer, ASSET_STATUS.supplier
-        , ASSET_STATUS.returned, ASSET_STATUS.repair, ASSET_STATUS.inRepair, ASSET_STATUS.customerPossession
+        , ASSET_STATUS.returned, ASSET_STATUS.repair, ASSET_STATUS.inRepair, ASSET_STATUS.customerPossession, ASSET_STATUS.scrapRequested
       ]
 
       let tempStatus = [];
-      if (systemStatus?.includes(assetDetails.status)) {
+      if ([ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.scrapRequested]?.includes(assetDetails.status)) {
+        tempStatus = [];
+      }
+      else if (systemStatus?.includes(assetDetails.status)) {
         tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert];
       }
       else if ([ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(assetDetails.status)) {
@@ -350,7 +353,7 @@ const SerializedAssetDetailsPage = () => {
         ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
       }
       else if ([ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(assetDetails.status)) {
-        tempStatus = [ASSET_STATUS.available, ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ...otherStatus];
+        tempStatus = [ASSET_STATUS.scrap, ASSET_STATUS.lost, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair, ...otherStatus];
       }
       else if (assetDetails.status === ASSET_STATUS.scrap) {
         tempStatus = [ASSET_STATUS.lost, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert, ...otherStatus];
@@ -376,7 +379,7 @@ const SerializedAssetDetailsPage = () => {
           <Box className="control-buttons-v1">
             {assetDetails ? (
               <>
-                {permissions?.sendOutboundMessage?.isCreate && (
+                {permissions?.sendOutboundMessage?.isCreate && assetDetails?.iotUnit && (
                   <Button
                     variant="outlined"
                     className={'btn-outline-v1'}
@@ -500,10 +503,10 @@ const SerializedAssetDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>Details</CustomTab>
-          {deviceTemplate && <CustomTab value={1}>Current</CustomTab>}
-          {deviceTemplate && <CustomTab value={2}>Performance Analysis</CustomTab>}
-          {deviceTemplate && <CustomTab value={3}>Alarms</CustomTab>}
-          {deviceTemplate && <CustomTab value={4}>Status</CustomTab>}
+          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={1}>Current</CustomTab>}
+          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={2}>Performance Analysis</CustomTab>}
+          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={3}>Alarms</CustomTab>}
+          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={4}>Status</CustomTab>}
           {resourceData && resourceData?.steps?.length && <CustomTab value={5}>Associations</CustomTab>}
           <CustomTab value={6}>History</CustomTab>
           {user?.user?.brandPolicy?.serializedAssetCertification && <CustomTab value={7}>Certification History</CustomTab>}

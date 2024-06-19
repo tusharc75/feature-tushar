@@ -14,9 +14,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { CHILD_RESOURCE, CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 
-function ViewLogs({ fieldTicketData, handleClose }) {
+function ViewLogs({ fieldTicketData, handleClose, fields }) {
   const renderedFrom = `${routes.fieldTicket.title}_logs`;
 
   const {
@@ -93,7 +93,7 @@ function ViewLogs({ fieldTicketData, handleClose }) {
         }
       }
     ];
-    const fields = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
+    fields = fields?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const actionColumn = {
       accessor: 'action',

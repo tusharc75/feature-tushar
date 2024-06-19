@@ -1,12 +1,14 @@
 import { Box, IconButton, MenuItem } from "@material-ui/core";
-import { OpenInNew } from "@material-ui/icons";
+import { LocalShipping } from "@material-ui/icons";
 import { map, uniq } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
+import { FiExternalLink } from "react-icons/fi";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
 import { fetch_child_resource_fields } from "src/components/ChildResourceField";
 import CustomReactTable, { useColumns, useTableReducer } from "src/components/CustomReactTable";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
@@ -16,7 +18,8 @@ import { CHILD_RESOURCE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, 
 import { subcontractAssemblyActions, subcontractAssemblyMessage } from "src/constants/messageHelpers";
 import ManageDeliveryTicket from "src/pages/DeliveryTicket/ManageDeliveryTicket";
 
-const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen }) => {
+const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, allowedToEdit }) => {
+
 	const renderedFrom = `${routes.subcontractAssembly.title}_LoadingTicket`;
 	const toastConfig = useContext(CustomToastContext);
 
@@ -36,47 +39,71 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 	const fetchFields = async () => {
 		var data = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyMaterial, subcontractAssemblyData?.currency, true);
 		const newColumns = generateColumns(renderedFrom, data, null, false, subcontractAssemblyData?.currency);
-		let coloum: any = [
+
+		let column: any = [
 			{
 				accessor: 'index',
 				Header: 'Index',
 				width: 70,
 				sticky: 'left',
-				Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+				Cell: ({ row }) => (
+					<div className="d-flex align-items-center gap-2">
+						<p className="text-truncate">{row.original.index}</p>
+						{row?.original?.loadingTicketId && (
+							<HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
+								<LocalShipping fontSize="small" color={'primary'} />
+							</HtmlTooltip>
+						)}
+					</div>
+				),
 				Footer: () => {
 					return <>Total</>;
 				}
 			},
-			{
-				accessor: 'detail',
-				Header: 'Detail',
-				disabled: true,
-				sticky: isMobile || isTablet ? 'none' : 'left',
-				width: 200,
-				Cell: ({ row }) => (
-					<div style={{ display: 'flex', alignItems: 'center' }}>
-						{<p title={row.original?.detail}>{row.original?.detail}</p>}
-						<Box ml={1}>
+		];
+
+		let fields;
+		const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
+		fields = response?.data?.data;
+
+		const productFields = fields?.find((e) => e.resource === 'Product')?.fieldNames || [];
+		productFields?.forEach((e) => {
+			if (e?.fieldName === 'productName') {
+				column.push({
+					accessor: e?.fieldName,
+					Header: e?.fieldLabel,
+					width: 200,
+					disabled: true,
+					sticky: isMobile || isTablet ? 'none' : 'left',
+					primaryField: true,
+					cell: ({ row, table }) => (
+						<div className="flex items-center gap-2">
+							<p>{row?.original[e?.fieldName]}</p>
 							<IconButton
 								size="small"
 								onClick={() => {
-									window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+									window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
 								}}
 							>
-								<OpenInNew fontSize="small" color="primary" />
+								<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
 							</IconButton>
-						</Box>
-					</div>
-				)
-			},
-			{
-				accessor: 'description',
-				Header: 'Description',
-				width: 200,
-				Cell: ({ row }) => {
-					return row.original['description'] ? <div><p className="text-truncate">{row.original.description}</p></div> : <NoDataCell />;
-				}
-			},
+						</div>
+					)
+				});
+			} else {
+				column.push({
+					accessor: e?.fieldName,
+					Header: e?.fieldLabel,
+					width: 200,
+					cell: ({ row }) => {
+						return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
+					}
+				});
+			}
+		});
+
+		const extracolumns: any = [
+			...newColumns,
 			{
 				accessor: 'parent',
 				Header: 'Parent',
@@ -90,18 +117,16 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 				Header: 'Loading Ticket',
 				Cell: ({ row }) =>
 					row?.original?.loadingTicket ? (
-						<div>
+						<div className="flex items-center gap-2">
 							<h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
-							<Box ml={1}>
-								<IconButton
-									size="small"
-									onClick={() => {
-										window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
-									}}
-								>
-									<OpenInNew fontSize="small" color="primary" />
-								</IconButton>
-							</Box>
+							<IconButton
+								size="small"
+								onClick={() => {
+									window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
+								}}
+							>
+								<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+							</IconButton>
 						</div>
 					) : (
 						<NoDataCell />
@@ -117,9 +142,9 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 						<NoDataCell />
 					)
 			}
-		];
-		coloum = [...coloum, ...newColumns];
-		setColumns(coloum);
+		]
+
+		setColumns([...column, ...extracolumns]);
 	};
 
 	const fetchData = async () => {
@@ -141,8 +166,9 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 		const rows = material.filter((e) => e.parentId != null && MATERIAL_TYPE.product);
 		rows.forEach((obj, i) => {
 			obj.index = i + 1;
-			obj.detail = obj.productDetail?.productName;
-			obj.description = obj?.productDetail?.productDescription;
+			obj.productName = obj?.productDetail?.productName;
+			obj.productDescription = obj?.productDetail?.productDescription;
+			obj.productNumber = obj?.productDetail?.productNumber;
 			obj.qty = obj.qty;
 			obj.uniqueId = obj._id;
 			obj.parent = material?.find(m => m?.parentId === null && m?._id === obj?.parentId)?.productDetail?.productName || '';
@@ -161,7 +187,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 			}
 		});
 
-		if (rows.every((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) {
+		if (rows.some((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered)) {
 			setNextStep(true);
 		}
 
@@ -269,7 +295,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 			<>
 				<DetailsPageHeader
 					isAddButtonVisible={false}
-					isActionButtonVisible={true}
+					isActionButtonVisible={allowedToEdit}
 					actionButtonMenuItems={actionButtonMenuItems()}
 					actionButtonProps={{ disabled: selectedRecords.length === 0 }}
 					hasXpadding
@@ -284,6 +310,8 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen })
 							renderedFrom={renderedFrom}
 							isClientSideGrid={true}
 							refreshGrid={fetchData}
+							hideSelection={!allowedToEdit}
+							hideAction={!allowedToEdit}
 						/>
 					</Box>
 				) : (

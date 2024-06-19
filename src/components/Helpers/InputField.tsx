@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Grid, Box, InputAdornment } from '@material-ui/core';
 import FormTypes from './FormTypes';
-import { setFieldsInAscendingOrder } from '../../constants/helpers';
+import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
 
 const InputField = (props) => {
@@ -93,26 +93,10 @@ const InputField = (props) => {
                       key={field.fieldName}
                       item
                       xs={12}
-                      sm={
-                        field.type === 'imageUpload' ||
-                        field.type === 'fileUpload' ||
-                        field.type === 'multiImageUpload' ||
-                        field.type === 'multiFileUpload' ||
-                        field.type === 'counter' ||
-                        field.type === 'description'
-                          ? 12
-                          : 6
-                      }
-                      md={
-                        field.type === 'imageUpload' ||
-                        field.type === 'fileUpload' ||
-                        field.type === 'multiImageUpload' ||
-                        field.type === 'multiFileUpload' ||
-                        field.type === 'counter' ||
-                        field.type === 'description' 
-                          ? 12
-                          : 6
-                      }
+                            sm={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                            md={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                            lg={field?.columnSize ? field?.columnSize : gridSize(field.type)}
+                            xl={field?.columnSize ? field?.columnSize : gridSize(field.type)}
                     >
                       <FormTypes
                         {...rest}
@@ -132,27 +116,23 @@ const InputField = (props) => {
                         onChange={
                           field.fieldName === 'currency'
                             ? (e, val) => {
-                                if (val && val.currencyCode) {
-                                  setFieldValue(field.fieldName, val.currencyCode);
-                                  setCurrencySymbol(val.symbolNative);
-                                } else {
-                                  setFieldValue(field.fieldName, '');
-                                  setCurrencySymbol(null);
-                                }
+                              if (val && val.currencyCode) {
+                                setFieldValue(field.fieldName, val.currencyCode);
+                                setCurrencySymbol(val.symbolNative);
+                              } else {
+                                setFieldValue(field.fieldName, '');
+                                setCurrencySymbol(null);
                               }
-                            : field.type === 'dropDown'
-                            ? (e, val) => {
-                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                              }
+                            }
                             : null
                         }
                         imageOrFileUploadCompletePercentage={
                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                             ? (completePercentage) => {
-                                if (onImageUploadCompletePercentage) {
-                                  onImageUploadCompletePercentage(completePercentage);
-                                }
+                              if (onImageUploadCompletePercentage) {
+                                onImageUploadCompletePercentage(completePercentage);
                               }
+                            }
                             : null
                         }
                         fields={fieldsData}

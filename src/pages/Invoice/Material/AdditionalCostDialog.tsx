@@ -13,7 +13,6 @@ import InputField from 'src/components/Helpers/InputField';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const AdditionalCostDialog = ({ costData, onClose, handleAddCost, handleUpdateCost, loadingEdit, showSaveAndNext, invoiceData }) => {
@@ -111,7 +110,7 @@ const AdditionalCostDialog = ({ costData, onClose, handleAddCost, handleUpdateCo
                 </Button>
                 {showSaveAndNext && (
                   <Button
-                    disabled={ isEqual(initialData.values, values) || loadingEdit}
+                    disabled={isEqual(initialData.values, values) || loadingEdit}
                     variant="contained"
                     color="primary"
                     type="submit"

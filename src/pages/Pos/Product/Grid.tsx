@@ -20,7 +20,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
   const {
     state: { user, permissions }
   }: any = useData();
-  const [columns,setColumns] = useState([]);
+  const [columns, setColumns] = useState([]);
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting } = state;
 
@@ -28,7 +28,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
     fetchGridColumns();
   }, [])
 
-  const fetchGridColumns = ()=>{
+  const fetchGridColumns = () => {
     let columns = [
       {
         accessor: 'productName',
@@ -36,8 +36,8 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
         width: 200,
         Cell: ({ row }) => {
           return row.original?.productName ? <Link className="link text-truncate" title={row?.original?.productName} to={`${routes.posProductDetail.path}/${row?.original?._id}/${row?.original?.plantId}`}>
-          {row.original?.productName}
-        </Link>: <NoDataCell />;
+            {row.original?.productName}
+          </Link> : <NoDataCell />;
         }
       },
       {
@@ -84,21 +84,21 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
     canDrag: false,
     Cell: ({ row }) => (
       <>
-       <HtmlTooltip title={row?.original?.availableInventory ? 'Add to cart' : 'No inventory'}>
-      <span>
-        <IconButton
-          size="small"
-          disabled={!row?.original?.availableInventory || row?.original?.availableInventory === 0}
-          aria-label="Add to cart"
-          onClick={() => {
-            setAssignCartProductQty(row?.original);
-          }}
-          color={row?.original?.availableInventory ? 'secondary' : 'inherit'}
-        >
-          <MdAddShoppingCart />
-        </IconButton>
-      </span>
-    </HtmlTooltip>
+        <HtmlTooltip title={row?.original?.availableInventory ? 'Add to cart' : 'No inventory'}>
+          <span>
+            <IconButton
+              size="small"
+              disabled={!row?.original?.availableInventory || row?.original?.availableInventory === 0}
+              aria-label="Add to cart"
+              onClick={() => {
+                setAssignCartProductQty(row?.original);
+              }}
+              color={row?.original?.availableInventory ? 'secondary' : 'inherit'}
+            >
+              <MdAddShoppingCart />
+            </IconButton>
+          </span>
+        </HtmlTooltip>
       </>)
   };
 
@@ -143,7 +143,7 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
   const fetchProducts = () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    let api = `/pos?wareHouse=${plantId}${queryString}`;
+    let api = `/pos?warehouse=${plantId}${queryString}`;
     axiosInstance()
       .get(api)
       .then(({ data: { data, count } }) => {
@@ -165,25 +165,25 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
       });
   };
 
-  
+
 
   return (
     <Fragment>
-       {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchProducts}
-            hideSelection = {true}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchProducts}
+          hideSelection={true}
+        />
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Fragment>
   );
 };

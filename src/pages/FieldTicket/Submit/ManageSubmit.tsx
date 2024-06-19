@@ -14,7 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { array, object, string } from 'yup';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 
 const submitValidation = object().shape({
     signature: string(),
@@ -30,7 +30,7 @@ const submitValidation = object().shape({
         }),
 });
 
-const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
+const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
 
     const toastConfig = useContext(CustomToastContext);
     const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
@@ -46,13 +46,13 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData }) => {
 
     const fetchFields = async () => {
         try {
-            const data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketSubmit, fieldTicketData?.currency, true);
-            const tempInitialData = getObjKeys('', data);
-            if (data?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
+            fields = fields?.filter((f) => f?.isRead);
+            const tempInitialData = getObjKeys('', fields);
+            if (fields?.find((d) => d.fieldName === 'customerAccount') && fieldTicketData?.customerAccount?.optionValue) {
                 tempInitialData["customerAccount"] = fieldTicketData.customerAccount.optionValue;
             }
             setInitialData({
-                fields: data,
+                fields: fields,
                 values: tempInitialData
             });
         } catch (error) {

@@ -7,7 +7,6 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';

@@ -85,7 +85,7 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
 									if (isEqual(initialData.values, values)) onClose();
 									else setShowConfirmDialog(true);
 								}}
-								title={`Edit - ${rowData.index} (${rowData?.detail || ''})`}
+								title={`Edit - ${rowData.index} (${rowData?.productName || ''})`}
 								isMinimized={!fullScreen}
 								onMinimizeMaximize={() => {
 									setFullScreen((prevState) => !prevState);

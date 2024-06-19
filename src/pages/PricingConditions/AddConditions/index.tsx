@@ -328,7 +328,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             >
               Add Existing Services
             </MenuItem>
-            <MenuItem
+            {permissions?.competencies?.isRead && (
+              <MenuItem
               onClick={() => {
                 closeAddActions();
                 setAddMaterialDialog({ open: true, materialType: 'competency' });
@@ -336,6 +337,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             >
               Add Existing Competencies
             </MenuItem>
+          )}
           </Menu>
         </Box>
         <Box display="flex">

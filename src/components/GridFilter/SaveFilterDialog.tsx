@@ -51,10 +51,22 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
   });
 
   const handleSubmit = (values) => {
+    const updatedFilterValue = filterValue;
+    const colNames = Object.keys(filterValue);
+    for (const col of columns) {
+      const fieldName = col.fieldName
+       if(colNames.includes(fieldName) && col.lookup){
+        if(updatedFilterValue[fieldName]?.length){
+          updatedFilterValue[fieldName] = filterValue[fieldName]?.map((e)=> e.optionValue);
+        }else{
+          delete updatedFilterValue[fieldName];
+        }
+       }
+    }
     const data = {
       title: values?.title,
       resource: resource,
-      filterValue: filterValue,
+      filterValue: updatedFilterValue,
       default: values.default,
       sorting: values.sorting || false,
       sortBy: values.sortBy,
@@ -147,7 +159,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                   </Box>
                 }
                   
-                {values['sorting'] && columns.length && (
+                {values['sorting'] && columns?.length && (
                   <div className="flex flex-wrap gap-2 my-2">
                     <Autocomplete
                       id="sorting"

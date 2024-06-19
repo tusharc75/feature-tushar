@@ -10,7 +10,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import { checkFormula } from '../../../constants/formulaUtility';
-import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constants/helpers';
+import { CustomDialogTransition, fieldLabelToFieldName, gridSize } from '../../../constants/helpers';
 import FieldList from '../FieldList';
 import General from './General';
 import Setting from './Setting';
@@ -56,6 +56,9 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (!values.dataList) {
         values.dataList = false;
         values.dataListId = null;
+      }
+      if (!values.columnSize) {
+        values.columnSize = gridSize(fieldData?.type);
       }
       if (
         !values.isColumnEditable &&
@@ -210,6 +213,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.lookupResource = values.lookup ? values.lookupResource : '';
             ele.dataList = values.dataList || false;
             ele.dataListId = values.dataList ? values.dataListId : '';
+            ele.columnSize = values.columnSize || 6;
             ele.preFilters = values.preFilters?.length > 0 ? values.preFilters : [];
             ele.htmlDescription = values.htmlDescription || '';
             ele.entityWiseLookup = values?.entityWiseLookup || false;

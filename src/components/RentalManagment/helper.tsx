@@ -3,7 +3,7 @@ import { CHILD_RESOURCE, PRICING_SETUP_TYPE, getObjKeysWithValues, pricingCondit
 import { objectStore, findOne } from '../../constants/indexdbhelper';
 import axiosInstance from '../../axios/axiosInstance';
 import { autoCalculateSpecificFields, CURReplaceByCurrencySingle } from '../../constants/formulaUtility';
-import { unionBy, uniq, map, isArray } from 'lodash';
+import { unionBy, uniq, map, isArray, isObject } from 'lodash';
 
 export const fetch_rental_product_fields = async (currency, isOffline) => {
     var data;
@@ -13,7 +13,7 @@ export const fetch_rental_product_fields = async (currency, isOffline) => {
         const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.rentalManagementProduct}`);
         data = response?.data?.data;
     }
-    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
+    data = CURReplaceByCurrencySingle(data?.map(d => ({ ...d?.fieldData, isRead: d?.isRead })), currency ? currency : "USD");
     return data;
 }
 
@@ -26,7 +26,7 @@ export const fetch_rental_cost_fields = async (currency, isOffline) => {
         const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.rentalManagementCost}`);
         data = response?.data?.data;
     }
-    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
+    data = CURReplaceByCurrencySingle(data?.map(d => ({ ...d?.fieldData, isRead: d?.isRead })), currency ? currency : "USD");
     return data;
 }
 
@@ -38,7 +38,7 @@ export const fetch_rental_technician_fields = async (currency, isOffline) => {
         const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.rentalManagementTechnician}`);
         data = response?.data?.data;
     }
-    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
+    data = CURReplaceByCurrencySingle(data?.map(d => ({ ...d?.fieldData, isRead: d?.isRead })), currency ? currency : "USD");
     return data;
 }
 
@@ -50,7 +50,7 @@ export const fetch_rental_quotation_fields = async (currency, isOffline) => {
         const response = await axiosInstance().get(`/field?resource=${CHILD_RESOURCE.quotationProduct}`);
         data = response?.data?.data;
     }
-    data = CURReplaceByCurrencySingle(data?.map(d => ({...d?.fieldData, isRead: d?.isRead})), currency ? currency : "USD");
+    data = CURReplaceByCurrencySingle(data?.map(d => ({ ...d?.fieldData, isRead: d?.isRead })), currency ? currency : "USD");
     return data;
 }
 
@@ -276,3 +276,33 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
     })
     return updatedRows;
 };
+
+export const getParentWellNumber = (material, _id) => {
+    const materialData = material?.find((e) => e._id === _id);
+    const parent = material?.find((e) => e._id === materialData?.parentId);
+    if (parent) {
+        return getParentWellNumber(material, parent._id)
+    }
+    else {
+        return materialData?.wellNumber
+    }
+}
+
+
+export const getUniqueWellNumber = (data) => {
+    const wellNumber: any = [];
+    data?.forEach((ele) => {
+        if (ele?.wellNumber) {
+            if (ele?.wellNumber?.optionValue) {
+                wellNumber.push(ele?.wellNumber?.optionValue);
+            }
+            else if (isArray(ele?.wellNumber)) {
+                ele?.wellNumber?.forEach((e) => {
+                    wellNumber.push(e?.optionValue);
+                })
+            }
+        }
+    })
+    return uniq(wellNumber);
+}
+
