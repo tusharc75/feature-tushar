@@ -238,7 +238,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 				{showConfirmationDialog && (
 					<ConfirmationDialog
 						open={true}
-						message="Please confirm if you want to split this qty ?"
+						message="Please confirm this if you want to split this quantity into multiple line item(s)?"
 						onOk={() => {
 							setShowConfirmationDialog(false);
 							const data: any = []
