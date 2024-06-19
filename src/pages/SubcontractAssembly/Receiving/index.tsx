@@ -183,12 +183,13 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
 
 		let rows = data?.filter((d: any) => !d.parentId);
 		rows.forEach((parent, i) => {
+			const consumables = data?.filter(d => d?.parentId === parent?._id);
 			parent.index = i + 1;
 			parent.productName = parent?.productDetail?.productName;
 			parent.productDescription = parent?.productDetail?.productDescription;
 			parent.productNumber = parent?.productDetail?.productNumber;
 			parent.receivedQty = parent?.receivedQty || 0;
-			parent.canReceive = data?.filter(d => d?.parentId === parent?._id)?.every(d =>
+			parent.canReceive = consumables?.length>0 && consumables?.every(d =>
 				deliveryTicketList?.filter(dt => dt.ticketType === DELIVERY_TICKET_TYPE.delivery
 					&& dt.status === DELIVERY_TICKET_STATUS.delivered).some(_d => _d?.products?.map(p => p?.product).includes(d?.materialId) && _d?.products?.map(p => p?.uniqueId)?.includes(d?._id)))
 		});
