@@ -72,6 +72,7 @@ import ServiceLogDialog from './ServiceLogDialog';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
+import TransferToAnotherPackageDialog from 'src/pages/RentalManagement/ReceivingTicket/TransferToAnotherPackageDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -143,6 +144,7 @@ const ReceivingTicket = ({
   const [assetsData, setAssetsData] = useState([]);
   const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
   const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false });
+  const [transferAnotherPackageDialog, setTransferAnotherPackageialog] = useState(false)
 
   const {
     state: { user, permissions, selectedEntity }
@@ -1804,7 +1806,8 @@ const ReceivingTicket = ({
               columns,
               rentalManagementData,
               setServiceConfirmationDialog,
-              rentalPolicyData
+              rentalPolicyData,
+              setTransferAnotherPackageialog
             }}
           />
         }
@@ -2328,6 +2331,20 @@ const ReceivingTicket = ({
           renderedFrom={renderedFrom}
         />
       )}
+
+      {transferAnotherPackageDialog && (
+        <TransferToAnotherPackageDialog
+          onClose={() => {
+            setTransferAnotherPackageialog(false)
+          }}
+          onSuccess={() => {
+            fetchRecords();
+            setTransferAnotherPackageialog(false)
+          }}
+          selectedAssets={selectedRecords}
+          rentalManagementData={rentalManagementData}
+        />
+      )}
     </>
   );
 };
@@ -2360,7 +2377,8 @@ const ActionButtonMenuItems = ({
   columns,
   rentalManagementData,
   setServiceConfirmationDialog,
-  rentalPolicyData
+  rentalPolicyData,
+  setTransferAnotherPackageialog
 }) => {
   const checkUniqWarehouse = () => {
     if (selectedRecords.length === 0) {
@@ -2605,6 +2623,19 @@ const ActionButtonMenuItems = ({
     return false;
   };
 
+  const getParentPackageId = (uniqueId) => {
+    const product = rentalManagementData?.material?.find(d => d?._id === uniqueId)
+    if (!product?.parentId) {
+      return
+    }
+    const data = rentalManagementData?.material?.find(d => d?._id === product?.parentId)
+    if (!data?.parentId) {
+      return data?.materialId
+    } else {
+      getParentPackageId(data?.parentId)
+    }
+  }
+
   return (
     <>
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
@@ -2813,6 +2844,19 @@ const ActionButtonMenuItems = ({
             {`Transfer to another ${routes.rentalManagement.title}`}
           </MenuItem>
         )}
+      {checkUniqStatus() &&
+        selectedRecords?.every(r => r?.loadingTicketId) &&
+        !selectedRecords?.some(r => r?.receivingTicketId || r?.returnTicketId) &&
+        selectedRecords?.map(r => getParentPackageId(r?.uniqueId))?.every(_id => _id === getParentPackageId(selectedRecords[0]?.uniqueId)) && (
+        <MenuItem
+          onClick={() => {
+            setTransferAnotherPackageialog(true)
+          }}
+        >
+          {`Transfer to another ${routes.packages.title}`}
+        </MenuItem>
+        )}
+
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
         <MenuItem
           onClick={() => {
