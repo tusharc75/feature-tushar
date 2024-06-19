@@ -2844,18 +2844,19 @@ const ActionButtonMenuItems = ({
             {`Transfer to another ${routes.rentalManagement.title}`}
           </MenuItem>
         )}
-      <MenuItem
-        disabled={
-          !checkUniqStatus() ||
-          !selectedRecords?.every(r => r?.loadingTicketId && !r?.receivingTicketId && !r?.returnTicketId) ||
-          !selectedRecords?.map(r => getParentPackageId(r?.uniqueId))?.every(_id => _id === getParentPackageId(selectedRecords[0]?.uniqueId))
-        }
-        onClick={() => {
-          setTransferAnotherPackageialog(true)
-        }}
-      >
-        {`Transfer to another ${routes.packages.title}`}
-      </MenuItem>
+      {checkUniqStatus() &&
+        selectedRecords?.every(r => r?.loadingTicketId) &&
+        !selectedRecords?.some(r => r?.receivingTicketId || r?.returnTicketId) &&
+        selectedRecords?.map(r => getParentPackageId(r?.uniqueId))?.every(_id => _id === getParentPackageId(selectedRecords[0]?.uniqueId)) && (
+        <MenuItem
+          onClick={() => {
+            setTransferAnotherPackageialog(true)
+          }}
+        >
+          {`Transfer to another ${routes.packages.title}`}
+        </MenuItem>
+        )}
+
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
         <MenuItem
           onClick={() => {
