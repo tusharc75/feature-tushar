@@ -370,7 +370,7 @@ const ServiceOrderDetailsPage = () => {
                 statusOptions={statusOptions}
               />
             )} */}
-            {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
+            {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && permissions?.invoice?.isRead && (
               <Invoices
                 resourceId={serviceOrderData?._id}
                 resource={sidebarResource.fieldTicket}
