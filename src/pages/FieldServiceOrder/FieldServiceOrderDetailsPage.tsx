@@ -141,6 +141,8 @@ const ServiceOrderDetailsPage = () => {
         ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setServiceOrderData(data);
+      let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !=='Field Ticket Invoice');
+      setSteps(fieldServiceSteps)
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(steps?.length - 1);
       } else {
@@ -370,7 +372,7 @@ const ServiceOrderDetailsPage = () => {
                 statusOptions={statusOptions}
               />
             )} */}
-            {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && permissions?.invoice?.isRead && (
+            {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (
               <Invoices
                 resourceId={serviceOrderData?._id}
                 resource={sidebarResource.fieldTicket}
