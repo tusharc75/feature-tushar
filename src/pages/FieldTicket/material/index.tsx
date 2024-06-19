@@ -355,6 +355,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.unit = d.unit ? d.unit : '';
           element.pricingMethod = d.pricingMethod ? d.pricingMethod : '';
           element.qty = d.qty ? parseFloat(d.qty) : 1;
+          element.uniqueId = d._id; 
           element.estimateStartDate = d?.estimateStartDate ? d?.estimateStartDate : new Date();
           element.estimateEndDate = d?.estimateEndDate ? d?.estimateEndDate : new Date();
           element.estimateJobDuration = d?.estimateJobDuration;
@@ -905,7 +906,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           rentalId={fieldTicketData?.rentalJob?.optionValue}
           currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
-          ids={dataRows?.map((row) => row?.materialId)}
+          ids={dataRows?.map((row) => assignRentalDataDialog?.type===MATERIAL_TYPE.package ? row?.uniqueId : row?.materialId)}
         />
       )}
     </>
