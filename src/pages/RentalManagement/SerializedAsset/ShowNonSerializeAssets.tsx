@@ -20,7 +20,7 @@ import {
   Typography
 } from '@material-ui/core';
 
-const ShowNonSerializeAssets = ({ data, onClose, title = `Non-${routes.serializedAsset.title}` }) => {
+const ShowNonSerializeAssets = ({ data, onClose, title }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   return (
     <Dialog

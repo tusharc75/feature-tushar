@@ -270,7 +270,7 @@ const LoadingTicket = ({
                 ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
                 : element?.status
             : element?.status;
-          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId);
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId && e._id === element._id);
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
           obj.loadingTicketStatus = ele?.loadingTicketStatus;
@@ -301,7 +301,7 @@ const LoadingTicket = ({
           obj.productName = element?.productDetail?.productName;
           obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
-          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId);
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId && e._id === element._id);
           obj.wellNumber = getParentWellNumber(material, element?._id)
 
           productAssets.push(obj);
@@ -564,23 +564,25 @@ const LoadingTicket = ({
           </IconButton>
           {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
             (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-              <HtmlTooltip title={row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setShowInfo({
-                      open: true,
-                      data: {
-                        productName: row?.original?.productName,
-                        data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
-                      },
-                      type: row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`
-                    });
-                  }}
-                >
-                  <InfoIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
+              <Box>
+                <HtmlTooltip title={`Serial Numbers`}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setShowInfo({
+                        open: true,
+                        data: {
+                          productName: row?.original?.productName,
+                          data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                        },
+                        type: `Serial Numbers`
+                      });
+                    }}
+                  >
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
             )}
         </div>
       )
@@ -1437,7 +1439,10 @@ const LoadingTicket = ({
         />
       )}
       {showInfo.open && (
-        <ShowNonSerializeAssets data={showInfo.data} onClose={() => setShowInfo({ open: false, data: {}, type: null })} title={showInfo.type} />
+        <ShowNonSerializeAssets
+          data={showInfo.data}
+          onClose={() => setShowInfo({ open: false, data: {}, type: null })}
+          title={showInfo.type} />
       )}
       {addSerializedAssetDialog.open && (
         <AddSerializedAsset

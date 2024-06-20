@@ -419,7 +419,7 @@ const ReceivingTicket = ({
           obj.endDate = element?.actualEndDate;
           obj.manualStartDate = element?.manualStartDate;
           obj.manualEndDate = element?.manualEndDate;
-          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId && e._id === element._id);
           obj.loadingTicket = ele?.loadingTicket;
           obj.loadingTicketId = ele?.loadingTicketId;
           obj.loadingTicketStatus = ele?.loadingTicketStatus;
@@ -465,7 +465,7 @@ const ReceivingTicket = ({
           obj.productId = element?.productDetail?._id;
           obj.warehouse = element?.warehouse ? element?.warehouse?.optionLabel : rentalManagementData?.warehouse?.optionLabel;
           obj.warehouseId = element?.warehouse ? element?.warehouse?.optionValue : rentalManagementData?.warehouse?.optionValue;
-          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId);
+          obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.productId && e._id === element._id);
           obj.status = element?.productDetail?.serializedProduct === true ? element?.status : 'N/A';
           obj.rentalAssetStatus = element?.productDetail?.serializedProduct ? element?.status : '';
           obj.currentLocation =
@@ -810,23 +810,25 @@ const ReceivingTicket = ({
             </IconButton>
             {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-                <HtmlTooltip title={row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setShowInfo({
-                        open: true,
-                        data: {
-                          productName: row?.original?.productName,
-                          data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
-                        },
-                        type: row?.original?.nonSerializeAsset?.length > 0 ? `Non-${routes.serializedAsset.title}` : `Serial Numbers`
-                      });
-                    }}
-                  >
-                    <InfoIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
+                <Box>
+                  <HtmlTooltip title={`Serial Numbers`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setShowInfo({
+                          open: true,
+                          data: {
+                            productName: row?.original?.productName,
+                            data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                          },
+                          type: `Serial Numbers`
+                        });
+                      }}
+                    >
+                      <InfoIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
               )}
             {row?.original?.isRepairJob && (
               <HtmlTooltip title={`${routes.repairJob.title}`}>
@@ -2170,7 +2172,10 @@ const ReceivingTicket = ({
         />
       )}
       {showInfo.open && (
-        <ShowNonSerializeAssets data={showInfo.data} onClose={() => setShowInfo({ open: false, data: {}, type: null })} title={showInfo?.type} />
+        <ShowNonSerializeAssets
+          data={showInfo.data}
+          onClose={() => setShowInfo({ open: false, data: {}, type: null })}
+          title={showInfo?.type} />
       )}
       {showConformationConsumeMultiple && (
         <ConfirmationDialog
