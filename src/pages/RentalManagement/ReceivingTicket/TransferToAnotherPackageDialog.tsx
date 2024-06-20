@@ -57,6 +57,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 				const rows: any = []
 				data?.forEach(d => {
 					rows.push(...d?.products?.map(p => ({
+						_id: p?.uniqueId,
 						productName: p?.productName,
 						productId: p?._id,
 						packageName: d?.package?.packageName,
