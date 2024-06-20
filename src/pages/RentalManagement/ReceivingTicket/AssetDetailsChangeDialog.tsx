@@ -19,6 +19,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { read, utils, writeFile } from 'xlsx';
 
 export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, ids, setAssetsData, staticLookUpFilters = {}, productsDefaultData = [] }) {
+
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -44,13 +45,17 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     let values = {};
     let tempAssetData = [];
     const decimalField = [];
+    let i = 0;
     let j = 0;
     let index = null;
     let product = assetData?.length > 0 ? assetData[0]?.product?.optionValue : ''
-    assetData?.forEach((data, i) => {
+
+    assetData?.forEach((data) => {
       if (product !== data?.product?.optionValue) {
         j = 0;
-        index = null
+        i = 0;
+        index = null;
+        product = data?.product?.optionValue;
       }
       let initialValues = getObjKeysWithValues(data, fieldsDataForUpdate);
       if (statusPolicy?.sumDecimalField) {
@@ -64,6 +69,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       }
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
+
       const assetDefaultData = productsDefaultData?.find((e) => e.materialId === data?.product?.optionValue)?.assetDefaultData;
       if (!index) {
         index = assetDefaultData?.length > 0 ? assetDefaultData[0]?.qty : null
@@ -71,6 +77,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       if (index === i) {
         j = j + 1;
         index = index + assetDefaultData[j]?.qty
+        i = 0;
       }
 
       if (assetDefaultData?.length > 0) {
@@ -91,6 +98,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
         }
       }
       tempAssetData.push(initialValues);
+      i = i + 1
     });
     values['assetData'] = tempAssetData;
     setDecimalFields(decimalField);
