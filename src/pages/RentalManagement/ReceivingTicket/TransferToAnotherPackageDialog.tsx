@@ -55,8 +55,9 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 			.patch(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/package-similar-product`, selectedAssets?.map(r => ({ asset: r?._id, _id: r?.uniqueId })))
 			.then(({ data: { data } }) => {
 				const rows: any = []
-				data?.forEach(d => {
+				data?.forEach((d, i) => {
 					rows.push(...d?.products?.map(p => ({
+						_id: p?.uniqueId,
 						productName: p?.productName,
 						productId: p?._id,
 						packageName: d?.package?.packageName,
