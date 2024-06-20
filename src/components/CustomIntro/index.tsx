@@ -36,8 +36,8 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
               }}
               content={<div className="z-[3] p-1 text-gray-600 dark:text-gray-300">{step.content}</div>}
               styles={{
-                container: { background: 'var(--dark-primary, white)', color: 'var(--primary-text)', zIndex: '3', padding: '8px', borderRadius: 5 },
-                arrow: { fill: 'var(--dark-primary, white)' },
+                container: { background: 'var(--dark-secondary, white)', color: 'var(--primary-text)', zIndex: '3', padding: '8px', borderRadius: 5 },
+                arrow: { fill: 'var(--dark-secondary, white)' },
                 title: { color: 'var(--primary-text)', borderBottom: '1px solid var(--common-border-color)', fontWeight: 600 },
                 close: { display: 'none' }
               }}
