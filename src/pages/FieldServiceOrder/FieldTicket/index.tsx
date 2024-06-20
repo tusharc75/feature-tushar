@@ -179,10 +179,7 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
       .put(`${routes.fieldTicket.path}/remove`, { ids: deleteRecord })
       .then(() => {
         fetchData();
-        const isAllFieldTicketClosed = dataRows?.filter((ele)=> !deleteRecord.includes(ele._id)).every((ele)=> ele?.status===FIELD_TICKET_STATUS.closed);
-        if(isAllFieldTicketClosed){
-          fetchServiceOrderData();
-        }
+        fetchServiceOrderData()
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
       })
@@ -339,9 +336,8 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
           onSuccess={() => {
             if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
               handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
-            }else {
-              fetchServiceOrderData();
             }
+             fetchServiceOrderData();
             setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
           }}
