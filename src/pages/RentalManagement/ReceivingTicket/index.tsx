@@ -2343,6 +2343,7 @@ const ReceivingTicket = ({
           }}
           selectedAssets={selectedRecords}
           rentalManagementData={rentalManagementData}
+          assetPolicyData={assetPolicyData}
         />
       )}
     </>
