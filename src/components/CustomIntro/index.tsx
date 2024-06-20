@@ -80,7 +80,8 @@ type CustomIntroWrapperProps = {
   title: ReactNode;
   content: ReactNode;
   disabled?: boolean;
-} & HTMLAttributes<HTMLSpanElement>;
+  children: ReactNode;
+};
 
 export const CustomIntroWrapper = ({ title, content, disabled, children, ...rest }: CustomIntroWrapperProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
