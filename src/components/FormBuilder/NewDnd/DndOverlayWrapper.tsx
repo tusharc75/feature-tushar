@@ -41,7 +41,7 @@ const DndOverlayWrapper = () => {
 
   return (
     <>
-      <DragOverlay>
+      <DragOverlay adjustScale={false}>
         {activeSection && (
           <span className=" [&_.drag-handle]:!cursor-grabbing">
             <SingleSection {...activeSection} />
