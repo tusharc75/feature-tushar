@@ -89,7 +89,7 @@ const PRODUCT_FILTERS = [
   }
 ];
 
-function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
+function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }) {
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
 
@@ -240,6 +240,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource }) {
 
   const fetchData = () => {
     const queryString = getQueryString();
+    setQueryString(queryString);
     axiosInstance()
       .get(`/planning-view${queryString}`)
       .then(({ data: { data } }) => {
