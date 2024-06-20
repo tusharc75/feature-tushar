@@ -80,6 +80,7 @@ export const rentalManagementMessage = {
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
     serviceAlreadyStarted: 'Service already in progress',
     serviceNotstarted: 'Service not started yet',
+    serviceCannotbeSelect: `Service cannot be select for this action`
 };
 
 export const subleaseActions = {
