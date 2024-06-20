@@ -1731,8 +1731,9 @@ const ReceivingTicket = ({
             disabled={
               selectedRecords?.length === 0 ||
               isOffline ||
-              selectedRecords?.some((f) => f.type === 'Product') ||
-              selectedRecords?.some((f) => [ASSET_STATUS.lost].includes(f.status))
+              selectedRecords?.some((f) => f.type === 'Product' || f.type === MATERIAL_TYPE.service) ||
+              selectedRecords?.some((f) => [ASSET_STATUS.lost, ASSET_STATUS.delivered,
+              ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.inTransit].includes(f.status))
             }
             size="small"
             onClick={handleClick}
