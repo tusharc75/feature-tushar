@@ -11,6 +11,7 @@ import ListView from './List';
 import { FormatListNumbered } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DateRangeIcon from '@material-ui/icons/DateRange';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const PLANNING_RESOURCE = [
   {
@@ -143,6 +144,7 @@ function PlanningView() {
 
   const [resourceList, setResourceList] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
+  const [queryString, setQueryString] = useState(null);
 
   const [view, setView] = useState('calendar');
 
@@ -170,6 +172,15 @@ function PlanningView() {
           <Box className="nav-v1">
             <CustomBreadCrumbs routes={[{ title: routes.planningView.title, path: routes.planningView.path }]} />
           </Box>
+          <ImportExportLinks
+            permissions={permissions?.planningView}
+            module={routes.planningView.title}
+            api={routes.planningView.path}
+            afterImportCompleted={() => { }}
+            onExportToExcelSuccess={() => { }}
+            additionalParams={queryString}
+            onlyExport={true}
+          />
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px] ">
@@ -189,9 +200,9 @@ function PlanningView() {
             </HtmlTooltip>
           </div>
           {view === 'calendar' ? (
-            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
+            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString}/>
           ) : (
-            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} />
+            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString}/>
           )}
         </Box>
       </Box>
