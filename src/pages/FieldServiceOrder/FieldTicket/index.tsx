@@ -23,13 +23,13 @@ import { camelCase } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
 import { FiExternalLink } from 'react-icons/fi';
 
-const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource, enableGlobalSearch = true }) => {
+const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource, enableGlobalSearch = true }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const renderedFrom = camelCase(routes?.fieldTicket.title);
 
   const { state, dispatch } = useTableReducer();
-  const { selectedRecords } = state;
+  const { selectedRecords, dataRows } = state;
   const { generateColumns } = useColumns();
 
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
@@ -179,6 +179,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
       .put(`${routes.fieldTicket.path}/remove`, { ids: deleteRecord })
       .then(() => {
         fetchData();
+        fetchServiceOrderData()
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
       })
@@ -336,6 +337,7 @@ const FieldTicket = ({ serviceOrderData, setNextStep, allowedToEdit, handleChang
             if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
               handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
             }
+             fetchServiceOrderData();
             setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
           }}
