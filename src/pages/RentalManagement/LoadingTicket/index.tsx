@@ -1170,7 +1170,8 @@ const LoadingTicket = ({
               selectedRecords.length === 0 ||
               selectedRecords?.some((f) => f.type === 'Product') ||
               isOffline ||
-              selectedRecords?.some((f) => [ASSET_STATUS.lost].includes(f.status))
+              selectedRecords?.some((f) => [ASSET_STATUS.lost, ASSET_STATUS.delivered,
+              ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.inTransit].includes(f.status))
             }
             size="small"
             onClick={handleClick}
