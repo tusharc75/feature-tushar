@@ -80,7 +80,7 @@ const DynamicFormDetail = () => {
       let isAllowedToEdit = true;
       let isAllowedToDelete = true;
       if (data.hasOwnProperty('collaborator') || data.hasOwnProperty('owner')) {
-        isAllowedToEdit = checkIsAllowedToEdit(user, resource, data)
+        isAllowedToEdit = checkIsAllowedToEdit(user, resource, data);
         isAllowedToDelete = data.owner.optionValue === user?.user?._id;
       }
       setAllowedToEdit(isAllowedToEdit);

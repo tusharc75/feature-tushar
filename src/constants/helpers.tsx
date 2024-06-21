@@ -26,6 +26,10 @@ import { stepIconInterface } from 'src/components/Steps/icons';
 import { v4 as uuid } from 'uuid';
 import mimeDb from 'mime-db';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
+import axiosInstance from 'src/axios/axiosInstance';
+import { ClassValue } from 'clsx';
+import clsx from 'clsx';
+import { twMerge } from 'tailwind-merge';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -188,7 +192,6 @@ export const serviceOrderSteps: stepInterface[] = [
 
 export const subcontractAssemblySteps: stepInterface[] = [
   { name: 'Add', title: 'Add', icon: 'add' },
-  { name: 'Assign', title: 'Assign', icon: 'assign' },
   { name: 'Loading', title: 'Loading', icon: 'ticket' },
   { name: 'Receiving', title: 'Receiving', icon: 'ticket' }
 ];
@@ -327,7 +330,6 @@ export const sidebarResource = {
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
   quotation: 'Quotation',
   serviceMaster: 'Service Master',
-  leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
   fieldServiceOrder: 'Field Service Order',
@@ -387,7 +389,8 @@ export const sidebarResource = {
   units: 'Units',
   resourceDoaRequest: 'Resource Doa Request',
   workOrderPlanning: 'Work Order Planning',
-  subcontractAssembly: 'Subcontract Assembly'
+  subcontractAssembly: 'Subcontract Assembly',
+  managedPackages: 'Managed Packages'
 };
 
 export const primaryFields = {
@@ -476,7 +479,6 @@ export const RESOURCE_LABEL = {
   cycleCountPhysicalInventory: 'Cycle Count Physical Inventory',
   quotation: 'Quotation',
   serviceMaster: 'Service Master',
-  leadTimeMaster: 'Lead Time Master',
   repairOrder: 'Repair Order',
   productionOrder: 'Production Order',
   fieldServiceOrder: 'Field Service Order',
@@ -529,7 +531,8 @@ export const RESOURCE_LABEL = {
   userAttendance: 'User Attendance',
   dataList: 'Data List',
   dataListitems: 'Data List Items',
-  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request'
+  serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
+  managedPackages: 'Managed Packages'
 };
 
 export const CHILD_RESOURCE = {
@@ -905,12 +908,6 @@ export const serviceMaster = {
   route: '/service-master',
   permission: 'Service Master',
   resource: 'Service Master'
-};
-export const leadTimeMaster = {
-  api: '/lead-time-master',
-  route: '/lead-time-master',
-  permission: 'Lead Time Master',
-  resource: 'Lead Time Master'
 };
 
 export const workOrder = {
@@ -2006,7 +2003,8 @@ export const ASSET_STATUS = {
   inRepair: 'In-Repair',
   customerPossession: 'Customer Possession',
   onPO: 'On PO',
-  notApplied: 'N/A'
+  notApplied: 'N/A',
+  scrapRequested: 'Scrap Requested'
 };
 
 export const ASSET_NUMBER_TYPE = {
@@ -2239,7 +2237,6 @@ export const LOG_RESOURCE = {
   zone: sidebarResource.zone,
   eCommercePolicy: sidebarResource.eCommercePolicy,
   productAuction: sidebarResource.productAuction,
-  leadTimeMaster: sidebarResource.leadTimeMaster,
   irtTicket: sidebarResource.irtTicket,
   purchaseOrder: sidebarResource.purchaseOrder,
   rentalManagement: sidebarResource.rentalManagement,
@@ -2455,6 +2452,12 @@ export const REPORT_LIST = [
     permission: 'invoice',
     key: 'invoice',
     type: 'dynamic'
+  },
+  {
+    title: 'Lost Assets',
+    permission: 'serializedAsset',
+    key: 'standardReport',
+    type: 'lostAssets'
   },
   {
     title: 'Purchase Order Details',
@@ -3116,7 +3119,7 @@ export const DEAL_STAGE = {
 };
 
 export const cloneResourceData = (fromFields, toFields, data, currency) => {
-  const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName));
+  const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type));
   const result: any = {};
   overlappingFields?.forEach((e) => {
     let fieldName = e?.fieldName;
@@ -3313,7 +3316,20 @@ export const colSpans = [
   'col-span-9',
   'col-span-10',
   'col-span-11',
-  'col-span-12'
+  'col-span-12',
+
+  'md:col-span-1',
+  'md:col-span-2',
+  'md:col-span-3',
+  'md:col-span-4',
+  'md:col-span-5',
+  'md:col-span-6',
+  'md:col-span-7',
+  'md:col-span-8',
+  'md:col-span-9',
+  'md:col-span-10',
+  'md:col-span-11',
+  'md:col-span-12'
 ];
 
 export const getFileIconSrc = (file) => {
@@ -3339,3 +3355,32 @@ export const getFileIconSrc = (file) => {
   }
   return FileIcon;
 };
+
+export const checkIfSynching = async (setToFalse = false) => {
+  try {
+    let api = `user/update-synching-status`;
+    if (setToFalse) {
+      api += `?setToFalse=true`;
+    }
+    const { data } = await axiosInstance().post(api);
+    return data?.data;
+  } catch (error) { }
+};
+
+export const columnSize = (type) => {
+  if (['imageUpload', 'fileUpload', 'multiImageUpload', 'multiFileUpload', 'counter', 'description'].includes(type)) {
+    return 'col-span-12';
+  }
+  return 'col-span-6';
+};
+
+export const gridSize = (type) => {
+  if (['imageUpload', 'fileUpload', 'multiImageUpload', 'multiFileUpload', 'counter', 'description'].includes(type)) {
+    return 12;
+  }
+  return 6;
+};
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}

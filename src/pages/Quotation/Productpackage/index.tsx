@@ -31,15 +31,16 @@ import {
   SERVICE_TYPE,
   pricingCondition,
   quotation,
+  sidebarResource,
   supplierContact
 } from '../../../constants/helpers';
 import AskSupplierPriceDialog from './AskSupplierPriceDialog';
-import LeadTimeDialog from './LeadTimeDialog';
 import PriceRequestDialog from './PriceRequestDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 
 const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, renderedFrom, stepFullScreen, version, allowedToEdit, updateDOASetup }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -201,22 +202,18 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           </div>
         )
       },
-      ...(permissions?.leadTimeMaster
-        ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div> {(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)} </div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows
-                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <div>{total}</div>;
-            }
-          }
-        ]
-        : []),
+      {
+        accessor: 'leadTime',
+        Header: 'Lead Time (Days)',
+        Cell: ({ row }) => <div> {(row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0)} </div>,
+        Footer: (info) => {
+          let rows = info.table.getExpandedRowModel().rows;
+          const total = rows
+            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+          return <div>{total}</div>;
+        }
+      },
       {
         accessor: 'description',
         Header: 'Description',
@@ -256,7 +253,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
           )}
           {!row.original.hideSelection && (
             <>
-              {row.original.type !== MATERIAL_TYPE.serializedAsset && permissions?.leadTimeMaster && (
+              {row.original.type !== MATERIAL_TYPE.serializedAsset && (
                 <IconButton
                   size="small"
                   aria-label="Details"
@@ -839,6 +836,36 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
     );
   };
 
+  const handleSaveLeadTime = (data) => {
+    setSubmitting(true)
+    const value = {
+      leadTime: data?.steps || [],
+      _id: leadTimeDialog?.data?._id
+    };
+    let api = '';
+    if (quotationData?.type === 'Manual Entry') {
+      api = `${quotation.api}/additionalcost/${quotationData?._id}/${versionId}/lead-time`
+    } else {
+      api = `${quotation.api}/productpackage/${quotationData?._id}/${versionId}/lead-time`
+    }
+    axiosInstance()
+      .put(api, value)
+      .then((res) => {
+        setSubmitting(false);
+        setLeadTimeDialog({ open: false, data: null });
+        fetchData()
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Lead time updated successfully'
+        });
+      })
+      .catch((err) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(err);
+      });
+  }
+
   return (
     <Fragment>
       <DetailsPageHeader
@@ -984,17 +1011,22 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
         />
       )}
       {leadTimeDialog.open && (
-        <LeadTimeDialog
-          quotationId={quotationData._id}
-          data={leadTimeDialog?.data}
-          versionId={versionId}
+        <ManageLeadTime
           onClose={() => {
             setLeadTimeDialog({ open: false, data: null });
           }}
-          handleSucess={() => {
-            setLeadTimeDialog({ open: false, data: null });
-            fetchData();
+          onSuccess={(data) => {
+            handleSaveLeadTime(data)
           }}
+          referenceType={sidebarResource.quotation}
+          referenceId={null}
+          referenceData={leadTimeDialog?.data}
+          referenceLabel={leadTimeDialog?.data?.detail ||
+            leadTimeDialog?.data?.productDetail?.productName ||
+            leadTimeDialog?.data?.serviceDetail?.serviceName ||
+            leadTimeDialog?.data?.packageDetail?.packageName ||
+            'Lead Time Status'}
+          loading={isSubmitting}
         />
       )}
       {addchildDialog.open && (

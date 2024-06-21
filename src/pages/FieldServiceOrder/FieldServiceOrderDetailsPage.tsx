@@ -141,6 +141,8 @@ const ServiceOrderDetailsPage = () => {
         ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setServiceOrderData(data);
+      let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !=='Field Ticket Invoice');
+      setSteps(fieldServiceSteps)
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(steps?.length - 1);
       } else {
@@ -320,6 +322,7 @@ const ServiceOrderDetailsPage = () => {
                 allowedToEdit={allowedToEdit}
                 handleChangeStatus={handleChangeStatus}
                 resource={sidebarResource.fieldServiceOrder}
+                fetchServiceOrderData={fetchServiceOrderData}
               />
             )}
             {/* {steps[currentStep]?.name === steps[1]?.name && serviceOrderData && (

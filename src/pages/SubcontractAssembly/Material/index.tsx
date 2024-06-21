@@ -13,12 +13,12 @@ import { DetailsPageHeader } from "src/components/PageHeaders";
 import { CHILD_RESOURCE, MATERIAL_TYPE, SUBCONTRACT_ASSEMBLY_STATUS } from "src/constants/helpers";
 import EditIcon from '@material-ui/icons/Edit';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { ownerAndColaborator } from "src/constants/messageHelpers";
 import axiosInstance from "src/axios/axiosInstance";
 import AssignProductDialog from "src/components/AssignRolesDialog/AssignProductDialog";
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from "src/pages/SubcontractAssembly/Material/MaterialDialog";
 import { FiExternalLink } from "react-icons/fi";
+import Consumables from "src/pages/SubcontractAssembly/Material/Consumables";
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
 	const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
@@ -35,6 +35,8 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 	const [deleteData, setDeleteData] = useState(null);
 	const [isDeleting, setDeleting] = useState(false);
 	const [openMaterialDialog, setOpenMaterialDialog] = useState({ open: false, data: null })
+	const [material, setMaterial] = useState([]);
+	const [productFields, setProductFields] = useState(null);
 
 	useEffect(() => {
 		fetchFields();
@@ -46,108 +48,129 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 		}
 	}, [columns]);
 
+	const fetchProductFields = async () => {
+		let fields;
+		const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
+		fields = response?.data?.data;
+
+		return fields?.find((e) => e.resource === 'Product')?.fieldNames || []
+	};
+
 	const fetchFields = async () => {
 		var data = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyMaterial, subcontractAssemblyData?.currency, allowedToEdit);
 		setAllFields(JSON.parse(JSON.stringify(data)));
 		const newColumns = generateColumns(renderedFrom, data, null, false, subcontractAssemblyData?.currency);
-		let column: any = [
+
+		const column: any = [
 			{
 				accessor: 'index',
 				Header: 'Index',
 				width: 70,
 				sticky: 'left',
-				Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+				cell: ({ row }) => <p className="text-truncate">{row?.original?.index}</p>,
 				Footer: () => {
 					return <>Total</>;
 				}
-			},
-			{
-				accessor: 'detail',
-				Header: 'Details',
-				minWidth: 300,
-				width: 300,
-				disabled: true,
-				sticky: isMobile || isTablet ? 'none' : 'left',
-				Cell: ({ row }) => (
-					row.original.detail ? (
-						<div className="flex items-center gap-1">
-							<p
-								onClick={() => {
-									setOpenMaterialDialog({ open: true, data: row?.original })
-								}}
-								className="link text-truncate"
-								title={row.original.detail}
-							>
-								{row.original.detail}
-							</p>
+			}
+		];
+
+		const productFields = await fetchProductFields()
+		setProductFields(JSON.parse(JSON.stringify(productFields)))
+
+		productFields?.forEach((e) => {
+			if (e?.fieldName === 'productName') {
+				column.push({
+					accessor: e?.fieldName,
+					Header: e?.fieldLabel,
+					width: 200,
+					disabled: true,
+					sticky: isMobile || isTablet ? 'none' : 'left',
+					primaryField: true,
+					cell: ({ row, table }) => (
+						<div className="flex items-center gap-2">
+							{!allowedToEdit || subcontractAssemblyData?.quotation ? (
+								<p>{row?.original[e?.fieldName]}</p>
+							) : (
+								<p
+									onClick={() => {
+										setOpenMaterialDialog({ open: true, data: row?.original })
+									}}
+									className="link text-truncate"
+										title={row?.original[e?.fieldName]}
+								>
+									{row?.original[e?.fieldName]}
+								</p>
+							)}
 							<IconButton
 								size="small"
 								onClick={() => {
-									window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+									window.open(`${routes.productDetail.path}/${row.original?.materialId}`);
 								}}
 							>
 								<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
 							</IconButton>
-						</div >
-					) : (
-						<NoDataCell />
+						</div>
 					)
-				)
-			},
-			{
-				accessor: 'description',
-				Header: 'Description',
-				width: 200,
-				Cell: ({ row }) => {
-					return row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />;
-				}
-			},
-		];
-		column = [...column, ...newColumns];
-		column.push({
-			accessor: 'action',
-			Header: 'Actions',
-			minWidth: 100,
-			width: 100,
-			sticky: 'right',
-			disableFilters: true,
-			disableSortBy: true,
-			canDrag: false,
-			Cell: ({ row, table }) => {
-				return (
-					<>
-						<HtmlTooltip title={allowedToEdit ? 'Edit' : ownerAndColaborator}>
-							<IconButton
-								size="small"
-								aria-label="Edit"
-								disabled={!allowedToEdit}
-								onClick={() => {
-									setOpenMaterialDialog({ open: true, data: row?.original })
-								}}
-							>
-								<EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-							</IconButton>
-						</HtmlTooltip>
-						<HtmlTooltip title={row?.original?.canDelete ? 'Delete' : ''}>
-							<span>
-								<IconButton
-									size="small"
-									aria-label="Delete"
-									disabled={!allowedToEdit || !row?.original?.canDelete}
-									onClick={() => {
-										const obj: any = [{ id: row.original._id, materialId: row.original?.materialId }];
-										setDeleteData(obj);
-									}}
-								>
-									<DeleteIcon fontSize="small" color={!allowedToEdit || !row?.original?.canDelete ? 'disabled' : 'error'} />
-								</IconButton>
-							</span>
-						</HtmlTooltip>
-					</>
-				);
+				});
+			} else {
+				column.push({
+					accessor: e?.fieldName,
+					Header: e?.fieldLabel,
+					width: 200,
+					cell: ({ row }) => {
+						return row.original[e?.fieldName] ? <p className="text-truncate">{row.original[e?.fieldName]}</p> : <NoDataCell />;
+					}
+				});
 			}
 		});
-		setColumns(column);
+
+		const extracolumns: any = [
+			...newColumns,
+			{
+				accessor: 'action',
+				Header: 'Actions',
+				minWidth: 100,
+				width: 100,
+				sticky: 'right',
+				disableFilters: true,
+				disableSortBy: true,
+				canDrag: false,
+				Cell: ({ row, table }) => {
+					return (
+						<>
+							<HtmlTooltip title={'Edit'}>
+								<IconButton
+									size="small"
+									aria-label="Edit"
+									onClick={() => {
+										setOpenMaterialDialog({ open: true, data: row?.original })
+									}}
+								>
+									<EditIcon fontSize="small" color={'primary'} />
+								</IconButton>
+							</HtmlTooltip>
+							<HtmlTooltip title={'Delete'}>
+								<span>
+									<IconButton
+										size="small"
+										aria-label="Delete"
+										disabled={!row?.original?.canDelete}
+										onClick={() => {
+											const obj: any = [{ id: row.original._id, materialId: row.original?.materialId }];
+											setDeleteData(obj);
+										}}
+									>
+										<DeleteIcon fontSize="small" color={!row?.original?.canDelete ? 'disabled' : 'error'} />
+									</IconButton>
+								</span>
+							</HtmlTooltip>
+						</>
+					);
+				}
+			}
+		];
+
+		setColumns([...column, ...extracolumns]);
 	};
 
 	const fetchMaterial = async () => {
@@ -157,12 +180,14 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 		let data;
 		const response = await axiosInstance().get(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`);
 		data = response?.data?.data?.material;
+		setMaterial(JSON.parse(JSON.stringify(data)))
 		let rows = data?.filter((d: any) => !d.parentId);
 		rows.forEach((parent, i) => {
 			parent.index = i + 1;
-			parent.detail = parent.productDetail?.productName || '';
-			parent.description = parent.productDetail?.productDescription || '';
-			parent.canDelete = parent.canDelete ?? true;
+			parent.canDelete = data?.some((e) => e.parentId === parent._id) ? false : true;
+			parent.productName = parent?.productDetail?.productName;
+			parent.productDescription = parent?.productDetail?.productDescription;
+			parent.productNumber = parent?.productDetail?.productNumber;
 			parent.hideSelection = parent?.receivedQty > 0 || false;
 		});
 		if (rows?.length) {
@@ -189,20 +214,18 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 	const ActionButtonMenuItms = () => {
 		return (
 			<>
-				<HtmlTooltip title={Boolean(selectedRecords?.length) ? 'Delete selected records' : 'Select records to delete'}>
-					<MenuItem
-						disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
-						onClick={() => {
-							const obj: any = [];
-							selectedRecords?.forEach((ele) => {
-								obj.push({ id: ele._id, materialId: ele.materialId });
-							});
-							setDeleteData(obj);
-						}}
-					>
-						Delete
-					</MenuItem>
-				</HtmlTooltip>
+				<MenuItem
+					disabled={isDeleting || selectedRecords.some((ele) => !ele?.canDelete)}
+					onClick={() => {
+						const obj: any = [];
+						selectedRecords?.forEach((ele) => {
+							obj.push({ id: ele._id, materialId: ele.materialId });
+						});
+						setDeleteData(obj);
+					}}
+				>
+					Delete
+				</MenuItem>
 			</>
 		);
 	};
@@ -270,28 +293,26 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 
 	return (
 		<>
-			{allowedToEdit && (
-				<>
-					<DetailsPageHeader
-						isAddButtonVisible={true}
-						addButtonMenuItems={<AddButtonMenuItems />}
-						isActionButtonVisible={true}
-						actionButtonMenuItems={<ActionButtonMenuItms />}
-						actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
-						hasXpadding
-					/>
-				</>
-			)}
+			<DetailsPageHeader
+				isAddButtonVisible={allowedToEdit}
+				addButtonMenuItems={<AddButtonMenuItems />}
+				isActionButtonVisible={allowedToEdit}
+				actionButtonMenuItems={<ActionButtonMenuItms />}
+				actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
+				hasXpadding
+			/>
 			{columns ? (
 				<Box zIndex={5} width={'100%'}>
 					<CustomReactTable
-						height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+						height={stepFullScreen ? 'calc(100vh - 300px)' : '300px'}
 						columns={columns}
 						state={state}
 						dispatch={dispatch}
 						renderedFrom={renderedFrom}
 						isClientSideGrid={true}
 						refreshGrid={fetchMaterial}
+						hideSelection={!allowedToEdit}
+						hideAction={!allowedToEdit}
 					/>
 				</Box>
 			) : (
@@ -299,6 +320,19 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
 					<CommonSkeleton lenArray={[...Array(10).keys()]} />
 				</Box>
 			)}
+			<Box mt={3}>
+				{productFields && (
+					<Consumables
+						allowedToEdit={allowedToEdit}
+						products={dataRows}
+						subcontractAssemblyData={subcontractAssemblyData}
+						fetchMaterial={fetchMaterial}
+						stepFullScreen={stepFullScreen}
+						material={material}
+						productFields={productFields}
+					/>
+				)}
+			</Box>
 			{open.open && open.type === MATERIAL_TYPE.product && (
 				<AssignProductDialog
 					handleCloseDialog={() => setOpen({ open: false, type: '' })}

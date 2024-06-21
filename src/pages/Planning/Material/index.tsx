@@ -2,7 +2,6 @@ import { Box, IconButton, MenuItem } from '@material-ui/core';
 import { Add } from '@material-ui/icons';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -22,10 +21,10 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { ASSET_STATUS, CHILD_RESOURCE, MATERIAL_TYPE, sidebarResource } from 'src/constants/helpers';
 import MaterialDialog from './materialDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData, setReserveAssetWarning }) => {
   const {
@@ -86,12 +85,12 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === MATERIAL_TYPE.package
-                ? row.original?.packageDetail?.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === MATERIAL_TYPE.service
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail?.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === MATERIAL_TYPE.service
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </Box>
           </div>
         )
@@ -104,7 +103,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row, table }) => (
-          <div style={{ display: 'flex', alignItems: 'center' }}>
+          <div className="flex items-center gap-2">
             {allowedToEdit && row.original.type !== MATERIAL_TYPE.serializedAsset ? (
               <p
                 onClick={() => {
@@ -120,10 +119,10 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             )}
             {row.original.type === MATERIAL_TYPE.package && allowedToEdit && (
               <>
-                <Box ml={1}>
+                <Box>
                   <span>({row.original?.subRows?.length})</span>
                 </Box>
-                <Box ml={1}>
+                <Box>
                   <HtmlTooltip title="Add Product">
                     <IconButton
                       onClick={() => {
@@ -137,24 +136,23 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
                 </Box>
               </>
             )}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === MATERIAL_TYPE.service) {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <OpenInNewIcon fontSize="small" color="primary" />
-              </IconButton>
-            </Box>
+
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === MATERIAL_TYPE.service) {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.product) {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.serializedAsset) {
+                  window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -225,14 +223,14 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
           : parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.serviceDetail?.serviceName;
+            ? parent.packageDetail?.packageName
+            : parent.serviceDetail?.serviceName;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription
           : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription
-          : parent?.serviceDetail?.serviceDescription;
+            ? parent?.packageDetail?.packageDescription
+            : parent?.serviceDetail?.serviceDescription;
       parent.qty = parent.qty;
       parent.assetQty = data.material?.filter((i) => i.parentId === parent._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       parent.hideSelection = false;
@@ -268,24 +266,24 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow.productDetail?.productName
           : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? _subRow.assetDetail.assetNumber
-          : _subRow.serviceDetail?.serviceName;
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow.assetDetail.assetNumber
+              : _subRow.serviceDetail?.serviceName;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
           : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription
-          : _subRow.type === MATERIAL_TYPE.serializedAsset
-          ? parent.description
-          : _subRow?.serviceDetail?.serviceDescription;
+            ? _subRow?.packageDetail?.packageDescription
+            : _subRow.type === MATERIAL_TYPE.serializedAsset
+              ? parent.description
+              : _subRow?.serviceDetail?.serviceDescription;
       _subRow.qty = _subRow.qty;
       _subRow.assetQty = material?.filter((i) => i.parentId === _subRow._id && i.type === MATERIAL_TYPE.serializedAsset)?.length;
       _subRow.hideSelection = false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
-    for(const _subRow of subRows) {
+    for (const _subRow of subRows) {
       let assetStatus = _subRow?.assetDetail?.status;
       if (planningData?.type === 'Rental Job' && _subRow.type === MATERIAL_TYPE.serializedAsset && assetStatus !== ASSET_STATUS.new && assetStatus !== ASSET_STATUS.available && assetStatus !== ASSET_STATUS.underReview) {
         setReserveAssetWarning(true);

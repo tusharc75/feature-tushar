@@ -1,6 +1,6 @@
 import React, { createContext, useEffect, useState } from 'react';
 import axiosInstance from '../../axios/axiosInstance';
-import { deliveryTicket, rentalManagement, asyncForEach } from '../../constants/helpers';
+import { deliveryTicket, rentalManagement, asyncForEach, checkIfSynching } from '../../constants/helpers';
 import { objectStore, findAll, deleteOne, setUpindexDB, deleteMany } from '../../constants/indexdbhelper';
 import { rentalJobOfflineUpdate } from '../../pages/RentalManagement/rentalOfflineHelper';
 import { sortBy } from 'lodash';
@@ -42,81 +42,83 @@ export const CustomOfflineProvider = ({ children }) => {
   });
 
   const synchronizationData = async () => {
-    if (localStorage.getItem('isSynchronizationData') === 'true') {
-      return false;
-    }
-    if (!isOffline) {
-      await setUpindexDB();
-      var data = await findAll(objectStore.offlineDataSync);
-      if (data?.length) {
-        localStorage.setItem('isSynchronizationData', 'true');
-        setIsSynch(true);
-        var OrderBy = ['Loading', 'Receiving'];
-        data = sortBy(data, function (item: any) {
-          return OrderBy.indexOf(item?.data?.ticketType);
-        });
-        await asyncForEach(data, async (d: any) => {
-          if (d?.type === 'deliveryTicket') {
-            await axiosInstance()
-              .post(`${deliveryTicket.api}/offlinedatasync`, d.data)
-              .then(({ data: { data } }) => {
-                deleteOne(objectStore.offlineDataSync, d.data._id);
-                deleteOne(objectStore.deliveryTicket, d.data._id);
-              })
-              .catch((error) => { });
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-          }
-          if (d?.type === 'assets') {
-            d.data?.forEach((ele) => {
-              delete ele.status;
-            });
-            await axiosInstance()
-              .post(`${rentalManagement.api}/${d._id}/inventory/sync-assets`, d.data)
-              .then(({ data: { data } }) => {
-                deleteOne(objectStore.offlineDataSync, d._id);
-              })
-              .catch((error) => { });
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-          }
-          if (d?.type === 'fieldTicket') {
-            await axiosInstance().post(`${routes?.fieldTicket?.path}/offlinedatasync`, d.data);
-            deleteOne(objectStore.offlineDataSync, d.data._id);
-            deleteOne(objectStore.fieldTicket, d.data._id);
-            let fieldTicketMaterial = await findAll(objectStore.fieldTicketMaterial);
-            fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
-            deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterial);
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-          }
-          if (d?.type === 'fieldTicketMaterial') {
-            if (d?.data?.length) {
+    try {
+      if (!isOffline) {
+        const canSynch = await checkIfSynching();
+        if(!canSynch) return;
+        await setUpindexDB();
+        var data = await findAll(objectStore.offlineDataSync);
+        if (data?.length) {
+          setIsSynch(true);
+          var OrderBy = ['Loading', 'Receiving'];
+          data = sortBy(data, function (item: any) {
+            return OrderBy.indexOf(item?.data?.ticketType);
+          });
+          await asyncForEach(data, async (d: any) => {
+            if (d?.type === 'deliveryTicket') {
               await axiosInstance()
-                .post(`${routes?.fieldTicket?.path}/${d?._id}/material-offline-data-sync`, d.data)
+                .post(`${deliveryTicket.api}/offlinedatasync`, d.data)
                 .then(({ data: { data } }) => {
-                  let ids = d?.data?.map((e) => e?._id);
-                  deleteMany(objectStore.fieldTicketMaterial, ids);
+                  deleteOne(objectStore.offlineDataSync, d.data._id);
+                  deleteOne(objectStore.deliveryTicket, d.data._id);
                 })
                 .catch((error) => { });
               await new Promise((resolve) => setTimeout(resolve, 2000));
             }
-            deleteOne(objectStore.offlineDataSync, d._id);
-          }
-          if (d?.type === 'fieldTicketMaterialDelete') {
-            await axiosInstance()
-              .post(`${routes?.fieldTicket?.path}/${d?.data?.fieldTicketId}/material-offline-data-sync`, d.data)
-              .then(({ data: { data } }) => {
-                deleteOne(objectStore.offlineDataSync, d._id);
-              })
-              .catch((error) => { });
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-          }
-        });
-        await rentalJobOfflineUpdate([]);
-        localStorage.removeItem('isSynchronizationData');
-        setIsSynch(false);
-      } else {
-        setIsSynch(false);
+            if (d?.type === 'assets') {
+              d.data?.forEach((ele) => {
+                delete ele.status;
+              });
+              await axiosInstance()
+                .post(`${rentalManagement.api}/${d._id}/inventory/sync-assets`, d.data)
+                .then(({ data: { data } }) => {
+                  deleteOne(objectStore.offlineDataSync, d._id);
+                })
+                .catch((error) => { });
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+            if (d?.type === 'fieldTicket') {
+              await axiosInstance().post(`${routes?.fieldTicket?.path}/offlinedatasync`, d.data);
+              deleteOne(objectStore.offlineDataSync, d.data._id);
+              deleteOne(objectStore.fieldTicket, d.data._id);
+              let fieldTicketMaterial = await findAll(objectStore.fieldTicketMaterial);
+              fieldTicketMaterial = fieldTicketMaterial?.filter((e) => e?.fieldTicketId === d?.data?._id)?.map((e) => e?._id);
+              deleteMany(objectStore.fieldTicketMaterial, fieldTicketMaterial);
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+            if (d?.type === 'fieldTicketMaterial') {
+              if (d?.data?.length) {
+                await axiosInstance()
+                  .post(`${routes?.fieldTicket?.path}/${d?._id}/material-offline-data-sync`, d.data)
+                  .then(({ data: { data } }) => {
+                    let ids = d?.data?.map((e) => e?._id);
+                    deleteMany(objectStore.fieldTicketMaterial, ids);
+                  })
+                  .catch((error) => { });
+                await new Promise((resolve) => setTimeout(resolve, 2000));
+              }
+              deleteOne(objectStore.offlineDataSync, d._id);
+            }
+            if (d?.type === 'fieldTicketMaterialDelete') {
+              await axiosInstance()
+                .post(`${routes?.fieldTicket?.path}/${d?.data?.fieldTicketId}/material-offline-data-sync`, d.data)
+                .then(({ data: { data } }) => {
+                  deleteOne(objectStore.offlineDataSync, d._id);
+                })
+                .catch((error) => { });
+              await new Promise((resolve) => setTimeout(resolve, 2000));
+            }
+          });
+          await rentalJobOfflineUpdate([]);
+          setIsSynch(false);
+        } else {
+          setIsSynch(false);
+        }
+        await checkIfSynching(true);
       }
-    }
+    } catch (err) {
+      await checkIfSynching(true);
+    } 
   };
 
   return (

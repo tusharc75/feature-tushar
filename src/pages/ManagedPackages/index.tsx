@@ -6,22 +6,23 @@ import { useContext, useEffect, useState } from 'react';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { ListingPageHeader } from 'src/components/PageHeaders';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, leadTimeMaster, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
-import ManageLeadTimeMaster from './ManageLeadTimeMaster';
+import ManageManagedPackages from './ManageManagedPackages';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const LeadTimeMaster = () => {
-  const renderedFrom = camelCase(routes?.leadTimeMaster.title);
+const ManagedPackages = () => {
+  const renderedFrom = camelCase(routes?.managedPackages.title);
   const toastConfig = useContext(CustomToastContext);
+
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
@@ -49,9 +50,9 @@ const LeadTimeMaster = () => {
 
   const fetchGridColumns = async () => {
     let data;
-    const response = await axiosInstance().get(`/field?resource=${sidebarResource.leadTimeMaster}`);
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.managedPackages}`);
     data = response?.data?.data;
-    const newColumns = generateColumns(renderedFrom, data, routes.leadTimeMasterDetail.path, true);
+    let newColumns = generateColumns(renderedFrom, data, routes.managedPackagesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -59,15 +60,14 @@ const LeadTimeMaster = () => {
     accessor: 'action',
     Header: 'Actions',
     minWidth: 100,
-    width: 110,
-    maxWidth: 110,
+    width: 100,
     sticky: 'right',
     disableFilters: true,
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.leadTimeMaster?.isCreate ? (
+        {permissions?.managedPackages?.isCreate ? (
           <HtmlTooltip title="Clone">
             <IconButton
               size="small"
@@ -86,7 +86,7 @@ const LeadTimeMaster = () => {
             </IconButton>
           </HtmlTooltip>
         )}
-        {permissions?.leadTimeMaster?.isDelete && (
+        {permissions?.managedPackages?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
               size="small"
@@ -136,23 +136,14 @@ const LeadTimeMaster = () => {
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${leadTimeMaster.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
-      .then(({ data: { data, count } }) => {
-        let rows = data.map((u) => {
+      .get(`${routes.managedPackages.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
+        let count = data?.count;
+        let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['allowedToEdit'] = permissions?.leadTimeMaster?.isUpdate;
-          finalObject['canDelete'] = permissions?.leadTimeMaster?.isDelete;
-          // finalObject['owerCollaboratorInitialsOrImages'] = [];
-          // if (finalObject['owner']) finalObject['owerCollaboratorInitialsOrImages'].push({ initials: finalObject['owner'] });
-          // finalObject['owerCollaboratorInitialsOrImages'].forEach((f) => {
-          //   if (f.initials) {
-          //     f.initials = f.initials
-          //       .split(' ')
-          //       .map((i) => i[0])
-          //       .join('');
-          //   }
-          // });
+          finalObject['allowedToEdit'] = permissions?.managedPackages?.isUpdate;
+          finalObject['canDelete'] = permissions?.managedPackages?.isDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -180,7 +171,7 @@ const LeadTimeMaster = () => {
       ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`${leadTimeMaster.api}/remove`, { ids: ids })
+      .put(`${routes.managedPackages.path}/remove`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -193,19 +184,20 @@ const LeadTimeMaster = () => {
         setIsSubmitting(false);
       });
   };
-
+  
   const ActionMenuItems = () => {
     return (
       <>
-        <MenuItem
-          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete === true)?.length) === selectedRecords?.length)}
-          onClick={() => {
-            if (selectedRecords.length === 1) setDeleteRecord(selectedRecords[0]);
-            setShowDeleteConfirmBox(true);
-          }}
-        >
-          {`Delete (${selectedRecords?.length})`}
-        </MenuItem>
+        {selectedRecords?.length > 0 && (
+          <MenuItem
+            disabled={selectedRecords.every((e) => e.canDelete) ? false : true}
+            onClick={() => {
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            {`Delete (${selectedRecords?.length})`}
+          </MenuItem>
+        )}
       </>
     );
   };
@@ -213,11 +205,11 @@ const LeadTimeMaster = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.leadTimeMaster]} />
+        <CustomBreadCrumbs routes={[routes.managedPackages]} />
         <ImportExportLinks
-          permissions={permissions?.leadTimeMaster}
-          module={routes.leadTimeMaster.title}
-          api={leadTimeMaster.api}
+          permissions={permissions?.managedPackages}
+          module={routes.managedPackages.title}
+          api={routes.managedPackages.path}
           afterImportCompleted={() => {
             fetchData();
           }}
@@ -235,15 +227,13 @@ const LeadTimeMaster = () => {
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          isActionButtonVisible={permissions?.leadTimeMaster?.isDelete}
-          actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
+          isActionButtonVisible={true}
+          isAddButtonVisible={true}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
             setShowManageDialog({ open: true, isClone: false, idToClone: null });
           }}
-          isAddButtonVisible={permissions?.leadTimeMaster?.isCreate}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -254,7 +244,7 @@ const LeadTimeMaster = () => {
             refreshGrid={fetchData}
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
-            resource={sidebarResource.leadTimeMaster}
+            resource={sidebarResource.managedPackages}
           />
         ) : (
           <Box p={2} height={500}>
@@ -265,7 +255,7 @@ const LeadTimeMaster = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.leadTimeMaster?.title}: ${deleteRecord?.leadTimeName || ''} ?`}
+          message={`Are you sure you want to delete ${routes?.managedPackages?.title} ${deleteRecord?.managedPackageName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -275,9 +265,9 @@ const LeadTimeMaster = () => {
         />
       )}
       {showManageDialog.open && (
-        <ManageLeadTimeMaster
+        <ManageManagedPackages
           isClone={showManageDialog.isClone}
-          leadTimeMasterId={showManageDialog.idToClone}
+          id={showManageDialog.idToClone}
           onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
           onSuccess={() => {
             fetchData();
@@ -289,4 +279,4 @@ const LeadTimeMaster = () => {
   );
 };
 
-export default LeadTimeMaster;
+export default ManagedPackages;

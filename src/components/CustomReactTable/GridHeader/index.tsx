@@ -70,14 +70,14 @@ const GridHeader = ({
 
   const { savedFilters } = useContext(FiltersContext);
 
-  useEffect(() => {
-    if (customFilters && !selectedFilter) {
-      const newformValues = filtermodelToFormValue(customFilters);
-      if (newformValues) {
-        setCurrentFomValue(newformValues);
-      }
-    }
-  }, [customFilters, selectedFilter]);
+  // useEffect(() => {
+  //   if (customFilters && !selectedFilter) {
+  //     const newformValues = filtermodelToFormValue(customFilters);
+  //     if (newformValues) {
+  //       setCurrentFomValue(newformValues);
+  //     }
+  //   }
+  // }, [customFilters, selectedFilter]);
 
   const handleFilterOpen = () => {
     setIsFilterOpen(true);

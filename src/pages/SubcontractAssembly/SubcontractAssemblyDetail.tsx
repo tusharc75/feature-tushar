@@ -20,7 +20,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import Steps, { getIndex } from "src/components/Steps";
 import ContentFullScreen from "src/components/ContentFullScreen";
 import Material from "src/pages/SubcontractAssembly/Material";
-import Assign from "src/pages/SubcontractAssembly/Assign";
 import LoadingTicket from "src/pages/SubcontractAssembly/LoadingTicket";
 import Receiving from "src/pages/SubcontractAssembly/Receiving"
 import { Skeleton } from "@material-ui/lab";
@@ -160,8 +159,9 @@ const SubcontractAssemblyDetail = () => {
 					<Box className="control-buttons-v1">
 						{subcontractAssemblyData ? (
 							<>
-								{permissions?.subcontractAssembly?.isUpdate &&
-									[SUBCONTRACT_ASSEMBLY_STATUS.inProgress].includes(subcontractAssemblyData?.status) && subcontractAssemblyData?.material?.filter(m => !m?.parentId)?.every(d => d?.receivedQty > 0) && (
+								{permissions?.subcontractAssembly?.isUpdate && allowedToEdit &&
+									[SUBCONTRACT_ASSEMBLY_STATUS.inProgress].includes(subcontractAssemblyData?.status)
+									&& subcontractAssemblyData?.material?.filter(m => !m?.parentId)?.every(d => d?.receivedQty > 0) && (
 										<ButtonWithPulse
 											variant={'outlined'}
 											color="default"
@@ -174,7 +174,6 @@ const SubcontractAssemblyDetail = () => {
 											Close
 										</ButtonWithPulse>
 									)}
-
 								{permissions?.subcontractAssembly?.isUpdate && allowedToEdit && ![SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status) && (
 									<Button variant={isMobile && !isTablet ? 'text' : 'contained'} className="btn-outline-v1" onClick={handleOpenUpdateDialog}>
 										{isMobile && !isTablet ? <Edit /> : 'Edit'}
@@ -198,11 +197,11 @@ const SubcontractAssemblyDetail = () => {
 					<CustomTab value={0}>Header</CustomTab>
 					<CustomTab value={1}>Details</CustomTab>
 					{!(isMobile && !isTablet) && (
-            <CustomTab value={2}>
-              <RiFlowChart className="mr-1" fontSize="inherit" />
-              Views
-            </CustomTab>
-          )}
+						<CustomTab value={2}>
+							<RiFlowChart className="mr-1" fontSize="inherit" />
+							Views
+						</CustomTab>
+					)}
 				</CustomTabs>
 				<TabPanel value={tabValue} index={0}>
 					{loading || !fields?.length ? (
@@ -225,22 +224,35 @@ const SubcontractAssemblyDetail = () => {
 					/>
 					<ContentFullScreen title={subcontractAssemblySteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
 						{currentStep === 0 && subcontractAssemblyData && (
-							<Material subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} handleChangeStatus={handleChangeStatus} fetchParentData={fetchData} />
+							<Material
+								subcontractAssemblyData={subcontractAssemblyData}
+								stepFullScreen={stepFullScreen}
+								allowedToEdit={allowedToEdit}
+								setNextStep={setNextStep}
+								handleChangeStatus={handleChangeStatus}
+								fetchParentData={fetchData} />
 						)}
 						{currentStep === 1 && subcontractAssemblyData && (
-							<Assign subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} allowedToEdit={allowedToEdit} setNextStep={setNextStep} />
+							<LoadingTicket
+								subcontractAssemblyData={subcontractAssemblyData}
+								setNextStep={setNextStep}
+								stepFullScreen={stepFullScreen}
+								allowedToEdit={allowedToEdit}
+							/>
 						)}
 						{currentStep === 2 && subcontractAssemblyData && (
-							<LoadingTicket subcontractAssemblyData={subcontractAssemblyData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
-						)}
-						{currentStep === 3 && subcontractAssemblyData && (
-							<Receiving subcontractAssemblyData={subcontractAssemblyData} stepFullScreen={stepFullScreen} fetchParentData={fetchData} />
+							<Receiving
+								subcontractAssemblyData={subcontractAssemblyData}
+								stepFullScreen={stepFullScreen}
+								fetchParentData={fetchData}
+								allowedToEdit={allowedToEdit}
+							/>
 						)}
 					</ContentFullScreen>
 				</TabPanel>
 				<TabPanel value={tabValue} index={2}>
-          {subcontractAssemblyData && <SubcontractAssemblyView subcontractAssemblyData={subcontractAssemblyData} />}
-        </TabPanel>
+					{subcontractAssemblyData && <SubcontractAssemblyView subcontractAssemblyData={subcontractAssemblyData} />}
+				</TabPanel>
 			</Box>
 			{showConfirmBox && (
 				<ConfirmationDialog

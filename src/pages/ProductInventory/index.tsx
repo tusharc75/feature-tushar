@@ -148,41 +148,41 @@ const InventoryProduct = () => {
     const defaultColumns = [
       ...(!user?.user?.brandPolicy?.hideInventoryCount
         ? [
-            {
-              accessor: 'availableInventory',
-              Header: 'Available Inventory',
-              disableFilters: true,
-              disableSortBy: true,
-              show: true,
-              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
-            },
-            {
-              accessor: 'softHold',
-              Header: 'Soft Hold',
-              disableFilters: true,
-              disableSortBy: true,
-              show: true,
-              Cell: ({ row }) =>
-                row?.original?.softHold ? (
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
-                    <h5 className="text-truncate">{row?.original?.softHold}</h5>
-                    <HtmlTooltip title={`Soft Hold History`}>
-                      <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
-                    </HtmlTooltip>
-                  </div>
-                ) : (
-                  <h5 className="text-truncate">0</h5>
-                )
-            },
-            {
-              accessor: 'purchaseOrderQty',
-              Header: 'On PO',
-              disableFilters: true,
-              disableSortBy: true,
-              show: true,
-              Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
-            }
-          ]
+          {
+            accessor: 'availableInventory',
+            Header: 'Available Inventory',
+            disableFilters: true,
+            disableSortBy: true,
+            show: true,
+            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
+          },
+          {
+            accessor: 'softHold',
+            Header: 'Soft Hold',
+            disableFilters: true,
+            disableSortBy: true,
+            show: true,
+            Cell: ({ row }) =>
+              row?.original?.softHold ? (
+                <div className="flex items-center gap-2">
+                  <h5 className="text-truncate">{row?.original?.softHold}</h5>
+                  <HtmlTooltip title={`Soft Hold History`}>
+                    <InfoIcon className="ml-1 cursor-pointer" fontSize="small" color="primary" onClick={() => infoHandler(row?.original)} />
+                  </HtmlTooltip>
+                </div>
+              ) : (
+                <h5 className="text-truncate">0</h5>
+              )
+          },
+          {
+            accessor: 'purchaseOrderQty',
+            Header: 'On PO',
+            disableFilters: true,
+            disableSortBy: true,
+            show: true,
+            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
+          }
+        ]
         : [])
     ];
     setColumns([...columns, ...defaultColumns, ActionsRenderer]);
@@ -222,12 +222,12 @@ const InventoryProduct = () => {
               !permissions?.productInventory?.isUpdate
                 ? TOOLTIP_MESSAGE.remove
                 : row?.original?.plantId === 'All'
-                ? 'Select Plant'
-                : user?.user?.brandPolicy?.allowNegativeInventory
-                ? 'Remove'
-                : !row?.original?.availableInventory
-                ? 'Inventory not available'
-                : 'Remove'
+                  ? 'Select Plant'
+                  : user?.user?.brandPolicy?.allowNegativeInventory
+                    ? 'Remove'
+                    : !row?.original?.availableInventory
+                      ? 'Inventory not available'
+                      : 'Remove'
             }
           >
             <span>
@@ -239,8 +239,8 @@ const InventoryProduct = () => {
                     ? user?.user?.brandPolicy?.allowNegativeInventory
                       ? false
                       : row?.original?.availableInventory
-                      ? false
-                      : true
+                        ? false
+                        : true
                     : true
                 }
                 onClick={() => {
@@ -254,8 +254,8 @@ const InventoryProduct = () => {
                       ? user?.user?.brandPolicy?.allowNegativeInventory
                         ? 'error'
                         : row?.original?.availableInventory
-                        ? 'error'
-                        : 'disabled'
+                          ? 'error'
+                          : 'disabled'
                       : 'disabled'
                   }
                 />
@@ -303,10 +303,13 @@ const InventoryProduct = () => {
         .get(`${productInventory.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data }) => {
           let rows = data.data?.map((u) => {
-            let finalObject = prepareDataForGrid(u);
+            let finalObject: any = prepareDataForGrid(u);
             finalObject['productId'] = u._id;
             finalObject['plantId'] = plantId;
             finalObject['availableInventory'] = (u?.inventory || 0) - (u?.softHold || 0);
+            if (finalObject['availableInventory'] < 0 && u?.inventory) {
+              finalObject['availableInventory'] = 0;
+            }
             return {
               ...finalObject
             };
@@ -332,17 +335,17 @@ const InventoryProduct = () => {
     let tempPlantId =
       plantId === 'All'
         ? plantOptions
-            .filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+          .filter((d) => d.optionValue !== 'All')
+          .map((d) => d.optionValue)
+          .toString()
         : plantId;
 
     let deepFilter = '';
     if (!isExport) {
-      deepFilter = `?wareHouse=${tempPlantId}`;
+      deepFilter = `?warehouse=${tempPlantId}`;
       deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
     } else {
-      deepFilter = `&wareHouse=${tempPlantId}`;
+      deepFilter = `&warehouse=${tempPlantId}`;
     }
 
     if (storageLocationId) {
@@ -411,7 +414,7 @@ const InventoryProduct = () => {
     }
     axiosInstance()
       .get(api)
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -556,9 +559,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                .filter((d) => d.optionValue !== 'All')
+                .map((d) => d.optionValue)
+                .toString()
               : plantId
           }
         />
@@ -574,9 +577,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                .filter((d) => d.optionValue !== 'All')
+                .map((d) => d.optionValue)
+                .toString()
               : plantId
           }
           storageLocation={storageLocationId}
@@ -592,9 +595,9 @@ const InventoryProduct = () => {
           warehouse={
             plantId === 'All'
               ? plantOptions
-                  .filter((d) => d.optionValue !== 'All')
-                  .map((d) => d.optionValue)
-                  .toString()
+                .filter((d) => d.optionValue !== 'All')
+                .map((d) => d.optionValue)
+                .toString()
               : plantId
           }
         />

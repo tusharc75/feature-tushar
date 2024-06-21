@@ -22,7 +22,7 @@ const AddRentalDataDialog = ({
   type,
   isSubmitting = false,
   currency,
-  ids = []
+  ids = [],
 }) => {
 
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Rental_Material`;
@@ -47,6 +47,7 @@ const AddRentalDataDialog = ({
   const fetchFields = async () => {
     var data = [];
     data = await fetch_rental_product_fields(currency, false);
+    data = data?.filter((f) => f?.isRead);
     setAllFields(JSON.parse(JSON.stringify(data)));
     data?.forEach((e) => {
       e.isColumnEditable = false;
@@ -164,7 +165,7 @@ const AddRentalDataDialog = ({
         rows.push(obj);
       });
     } else if (type === MATERIAL_TYPE.package) {
-      let material = data?.material?.filter((e) => e.type === MATERIAL_TYPE.package && !ids?.some((ele) => ele === e.materialId));
+      let material = data?.material?.filter((e) => e.type === MATERIAL_TYPE.package && !ids?.some((ele) => ele === e._id));
       rows = material?.filter((e) => !e?.parentId);
       rows.forEach((parent, i) => {
         parent.index = i + 1;

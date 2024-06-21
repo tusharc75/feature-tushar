@@ -4,6 +4,7 @@ import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomReactTable, { useTableReducer } from "src/components/CustomReactTable";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { CustomDialogTransition } from "src/constants/helpers";
 
@@ -31,6 +32,20 @@ const PadData = ({ handleClose, column, data }) => {
 								window.open(`${routes.padMasterDetail.path}/${row?.original?.padName?.optionValue}`)
 							}}>{row?.original?.padName?.optionLabel}</p>
 					) : 'Total'}
+				</div>
+			),
+		}, {
+			accessor: 'customerAccount',
+			Header: 'Customer Account',
+			width: 200,
+			Cell: ({ row }) => (
+				<div>
+					{row?.original?.customerAccount?.optionLabel ? (
+						<p className="link text-truncate"
+							onClick={() => {
+								window.open(`${routes.customerAccountDetail.path}/${row?.original?.customerAccount?.optionValue}`)
+							}}>{row?.original?.customerAccount?.optionLabel}</p>
+					) : <NoDataCell />}
 				</div>
 			),
 		}, ...column])
