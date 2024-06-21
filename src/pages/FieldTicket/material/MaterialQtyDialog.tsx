@@ -132,6 +132,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingCondition') {
           element.option = [];
         }
+        if (element.fieldName === 'wellNumber' && isArray(fieldTicketData?.wellNumber)) {
+          element.option = element.option?.filter((ele) => fieldTicketData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
+        }
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
