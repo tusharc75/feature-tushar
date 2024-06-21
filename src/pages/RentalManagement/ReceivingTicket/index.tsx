@@ -73,6 +73,7 @@ import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 import TransferToAnotherPackageDialog from 'src/pages/RentalManagement/ReceivingTicket/TransferToAnotherPackageDialog';
+import PreviewDownload from '../PreviewDownload';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -1684,44 +1685,12 @@ const ReceivingTicket = ({
       });
   };
 
-  const getPreview = () => {
-    setDownlodingFile(true);
-    axiosInstance()
-      .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${uniqueReceivingTicket}`, {
-        responseType: 'blob'
-      })
-      .then(({ data }) => {
-        const file = new Blob([data], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(file);
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.target = '_blank';
-        link.style.display = 'none';
-        link.click();
-        toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
-        setDownlodingFile(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setDownlodingFile(false);
-      });
-  };
-
   const rightSideContents = () => {
     return (
       <>
-        <Button
-          onClick={getPreview}
-          variant={isMobile && !isTablet ? 'text' : 'outlined'}
-          color="primary"
-          type="button"
-          size="small"
-          disabled={downlodingFile || isOffline || uniqueReceivingTicket.length === 0}
-          startIcon={isMobile ? '' : <VisibilityIcon />}
-          style={isMobile && !isTablet ? { color: 'var(--info-dark)' } : {}}
-        >
-          {downlodingFile ? 'Please wait...' : 'Preview'}
-        </Button>
+        <span>
+          <PreviewDownload referenceIds={uniqueReceivingTicket} />
+        </span>
         {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <Button
             variant={'outlined'}
