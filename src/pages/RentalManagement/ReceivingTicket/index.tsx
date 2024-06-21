@@ -674,20 +674,10 @@ const ReceivingTicket = ({
         }
       } else {
         if (
-          productAssets.filter(
-            (e) =>
-              [
-                ASSET_STATUS.underReview,
-                ASSET_STATUS.available,
-                ASSET_STATUS.repair,
-                ASSET_STATUS.scrap,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.notApplied
-              ].includes(e.status) ||
-              [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete, RENTAL_INTERNAL_ASSET_STATUS.return].includes(
-                e.rentalAssetStatus
-              )
-          ).length === productAssets?.filter((p) => p.type !== MATERIAL_TYPE.service)?.length
+          productAssets?.filter((p) => p.type !== MATERIAL_TYPE.service).every((e) =>
+            [RENTAL_INTERNAL_ASSET_STATUS.consumed, RENTAL_INTERNAL_ASSET_STATUS.complete
+              , RENTAL_INTERNAL_ASSET_STATUS.return, 'Returned', RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed].includes(e.rentalAssetStatus)
+          )
         ) {
           setNextStep(true);
         } else {
