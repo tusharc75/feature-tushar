@@ -279,7 +279,7 @@ const FieldServiceTechnician = () => {
     dispatch({ type: 'selection', selectedRecords: [] });
   };
 
-  const handleRemoveoffline = async (ids: any[]= []) => {
+  const handleRemoveoffline = async (ids: any[] = []) => {
     await fieldServiceOrderClearOffline(ids);
   };
 
@@ -368,6 +368,7 @@ const FieldServiceTechnician = () => {
                     handleChangeStatus={() => { }}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
+                    fetchServiceOrderData={() => { }}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full">
