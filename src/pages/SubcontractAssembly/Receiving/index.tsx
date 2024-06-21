@@ -121,7 +121,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
               {row?.original?.receivedQty <= 0 && (
                 <CustomIntroWrapper
                   title={'Receive'}
-                  content={'By clicking this button, you will initiate the process to receive the subcontracted assembly.'}
+                  content={'Press this to initiate receiving of subcontract assembly.'}
                 >
                   <HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
                     <IconButton
