@@ -326,6 +326,7 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
             estimateStartDate: serviceOrderData?.estimateStartDate || '',
             estimateEndDate: serviceOrderData?.estimateEndDate || '',
             customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
+            customerContact: serviceOrderData?.customerContact?.optionValue || '',
             billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
             shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
             taxCode: serviceOrderData?.taxCode?.optionValue || '',
