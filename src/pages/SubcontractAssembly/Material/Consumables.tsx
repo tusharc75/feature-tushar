@@ -200,17 +200,21 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
 
       let rows = material?.filter((ele: any) => ele.parentId)
       rows?.forEach((parent, i) => {
-        parent.index = i + 1;
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
         parent.canEdit = !deliveryTicketProducts?.some((ele: any) => ele?.product === parent?.materialId && ele?.uniqueId === parent?._id)
         parent.canDelete = parent.canEdit
+        parent.parent = parent?.parentId;
+        parent.parentId = null;
       });
       setAllConsumables(rows)
       if (selectedProductOption?.optionValue !== 'All') {
-        rows = rows?.filter((ele: any) => ele.parentId === selectedProductOption?.optionValue)
+        rows = rows?.filter((ele: any) => ele.parent === selectedProductOption?.optionValue)
       }
+      rows?.forEach((e, i) => {
+        e.index = i + 1
+      })
       dispatch({ type: 'initialize', data: rows || [], count: rows?.length || 0 });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -245,7 +249,6 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
       });
   };
 
-
   const handleDelete = async (rows) => {
     try {
       setDeleting(true);
@@ -264,6 +267,12 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
   };
 
   const handleSaveData = async (rows: any) => {
+    rows?.forEach((element: any) => {
+      if (element.parent) {
+        element.parentId = element.parent;
+        delete element.parent
+      }
+    })
     try {
       setSubmitting(true);
       await axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`, { material: rows });
@@ -324,8 +333,11 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
               }
               let rows = allConsumables;
               if (value.optionValue !== 'All') {
-                rows = allConsumables?.filter((ele) => ele.parentId === value.optionValue);
+                rows = allConsumables?.filter((ele) => ele.parent === value.optionValue);
               }
+              rows?.forEach((e, i) => {
+                e.index = i + 1
+              })
               dispatch({ type: 'update', data: rows });
               setSelectedProductOption(value);
             }}
