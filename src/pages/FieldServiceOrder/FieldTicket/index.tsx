@@ -331,6 +331,7 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
             taxCode: serviceOrderData?.taxCode?.optionValue || '',
             pricingCondition: serviceOrderData?.pricingCondition?.optionValue || '',
             rentalJob: serviceOrderData?.rentalJob?.optionValue || '',
+            padName: serviceOrderData?.padName?.optionValue || '',
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || []
           }}
           onSuccess={() => {
