@@ -149,6 +149,17 @@ const FieldServiceTechnician = () => {
     setColumns(newColumns);
   };
 
+  const handleChangeFieldServiceOrderStatus = (fieldServiceOrderId, status) => {
+    if (isOffline) return;
+    axiosInstance()
+      .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
+      .then(() => {
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleCreateFieldTicket = async (data, fieldServiceOrderFields) => {
     setIsSubmitting(true);
     toastConfig.setToastConfig({
@@ -191,6 +202,7 @@ const FieldServiceTechnician = () => {
       setIsSubmitting(false);
     } else {
       axiosInstance().post(`${routes.fieldTicket?.path}`, tempInitialData).then(({ data }) => {
+        handleChangeFieldServiceOrderStatus(tempInitialData['fieldServiceOrder'], SERVICE_ORDER_STATUS.inProgress)
         window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
         toastConfig.setToastConfig({
           open: true,
