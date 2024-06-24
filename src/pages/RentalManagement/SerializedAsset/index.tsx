@@ -415,7 +415,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length +
           data?.nonSerializedInventory?.filter((n) => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0);
         parent.realAssetQty = parent.assetQty;
-        parent.realAssetAssignedQty = parent.assetAssignedQty;
+        parent.realAssetAssignedQty = !parent.serializedProduct && parent.assetAssignedQty === 0 && parent?.status ? parent.qty : parent.assetAssignedQty;
         parent.isSublease = subleaseProduct?.some((e) => e.materialId === parent.materialId);
         parent.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === parent.materialId);
         parent.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === parent.materialId);
@@ -614,7 +614,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       _subRow.realAssetQty = [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(_subRow.type)
         ? _subRow.qty * parent.realAssetQty
         : 0;
-      _subRow.realAssetAssignedQty = _subRow.assetAssignedQty;
+      _subRow.realAssetAssignedQty = !_subRow.serializedProduct && _subRow.assetAssignedQty === 0 && _subRow?.status ? _subRow.qty : _subRow.assetAssignedQty;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === _subRow.materialId);
       _subRow.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === _subRow.materialId);
@@ -867,7 +867,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
     const nonSerializeAssetProduct = [];
     let flatArrayNonSerializeAsset = treeToFlatArray(selectedRecords, 'subRows').filter(
-      (e) => e.type === MATERIAL_TYPE.product && !e.status && !e.serializedProduct && e.realAssetQty > e.realAssetAssignedQty
+      (e) => e.type === MATERIAL_TYPE.product && !e.serializedProduct && e.realAssetQty > e.realAssetAssignedQty
     );
     flatArrayNonSerializeAsset.forEach((element) => {
       if (element.type === MATERIAL_TYPE.product && element.realAssetQty > element.realAssetAssignedQty) {
