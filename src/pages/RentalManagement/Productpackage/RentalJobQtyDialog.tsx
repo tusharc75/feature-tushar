@@ -405,12 +405,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
         if (_package.length) {
-          if (values.qty * _package[0].qty < rowData.assetQty) {
+          if (values.qty * _package[0].qty < rowData.assetQty || values.qty * _package[0].qty < rowData.nonSerializedQty) {
             errors['qty'] = 'The quantity is less than what was assigned.';
           }
         }
       } else {
-        if (values.qty < rowData.assetQty) {
+        if (values.qty < rowData.assetQty || values.qty < rowData?.nonSerializedQty) {
           errors['qty'] = 'The quantity is less than what was assigned.';
         }
       }
