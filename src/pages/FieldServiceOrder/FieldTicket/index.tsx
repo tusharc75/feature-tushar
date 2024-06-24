@@ -326,11 +326,13 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
             estimateStartDate: serviceOrderData?.estimateStartDate || '',
             estimateEndDate: serviceOrderData?.estimateEndDate || '',
             customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
+            customerContact: serviceOrderData?.customerContact?.optionValue || '',
             billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
             shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
             taxCode: serviceOrderData?.taxCode?.optionValue || '',
             pricingCondition: serviceOrderData?.pricingCondition?.optionValue || '',
             rentalJob: serviceOrderData?.rentalJob?.optionValue || '',
+            padName: serviceOrderData?.padName?.optionValue || '',
             collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || []
           }}
           onSuccess={() => {

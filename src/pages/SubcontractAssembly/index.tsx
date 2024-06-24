@@ -18,30 +18,6 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import CustomIntro, { Step } from 'src/components/CustomIntro';
-
-const steps: Step[] = [
-  {
-    title: 'Add',
-    content: 'Clicking this button will create additional subcontracts',
-    target: '#add-button'
-  },
-  {
-    title: 'Actions',
-    content: 'By clicking this button, you can perform various actions. Begin by selecting the rows of interest.',
-    target: '#action-button'
-  },
-  {
-    title: 'Data',
-    content: 'Clicking this button will exclusively display your subcontract',
-    target: '.MuiToggleButtonGroup-root > button'
-  },
-  {
-    title: 'Data',
-    content: 'Clicking this button will show all the subcontract',
-    target: '.MuiToggleButtonGroup-root > button + button'
-  }
-];
 
 const SubcontractAssembly = () => {
   const types = [
@@ -329,7 +305,6 @@ const SubcontractAssembly = () => {
           />
         )}
       </CustomContainer>
-      <CustomIntro steps={steps} />
     </section>
   );
 };

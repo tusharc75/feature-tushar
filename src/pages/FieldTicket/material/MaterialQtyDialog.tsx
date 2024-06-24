@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
-import { uniqBy } from 'lodash';
+import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -132,6 +132,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingCondition') {
           element.option = [];
         }
+        if (element.fieldName === 'wellNumber' && isArray(fieldTicketData?.wellNumber)) {
+          element.option = element.option?.filter((ele) => fieldTicketData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
+        }
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
@@ -191,6 +194,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           }
           if (element.fieldName === 'pricingMethod') {
             element.option = pricingMethodOptions;
+          }
+          if (element.fieldName === 'wellNumber' && isArray(fieldTicketData?.wellNumber)) {
+            element.option = element.option?.filter((ele) => fieldTicketData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
           }
         }
       });

@@ -54,6 +54,7 @@ import DateDialog from './DateDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
+import PreviewDownload from '../PreviewDownload';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -204,7 +205,7 @@ const LoadingTicket = ({
       const loadingTicketProducts = [];
 
       deliveryTicketList?.forEach((element) => {
-        if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products && element?.products?.length) {
+        if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products?.length) {
           element?.products?.forEach((ele) => {
             loadingTicketProducts.push({
               ...ele,
@@ -331,11 +332,11 @@ const LoadingTicket = ({
               obj.displayType = element?.productDetail?.serializedProduct ? 'Product (Serialized)' : 'Product (Non-Serialized)';
               obj.qty = ele.qty;
               obj.description =
-                element.type === 'service'
+                element.type === MATERIAL_TYPE.service
                   ? element?.serviceDetail?.serviceDescription || ''
-                  : element.type === 'product'
+                  : element.type === MATERIAL_TYPE.product
                     ? element?.productDetail?.productDescription || ''
-                    : element.type === 'package'
+                    : element.type === MATERIAL_TYPE.package
                       ? element?.packageDetail?.packageDescription || ''
                       : '';
               obj.assetNumber = element?.productDetail?.productName;
@@ -1117,48 +1118,12 @@ const LoadingTicket = ({
     return false;
   };
 
-  const getPreview = () => {
-    setDownlodingFile(true);
-    axiosInstance()
-      .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${uniqueLoadingTicket}`, {
-        responseType: 'blob'
-      })
-      .then(({ data }) => {
-        const file = new Blob([data], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(file);
-        const link = document.createElement('a');
-        link.href = fileURL;
-        link.target = '_blank';
-        link.style.display = 'none';
-        link.click();
-        toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
-        setDownlodingFile(false);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setDownlodingFile(false);
-      });
-  };
-
   const rightSideContents = () => {
     return (
       <>
-        <HtmlTooltip title={'Preview PDF'} placement="top" arrow enterTouchDelay={0}>
-          <span>
-            <Button
-              onClick={getPreview}
-              variant={isMobile ? 'text' : 'outlined'}
-              className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-              color="primary"
-              type="button"
-              size="small"
-              disabled={downlodingFile || isOffline || uniqueLoadingTicket.length === 0}
-              startIcon={isMobile ? null : <VisibilityIcon />}
-            >
-              {isMobile ? downlodingFile ? <CircularProgress size={20} /> : <VisibilityIcon /> : downlodingFile ? 'Please wait...' : 'Preview'}
-            </Button>
-          </span>
-        </HtmlTooltip>
+        <span>
+          <PreviewDownload referenceIds={uniqueLoadingTicket} />
+        </span>
         {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <Button
             variant={'outlined'}
