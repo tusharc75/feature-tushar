@@ -122,6 +122,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                 <CustomIntroWrapper
                   title={'Receive'}
                   content={'Press this to initiate receiving of subcontract assembly.'}
+                  disabled={row?.original?.canReceive && allowedToEdit ? false : true}
                 >
                   <HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
                     <IconButton
