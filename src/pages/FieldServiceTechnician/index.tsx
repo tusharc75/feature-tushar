@@ -149,7 +149,18 @@ const FieldServiceTechnician = () => {
     setColumns(newColumns);
   };
 
-  const handleCreateFieldTicket = async (data, fieldServiceOrderFields) => {
+  const handleChangeFieldServiceOrderStatus = (fieldServiceOrderId, status) => {
+    if (isOffline) return;
+    axiosInstance()
+      .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
+      .then(() => {
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleCreateFieldTicket = async (fieldServiceOrderData, fieldServiceOrderFields) => {
     setIsSubmitting(true);
     toastConfig.setToastConfig({
       open: true,
@@ -167,14 +178,14 @@ const FieldServiceTechnician = () => {
 
     const tempInitialData = getObjKeys('', fieldTicketField);
     tempInitialData['fieldTicketNumber'] = GenerateResourceLineNumber(fieldTicketField);
-    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, data, user.user?.brandCurrency);
+    const referenceData: any = cloneResourceData(fieldServiceOrderFields, fieldTicketField, fieldServiceOrderData, user.user?.brandCurrency);
     for (const key in referenceData) {
       tempInitialData[key] = referenceData[key];
     }
     if (fieldTicketField?.some((e) => e.fieldName === 'currency')) {
       tempInitialData['currency'] = user.user?.brandCurrency;
     }
-    tempInitialData['fieldServiceOrder'] = data?._id;
+    tempInitialData['fieldServiceOrder'] = fieldServiceOrderData?._id;
 
     if (isOffline) {
       const _id: any = Math.floor(Math.random() * 1000000).toString();
@@ -191,6 +202,9 @@ const FieldServiceTechnician = () => {
       setIsSubmitting(false);
     } else {
       axiosInstance().post(`${routes.fieldTicket?.path}`, tempInitialData).then(({ data }) => {
+        if (fieldServiceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+          handleChangeFieldServiceOrderStatus(fieldServiceOrderData?._id, SERVICE_ORDER_STATUS.inProgress)
+        }
         window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
         toastConfig.setToastConfig({
           open: true,
