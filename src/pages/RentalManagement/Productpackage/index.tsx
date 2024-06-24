@@ -370,7 +370,7 @@ const Productpackage = ({
         data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.hideSelection =
         parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
-      parent.nonSerializedQty = !parent.serializedProduct && parent.assetQty === 0 && parent?.status ? parent.qty : 0;
+      parent.nonSerializedQty = parent.type === MATERIAL_TYPE.product && !parent.serializedProduct && parent.assetQty === 0 && parent?.status ? parent.qty : 0;
       parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired);
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage;
@@ -415,7 +415,7 @@ const Productpackage = ({
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
-      _subRow.nonSerializedQty = !_subRow.serializedProduct && _subRow.assetQty === 0 && _subRow?.status ? _subRow.qty : 0;
+      _subRow.nonSerializedQty = _subRow.type === MATERIAL_TYPE.product && !_subRow.serializedProduct && _subRow.assetQty === 0 && _subRow?.status ? _subRow.qty : 0;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, productSerialNumbers, _subRow, isPriceRequired);
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {

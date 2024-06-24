@@ -269,9 +269,7 @@ const LoadingTicket = ({
               ? RENTAL_INTERNAL_ASSET_STATUS.consumed
               : consumeQty < ele.qty && consumeQty > 0
                 ? RENTAL_INTERNAL_ASSET_STATUS.partiallyConsumed
-                : ele?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered && element?.status === ASSET_STATUS.inTransit
-                  ? ASSET_STATUS.inUse
-                  : element?.status
+                : element?.status
             : element?.status;
           obj.nonSerializeAsset = nonSerializeAsset?.filter((e) => e.product === obj.materialId && e._id === element._id);
           obj.loadingTicket = ele?.loadingTicket;
