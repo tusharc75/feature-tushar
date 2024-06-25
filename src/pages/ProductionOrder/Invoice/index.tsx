@@ -8,7 +8,6 @@ import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { CHILD_RESOURCE, MATERIAL_TYPE, WORK_ORDER_STATUS, productionOrder, sidebarResource } from '../../../constants/helpers';
 import { orderBy, startCase } from 'lodash';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { isMobile, isTablet } from 'react-device-detect';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -62,20 +61,20 @@ const Invoice = ({ productionOrderData, renderedFrom, stepFullScreen }) => {
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <h5 className="text-truncate">{row.original?.detail}</h5>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === MATERIAL_TYPE.service) {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === MATERIAL_TYPE.product) {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === MATERIAL_TYPE.service) {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },

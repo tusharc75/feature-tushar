@@ -99,7 +99,7 @@ const CycleCountDetermination = () => {
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`/cycle-count-determination?wareHouse=${warehouse}`)
+      .get(`/cycle-count-determination?warehouse=${warehouse}`)
       .then(({ data: { data } }) => {
         setEditData(data);
         let rows = data?.map((u) => {
@@ -178,7 +178,7 @@ const CycleCountDetermination = () => {
             fetchData();
           }}
           isDownloadExcel={false}
-          additionalParams={'wareHouse=' + warehouse}
+          additionalParams={`warehouse=${warehouse}`}
           onlyExport={false}
         />
       </div>

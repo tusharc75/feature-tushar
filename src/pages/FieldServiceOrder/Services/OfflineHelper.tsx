@@ -23,10 +23,10 @@ export const fieldServiceOrderAddOffline = async (ids) => {
         axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, sidebarResource.fieldTicket, data);
         });
-        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketMateial}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${CHILD_RESOURCE.fieldTicketMateial}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, CHILD_RESOURCE.fieldTicketMateial, data);
         });
-        axiosInstance().get(`/field/child?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
+        axiosInstance().get(`/field?resource=${CHILD_RESOURCE.fieldTicketCost}`).then(({ data: { data } }) => {
             insertUpdate(objectStore.resource, CHILD_RESOURCE.fieldTicketCost, data);
         });
         axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}&view=true`).then(({ data: { data } }) => {

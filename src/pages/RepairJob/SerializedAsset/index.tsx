@@ -12,7 +12,6 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import AssetScrapRepairDialog from '../../../components/AssetScrapRepairDialog/AssetScrapRepairDialog';
@@ -124,14 +123,14 @@ const SerializedAsset = ({
               {row.original.assetNumber ? (
                 <div className="flex items-center gap-2">
                   <p className="text-truncate">{row.original.assetNumber}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                 </div>
               ) : (
                 <NoDataCell />

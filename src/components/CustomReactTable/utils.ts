@@ -280,7 +280,7 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
   ];
 
   try {
-    const req = await axiosInstance().get(`/field?resource=${resource}`);
+    const req = await axiosInstance().get(`/field?resource=${resource}&view=true`);
     const {
       data: { data }
     } = req;
@@ -429,12 +429,12 @@ export const createFilterModel = (formValues, coloums) => {
       case 'multiSelect':
       case 'dropDown':
         if ((col.lookup || col.dataList) && formValues[fieldName]) {
-          const options = coloums?.find((item) => item.fieldName === fieldName)?.option || [];
+          
           if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
             filterModel.set(fieldName, {
               operator: 'OR',
               condition1: {
-                filter: options?.filter((e) => formValues[fieldName]?.includes(e?.optionValue))
+                filter: formValues[fieldName] ?? []
               }
             });
           }
@@ -485,7 +485,7 @@ export const filtermodelToFormValue = (filtermodel: FilterModel) => {
       formValues[`from_${snakeCase(key)}`] = new Date(value.filter['from']);
       formValues[`to_${snakeCase(key)}`] = new Date(value.filter['to']);
     } else if (value['operator'] === 'OR') {
-      formValues[key] = value['condition1']?.filter.map((e) => e.optionValue);
+      formValues[key] = value.condition1?.filter.map((e) => e.optionValue);
     } else if (value.filter) {
       formValues[key] = value.filter;
     }

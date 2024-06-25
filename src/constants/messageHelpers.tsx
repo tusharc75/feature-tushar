@@ -80,6 +80,7 @@ export const rentalManagementMessage = {
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
     serviceAlreadyStarted: 'Service already in progress',
     serviceNotstarted: 'Service not started yet',
+    serviceCannotbeSelect: `Service cannot be select for this action`
 };
 
 export const subleaseActions = {
@@ -134,10 +135,12 @@ export const salesOrderMessage = {
 export const subcontractAssemblyActions = {
     createLoadingTicket: 'Create Loading Ticket',
     deliveredLoadingTicket: 'Delivered Loading Ticket',
+    cancelLoadingTicket: 'Cancel Loading Ticket',
 }
 
 export const subcontractAssemblyMessage = {
     loadingAlreadyCreated: 'Loading Ticket is already created',
     loadingNotCreated: 'Loading Ticket is not created',
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+    assemblyProductAlreadyReceived: 'Assembly product already received',
 }

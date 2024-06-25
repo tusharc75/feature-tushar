@@ -24,7 +24,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import Consumables from './Consumables';
 import MaterialQtyDialog from './MaterialQtyDialog';
 import AddCostDialog from './AddCostDialog';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import AddRentalDataDialog from './AddRentalDataDialog';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
@@ -70,8 +70,10 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
-    let costField: any = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
+    let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
+    data = data?.filter((f) => f?.isRead);
+    let costField: any = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
+    costField = costField?.filter((f) => f?.isRead);
     setCostFields(costField);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
@@ -316,6 +318,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           serviceName: d.serviceName,
           serviceDescription: d.serviceDescription,
           competencyType: { optionLabel: d.competencyType, optionValue: d.competencyTypeId },
+          unit : d?.unitMain?.length ? d.unitMain : [],
+          pricingMethod : d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
         }
         element.fieldTicketId = fieldTicketData?._id;
         material.push(element);
@@ -351,6 +355,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.unit = d.unit ? d.unit : '';
           element.pricingMethod = d.pricingMethod ? d.pricingMethod : '';
           element.qty = d.qty ? parseFloat(d.qty) : 1;
+          element.uniqueId = d._id; 
           element.estimateStartDate = d?.estimateStartDate ? d?.estimateStartDate : new Date();
           element.estimateEndDate = d?.estimateEndDate ? d?.estimateEndDate : new Date();
           element.estimateJobDuration = d?.estimateJobDuration;
@@ -901,7 +906,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           rentalId={fieldTicketData?.rentalJob?.optionValue}
           currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
-          ids={dataRows?.map((row) => row?.materialId)}
+          ids={dataRows?.map((row) => assignRentalDataDialog?.type===MATERIAL_TYPE.package ? row?.uniqueId : row?.materialId)}
         />
       )}
     </>

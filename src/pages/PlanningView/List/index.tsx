@@ -9,7 +9,7 @@ import { gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import CustomReactTable, { useColumns, getStaticFields, gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-function ListView({ resourceList, selectedResource, setSelectedResource }) {
+function ListView({ resourceList, selectedResource, setSelectedResource, setQueryString }) {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, selectedEntity }
@@ -77,6 +77,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource }) {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
+    setQueryString(queryString);
     try {
       let data: any = [],
         count;

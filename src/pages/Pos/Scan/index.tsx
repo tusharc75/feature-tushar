@@ -46,7 +46,7 @@ export default function Scan({ onClose, plantId, setAssignCartProductQty }) {
     });
     const deepFilter = `&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
     axiosInstance()
-      .get(`/pos?wareHouse=${plantId}${deepFilter}`)
+      .get(`/pos?warehouse=${plantId}${deepFilter}`)
       .then(({ data: { data, count } }) => {
         if (data?.length === 1) {
           setAssignCartProductQty(data[0]);

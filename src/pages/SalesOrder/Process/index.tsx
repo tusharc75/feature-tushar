@@ -63,22 +63,20 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
             {<p title={row.original?.detail}>{row.original?.detail}</p>}
-            <Box ml={1}>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row.original.type === 'service') {
-                    window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                  } else if (row.original.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                  } else {
-                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                  }
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </Box>
+            <IconButton
+              size="small"
+              onClick={() => {
+                if (row.original.type === 'service') {
+                  window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                } else if (row.original.type === 'product') {
+                  window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                } else {
+                  window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                }
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -129,22 +127,18 @@ const Process = ({ salesOrderData, setNextStep, stepFullScreen }) => {
           row.original?.procurementStatus ? <div>{<p title={row.original?.procurementStatus}>{row.original?.procurementStatus}</p>}</div> : <NoDataCell />
         )
       },
-      ...(permissions?.leadTimeMaster
-        ? [
-          {
-            accessor: 'leadTime',
-            Header: 'Lead Time (Days)',
-            Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
-            Footer: (info) => {
-              let rows = info.table.getExpandedRowModel().rows;
-              const total = rows
-                ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-                .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-              return <>{total}</>;
-            }
-          }
-        ]
-        : [])
+      {
+        accessor: 'leadTime',
+        Header: 'Lead Time (Days)',
+        Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
+        Footer: (info) => {
+          let rows = info.table.getExpandedRowModel().rows;
+          const total = rows
+            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+            .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+          return <>{total}</>;
+        }
+      },
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);

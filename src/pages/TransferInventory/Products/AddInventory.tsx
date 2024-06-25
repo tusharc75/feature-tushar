@@ -63,7 +63,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${productInventory.api}?wareHouse=${warehouse}&${queryString}`)
+      .get(`${productInventory.api}?warehouse=${warehouse}&${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u: any) => {
           const selectedData = selectedRecords.find((d: any) => d._id === u._id);

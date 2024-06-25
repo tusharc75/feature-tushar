@@ -1,7 +1,6 @@
 import { Chip, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core';
 import Box from '@material-ui/core/Box';
 import { Delete as DeleteIcon } from '@material-ui/icons';
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 
 import { camelCase } from 'lodash';
@@ -27,6 +26,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { CustomDialogTransition, displayDate, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
+import { FiExternalLink } from 'react-icons/fi';
 
 const Note = () => {
   const renderedFrom = camelCase(routes?.activityNote.title);
@@ -101,12 +101,12 @@ const Note = () => {
             {row.original?.relatedTo && row.original?.relatedTo?.length > 0 ? (
               row.original?.relatedTo.map((d) => {
                 return (
-                  <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
+                  <div className="flex items-center gap-2" key={d.name}>
                     <p> {d.name}</p>
-                    <IconButton className="ml-3" size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                    <IconButton size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                    <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
+                    <Chip color="primary" label={`${routes[d?.type]?.title}`} />
                   </div>
                 );
               })

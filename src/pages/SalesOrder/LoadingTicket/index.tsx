@@ -1,8 +1,8 @@
 import { Box, IconButton, MenuItem } from "@material-ui/core";
-import { OpenInNew } from "@material-ui/icons";
 import { map, startCase, uniq } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
+import { FiExternalLink } from "react-icons/fi";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "src/StateProvider/Provider";
 import axiosInstance from "src/axios/axiosInstance";
@@ -71,24 +71,22 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 				sticky: isMobile || isTablet ? 'none' : 'left',
 				width: 200,
 				Cell: ({ row }) => (
-					<div style={{ display: 'flex', alignItems: 'center' }}>
-						{<p title={row.original?.detail}>{row.original?.detail}</p>}
-						<Box ml={1}>
-							<IconButton
-								size="small"
-								onClick={() => {
-									if (row.original.type === 'service') {
-										window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-									} else if (row.original.type === 'product') {
-										window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-									} else {
-										window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-									}
-								}}
-							>
-								<OpenInNew fontSize="small" color="primary" />
-							</IconButton>
-						</Box>
+					<div className="flex items-center gap-2">
+						<p title={row.original?.detail}>{row.original?.detail}</p>
+						<IconButton
+							size="small"
+							onClick={() => {
+								if (row.original.type === 'service') {
+									window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+								} else if (row.original.type === 'product') {
+									window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+								} else {
+									window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+								}
+							}}
+						>
+							<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+						</IconButton>
 					</div>
 				)
 			},
@@ -105,18 +103,16 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 				Header: 'Loading Ticket',
 				Cell: ({ row }) =>
 					row?.original?.loadingTicket ? (
-						<div>
+						<div className="flex items-center gap-2">
 							<h5 className="text-truncate">{row?.original?.loadingTicket}</h5>
-							<Box ml={1}>
-								<IconButton
-									size="small"
-									onClick={() => {
-										window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
-									}}
-								>
-									<OpenInNew fontSize="small" color="primary" />
-								</IconButton>
-							</Box>
+							<IconButton
+								size="small"
+								onClick={() => {
+									window.open(`${routes.deliveryTicketDetail.path}/${row?.original?.loadingTicketId}`);
+								}}
+							>
+								<FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+							</IconButton>
 						</div>
 					) : (
 						<NoDataCell />
@@ -132,22 +128,18 @@ const LoadingTicket = ({ salesOrderData, setNextStep, stepFullScreen }) => {
 						<NoDataCell />
 					)
 			},
-			...(permissions?.leadTimeMaster
-				? [
-					{
-						accessor: 'leadTime',
-						Header: 'Lead Time (Days)',
-						Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
-						Footer: (info) => {
-							let rows = info.table.getExpandedRowModel().rows;
-							const total = rows
-								?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
-								.reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
-							return <>{total}</>;
-						}
-					}
-				]
-				: [])
+			{
+				accessor: 'leadTime',
+				Header: 'Lead Time (Days)',
+				Cell: ({ row }) => <div>{<p>{row.original['leadTime'] || 0}</p>}</div>,
+				Footer: (info) => {
+					let rows = info.table.getExpandedRowModel().rows;
+					const total = rows
+						?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+						.reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
+					return <>{total}</>;
+				}
+			},
 		];
 		coloum = [...coloum, ...newColumns];
 		setColumns(coloum);

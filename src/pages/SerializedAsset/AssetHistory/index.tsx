@@ -12,6 +12,7 @@ import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase, uniq } from 'lodash';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const AssetHistory = ({ id, status, resourceData, fields }) => {
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assetHistory`;
@@ -23,7 +24,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
   });
-  const [column,setColumn] = useState([])
+  const [column, setColumn] = useState([])
 
   const {
     state: { permissions }
@@ -359,11 +360,24 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       });
   };
 
+
   return (
     <Box>
-      <Box className="max-w-[800px]">
-        <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
+      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+        <Box className="max-w-[800px]">
+          <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
+        </Box>
+        <ImportExportLinks
+          permissions={permissions?.history}
+          module={"Asset History"}
+          api={`/history/inventory/${id}`}
+          afterImportCompleted={() => { }}
+          onExportToExcelSuccess={() => { }}
+          additionalParams={getQueryString()}
+          onlyExport={true}
+        />
       </Box>
+
       {column ? (
         <CustomReactTable
           height={'calc(100vh - 250px)'}

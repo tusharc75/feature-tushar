@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import axiosInstance from '../../../axios/axiosInstance';
-import { uniqBy } from 'lodash';
+import { isArray, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, MATERIAL_TYPE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -21,7 +21,7 @@ import moment from 'moment';
 import { bulkUpdate, calculatePrice, calculateRowsField } from '../../../components/RentalManagment/helper';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 interface EditDialogProps {
@@ -95,7 +95,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
 
   const fetchData = async () => {
     setFetchingData(true);
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true, isOffline);
+    let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, true, isOffline);
+    data = data?.filter((f) => f?.isRead);
     setAllFields(JSON.parse(JSON.stringify(data)));
     if (isBulkedit) {
       let unitArray: any = [];
@@ -131,6 +132,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
         if (element.fieldName === 'pricingCondition') {
           element.option = [];
         }
+        if (element.fieldName === 'wellNumber' && isArray(fieldTicketData?.wellNumber)) {
+          element.option = element.option?.filter((ele) => fieldTicketData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
+        }
         element.required = false;
         element.isFormula = false;
         element.isMulitFormula = false;
@@ -157,6 +161,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       setPriceMethodListConst(pricingMethodOptions);
       if (!isOffline) {
         await getAllPricingCondition(rowData, unitOptions, pricingMethodOptions);
+      } else {
+        setPriceMethodList(pricingMethodOptions);
       }
       data.forEach((element) => {
         if (rowData?.type === MATERIAL_TYPE.serializedAsset) {
@@ -188,6 +194,9 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
           }
           if (element.fieldName === 'pricingMethod') {
             element.option = pricingMethodOptions;
+          }
+          if (element.fieldName === 'wellNumber' && isArray(fieldTicketData?.wellNumber)) {
+            element.option = element.option?.filter((ele) => fieldTicketData?.wellNumber?.map((e) => e.optionValue)?.includes(ele.optionValue));
           }
         }
       });

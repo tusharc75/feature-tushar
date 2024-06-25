@@ -759,6 +759,7 @@ const AddSerializedAsset = ({
             setOpenAssetDataDialog({ open: false, statusPolicy: null });
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
+          productsDefaultData={selectedProducts}
         />
       )}
     </Fragment>

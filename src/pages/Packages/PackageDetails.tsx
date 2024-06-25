@@ -18,13 +18,13 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import DetailsPage from 'src/components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, packages } from 'src/constants/helpers';
-import LeadTimeMaster from '../../components/LeadTime';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, packages } from 'src/constants/helpers';
 import ManagePackageDialog from './ManagePackageDialog';
 import Packages from './Packages';
 import Products from './Products';
 import Services from './Services';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import LeadTime from 'src/components/LeadTime';
 
 const PackageDetails = () => {
   const renderedFrom = camelCase(routes?.packages.title);
@@ -156,15 +156,13 @@ const PackageDetails = () => {
           <Grid item xs={12} sm={12} md={12}>
             <TabPanel value={tabValue} index={0}>
               <DetailsPage data={packageData} fields={packageFields} />
-              {permissions?.leadTimeMaster?.isRead && (
-                <Box mb={2} mt={2}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6} md={6}>
-                      <LeadTimeMaster Id={id} type={'package'} />
-                    </Grid>
+              <Box mb={2} mt={2}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6} md={6}>
+                    <LeadTime referenceType={MATERIAL_TYPE.package} referenceId={id} referenceLabel={packageData?.packageName} />
                   </Grid>
-                </Box>
-              )}
+                </Grid>
+              </Box>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
               {tabValue === 1 && <Services packageData={packageData} packageId={id} />}

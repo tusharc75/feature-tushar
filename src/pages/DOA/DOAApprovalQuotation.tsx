@@ -29,7 +29,7 @@ const DoaQuotationApproval = () => {
 
   const {
     state: {
-      user: { user: currentUser, permissions }
+      user: { user: currentUser }
     }
   } = useData();
 
@@ -183,7 +183,7 @@ const DoaQuotationApproval = () => {
           </div>
         )
       },
-      ...(permissions?.leadTimeMaster ? [{
+      {
         accessor: 'leadTime',
         Header: 'Lead Time (Days)',
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
@@ -193,7 +193,7 @@ const DoaQuotationApproval = () => {
             .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
           return <>{total}</>;
         }
-      }] : [])
+      }
     ];
     column = [...column, ...newColumns];
     setColumns(column);

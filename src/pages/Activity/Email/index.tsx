@@ -14,8 +14,6 @@ import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MessageDialog from '../../../components/Helpers/MessageDialog';
 import { isObjectEmpty, sidebarResource } from '../../../constants/helpers';
-
-import OpenInNewIcon from '@material-ui/icons/OpenInNew';
 import { Autocomplete } from '@material-ui/lab';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
@@ -31,6 +29,7 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { CustomDialogTransition, displayDate } from '../../../constants/helpers';
 import './email.scss';
+import { FiExternalLink } from 'react-icons/fi';
 
 const tabs = {
   Inbox: 1,
@@ -144,12 +143,12 @@ const Email = () => {
             {row.original?.relatedTo && row.original?.relatedTo?.length > 0 ? (
               row.original?.relatedTo.map((d) => {
                 return (
-                  <div style={{ display: 'flex', alignItems: 'center' }} key={d.name}>
+                  <div className="flex items-center gap-2" key={d.name}>
                     <p>{d?.name}</p>
-                    <IconButton className="ml-3" size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
-                      <OpenInNewIcon fontSize="small" color="primary" />
+                    <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
-                    <Chip className="ml-3" color="primary" label={`${routes[d?.type]?.title}`} />
+                    <Chip color="primary" label={`${routes[d?.type]?.title}`} />
                   </div>
                 );
               })
