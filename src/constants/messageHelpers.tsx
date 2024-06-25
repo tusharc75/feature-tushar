@@ -135,10 +135,12 @@ export const salesOrderMessage = {
 export const subcontractAssemblyActions = {
     createLoadingTicket: 'Create Loading Ticket',
     deliveredLoadingTicket: 'Delivered Loading Ticket',
+    cancelLoadingTicket: 'Cancel Loading Ticket',
 }
 
 export const subcontractAssemblyMessage = {
     loadingAlreadyCreated: 'Loading Ticket is already created',
     loadingNotCreated: 'Loading Ticket is not created',
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+    assemblyProductAlreadyReceived: 'Assembly product already received',
 }

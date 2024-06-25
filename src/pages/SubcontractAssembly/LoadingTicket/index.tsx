@@ -17,6 +17,7 @@ import { DetailsPageHeader } from "src/components/PageHeaders";
 import { CHILD_RESOURCE, DELIVERY_FROM_TO_TYPE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_STATUS, DELIVERY_TICKET_TYPE, MATERIAL_TYPE, deliveryTicket } from "src/constants/helpers";
 import { subcontractAssemblyActions, subcontractAssemblyMessage } from "src/constants/messageHelpers";
 import ManageDeliveryTicket from "src/pages/DeliveryTicket/ManageDeliveryTicket";
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog'
 
 const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, allowedToEdit }) => {
 
@@ -26,6 +27,8 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 	const [columns, setColumns] = useState(null);
 	const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
 	const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
+	const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false)
+	const [okBtnLoading, setOkBtnLoading] = useState(false);
 
 	const { state, dispatch } = useTableReducer();
 	const { selectedRecords } = state;
@@ -172,6 +175,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 			obj.qty = obj.qty;
 			obj.uniqueId = obj._id;
 			obj.parent = material?.find(m => m?.parentId === null && m?._id === obj?.parentId)?.productDetail?.productName || '';
+			obj.receivedQty = material?.find(m => m?.parentId === null && m?._id === obj?.parentId)?.receivedQty || 0;
 			obj.parentId = null
 		});
 
@@ -208,6 +212,12 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingNotCreated });
 				} else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
 					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingAlreadyDelivered });
+				}
+			} else if (action === subcontractAssemblyActions.cancelLoadingTicket) {
+				if (!e.hasOwnProperty('loadingTicketId')) {
+					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingNotCreated });
+				} else if (e?.receivedQty > 0) {
+					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.assemblyProductAlreadyReceived });
 				}
 			}
 		});
@@ -263,6 +273,43 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 		}
 	};
 
+	const handelCancleTickets = async () => {
+		setOkBtnLoading(true);
+		try {
+			const inTransitloadingTicketIds = uniq(
+				map(
+					selectedRecords?.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit),
+					'loadingTicketId'
+				)
+			);
+			if (inTransitloadingTicketIds?.length) {
+				await axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: inTransitloadingTicketIds });
+			}
+
+			const deliveredloadingTicketIds = uniq(
+				map(
+					selectedRecords?.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered),
+					'loadingTicketId'
+				)
+			);
+			if (deliveredloadingTicketIds?.length) {
+				await axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, { _ids: deliveredloadingTicketIds });
+			}
+
+			toastConfig.setToastConfig({
+				open: true,
+				type: 'success',
+				message: `Cancelled Successfully`
+			});
+			setOkBtnLoading(false);
+			setShowConformationCancleTicket(false)
+			fetchData();
+		} catch (error) {
+			setOkBtnLoading(false);
+			toastConfig.setToastConfig(error);
+		}
+	};
+
 	const actionButtonMenuItems = () => {
 		return (
 			<>
@@ -285,6 +332,16 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 					disabled={selectedRecords.length === 0}
 				>
 					Delivered Loading Ticket
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
+						if (!validateAction(subcontractAssemblyActions.cancelLoadingTicket)) {
+							setShowConformationCancleTicket(true)
+						}
+					}}
+					disabled={selectedRecords.length === 0}
+				>
+					Cancel Loading Ticket (s)
 				</MenuItem>
 			</>
 		);
@@ -339,6 +396,19 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 						onClose={() => {
 							setOpenMessageDialog({ open: false, errorMessages: [] });
 						}}
+					/>
+				)}
+				{showConformationCancleTicket && (
+					<ConfirmationDialog
+						open={showConformationCancleTicket}
+						message={`This action will cancel the complete Loading Ticket(s). Are you sure?`}
+						onClose={() => {
+							setShowConformationCancleTicket(false);
+						}}
+						onOk={() => {
+							handelCancleTickets();
+						}}
+						okBtnLoading={okBtnLoading}
 					/>
 				)}
 			</>
