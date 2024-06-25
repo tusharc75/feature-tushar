@@ -124,7 +124,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
               {row?.original?.receivedQty <= 0 && (
                 <CustomIntroWrapper
                   title={'Receive'}
-                  content={'Press this to initiate receiving of subcontract assembly.'}
+                  content={'Press this to receive the product'}
                   disabled={row?.original?.canReceive && allowedToEdit ? false : true}
                 >
                   <HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
@@ -141,17 +141,17 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                   </HtmlTooltip>
                 </CustomIntroWrapper>
               )}
-              {row?.original?.receivedQty > 0 && (
-                <HtmlTooltip title={'Reject'}>
+              {row?.original?.receivedQty > 0 && allowedToEdit && (
+                <HtmlTooltip title={'Revert'}>
                   <span>
                     <IconButton
                       size="small"
-                      aria-label="reject"
+                      aria-label="Revert"
                       onClick={() => {
                         setShowConformationReject({ open: true, _id: row?.original?._id })
                       }}
                     >
-                      <RemoveCircleOutlineIcon fontSize="small" color={'primary'} />
+                      <RemoveCircleOutlineIcon fontSize="small" color={'error'} />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
@@ -329,7 +329,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
       {showConformationReject.open && (
         <ConfirmationDialog
           open={showConformationReject.open}
-          message={`Are you sure to want reject ?`}
+          message={`Are you sure to want Revert ?`}
           onClose={() => {
             setShowConformationReject({ open: false, _id: null });
           }}
