@@ -646,6 +646,7 @@ const ReceivingTicket = ({
           if (parentId) {
             const parent = material?.find((e) => e._id === parentId);
             if (parent) {
+              d["parentId"] = parentId;
               d['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
             }
           }
@@ -1648,7 +1649,7 @@ const ReceivingTicket = ({
     selectedRecords?.forEach((element: any) => {
       const result = rows.filter((f) => f.productId === element?.product?.optionValue && !f.isCounted);
       if (result.length) {
-        data.push({ _id: element._id, newId: result[0]._id });
+        data.push({ _id: element._id, newId: result[0]._id, parentId: element?.parentId });
         result[0].isCounted = true;
       }
     });
@@ -1656,7 +1657,7 @@ const ReceivingTicket = ({
     axiosInstance()
       .post(`${rentalManagement.api}/swap-inuse-assets`, {
         assets: data?.map((e) => e._id),
-        newAssets: data?.map((e) => e.newId),
+        newAssets: data?.map((e) => { return { asset: e.newId, oldAssetParentId: e?.parentId } }),
         rentalJob: rentalManagementData?._id
       })
       .then(({ data }) => {
