@@ -3286,8 +3286,9 @@ export const restoreObjKeysWithValues = (dataObj: object, fields: any[]) => {
       if (dataObj[field.fieldName] && dataObj[field.fieldName].length) {
         let option = [];
         dataObj[field.fieldName].forEach((e: any) => {
+          const optionLabel = field?.option?.find((o) => o.optionValue === e)?.optionLabel;
           option.push({
-            optionLabel: e,
+            optionLabel: optionLabel,
             optionValue: e
           });
         });
