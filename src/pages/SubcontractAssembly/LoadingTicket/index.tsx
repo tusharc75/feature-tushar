@@ -175,6 +175,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 			obj.qty = obj.qty;
 			obj.uniqueId = obj._id;
 			obj.parent = material?.find(m => m?.parentId === null && m?._id === obj?.parentId)?.productDetail?.productName || '';
+			obj.receivedQty = material?.find(m => m?.parentId === null && m?._id === obj?.parentId)?.receivedQty || 0;
 			obj.parentId = null
 		});
 
@@ -215,8 +216,8 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 			} else if (action === subcontractAssemblyActions.cancelLoadingTicket) {
 				if (!e.hasOwnProperty('loadingTicketId')) {
 					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingNotCreated });
-				} else if (e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
-					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingAlreadyDelivered });
+				} else if (e?.receivedQty > 0) {
+					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.assemblyProductAlreadyReceived });
 				}
 			}
 		});
@@ -283,6 +284,16 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 			);
 			if (inTransitloadingTicketIds?.length) {
 				await axiosInstance().put(`${deliveryTicket.api}/revert`, { ids: inTransitloadingTicketIds });
+			}
+
+			const deliveredloadingTicketIds = uniq(
+				map(
+					selectedRecords?.filter((e) => e.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered),
+					'loadingTicketId'
+				)
+			);
+			if (deliveredloadingTicketIds?.length) {
+				await axiosInstance().post(`${deliveryTicket.api}/cancel-delivered-ticket`, { _ids: deliveredloadingTicketIds });
 			}
 
 			toastConfig.setToastConfig({

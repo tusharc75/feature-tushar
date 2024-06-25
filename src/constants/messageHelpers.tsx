@@ -142,4 +142,5 @@ export const subcontractAssemblyMessage = {
     loadingAlreadyCreated: 'Loading Ticket is already created',
     loadingNotCreated: 'Loading Ticket is not created',
     loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+    assemblyProductAlreadyReceived: 'Assembly product already received',
 }
