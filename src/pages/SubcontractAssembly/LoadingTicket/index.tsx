@@ -216,7 +216,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 			} else if (action === subcontractAssemblyActions.cancelLoadingTicket) {
 				if (!e.hasOwnProperty('loadingTicketId')) {
 					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingNotCreated });
-				} else if (e?.receivedQty > 0) {
+				} else if (e?.receivedQty) {
 					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.assemblyProductAlreadyReceived });
 				}
 			}
@@ -341,7 +341,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 					}}
 					disabled={selectedRecords.length === 0}
 				>
-					Cancel Loading Ticket (s)
+					Cancel Loading Ticket(s)
 				</MenuItem>
 			</>
 		);
