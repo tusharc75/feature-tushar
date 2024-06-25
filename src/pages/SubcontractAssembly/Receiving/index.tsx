@@ -1,6 +1,7 @@
 import { Box, IconButton } from '@material-ui/core';
 import { AddCircleOutline, Visibility } from '@material-ui/icons';
 import HistoryIcon from '@material-ui/icons/History';
+import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -26,6 +27,7 @@ import History from '../../ProductInventory/LedgerHistory';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 import { CustomIntroWrapper } from 'src/components/CustomIntro';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog'
 
 const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, allowedToEdit }) => {
   const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receiving`;
@@ -39,6 +41,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewCost, setViewCost] = useState({ open: false, data: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
+  const [showConformationReject, setShowConformationReject] = useState({ open: false, _id: null })
 
   useEffect(() => {
     fetchFields();
@@ -109,8 +112,8 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
       {
         accessor: 'action',
         Header: 'Actions',
-        minWidth: 100,
-        width: 100,
+        minWidth: 110,
+        width: 110,
         sticky: 'right',
         disableFilters: true,
         disableSortBy: true,
@@ -137,6 +140,21 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                     </IconButton>
                   </HtmlTooltip>
                 </CustomIntroWrapper>
+              )}
+              {row?.original?.receivedQty > 0 && (
+                <HtmlTooltip title={'Reject'}>
+                  <span>
+                    <IconButton
+                      size="small"
+                      aria-label="reject"
+                      onClick={() => {
+                        setShowConformationReject({ open: true, _id: row?.original?._id })
+                      }}
+                    >
+                      <RemoveCircleOutlineIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </span>
+                </HtmlTooltip>
               )}
               {row?.original?.receivedQty > 0 && (
                 <HtmlTooltip title={'View History'}>
@@ -231,6 +249,23 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
       });
   };
 
+  const handelReject = () => {
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/reject`, { ids: [showConformationReject?._id] })
+      .then((res) => {
+        fetchData();
+        fetchParentData();
+        setIsSubmitting(false);
+        setShowConformationReject({ open: false, _id: null });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
+        setShowConformationReject({ open: false, _id: null });
+      });
+  }
+
   const previewDownloadProps = {
     fileName: `${routes.subcontractAssembly.title}-${subcontractAssemblyData?.subcontractAssemblyNumber}`,
     resource: sidebarResource.subcontractAssembly,
@@ -289,6 +324,19 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
             setViewCost({ open: false, data: null });
           }}
           subcontractAssemblyData={subcontractAssemblyData}
+        />
+      )}
+      {showConformationReject.open && (
+        <ConfirmationDialog
+          open={showConformationReject.open}
+          message={`Are you sure to want reject ?`}
+          onClose={() => {
+            setShowConformationReject({ open: false, _id: null });
+          }}
+          onOk={() => {
+            handelReject();
+          }}
+          okBtnLoading={isSubmitting}
         />
       )}
     </>
