@@ -104,11 +104,11 @@ export const CustomIntroWrapper = ({ title, content, disabled, children, ...rest
           type="button"
           onClick={handlePopoverOpen}
           className={cn(
-            'absolute right-0 top-0 z-[2] !-mr-[5px] flex size-3 cursor-help items-center justify-center rounded-full border-0 bg-blue-400 focus-within:border-0 focus-within:outline-none',
+            'absolute right-0 top-0 z-[2] !-mr-[5px] flex size-3 cursor-help items-center justify-center rounded-full border-0 bg-[var(--new-theme-color)] focus-within:border-0 focus-within:outline-none',
             open && 'opacity-0'
           )}
         >
-          <span className="h-3 w-3 animate-ping rounded-full bg-blue-400 opacity-75"></span>
+          <span className="h-3 w-3 animate-ping rounded-full bg-[var(--new-theme-color)] opacity-75"></span>
           <span className=" sr-only">more info</span>
         </button>
       )}
