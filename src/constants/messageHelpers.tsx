@@ -135,6 +135,7 @@ export const salesOrderMessage = {
 export const subcontractAssemblyActions = {
     createLoadingTicket: 'Create Loading Ticket',
     deliveredLoadingTicket: 'Delivered Loading Ticket',
+    cancelLoadingTicket: 'Cancel Loading Ticket',
 }
 
 export const subcontractAssemblyMessage = {
