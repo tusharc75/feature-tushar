@@ -217,7 +217,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
 				if (!e.hasOwnProperty('loadingTicketId')) {
 					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingNotCreated });
 				} else if (e?.receivedQty > 0) {
-					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.loadingAlreadyReceived });
+					errorMessages.push({ index: e.index, message: subcontractAssemblyMessage.assemblyProductAlreadyReceived });
 				}
 			}
 		});
