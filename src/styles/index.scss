@@ -5,7 +5,13 @@
 @tailwind utilities;
 
 :root {
-  --sidebar-color: #0e0e23;
+  --sidebar-bg: #fff;
+  --sidebar-sub-bg: #f7f7f7;
+  --sidebar-text-color: #777575;
+  --sidebar-active-item-bg: #f1f5ff;
+  --sidebar-hover-item-bg: #f5f7ff;
+  --sidebar-active-sub-item-bg: #d7e2fe;
+  --primary-color: #0e0e23;
   --primary: #163340; //#003f57;
   --primary-light: #163340;
   --secondary: #047d1c;
@@ -90,6 +96,12 @@
   background-color: var(--dark-primary);
 }
 [data-mode='dark']:root {
+  --sidebar-bg: #0e0e23;
+  --sidebar-sub-bg: #0e0e23;
+  --sidebar-text-color: #fff;
+  --sidebar-active-item-bg: #24243e;
+  --sidebar-hover-item-bg: hsl(240, 27%, 25%);
+  --sidebar-active-sub-item-bg: #2b2b3e;
   --ag-header-background-color: var(--dark-primary);
   --ag-background-color: var(--dark-primary);
   --ag-odd-row-background-color: var(--dark-primary);
@@ -3150,7 +3162,7 @@ svg.MuiSvgIcon-root {
     border-bottom: 0 !important;
     min-width: max-content;
     &.primaryColoredTab {
-      border: 1px solid var(--sidebar-color) !important;
+      border: 1px solid var(--primary-color) !important;
     }
     [data-mode='dark'] & {
       background-color: #282845;
@@ -3176,8 +3188,8 @@ svg.MuiSvgIcon-root {
       border: 1px solid #109fa9 !important;
       box-shadow: 0px 4px 40px rgba(0, 0, 0, 0.12);
       &.primaryColoredTab {
-        background: var(--sidebar-color);
-        border: 1px solid var(--sidebar-color) !important;
+        background: var(--primary-color);
+        border: 1px solid var(--primary-color) !important;
         [data-mode='dark'] & {
           border-color: var(--common-border-color) !important;
           background-color: #282845 !important;

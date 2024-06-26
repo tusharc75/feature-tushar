@@ -22,7 +22,6 @@ export default makeStyles((theme) => ({
     }
   },
   drawerOpen: {
-    borderRight: '0 !important',
     overflowY: 'auto',
     width: drawerWidth,
     transition: theme.transitions.create('width', {
@@ -83,9 +82,6 @@ export default makeStyles((theme) => ({
   heading: {
     fontWeight: 'normal',
     marginLeft: theme.spacing(2)
-  },
-  nested: {
-    paddingLeft: theme.spacing(4)
   },
   sidebarUser: {
     padding: '1.5rem 1rem 1rem',

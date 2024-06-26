@@ -6,6 +6,7 @@ import SyncIcon from '@material-ui/icons/Sync';
 import { isEmpty } from 'lodash';
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
+import { GoChevronLeft, GoChevronRight } from 'react-icons/go';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import { useHistory, useLocation } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
@@ -13,6 +14,7 @@ import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvi
 import { SVG } from 'src/assets';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { cn } from 'src/constants/helpers';
 import { useScrollDirection } from 'src/hooks/useScroll';
 import { userManual } from 'src/pages/Home';
 import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
@@ -324,7 +326,7 @@ const Header = () => {
                 closeEntitiesMenu();
               }}
             >
-              <Typography className={`max-w-[200px] line-clamp-1`}>{curEntity.entityName}</Typography>
+              <Typography className={`line-clamp-1 max-w-[200px]`}>{curEntity.entityName}</Typography>
               <Box component="span" marginX={1} />
               {selectedEntity === curEntity._id && <Chip size="small" label="Current" color="primary" />}
             </MenuItem>
@@ -352,7 +354,7 @@ const Header = () => {
       </MenuItem> */}
       {selectedEntity && (
         <MenuItem disabled={!selectedEntity} onClick={openEntitiesMenu} className="d-flex justify-content-space-between  ">
-          <div className="max-w-[180px] line-clamp-1">
+          <div className="line-clamp-1 max-w-[180px]">
             <p className={'text-ellipsis'}>{curEntity && curEntity.entityName}</p>
           </div>
           <ExpandMore />
@@ -438,6 +440,28 @@ const Header = () => {
   return (
     <div className="poppins">
       <div className={styles.filler}></div>
+      <span
+        className={cn(
+          'fixed  top-[50px] z-[1201] [transition:left_225ms_cubic-bezier(0.4,0,0.6,1)_0ms] [&_svg]:block',
+          isSidebarOpen ? 'left-[calc(290px)]' : 'left-[70px]',
+          isMobile && !isSidebarOpen && '-left-[27px]'
+        )}
+      >
+        <IconButton
+          size="small"
+          onClick={() => {
+            if (isSidebarOpen) {
+              setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
+              setSidebarOpenedByButton({ [SIDEBAR_OPENED_BY_BUTTON]: false });
+            } else {
+              setIsSidebarOpen({ [SIDEBAR_OPEN]: true });
+            }
+          }}
+          className=" !size-[26px] !rounded-[9px]  !bg-[var(--sidebar-bg)] !text-[var(--sidebar-text-color)] ![border:1px_solid_var(--common-border-color)]"
+        >
+          {isSidebarOpen ? <GoChevronLeft /> : <GoChevronRight className=" align-middle" />}
+        </IconButton>
+      </span>
       <AppBar
         position="relative"
         className={` ${scrollPos?.scrolled ? styles.fixedAppBar : ''} ${styles.toolbar}`}
