@@ -1,7 +1,6 @@
 import { Box, IconButton } from '@material-ui/core';
-import { AddCircleOutline, Visibility } from '@material-ui/icons';
+import { AddCircleOutline, Autorenew, Visibility } from '@material-ui/icons';
 import HistoryIcon from '@material-ui/icons/History';
-import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -151,7 +150,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                         setShowConformationReject({ open: true, _id: row?.original?._id })
                       }}
                     >
-                      <RemoveCircleOutlineIcon fontSize="small" color={'error'} />
+                      <Autorenew fontSize="small" color="primary" />
                     </IconButton>
                   </span>
                 </HtmlTooltip>
@@ -329,7 +328,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
       {showConformationReject.open && (
         <ConfirmationDialog
           open={showConformationReject.open}
-          message={`Are you sure to want Revert ?`}
+          message={`Are you sure you want to revert the receive action?`}
           onClose={() => {
             setShowConformationReject({ open: false, _id: null });
           }}
