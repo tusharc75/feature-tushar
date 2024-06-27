@@ -26,6 +26,7 @@ import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUB
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import StartSubleaseDialog from 'src/pages/Sublease/Receiving/StartSubleaseDialog';
 
 const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,6 +53,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  // const [startSubleaseDialog, setStartSubleaseDialog] = useState(false);
 
   useEffect(() => {
     fetchFields();
@@ -196,7 +198,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
-    setNextStepToolTip(null);
+    // setNextStepToolTip(null);
     var data: any = [];
     var inventory: any = [];
     const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
@@ -247,21 +249,24 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
-      setNextStepToolTip(subleaseMessage.addProductPackage);
+      // setNextStepToolTip(subleaseMessage.addProductPackage);
     } else {
-      if (subleaseData?.type === SUBLEASE_TYPE.vendor) {
-        if (isIssued) {
-          setNextStep(true);
-          setNextStepToolTip(null);
-        } else {
-          setNextStep(false);
-          setNextStepToolTip(subleaseMessage.startSublease);
-        }
-      } else {
-        setNextStep(true);
-        setNextStepToolTip(null);
-      }
+      setNextStep(true)
     }
+    // else {
+    //   if (subleaseData?.type === SUBLEASE_TYPE.vendor) {
+    //     if (isIssued) {
+    //       setNextStep(true);
+    //       setNextStepToolTip(null);
+    //     } else {
+    //       setNextStep(false);
+    //       setNextStepToolTip(subleaseMessage.startSublease);
+    //     }
+    //   } else {
+    //     setNextStep(true);
+    //     setNextStepToolTip(null);
+    //   }
+    // }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -450,32 +455,34 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     );
   };
 
-  const rightSideContents = () => {
-    return (
-      <>
-        {material?.length &&
-          dataRows?.length &&
-          !isIssued &&
-          !dataRows?.some((f) => !f.isValid) &&
-          subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              onClick={() => {
-                issueSublease();
-              }}
-              disabled={isIssueing || !allowedToEdit}
-              endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
-            >
-              {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
-            </Button>
-          </HtmlTooltip>
-        ) : null}
-      </>
-    );
-  };
+  // const rightSideContents = () => {
+  //   return (
+  //     <>
+  //       {material?.length &&
+  //         dataRows?.length &&
+  //         !isIssued &&
+  //         !dataRows?.some((f) => !f.isValid) &&
+  //         subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
+  //         <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
+  //           <Button
+  //             variant={'contained'}
+  //             color="primary"
+  //             size="small"
+  //             onClick={() => {
+  //               console.log('ddddddd', dataRows, material)
+  //               setStartSubleaseDialog(true)
+  //               // issueSublease();
+  //             }}
+  //             disabled={isIssueing || !allowedToEdit}
+  //             endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
+  //           >
+  //             {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
+  //           </Button>
+  //         </HtmlTooltip>
+  //       ) : null}
+  //     </>
+  //   );
+  // };
 
   const actionButtonMenuItems = () => {
     return (
@@ -520,7 +527,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         addButtonMenuItems={addButtonMenuitems()}
         addButtonProps={{
           tooltip: !allowedToEdit ? ownerAndColaborator : '',
-          disabled: !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && subleaseData.status === SUBLEASE_STATUS.issued)
+          disabled: !allowedToEdit
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}
@@ -528,10 +535,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           tooltip: !allowedToEdit ? ownerAndColaborator : 'Actions',
           disabled: selectedRecords?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true
         }}
-        rightSideContents={rightSideContents()}
+        // rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -599,6 +605,14 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           isSubmitting={isSubmitting}
         />
       )}
+      {/* {startSubleaseDialog && (
+        <StartSubleaseDialog
+          onClose={() => {
+            setStartSubleaseDialog(false)
+          }}
+          material={dataRows?.map(d => ({ uniqueId: d?._id, materialId: d?.materialId, type: d?.type, qty: d?.qty }))}
+        />
+      )} */}
     </Fragment>
   );
 };
