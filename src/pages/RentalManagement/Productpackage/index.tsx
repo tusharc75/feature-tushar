@@ -861,7 +861,10 @@ const Productpackage = ({
         addButtonMenuItems={addButtonMenuItems()}
         addButtonProps={{
           disabled: !allowedToEdit || quotationApproved,
-          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``
+          tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``,
+          introWrapper: true,
+          introWrapperTitle: 'Click add button',
+          introWrapperContent: 'Click add button and select the dropdown option'
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonmenuItems()}
@@ -869,7 +872,6 @@ const Productpackage = ({
         rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <Box zIndex={5}>
           <CustomReactTable

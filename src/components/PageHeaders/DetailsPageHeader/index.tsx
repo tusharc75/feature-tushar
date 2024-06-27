@@ -5,10 +5,14 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';
 // import { MdExpandCircleDown } from 'react-icons/md';
 import { FaCircleChevronDown } from 'react-icons/fa6';
+import { CustomIntroWrapper } from 'src/components/CustomIntro';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
   placement?: 'left' | 'right';
+  introWrapper?: boolean,
+  introWrapperTitle?: string,
+  introWrapperContent?: string
 } & ButtonProps;
 
 type DetailsPageHeaderProps = {
@@ -37,7 +41,7 @@ const DetailsPageHeader = ({
   hasXpadding = true
 }: DetailsPageHeaderProps) => {
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
-  const { tooltip: addButtonTooltip, onClick: addButtonOnClick, placement = 'left', ...restOfAddButtonProps } = addButtonProps || {};
+  const { tooltip: addButtonTooltip, onClick: addButtonOnClick, placement = 'left', introWrapper = false, introWrapperTitle = '', introWrapperContent = '', ...restOfAddButtonProps } = addButtonProps || {};
 
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
@@ -70,23 +74,29 @@ const DetailsPageHeader = ({
       <div className="flex flex-wrap gap-2 items-center flex-grow">
         {isAddButtonVisible && placement === 'left' ? (
           <>
-            <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
-              <span>
-                <Button
-                  variant={isMobile ? 'text' : 'outlined'}
-                  color="primary"
-                  size="small"
-                  startIcon={isMobile ? null : <Add />}
-                  onClick={AddClick}
-                  {...restOfAddButtonProps}
-                  aria-controls="add-menu"
-                  className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-                  endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
-                >
-                  {isMobile ? <Add /> : 'Add'}
-                </Button>
-              </span>
-            </HtmlTooltip>
+            <CustomIntroWrapper
+              title={introWrapperTitle}
+              content={introWrapperContent}
+              disabled={!introWrapper}
+            >
+              <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
+                <span>
+                  <Button
+                    variant={isMobile ? 'text' : 'outlined'}
+                    color="primary"
+                    size="small"
+                    startIcon={isMobile ? null : <Add />}
+                    onClick={AddClick}
+                    {...restOfAddButtonProps}
+                    aria-controls="add-menu"
+                    className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
+                    endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
+                  >
+                    {isMobile ? <Add /> : 'Add'}
+                  </Button>
+                </span>
+              </HtmlTooltip>
+            </CustomIntroWrapper>
           </>
         ) : null}
         {isAddButtonVisible && (
