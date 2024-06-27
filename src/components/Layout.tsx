@@ -46,13 +46,14 @@ const Layout = ({ children, width }) => {
             initial={{ opacity: 0 }}
             transition={{ duration: 0.3 }}
             exit={{ opacity: 0 }}
-            className={`flex-grow f-full overflow-hidden min-h-[calc(100vh-64px)] max-[768px]:min-h-[calc(100vh-108px)]`}
+            className={`f-full min-h-[calc(100vh-64px)] flex-grow overflow-hidden max-[768px]:min-h-[calc(100vh-108px)]`}
             style={{ backgroundColor: theme === 'light' ? '#f1f5ff' : 'var(--dark-secondary)' }}
             onClick={handleSidebarClose}
           >
             <div
-              className={`flex-grow w-[calc(100%-6%)] mx-auto h-full z-[1]  max-[900px]:px-[13px] max-[900px]:w-full [transition:padding_195ms_cubic-bezier(0.4,_0,_0.6,_1)_0ms] ${isSidebarOpen && sidebarOpenedByButton ? 'min-[960px]:pl-[222px]' : ''
-                }`}
+              className={`z-[1] mx-auto h-full w-[calc(100%-2%)] flex-grow  [transition:padding_195ms_cubic-bezier(0.4,_0,_0.6,_1)_0ms] max-[900px]:w-full max-[900px]:px-[13px] ${
+                isSidebarOpen && sidebarOpenedByButton ? 'min-[960px]:pl-[222px]' : ''
+              }`}
               ref={bodyRef}
               onScroll={onScroll}
             >
