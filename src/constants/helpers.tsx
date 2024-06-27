@@ -114,7 +114,8 @@ export const bulkAssetCreationSteps: stepInterface[] = [
 
 export const sublease_Vendor_Steps: stepInterface[] = [
   { name: 'Add Products', title: 'Add', icon: 'add' },
-  { name: 'Start Sublease', title: 'Sublease', icon: 'startSublease' },
+  // { name: 'Start Sublease', title: 'Sublease', icon: 'startSublease' },
+  { name: 'Receiving', title: 'Receiving', icon: 'receiveProduct' },
   { name: 'End Sublease', title: 'End', icon: 'end' }
 ];
 export const sublease_InterCompany_Steps: stepInterface[] = [
@@ -2009,7 +2010,8 @@ export const ASSET_STATUS = {
 
 export const ASSET_NUMBER_TYPE = {
   auto: 'Auto',
-  manual: 'Manual'
+  manual: 'Manual',
+  existing: 'Existing'
 };
 
 export const INVENTORY_HISTORY_TYPE = {
