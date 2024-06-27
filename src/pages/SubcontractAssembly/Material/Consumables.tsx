@@ -35,7 +35,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
   const [isDeleting, setDeleting] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [productOption, setProductOption] = useState(null);
-  const [selectedProductOption, setSelectedProductOption] = useState({ optionLabel: 'All', optionValue: 'All' });
+  const [selectedProductOption, setSelectedProductOption] = useState({ optionLabel: 'All', optionValue: 'All', receivedQty: 1 });
   const [allConsumables, setAllConsumables] = useState([]);
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null });
   const [isSubmitting, setSubmitting] = useState(false);
@@ -51,11 +51,12 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
         return {
           optionLabel: s?.productName,
           optionValue: s?._id,
+          receivedQty: s?.receivedQty || 0
         };
       })
     ]);
     if (selectedProductOption?.optionValue !== 'All' && !products?.some((s) => s?._id === selectedProductOption?.optionValue)) {
-      setSelectedProductOption({ optionLabel: 'All', optionValue: 'All' });
+      setSelectedProductOption({ optionLabel: 'All', optionValue: 'All', receivedQty: 1 });
     }
   }, [products]);
 
@@ -351,7 +352,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           <DetailsPageHeader
-            isAddButtonVisible={selectedProductOption?.optionValue !== 'All'}
+            isAddButtonVisible={selectedProductOption?.optionValue !== 'All' && !selectedProductOption?.receivedQty}
             addButtonProps={{ onClick: () => setConsumablesDialog(true) }}
             actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.length) }}
             actionButtonMenuItems={actionButtonMenuItems()}
