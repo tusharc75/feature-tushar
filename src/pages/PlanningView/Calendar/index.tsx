@@ -15,7 +15,7 @@ import { ExpandMore } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
 import { camelCase, groupBy } from 'lodash';
 import moment from 'moment';
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { forwardRef, useCallback, useContext, useEffect, useImperativeHandle, useMemo, useState } from 'react';
 import { Calendar, View, momentLocalizer } from 'react-big-calendar';
 import withDragAndDrop from 'react-big-calendar/lib/addons/dragAndDrop';
 import 'react-big-calendar/lib/addons/dragAndDrop/styles.scss';
@@ -89,7 +89,7 @@ const PRODUCT_FILTERS = [
   }
 ];
 
-function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }) {
+function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString },ref) {
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
 
@@ -133,6 +133,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [anchor, setAnchor] = useState(null);
 
   const [lookupLoading, setLookupLoading] = useState(false);
+
+  useImperativeHandle(ref, () => ({
+    fetchData
+  }));
 
   useEffect(() => {
     if (view === 'month') {
@@ -738,7 +742,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   );
 }
 
-export default CalendarView;
+export default forwardRef(CalendarView);
 
 const RenderTable = ({ data }) => {
   return (
