@@ -58,25 +58,21 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
           return row?.original['type'] ? <p className="text-truncate">{row?.original['type']}</p> : <NoDataCell />;
         }
       },
-      {
+     ...(permissions?.invoice?.isRead ? [{
         accessor: 'invoice',
         Header: 'Invoice',
         width: 200,
         disabled: true,
         Cell: ({ row }) => {
           return row?.original['invoice'] ? (
-            permissions?.invoice?.isRead ? (
               <a className="link text-truncate" href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`} target="_blank" rel="noreferrer">
                 {row?.original['invoice']}
               </a>
-            ) : (
-              <p className="text-truncate">{row?.original['invoice']}</p>
-            )
           ) : (
             <NoDataCell />
           );
         }
-      },
+      }]: []),
       {
         accessor: 'user',
         Header: 'User',
