@@ -622,7 +622,10 @@ const Services = ({
         addButtonMenuItems={addButtonMenuItems()}
         addButtonProps={{
           tooltip: !allowedToEdit ? ownerAndColaborator : quotationApproved ? `Quotation ${quotationStatus} you can not perform this action` : ``,
-          disabled: !allowedToEdit || quotationApproved
+          disabled: !allowedToEdit || quotationApproved,
+          introWrapper: true,
+          introWrapperTitle: 'Click add button',
+          introWrapperContent: 'Click add button and select the dropdown option'
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}

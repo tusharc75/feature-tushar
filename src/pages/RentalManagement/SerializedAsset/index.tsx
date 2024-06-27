@@ -43,6 +43,7 @@ import AddSerializedAsset from './AddSerializedAsset';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 import AddNonSerializedInventory from './AddNonSerializedInventory';
 import { FiExternalLink } from 'react-icons/fi';
+import { CustomIntroWrapper } from 'src/components/CustomIntro';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -918,26 +919,32 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const rightSideContents = () => {
     return (
       <>
-        <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
-          <span>
-            <Button
-              variant="contained"
-              color="primary"
-              type="button"
-              size="small"
-              disabled={disableAssignSerializedAssets()}
-              onClick={() => {
-                if (isOffline) {
-                  setAddNonSerializedAssetDialog(true);
-                } else {
-                  setAddSerializedAssetDialog({ open: true });
-                }
-              }}
-            >
-              {`Assign ${routes.serializedAsset.title}`}
-            </Button>
-          </span>
-        </HtmlTooltip>
+        <CustomIntroWrapper
+          title={`Assign ${routes.serializedAsset.title}`}
+          content={`Select the serialized products below and assign its ${routes.serializedAsset.title}`}
+          disabled={!allowedToEdit}
+        >
+          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : ``}>
+            <span>
+              <Button
+                variant="contained"
+                color="primary"
+                type="button"
+                size="small"
+                disabled={disableAssignSerializedAssets()}
+                onClick={() => {
+                  if (isOffline) {
+                    setAddNonSerializedAssetDialog(true);
+                  } else {
+                    setAddSerializedAssetDialog({ open: true });
+                  }
+                }}
+              >
+                {`Assign ${routes.serializedAsset.title}`}
+              </Button>
+            </span>
+          </HtmlTooltip>
+        </CustomIntroWrapper>
         {(purchaseOrderCount > 0 || subleaseCount > 0 || transferAssetCount > 0 || bulkAssetCreationCount > 0) && (
           <Button
             onClick={openLinkActions}
