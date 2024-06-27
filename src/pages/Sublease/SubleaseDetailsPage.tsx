@@ -66,7 +66,6 @@ const SubleaseDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
 
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
-  const [isIssued, setIsIssued] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
@@ -85,8 +84,8 @@ const SubleaseDetailsPage = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -97,7 +96,7 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   useEffect(() => {
@@ -143,9 +142,6 @@ const SubleaseDetailsPage = () => {
       }
       var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.sublease, data)
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
-      if (data.status === SUBLEASE_STATUS.issued) {
-        setIsIssued(true);
-      }
       if (data.status === SUBLEASE_STATUS.closed) {
         isAllowedToEdit = false;
       }
@@ -264,7 +260,6 @@ const SubleaseDetailsPage = () => {
                       subleaseData={subleaseData}
                       setNextStep={setNextStep}
                       fetchData={fetchData}
-                      isIssued={isIssued}
                       setNextStepToolTip={setNextStepToolTip}
                       renderedFrom={`${renderedFrom}_grid-1`}
                       allowedToEdit={allowedToEdit}
@@ -276,11 +271,9 @@ const SubleaseDetailsPage = () => {
                       subleaseData={subleaseData}
                       renderedFrom={`${renderedFrom}_Receiving`}
                       allowedToEdit={allowedToEdit}
-                      isIssued={isIssued}
                       setNextStep={setNextStep}
                       setNextStepToolTip={setNextStepToolTip}
                       stepFullScreen={stepFullScreen}
-                      isProcessor={isProcessor}
                     />
                   )}
                   {['End Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (

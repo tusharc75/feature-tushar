@@ -1,11 +1,10 @@
-import { Box, Button, CircularProgress, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdDelete } from 'react-icons/md';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -26,13 +25,10 @@ import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUB
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
-import StartSubleaseDialog from 'src/pages/Sublease/Receiving/StartSubleaseDialog';
 
-const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
+const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -45,7 +41,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [isIssueing, setIssueing] = useState(false);
 
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
@@ -53,18 +48,17 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const [allFields, setAllFields] = useState([]);
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // const [startSubleaseDialog, setStartSubleaseDialog] = useState(false);
 
   useEffect(() => {
     fetchFields();
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchMaterial();
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit && !isIssued);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(
       renderedFrom,
@@ -81,13 +75,16 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         Header: 'Index',
         width: 70,
         sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
       },
       {
         accessor: 'detail',
         Header: 'Detail',
-        minWidth: 300,
-        width: 300,
+        minWidth: 250,
+        width: 250,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
@@ -132,10 +129,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               </IconButton>
             </HtmlTooltip>
           </div>
-        ),
-        Footer: () => {
-          return <>Total</>;
-        }
+        )
       },
       {
         accessor: 'description',
@@ -194,11 +188,11 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     setColumns(coloum);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchMaterial = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
-    // setNextStepToolTip(null);
+    setNextStepToolTip(null);
     var data: any = [];
     var inventory: any = [];
     const response = await axiosInstance().get(`${sublease.api}/productpackage/${subleaseData._id}`);
@@ -249,24 +243,11 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
       setNextStep(false);
-      // setNextStepToolTip(subleaseMessage.addProductPackage);
+      setNextStepToolTip(subleaseMessage.addProductPackage);
     } else {
       setNextStep(true)
     }
-    // else {
-    //   if (subleaseData?.type === SUBLEASE_TYPE.vendor) {
-    //     if (isIssued) {
-    //       setNextStep(true);
-    //       setNextStepToolTip(null);
-    //     } else {
-    //       setNextStep(false);
-    //       setNextStepToolTip(subleaseMessage.startSublease);
-    //     }
-    //   } else {
-    //     setNextStep(true);
-    //     setNextStepToolTip(null);
-    //   }
-    // }
+
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -316,7 +297,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .post(`${sublease.api}/productpackage/${subleaseData._id}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
+        fetchMaterial();
         fetchData();
         setIsSubmitting(false);
       })
@@ -333,7 +314,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
+        fetchMaterial();
       })
       .catch((error) => {
         setUpdating(false);
@@ -348,7 +329,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchMaterial();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -363,19 +344,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     setRecordToUpdate(rowData);
   };
 
-  const issueSublease = () => {
-    setIssueing(true);
-    axiosInstance()
-      .put(`${sublease.api}/${subleaseData._id}/issue-sublease`)
-      .then(() => {
-        setIssueing(false);
-        fetchData();
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const calculatePrice = (arr: any[]) => {
     if (subleaseData) {
@@ -455,35 +423,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     );
   };
 
-  // const rightSideContents = () => {
-  //   return (
-  //     <>
-  //       {material?.length &&
-  //         dataRows?.length &&
-  //         !isIssued &&
-  //         !dataRows?.some((f) => !f.isValid) &&
-  //         subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
-  //         <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
-  //           <Button
-  //             variant={'contained'}
-  //             color="primary"
-  //             size="small"
-  //             onClick={() => {
-  //               console.log('ddddddd', dataRows, material)
-  //               setStartSubleaseDialog(true)
-  //               // issueSublease();
-  //             }}
-  //             disabled={isIssueing || !allowedToEdit}
-  //             endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
-  //           >
-  //             {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
-  //           </Button>
-  //         </HtmlTooltip>
-  //       ) : null}
-  //     </>
-  //   );
-  // };
-
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -533,9 +472,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{
           tooltip: !allowedToEdit ? ownerAndColaborator : 'Actions',
-          disabled: selectedRecords?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true
+          disabled: selectedRecords?.length || !allowedToEdit ? false : true
         }}
-        // rightSideContents={rightSideContents()}
         hasXpadding
       />
       {columns ? (
@@ -545,7 +483,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             columns={columns}
             state={state}
             dispatch={dispatch}
-            refreshGrid={fetchProductInventory}
+            refreshGrid={fetchMaterial}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             hideSelection={!allowedToEdit}
             onSaveEdit={onSaveInlineEdit}
@@ -605,14 +543,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           isSubmitting={isSubmitting}
         />
       )}
-      {/* {startSubleaseDialog && (
-        <StartSubleaseDialog
-          onClose={() => {
-            setStartSubleaseDialog(false)
-          }}
-          material={dataRows?.map(d => ({ uniqueId: d?._id, materialId: d?.materialId, type: d?.type, qty: d?.qty }))}
-        />
-      )} */}
     </Fragment>
   );
 };
