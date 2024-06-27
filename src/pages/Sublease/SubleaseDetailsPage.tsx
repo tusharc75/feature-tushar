@@ -40,6 +40,7 @@ import SerializedAsset from './SerializedAsset';
 import Slip from './Slip';
 import SubleaseAsset from './SubleaseAsset';
 import Tickets from './Tickets';
+import Receiving from 'src/pages/Sublease/Receiving';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -270,7 +271,19 @@ const SubleaseDetailsPage = () => {
                       stepFullScreen={stepFullScreen}
                     />
                   )}
-                  {['End Sublease', 'Start Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                  {['Receiving'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                    <Receiving
+                      subleaseData={subleaseData}
+                      renderedFrom={`${renderedFrom}_Receiving`}
+                      allowedToEdit={allowedToEdit}
+                      isIssued={isIssued}
+                      setNextStep={setNextStep}
+                      setNextStepToolTip={setNextStepToolTip}
+                      stepFullScreen={stepFullScreen}
+                      isProcessor={isProcessor}
+                    />
+                  )}
+                  {['End Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
                     <SubleaseAsset
                       fetchData={fetchData}
                       subleaseData={subleaseData}
