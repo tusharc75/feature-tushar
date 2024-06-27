@@ -4,7 +4,6 @@ import { map, uniq } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { subleaseMessage } from 'src/constants/messageHelpers';
@@ -359,7 +358,7 @@ const SerializedAsset = ({
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={currentStep === 1 ? true : false}
+        isActionButtonVisible={true}
         actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
         actionButtonMenuItems={actionButtonMenuItems()}
         previewDownloadProps={previewDownloadProps}

@@ -30,7 +30,7 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 	useEffect(() => {
 		const productsData = products.flatMap((product, index) =>
 			[...Array(product?.qty).keys()].map((_, index2) => ({
-				id: product?.id,
+				_id: product?._id,
 				index: `${index + 1}.${index2 + 1}`,
 				productName: product?.productName,
 				product: product?.product,
@@ -39,8 +39,6 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 			}))
 		);
 		setProductList(productsData);
-
-
 	}, [products]);
 
 	const handleSubmit = (values) => {
