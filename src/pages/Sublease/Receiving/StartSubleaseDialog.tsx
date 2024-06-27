@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, TextField } from "@material-ui/core";
+import { Box, Button, Dialog, Grid, TextField } from "@material-ui/core";
 import { FieldArray, Form, Formik } from "formik";
 import { isEqual, startCase } from "lodash";
 import { useContext, useState } from "react";
@@ -123,45 +123,48 @@ const StartSubleaseDialog = ({ onClose, material, subleaseId, onSuccess }) => {
 														<div className="grid gap-[15px] sm:gap-[18px]">
 															{values.material.map((data, index) => (
 																<div
-																	style={{ border: '1.5px solid var(--common-border-color)' }}
+																	style={{ border: '1.5px solid var(--common-border-color)', display: 'flex' }}
 																	className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
 																	key={index}
 																>
-																	<div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
-																		<p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
-																	</div>
-																	<div className="flex">
-																		<div>
-																			<span>
-																				<span className="text-[var(--primary-text)] font-semibold">{startCase(data?.type)}: </span>
-																				{data?.detail}
-																			</span>
-																		</div>
-																		<div className="pl-5" style={{ minWidth: '30%' }}>
-																			{data?.serializedProduct && (
-																				<TextField
-																					fullWidth
-																					label="Asset Quantity"
-																					variant="outlined"
-																					type="number"
-																					size="small"
-																					onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-																					name="assetQuantity"
-																					placeholder="Asset Quantity"
-																					value={data.assetQuantity}
-																					onChange={(e) => {
-																						const value = e.target.value.replace(/[^0-9]/g, '');
-																						arrayHelpers.replace(index, {
-																							...values.material[index],
-																							['assetQuantity']: value
-																						});
-																					}}
-																					error={validate([data])?.assetQuantity}
-																					helperText={validate([data]).assetQuantity ? 'Receiving quantity is more than actual quantity' : ''}
-																				/>
-																			)}
-																		</div>
-																	</div>
+																	<Grid container spacing={2} direction="row">
+																		<Grid item lg={4} md={4}>
+																			<Box display={'flex'} justifyContent={'start'} alignItems={'center'}>
+																				<div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
+																					<p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
+																				</div>
+																				<div className="pl-10">
+																					{data?.detail}
+																				</div>
+																			</Box>
+																		</Grid>
+																		<Grid item lg={4} md={4}>
+																			<div>
+																				{data?.serializedProduct && (
+																					<TextField
+																						fullWidth
+																						label="Asset Quantity"
+																						variant="outlined"
+																						type="number"
+																						size="small"
+																						onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+																						name="assetQuantity"
+																						placeholder="Asset Quantity"
+																						value={data.assetQuantity}
+																						onChange={(e) => {
+																							const value = e.target.value.replace(/[^0-9]/g, '');
+																							arrayHelpers.replace(index, {
+																								...values.material[index],
+																								['assetQuantity']: value
+																							});
+																						}}
+																						error={validate([data])?.assetQuantity}
+																						helperText={validate([data]).assetQuantity ? 'Receiving quantity is more than actual quantity' : ''}
+																					/>
+																				)}
+																			</div>
+																		</Grid>
+																	</Grid>
 																</div>
 															))}
 														</div>

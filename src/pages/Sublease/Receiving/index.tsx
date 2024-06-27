@@ -158,7 +158,7 @@ const Receiving = ({ subleaseData, allowedToEdit, isIssued, setNextStep, setNext
 			parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
 			parent.qtyDisplay = parent.qty;
 			parent.subRows = generateNestedRows(parent, [], assets?.data?.data)
-			parent.assetQty = parent.subRows?.filter(s => s?.type === 'asset')?.length;
+			parent.assetQty = parent.assetQty;
 			if (parent.type === 'package') {
 				parent.subRows = generateNestedRows(parent, data.material, assets?.data?.data);
 			}
@@ -193,7 +193,7 @@ const Receiving = ({ subleaseData, allowedToEdit, isIssued, setNextStep, setNext
 				_subRow.description = _subRow.productDetail?.productDescription;
 				_subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
 				_subRow.subRows = generateNestedRows(_subRow, [], assets);
-				_subRow.assetQty = _subRow.subRows?.filter(s => s?.type === 'asset')?.length;
+				_subRow.assetQty = _subRow.assetQty;
 				subRow.push(_subRow)
 			});
 		}
