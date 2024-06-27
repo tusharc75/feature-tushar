@@ -23,8 +23,8 @@ const StartSubleaseDialog = ({ onClose, material, subleaseId, onSuccess }) => {
 		if (values.length > 0) {
 			values.map((d) => {
 				let tempProduct = material.find((u) => u.uniqueId === d._id);
-
-				if (tempProduct && d.assetQuantity > tempProduct?.qty) {
+				const qty = tempProduct?.qty - tempProduct?.assetQty
+				if (tempProduct && d.assetQuantity > qty) {
 					errors.assetQuantity = 'should be greater';
 				}
 			});
@@ -130,17 +130,14 @@ const StartSubleaseDialog = ({ onClose, material, subleaseId, onSuccess }) => {
 																	<div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
 																		<p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
 																	</div>
-																	<div>
-																		<div
-																			style={{ borderBottom: '1px solid var(--common-border-color)' }}
-																			className="flex flex-wrap border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
-																		>
+																	<div className="flex">
+																		<div>
 																			<span>
 																				<span className="text-[var(--primary-text)] font-semibold">{startCase(data?.type)}: </span>
 																				{data?.detail}
 																			</span>
 																		</div>
-																		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
+																		<div className="pl-5" style={{ minWidth: '30%' }}>
 																			{data?.serializedProduct && (
 																				<TextField
 																					fullWidth
