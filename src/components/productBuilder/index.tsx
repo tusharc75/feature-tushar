@@ -32,6 +32,7 @@ import SupplierAskPrice from './SupplierAskPrice';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 import NoDataCell from '../Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
+import CustomEditableGrid from 'src/components/CustomEditableGridNew';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -82,6 +83,8 @@ const ProductBuilder = (props) => {
   const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
   const [supplierContactData, setSupplierContactData] = useState([]);
   const [supplierData, setSupplierData] = useState(null);
+  const [inlineBulkEdit, setInlineBulkEdit] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const { generateColumns } = useColumns();
 
   const {
@@ -146,7 +149,7 @@ const ProductBuilder = (props) => {
         });
         let newColumns = generateColumns(routes.product.title, fields, null, false, currency);
         newColumns.forEach(column => {
-          if(column?.accessor === 'productName'){
+          if (column?.accessor === 'productName') {
             column.cell = ({ row }) => (
               <span>
                 {row?.original?.['productName'] ? (
@@ -322,18 +325,23 @@ const ProductBuilder = (props) => {
       setProductId(null);
       setIsClone(false);
     } else {
+      setIsSubmitting(true)
       let data: any = {};
       data.product = rows;
       data._id = productBuilderId;
       axiosInstance()
         .put(`/productbuilder/updateProduct`, data)
         .then(() => {
+          setIsSubmitting(false)
           setProductId(null);
           setIsBulkEdit(false);
           setproductDataList([]);
           fetchProduct();
+          setInlineBulkEdit(false)
         })
         .catch((error) => {
+          setIsSubmitting(false)
+          setInlineBulkEdit(false)
           toastConfig.setToastConfig(error);
         });
     }
@@ -523,6 +531,15 @@ const ProductBuilder = (props) => {
     return (
       <>
         {stage === 'cost' && permissions?.isUpdate && (
+          <MenuItem
+            onClick={() => {
+              setInlineBulkEdit(true)
+            }}
+          >
+            {isMobile && !isTablet ? '' : 'Bulk Edit New'}
+          </MenuItem>
+        )}
+        {stage === 'cost' && permissions?.isUpdate && (
           <MenuItem onClick={handelOpenBulkEdit} disabled={checkUniqTemplate()}>
             {isMobile && !isTablet ? '' : 'Bulk Edit'}
           </MenuItem>
@@ -627,8 +644,8 @@ const ProductBuilder = (props) => {
             isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
               ? false
               : selectedRecords.length
-              ? false
-              : true
+                ? false
+                : true
         }}
         previewDownloadProps={previewDownloadProps}
         leftSideContents={typeof leftSideContents === 'function' ? leftSideContents() : null}
@@ -703,6 +720,19 @@ const ProductBuilder = (props) => {
           loading={loading}
           productBuilderId={productBuilderId}
           stage={stage}
+        />
+      )}
+      {inlineBulkEdit && (
+        <CustomEditableGrid
+          onClose={() => {
+            setInlineBulkEdit(false)
+          }}
+          data={dataRows}
+          fields={productData.productFields}
+          currency={currency}
+          extraData={['productId']}
+          handleSave={(products) => { handleSaveProduct(products) }}
+          isSubmitting={isSubmitting}
         />
       )}
       {openSupplierPriceDialog && (
