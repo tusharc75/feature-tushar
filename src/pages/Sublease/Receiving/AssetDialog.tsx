@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import {
 	Dialog,
 	Box,
@@ -22,9 +22,12 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axiosInstance from 'src/axios/axiosInstance';
-import _ from 'lodash';
+import { uniqBy } from 'lodash';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
+
+	const toastConfig = useContext(CustomToastContext);
 
 	const [productList, setProductList] = useState(null);
 	const [fullScreen, setFullScreen] = useState(true);
@@ -48,16 +51,15 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 		if (productList) {
 			fetchExistingAssets()
 		}
-
 	}, [productList])
 
 	const fetchExistingAssets = () => {
-		axiosInstance().get(`${sublease.api}/existing-assets?products=${JSON.stringify(_.uniqBy(productList, 'product')?.map((p: any) => p?.product))}`)
+		axiosInstance().get(`${sublease.api}/existing-assets?products=${JSON.stringify(uniqBy(productList, 'product')?.map((p: any) => p?.product))}`)
 			.then(({ data: { data } }) => {
 				setExistingAssets(data)
 			})
 			.catch((error) => {
-
+				toastConfig.setToastConfig(error);
 			})
 	}
 
@@ -206,10 +208,10 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 											<Table aria-label="customized table">
 												<TableHead>
 													<TableRow>
-														<TableCell>Index</TableCell>
-														<TableCell align="left">Product</TableCell>
-														<TableCell>Asset Number Type *</TableCell>
-														<TableCell align="left">Asset Number *</TableCell>
+														<TableCell width="10%">Index</TableCell>
+														<TableCell width="30%" align="left">Product</TableCell>
+														<TableCell width="30%" align="left">Asset Number Type *</TableCell>
+														<TableCell width="30%" align="left">Asset Number *</TableCell>
 													</TableRow>
 												</TableHead>
 												<TableBody>
@@ -248,61 +250,54 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 																		/>
 																	</TableCell>
 																	<TableCell align="left">
-																		{
-																			data.assetNumberType === ASSET_NUMBER_TYPE.existing ? (
-																				<Autocomplete
-																					fullWidth
-																					options={existingAssets ? existingAssets?.filter(e => e?.product === data?.product) : []}
-																					getOptionLabel={(option: any) => (option ? option?.assetNumber : '')}
-																					getOptionSelected={(option: any, val) => option.assetNumber === val}
-																					value={existingAssets?.filter(e => e?.assetNumber === data.assetNumber)?.length > 0 ? existingAssets?.filter(e => e?.assetNumber === data.assetNumber)[0] : ''}
-																					disableClearable={true}
-																					onChange={(e, val) => {
-																						arrayHelpers.replace(index, {
-																							...values.products[index],
-																							['assetNumber']: val ? val?.assetNumber : ''
-																						});
-																					}}
-																					renderInput={(params) => (
-																						<TextField
-																							{...params}
-																							margin="dense"
-																							name="plant"
-																							placeholder="Asset Number"
-																							label="Asset Number"
-																							variant="outlined"
-																							error={Boolean(errors[`assetNumber_${index}`])}
-																							helperText={errors[`assetNumber_${index}`]}
-																							required
-																							fullWidth
-																						/>
-																					)}
-																				/>
-																			) :
-																				(
+																		{data.assetNumberType === ASSET_NUMBER_TYPE.existing ?
+																			<Autocomplete
+																				fullWidth
+																				options={existingAssets ? existingAssets?.filter(e => e?.product === data?.product) : []}
+																				getOptionLabel={(option: any) => (option ? option?.assetNumber : '')}
+																				getOptionSelected={(option: any, val) => option.assetNumber === val}
+																				value={existingAssets?.filter(e => e?.assetNumber === data.assetNumber)?.length > 0 ? existingAssets?.filter(e => e?.assetNumber === data.assetNumber)[0] : ''}
+																				onChange={(e, val) => {
+																					arrayHelpers.replace(index, {
+																						...values.products[index],
+																						['assetNumber']: val ? val?.assetNumber : ''
+																					});
+																				}}
+																				renderInput={(params) => (
 																					<TextField
-																						fullWidth
+																						{...params}
+																						margin="dense"
+																						name={`assetNumber_${index}`}
 																						label=""
 																						variant="outlined"
-																						type="text"
-																						size="small"
-																						name={`assetNumber_${index}`}
-																						disabled={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? true : false}
-																						placeholder="Asset Number"
-																						value={data.assetNumber}
-																						onChange={(e) => {
-																							arrayHelpers.replace(index, {
-																								...values.products[index],
-																								['assetNumber']: e.target.value
-																							});
-																						}}
 																						error={Boolean(errors[`assetNumber_${index}`])}
 																						helperText={errors[`assetNumber_${index}`]}
 																						required
+																						fullWidth
 																					/>
-																				)
+																				)}
+																			/>
+																			: <TextField
+																				fullWidth
+																				label=""
+																				variant="outlined"
+																				type="text"
+																				size="small"
+																				name={`assetNumber_${index}`}
+																				disabled={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? true : false}
+																				placeholder="Asset Number"
+																				value={data.assetNumber}
+																				onChange={(e) => {
+																					arrayHelpers.replace(index, {
+																						...values.products[index],
+																						['assetNumber']: e.target.value
+																					});
+																				}}
+																				error={Boolean(errors[`assetNumber_${index}`])}
+																				helperText={errors[`assetNumber_${index}`]}
+																				required
+																			/>
 																		}
-
 																	</TableCell>
 																</TableRow>
 															))
