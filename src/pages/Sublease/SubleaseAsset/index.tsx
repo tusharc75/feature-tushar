@@ -34,15 +34,12 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 const SerializedAsset = ({
   subleaseData,
   fetchData,
-  setNextStep,
-  setNextStepToolTip,
   currentStep,
   renderedFrom,
   allowedToEdit,
   isProcessor,
   stepFullScreen
 }) => {
-  const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -53,8 +50,6 @@ const SerializedAsset = ({
   }: any = useData();
 
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
-  const [isCompleteing, setIsCompleteing] = useState(false);
-  const [isCompleteEnable, setIsCompleteEnable] = useState(false);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -94,8 +89,7 @@ const SerializedAsset = ({
   };
 
   const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
       .then(({ data: { data } }) => {
         const newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         newColumns?.forEach((o) => {
@@ -169,14 +163,7 @@ const SerializedAsset = ({
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     const response = await axiosInstance().get(`${sublease.api}/asset/${subleaseData._id}`);
-    var isComplate = true;
     let rows = response?.data?.data.map((u, i) => {
-      if (
-        u?.currentOwner?.optionValue !== subleaseData?.supplierAccount?.optionValue ||
-        [ASSET_STATUS.reserved, ASSET_STATUS.inUse, ASSET_STATUS.repair].includes(u.status)
-      ) {
-        isComplate = false;
-      }
       let res = {
         ...prepareDataForGrid(u, user)
       };
@@ -184,31 +171,8 @@ const SerializedAsset = ({
       res['isChecked'] = false;
       return res;
     });
-    setIsCompleteEnable(isComplate);
-    if (isComplate) {
-      setNextStep(true);
-      setNextStepToolTip(null);
-    } else {
-      setNextStep(false);
-      setNextStepToolTip(subleaseMessage.subleaseProcessStep);
-    }
     dispatch({ type: 'initialize', data: rows, count: rows.length });
     dispatch({ type: 'loading', loading: false });
-  };
-
-  const completeSublease = () => {
-    setIsCompleteing(true);
-    axiosInstance()
-      .put(`${sublease.api}/${subleaseData._id}/complete-sublease`)
-      .then(() => {
-        setIsCompleteing(false);
-        fetchData();
-        fetchRecords();
-      })
-      .catch((error) => {
-        setIsCompleteing(false);
-        toastConfig.setToastConfig(error);
-      });
   };
 
   const checkUniqWarehouse = () => {
@@ -269,21 +233,6 @@ const SerializedAsset = ({
             ids={selectedRecords.length ? selectedRecords?.map((d: any) => d._id) : dataRows?.map((d: any) => d._id)}
           />
         )}
-        {SUBLEASE_STATUS.completed != subleaseData?.status && (allowedToEdit || isProcessor) && currentStep === 2 && allowedToEdit && (
-          <Fragment>
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              disabled={!isCompleteEnable || isCompleteing}
-              onClick={() => {
-                completeSublease();
-              }}
-            >
-              End Sublease
-            </Button>
-          </Fragment>
-        )}
       </>
     );
   };
@@ -312,8 +261,7 @@ const SerializedAsset = ({
     return (
       <>
         <MenuItem
-          disabled={SUBLEASE_STATUS.completed != subleaseData?.status &&
-            checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
+          disabled={checkUniqWarehouse() && (allowedToEdit || isProcessor) ? false : true}
           onClick={() => {
             if (!validateAction()) {
               const data = {};
@@ -358,7 +306,7 @@ const SerializedAsset = ({
     <>
       <DetailsPageHeader
         isAddButtonVisible={false}
-        isActionButtonVisible={true}
+        isActionButtonVisible={allowedToEdit}
         actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
         actionButtonMenuItems={actionButtonMenuItems()}
         previewDownloadProps={previewDownloadProps}
@@ -375,6 +323,7 @@ const SerializedAsset = ({
           refreshGrid={fetchRecords}
           isClientSideGrid={true}
           hideExportTable={true}
+          hideSelection={!allowedToEdit}
         />
       ) : (
         <Box p={2} height={500}>
@@ -391,6 +340,7 @@ const SerializedAsset = ({
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchRecords();
+            fetchData()
           }}
         />
       )}

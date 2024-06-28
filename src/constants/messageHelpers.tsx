@@ -94,7 +94,6 @@ export const subleaseMessage = {
     addProductPackage: 'Add Products or Packages to proceed',
     startSublease: 'Start Sublease to proceed',
     assignAssets: 'Assign Assets to proceed',
-    subleaseProcessStep: 'Send to Supplier to proceed',
     deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
     deliverReceivingTicketStep: 'Create & Receive Receiving Ticket to proceed',
 
@@ -112,6 +111,7 @@ export const subleaseMessage = {
     assetStatusSendSupplier: 'Only New,Available and Under Review asset status can send to supplier',
     assetsIsWithCustomer: 'Assets are at customer location',
     assetsAlradyReturned: 'Assets are already returned to supplier',
+    receiveAssets: 'Reveive Assets to proceed',
 
     sameWarehouse: `Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
     pickupDeliveryDifferent: 'Pickup and Delivery must be different',

@@ -2116,7 +2116,6 @@ export const SUBLEASE_STATUS = {
   new: 'New',
   inProgress: 'In-Progress',
   issued: 'Issued',
-  completed: 'Completed',
   readyToInvoice: 'Ready to Invoice',
   invoiced: 'Invoiced',
   closed: 'Closed'
