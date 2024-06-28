@@ -34,8 +34,6 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 const SerializedAsset = ({
   subleaseData,
   fetchData,
-  setNextStep,
-  setNextStepToolTip,
   currentStep,
   renderedFrom,
   allowedToEdit,
@@ -342,6 +340,7 @@ const SerializedAsset = ({
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchRecords();
+            fetchData()
           }}
         />
       )}

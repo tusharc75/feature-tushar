@@ -15,6 +15,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
 import AddSerialNumber from 'src/pages/ProductInventory/SerialNumber/AddSerialNumber';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const AssignSerialNumbersDialog = ({
   selectedProducts = [],
@@ -336,18 +337,31 @@ const AssignSerialNumbersDialog = ({
   const leftSideContentsOfSearchFilter = () => {
     return (
       <>
-        {serialNumberCount ? (
-          <Button
-            variant={'contained'}
-            color="primary"
-            size="small"
-            onClick={() => {
-              setAddserialNumber(true);
-            }}
-          >
-            Add New Serial Number
-          </Button>
-        ) : null}
+        {!selectedProduct || !selectedWarehouse ?
+          <HtmlTooltip title={"Please Select Product"}>
+            <span>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                size="small"
+                disabled={true}
+              >
+                Add New Serial Numbers
+              </Button>
+            </span>
+          </HtmlTooltip> :
+          serialNumberCount ? (
+            <Button
+              variant={'contained'}
+              color="primary"
+              size="small"
+              onClick={() => {
+                setAddserialNumber(true);
+              }}
+            >
+              Add New Serial Numbers
+            </Button>
+          ) : null}
       </>
     );
   };

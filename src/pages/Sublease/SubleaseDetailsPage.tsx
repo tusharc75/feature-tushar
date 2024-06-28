@@ -276,9 +276,7 @@ const SubleaseDetailsPage = () => {
                     <SubleaseAsset
                       fetchData={fetchData}
                       subleaseData={subleaseData}
-                      setNextStep={setNextStep}
                       currentStep={currentStep}
-                      setNextStepToolTip={setNextStepToolTip}
                       renderedFrom={`${renderedFrom}_grid-2`}
                       allowedToEdit={allowedToEdit}
                       isProcessor={isProcessor}
