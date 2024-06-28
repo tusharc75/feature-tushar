@@ -25,7 +25,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { uniqBy } from 'lodash';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
+const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId }) => {
 
 	const toastConfig = useContext(CustomToastContext);
 
@@ -54,7 +54,7 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 	}, [productList])
 
 	const fetchExistingAssets = () => {
-		axiosInstance().get(`${sublease.api}/existing-assets?products=${JSON.stringify(uniqBy(productList, 'product')?.map((p: any) => p?.product))}`)
+		axiosInstance().get(`${sublease.api}/${subleaseId}/existing-assets?products=${JSON.stringify(uniqBy(productList, 'product')?.map((p: any) => p?.product))}`)
 			.then(({ data: { data } }) => {
 				setExistingAssets(data)
 			})
