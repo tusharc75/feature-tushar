@@ -191,7 +191,9 @@ const RoleEngine = (props: RoleProps) => {
           } else {
             _resource[access] = event.target.checked;
             if(!_resource?.parentResource){
-              updateChildResource(_resource.name, access, event.target.checked);
+              if (updateChildResource) {
+                updateChildResource(_resource.name, access, event.target.checked);
+              }
             }
           }
           if (event.target.checked) {
