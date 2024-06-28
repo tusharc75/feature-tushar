@@ -5,12 +5,12 @@ import { dateFormatForInputControl, getUniqueCurrencies } from "src/constants/he
 import DateUtils from '@date-io/date-fns';
 
 const FormTypes = (props) => {
-	const { values, onChange, fieldData, currency, touched, errors, ...others } = props;
+	const { values, onChange, fieldData, currency, touched, errors, disabled, ...others } = props;
 	return (
 		fieldData?.type === 'singleLine' ? (
 			<TextField
 				style={{ paddingRight: 1 }}
-				disabled={fieldData?.isUneditable}
+				disabled={fieldData?.isUneditable || disabled}
 				variant="outlined"
 				type="text"
 				label={fieldData?.fieldLabel}
@@ -33,6 +33,7 @@ const FormTypes = (props) => {
 				name={`${fieldData?.fieldName}`}
 				required={fieldData?.required}
 				rows={3}
+					disabled={disabled}
 				value={values[fieldData?.fieldName]}
 				margin="dense"
 				error={touched[`${values._id}_${fieldData?.fieldName}`] && Boolean(errors[`${values._id}_${fieldData?.fieldName}`])}
@@ -46,6 +47,7 @@ const FormTypes = (props) => {
 				type="number"
 				variant="outlined"
 				label={fieldData?.label}
+						disabled={disabled}
 				required={fieldData?.required}
 				name={`${fieldData?.fieldName}`}
 				value={values[fieldData?.fieldName]}
@@ -66,6 +68,7 @@ const FormTypes = (props) => {
 				type="number"
 				variant="outlined"
 				label={fieldData?.label}
+							disabled={disabled}
 				required={fieldData?.required}
 				name={`${fieldData?.fieldName}`}
 				value={values[fieldData?.fieldName]}
@@ -84,6 +87,7 @@ const FormTypes = (props) => {
 			<Autocomplete
 				size="small"
 				fullWidth
+								disabled={disabled}
 				options={fieldData?.option || []}
 				value={
 					(fieldData?.option || []).find((data) => data.optionValue === values[fieldData?.fieldName])
@@ -111,6 +115,7 @@ const FormTypes = (props) => {
 				size="small"
 				fullWidth
 				multiple
+									disabled={disabled}
 				options={fieldData?.option || []}
 				value={
 					(fieldData?.option || []).filter((data) => values[fieldData?.fieldName]?.includes(data.optionValue))?.length
@@ -139,6 +144,7 @@ const FormTypes = (props) => {
 				variant="outlined"
 				type="number"
 				label={fieldData?.label}
+										disabled={disabled}
 				required={fieldData?.required}
 				name={`${fieldData?.fieldName}`}
 				value={values[fieldData?.fieldName]}
@@ -158,6 +164,7 @@ const FormTypes = (props) => {
 					<Checkbox
 						required={fieldData?.required}
 						name={`${fieldData?.fieldName}`}
+													disabled={disabled}
 						checked={values[fieldData?.fieldName]}
 						onChange={(e) => onChange(fieldData?.fieldName, e.target.checked)}
 						color="secondary"
@@ -170,7 +177,7 @@ const FormTypes = (props) => {
 			<MuiPickersUtilsProvider utils={DateUtils}>
 				<KeyboardDatePicker
 					style={{ paddingRight: 1 }}
-					disabled={fieldData?.isUneditable}
+													disabled={fieldData?.isUneditable || disabled}
 					clearable
 					autoOk
 					required={fieldData?.required}
@@ -197,6 +204,7 @@ const FormTypes = (props) => {
 					clearable
 					style={{ paddingRight: 1 }}
 					required={fieldData?.required}
+														disabled={disabled}
 					variant="inline"
 					inputVariant="outlined"
 					ampm={false}

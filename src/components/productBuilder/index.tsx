@@ -85,6 +85,7 @@ const ProductBuilder = (props) => {
   const [supplierData, setSupplierData] = useState(null);
   const [inlineBulkEdit, setInlineBulkEdit] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fields, setFields] = useState([])
   const { generateColumns } = useColumns();
 
   const {
@@ -176,6 +177,7 @@ const ProductBuilder = (props) => {
         if (stage && stage === 'product') {
           fields = fields.filter((t) => t.leval === 'product' || t.leval === 'product-custom' || t.leval === 'product-template');
         }
+        setFields(JSON.parse(JSON.stringify(fields)))
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns = sortBy(columns, function (item: any) {
           return levalOrderBy.indexOf(item.leval);
@@ -530,7 +532,7 @@ const ProductBuilder = (props) => {
   const actionButtonMenuItems = () => {
     return (
       <>
-        {stage === 'cost' && permissions?.isUpdate && (
+        {stage === 'cost' && permissions?.isUpdate && fromQuote && (
           <MenuItem
             onClick={() => {
               setInlineBulkEdit(true)
@@ -722,15 +724,16 @@ const ProductBuilder = (props) => {
           stage={stage}
         />
       )}
-      {inlineBulkEdit && (
+      {inlineBulkEdit && fromQuote && (
         <CustomEditableGrid
           onClose={() => {
             setInlineBulkEdit(false)
           }}
           data={dataRows}
-          fields={productData.productFields}
+          fields={fields}
           currency={currency}
           extraData={['productId']}
+          extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
           handleSave={(products) => { handleSaveProduct(products) }}
           isSubmitting={isSubmitting}
         />
