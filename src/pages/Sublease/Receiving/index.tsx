@@ -13,6 +13,7 @@ import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
 import { DetailsPageHeader } from "src/components/PageHeaders";
 import { CHILD_RESOURCE, MATERIAL_TYPE, serializedAsset, sidebarResource, sublease, treeToFlatArray } from "src/constants/helpers";
+import { subleaseMessage } from "src/constants/messageHelpers";
 import ReceiveProduct from "src/pages/Sublease/Receiving/ReceiveProduct";
 
 const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTip, renderedFrom, stepFullScreen }) => {
@@ -134,8 +135,15 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 			parent.subRows = generateNestedRows(parent, data.material, assets)
 		});
 
-		setNextStep(true);
-		setNextStepToolTip(null);
+		if (assets?.length) {
+			setNextStep(true);
+			setNextStepToolTip(null);
+		}
+		else {
+			setNextStep(false);
+			setNextStepToolTip(subleaseMessage.receiveAssets);
+		}
+
 
 		dispatch({ type: 'initialize', data: rows, count: rows?.length });
 		dispatch({ type: 'loading', loading: false });
@@ -196,7 +204,6 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 		);
 	};
 
-
 	const rightSideContents = () => {
 		return (
 			<>
@@ -253,7 +260,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 					onClose={() => {
 						setReceiveDialog(false)
 					}}
-					material={treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.product)?.map(d =>
+					material={treeToFlatArray(selectedRecords, 'subRows')?.filter((e) => e.type === MATERIAL_TYPE.product && (e?.qty - e?.assetQty) > 0)?.map(d =>
 					({
 						uniqueId: d?._id,
 						materialId: d?.materialId,
