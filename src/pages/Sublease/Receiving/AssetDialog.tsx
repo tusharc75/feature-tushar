@@ -12,7 +12,7 @@ import {
 	TableRow,
 	Link,
 } from '@material-ui/core';
-import { ASSET_NUMBER_TYPE } from '../../../constants/helpers';
+import { ASSET_NUMBER_TYPE, sublease } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { read, utils, writeFile } from 'xlsx';
@@ -21,11 +21,14 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import axiosInstance from 'src/axios/axiosInstance';
+import _ from 'lodash';
 
 const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 
 	const [productList, setProductList] = useState(null);
 	const [fullScreen, setFullScreen] = useState(true);
+	const [existingAssets, setExistingAssets] = useState([]);
 
 	useEffect(() => {
 		const productsData = products.flatMap((product, index) =>
@@ -40,6 +43,23 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 		);
 		setProductList(productsData);
 	}, [products]);
+
+	useEffect(() => {
+		if (productList) {
+			fetchExistingAssets()
+		}
+
+	}, [productList])
+
+	const fetchExistingAssets = () => {
+		axiosInstance().get(`${sublease.api}/existing-assets?products=${JSON.stringify(_.uniqBy(productList, 'product')?.map((p: any) => p?.product))}`)
+			.then(({ data: { data } }) => {
+				setExistingAssets(data)
+			})
+			.catch((error) => {
+
+			})
+	}
 
 	const handleSubmit = (values) => {
 		handleSuccess(values?.products)
@@ -212,6 +232,7 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 																				arrayHelpers.replace(index, {
 																					...values.products[index],
 																					['assetNumberType']: newValue,
+																					['assetNumber']: newValue === ASSET_NUMBER_TYPE.auto ? 'Auto Generate' : '',
 																				});
 																			}}
 																			disableClearable
@@ -227,26 +248,61 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess }) => {
 																		/>
 																	</TableCell>
 																	<TableCell align="left">
-																		<TextField
-																			fullWidth
-																			label=""
-																			variant="outlined"
-																			type="text"
-																			size="small"
-																			name={`assetNumber_${index}`}
-																			disabled={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? true : false}
-																			placeholder="Asset Number"
-																			value={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? 'Auto Generate' : data.assetNumber}
-																			onChange={(e) => {
-																				arrayHelpers.replace(index, {
-																					...values.products[index],
-																					['assetNumber']: e.target.value
-																				});
-																			}}
-																			error={Boolean(errors[`assetNumber_${index}`])}
-																			helperText={errors[`assetNumber_${index}`]}
-																			required
-																		/>
+																		{
+																			data.assetNumberType === ASSET_NUMBER_TYPE.existing ? (
+																				<Autocomplete
+																					fullWidth
+																					options={existingAssets ? existingAssets?.filter(e => e?.product === data?.product) : []}
+																					getOptionLabel={(option: any) => (option ? option?.assetNumber : '')}
+																					getOptionSelected={(option: any, val) => option.assetNumber === val}
+																					value={existingAssets?.filter(e => e?.assetNumber === data.assetNumber)?.length > 0 ? existingAssets?.filter(e => e?.assetNumber === data.assetNumber)[0] : ''}
+																					disableClearable={true}
+																					onChange={(e, val) => {
+																						arrayHelpers.replace(index, {
+																							...values.products[index],
+																							['assetNumber']: val ? val?.assetNumber : ''
+																						});
+																					}}
+																					renderInput={(params) => (
+																						<TextField
+																							{...params}
+																							margin="dense"
+																							name="plant"
+																							placeholder="Asset Number"
+																							label="Asset Number"
+																							variant="outlined"
+																							error={Boolean(errors[`assetNumber_${index}`])}
+																							helperText={errors[`assetNumber_${index}`]}
+																							required
+																							fullWidth
+																						/>
+																					)}
+																				/>
+																			) :
+																				(
+																					<TextField
+																						fullWidth
+																						label=""
+																						variant="outlined"
+																						type="text"
+																						size="small"
+																						name={`assetNumber_${index}`}
+																						disabled={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? true : false}
+																						placeholder="Asset Number"
+																						value={data.assetNumber}
+																						onChange={(e) => {
+																							arrayHelpers.replace(index, {
+																								...values.products[index],
+																								['assetNumber']: e.target.value
+																							});
+																						}}
+																						error={Boolean(errors[`assetNumber_${index}`])}
+																						helperText={errors[`assetNumber_${index}`]}
+																						required
+																					/>
+																				)
+																		}
+
 																	</TableCell>
 																</TableRow>
 															))
