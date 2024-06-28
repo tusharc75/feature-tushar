@@ -150,7 +150,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 	}
 
 	const generateNestedRows = (parent, material, assets) => {
-		const subRow: any = []
+		const subRows: any = []
 		const child: any = material.filter((e) => e.parentId === parent._id);
 		child.forEach((_subRow, j) => {
 			_subRow.index = parent.index + '.' + (j + 1);
@@ -159,20 +159,20 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 			_subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
 			_subRow.assetQty = assets?.filter((e) => e._id === _subRow._id).length;
 			_subRow.subRows = generateNestedRows(_subRow, material, assets);
-			subRow.push(_subRow)
+			subRows.push(_subRow)
 		});
 		const asset = assets?.filter(a => a?._id === parent?._id)
 		asset.forEach((_asset, j) => {
-			_asset.index = parent.index + '.' + (j + 1 + subRow?.length);
+			_asset.index = parent.index + '.' + (subRows?.length + 1);
 			_asset.type = MATERIAL_TYPE.serializedAsset;
 			_asset.materialId = _asset?.inventory;
 			_asset.detail = _asset?.inventoryDetail?.assetNumber;
 			_asset.qtyDisplay = 1;
 			_asset.parentId = parent?._id;
 			_asset._id = _asset?.inventory;
-			subRow.push(_asset)
+			subRows.push(_asset)
 		});
-		return subRow;
+		return subRows;
 	}
 
 	const previewDownloadProps =
@@ -217,8 +217,8 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 						}}
 						isExportAllOrSomeFeature={true}
 						isDownloadExcel={false}
-						recordsToExport={treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === 'asset')?.length ? treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === 'asset')?.length : treeToFlatArray(dataRows, 'subRows').filter(f => f.type === 'asset')?.length}
-						ids={treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === 'asset')?.length ? treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === 'asset')?.map(d => d?._id) : treeToFlatArray(dataRows, 'subRows').filter(f => f.type === 'asset')?.map(d => d?._id)}
+						recordsToExport={treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length ? treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length : treeToFlatArray(dataRows, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length}
+						ids={treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length ? treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.map(d => d?._id) : treeToFlatArray(dataRows, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.map(d => d?._id)}
 					/>
 				)}
 			</>
