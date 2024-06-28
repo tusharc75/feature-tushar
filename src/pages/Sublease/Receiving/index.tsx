@@ -153,7 +153,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 		const subRows: any = []
 		const child: any = material.filter((e) => e.parentId === parent._id);
 		child.forEach((_subRow, j) => {
-			_subRow.index = parent.index + '.' + (j + 1);
+			_subRow.index = parent.index + '.' + (subRows?.length + 1);
 			_subRow.detail = _subRow.productDetail?.productName;
 			_subRow.description = _subRow.productDetail?.productDescription;
 			_subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;

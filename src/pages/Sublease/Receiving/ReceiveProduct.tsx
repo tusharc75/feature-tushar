@@ -195,6 +195,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
 						handleReceive(rows);
 					}}
 					loading={isSubmitting}
+					subleaseId={subleaseId}
 				/>
 			)}
 		</>
