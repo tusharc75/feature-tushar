@@ -207,7 +207,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 	const rightSideContents = () => {
 		return (
 			<>
-				{allowedToEdit && (
+				{allowedToEdit && treeToFlatArray(dataRows, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length > 0 && (
 					<ImportExportMenu
 						permissions={permissions?.serializedAsset}
 						module={routes.serializedAsset.title}
@@ -217,8 +217,12 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 						}}
 						isExportAllOrSomeFeature={true}
 						isDownloadExcel={false}
-						recordsToExport={treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length ? treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length : treeToFlatArray(dataRows, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length}
-						ids={treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length ? treeToFlatArray(selectedRecords, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.map(d => d?._id) : treeToFlatArray(dataRows, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.map(d => d?._id)}
+						recordsToExport={selectedRecords.filter(e => e.type === MATERIAL_TYPE.serializedAsset)?.length
+							? selectedRecords.filter(e => e.type === MATERIAL_TYPE.serializedAsset)?.length :
+							treeToFlatArray(dataRows, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.length}
+						ids={selectedRecords.filter(e => e.type === MATERIAL_TYPE.serializedAsset)?.length ?
+							selectedRecords.filter(e => e.type === MATERIAL_TYPE.serializedAsset)?.map(d => d?._id) :
+							treeToFlatArray(dataRows, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.map(d => d?._id)}
 					/>
 				)}
 			</>
