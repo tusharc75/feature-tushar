@@ -25,7 +25,7 @@ import CustomButton from "src/components/Helpers/CustomButton";
 import { isEmpty } from "lodash";
 import { yupSchemaForBulkEdit } from "src/components/CustomEditableGridNew/helper";
 
-const CustomEditableGrid = ({ onClose, fields, data, currency, extraData, handleSave, isSubmitting }) => {
+const CustomEditableGrid = ({ onClose, fields, data, currency, extraData, extraDisabledFields, handleSave, isSubmitting }) => {
 
 	const [displayRows, setDisplayRows] = useState([]);
 	const [flatRows, setFlatRows] = useState(null);
@@ -258,6 +258,7 @@ const CustomEditableGrid = ({ onClose, fields, data, currency, extraData, handle
 											return (
 												<TableRow {...row.getRowProps()} className="tr">
 													{row.cells.map((cell) => {
+														const fieldData = constColummns.find((d) => d.fieldName === cell.column.id);
 														return (
 															<TableCell
 																{...cell.getCellProps()}
@@ -267,11 +268,12 @@ const CustomEditableGrid = ({ onClose, fields, data, currency, extraData, handle
 																	<div className="full-height-cell">{cell.render('Cell')}</div>
 																) : (
 																	<FormTypes
-																		fieldData={constColummns.find((d) => d.fieldName === cell.column.id)}
+																			fieldData={fieldData}
 																		values={row?.original}
 																		currency={currency}
 																		errors={error}
 																		touched={touched}
+																			disabled={extraDisabledFields?.includes(fieldData?.fieldName)}
 																		style={{ marginTop: '4px' }}
 																		onChange={(inputField, val) => {
 																			updateData(row.original, inputField, val);
@@ -316,6 +318,7 @@ const CustomEditableGrid = ({ onClose, fields, data, currency, extraData, handle
 								color="primary"
 								type="submit"
 								onClick={() => {
+									console.log('eeeeeeeeeee', error)
 									if (isEmpty(error)) {
 										handleSave(flatRows)
 									}
