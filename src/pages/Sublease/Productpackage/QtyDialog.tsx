@@ -3,9 +3,9 @@ import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { groupBy, unionBy, uniqBy } from 'lodash';
+import { unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, SUBLEASE_TYPE, CHILD_RESOURCE } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -15,7 +15,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { autoCalculateSpecificFields, handleAutoCalculation } from '../../../constants/formulaUtility';
+import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { calculateRowsField, resetValueZero, sumOnParent } from 'src/components/RentalManagment/helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
@@ -32,7 +32,7 @@ interface EditDialogProps {
   loading: any;
 }
 
-const rateChangeFields = ['unit', 'pricingMethod','pricingCondition'];
+const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
 const QtyDialog: FC<EditDialogProps> = ({
   calculatePrice,
@@ -136,13 +136,6 @@ const QtyDialog: FC<EditDialogProps> = ({
       if (rowData.actualStartDate === '' || rowData.actualEndDate === '') {
         data = data.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
       }
-      if (subleaseData?.type === SUBLEASE_TYPE.vendor && rowData?.assetQty) {
-        data?.forEach((e) => {
-          if (e?.fieldName === 'qty') {
-            e.isUneditable = true;
-          }
-        })
-      }
       setInitialData({
         fields: data,
         values: getObjKeysWithValues(rowData, data)
@@ -163,9 +156,9 @@ const QtyDialog: FC<EditDialogProps> = ({
 
   const getTitle = () => {
     if (rowData) {
-      let editTitle = `Edit - [${rowData.detail}]`;
+      let editTitle = `Edit - ${rowData.detail}`;
       if (rowData.subRows && rowData.subRows?.length > 0) {
-        editTitle = `Edit - [${rowData.detail}(${rowData.subRows.length})]`;
+        editTitle = `Edit - ${rowData.detail}(${rowData.subRows.length})`;
       }
       return editTitle;
     } else {
@@ -265,7 +258,7 @@ const QtyDialog: FC<EditDialogProps> = ({
     }
   };
 
-  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any)  {
+  async function getAllPricingCondition(values: any, unitOptions: any, pricingMethodOptions: any) {
     if (rowData) {
       const priceData: any = await calculatePrice([
         {
@@ -431,7 +424,7 @@ const QtyDialog: FC<EditDialogProps> = ({
                                           name={field.fieldName}
                                           type={field.type}
                                           options={field.fieldName === 'pricingCondition' ? priceConditionList :
-                                          field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
+                                            field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
