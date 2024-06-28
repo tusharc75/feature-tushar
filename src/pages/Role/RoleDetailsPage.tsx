@@ -465,6 +465,16 @@ const RoleDetailsPage = () => {
     }
   };
 
+  const updateChildResource = (resource, access, checked) => {
+    const toUpdateResource = [...childrenResource];
+    toUpdateResource?.forEach((_childResource) => {
+      if (_childResource.parentResource === resource) {
+        _childResource[access] = checked;
+      }
+    })
+    setChildrenResource(toUpdateResource);
+  }
+
   const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0;
 
   return (
@@ -573,6 +583,7 @@ const RoleDetailsPage = () => {
                         resource={resource}
                         setField={setField}
                         setResource={setResource}
+                          updateChildResource={updateChildResource}
                         isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
                         tier={values?.tier}
                       />
