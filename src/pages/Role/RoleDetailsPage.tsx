@@ -467,9 +467,22 @@ const RoleDetailsPage = () => {
 
   const updateChildResource = (resource, access, checked) => {
     const toUpdateResource = [...childrenResource];
+    const newField = [...field];
     toUpdateResource?.forEach((_childResource) => {
       if (_childResource.parentResource === resource) {
+        const childResourceFields = newField.filter((_field) => _field.fieldData.resource === _childResource.name);
         _childResource[access] = checked;
+        if (checked) {
+          _childResource['isRead'] = checked
+        }
+        childResourceFields?.forEach(_field => {
+          _field[access] = checked
+          if (access === 'isCreate' || access === 'isUpdate') {
+            if (checked) {
+              _field['isRead'] = checked
+            }
+          }
+        });
       }
     })
     setChildrenResource(toUpdateResource);

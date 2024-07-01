@@ -1,7 +1,12 @@
 .drawer {
-  background-color: var(--sidebar-color) !important;
+  background-color: var(--sidebar-bg) !important;
   color: #dbdbdb !important;
-  border-right: 0 !important;
+  border-right: 1px solid var(--common-border-color) !important;
+
+  .innerContainer {
+    border-top: 1px solid var(--common-border-color);
+    background-color: var(--sidebar-bg);
+  }
 
   // List container
   .listContainer {
@@ -9,18 +14,16 @@
   }
   //   list Items
   .listItem {
+    background-color: var(--sidebar-bg);
     padding-left: 31px;
     padding-block: 12px;
     background-color: transparent !important;
     &:hover {
-      background-color: rgba(0, 0, 0, 0.8) !important;
-    }
-    svg {
-      color: #ffffff;
+      background-color: var(--sidebar-hover-item-bg) !important;
     }
   }
   .listIcon {
-    color: #dbdbdb;
+    color: var(--sidebar-text-color);
   }
   .logo {
     max-height: 33px;
@@ -34,90 +37,25 @@
     position: relative;
     isolation: isolate;
     color: var(--new_theme_color);
-    .listArrowIcon {
-      color: var(--new_theme_color);
-    }
 
-    & > div > span {
-      font-weight: 600;
-    }
     .listIcon {
       position: relative;
-      &::before {
-        content: '';
-        position: absolute;
-        top: -6px;
-        bottom: -6px;
-        left: -6px;
-        background-color: var(--new_theme_color);
-        z-index: -1;
-        width: 33px;
-        border-radius: 7px;
-      }
-    }
-    &::before {
-      content: '';
-      position: absolute;
-      z-index: -1;
-      left: 8px;
-      right: 0;
-      border-radius: 100vh 0 0 100vh;
-      background-color: #f1f5ff;
-      [data-mode='dark'] & {
-        background-color: #24243e;
-      }
-      top: 0;
-      bottom: 0;
-    }
-    i {
-      --height: 16px;
-      position: absolute;
-      width: 100%;
-      background-color: #f1f5ff;
-      [data-mode='dark'] & {
-        background-color: #24243e;
-      }
-      height: var(--height, 10px);
-      left: 0;
-      &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: #0e0e23;
-      }
-      &:first-of-type {
-        top: calc(var(--height, 10px) * -1);
-        &::before {
-          border-radius: 0 0 var(--height, 10px) 0;
-        }
-      }
-      &:last-of-type {
-        bottom: calc(var(--height, 10px) * -1);
-        &::before {
-          border-radius: 0 var(--height, 10px) 0 0;
-        }
-      }
     }
   }
   .subList {
-    background-color: hsl(199, 49%, 22%);
-    background-color: rgba(255, 255, 255, 0.04);
-    border-bottom: 1px solid #1d4254;
-    &.activeSubList {
-      border-radius: 0 15px 0 0;
-    }
-    // padding-left: 56px;
-
-    // padding-block: 16px;
+    background-color: var(--sidebar-sub-bg);
+    border-bottom: 1px solid var(--common-border-color);
+    border-top: 1px solid var(--common-border-color);
   }
   .subListItems {
     padding-left: 47px;
+
+    svg {
+      color: var(--sidebar-text-color);
+    }
   }
   .active_sub {
-    background-color: hsl(240, 43%, 10%);
+    background-color: var(--sidebar-active-sub-item-bg);
     display: block;
   }
 }

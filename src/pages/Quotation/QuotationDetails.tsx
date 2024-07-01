@@ -253,7 +253,10 @@ const QuotationDetails = () => {
       setCurrVersionId(data.versions[versionIndex]?._id);
       setSentToCustomer(data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer);
 
-      if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
+      if (data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer) {
+        setCurrentStep(tempStepList?.length - 2);
+      }
+      else if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
         setCurrentStep(tempStepList?.length - 1);
       } else {
         setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));

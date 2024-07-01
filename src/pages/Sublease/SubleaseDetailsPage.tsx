@@ -40,6 +40,7 @@ import SerializedAsset from './SerializedAsset';
 import Slip from './Slip';
 import SubleaseAsset from './SubleaseAsset';
 import Tickets from './Tickets';
+import Receiving from 'src/pages/Sublease/Receiving';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -65,7 +66,6 @@ const SubleaseDetailsPage = () => {
   const [nextStep, setNextStep] = useState(true);
 
   const [tabValue, setTabValue] = useState(Number(parsed?.tab || 0));
-  const [isIssued, setIsIssued] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
@@ -84,8 +84,8 @@ const SubleaseDetailsPage = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+      .then(({ data }) => { })
+      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -96,7 +96,7 @@ const SubleaseDetailsPage = () => {
       .then(({ data }) => {
         fetchData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   useEffect(() => {
@@ -142,9 +142,6 @@ const SubleaseDetailsPage = () => {
       }
       var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.sublease, data)
       const isProcessorToEdit = [data.processor].some((d) => d?.optionValue === user?.user?._id);
-      if (data.status === SUBLEASE_STATUS.issued) {
-        setIsIssued(true);
-      }
       if (data.status === SUBLEASE_STATUS.closed) {
         isAllowedToEdit = false;
       }
@@ -177,32 +174,28 @@ const SubleaseDetailsPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.sublease?.isUpdate &&
-              allowedToEdit &&
-              [SUBLEASE_STATUS.readyToInvoice, SUBLEASE_STATUS.invoiced, SUBLEASE_STATUS.completed].includes(subleaseData?.status) && (
-                <ButtonWithPulse
-                  variant={'outlined'}
-                  color="default"
-                  size="small"
-                  onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
+            {permissions?.sublease?.isUpdate && allowedToEdit && subleaseData?.canComplete && ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && (
+              <ButtonWithPulse
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={() => updateStatus(SUBLEASE_STATUS.closed)}
+                className={'btn-outline-v1'}
+              >
+                Close
+              </ButtonWithPulse>
+            )}
+            {permissions?.sublease?.isUpdate && ![SUBLEASE_STATUS.closed].includes(subleaseData?.status) && allowedToEdit && (
+              <>
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  onClick={() => setOpenUpdateDialog(true)}
                   className={'btn-outline-v1'}
                 >
-                  Close
-                </ButtonWithPulse>
-              )}
-            {permissions?.sublease?.isUpdate &&
-              ![SUBLEASE_STATUS.closed, SUBLEASE_STATUS.completed].includes(subleaseData?.status) &&
-              allowedToEdit && (
-                <>
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
-                    onClick={() => setOpenUpdateDialog(true)}
-                    className={'btn-outline-v1'}
-                  >
-                    {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-                  </Button>
-                </>
-              )}
+                  {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
+                </Button>
+              </>
+            )}
             <ActivityButton referenceId={subleaseData?._id} resource={ACTIVITY_RESOURCE.sublease} resourceLabel={subleaseData?.subleaseName} />
           </Box>
         </Box>
@@ -254,7 +247,7 @@ const SubleaseDetailsPage = () => {
                   nextStepToolTip={nextStepToolTip}
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
-                  isStepEnded={[SUBLEASE_STATUS.completed, SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
+                  isStepEnded={[SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
                 />
                 <ContentFullScreen title={subleaseStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
@@ -263,20 +256,27 @@ const SubleaseDetailsPage = () => {
                       subleaseData={subleaseData}
                       setNextStep={setNextStep}
                       fetchData={fetchData}
-                      isIssued={isIssued}
                       setNextStepToolTip={setNextStepToolTip}
                       renderedFrom={`${renderedFrom}_grid-1`}
                       allowedToEdit={allowedToEdit}
                       stepFullScreen={stepFullScreen}
                     />
                   )}
-                  {['End Sublease', 'Start Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                  {['Receiving'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
+                    <Receiving
+                      subleaseData={subleaseData}
+                      renderedFrom={`${renderedFrom}_Receiving`}
+                      allowedToEdit={allowedToEdit}
+                      setNextStep={setNextStep}
+                      setNextStepToolTip={setNextStepToolTip}
+                      stepFullScreen={stepFullScreen}
+                    />
+                  )}
+                  {['End Sublease'].includes(subleaseStepsNames[currentStep]) && subleaseData && (
                     <SubleaseAsset
                       fetchData={fetchData}
                       subleaseData={subleaseData}
-                      setNextStep={setNextStep}
                       currentStep={currentStep}
-                      setNextStepToolTip={setNextStepToolTip}
                       renderedFrom={`${renderedFrom}_grid-2`}
                       allowedToEdit={allowedToEdit}
                       isProcessor={isProcessor}

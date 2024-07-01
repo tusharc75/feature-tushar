@@ -25,7 +25,7 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
       statusNames.findIndex((s) => s.optionLabel === SUBLEASE_STATUS.readyToInvoice) >
       statusNames.findIndex((s) => s.optionLabel === subleaseData?.status)
     ) {
-      if (![SUBLEASE_STATUS.closed, SUBLEASE_STATUS.completed].includes(subleaseData?.status)) {
+      if (![SUBLEASE_STATUS.closed].includes(subleaseData?.status)) {
         updateStatus(SUBLEASE_STATUS.readyToInvoice);
       }
     }
@@ -109,19 +109,18 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
       let rows = data.material.filter((e) => !e.parentId);
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${
-          parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.package
+        parent.detail = `${parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.package
             ? parent?.packageDetail?.packageName
             : ''
-        }`;
+          }`;
         parent.description =
           parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
             : parent.type === MATERIAL_TYPE.package
-            ? parent?.packageDetail?.packageDescription || ''
-            : '';
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
         parent.subRows = generateNestedData(data.material, data.inventory, parent);
       });
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -153,8 +152,8 @@ function Slip({ subleaseData, stepFullScreen, renderedFrom, statusNames, updateS
           _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
             : _subRow.type === MATERIAL_TYPE.package
-            ? _subRow?.packageDetail?.packageDescription || ''
-            : '';
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
         _subRow.subRows = generateNestedData(material, inventory, _subRow);
         subRows.push(_subRow);
       });

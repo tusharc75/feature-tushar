@@ -1,11 +1,10 @@
-import { Box, Button, CircularProgress, IconButton, MenuItem } from '@material-ui/core';
+import { Box, IconButton, MenuItem } from '@material-ui/core';
 import Add from '@material-ui/icons/Add';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { isArray } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdDelete } from 'react-icons/md';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -14,7 +13,6 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -22,16 +20,14 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUBLEASE_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
-const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, isIssued, renderedFrom, allowedToEdit, stepFullScreen }) => {
+const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchData, renderedFrom, allowedToEdit, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, permissions }
-  }: any = useData();
+
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -44,7 +40,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
-  const [isIssueing, setIssueing] = useState(false);
 
   const [material, setMaterial] = useState([]);
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
@@ -58,11 +53,11 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   }, []);
 
   useEffect(() => {
-    fetchProductInventory();
+    fetchMaterial();
   }, [columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit && !isIssued);
+    var data = await fetch_child_resource_fields(CHILD_RESOURCE.subleaseProduct, subleaseData?.currency, allowedToEdit);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(
       renderedFrom,
@@ -79,13 +74,16 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         Header: 'Index',
         width: 70,
         sticky: 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
       },
       {
         accessor: 'detail',
         Header: 'Detail',
-        minWidth: 300,
-        width: 300,
+        minWidth: 250,
+        width: 250,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
@@ -130,10 +128,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
               </IconButton>
             </HtmlTooltip>
           </div>
-        ),
-        Footer: () => {
-          return <>Total</>;
-        }
+        )
       },
       {
         accessor: 'description',
@@ -192,7 +187,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     setColumns(coloum);
   };
 
-  const fetchProductInventory = async () => {
+  const fetchMaterial = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     setNextStep(false);
@@ -206,17 +201,14 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
+      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty =
-        subleaseData.type === SUBLEASE_TYPE.vendor
-          ? parent?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length
-          : inventory?.filter((e) => e._id === parent._id).length;
+      parent.assetQty = inventory?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : false;
       parent.canDelete = parent.assetQty === 0 && allowedToEdit ? true : false;
-      if (parent.type === 'package') {
+      if (parent.type === MATERIAL_TYPE.package) {
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         var assetQty = 0;
         subRows.forEach((_subRow, j) => {
@@ -225,10 +217,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.assetQty =
-            subleaseData.type === SUBLEASE_TYPE.vendor
-              ? _subRow?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === _subRow.materialId).length
-              : inventory?.filter((e) => e._id === _subRow._id).length;
+          _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length;
           _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
           if (!_subRow.canDelete) {
             parent.canDelete = false;
@@ -249,19 +238,9 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       setNextStep(false);
       setNextStepToolTip(subleaseMessage.addProductPackage);
     } else {
-      if (subleaseData?.type === SUBLEASE_TYPE.vendor) {
-        if (isIssued) {
-          setNextStep(true);
-          setNextStepToolTip(null);
-        } else {
-          setNextStep(false);
-          setNextStepToolTip(subleaseMessage.startSublease);
-        }
-      } else {
-        setNextStep(true);
-        setNextStepToolTip(null);
-      }
+      setNextStep(true)
     }
+
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -311,7 +290,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .post(`${sublease.api}/productpackage/${subleaseData._id}`, { material })
       .then(() => {
         setAddExistingProductDialog({ open: false, type: '', parentId: null });
-        fetchProductInventory();
+        fetchMaterial();
         fetchData();
         setIsSubmitting(false);
       })
@@ -328,7 +307,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .then(() => {
         setUpdating(false);
         setIsProductEdit({ open: false, isBulkedit: false });
-        fetchProductInventory();
+        fetchMaterial();
       })
       .catch((error) => {
         setUpdating(false);
@@ -343,7 +322,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       .put(`${sublease.api}/productpackage/${subleaseData?._id}/delete`, { ids })
       .then(() => {
         setDeleting(false);
-        fetchProductInventory();
+        fetchMaterial();
         setDeleteData(null);
       })
       .catch((error) => {
@@ -358,19 +337,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     setRecordToUpdate(rowData);
   };
 
-  const issueSublease = () => {
-    setIssueing(true);
-    axiosInstance()
-      .put(`${sublease.api}/${subleaseData._id}/issue-sublease`)
-      .then(() => {
-        setIssueing(false);
-        fetchData();
-      })
-      .catch((error) => {
-        setUpdating(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const calculatePrice = (arr: any[]) => {
     if (subleaseData) {
@@ -450,33 +416,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     );
   };
 
-  const rightSideContents = () => {
-    return (
-      <>
-        {material?.length &&
-          dataRows?.length &&
-          !isIssued &&
-          !dataRows?.some((f) => !f.isValid) &&
-          subleaseData?.type !== SUBLEASE_TYPE.interCompany ? (
-          <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Start Sublease'}>
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              onClick={() => {
-                issueSublease();
-              }}
-              disabled={isIssueing || !allowedToEdit}
-              endIcon={isIssueing && <CircularProgress size={20} color="primary" />}
-            >
-              {isMobile && !isTablet ? <MdDelete size={20} /> : 'Start Sublease'}
-            </Button>
-          </HtmlTooltip>
-        ) : null}
-      </>
-    );
-  };
-
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -520,18 +459,16 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
         addButtonMenuItems={addButtonMenuitems()}
         addButtonProps={{
           tooltip: !allowedToEdit ? ownerAndColaborator : '',
-          disabled: !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && subleaseData.status === SUBLEASE_STATUS.issued)
+          disabled: !allowedToEdit
         }}
         isActionButtonVisible={true}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{
           tooltip: !allowedToEdit ? ownerAndColaborator : 'Actions',
-          disabled: selectedRecords?.length || !allowedToEdit || (subleaseData.type === SUBLEASE_TYPE.vendor && !isIssued) ? false : true
+          disabled: selectedRecords?.length || !allowedToEdit ? false : true
         }}
-        rightSideContents={rightSideContents()}
         hasXpadding
       />
-
       {columns ? (
         <Box zIndex={5} width={'100%'}>
           <CustomReactTable
@@ -539,7 +476,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
             columns={columns}
             state={state}
             dispatch={dispatch}
-            refreshGrid={fetchProductInventory}
+            refreshGrid={fetchMaterial}
             setWholeRowsCellColor={(rowData) => (!rowData.isValid ? 'error' : '')}
             hideSelection={!allowedToEdit}
             onSaveEdit={onSaveInlineEdit}
