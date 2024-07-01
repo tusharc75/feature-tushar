@@ -133,8 +133,7 @@ const FieldServiceTechnician = () => {
     let data;
     if (isOffline) {
       data = await findOne(objectStore.resource, sidebarResource.fieldServiceOrder);
-    }
-    else {
+    } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource?.fieldServiceOrder}`);
       data = response?.data?.data;
       try {
@@ -153,8 +152,7 @@ const FieldServiceTechnician = () => {
     if (isOffline) return;
     axiosInstance()
       .patch(`${routes.fieldServiceOrder.path}/status/${fieldServiceOrderId}`, { status: status })
-      .then(() => {
-      })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -201,21 +199,24 @@ const FieldServiceTechnician = () => {
       history.push(`${routes.fieldTicketDetail.path}/${_id}`);
       setIsSubmitting(false);
     } else {
-      axiosInstance().post(`${routes.fieldTicket?.path}`, tempInitialData).then(({ data }) => {
-        if (fieldServiceOrderData?.status === SERVICE_ORDER_STATUS.new) {
-          handleChangeFieldServiceOrderStatus(fieldServiceOrderData?._id, SERVICE_ORDER_STATUS.inProgress)
-        }
-        window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .post(`${routes.fieldTicket?.path}`, tempInitialData)
+        .then(({ data }) => {
+          if (fieldServiceOrderData?.status === SERVICE_ORDER_STATUS.new) {
+            handleChangeFieldServiceOrderStatus(fieldServiceOrderData?._id, SERVICE_ORDER_STATUS.inProgress);
+          }
+          window.open(`${routes.fieldTicketDetail.path}/${data?.data?._id}`);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setIsSubmitting(false);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+          setIsSubmitting(false);
         });
-        setIsSubmitting(false);
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
-      });
     }
   };
 
@@ -303,7 +304,10 @@ const FieldServiceTechnician = () => {
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
           {`Add ${routes.fieldServiceOrder.title} Offline`}
         </MenuItem>
-        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map(e => e._id))}>{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
+        <MenuItem
+          disabled={!selectedRecords.length}
+          onClick={() => handleRemoveoffline(selectedRecords?.map((e) => e._id))}
+        >{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );
@@ -312,7 +316,11 @@ const FieldServiceTechnician = () => {
   const onRowClick = (row) => {
     if (!selectedData || row._id !== selectedData._id) {
       setSelectedData(row);
-      setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) && ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status));
+      setAllowedToEdit(
+        permissions?.fieldTicket?.isUpdate &&
+          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, row?.originaData) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(row?.orignalData?.status)
+      );
     } else {
       setSelectedData(null);
       setAllowedToEdit(false);
@@ -351,7 +359,7 @@ const FieldServiceTechnician = () => {
         />
         {columns ? (
           view === 'card' ? (
-            <div className="grid md:grid-cols-[400px_1fr] grid-cols-1 gap-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-[400px_1fr]">
               <div className="container-with-border p-[20px] md:min-h-[calc(100vh-200px)]">
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
@@ -377,15 +385,15 @@ const FieldServiceTechnician = () => {
                 {selectedData ? (
                   <FieldTicket
                     serviceOrderData={selectedData?.orignalData}
-                    setNextStep={() => { }}
+                    setNextStep={() => {}}
                     allowedToEdit={allowedToEdit}
-                    handleChangeStatus={() => { }}
+                    handleChangeStatus={() => {}}
                     resource={sidebarResource.fieldServiceTechnician}
                     enableGlobalSearch={false}
-                    fetchServiceOrderData={() => { }}
+                    fetchServiceOrderData={() => {}}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full">
+                  <div className="flex h-full items-center justify-center">
                     <h6 className="text-xl text-gray-400">Please select a record</h6>
                   </div>
                 )}
@@ -430,7 +438,7 @@ export default FieldServiceTechnician;
 
 const ViewButtons = ({ view, handleViewChange }) => {
   return (
-    <>
+    <div className="flex flex-nowrap gap-2">
       <HtmlTooltip title={'Card View'} placement="top" arrow enterTouchDelay={0}>
         <span>
           <IconButton size="small" onClick={() => handleViewChange('card')} disabled={view === 'card'}>
@@ -445,6 +453,6 @@ const ViewButtons = ({ view, handleViewChange }) => {
           </IconButton>
         </span>
       </HtmlTooltip>
-    </>
+    </div>
   );
 };
