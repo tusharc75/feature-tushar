@@ -13,7 +13,6 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { flattenArray } from 'src/constants/columns';
 import { ownerAndColaborator, subleaseMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
@@ -21,7 +20,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SUBLEASE_STATUS, SUBLEASE_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
+import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, pricingCondition, sublease } from '../../../constants/helpers';
 import QtyDialog from './QtyDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
@@ -202,17 +201,14 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent.type === 'product' ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === 'product' ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
+      parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
+      parent.description = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-      parent.assetQty =
-        subleaseData.type === SUBLEASE_TYPE.vendor
-          ? parent?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === parent.materialId).length
-          : inventory?.filter((e) => e._id === parent._id).length;
+      parent.assetQty = inventory?.filter((e) => e._id === parent._id).length;
       parent.hideSelection = parent.assetQty > 0 ? true : false;
       parent.canDelete = parent.assetQty === 0 && allowedToEdit ? true : false;
-      if (parent.type === 'package') {
+      if (parent.type === MATERIAL_TYPE.package) {
         const subRows: any = data.material.filter((e) => e.parentId === parent._id);
         var assetQty = 0;
         subRows.forEach((_subRow, j) => {
@@ -221,10 +217,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
           _subRow.description = _subRow.productDetail?.productDescription;
           _subRow.qtyDisplay = `${parent.qty * _subRow.qty}`;
           _subRow.isValid = _subRow['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
-          _subRow.assetQty =
-            subleaseData.type === SUBLEASE_TYPE.vendor
-              ? _subRow?.assetQty || inventory?.filter((e) => e?.inventoryDetail?.product === _subRow.materialId).length
-              : inventory?.filter((e) => e._id === _subRow._id).length;
+          _subRow.assetQty = inventory?.filter((e) => e._id === _subRow._id).length;
           _subRow.canDelete = _subRow.assetQty === 0 && allowedToEdit ? true : false;
           if (!_subRow.canDelete) {
             parent.canDelete = false;
