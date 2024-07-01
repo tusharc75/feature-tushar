@@ -4335,3 +4335,9 @@ body .btn-outline-red-v1 {
 div[role='tooltip'] {
   z-index: 1201;
 }
+div[role='presentation'].MuiAutocomplete-popper {
+  ul,
+  li {
+    list-style: none;
+  }
+}
