@@ -1225,7 +1225,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             addNonSerializedInventoryDialog.type === 'add'
               ? nonSerializedProduct
               : selectedRecords
-                ?.filter((r) => r?.type === 'product' && !r?.productDetail?.serializedProduct && r?.realAssetAssignedQty > 0)
+                ?.filter((r) => r?.type === MATERIAL_TYPE.product
+                  && !r?.productDetail?.serializedProduct && r?.realAssetAssignedQty > 0)
                 ?.map((s) => ({
                   ...s,
                   _id: s._id,
