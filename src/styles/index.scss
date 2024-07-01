@@ -4332,3 +4332,6 @@ body .btn-outline-red-v1 {
 .__floater.__floater__open {
   z-index: 101 !important;
 }
+div[role='tooltip'] {
+  z-index: 1201;
+}
