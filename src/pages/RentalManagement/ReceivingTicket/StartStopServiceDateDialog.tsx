@@ -6,6 +6,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
+import moment from 'moment';
 
 const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
 
@@ -38,7 +39,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       })
     } else {
       setInitialValues({
-        startDate : new Date (data.startDate),
+        startDate: new Date(data.startDate),
         ...(data?.endDate && { endDate: new Date(data.endDate) })
       })
     }
@@ -46,8 +47,28 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
   }, [data, type]);
 
   const onSubmit = (values) => {
-    if(type) handleSubmit({ ...values, date: new Date(values.date)?.toISOString() })
-    else handleSubmit({...values, startDate: new Date(values.startDate)?.toISOString(),  ...(values.endDate && { endDate: new Date(values.endDate).toISOString() })})
+    if (type) handleSubmit({ ...values, date: new Date(values.date)?.toISOString() })
+    else handleSubmit({ ...values, startDate: new Date(values.startDate)?.toISOString(), ...(values.endDate && { endDate: new Date(values.endDate).toISOString() }) })
+  };
+
+  const validate = (values) => {
+    const errors = {};
+    if (type) {
+      if (minDate && values?.date < minDate) {
+        errors['date'] = `${type === 'start' ? 'Start' : 'End'} Date can't be less than ${moment(minDate).format('DD/MM/YYYY')}`;
+      }
+    } else {
+      if (values?.endDate && values?.startDate > values.endDate) {
+        errors['endDate'] = `End Date can't be less than Start Date`;
+      }
+      if (minStartDate && values?.startDate < minStartDate) {
+        errors['startDate'] = `Start Date can't be less than ${moment(minStartDate).format('DD/MM/YYYY')}`;
+      }
+      if (maxEndDate && values?.endDate > maxEndDate) {
+        errors['endDate'] = `End Date can't be greater than ${moment(maxEndDate).format('DD/MM/YYYY')}`;
+      }
+    }
+    return errors;
   };
 
   return (
@@ -61,7 +82,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       }}
       maxWidth="sm"
       fullWidth>
-      <Formik initialValues={initialValues} onSubmit={(val) => {onSubmit(val)}} enableReinitialize={true}>
+      <Formik initialValues={initialValues} onSubmit={(val) => { onSubmit(val) }} enableReinitialize={true} validate={validate}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form >
             <CustomDialogHeader title={`Set ${!type ? 'Start/End' : type === 'start' ? 'Start' : 'End'} Date`} onClose={onClose} />
