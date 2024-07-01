@@ -52,6 +52,8 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 					minWidth: 180,
 					width: 180,
 					disabled: true,
+					disableFilters: true,
+					disableSortBy: true,
 					Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
 				}
 			]
