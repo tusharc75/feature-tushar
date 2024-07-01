@@ -105,40 +105,38 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
   return (
     <>
       <Box display="flex" justifyContent="flex-end" p={1} pt={1} pb={0}>
-        {!isMobile && (
-          <Button
-            onClick={() => {
-              setDownlodingFile(true);
-              axiosInstance()
-                .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${selectedRecords.length > 0 ? selectedRecords.map((s) => s._id) : dataRows.map((d) => d._id)}`, {
-                  responseType: 'blob'
-                })
-                .then(({ data }) => {
-                  const file = new Blob([data], { type: 'application/pdf' });
-                  const fileURL = URL.createObjectURL(file);
-                  const link = document.createElement('a');
-                  link.href = fileURL;
-                  link.target = '_blank';
-                  link.style.display = 'none';
-                  link.click();
-                  toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
-                  setDownlodingFile(false);
-                })
-                .catch((err) => {
-                  toastConfig.setToastConfig(err);
-                  setDownlodingFile(false);
-                });
-            }}
-            variant={isMobile && !isTablet ? 'text' : 'outlined'}
-            color="primary"
-            type="button"
-            size="small"
-            disabled={downlodingFile || dataRows.length === 0}
-            startIcon={<VisibilityIcon />}
-          >
-            {downlodingFile ? 'Please wait...' : 'Preview'}
-          </Button>
-        )}
+        <Button
+          onClick={() => {
+            setDownlodingFile(true);
+            axiosInstance()
+              .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${selectedRecords.length > 0 ? selectedRecords.map((s) => s._id) : dataRows.map((d) => d._id)}`, {
+                responseType: 'blob'
+              })
+              .then(({ data }) => {
+                const file = new Blob([data], { type: 'application/pdf' });
+                const fileURL = URL.createObjectURL(file);
+                const link = document.createElement('a');
+                link.href = fileURL;
+                link.target = '_blank';
+                link.style.display = 'none';
+                link.click();
+                toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
+                setDownlodingFile(false);
+              })
+              .catch((err) => {
+                toastConfig.setToastConfig(err);
+                setDownlodingFile(false);
+              });
+          }}
+          variant={isMobile && !isTablet ? 'text' : 'outlined'}
+          color="primary"
+          type="button"
+          size="small"
+          disabled={downlodingFile || dataRows.length === 0}
+          startIcon={<VisibilityIcon />}
+        >
+          {downlodingFile ? 'Please wait...' : 'Preview'}
+        </Button>
       </Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
