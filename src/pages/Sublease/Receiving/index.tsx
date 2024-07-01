@@ -186,24 +186,6 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 			}
 			: null;
 
-	const LeftSideContents = () => {
-		return (
-			<>
-				<Button
-					variant={'contained'}
-					color="primary"
-					size="small"
-					disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && (e?.qty - e?.assetQty) > 0).length ? false : true}
-					onClick={() => {
-						setReceiveDialog(true)
-					}}
-				>
-					Receive
-				</Button>
-			</>
-		);
-	};
-
 	const rightSideContents = () => {
 		return (
 			<>
@@ -225,6 +207,19 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 							treeToFlatArray(dataRows, 'subRows').filter(f => f.type === MATERIAL_TYPE.serializedAsset)?.map(d => d?._id)}
 					/>
 				)}
+				{allowedToEdit &&
+					<Button
+						variant={'contained'}
+						color="primary"
+						size="small"
+						disabled={selectedRecords?.filter((e) => e.type === MATERIAL_TYPE.product && (e?.qty - e?.assetQty) > 0).length ? false : true}
+						onClick={() => {
+							setReceiveDialog(true)
+						}}
+					>
+						Receive
+					</Button>
+				}
 			</>
 		);
 	};
@@ -236,7 +231,6 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 				isActionButtonVisible={false}
 				previewDownloadProps={previewDownloadProps}
 				rightSideContents={rightSideContents()}
-				leftSideContents={LeftSideContents()}
 				hasXpadding
 			/>
 			{columns ? (
