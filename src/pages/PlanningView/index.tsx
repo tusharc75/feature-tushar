@@ -1,6 +1,6 @@
 import { Box, IconButton } from '@material-ui/core';
 import queryString from 'query-string';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -12,6 +12,7 @@ import { FormatListNumbered } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import RefreshIcon from '@material-ui/icons/Refresh';
 
 const PLANNING_RESOURCE = [
   {
@@ -147,6 +148,7 @@ function PlanningView() {
   const [queryString, setQueryString] = useState(null);
 
   const [view, setView] = useState('calendar');
+  const ref: any = useRef();
 
   useEffect(() => {
     const options: any = [];
@@ -164,6 +166,12 @@ function PlanningView() {
       setSelectedResource(resourceList?.find((_r) => _r?.resource === resource));
     }
   }, [resourceList, history?.location?.state?.resource]);
+
+  const onClickRefreshIcon = ()=>{
+    if (ref?.current) {
+      ref?.current?.fetchData();
+    }
+  }
 
   return (
     <>
@@ -198,9 +206,14 @@ function PlanningView() {
                 </IconButton>
               </span>
             </HtmlTooltip>
+            <HtmlTooltip title={`Refresh`} arrow placement="top" enterTouchDelay={0}>
+            <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
+              <RefreshIcon color="primary" />
+            </IconButton>
+          </HtmlTooltip>
           </div>
           {view === 'calendar' ? (
-            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString}/>
+            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString} ref={ref}/>
           ) : (
             <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString}/>
           )}

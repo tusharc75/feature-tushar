@@ -1,14 +1,15 @@
 import { Collapse, CssBaseline, Drawer, IconButton, List, ListItem, ListItemIcon, ListItemText, Toolbar } from '@material-ui/core';
-import { Close, ExpandLess, ExpandMore } from '@material-ui/icons';
+import { Close } from '@material-ui/icons';
 import clsx from 'clsx';
 import { kebabCase, lowerCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
+import { GoChevronDown, GoChevronUp } from 'react-icons/go';
 import { Link, useHistory, withRouter } from 'react-router-dom';
 import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
 import { DynamicIcon } from 'src/assets/IconGenerator';
+import { cn } from 'src/constants/helpers';
 import { setDataBySectionName } from 'src/pages/Home/helpers';
-import { GlobalChatContext } from '../../StateProvider/GlobalChatContext';
 import { CustomOfflineContext } from '../../StateProvider/OfflineContext/OfflineContext';
 import { useData } from '../../StateProvider/Provider';
 import HtmlTooltip from '../CustomTooltipTitle';
@@ -36,7 +37,6 @@ function SideBar({ location }) {
   }: any = useData();
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const { setOpen: setChatOpen } = useContext(GlobalChatContext);
   const history = useHistory();
   const classes = useStyles();
   const [open, setOpen] = useState({});
@@ -128,7 +128,7 @@ function SideBar({ location }) {
           'sidebar-overflow-auto': isSidebarOpen && tour.stepIndex !== 1
         })}
         classes={{
-          paper: clsx(styles.drawer, {
+          paper: clsx(styles.drawer, '', {
             [classes.drawerOpen]: isSidebarOpen,
             [classes.drawerClose]: !isSidebarOpen,
             'sidebar-overflow-hide': !isSidebarOpen && tour.stepIndex !== 1,
@@ -156,8 +156,8 @@ function SideBar({ location }) {
         }}
       >
         <Toolbar />
-        <div id="sidebarOrDrawer" style={{ borderTop: '1px solid #485B64' }}>
-          <div className="bg-white max-[959px]:min-h-[56px] max-[768px]:min-h-[56px] min-[769px]:min-h-[unset]">
+        <div id="sidebarOrDrawer" className={styles.innerContainer}>
+          <div className=" max-[959px]:min-h-[56px] max-[768px]:min-h-[56px] min-[769px]:min-h-[unset]">
             <div className={`max-[768px]:pr-[50px] ${styles.logo} `}>
               <img
                 className={` ${isSidebarOpen ? 'block' : 'hidden'} mx-auto max-h-[33px]`}
@@ -187,12 +187,13 @@ function SideBar({ location }) {
           >
             {getListItem()?.map((listItem, i) => {
               const hasChild = Boolean(listItem.items);
+              const isItemActive = isSectionActive(pathName, location.pathname, listItem);
 
               return (
                 <React.Fragment key={listItem.name}>
                   <HtmlTooltip title={!isSidebarOpen ? listItem.name : ''}>
                     <ListItem
-                      className={`${styles.listItem} dropdown-items ${isSectionActive(pathName, location.pathname, listItem) && styles.activeList}`}
+                      className={`${styles.listItem} dropdown-items ${isItemActive && styles.activeList}`}
                       button
                       key={listItem.name + '' + i}
                       onClick={() => {
@@ -204,26 +205,31 @@ function SideBar({ location }) {
                         }
                       }}
                     >
-                      {isSectionActive(pathName, location.pathname, listItem) && (
-                        <>
-                          <i />
-                          <i />
-                        </>
-                      )}
-                      <ListItemIcon className={styles.listIcon}>{listItem.icon}</ListItemIcon>
-                      <ListItemText primary={listItem.name} className={`wordWrap  `} />
+                      <span
+                        className={cn(
+                          '-z-10',
+                          isItemActive ? 'absolute bottom-2 left-[19px] right-[19px] top-2 rounded-md bg-[var(--new-theme-color)] ' : 'sr-only',
+                          isSidebarOpen && 'left-3 right-3'
+                        )}
+                      ></span>
+                      <ListItemIcon className={cn(styles.listIcon, isItemActive && '!text-white')}>{listItem.icon}</ListItemIcon>
+                      <ListItemText
+                        primary={listItem.name}
+                        className={cn(
+                          `wordWrap [&>span]:!font-normal`,
+                          isItemActive ? '[&>span]:!text-white' : '[&>span]:!text-[var(--sidebar-text-color)]'
+                        )}
+                      />
                       {hasChild && (
-                        <>{open[listItem.name] ? <ExpandLess className={styles.listArrowIcon} /> : <ExpandMore className={styles.listArrowIcon} />}</>
+                        <span className={cn('mr-2', isItemActive ? 'text-white' : 'text-[var(--sidebar-text-color)]')}>
+                          {open[listItem.name] ? <GoChevronUp size={20} /> : <GoChevronDown size={20} />}
+                        </span>
                       )}
                     </ListItem>
                   </HtmlTooltip>
                   {hasChild && (
                     <Collapse in={open[listItem.name]} timeout="auto" unmountOnExit>
-                      <List
-                        component="div"
-                        disablePadding
-                        className={`${styles.subList} ${isSectionActive(pathName, location.pathname, listItem) && styles.activeSubList}`}
-                      >
+                      <List component="div" disablePadding className={`${styles.subList} ${isItemActive && styles.activeSubList}`}>
                         {listItem.items.map((item, j) => (
                           <Link
                             className={`sub-list ${pathName === item.name.toLowerCase().split(' ').join('-') && styles.active_sub} ${
@@ -240,7 +246,7 @@ function SideBar({ location }) {
                             <ListItem
                               button
                               selected={pathnames?.includes(lowerCase(item.name))}
-                              className={`${classes.nested} ${styles.subListItems} `}
+                              className={`${styles.subListItems} `}
                               style={{ gap: 32 }}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
@@ -250,7 +256,10 @@ function SideBar({ location }) {
                                   stroke="currentcolor"
                                 ></path>
                               </svg>
-                              <ListItemText primary={item.resourceLabel || item.name} className={`line-clamp-1`} />
+                              <ListItemText
+                                primary={item.resourceLabel || item.name}
+                                className={`line-clamp-1 !text-[var(--sidebar-text-color)] [&>span]:!font-normal`}
+                              />
                             </ListItem>
                           </Link>
                         ))}
@@ -262,16 +271,6 @@ function SideBar({ location }) {
             })}
           </List>
         </div>
-        {/* {!isOffline && (
-          <List style={{ bottom: '0px', marginTop: 'auto' }}>
-            <ListItem style={{ paddingLeft: '31px', paddingBlock: '12px' }} button onClick={() => setChatOpen((prevState) => !prevState)}>
-              <ListItemIcon className={styles.listIcon}>
-                <BsChatLeftTextFill size={20} className={styles.sidebarIcon} />
-              </ListItemIcon>
-              <ListItemText primary="Chat" />
-            </ListItem>
-          </List>
-        )} */}
       </Drawer>
     </div>
   );

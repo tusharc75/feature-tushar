@@ -32,6 +32,7 @@ import SupplierAskPrice from './SupplierAskPrice';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 import NoDataCell from '../Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
+import CustomEditableGrid from 'src/components/CustomEditableGridNew';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -82,6 +83,9 @@ const ProductBuilder = (props) => {
   const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
   const [supplierContactData, setSupplierContactData] = useState([]);
   const [supplierData, setSupplierData] = useState(null);
+  const [inlineBulkEdit, setInlineBulkEdit] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [fields, setFields] = useState([])
   const { generateColumns } = useColumns();
 
   const {
@@ -146,7 +150,7 @@ const ProductBuilder = (props) => {
         });
         let newColumns = generateColumns(routes.product.title, fields, null, false, currency);
         newColumns.forEach(column => {
-          if(column?.accessor === 'productName'){
+          if (column?.accessor === 'productName') {
             column.cell = ({ row }) => (
               <span>
                 {row?.original?.['productName'] ? (
@@ -173,6 +177,7 @@ const ProductBuilder = (props) => {
         if (stage && stage === 'product') {
           fields = fields.filter((t) => t.leval === 'product' || t.leval === 'product-custom' || t.leval === 'product-template');
         }
+        setFields(JSON.parse(JSON.stringify(fields)))
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns = sortBy(columns, function (item: any) {
           return levalOrderBy.indexOf(item.leval);
@@ -322,18 +327,23 @@ const ProductBuilder = (props) => {
       setProductId(null);
       setIsClone(false);
     } else {
+      setIsSubmitting(true)
       let data: any = {};
       data.product = rows;
       data._id = productBuilderId;
       axiosInstance()
         .put(`/productbuilder/updateProduct`, data)
         .then(() => {
+          setIsSubmitting(false)
           setProductId(null);
           setIsBulkEdit(false);
           setproductDataList([]);
           fetchProduct();
+          setInlineBulkEdit(false)
         })
         .catch((error) => {
+          setIsSubmitting(false)
+          setInlineBulkEdit(false)
           toastConfig.setToastConfig(error);
         });
     }
@@ -522,6 +532,15 @@ const ProductBuilder = (props) => {
   const actionButtonMenuItems = () => {
     return (
       <>
+        {stage === 'cost' && permissions?.isUpdate && fromQuote && (
+          <MenuItem
+            onClick={() => {
+              setInlineBulkEdit(true)
+            }}
+          >
+            {isMobile && !isTablet ? '' : 'Bulk Edit New'}
+          </MenuItem>
+        )}
         {stage === 'cost' && permissions?.isUpdate && (
           <MenuItem onClick={handelOpenBulkEdit} disabled={checkUniqTemplate()}>
             {isMobile && !isTablet ? '' : 'Bulk Edit'}
@@ -627,8 +646,8 @@ const ProductBuilder = (props) => {
             isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice
               ? false
               : selectedRecords.length
-              ? false
-              : true
+                ? false
+                : true
         }}
         previewDownloadProps={previewDownloadProps}
         leftSideContents={typeof leftSideContents === 'function' ? leftSideContents() : null}
@@ -703,6 +722,20 @@ const ProductBuilder = (props) => {
           loading={loading}
           productBuilderId={productBuilderId}
           stage={stage}
+        />
+      )}
+      {inlineBulkEdit && fromQuote && (
+        <CustomEditableGrid
+          onClose={() => {
+            setInlineBulkEdit(false)
+          }}
+          data={dataRows}
+          fields={fields}
+          currency={currency}
+          extraData={['productId']}
+          extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
+          handleSave={(products) => { handleSaveProduct(products) }}
+          isSubmitting={isSubmitting}
         />
       )}
       {openSupplierPriceDialog && (

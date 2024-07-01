@@ -221,10 +221,10 @@
   .mainConainer {
     display: flex;
     padding-block: 10px;
-    padding-inline: 3% !important;
+    padding-inline: 1.5% !important;
 
     @media all and (max-width: 900px) {
-      padding-inline: 24px;
+      padding-inline: 2% !important;
     }
     // max-width: 1482px;
     // padding-inline: 24px;
@@ -260,6 +260,9 @@
   // toggleButton
   .toggleButton {
     margin-left: -7px;
+    @media all and (max-width: 959px) {
+      margin-left: 0;
+    }
     button {
       padding: 7px;
     }
@@ -318,7 +321,9 @@
   svg {
     display: block;
     margin-left: 10px;
-    transition: margin 0.3s, color 0.3s;
+    transition:
+      margin 0.3s,
+      color 0.3s;
     color: inherit;
   }
   &:hover {
