@@ -17,6 +17,7 @@ import {
   DELIVERY_TICKET_REFERENCE_TYPE,
   DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
+  SUBCONTRACT_ASSEMBLY_STATUS,
   deliveryTicket,
   sidebarResource
 } from 'src/constants/helpers';
@@ -140,7 +141,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                   </HtmlTooltip>
                 </CustomIntroWrapper>
               )}
-              {row?.original?.receivedQty > 0 && allowedToEdit && (
+              {row?.original?.receivedQty > 0 && allowedToEdit && ![SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status) && (
                 <HtmlTooltip title={'Revert'}>
                   <span>
                     <IconButton
