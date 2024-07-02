@@ -25,7 +25,7 @@ import { startCase } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 
 const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderData, materialserializedAssets, materialSerialNumbers }) => {
-  
+
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -247,7 +247,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                         {data?.row?.qty}
                                       </span>
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">Recieved: </span>
+                                        <span className="text-[var(--primary-text)] font-semibold">Received: </span>
                                         {data?.row?.actualReceived || 0}
                                       </span>
                                       <span>
