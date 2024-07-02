@@ -94,9 +94,6 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 
     if (type === MATERIAL_TYPE.package) {
       updatedDeepFilters.push({ field: 'packageType', term: 'product' });
-      if (rentalPolicyData?.customerAccountWisePackages) {
-        updatedFilterByIds.push({ field: 'customerAccount', term: rentalManagementData?.customerAccount?.optionValue });
-      }
     }
 
     if (updatedFilterByIds?.length) {
@@ -114,6 +111,9 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    if (type === MATERIAL_TYPE.package) {
+      deepFilter = `${deepFilter}&rentalCustomerAccountWisePackages=true&customerAccount=${rentalManagementData?.customerAccount?.optionValue}`;
     }
     return deepFilter;
   };
