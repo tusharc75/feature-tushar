@@ -254,6 +254,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
+    data.material = data?.material?.filter((e) => e[`price_${rentalManagementData?.currency?.toLowerCase()}`])
+
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
       if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
@@ -269,60 +271,56 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
-    data?.material
-      ?.filter((d) => d?.actualStartDate && d?.parentId === null && d?.type === MATERIAL_TYPE.product && d?.productDetail?.serializedProduct)
-      ?.forEach((element) => {
-        data?.inventory
-          ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
-          ?.forEach((ele: any) => {
-            ele.type = 'serializedAsset';
-            ele.qty = 1;
-            ele._id = ele?.inventoryDetail?._id;
-            ele.materialId = ele?.inventoryDetail?._id;
-            ele.description = `${element?.productDetail?.productName}-${element?.productDetail?.productDescription || ''}`;
-            let values = { qty: 1 };
-            values['actualStartDate'] = ele?.manualStartDate;
-            values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
-            values['manualEndDate'] = ele?.manualEndDate;
-            const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-            const { materialId, qty, type, _id, ...rest } = element;
-            newMaterial.push({ ...rest, ...ele, ...calValues });
-          });
-      });
-
-    data?.material
-      ?.filter((d) => d.actualStartDate)
-      ?.forEach((element) => {
-        if (element?.parentId === null && element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
-        } else {
-          let values: any = {};
-          values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
-          values['manualEndDate'] = element?.actualEndDate;
+    data?.material?.filter((d) => d?.actualStartDate && d?.parentId === null && d?.type === MATERIAL_TYPE.product && d?.productDetail?.serializedProduct)?.forEach((element) => {
+      data?.inventory
+        ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
+        ?.forEach((ele: any) => {
+          ele.type = 'serializedAsset';
+          ele.qty = 1;
+          ele._id = ele?.inventoryDetail?._id;
+          ele.materialId = ele?.inventoryDetail?._id;
+          ele.description = `${element?.productDetail?.productName}-${element?.productDetail?.productDescription || ''}`;
+          let values = { qty: 1 };
+          values['actualStartDate'] = ele?.manualStartDate;
+          values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
+          values['manualEndDate'] = ele?.manualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-          if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
-            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
-          }
-          newMaterial.push({ ...element, ...calValues });
+          const { materialId, qty, type, _id, ...rest } = element;
+          newMaterial.push({ ...rest, ...ele, ...calValues });
+        });
+    });
 
-          if (element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
-            data?.inventory
-              ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
-              ?.forEach((ele: any) => {
-                ele.parentId = element?._id;
-                ele.type = 'serializedAsset';
-                ele.qty = 1;
-                ele._id = ele?.inventoryDetail?._id;
-                ele.materialId = ele?.inventoryDetail?._id;
-                let values = { qty: 1 };
-                values['actualStartDate'] = ele?.manualStartDate;
-                values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
-                const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
-                const { materialId, qty, type, _id, ...rest } = element;
-                newMaterial.push({ ...rest, ...ele, ...calValues });
-              });
-          }
+    data?.material?.filter((d) => d.actualStartDate)?.forEach((element) => {
+      if (element?.parentId === null && element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
+      } else {
+        let values: any = {};
+        values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+        values['manualEndDate'] = element?.actualEndDate;
+        const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+        if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === "Per Day" && element?.serviceLog?.length) {
+          calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
         }
-      });
+        newMaterial.push({ ...element, ...calValues });
+
+        if (element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
+          data?.inventory
+            ?.filter((d) => d._id === element?._id && !d.isReplaced && d?.manualStartDate)
+            ?.forEach((ele: any) => {
+              ele.parentId = element?._id;
+              ele.type = 'serializedAsset';
+              ele.qty = 1;
+              ele._id = ele?.inventoryDetail?._id;
+              ele.materialId = ele?.inventoryDetail?._id;
+              let values = { qty: 1 };
+              values['actualStartDate'] = ele?.manualStartDate;
+              values['actualEndDate'] = ele?.manualEndDate || element?.estimateEndDate;
+              const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
+              const { materialId, qty, type, _id, ...rest } = element;
+              newMaterial.push({ ...rest, ...ele, ...calValues });
+            });
+        }
+      }
+    });
 
     if (additionalCostData.length > 0) {
       additionalCostData.forEach((element) => {
