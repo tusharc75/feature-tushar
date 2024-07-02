@@ -59,14 +59,9 @@ const Quotation = ({
   }, []);
 
   useEffect(() => {
-    if (material?.filter((e) => !e.parentId).some((d) =>
-      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-    )) {
+    if (!material?.filter((e) => !e.parentId).some((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
       setNextStepToolTip(rentalManagementMessage.validPrice)
     }
-
   }, [material]);
 
   useEffect(() => {
@@ -83,9 +78,6 @@ const Quotation = ({
     if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
       setNextStep(true);
     }
-
-
-
   }, [quotationData?.versions[currentVersion]?._id]);
 
   const fetchFields = async () => {
@@ -117,15 +109,15 @@ const Quotation = ({
           row.original['type'] ? (
             <p>
               {`${startCase(row.original?.type)} `}
-              {row.original['type'] === 'product'
+              {row.original['type'] === MATERIAL_TYPE.product
                 ? row.original?.productDetail?.serializedProduct
                   ? '(Serialized)'
                   : '(Non-Serialized)'
-                : row.original?.type === 'package'
+                : row.original?.type === MATERIAL_TYPE.package
                   ? row.original?.packageDetail.packageType === 'Product'
                     ? '(Product)'
                     : '(Service)'
-                  : row.original.type === 'service'
+                  : row.original.type === MATERIAL_TYPE.service
                     ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
                     : ''}
             </p>
@@ -185,20 +177,20 @@ const Quotation = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
+      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.serializedAsset
         ? _subRow?.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
+        : _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productName
-          : _subRow.type === 'service'
+          : _subRow.type === MATERIAL_TYPE.service
             ? _subRow?.serviceDetail?.serviceName
             : _subRow?.packageDetail?.packageName
         }`;
       _subRow.description =
-        _subRow.type === 'service'
+        _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
-          : _subRow.type === 'product'
+          : _subRow.type === MATERIAL_TYPE.product
             ? _subRow?.productDetail?.productDescription || ''
-            : _subRow.type === 'package'
+            : _subRow.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription || ''
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
@@ -208,10 +200,10 @@ const Quotation = ({
       _subRow.assetQty = inventory.filter((e) => e._id === _subRow._id).length;
       _subRow.subRows = generateNestedData(material, inventory, _subRow);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return orderBy(subRows, ['order'], ['asc']);
@@ -243,25 +235,25 @@ const Quotation = ({
     const rows = [...rowsMaterial, ...additionalCostData];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
+      parent.detail = `${parent.type === MATERIAL_TYPE.serializedAsset
         ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
+        : parent.type === MATERIAL_TYPE.product
           ? parent.productDetail?.productName
-          : parent.type === 'service'
+          : parent.type === MATERIAL_TYPE.service
             ? parent.serviceDetail?.serviceName
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent.packageDetail?.packageName
               : parent.detail
         }`;
       parent.description =
-        parent.type === 'service'
+        parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
-          : parent.type === 'product'
+          : parent.type === MATERIAL_TYPE.product
             ? parent?.productDetail?.productDescription || ''
-            : parent.type === 'package'
+            : parent.type === MATERIAL_TYPE.package
               ? parent?.packageDetail?.packageDescription || ''
               : parent?.description;
-      parent.serializedProduct = parent.type === 'product' ? parent.productDetail?.serializedProduct : false;
+      parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + quotationData?.currency?.toLowerCase()] ? true : false;
       parent.hideSelection = inventory.filter((e) => e._id === parent._id).length ? true : false;
@@ -349,14 +341,7 @@ const Quotation = ({
             {quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
               quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice ? (
               <Button
-                disabled={material
-                  .filter((e) => e.parentId === null)
-                  .some(
-                    (d) =>
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === 0 ||
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === null ||
-                      d[`finalPrice_${quotationData?.currency?.toLowerCase()}`] === undefined
-                  )}
+                disabled={material.filter((e) => !e.parentId).some((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`]) ? false : true}
                 onClick={handleSendToCustomer}
                 variant="contained"
                 size="small"
