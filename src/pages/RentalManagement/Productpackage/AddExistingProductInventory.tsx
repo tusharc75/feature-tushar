@@ -6,15 +6,15 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { CustomDialogTransition, MATERIAL_TYPE, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
-const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData, isAddingProducts, handleClose, addMaterial }) => {
+const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData, isAddingProducts, handleClose, addMaterial, rentalPolicyData }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
@@ -44,18 +44,18 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
   const defaultColumns =
     type === MATERIAL_TYPE.product
       ? [
-          ...qtyColumn,
-          {
-            accessor: 'availableAssetCount',
-            Header: 'Available Asset',
-            minWidth: 180,
-            width: 180,
-            disabled: true,
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
-          }
-        ]
+        ...qtyColumn,
+        {
+          accessor: 'availableAssetCount',
+          Header: 'Available Asset',
+          minWidth: 180,
+          width: 180,
+          disabled: true,
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
+        }
+      ]
       : qtyColumn;
 
   useEffect(() => {
@@ -80,33 +80,40 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
   }, [search, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const getQueryString = () => {
+
     let deepFilter = `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}`;
+
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
     }
-    const updatedFilters = [];
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    const updatedDeepFilters = [...deepFilters];
+    const updatedFilterByIds = [...filterByIds];
+
     if (type === MATERIAL_TYPE.package) {
-      updatedFilters.push({ field: 'packageType', term: 'product' });
+      updatedDeepFilters.push({ field: 'packageType', term: 'product' });
     }
-    // if (type === "product") {
-    //     updatedFilters.push({ field: 'serializedProduct', term: 'yes' })
-    // }
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
+
+    if (updatedFilterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
     }
-    if (updatedFilters.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
     }
+    if (updatedFilterByIds?.length || updatedDeepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
     if (search) {
-      deepFilter = `${deepFilter}&search=${search}`;
+      deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
+    }
+    if (type === MATERIAL_TYPE.package && rentalPolicyData?.customerAccountWisePackages) {
+      deepFilter = `${deepFilter}&customerAccount=${rentalManagementData?.customerAccount?.optionValue}`;
     }
     return deepFilter;
   };
@@ -222,6 +229,8 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
               onSaveEdit={onSaveEdit}
               refreshGrid={fetchMaterial}
               showOnlyShowFilteredRecordSwitch={true}
+              showFilters={true}
+              resource={type === MATERIAL_TYPE.product ? sidebarResource.product : sidebarResource.packages}
             />
           ) : (
             <Box p={2} height={500}>

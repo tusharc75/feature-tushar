@@ -307,7 +307,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                         {data?.row?.qty}
                                       </span>
                                       <span>
-                                        <span className="text-[var(--primary-text)] font-semibold">Recieved: </span>
+                                        <span className="text-[var(--primary-text)] font-semibold">Received: </span>
                                         {data?.row?.actualReceived || 0}
                                       </span>
                                       <span>
