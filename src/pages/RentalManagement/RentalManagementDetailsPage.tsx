@@ -587,6 +587,7 @@ const RentalManagementDetailsPage = () => {
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
                   fetchRentalManagementData={fetchRentalManagementData}
+                  rentalPolicyData={resourceData?.policy}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Add Services' && rentalManagementData && (
@@ -610,6 +611,7 @@ const RentalManagementDetailsPage = () => {
                   }
                   quotationStatus={quotationData && quotationData?.versions[currentVersion]?.status}
                   fetchRentalManagementData={fetchRentalManagementData}
+                  rentalPolicyData={resourceData?.policy}
                 />
               )}
 

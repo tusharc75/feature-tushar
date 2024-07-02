@@ -13,7 +13,7 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids = [], isSubmitting = false, hideQty = false }) => {
+const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, customerAccount = null, ids = [], isSubmitting = false, hideQty = false }) => {
   const renderedFrom = `${camelCase(routes.packages?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -112,6 +112,9 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
         field: 'packageType',
         term: packageType
       });
+    }
+    if (customerAccount) {
+      updatedFilterByIds.push({ field: 'customerAccount', term: customerAccount });
     }
     if (updatedDeepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
