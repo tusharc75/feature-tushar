@@ -113,7 +113,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (type === MATERIAL_TYPE.package && rentalPolicyData?.customerAccountWisePackages) {
-      deepFilter = `${deepFilter}&rentalCustomerAccountWisePackages=true&customerAccount=${rentalManagementData?.customerAccount?.optionValue}`;
+      deepFilter = `${deepFilter}&customerAccount=${rentalManagementData?.customerAccount?.optionValue}`;
     }
     return deepFilter;
   };
