@@ -225,13 +225,11 @@ const ConvertInventory = () => {
           }
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
-          isActionButtonVisible={permissions?.inventoryToAsset?.isUpdate}
+          isActionButtonVisible={false}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           isAddButtonVisible={false}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
