@@ -113,9 +113,6 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, custo
         term: packageType
       });
     }
-    if (customerAccount) {
-      updatedFilterByIds.push({ field: 'customerAccount', term: customerAccount });
-    }
     if (updatedDeepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedDeepFilters))}`;
     }
@@ -127,6 +124,9 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, custo
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
+    }
+    if (customerAccount) {
+      deepFilter = `${deepFilter}&customerAccount=${customerAccount}`;
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
