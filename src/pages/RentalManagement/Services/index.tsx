@@ -41,7 +41,8 @@ const Services = ({
   allowedToEdit,
   quotationApproved,
   quotationStatus,
-  fetchRentalManagementData
+  fetchRentalManagementData,
+  rentalPolicyData
 }: any) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -708,6 +709,7 @@ const Services = ({
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           packageType="service"
+          customerAccount={rentalPolicyData?.customerAccountWisePackages ? rentalManagementData?.customerAccount?.optionValue : null}
           isSubmitting={isSubmitting}
         />
       )}
