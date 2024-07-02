@@ -35,22 +35,10 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
         const invoiceData = invoiceQtyData?.find((i) => i?._id === d?.row?.uniqueId);
         const invoiceQuantity = invoiceData?.qty || 0;
         let product = d?.row;
-        if (!product?.serialized && returnQty > product.qty - invoiceQuantity - consumeQty) {
-          errors.returnQuantity = `Return quantity is not valid`;
-        } else if (returnQty > product.qty) {
-          errors.returnQuantity = 'Return quantity is not valid';
-        } else {
-          errors.returnQuantity = '';
-        }
-        if (consumeQty > product.qty) {
-          errors.consumeQty = 'Consume quantity should not be more then order quantity';
-        } else {
-          errors.consumeQty = '';
-        }
-        if (consumeQty + returnQty > product.qty && !errors?.returnQuantity && !errors?.consumeQty) {
-          errors['sum'] = 'The sum of the quantities you return and consume cannot exceed the quantity you ordered.';
-        } else {
-          errors['sum'] = '';
+        if (returnQty > product.qty) {
+          errors.returnQuantity = 'Return quantity is not more then order quantity';
+        } else if (returnQty > (product.qty - invoiceQuantity - consumeQty)) {
+          errors.returnQuantity = `Sum of return and consume quantity cannot exceed the quantity you ordered`;
         }
       });
     }
@@ -123,11 +111,6 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                 <b>{data?.product}</b>
                                               </Typography>
                                             </Grid>
-                                            {validate([data])['sum'] && (
-                                              <Grid item xs={12}>
-                                                <Typography color="error">{validate([data])['sum']}</Typography>
-                                              </Grid>
-                                            )}
                                           </Grid>
                                           <Box mt={1}>
                                             <Grid container spacing={2} alignItems="center">
@@ -156,24 +139,14 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                               <Grid item xs={12} md={3}>
                                                 <TextField
                                                   fullWidth
-                                                  label="Product is Consumed"
+                                                  label="Consumed Quantity"
                                                   variant="outlined"
                                                   type="number"
-                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   size="small"
                                                   disabled
                                                   name="consumeQty"
                                                   placeholder="Consumed Quantity"
                                                   value={data.consumeQty}
-                                                  onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.products[index],
-                                                      ['consumeQty']: parseInt(value)
-                                                    });
-                                                  }}
-                                                  error={validate([data])?.consumeQty}
-                                                  helperText={validate([data]).consumeQty ? validate([data]).consumeQty : ''}
                                                 />
                                               </Grid>
                                               <Grid item xs={12} md={3}>
@@ -182,21 +155,11 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                                                   label="Invoiced Quantity"
                                                   variant="outlined"
                                                   type="number"
-                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
                                                   size="small"
                                                   disabled
                                                   name="invoiceQty"
                                                   placeholder="Invoiced Quantity"
                                                   value={data.invoiceQty}
-                                                  onChange={(e) => {
-                                                    const value = e.target.value.replace(/[^0-9]/g, '');
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.products[index],
-                                                      ['invoiceQty']: parseInt(value)
-                                                    });
-                                                  }}
-                                                  error={validate([data])?.invoiceQty}
-                                                  helperText={validate([data]).invoiceQty ? validate([data]).invoiceQty : ''}
                                                 />
                                               </Grid>
                                               <Grid item xs={12} md={3}>
@@ -238,7 +201,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).returnQuantity && !validate(values.products).consumeQty && !validate(values.products).sum) {
+                    if (!validate(values.products).returnQuantity) {
                       handleSubmit(values);
                     }
                   }}

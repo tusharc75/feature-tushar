@@ -157,8 +157,8 @@ const ListingPageHeader = ({
 
   return (
     <div className="header-panel listing-head">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-2 items-start">
-        <div className={'flex flex-wrap items-center gap-2 w-full'}>
+      <div className="flex items-start gap-2 [flex-wrap:wrap] lg:flex-nowrap">
+        <div className={'flex flex-grow flex-wrap items-center gap-2'}>
           {toggleButtonList ? (
             <HideWhenOffline>
               <ToggleButtonGroup
@@ -181,8 +181,9 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex ${shouldNotFlexWrap ? '' : 'flex-wrap'} gap-[8px] justify-end items-center ${!isLeftSidePresent && isMobile ? '-mt-2' : ''
-            }`}
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${
+            !isLeftSidePresent && isMobile ? '-mt-2' : ''
+          }`}
         >
           {Boolean(leftSideContentsOfSearchFilter) ? leftSideContentsOfSearchFilter : null}
           {onSearch ? (
@@ -197,7 +198,7 @@ const ListingPageHeader = ({
           ) : null}
           {handleSearchFilter ? (
             <SearchFilter
-              className="w-full sm:w-[unset] sm:max-w-[400px] sm:min-w-[200px] flex-grow"
+              className="w-full flex-grow sm:w-[unset] sm:min-w-[200px] sm:max-w-[400px]"
               handleChangeFilter={handleSearchFilter}
               filter={searchFilter}
               chip={{ size: 'small' }}
@@ -206,7 +207,7 @@ const ListingPageHeader = ({
           ) : null}
           {rightSideContents || isAddButtonVisible || isActionButtonVisible ? (
             <>
-              <div className="flex gap-[8px] flex-wrap items-center min-w-fit">
+              <div className="flex min-w-fit flex-wrap items-center gap-[8px]">
                 {/* <HideWhenOffline> */}
                 {isAddButtonVisible ? (
                   <HtmlTooltip title={addButtonTooltip ?? ''} placement="top" arrow enterTouchDelay={0}>
@@ -251,7 +252,7 @@ const ListingPageHeader = ({
                               text: 'Actions',
                               loading: actionButtonLoading,
                               mobileIcon: (
-                                <span className="w-[20px] h-[16px]">
+                                <span className="h-[16px] w-[20px]">
                                   <FaCircleChevronDown size={16} />
                                 </span>
                               )
