@@ -22,7 +22,8 @@ type CustomIntroProps = {
 };
 
 const CustomIntro = ({ steps }: CustomIntroProps) => {
-  const [updateSignal, setUpdateSignal] = useState<number>(0);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_, setUpdateSignal] = useState<number>(0);
   let handleStep = useRef<HandleStep | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const arrowRef = useRef(null);
@@ -37,7 +38,6 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
   useEffect(() => {
     handleStep.current = new HandleStep({
       steps,
-      updateSignal: updateSignal,
       setUpdateSignal: setUpdateSignal
     });
     return () => handleStep.current.removeListeners();
@@ -49,10 +49,16 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
   const isFirstStep = handleStep.current?.isFirstStep();
   const arrowPosition = handleStep.current?.getArrowPosition();
 
+  // Early return if class is not ready yet.
+  if (!handleStep.current?.ready) return null;
+
   return (
     <>
       <div
-        className={cn('floating-card fixed bottom-2 right-3 z-[1300]', handleStep.current && handleStep.current?.started ? 'sr-only' : 'not-sr-only')}
+        className={cn(
+          'floating-card fixed bottom-2 right-3 z-[1300]',
+          handleStep.current?.started || !handleStep.current?.ready || !handleStep.current ? 'sr-only' : 'not-sr-only'
+        )}
       >
         <button
           onClick={() => {

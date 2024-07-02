@@ -2,7 +2,6 @@ import { Step } from 'src/components/CustomIntro';
 
 export class HandleStep {
   steps: Step[];
-  updateSignal: number;
   setUpdateSignal: React.Dispatch<React.SetStateAction<number>>;
   elements: HTMLElement[];
   currentStepIndex: number;
@@ -11,25 +10,18 @@ export class HandleStep {
   finished: boolean;
   timeoutSignal: NodeJS.Timeout;
   documentHeight: number;
-  constructor({
-    steps,
-    updateSignal,
-    setUpdateSignal
-  }: {
-    steps: Step[];
-    updateSignal: number;
-    setUpdateSignal: React.Dispatch<React.SetStateAction<number>>;
-  }) {
+  ready: boolean;
+  constructor({ steps, setUpdateSignal }: { steps: Step[]; setUpdateSignal: React.Dispatch<React.SetStateAction<number>> }) {
     this.steps = steps;
     this.elements = [];
     this.itemPositions = [];
     this.currentStepIndex = -1;
     this.started = false;
     this.finished = false;
-    this.updateSignal = updateSignal;
     this.setUpdateSignal = setUpdateSignal;
     this.timeoutSignal = null;
     this.documentHeight = document?.body.offsetHeight;
+    this.ready = false;
 
     // initialize main class
     this.init();
@@ -75,6 +67,7 @@ export class HandleStep {
       }
     }
     this.itemPositions = positions;
+    this.ready = true;
     return positions;
   }
   getArrowPosition() {
