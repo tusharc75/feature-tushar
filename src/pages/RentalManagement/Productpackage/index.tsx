@@ -46,7 +46,8 @@ const Productpackage = ({
   allowedToEdit,
   quotationApproved,
   quotationStatus,
-  fetchRentalManagementData
+  fetchRentalManagementData,
+  rentalPolicyData
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -962,6 +963,7 @@ const Productpackage = ({
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           addMaterial={handleAdd}
+          rentalPolicyData={rentalPolicyData}
         />
       )}
       {addchildDialog.open && (
