@@ -139,6 +139,7 @@ const AssignRolesDialog = ({ rolesDialogOpen, onSuccess, handleCloseDialog, user
         ) : rolesConst.length ? (
           <>
             <ListingPageHeader
+              showSearchInMobile={true}
               leftSideContents={leftSideContents()}
               searchValue={search}
               onSearch={handleSearch}

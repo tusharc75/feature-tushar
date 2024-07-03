@@ -240,6 +240,7 @@ const AssignProductDialog = ({
       <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
+            showSearchInMobile={true}
             searchValue={search}
             onSearch={handleSearch}
             isActionButtonVisible={false}
