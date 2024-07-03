@@ -196,7 +196,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
                 data.push({ product: ele.product, package: ele?.packages[0], asset: result[0]._id });
                 ele.packages.shift();
               } else {
-                data.push({ product: ele.product, asset: result[0]._id })
+                data.push({ product: ele.product, asset: result[0]._id });
               }
             } else {
               data.push({ ...ele, asset: result[0]._id });
@@ -260,6 +260,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
       />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
+          showSearchInMobile={true}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}

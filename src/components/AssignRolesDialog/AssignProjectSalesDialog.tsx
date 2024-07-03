@@ -62,8 +62,8 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
           type.find((item) => item.type === customerAccount.accountResource).id
         }"}]`
       : user?.user?._id
-      ? `/project-sales?filterById=[{"field": "projectManager", "term": "${user?.user?._id}"}]`
-      : `/project-sales`;
+        ? `/project-sales?filterById=[{"field": "projectManager", "term": "${user?.user?._id}"}]`
+        : `/project-sales`;
     axiosInstance()
       .get(api)
       .then(({ data: { data } }) => {
@@ -161,6 +161,7 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
         ) : projectSalesConst.length ? (
           <>
             <ListingPageHeader
+              showSearchInMobile={true}
               leftSideContents={leftSideContents()}
               searchValue={search}
               onSearch={handleSearch}

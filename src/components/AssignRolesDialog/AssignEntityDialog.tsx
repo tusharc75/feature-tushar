@@ -249,7 +249,7 @@ const AssignEntityDialog = ({
           <ul key={0}>
             {data.map((d) => (
               <li
-                className="flex gap-2 px-2 py-2 md:px-[15px] text-[var(--primary-text)]"
+                className="flex gap-2 px-2 py-2 text-[var(--primary-text)] md:px-[15px]"
                 style={{ borderBottom: '1px solid var(--common-border-color)' }}
               >
                 <div>
@@ -267,10 +267,10 @@ const AssignEntityDialog = ({
                   />
                 </div>
                 <div>
-                  <h6 className="line-clamp-1 MuiTypography-body1 text-[16px] font-[500_!important]">
+                  <h6 className="MuiTypography-body1 line-clamp-1 text-[16px] font-[500_!important]">
                     {type === 'entity' ? d.entityName : d.concatedName}
                   </h6>
-                  <p className="line-clamp-1 MuiTypography-body2">{type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}</p>
+                  <p className="MuiTypography-body2 line-clamp-1">{type === 'user' ? d.email : d?.address?.optionLabel || d?.address || ''}</p>
                 </div>
               </li>
             ))}
@@ -281,7 +281,7 @@ const AssignEntityDialog = ({
           <ul style={{ padding: 0 }} key={1}>
             {role.map((d) => (
               <li
-                className="flex gap-2 px-2 py-2 md:px-[15px] text-[var(--primary-text)]"
+                className="flex gap-2 px-2 py-2 text-[var(--primary-text)] md:px-[15px]"
                 style={{ borderBottom: '1px solid var(--common-border-color)' }}
               >
                 <div>
@@ -298,8 +298,8 @@ const AssignEntityDialog = ({
                   />
                 </div>
                 <div>
-                  <h6 className="line-clamp-1 MuiTypography-body1 text-[16px] font-[500_!important]">{d.name || ''}</h6>
-                  <p className="line-clamp-1 MuiTypography-body2">{d.description || ''}</p>
+                  <h6 className="MuiTypography-body1 line-clamp-1 text-[16px] font-[500_!important]">{d.name || ''}</h6>
+                  <p className="MuiTypography-body2 line-clamp-1">{d.description || ''}</p>
                 </div>
               </li>
             ))}
@@ -363,6 +363,7 @@ const AssignEntityDialog = ({
             ) : dataConst.length ? (
               <>
                 <ListingPageHeader
+                  showSearchInMobile={true}
                   leftSideContents={leftSideContents()}
                   isActionButtonVisible={false}
                   isAddButtonVisible={false}
@@ -371,11 +372,11 @@ const AssignEntityDialog = ({
                   onSearch={handleSearch}
                 />
 
-                <div className="grid gap-[20px] mt-3">
+                <div className="mt-3 grid gap-[20px]">
                   {steps.map((label, index) => (
                     <div key={label} className="relative">
-                      <h4 className="text-[14px] flex items-center max-[600px]:ml-[6px] gap-[18px] text-[var(--primary-text)]">
-                        <span className="rounded-full bg-[--primary] grid place-items-center text-white text-[12px] w-[20px] h-[20px]">
+                      <h4 className="flex items-center gap-[18px] text-[14px] text-[var(--primary-text)] max-[600px]:ml-[6px]">
+                        <span className="grid h-[20px] w-[20px] place-items-center rounded-full bg-[--primary] text-[12px] text-white">
                           {activeStep > index ? <Check className="block" style={{ fontSize: 14 }} /> : index + 1}
                         </span>
                         <span>{label}</span>
@@ -383,7 +384,7 @@ const AssignEntityDialog = ({
                       {activeStep === index && (
                         <div
                           style={{ borderLeft: '1px dashed var(--common-border-color)' }}
-                          className="hidden min-[600px]:block w-[2px]  h-full absolute left-[10px] top-[20px] transform -translate-x-1/2 -translate-y-1/2 z-10"
+                          className="absolute left-[10px] top-[20px]  z-10 hidden h-full w-[2px] -translate-x-1/2 -translate-y-1/2 transform min-[600px]:block"
                         ></div>
                       )}
                       <Collapse in={activeStep === index}>

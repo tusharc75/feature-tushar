@@ -23,6 +23,7 @@ import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, purchas
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import axios, { CancelTokenSource } from 'axios';
 
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
@@ -65,7 +66,9 @@ const PurchaseOrder = () => {
   }, [selectedEntity]);
 
   useEffect(() => {
-    fetchPurchaseOrder();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchPurchaseOrder(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, fromSalesOrder, selectedType, showFilteredRecordsOnly, warehouse]);
 
   const getPlants = () => {
@@ -149,11 +152,11 @@ const PurchaseOrder = () => {
     )
   };
 
-  const fetchPurchaseOrder = () => {
+  const fetchPurchaseOrder = (cancelTokenSource?: CancelTokenSource | undefined) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${purchaseOrder.api}${queryString}`)
+      .get(`${purchaseOrder.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
