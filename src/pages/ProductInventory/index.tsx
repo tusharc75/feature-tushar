@@ -114,11 +114,6 @@ const InventoryProduct = () => {
 
     let newColumns = generateColumns(renderedFrom, productFields?.data?.data, routes.productDetail.path);
     columns = [...columns, ...newColumns];
-    columns?.forEach((e) => {
-      if (!['productName', 'serializedProduct'].includes(e?.accessor)) {
-        e.show = false;
-      }
-    });
     if (!user?.user?.brandPolicy?.hideInventoryCount) {
       let newColumns = generateColumns(renderedFrom, productInventoryFields?.data?.data, routes.productInventory.path);
       newColumns?.forEach((o) => {
@@ -153,7 +148,6 @@ const InventoryProduct = () => {
             Header: 'Available Inventory',
             disableFilters: true,
             disableSortBy: true,
-            show: true,
             Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableInventory || 0}</h5>
           },
           {
@@ -161,7 +155,6 @@ const InventoryProduct = () => {
             Header: 'Soft Hold',
             disableFilters: true,
             disableSortBy: true,
-            show: true,
             Cell: ({ row }) =>
               row?.original?.softHold ? (
                 <div className="flex items-center gap-2">
@@ -179,7 +172,6 @@ const InventoryProduct = () => {
             Header: 'On PO',
             disableFilters: true,
             disableSortBy: true,
-            show: true,
             Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.purchaseOrderQty || 0}</h5>
           }
         ]
