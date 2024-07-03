@@ -176,9 +176,9 @@ const Roles: FC = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-    const cencelToken = axios.CancelToken.source();
-    fetchRoles(cencelToken);
-    return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchRoles(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [search, page, limit, selectedType, filters, sorting]);
 
@@ -445,8 +445,8 @@ const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDia
       <MenuItem
         disabled={
           permissions?.role?.isUpdate &&
-          permissions?.role?.isDelete &&
-          selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            permissions?.role?.isDelete &&
+            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
             ? true
             : false
         }
@@ -459,8 +459,8 @@ const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDia
       <MenuItem
         disabled={
           permissions?.role?.isUpdate &&
-          permissions?.role?.isDelete &&
-          selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+            permissions?.role?.isDelete &&
+            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
             ? true
             : false
         }

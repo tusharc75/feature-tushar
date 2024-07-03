@@ -24,6 +24,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import './style.scss';
+import axios, { CancelTokenSource } from 'axios';
 
 const Leads = () => {
   const LeadTypes = [
@@ -67,7 +68,9 @@ const Leads = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
@@ -186,14 +189,14 @@ const Leads = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     if (selectedEntity) {
       const queryString = getQueryString();
       dispatch({ type: 'loading', loading: true });
 
       try {
         let data, count;
-        const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`);
+        const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`, { cancelToken: cancelTokenSource?.token });
         data = response?.data?.data;
         count = response?.data?.count;
         let rows = data.map((u) => {

@@ -185,9 +185,9 @@ const IrtTicket = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchIrtTicketData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchIrtTicketData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const showConfirmBox = () => {

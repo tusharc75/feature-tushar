@@ -20,6 +20,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageDeviceTemplateAlert from './ManageDeviceTemplateAlert';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import axios, { CancelTokenSource } from 'axios';
 
 export default function DeviceTemplatesAlerts() {
   const renderedFrom = camelCase(routes?.deviceTemplateAlert.title);
@@ -112,15 +113,17 @@ export default function DeviceTemplatesAlerts() {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.deviceTemplateAlert?.path}${queryString}`)
+      .get(`${routes?.deviceTemplateAlert?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let count = data?.count;
         let rows = data?.data?.map((u: any) => {

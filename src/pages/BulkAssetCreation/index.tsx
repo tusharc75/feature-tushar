@@ -21,6 +21,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { bulkAssetCreation, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageBulkAssetCreation from './ManageBulkAssetCreation';
+import axios, { CancelTokenSource } from 'axios';
 
 const BulkAssetCreation = () => {
   const types = [
@@ -57,7 +58,9 @@ const BulkAssetCreation = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
@@ -113,11 +116,11 @@ const BulkAssetCreation = () => {
     )
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${bulkAssetCreation.api}${queryString}`)
+      .get(`${bulkAssetCreation.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
@@ -319,9 +322,8 @@ const BulkAssetCreation = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-            deleteRecord?._id ? deleteRecord?.baNumber : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.bulkAssetCreation?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?._id ? deleteRecord?.baNumber : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

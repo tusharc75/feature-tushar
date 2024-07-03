@@ -73,9 +73,9 @@ const Entity: FC = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-    const cencelToken = axios.CancelToken.source();
-    fetchEntity(cencelToken);
-    return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchEntity(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [search, page, limit, filters, sorting, showFilteredRecordsOnly]);
 
@@ -154,8 +154,8 @@ const Entity: FC = () => {
             !permissions[entityResource]?.isDelete
               ? `You do not have permission to delete entity`
               : row?.original?.createdById === user?.user?._id
-              ? 'Delete'
-              : `You must be the owner of this entity to get the delete functionality`
+                ? 'Delete'
+                : `You must be the owner of this entity to get the delete functionality`
           }
         >
           <span>
@@ -263,8 +263,8 @@ const Entity: FC = () => {
             permissions[entityResource]?.isDelete && selectedRecords.length > 1
               ? true
               : Boolean(!(selectedRecords[0] && selectedRecords[0].createdById === user?.user?._id))
-              ? true
-              : false
+                ? true
+                : false
           }
           onClick={() => {
             if (selectedRecords[0] && selectedRecords[0]?._id) {

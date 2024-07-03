@@ -17,6 +17,7 @@ import { cycleCountPhysicalInventory, prepareDataForGrid } from 'src/constants/h
 import { gridLoadingTimeout } from '../../constants/helpers';
 import ManageCycleCountPInventory from './ManageCycleCountPInventory';
 import Products from './Products';
+import axios, { CancelTokenSource } from 'axios';
 
 const CycleCountPInventory = () => {
   const renderedFrom = camelCase(`${routes.cycleCountPhysicalInventory.title}`);
@@ -76,13 +77,15 @@ const CycleCountPInventory = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, []);
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(cycleCountPhysicalInventory.api)
+      .get(cycleCountPhysicalInventory.api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let rows = data?.map((u) => {
           let finalObject = prepareDataForGrid(u, user);

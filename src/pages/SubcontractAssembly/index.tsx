@@ -19,6 +19,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import CustomIntro, { Step } from 'src/components/CustomIntro';
+import axios, { CancelTokenSource } from 'axios';
 
 const steps: Step[] = [
   {
@@ -73,7 +74,9 @@ const SubcontractAssembly = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = async () => {
@@ -130,12 +133,12 @@ const SubcontractAssembly = () => {
     )
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.subcontractAssembly.path}${queryString}`)
+      .get(`${routes?.subcontractAssembly.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(
         ({
           data: {
@@ -302,9 +305,8 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.subcontractAssemblyNumber || ''
-            } ?`}
+            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.subcontractAssemblyNumber || ''
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

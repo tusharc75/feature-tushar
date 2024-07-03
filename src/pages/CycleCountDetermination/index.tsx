@@ -17,6 +17,7 @@ import { gridLoadingTimeout } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageCycleCountDetermination from './ManageCycleCountDetermination';
+import axios, { CancelTokenSource } from 'axios';
 
 const CycleCountDetermination = () => {
   const renderedFrom = camelCase(`${routes.cycleCountDetermination.title}`);
@@ -43,7 +44,9 @@ const CycleCountDetermination = () => {
 
   useEffect(() => {
     if (warehouse) {
-      fetchData();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     }
   }, [warehouse]);
 
@@ -96,10 +99,10 @@ const CycleCountDetermination = () => {
     setColumns(columns);
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`/cycle-count-determination?warehouse=${warehouse}`)
+      .get(`/cycle-count-determination?warehouse=${warehouse}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         setEditData(data);
         let rows = data?.map((u) => {
