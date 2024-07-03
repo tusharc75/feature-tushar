@@ -57,9 +57,9 @@ const TransferInventory = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = () => {

@@ -6,7 +6,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
-import { gridLoadingTimeout,  dateTimeFormat, prepareDataForGrid } from 'src/constants/helpers';
+import { gridLoadingTimeout, dateTimeFormat, prepareDataForGrid } from 'src/constants/helpers';
 import PreviewIcon from '@material-ui/icons/Visibility';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -33,9 +33,9 @@ const UserDownloadRequest = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, sorting, limit]);
 
   const fetchGridColumns = () => {

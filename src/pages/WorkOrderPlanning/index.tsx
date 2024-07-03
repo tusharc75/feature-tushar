@@ -69,7 +69,7 @@ const WorkOrderPlanning = () => {
             </Link>
           </div>
         );
-      } else if(o.accessor === 'assetStatus') {
+      } else if (o.accessor === 'assetStatus') {
         o.disableFilters = true;
       }
     });
@@ -82,9 +82,9 @@ const WorkOrderPlanning = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, search, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
 
   const getQueryString = (isExport = false) => {

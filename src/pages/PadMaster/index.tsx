@@ -191,9 +191,9 @@ const PadMaster = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchPadMasterData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchPadMasterData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const actionMenuItems = () => {

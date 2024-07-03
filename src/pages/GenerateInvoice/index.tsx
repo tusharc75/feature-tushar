@@ -112,10 +112,10 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   }, [selectedResource]);
 
   useEffect(() => {
-    if (selectedResource){
-      const cencelToken = axios.CancelToken.source();
-      fetchData(cencelToken);
-      return () => cencelToken.cancel();
+    if (selectedResource) {
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     }
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedResource]);
 

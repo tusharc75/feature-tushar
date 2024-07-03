@@ -96,13 +96,13 @@ export default function DeviceTemplates() {
     )
   };
 
-  
+
 
   useEffect(() => {
     if (renderCount > 0) {
-      const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
@@ -275,9 +275,8 @@ export default function DeviceTemplates() {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${
-            deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
-          }?`}
+          message={`Are you sure you want to delete ${routes?.deviceTemplates?.title?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.templateName : '') : ''
+            }?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

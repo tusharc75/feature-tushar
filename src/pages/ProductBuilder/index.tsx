@@ -72,9 +72,9 @@ const ProductBuilder = () => {
   //  Grid Variables - End
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchProductBuilder(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchProductBuilder(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, []);
 
   // useEffect(() => {

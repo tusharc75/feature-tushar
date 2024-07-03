@@ -189,9 +189,9 @@ const FrequentlyAskedQuestion = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchFrequentlyAskedQuestionData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchFrequentlyAskedQuestionData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const actionButtonMenuItems = () => {

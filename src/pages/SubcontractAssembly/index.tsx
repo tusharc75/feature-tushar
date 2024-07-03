@@ -74,9 +74,9 @@ const SubcontractAssembly = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedType]);
 
   const fetchGridColumns = async () => {
@@ -305,9 +305,8 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.subcontractAssemblyNumber || ''
-            } ?`}
+            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.subcontractAssemblyNumber || ''
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

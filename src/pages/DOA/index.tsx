@@ -92,9 +92,9 @@ const DOARequest = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      const cencelToken = axios.CancelToken.source();
-      fetchData(cencelToken);
-      return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 

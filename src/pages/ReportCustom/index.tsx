@@ -22,7 +22,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import axios, { CancelTokenSource } from 'axios';
 
 const CustomReport = () => {
-  
+
   const renderedFrom = 'custom-report';
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
@@ -45,9 +45,9 @@ const CustomReport = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [selectedEntity]);
 
   const fetchGridColumns = () => {
