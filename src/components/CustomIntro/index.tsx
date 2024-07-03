@@ -49,7 +49,7 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
   const isFirstStep = handleStep.current?.isFirstStep();
   const arrowPosition = handleStep.current?.getArrowPosition();
 
-  // Early return if class is not ready yet.
+  // Early return if HandleStep is not ready yet.
   if (!handleStep.current?.ready) return null;
 
   return (
