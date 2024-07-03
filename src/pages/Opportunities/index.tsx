@@ -134,9 +134,9 @@ const Opportunities = () => {
   };
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
@@ -363,9 +363,8 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? 's' : ''}   ${
-              deleteRecord.opportunityName || ''
-            }?`}
+            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? 's' : ''}   ${deleteRecord.opportunityName || ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

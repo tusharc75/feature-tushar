@@ -154,9 +154,9 @@ const ProjectSales: FC = () => {
   };
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
@@ -408,9 +408,8 @@ const ProjectSales: FC = () => {
       {showDeleteConfirmBox ? (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.projectSales?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-            deleteRecord?._id ? deleteRecord?.projectName : ''
-          } ? `}
+          message={`Are you sure you want to delete the ${routes?.projectSales?.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?._id ? deleteRecord?.projectName : ''
+            } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -77,9 +77,9 @@ const CycleCountPInventory = () => {
   };
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, []);
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {

@@ -74,9 +74,9 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
   };
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchMaterial(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchMaterial(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const getQueryString = () => {

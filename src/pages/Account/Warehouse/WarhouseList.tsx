@@ -32,9 +32,9 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchMaterial(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchMaterial(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchMaterial = (cancelTokenSource?: CancelTokenSource) => {
@@ -129,19 +129,19 @@ const WarhouseList = ({ api, isCustomer = false, addWarehouse, onClose, isAdding
             </Grid>
           </Box>
           {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 250px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchMaterial}
-            showOnlyShowFilteredRecordSwitch={true}
-            resource={sidebarResource.warehouse}
-          />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+            <CustomReactTable
+              height={'calc(100vh - 250px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              refreshGrid={fetchMaterial}
+              showOnlyShowFilteredRecordSwitch={true}
+              resource={sidebarResource.warehouse}
+            />
+          ) : <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>}
         </div>
       </Dialog>
     </Fragment>

@@ -80,7 +80,7 @@ const DataList = () => {
                 setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
               }}
             >
-            <Edit fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'}  />
+              <Edit fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -105,9 +105,9 @@ const DataList = () => {
   };
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {

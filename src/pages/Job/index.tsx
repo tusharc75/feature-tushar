@@ -102,9 +102,9 @@ const Job = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      const cencelToken = axios.CancelToken.source();
-      fetchJob(cencelToken);
-      return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchJob(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 

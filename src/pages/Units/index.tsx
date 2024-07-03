@@ -77,10 +77,10 @@ const Units = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
 
-    return () => cencelToken.cancel();
+    return () => cancelTokenSource.cancel();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, checkedFilter]);

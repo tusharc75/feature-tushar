@@ -86,9 +86,9 @@ const SerializedAsset = () => {
   }, []);
 
   useEffect(() => {
-    const cancelToken = axios.CancelToken.source();
-    fetchData(cancelToken);
-    return () => cancelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     page,

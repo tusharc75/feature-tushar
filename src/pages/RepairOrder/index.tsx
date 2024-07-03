@@ -70,9 +70,9 @@ const RepairOrder = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
@@ -374,9 +374,8 @@ const RepairOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
-              deleteRecord.repairOrderNumber || ''
-            }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
+              }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

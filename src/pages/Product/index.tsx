@@ -90,9 +90,9 @@ const Product = () => {
 
   useEffect(() => {
     if (productColumns && productColumns.length) {
-      const cencelToken = axios.CancelToken.source();
-      fetchData(cencelToken);
-      return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     }
   }, [page, limit, filters, sorting, search, selectedEntity, productCategory, productTemplate, productType, showFilteredRecordsOnly, productColumns]);
 

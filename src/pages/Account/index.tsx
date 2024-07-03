@@ -178,10 +178,10 @@ export default function Account(props) {
   }, [permissions]);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchAccounts(cencelToken);
-    return () => cencelToken.cancel();
-  },  [page, limit, selectedType, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, menuType]);
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchAccounts(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+  }, [page, limit, selectedType, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, menuType]);
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
@@ -544,24 +544,23 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                  {
-                    title: 'Supplier View Template',
-                    api: `${accountApi}/items/unknown/template`,
-                    type: 'download'
-                  },
-                  {
-                    title: 'Supplier View Export',
-                    api: `${accountApi}/items/unknown/template?export=true${
-                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                {
+                  title: 'Supplier View Template',
+                  api: `${accountApi}/items/unknown/template`,
+                  type: 'download'
+                },
+                {
+                  title: 'Supplier View Export',
+                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                    type: 'export'
-                  },
-                  {
-                    title: 'Supplier View Import',
-                    api: `${accountApi}/items/unknown/import`,
-                    type: 'import'
-                  }
-                ]
+                  type: 'export'
+                },
+                {
+                  title: 'Supplier View Import',
+                  api: `${accountApi}/items/unknown/import`,
+                  type: 'import'
+                }
+              ]
               : [])
           ]}
         />
@@ -656,9 +655,8 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
-              singleApproveDisapproveAccount.accountName
-            } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
+              } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -673,9 +671,8 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
-              multipleApproveDisapproveAccount.selectedRecords
-            } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
+              } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,

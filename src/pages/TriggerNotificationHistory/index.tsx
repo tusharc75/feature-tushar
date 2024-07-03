@@ -93,15 +93,15 @@ const TriggerNotificationHistory = () => {
         </div>
       )
     },
-    
+
   ];
   const [renderCount, setRenderCount] = useState(0);
 
   useEffect(() => {
     if (renderCount > 0) {
-      const cencelToken = axios.CancelToken.source();
-      fetchData(cencelToken);
-      return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else {
       setRenderCount(renderCount + 1);
     }
