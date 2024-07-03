@@ -125,7 +125,7 @@ const AssignSerialNumbersDialog = ({
           setSerialNumberCount(0);
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -252,31 +252,32 @@ const AssignSerialNumbersDialog = ({
         <Box style={{ display: 'inline' }}>
           {products.length > 0
             ? products?.map((d) => (
-              <Box
-                m={0.5}
-                p={1}
-                border={1}
-                className={`cursor-pointer rounded-sm ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
+                <Box
+                  m={0.5}
+                  p={1}
+                  border={1}
+                  className={`cursor-pointer rounded-sm ${
+                    selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'text-[var(--primary-text)]'
                   }`}
-                borderColor="var(--common-border-color)"
-                onClick={() => {
-                  if (selectedProduct === d.id) {
-                    setSelectedProduct(null);
-                  } else {
-                    setSelectedProduct(d.id);
-                  }
-                }}
-                style={{ display: 'inline-block' }}
-              >
-                {d?.qty < 0 ? (
-                  <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                ) : d?.qty === 0 ? (
-                  <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                ) : (
-                  <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                )}
-              </Box>
-            ))
+                  borderColor="var(--common-border-color)"
+                  onClick={() => {
+                    if (selectedProduct === d.id) {
+                      setSelectedProduct(null);
+                    } else {
+                      setSelectedProduct(d.id);
+                    }
+                  }}
+                  style={{ display: 'inline-block' }}
+                >
+                  {d?.qty < 0 ? (
+                    <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                  ) : d?.qty === 0 ? (
+                    <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                  ) : (
+                    <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                  )}
+                </Box>
+              ))
             : null}
         </Box>
         {showWarehouseFilter && (
@@ -337,31 +338,26 @@ const AssignSerialNumbersDialog = ({
   const leftSideContentsOfSearchFilter = () => {
     return (
       <>
-        {!selectedProduct || !selectedWarehouse ?
-          <HtmlTooltip title={"Please Select Product"}>
+        {!selectedProduct || !selectedWarehouse ? (
+          <HtmlTooltip title={'Please Select Product'}>
             <span>
-              <Button
-                variant={'outlined'}
-                color="primary"
-                size="small"
-                disabled={true}
-              >
+              <Button variant={'outlined'} color="primary" size="small" disabled={true}>
                 Add New Serial Numbers
               </Button>
             </span>
-          </HtmlTooltip> :
-          serialNumberCount ? (
-            <Button
-              variant={'contained'}
-              color="primary"
-              size="small"
-              onClick={() => {
-                setAddserialNumber(true);
-              }}
-            >
-              Add New Serial Numbers
-            </Button>
-          ) : null}
+          </HtmlTooltip>
+        ) : serialNumberCount ? (
+          <Button
+            variant={'contained'}
+            color="primary"
+            size="small"
+            onClick={() => {
+              setAddserialNumber(true);
+            }}
+          >
+            Add New Serial Numbers
+          </Button>
+        ) : null}
       </>
     );
   };
@@ -390,6 +386,7 @@ const AssignSerialNumbersDialog = ({
       <CustomDialogHeader title={`Assign Serial Numbers`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
+          showSearchInMobile={true}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}
@@ -449,7 +446,7 @@ const AssignSerialNumbersDialog = ({
             handleSucess={() => {
               setAddserialNumber(false);
               fetchProductInventory();
-              fetchData()
+              fetchData();
             }}
           />
         )}

@@ -13,7 +13,15 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, customerAccount = null, ids = [], isSubmitting = false, hideQty = false }) => {
+const AssignPackageDialog = ({
+  onSuccess,
+  handleClose,
+  packageType = null,
+  customerAccount = null,
+  ids = [],
+  isSubmitting = false,
+  hideQty = false
+}) => {
   const renderedFrom = `${camelCase(routes.packages?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -169,6 +177,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, custo
       <CustomDialogHeader title={`Assign ${routes.packages.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
+          showSearchInMobile={true}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}
