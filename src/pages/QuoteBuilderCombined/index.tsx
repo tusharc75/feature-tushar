@@ -36,6 +36,7 @@ import routes from './../../components/Helpers/Routes';
 import AllVersionStatus from './AllVersionStatus';
 import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
 import './style.scss';
+import axios, { CancelTokenSource } from 'axios';
 
 const types = [
   {
@@ -203,7 +204,9 @@ const QuoteBuilders = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [
     search,
     page,
@@ -323,13 +326,13 @@ const QuoteBuilders = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     if (selectedEntity) {
       dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
 
       axiosInstance()
-        .get(`${qbApi}${queryString}`)
+        .get(`${qbApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data, count } }) => {
           let clonedData = {};
           let rows = data.map((u) => {

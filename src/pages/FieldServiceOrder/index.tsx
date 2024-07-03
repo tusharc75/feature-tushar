@@ -24,6 +24,7 @@ import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/c
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from './Services/OfflineHelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
+import axios, { CancelTokenSource } from 'axios';
 
 let serviceOrderTimeout;
 
@@ -120,7 +121,9 @@ const ServiceOrder = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+      fetchData(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
@@ -235,7 +238,7 @@ const ServiceOrder = () => {
     return deepFilter;
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (isOffline) {
@@ -254,7 +257,7 @@ const ServiceOrder = () => {
       return;
     } else {
       axiosInstance()
-        .get(`${fieldServiceOrder.api}${queryString}`)
+        .get(`${fieldServiceOrder.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data, count } }) => {
           let rows = data?.map((u) => {
             let finalObject: any = prepareDataForGrid(u);

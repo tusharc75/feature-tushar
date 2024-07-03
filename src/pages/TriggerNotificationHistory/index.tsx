@@ -12,6 +12,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
+import axios, { CancelTokenSource } from 'axios';
 
 const TriggerNotificationHistory = () => {
 
@@ -98,7 +99,9 @@ const TriggerNotificationHistory = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+      fetchData(cencelToken);
+      return () => cencelToken.cancel();
     } else {
       setRenderCount(renderCount + 1);
     }
@@ -123,11 +126,11 @@ const TriggerNotificationHistory = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${routes?.triggerNotificationHistory?.path}${queryString}`)
+      .get(`${routes?.triggerNotificationHistory?.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         dispatch({ type: 'initialize', data: data, count: count });
       })

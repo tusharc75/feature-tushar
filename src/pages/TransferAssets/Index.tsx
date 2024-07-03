@@ -21,6 +21,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferAsset } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferAsset from './ManageTransferAsset';
+import axios, { CancelTokenSource } from 'axios';
 
 const TransferAsset = () => {
   const types = [
@@ -58,7 +59,9 @@ const TransferAsset = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
@@ -114,12 +117,12 @@ const TransferAsset = () => {
     )
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
 
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${transferAsset.api}${queryString}`)
+      .get(`${transferAsset.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);

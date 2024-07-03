@@ -15,6 +15,7 @@ import ManageRepairOrder from '../RepairOrder/ManageRepairOrder';
 import { Autocomplete } from '@material-ui/lab';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
+import axios, { CancelTokenSource } from 'axios';
 
 const WorkOrderPlanning = () => {
   const renderedFrom = camelCase(routes?.workOrderPlanning.title);
@@ -81,7 +82,9 @@ const WorkOrderPlanning = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, search, sorting, selectedEntity, showFilteredRecordsOnly, selectedStatus]);
 
   const getQueryString = (isExport = false) => {
@@ -116,11 +119,11 @@ const WorkOrderPlanning = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${workOrder.api}/work-order-planning${queryString}`)
+      .get(`${workOrder.api}/work-order-planning${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data: { data, count } } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
