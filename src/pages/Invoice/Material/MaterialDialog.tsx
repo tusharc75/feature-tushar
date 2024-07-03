@@ -31,7 +31,7 @@ interface EditDialogProps {
   showSaveAndNext: any;
   loadingEdit: any;
 }
-const rateChangeFields = ['unit', 'pricingMethod','pricingCondition'];
+const rateChangeFields = ['unit', 'pricingMethod', 'pricingCondition'];
 
 const MaterialDialog: FC<EditDialogProps> = ({
   calculatePrice,
@@ -216,7 +216,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
     if (values['unit'] && values['unit'] !== '') {
       tempPriceCondition = tempPriceCondition?.filter((e) => e.unit === values['unit']);
     }
-    if (values['pricingMethod'] && values['pricingMethod'] !== '') {
+    if (values['pricingMethod'] && values['pricingMethod'] !== '' && allFields?.find((e) => e.fieldName === 'pricingMethod')) {
       tempPriceCondition = tempPriceCondition?.filter((e) => e.pricingMethod === values['pricingMethod']);
     }
     tempPriceCondition = uniqBy(
@@ -348,12 +348,13 @@ const MaterialDialog: FC<EditDialogProps> = ({
                                           name={field.fieldName}
                                           type={field.type}
                                           options={field.fieldName === 'pricingCondition' ? priceConditionList :
-                                          field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
+                                            field.fieldName === 'pricingMethod' ? pricingMethodList : field.option}
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
+                                            const isPricingMethodField = allFields?.find((e) => e.fieldName === 'pricingMethod')
                                             const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
                                             if (values['pricingCondition']) {
                                               if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
@@ -368,11 +369,20 @@ const MaterialDialog: FC<EditDialogProps> = ({
                                             }
                                             let priceValue
                                             if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                              if (isPricingMethodField) {
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.unit === values['unit'] && d.pricingMethod === values['pricingMethod']);
+                                              }
+                                              else {
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.unit === values['unit']);
+                                              }
                                             } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.unit === values['unit'] && d.pricingMethod === value);
                                             } else {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                              if (isPricingMethodField) {
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.unit === value && d.pricingMethod === values['pricingMethod']);
+                                              } else {
+                                                priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.unit === value);
+                                              }
                                             }
                                             let priceFieldName = 'price_' + invoiceData?.currency?.toLowerCase();
                                             const result = autoCalculateSpecificFields(
