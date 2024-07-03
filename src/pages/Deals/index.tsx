@@ -87,9 +87,9 @@ const Deals = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchDeals(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchDeals(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, search, checkedFilter]);

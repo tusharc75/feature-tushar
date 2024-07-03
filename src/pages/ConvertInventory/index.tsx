@@ -64,9 +64,9 @@ const ConvertInventory = () => {
 
   useEffect(() => {
     if (warehouseId) {
-      const cencelToken = axios.CancelToken.source();
-      fetchProductInventory(cencelToken);
-      return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchProductInventory(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     }
   }, [search, warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 

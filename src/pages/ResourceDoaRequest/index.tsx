@@ -15,6 +15,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CancelOutlined, CheckCircleOutlined } from '@material-ui/icons';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import { useData } from 'src/StateProvider/Provider';
+import axios, { CancelTokenSource } from 'axios';
 
 const ResourceDoaRequest = () => {
   const renderedFrom = camelCase(routes?.resourceDoaRequest.title);
@@ -122,13 +123,15 @@ const ResourceDoaRequest = () => {
   ];
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`${routes.resourceDoaRequest.path}`)
+      .get(`${routes.resourceDoaRequest.path}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         const rows = data?.map((d) => ({
           _id: d?._id,
