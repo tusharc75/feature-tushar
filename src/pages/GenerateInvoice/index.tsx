@@ -18,6 +18,7 @@ import ViewInvoice from '../Invoice/ViewInvoice';
 import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBillingDialog';
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
+import axios, { CancelTokenSource } from 'axios';
 
 const GENERATE_RESOURCE = [
   {
@@ -111,7 +112,11 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
   }, [selectedResource]);
 
   useEffect(() => {
-    if (selectedResource) fetchData();
+    if (selectedResource){
+      const cencelToken = axios.CancelToken.source();
+      fetchData(cencelToken);
+      return () => cencelToken.cancel();
+    }
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, selectedResource]);
 
   const fetchGridColumns = async () => {
@@ -122,12 +127,12 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.generateInvoice.path}${queryString}`)
+      .get(`${routes?.generateInvoice.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u);

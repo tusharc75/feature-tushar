@@ -32,6 +32,7 @@ import routes from './../../components/Helpers/Routes';
 import CardView from './CardView';
 import ManageJobDialog from './ManageJobDialog';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import axios, { CancelTokenSource } from 'axios';
 
 let jobTimeout;
 
@@ -101,7 +102,9 @@ const Job = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchJob();
+      const cencelToken = axios.CancelToken.source();
+      fetchJob(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
@@ -203,13 +206,13 @@ const Job = () => {
     return deepFilter;
   };
 
-  const fetchJob = async () => {
+  const fetchJob = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
       let data: any = [],
         count;
-      const response: any = await axiosInstance().get(`${routes.job.path}${queryString}`);
+      const response: any = await axiosInstance().get(`${routes.job.path}${queryString}`, { cancelToken: cancelTokenSource?.token });
       data = response?.data?.data;
       count = response?.data?.data?.count;
       let rows = data?.data.map((u) => {

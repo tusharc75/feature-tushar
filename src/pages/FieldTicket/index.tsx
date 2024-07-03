@@ -21,6 +21,7 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
+import axios, { CancelTokenSource } from 'axios';
 
 const FieldTicket = () => {
   const types = [
@@ -60,7 +61,9 @@ const FieldTicket = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, isOffline, selectedType]);
 
   const fetchGridColumns = async () => {
@@ -80,7 +83,7 @@ const FieldTicket = () => {
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     if (isOffline) {
@@ -99,7 +102,7 @@ const FieldTicket = () => {
       }, gridLoadingTimeout);
     } else {
       axiosInstance()
-        .get(`${routes?.fieldTicket.path}${queryString}`)
+        .get(`${routes?.fieldTicket.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data, count } }) => {
           let rows = data?.map((u: any) => {
             let finalObject: any = prepareDataForGrid(u);

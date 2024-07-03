@@ -22,6 +22,7 @@ import { findAll, findOne, objectStore } from '../../constants/indexdbhelper';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
+import axios, { CancelTokenSource } from 'axios';
 
 let deliveryTicketTimeout;
 
@@ -128,7 +129,7 @@ const DeliveryTicket = () => {
     setColumns([...columns]);
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     try {
       if (selectedEntity) {
         dispatch({ type: 'loading', loading: true });
@@ -136,7 +137,7 @@ const DeliveryTicket = () => {
           count;
         if (!isOffline) {
           const queryString = getQueryString();
-          const response: any = await axiosInstance().get(`${deliveryTicket.api}${queryString}`);
+          const response: any = await axiosInstance().get(`${deliveryTicket.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
           data = response?.data?.data;
           count = response?.data?.count;
         } else {
@@ -182,7 +183,9 @@ const DeliveryTicket = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cencelToken = axios.CancelToken.source();
+      fetchData(cencelToken);
+      return () => cencelToken.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, selectedEntity, isOffline, selectedType, showFilteredRecordsOnly]);
 

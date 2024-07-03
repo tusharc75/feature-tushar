@@ -16,6 +16,7 @@ import moment from 'moment';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { camelCase } from 'lodash';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
+import axios, { CancelTokenSource } from 'axios';
 
 const UserDownloadRequest = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -32,7 +33,9 @@ const UserDownloadRequest = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [page, sorting, limit]);
 
   const fetchGridColumns = () => {
@@ -175,11 +178,11 @@ const UserDownloadRequest = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`/user-download-request${queryString}`)
+      .get(`/user-download-request${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(
         ({
           data: {

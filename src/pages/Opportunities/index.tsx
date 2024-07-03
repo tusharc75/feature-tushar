@@ -26,6 +26,7 @@ import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
 import './style.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import axios, { CancelTokenSource } from 'axios';
 
 const Opportunities = () => {
   const types = [
@@ -133,7 +134,9 @@ const Opportunities = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    const cencelToken = axios.CancelToken.source();
+    fetchData(cencelToken);
+    return () => cencelToken.cancel();
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, accountDetails, showFilteredRecordsOnly]);
 
   const getQueryString = (isExport = false) => {
@@ -187,12 +190,12 @@ const Opportunities = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     if (selectedEntity) {
       const queryString = getQueryString();
       dispatch({ type: 'loading', loading: true });
       axiosInstance()
-        .get(`${opportunityApi}${queryString}`)
+        .get(`${opportunityApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data, count } }) => {
           let rows = data.map((u) => {
             let finalObject = prepareDataForGrid(u);

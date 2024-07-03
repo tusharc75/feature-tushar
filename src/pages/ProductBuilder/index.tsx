@@ -19,6 +19,7 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
 import { dateFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CreateNewDialog from './CreateNewDialog';
+import axios, { CancelTokenSource } from 'axios';
 
 const ProductBuilder = () => {
   const renderedFrom = camelCase(routes?.productBuilder.title);
@@ -71,7 +72,9 @@ const ProductBuilder = () => {
   //  Grid Variables - End
 
   useEffect(() => {
-    fetchProductBuilder();
+    const cencelToken = axios.CancelToken.source();
+    fetchProductBuilder(cencelToken);
+    return () => cencelToken.cancel();
   }, []);
 
   // useEffect(() => {
@@ -131,12 +134,12 @@ const ProductBuilder = () => {
     return deepFilter;
   };
 
-  const fetchProductBuilder = () => {
+  const fetchProductBuilder = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
 
     const queryString = getQueryString();
     axiosInstance()
-      .get(`/productbuilder${queryString}`)
+      .get(`/productbuilder${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);

@@ -36,6 +36,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageAccountDialog from './ManageAccount/index';
 import WarhouseList from './Warehouse/WarhouseList';
+import axios, { CancelTokenSource } from 'axios';
 
 const options = ['All', 'Approved', 'Disapproved'];
 
@@ -177,8 +178,10 @@ export default function Account(props) {
   }, [permissions]);
 
   useEffect(() => {
-    fetchAccounts();
-  }, [page, limit, selectedType, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, menuType]);
+    const cencelToken = axios.CancelToken.source();
+    fetchAccounts(cencelToken);
+    return () => cencelToken.cancel();
+  },  [page, limit, selectedType, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, menuType]);
 
   const handleEntityChange = (entityId) => {
     entityDispatch({ type: SET_SELECTED_ENTITY, payload: entityId });
@@ -350,11 +353,11 @@ export default function Account(props) {
     setMenuType(options[selectedOption]);
   };
 
-  const fetchAccounts = async () => {
+  const fetchAccounts = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${accountApi}${queryString}`)
+      .get(`${accountApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
