@@ -210,16 +210,11 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
         }
       }}
       aria-labelledby="assign-roles-dialog"
-      PaperProps={{
-        component: 'form',
-        'aria-autocomplete': 'none',
-        autoCorrect: 'off'
-      }}
     >
       {!loadingInitialData ? (
         <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ touched, errors, setFieldValue, values }) => (
-            <>
+            <Form autoComplete="off" autoCorrect="off" >
               <CustomDialogHeader
                 title={`Convert Inventory`}
                 showRequiredLabel={true}
@@ -328,7 +323,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                   Convert
                 </CustomButton>
               </CustomDialogFooter>
-            </>
+            </Form>
           )}
         </Formik>
       ) : (
