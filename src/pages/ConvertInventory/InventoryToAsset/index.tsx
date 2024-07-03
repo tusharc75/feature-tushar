@@ -182,7 +182,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
     };
     axiosInstance()
       .post(`${convertInventory.api}/convert-inventory-to-asset`, data)
-      .then(({ data: { data } }) => {
+      .then(({ data }) => {
         setLoading(false);
         setToastConfig({
           open: true,
