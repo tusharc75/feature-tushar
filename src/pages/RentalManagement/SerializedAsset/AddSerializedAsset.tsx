@@ -86,9 +86,9 @@ const AddSerializedAsset = ({
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchAssets(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchAssets(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly, selectedWarehouse, selectedProduct, tabValue]);
 
   useEffect(() => {

@@ -29,6 +29,7 @@ import { findAll, findOne, insertUpdate, objectStore } from '../../constants/ind
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageRepairJob from './ManageRepairJob';
+import axios, { CancelTokenSource } from 'axios';
 
 let repairJobTimeout;
 
@@ -120,7 +121,9 @@ const RepairJob = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, accountDetails, selectedEntity, showFilteredRecordsOnly]);
 
@@ -230,14 +233,14 @@ const RepairJob = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     try {
       let data: any = [],
         count;
       if (!isOffline) {
-        const response: any = await axiosInstance().get(`${repairJob.api}${queryString}`);
+        const response: any = await axiosInstance().get(`${repairJob.api}${queryString}`, { cancelToken: cancelTokenSource?.token });
         data = response?.data?.data;
         count = response?.data?.count;
       } else {

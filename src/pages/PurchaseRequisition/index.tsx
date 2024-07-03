@@ -54,9 +54,9 @@ const PurchaseRequisition = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {

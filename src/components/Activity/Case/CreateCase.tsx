@@ -85,7 +85,7 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
           setInitialValues(null);
           setInitialValues(data);
         })
-        .catch((err) => {});
+        .catch((err) => { });
     } else {
       let initialData = {
         name: '',

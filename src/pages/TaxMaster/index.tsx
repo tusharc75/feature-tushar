@@ -44,9 +44,9 @@ const TaxMaster = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {

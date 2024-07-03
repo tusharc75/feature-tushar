@@ -12,6 +12,7 @@ import { sidebarResource } from 'src/constants/helpers';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { FiExternalLink } from 'react-icons/fi';
+import axios, { CancelTokenSource } from 'axios';
 
 const FIELD_TO_FILTER = [
   {
@@ -96,10 +97,12 @@ const MaterialHandling = () => {
   }, [selectedEntity]);
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [filterQuery, warehouseOptions])
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     setWorkOrder(null);
     setSelectedWorkOrder(null);
     let api = `/material-handling`;
@@ -120,7 +123,7 @@ const MaterialHandling = () => {
       api = `${api}&deepFilter=${JSON.stringify(deepFilter)}`;
     }
     axiosInstance()
-      .get(api)
+      .get(api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         setWorkOrder(data);
         if (data?.length) {

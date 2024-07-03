@@ -18,6 +18,7 @@ import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../c
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageScheduleReport from './ManageScheduleReport';
+import axios, { CancelTokenSource } from 'axios';
 
 const ScheduleReport = () => {
   const renderedFrom = 'schedule-report';
@@ -41,7 +42,9 @@ const ScheduleReport = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, selectedEntity]);
 
   const fetchGridColumns = () => {
@@ -134,10 +137,10 @@ const ScheduleReport = () => {
     )
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`${routes?.scheduleReport.path}`)
+      .get(`${routes?.scheduleReport.path}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.length;
         let rows = data?.map((u) => {
