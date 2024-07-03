@@ -18,6 +18,25 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
+import CustomIntro, { Step } from 'src/components/CustomIntro';
+
+const steps: Step[] = [
+  {
+    title: 'Dummy Title 1',
+    content: (
+      <p>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti molestias explicabo accusantium magnam quibusdam. Culpa amet natus aut
+        suscipit quam!
+      </p>
+    ),
+    target: '#add-button'
+  },
+  {
+    title: 'Dummy Title 2',
+    content: `Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatibus repellat commodi, aliquam possimus voluptatum cupiditate, magnam natus distinctio praesentium, explicabo quam incidunt. Eius, velit adipisci!`,
+    target: '#action-button'
+  }
+];
 
 const SubcontractAssembly = () => {
   const types = [
@@ -305,6 +324,7 @@ const SubcontractAssembly = () => {
           />
         )}
       </CustomContainer>
+      {/* <CustomIntro steps={steps} /> */}
     </section>
   );
 };

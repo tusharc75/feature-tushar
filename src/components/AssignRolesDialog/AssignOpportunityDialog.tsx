@@ -128,6 +128,7 @@ const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleClose
         ) : opportunitiesConst.length ? (
           <>
             <ListingPageHeader
+              showSearchInMobile={true}
               leftSideContents={leftSideContents()}
               isActionButtonVisible={false}
               isAddButtonVisible={false}
