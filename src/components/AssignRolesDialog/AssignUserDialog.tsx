@@ -108,6 +108,7 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
         ) : usersConst.length ? (
           <>
             <ListingPageHeader
+              showSearchInMobile={true}
               leftSideContents={leftSideContents()}
               searchValue={search}
               onSearch={handleSearch}

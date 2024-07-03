@@ -13,9 +13,7 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [],
-  defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
-
+const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
   const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -245,6 +243,7 @@ const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [],
         {competencyOptions && columns ? (
           <>
             <ListingPageHeader
+              showSearchInMobile={true}
               searchValue={search}
               onSearch={handleSearch}
               isActionButtonVisible={false}

@@ -226,6 +226,7 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
         ) : userConst.length ? (
           <>
             <ListingPageHeader
+              showSearchInMobile={true}
               leftSideContents={leftSideContents()}
               searchValue={search}
               onSearch={handleSearch}

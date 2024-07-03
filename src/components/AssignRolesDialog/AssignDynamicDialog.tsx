@@ -215,6 +215,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
       />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
+          showSearchInMobile={true}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}

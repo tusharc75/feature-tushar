@@ -9,6 +9,7 @@ import { SearchFilter } from 'src/components/SearchFilter';
 import HtmlTooltip from '../CustomTooltipTitle';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
+import { cn } from 'src/constants/helpers';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -36,6 +37,7 @@ type ListingPageHeaderProps = {
   addButtonOnclick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   isAddButtonVisible: boolean;
   setQueryString?: boolean;
+  showSearchInMobile?: boolean;
 } & React.ComponentProps<'div'>;
 
 const ListingPageHeader = ({
@@ -61,7 +63,8 @@ const ListingPageHeader = ({
 
   isActionButtonVisible,
   actionButtonProps = {},
-  actionMenuItems
+  actionMenuItems,
+  showSearchInMobile = false
 }: ListingPageHeaderProps) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
@@ -181,7 +184,7 @@ const ListingPageHeader = ({
           {leftSideContents ? <HideWhenOffline>{leftSideContents}</HideWhenOffline> : null}
         </div>
         <div
-          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${
+          className={`flex flex-grow ${shouldNotFlexWrap ? '' : 'flex-wrap'} items-center justify-end gap-[8px] ${cn(showSearchInMobile ? 'max-[600px]:pt-2' : '')} ${
             !isLeftSidePresent && isMobile ? '-mt-2' : ''
           }`}
         >
@@ -189,8 +192,8 @@ const ListingPageHeader = ({
           {onSearch ? (
             <HideWhenOffline>
               <SearchBox
-                className={`max-[600px]:hidden`}
-                containerProps={{ className: 'max-[600px]:hidden' }}
+                className={cn(showSearchInMobile ? '' : 'max-[600px]:hidden')}
+                containerProps={{ className: cn(showSearchInMobile ? '' : 'max-[600px]:hidden') }}
                 onChange={onSearch}
                 value={searchValue}
               />
