@@ -93,7 +93,7 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   }, [version, columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, allowedToEdit);
+    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, allowedToEdit); 
     data = data?.filter((f) => f?.isRead);
     var c_fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, quotationData?.currency, allowedToEdit);
     c_fields = c_fields?.filter((f) => f?.isRead);

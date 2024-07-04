@@ -63,7 +63,7 @@ const QuoteBuilder = ({
   }, [sentToCustomer, DOAData]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
+    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false); 
     data = data?.filter((f) => f?.isRead);
     const newColumns = generateColumns(
       renderedFrom,
