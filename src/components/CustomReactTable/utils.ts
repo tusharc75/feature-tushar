@@ -412,6 +412,10 @@ export const createFilterModel = (formValues, coloums) => {
 
     switch (col.type) {
       case 'singleLine':
+        if (formValues[fieldName]) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
       case 'multiLine':
       case 'email':
       case 'mobileNumber':
@@ -429,7 +433,6 @@ export const createFilterModel = (formValues, coloums) => {
       case 'multiSelect':
       case 'dropDown':
         if ((col.lookup || col.dataList) && formValues[fieldName]) {
-          
           if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
             filterModel.set(fieldName, {
               operator: 'OR',
