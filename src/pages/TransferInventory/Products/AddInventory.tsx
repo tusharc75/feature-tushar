@@ -220,8 +220,8 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
             text: selectedRecords?.filter((e) => !e?.hideSelection).length > 0 ? `(${selectedRecords?.filter((e) => !e?.hideSelection).length})` : ''
           }}
           setQueryString={false}
+          showSearchInMobile={true}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 250px)'}

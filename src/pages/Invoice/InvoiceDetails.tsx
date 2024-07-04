@@ -28,6 +28,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   INVOICE_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   invoice,
   invoiceProcessSteps,
@@ -63,6 +64,7 @@ const InvoiceDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [versionDialog, setVersionDialog] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -130,6 +132,7 @@ const InvoiceDetails = () => {
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
+      setAllowedToDelete(permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) && data?.canDelete);
       setInvoiceData(data);
       setLoading(false);
     } catch (error) {
@@ -247,7 +250,7 @@ const InvoiceDetails = () => {
                       {isMobile && !isTablet ? <Edit /> : 'Edit'}
                     </Button>
                   )}
-                {permissions?.invoice?.isDelete && invoiceData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 {permissions?.invoice?.isUpdate &&
                   allowedToEdit && [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
                     <ButtonWithPulse

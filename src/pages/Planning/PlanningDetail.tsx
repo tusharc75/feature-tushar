@@ -14,7 +14,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, PLANNING_STATUS, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, PLANNING_STATUS, checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -74,7 +74,7 @@ const PlanningDetail = () => {
         isAllowedToEdit = false;
       }
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      setAllowedToDelete(permissions?.planning?.isDelete && checkIsAllowedToDelete(user, sidebarResource.planning, data.owner.optionValue) && data?.canDelete);
       setPlanningData(data);
       setLoading(false);
     } catch (error) {
@@ -171,7 +171,7 @@ const PlanningDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.planning?.isDelete && allowedToDelete && planningData?.canDelete && (
+              { allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
               <ActivityButton referenceId={planningData?._id} resource={ACTIVITY_RESOURCE.planning} resourceLabel={planningData?.planningNumber} />

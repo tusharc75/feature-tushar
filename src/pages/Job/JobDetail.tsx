@@ -16,7 +16,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, jobProcessSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkIsAllowedToDelete, checkIsAllowedToEdit, jobProcessSteps, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -77,7 +77,7 @@ const JobDetail = () => {
       setCurrentStep(getIndex(data?.processStatus, jobProcessSteps));
   
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.job, data));
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      setAllowedToDelete(permissions?.job?.isDelete && checkIsAllowedToDelete(user, sidebarResource.job, data.owner.optionValue));
       setJobData(data);
       setCustomizedRoutes([routes.job, { title: data?.jobNumber }]);
       setLoading(false);
@@ -145,7 +145,7 @@ const JobDetail = () => {
                 {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
-            {permissions?.job?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={jobData?._id} resource={ACTIVITY_RESOURCE.job} resourceLabel={jobData?.jobNumber} />
           </Box>
         </Box>
