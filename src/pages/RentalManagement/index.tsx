@@ -22,6 +22,7 @@ import routes from 'src/components/Helpers/Routes';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import {
   CHILD_RESOURCE,
+  checkIsAllowedToDelete,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -267,7 +268,8 @@ const RentalManagement = () => {
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-        finalObject['canDelete'] = permissions?.rentalManagement?.isDelete && finalObject?.ownerId === user?.user?._id && u?.material?.length === 0;
+        finalObject['canDelete'] = permissions?.rentalManagement?.isDelete && u?.material?.length === 0 &&
+          checkIsAllowedToDelete(user, sidebarResource.rentalManagement, finalObject?.ownerId);
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
