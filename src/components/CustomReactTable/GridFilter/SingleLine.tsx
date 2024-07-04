@@ -1,12 +1,12 @@
 import { CircularProgress, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { debounce } from 'lodash';
+import { debounce, startCase } from 'lodash';
 import { useCallback, useContext, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fieldName, required = false }) => {
+const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fieldName, required = false, fieldData }) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -20,6 +20,12 @@ const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fi
   const fetchOptions = useCallback(
     debounce(async (searchKey: string = '', page: number = 0) => {
       try {
+        let _resource = resource;
+        let _fieldName = fieldName;
+        if (fieldData?.type === 'lookUpDisplay') {
+          _resource = startCase(fieldData?.lookUpField);
+          _fieldName = fieldData?.lookUpFieldDisplay;
+        }
         if (searchKey !== '') {
           page = 0;
           setCurrentPage(0);
@@ -28,7 +34,7 @@ const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fi
           setCurrentPage(0);
           setOptions([]);
         }
-        let query = `sa-field/fieldName/options?resource=${resource}&limit=25&page=${page}&entity=${selectedEntity}&fieldName=${fieldName}&search=${searchKey}`;
+        let query = `sa-field/fieldName/options?resource=${_resource}&limit=25&page=${page}&entity=${selectedEntity}&fieldName=${_fieldName}&search=${searchKey}`;
         const response = await axiosInstance().get(query);
         let data = response?.data?.data;
 
