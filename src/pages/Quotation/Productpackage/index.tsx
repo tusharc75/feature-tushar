@@ -38,7 +38,7 @@ import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import PriceRequestDialog from './PriceRequestDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields ,fetch_child_resource_fields_perm} from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 
@@ -93,8 +93,10 @@ const Productpackage = ({ quotationData, fetchQuotationData, setNextStep, render
   }, [version, columns]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, allowedToEdit);
-    const c_fields = await fetch_child_resource_fields(CHILD_RESOURCE.quotationCost, quotationData?.currency, allowedToEdit);
+    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, allowedToEdit);
+    data = data?.filter((f) => f?.isRead);
+    var c_fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, quotationData?.currency, allowedToEdit);
+    c_fields = c_fields?.filter((f) => f?.isRead);
     setCostFields(c_fields);
     setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns: any = generateColumns(renderedFrom, data, null, false, quotationData?.currency);
