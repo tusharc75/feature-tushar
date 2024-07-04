@@ -337,7 +337,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                               fieldLabel={field.fieldLabel}
                               required={false}
                             />
-                          ) : field?.type === 'singleLine' ? (
+                          ) : field?.type === 'singleLine' || field?.type === 'lookUpDisplay' ? (
                             <SingleLine
                               key={field?._id}
                               resource={resource}
@@ -350,6 +350,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                               fieldName={field.fieldName}
                               fieldLabel={field.fieldLabel}
                               required={false}
+                              fieldData={field}
                             />
                           ) : (
                             <FormTypes
