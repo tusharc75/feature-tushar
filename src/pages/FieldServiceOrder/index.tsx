@@ -18,7 +18,7 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import { fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import ManageServiceOrder from './ManageServiceOrder';
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -246,7 +246,7 @@ const ServiceOrder = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: rows.length });
@@ -262,7 +262,7 @@ const ServiceOrder = () => {
           let rows = data?.map((u) => {
             let finalObject: any = prepareDataForGrid(u);
             finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-            finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+            finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, finalObject?.ownerId) && u?.canDelete;
             return finalObject;
           });
           dispatch({ type: 'initialize', data: rows, count: count });

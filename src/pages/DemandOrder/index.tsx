@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { DEMAND_ORDER_STATUS, demandOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { DEMAND_ORDER_STATUS, checkIsAllowedToDelete, demandOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
@@ -156,7 +156,7 @@ const DemandOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.demandOrder?.isDelete && finalObject?.ownerId === user?.user?._id &&
+          finalObject['canDelete'] = permissions?.demandOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.demandOrder, finalObject?.ownerId) &&
             finalObject?.status !== DEMAND_ORDER_STATUS.converted;
           return finalObject;
         });

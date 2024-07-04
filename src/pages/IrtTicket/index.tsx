@@ -15,7 +15,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
@@ -59,7 +59,7 @@ const IrtTicket = () => {
       count = response?.data?.data?.count;
       let rows = data?.data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject['canDelete'] = permissions?.irtTicket?.isDelete && finalObject?.ownerId === user?.user?._id;
+        finalObject['canDelete'] = permissions?.irtTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.irtTicket, finalObject?.ownerId);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
         finalObject['allowedToEdit'] = permissions?.irtTicket?.isUpdate;
         return finalObject;
