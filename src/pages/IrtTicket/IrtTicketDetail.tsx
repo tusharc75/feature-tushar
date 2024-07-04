@@ -64,7 +64,6 @@ const IrtTicketDetail = () => {
       } = await axiosInstance().get(`${routes.irtTicket.path}/${id}`);
   
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.irtTicket, data));
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(permissions?.irtTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.irtTicket, data.owner.optionValue));
       setHeadingLbl(data.irtTicketNumber);
       setIrtTicketData(data);
