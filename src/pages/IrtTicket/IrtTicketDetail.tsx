@@ -11,7 +11,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -65,6 +65,7 @@ const IrtTicketDetail = () => {
   
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.irtTicket, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      setAllowedToDelete(permissions?.irtTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.irtTicket, data.owner.optionValue));
       setHeadingLbl(data.irtTicketNumber);
       setIrtTicketData(data);
       setCustomizedRoutes([routes.irtTicket, { title: data?.irtTicketNumber }]);
@@ -124,7 +125,7 @@ const IrtTicketDetail = () => {
                 {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
-            {permissions?.irtTicket?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+            {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             <ActivityButton referenceId={irtTicketData?._id} resource={ACTIVITY_RESOURCE.irtTicket} resourceLabel={irtTicketData?.irtTicketNumber} />
           </Box>
         </Box>

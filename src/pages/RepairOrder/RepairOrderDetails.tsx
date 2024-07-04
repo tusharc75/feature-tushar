@@ -31,6 +31,7 @@ import {
   QUOTATION_STATUS,
   REPAIR_ORDER_STATUS,
   REPAIR_ORDER_TYPE,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   repairOrder,
   repairOrderSteps,
@@ -179,7 +180,7 @@ const RepairOrderDetails = () => {
           );
         }
 
-        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+        setAllowedToDelete(permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, data.owner.optionValue) && data?.canDelete);
         setRepairOrderData({ ...data });
       })
       .catch((err) => {
@@ -363,7 +364,7 @@ const RepairOrderDetails = () => {
                       {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                     </Button>
                   )}
-                {permissions?.repairOrder?.isDelete && allowedToDelete && repairOrderData?.canDelete && (
+                { allowedToDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
               </>

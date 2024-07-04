@@ -14,7 +14,7 @@ import CustomTabs, { CustomTab, TabPanel } from "src/components/CustomTabs";
 import { DeleteButton } from "src/components/Helpers/Buttons";
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import routes from "src/components/Helpers/Routes";
-import { ACTIVITY_RESOURCE, SUBCONTRACT_ASSEMBLY_STATUS, checkIsAllowedToEdit, sidebarResource, subcontractAssemblySteps } from "src/constants/helpers";
+import { ACTIVITY_RESOURCE, SUBCONTRACT_ASSEMBLY_STATUS, checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource, subcontractAssemblySteps } from "src/constants/helpers";
 import ManageSubcontractAssembly from "src/pages/SubcontractAssembly/ManageSubcontractAssembly";
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import Steps, { getIndex } from "src/components/Steps";
@@ -74,7 +74,7 @@ const SubcontractAssemblyDetail = () => {
 			} = await axiosInstance().get(`${routes.subcontractAssembly.path}/${id}`);
 
 			setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
-			setAllowedToDelete(permissions?.subcontractAssembly?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
+			setAllowedToDelete(permissions?.subcontractAssembly?.isDelete && checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) && data?.canDelete);
 			setSubcontractAssemblyData(data);
 			if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
 				setCurrentStep(subcontractAssemblySteps?.length - 1);
