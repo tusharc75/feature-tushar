@@ -78,7 +78,7 @@ const CustomIntro = () => {
   const isFirstStep = handleSteps?.current?.isFirstStep();
   const isWaiting = handleSteps?.current?.waitingForUser;
 
-  console.log(currentStepData, handleSteps?.current);
+  // console.log(currentStepData, handleSteps?.current);
 
   const handleNext = () => {
     currentStepData?.element.click();
