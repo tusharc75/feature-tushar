@@ -75,14 +75,12 @@ const RentalManagementDetailsPage = () => {
   const [isProcessor, setIsProcessor] = useState(false);
 
   const [statusOptions, setStatusOptions] = useState([]);
-  const [anchorEl, setAnchorEl] = useState(null);
 
   const [nextStep, setNextStep] = useState(false);
   const [nextStepToolTip, setNextStepToolTip] = useState(null);
 
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [locationKeys, setLocationKeys] = useState([]);
-  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showCancelConfirmBox, setShowCancelConfirmBox] = useState({ open: false, isQuote: false });
   const [stepFullScreen, setStepFullScreen] = useState(false);
 
@@ -241,7 +239,6 @@ const RentalManagementDetailsPage = () => {
       }
       setLoadingDetails(false);
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.rentalManagement, data));
-      setAllowedToDelete(data.owner.optionValue === user?.user?._id);
       const isProcessor = [data.processor].some((d) => d?.optionValue === user?.user?._id);
       setIsProcessor(isProcessor);
       setRentalManagementData(data);
@@ -621,7 +618,6 @@ const RentalManagementDetailsPage = () => {
                   setNextStep={setNextStep}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
-                  allowedToDelete={allowedToDelete}
                   fetchQuotationData={fetchQuotationData}
                   quotationData={quotationData}
                   currentVersion={currentVersion}

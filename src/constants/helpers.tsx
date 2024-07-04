@@ -3231,6 +3231,14 @@ export const checkIsAllowedToEdit = (user, resource, data) => {
   return isAllowedToEdit;
 };
 
+export const checkIsAllowedToDelete = (user, resource, owner) => {
+  let isAllowedToDelete = owner === user?.user?._id ? true : false;
+  if (user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource)) {
+    isAllowedToDelete = true;
+  }
+  return isAllowedToDelete;
+};
+
 export function changeItemIndex<T>(array: T[], item: T, sourceIndex: number, destinationIndex: number) {
   const newArray = Array.from(array);
   newArray.splice(sourceIndex, 1); // remove the item at index
