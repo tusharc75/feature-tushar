@@ -324,7 +324,7 @@ const SubcontractAssembly = () => {
           />
         )}
       </CustomContainer>
-      {/* <CustomIntro steps={steps} /> */}
+      <CustomIntro steps={steps} />
     </section>
   );
 };

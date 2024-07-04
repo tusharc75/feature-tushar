@@ -1,121 +1,144 @@
 import { Step } from 'src/components/CustomIntro';
+const RETRY = 10; //in seconds
 
-export class HandleStep {
+export class HandleSteps {
+  setUpdateSignal: any;
   steps: Step[];
-  setUpdateSignal: React.Dispatch<React.SetStateAction<number>>;
-  elements: HTMLElement[];
-  currentStepIndex: number;
-  itemPositions: DOMRect[];
+  currentIndex: number;
   started: boolean;
-  finished: boolean;
-  timeoutSignal: NodeJS.Timeout;
   documentHeight: number;
-  ready: boolean;
-  constructor({ steps, setUpdateSignal }: { steps: Step[]; setUpdateSignal: React.Dispatch<React.SetStateAction<number>> }) {
+  finished: boolean;
+  boundMousedown!: (e: MouseEvent) => void;
+  currentStepData:
+    | ({
+        positionData: DOMRect;
+        element: HTMLElement;
+        index: number;
+      } & Step)
+    | null;
+  interval: NodeJS.Timeout;
+  retry: number;
+  message: string;
+  waitingForUser: boolean;
+  error: boolean;
+  resizeObserver: ResizeObserver;
+  constructor({ setUpdateSignal, steps }: { setUpdateSignal: React.Dispatch<React.SetStateAction<number>>; steps: Step[] }) {
+    this.setUpdateSignal = setUpdateSignal;
     this.steps = steps;
-    this.elements = [];
-    this.itemPositions = [];
-    this.currentStepIndex = -1;
+    this.currentIndex = -1;
     this.started = false;
     this.finished = false;
-    this.setUpdateSignal = setUpdateSignal;
-    this.timeoutSignal = null;
+    this.currentStepData = null;
     this.documentHeight = document?.body.offsetHeight;
-    this.ready = false;
+    this.retry = 0;
+    this.interval = null;
+    this.message = '';
+    this.error = false;
+    this.waitingForUser = false;
+    this.resizeObserver = new ResizeObserver((entries) => {
+      window.requestAnimationFrame(() => {
+        if (!entries[0]) return;
+        const height = entries[0].target.clientHeight;
+        console.log('Body height changed:', height);
+        this.documentHeight = height;
+        if (this.started) {
+          this.getCurrentStep(true);
+        }
+      });
+    });
 
-    // initialize main class
-    this.init();
-    this.listeaners();
+    this.addEventListeners();
+    this.resizeObserver.observe(document?.body);
   }
 
-  listeaners() {
-    window.addEventListener('resize', this.init.bind(this));
+  private addEventListeners() {
+    this.boundMousedown = this.handleMouseDown.bind(this);
+    window.addEventListener('mousedown', this.boundMousedown);
   }
   removeListeners() {
-    window.removeEventListener('resize', this.init.bind(this));
+    window.removeEventListener('mousedown', this.boundMousedown);
+  }
+
+  handleMouseDown(e: MouseEvent) {
+    if (this.steps[this.currentIndex - 1]?.waitForUserClick) {
+      this.waitingForUser = true;
+    }
+  }
+
+  start() {
+    this.started = true;
+    this.next();
+  }
+  finish() {
+    this.reset();
+    this.sendUpdateSignal();
+  }
+  reset() {
+    this.started = false;
+    this.finished = false;
+    this.currentIndex = -1;
+  }
+  next() {
+    if (this.currentIndex === this.steps.length - 1) return;
+    this.currentIndex++;
+    this.getCurrentStep();
+  }
+  previous() {
+    if (this.currentIndex === 0) return;
+    this.currentIndex--;
+    this.getCurrentStep();
+  }
+
+  getCurrentStep(dirty = false) {
+    if (!this.steps[this.currentIndex]) return;
+    if (this.currentStepData?.index === this.currentIndex && !dirty) return this.currentStepData;
+    const activeStep = this.steps[this.currentIndex];
+    let element = document.querySelector(activeStep.target) as HTMLElement;
+    if (!element) {
+      this.interval = setInterval(() => {
+        this.retry++;
+        if (this.retry >= RETRY) {
+          clearInterval(this.interval);
+          this.message = 'Element not found';
+          this.error = true;
+          this.sendUpdateSignal();
+        }
+        element = document.querySelector(activeStep.target) as HTMLElement;
+        if (element) {
+          this.retry = 0;
+          this.currentStepData = {
+            ...activeStep,
+            positionData: element?.getBoundingClientRect(),
+            index: this.currentIndex,
+            element
+          };
+          setTimeout(() => {
+            this.sendUpdateSignal();
+          }, 50);
+          clearInterval(this.interval);
+        }
+      }, 1000);
+    }
+
+    this.currentStepData = {
+      ...activeStep,
+      positionData: element?.getBoundingClientRect(),
+      index: this.currentIndex,
+      element
+    };
+    setTimeout(() => {
+      this.sendUpdateSignal();
+    }, 50);
   }
 
   private sendUpdateSignal() {
     this.setUpdateSignal((prev) => (prev < 10 ? prev + 1 : 0));
   }
 
-  init() {
-    if (!this.steps) return;
-    clearTimeout(this.timeoutSignal);
-    this.documentHeight = document?.body.offsetHeight;
-    this.elements = [];
-    this.itemPositions = [];
-    for (const item of this.steps) {
-      if (typeof item.target === 'string') {
-        this.elements.push(document.querySelector(item.target));
-      } else {
-        this.elements.push(item.target);
-      }
-    }
-    setTimeout(() => {
-      this.getTargetPositions();
-    }, 0);
-    this.timeoutSignal = setTimeout(() => {
-      this.sendUpdateSignal();
-    }, 50);
-  }
-  getTargetPositions() {
-    const positions = [];
-    for (const element of this.elements) {
-      if (element) {
-        positions.push(element.getBoundingClientRect());
-      }
-    }
-    this.itemPositions = positions;
-    this.ready = true;
-    return positions;
-  }
-  getArrowPosition() {
-    const data = this.getActiveStepData();
-    if (!data) return { left: 0, top: 0 };
-    return {
-      top: data.positionData.top + data.positionData.height + 10,
-      left: data.positionData.left + data.positionData.width / 2 + 5
-    };
-  }
-  getActiveStepData() {
-    if (!this.started && this.finished) return null;
-    if (this.itemPositions[this.currentStepIndex] && this.steps[this.currentStepIndex]) {
-      return { positionData: this.itemPositions[this.currentStepIndex], ...this.steps[this.currentStepIndex] };
-    }
-    return null;
-  }
-
-  start() {
-    if (this.started) return;
-    this.started = true;
-    this.next();
-  }
-  next() {
-    if (this.currentStepIndex === this.steps.length - 1) {
-      this.reset();
-      return;
-    }
-    this.currentStepIndex++;
-    this.sendUpdateSignal();
-  }
-  prev() {
-    if (this.currentStepIndex === 0) return;
-    this.currentStepIndex--;
-    this.sendUpdateSignal();
-  }
-
   isLastStep() {
-    return this.steps.length - 1 === this.currentStepIndex;
+    return this.steps.length - 1 === this.currentIndex;
   }
   isFirstStep() {
-    return this.currentStepIndex === 0;
-  }
-
-  reset() {
-    this.sendUpdateSignal();
-    this.currentStepIndex = -1;
-    this.started = false;
-    this.finished = false;
+    return this.currentIndex === 0;
   }
 }

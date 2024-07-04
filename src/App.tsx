@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Grid, ThemeProvider, CssBaseline } from '@material-ui/core';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
@@ -255,11 +255,19 @@ import SubcontractAssembly from 'src/pages/SubcontractAssembly';
 import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
 import ManagedPackages from 'src/pages/ManagedPackages';
 import ManagedPackagedDetail from 'src/pages/ManagedPackages/ManagedPackagesDetail';
-
+import { RecordUserInteraction } from 'src/components/CustomIntro/IntorCreator/RecordUserInteraction';
+import CustomIntro from 'src/components/CustomIntro';
 
 var notificationInterval: any = null;
 
 function App() {
+  const stepRecorderRef = useRef<RecordUserInteraction>(null);
+  useEffect(() => {
+    if (!stepRecorderRef.current && !import.meta.env.PROD) {
+      stepRecorderRef.current = new RecordUserInteraction();
+    }
+  }, []);
+
   useEffect(() => {
     if ('serviceWorker' in navigator) {
       registerSW();
@@ -310,7 +318,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -1162,6 +1170,7 @@ function App() {
         ) : (
           ''
         ))}
+      <CustomIntro />
     </ColorModeProvider>
   );
 }

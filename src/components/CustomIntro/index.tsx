@@ -2,67 +2,93 @@ import { IconButton, Popper } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { ReactNode, useRef, useState } from 'react';
 import { FaCaretUp } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 import { cn } from 'src/constants/helpers';
 
 import React, { useEffect } from 'react';
 import { FaArrowLeft, FaArrowRight, FaQuestion } from 'react-icons/fa';
 import { GiFinishLine } from 'react-icons/gi';
+import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
+import { getCurrentUrl } from 'src/components/CustomIntro/IntorCreator/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { HandleStep } from 'src/components/CustomIntro/HandleStep';
+import { stepData } from 'src/components/CustomIntro/data';
+
+export type IntroStep = {
+  [key: string]: {
+    name: string;
+    steps: Step[];
+  };
+};
 
 export type Step = {
   title: ReactNode;
   content: ReactNode;
-  target?: string | null | HTMLElement;
+  target: string;
+  url: string;
+  waitForUserClick: boolean;
 };
 
-type CustomIntroProps = {
-  steps: Step[];
-};
-
-const CustomIntro = ({ steps }: CustomIntroProps) => {
+const CustomIntro = () => {
+  const location = useLocation();
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setUpdateSignal] = useState<number>(0);
-  let handleStep = useRef<HandleStep | null>(null);
+  const [tutorialPresent, setTutorialPresent] = useState<string>(null);
+  let handleSteps = useRef<HandleSteps | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const arrowRef = useRef(null);
 
   const handlePopoverClose = () => {
-    handleStep.current?.reset();
+    handleSteps.current?.reset();
     setAnchorEl(null);
   };
 
   const open = Boolean(anchorEl);
 
   useEffect(() => {
-    handleStep.current = new HandleStep({
-      steps,
-      setUpdateSignal: setUpdateSignal
-    });
-    return () => handleStep.current.removeListeners();
+    if (!stepData) return () => handleSteps?.current?.removeListeners();
+    const currentUrl = getCurrentUrl();
+    if (stepData[currentUrl]) {
+      setTutorialPresent(currentUrl);
+      handleSteps.current = new HandleSteps({
+        steps: stepData[currentUrl].steps,
+        setUpdateSignal: setUpdateSignal
+      });
+    } else if (!handleSteps.current?.started) {
+      setTutorialPresent(null);
+      return () => {
+        handleSteps?.current?.removeListeners();
+        handleSteps.current = null;
+      };
+    }
+    return () => handleSteps.current?.removeListeners();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [location]);
 
-  const currentStepData = handleStep.current?.getActiveStepData();
-  const isLastStep = handleStep.current?.isLastStep();
-  const isFirstStep = handleStep.current?.isFirstStep();
-  const arrowPosition = handleStep.current?.getArrowPosition();
+  const handleFinish = () => {
+    setTutorialPresent(null);
+    handleSteps.current?.finish();
+    handleSteps?.current?.removeListeners();
+    handleSteps.current = null;
+  };
 
-  // Early return if HandleStep is not ready yet.
-  if (!handleStep.current?.ready) return null;
+  const currentStepData = handleSteps.current?.currentStepData;
+  const isLastStep = handleSteps.current?.isLastStep();
+  const isFirstStep = handleSteps.current?.isFirstStep();
+  const isWaiting = handleSteps.current?.waitingForUser;
+
+  console.log(currentStepData, handleSteps.current);
+
+  if (handleSteps.current?.error) return null;
 
   return (
     <>
       <div
-        className={cn(
-          'floating-card fixed bottom-2 right-3 z-[1300]',
-          handleStep.current?.started || !handleStep.current?.ready || !handleStep.current ? 'sr-only' : 'not-sr-only'
-        )}
+        className={cn('floating-card fixed bottom-2 right-3 z-[1300]', tutorialPresent && !handleSteps.current?.started ? 'not-sr-only' : 'sr-only')}
       >
         <button
           onClick={() => {
-            handleStep.current?.start();
+            handleSteps.current?.start();
           }}
           type="button"
           className="group relative flex size-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:size-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
@@ -75,20 +101,29 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
         </button>
       </div>
 
-      {handleStep.current?.started && currentStepData && (
+      {handleSteps.current?.started && currentStepData && !isWaiting && (
         <div className="">
-          <div className="backdrop absolute inset-0 z-[1300] bg-black/50 mix-blend-hard-light" style={{ height: handleStep.current?.documentHeight }}>
-            <div
-              ref={(ref) => setAnchorEl(ref)}
-              className="item pointer-events-auto absolute rounded-md bg-blend-lighten"
-              style={{
-                width: currentStepData.positionData.width + 10,
-                height: currentStepData.positionData.height + 10,
-                top: currentStepData.positionData.top - 5,
-                left: currentStepData.positionData.left - 5,
-                background: 'gray'
-              }}
-            ></div>
+          <div
+            className="backdrop absolute inset-0 z-[1300] bg-black/50 mix-blend-hard-light"
+            style={{ height: handleSteps.current?.documentHeight }}
+          >
+            {currentStepData.element && (
+              <div
+                ref={(ref) => setAnchorEl(ref)}
+                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
+                onClick={() => {
+                  currentStepData?.element.click();
+                  handleSteps.current?.next();
+                }}
+                style={{
+                  width: currentStepData?.positionData?.width + 10,
+                  height: currentStepData?.positionData?.height + 10,
+                  top: currentStepData?.positionData?.top - 5,
+                  left: currentStepData?.positionData?.left - 5,
+                  background: 'gray'
+                }}
+              ></div>
+            )}
           </div>
           <Popper
             open={open}
@@ -116,7 +151,7 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
                   <ThemeButton
                     color="secondary"
                     iconForMobile={false}
-                    onClick={() => handleStep.current?.prev()}
+                    onClick={() => handleSteps.current?.previous()}
                     startIcon={<FaArrowLeft size={16} />}
                   >
                     Prev
@@ -129,7 +164,10 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
                     borderColor="none"
                     color="primary"
                     iconForMobile={false}
-                    onClick={() => handleStep.current?.next()}
+                    onClick={() => {
+                      handleSteps.current?.next();
+                      currentStepData.element.click();
+                    }}
                     endIcon={<FaArrowRight size={16} />}
                   >
                     Next
@@ -139,7 +177,7 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
                     borderColor="none"
                     color="primary"
                     iconForMobile={false}
-                    onClick={() => handleStep.current?.next()}
+                    onClick={() => handleFinish()}
                     endIcon={<GiFinishLine size={16} />}
                   >
                     Finish
@@ -148,9 +186,9 @@ const CustomIntro = ({ steps }: CustomIntroProps) => {
               </div>
             </div>
           </Popper>
-          <span ref={arrowRef} className="absolute text-[var(--dark-secondary,white)]  drop-shadow-md " style={{ ...arrowPosition }}>
+          {/* <span ref={arrowRef} className="absolute text-[var(--dark-secondary,white)]  drop-shadow-md " style={{ ...arrowPosition }}>
             <FaCaretUp size={30} />
-          </span>
+          </span> */}
         </div>
       )}
     </>
