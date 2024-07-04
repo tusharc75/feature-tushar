@@ -273,8 +273,8 @@ export default function ManageAttachment({
                       <Grid container item xs={12}>
                         <Grid item xs={12}>
                           <div style={{ width: '100%' }}>
-                            <Box display="flex" flexDirection="row">
-                              <Box>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <div className="ml-0">
                                 <FormTypes
                                   label=""
                                   name="fileUrl"
@@ -294,13 +294,11 @@ export default function ManageAttachment({
                                     setUploadingImageOrFileProgress(completePercentage);
                                   }}
                                 />
-                              </Box>
-                              <Box pl={2}>
-                                <CustomButton variant="contained" color="primary" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
-                                  Scan Document
-                                </CustomButton>
-                              </Box>
-                            </Box>
+                              </div>
+                              <CustomButton variant="contained" color="primary" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
+                                Scan Document
+                              </CustomButton>
+                            </div>
                           </div>
                         </Grid>
                         <Grid item xs={12}>
