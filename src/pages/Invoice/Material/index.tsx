@@ -491,7 +491,7 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const calculatePrice = (arr: any[]) => {
     if (invoiceData) {
       const data: any = {};
-      data.conditionType = [PRICING_SETUP_TYPE.rent];
+      data.conditionType = [(invoiceData?.repairOrder || invoiceData?.salesOrder) ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent];
       const material: any = [];
       arr?.forEach((ele) => {
         const obj = {

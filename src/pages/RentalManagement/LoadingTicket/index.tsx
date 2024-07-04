@@ -54,7 +54,7 @@ import DateDialog from './DateDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
-import PreviewDownload from '../PreviewDownload';
+import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -1122,7 +1122,7 @@ const LoadingTicket = ({
     return (
       <>
         <span>
-          <PreviewDownload referenceIds={uniqueLoadingTicket} />
+          <PreviewDownloadMultiple referenceIds={uniqueLoadingTicket} />
         </span>
         {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <Button

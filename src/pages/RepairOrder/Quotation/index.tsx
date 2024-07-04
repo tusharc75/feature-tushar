@@ -82,7 +82,7 @@ const Quotation = ({
       invoiceStep &&
       ![REPAIR_ORDER_STATUS.invoiced, REPAIR_ORDER_STATUS.readyToInvoice, REPAIR_ORDER_STATUS.completed]?.includes(repairOrderData?.status)
     ) {
-      if (allowedToEdit && permissions?.repairOrder?.isUpdate) {
+      if (permissions?.repairOrder?.isUpdate) {
         updateOrderStatus(REPAIR_ORDER_STATUS.readyToInvoice);
       }
     }

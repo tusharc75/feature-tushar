@@ -77,9 +77,9 @@ const SerializedAssetsCertification = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, showFilteredRecordsOnly, issueDuration, expireDuration, selectedEntity, selectedAsset]);
 
   const fetchGridColumns = async () => {

@@ -65,9 +65,9 @@ const DynamicForm = () => {
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [search, page, limit, filters, sorting, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
@@ -75,7 +75,7 @@ const DynamicForm = () => {
     const response = await axiosInstance().get(`/field?resource=${resource}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, detailPagePath, true);
-    if(newColumns?.some((ele)=> ele.accessor==='owner')){
+    if (newColumns?.some((ele) => ele.accessor === 'owner')) {
       setShowToggleButtons(true);
     }
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
@@ -289,7 +289,7 @@ const DynamicForm = () => {
       </div>
       <CustomContainer>
         <ListingPageHeader
-          toggleButtonList={showToggleButtons ? DynamicFormType: null}
+          toggleButtonList={showToggleButtons ? DynamicFormType : null}
           onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
