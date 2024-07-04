@@ -14,7 +14,7 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields ,fetch_child_resource_fields_perm} from 'src/components/ChildResourceField';
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -40,7 +40,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
-    const poFields = await fetch_child_resource_fields(CHILD_RESOURCE.quotationCost, currency, true);
+    const poFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, currency, true);
     if (costData) {
       setInitialData({
         fields: poFields,
