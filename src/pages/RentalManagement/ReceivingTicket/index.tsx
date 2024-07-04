@@ -73,7 +73,7 @@ import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 import TransferToAnotherPackageDialog from 'src/pages/RentalManagement/ReceivingTicket/TransferToAnotherPackageDialog';
-import PreviewDownload from '../PreviewDownload';
+import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -1680,7 +1680,7 @@ const ReceivingTicket = ({
     return (
       <>
         <span>
-          <PreviewDownload referenceIds={uniqueReceivingTicket} />
+          <PreviewDownloadMultiple referenceIds={uniqueReceivingTicket} />
         </span>
         {allowedToEdit && !rentalPolicyData?.hideAssetChangeStatus && (
           <Button

@@ -2,27 +2,23 @@ import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useContext } from 'react';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import Grid from '@material-ui/core/Grid/Grid';
-import Button from '@material-ui/core/Button';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { gridLoadingTimeout, deliveryTicket, sidebarResource, DELIVERY_FROM_TO_TYPE } from '../../constants/helpers';
-import { isMobile, isTablet } from 'react-device-detect';
 import { prepareDataForGrid } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from '../Helpers/Routes';
 import { Link } from 'react-router-dom';
-import VisibilityIcon from '@material-ui/icons/Visibility';
+import PreviewDownloadMultiple from './PreviewDownloadMultiple';
 
 const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
 
-  const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
 
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
-  const [downlodingFile, setDownlodingFile] = useState(false);
   const {
     state: { user, }
   }: any = useData();
@@ -105,38 +101,7 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
   return (
     <>
       <Box display="flex" justifyContent="flex-end" p={1} pt={1} pb={0}>
-        <Button
-          onClick={() => {
-            setDownlodingFile(true);
-            axiosInstance()
-              .get(`pdf/multiple?resource=${sidebarResource.deliveryTicket}&ids=${selectedRecords.length > 0 ? selectedRecords.map((s) => s._id) : dataRows.map((d) => d._id)}`, {
-                responseType: 'blob'
-              })
-              .then(({ data }) => {
-                const file = new Blob([data], { type: 'application/pdf' });
-                const fileURL = URL.createObjectURL(file);
-                const link = document.createElement('a');
-                link.href = fileURL;
-                link.target = '_blank';
-                link.style.display = 'none';
-                link.click();
-                toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
-                setDownlodingFile(false);
-              })
-              .catch((err) => {
-                toastConfig.setToastConfig(err);
-                setDownlodingFile(false);
-              });
-          }}
-          variant={isMobile && !isTablet ? 'text' : 'outlined'}
-          color="primary"
-          type="button"
-          size="small"
-          disabled={downlodingFile || dataRows.length === 0}
-          startIcon={<VisibilityIcon />}
-        >
-          {downlodingFile ? 'Please wait...' : 'Preview'}
-        </Button>
+        <PreviewDownloadMultiple referenceIds={selectedRecords.length > 0 ? selectedRecords.map((s) => s._id) : dataRows.map((d) => d._id)} />
       </Box>
       <Grid item xs={12} md={12} sm={12} className="mt-3">
         {columns ? (
