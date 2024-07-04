@@ -41,7 +41,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     var poFields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationCost, currency, true);
-    poFields = poFields?.filter((f) => f?.isRead);
     if (costData) {
       setInitialData({
         fields: poFields,
