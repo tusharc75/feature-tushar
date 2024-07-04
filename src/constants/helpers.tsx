@@ -2467,6 +2467,12 @@ export const REPORT_LIST = [
     type: 'purchaseOrderDetails'
   },
   {
+    title: 'Purchase Order Actual Received Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderActualReceivedDetails'
+  },
+  {
     title: 'Inventory Evaluation',
     permission: 'purchaseOrder',
     key: 'standardReport',
