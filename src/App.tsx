@@ -262,6 +262,7 @@ var notificationInterval: any = null;
 
 function App() {
   const stepRecorderRef = useRef<RecordUserInteraction>(null);
+
   useEffect(() => {
     if (!stepRecorderRef.current && !import.meta.env.PROD) {
       stepRecorderRef.current = new RecordUserInteraction();

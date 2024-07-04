@@ -116,6 +116,7 @@ const DetailsPageHeader = ({
             id="add-menu"
             open={Boolean(addAnchorEl)}
             onClose={closeAddMenu}
+            TransitionProps={{ unmountOnExit: true }}
           >
             <span onClick={closeAddMenu}>{addButtonMenuItems}</span>
           </Menu>
@@ -182,6 +183,7 @@ const DetailsPageHeader = ({
                 vertical: 'top',
                 horizontal: 'right'
               }}
+              TransitionProps={{ unmountOnExit: true }}
               id="add-menu"
               open={Boolean(actionAnchorEl)}
               onClose={closeActionMenu}

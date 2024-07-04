@@ -1,6 +1,6 @@
 import { IconButton, Popper } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
-import { ReactNode, useRef, useState } from 'react';
+import { MutableRefObject, ReactNode, useRef, useState } from 'react';
 import { FaCaretUp } from 'react-icons/fa';
 import { useLocation } from 'react-router-dom';
 import { cn } from 'src/constants/helpers';
@@ -55,7 +55,7 @@ const CustomIntro = () => {
         steps: stepData[currentUrl].steps,
         setUpdateSignal: setUpdateSignal
       });
-    } else if (!handleSteps.current?.started) {
+    } else if (!handleSteps?.current?.started) {
       setTutorialPresent(null);
       return () => {
         handleSteps?.current?.removeListeners();
@@ -69,24 +69,32 @@ const CustomIntro = () => {
 
   const handleFinish = () => {
     setTutorialPresent(null);
-    handleSteps.current?.finish();
     handleSteps?.current?.removeListeners();
     handleSteps.current = null;
   };
 
-  const currentStepData = handleSteps.current?.currentStepData;
-  const isLastStep = handleSteps.current?.isLastStep();
-  const isFirstStep = handleSteps.current?.isFirstStep();
-  const isWaiting = handleSteps.current?.waitingForUser;
+  const currentStepData = handleSteps?.current?.currentStepData;
+  const isLastStep = handleSteps?.current?.isLastStep();
+  const isFirstStep = handleSteps?.current?.isFirstStep();
+  const isWaiting = handleSteps?.current?.waitingForUser;
 
-  console.log(currentStepData, handleSteps.current);
+  console.log(currentStepData, handleSteps?.current);
 
-  if (handleSteps.current?.error) return null;
+  const handleNext = () => {
+    currentStepData?.element.click();
+    handleSteps.current?.next();
+    handleSteps.current?.toggleWaitForUser();
+  };
+
+  if (handleSteps?.current?.error || !handleSteps) return null;
 
   return (
     <>
       <div
-        className={cn('floating-card fixed bottom-2 right-3 z-[1300]', tutorialPresent && !handleSteps.current?.started ? 'not-sr-only' : 'sr-only')}
+        className={cn(
+          'floating-card fixed bottom-2 right-3 z-[1300]',
+          tutorialPresent && (!handleSteps.current?.started || isWaiting) ? 'not-sr-only' : 'sr-only'
+        )}
       >
         <button
           onClick={() => {
@@ -114,8 +122,7 @@ const CustomIntro = () => {
                 ref={(ref) => setAnchorEl(ref)}
                 className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
                 onClick={() => {
-                  currentStepData?.element.click();
-                  handleSteps.current?.next();
+                  handleNext();
                 }}
                 style={{
                   width: currentStepData?.positionData?.width + 10,
@@ -167,8 +174,7 @@ const CustomIntro = () => {
                     color="primary"
                     iconForMobile={false}
                     onClick={() => {
-                      handleSteps.current?.next();
-                      currentStepData.element.click();
+                      handleNext();
                     }}
                     endIcon={<FaArrowRight size={16} />}
                   >
@@ -179,7 +185,10 @@ const CustomIntro = () => {
                     borderColor="none"
                     color="primary"
                     iconForMobile={false}
-                    onClick={() => handleFinish()}
+                    onClick={() => {
+                      handleNext();
+                      handleFinish();
+                    }}
                     endIcon={<GiFinishLine size={16} />}
                   >
                     Finish

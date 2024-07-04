@@ -23,22 +23,22 @@ export const stepData: IntroStep = {
         url: '/subcontract-assembly/detail/:id?itemTab=1',
         title: 'Add existing Products',
         content: '',
-        waitForUserClick: false
+        waitForUserClick: true
       },
-      {
-        target: '#Product-table-checkbox-0',
-        url: '/subcontract-assembly/detail/:id?itemTab=1',
-        title: 'Select product(s)',
-        content: 'Select any product(s) from the table',
-        waitForUserClick: false
-      },
-      {
-        target: '#dialog-add-button',
-        url: '/subcontract-assembly/detail/:id?itemTab=1',
-        title: 'Add product(s)',
-        content: 'Add products to your table',
-        waitForUserClick: false
-      },
+      // {
+      //   target: '#Product-table-checkbox-0',
+      //   url: '/subcontract-assembly/detail/:id?itemTab=1',
+      //   title: 'Select product(s)',
+      //   content: 'Select any product(s) from the table',
+      //   waitForUserClick: false
+      // },
+      // {
+      //   target: '#dialog-add-button',
+      //   url: '/subcontract-assembly/detail/:id?itemTab=1',
+      //   title: 'Add product(s)',
+      //   content: 'Add products to your table',
+      //   waitForUserClick: false
+      // },
       {
         target: '.MuiButtonBase-root.MuiIconButton-root.MuiAutocomplete-popupIndicator',
         url: '/subcontract-assembly/detail/:id?itemTab=1',

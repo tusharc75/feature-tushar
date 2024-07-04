@@ -276,6 +276,7 @@ const ListingPageHeader = ({
                         id="action-menu"
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
+                        TransitionProps={{ unmountOnExit: true }}
                       >
                         <span onClick={() => closeActions()}>{actionMenuItems}</span>
                       </Menu>

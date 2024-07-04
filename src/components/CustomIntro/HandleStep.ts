@@ -50,6 +50,10 @@ export class HandleSteps {
     this.resizeObserver.observe(document?.body);
   }
 
+  toggleWaitForUser() {
+    this.waitingForUser = this.steps[this.currentIndex - 1]?.waitForUserClick;
+  }
+
   private addEventListeners() {
     this.boundMousedown = this.handleMouseDown.bind(this);
     window.addEventListener('mousedown', this.boundMousedown);
@@ -59,14 +63,20 @@ export class HandleSteps {
   }
 
   handleMouseDown(e: MouseEvent) {
-    if (this.steps[this.currentIndex - 1]?.waitForUserClick) {
-      this.waitingForUser = true;
-    }
+    // if (this.steps[this.currentIndex]?.waitForUserClick) {
+    //   this.waitingForUser = true;
+    // }
   }
 
   start() {
     this.started = true;
-    this.next();
+    if (this.waitingForUser) {
+      this.waitingForUser = false;
+      this.getCurrentStep();
+      this.sendUpdateSignal();
+    } else {
+      this.next();
+    }
   }
   finish() {
     this.reset();
@@ -78,7 +88,7 @@ export class HandleSteps {
     this.sendUpdateSignal();
   }
   next() {
-    if (this.currentIndex === this.steps.length - 1) return;
+    if (this.currentIndex === this.steps.length - 1) this.reset();
     this.currentIndex++;
     this.getCurrentStep();
     console.log(this);
@@ -113,6 +123,7 @@ export class HandleSteps {
             element
           };
           clearInterval(this.interval);
+          // this.focusElement(element);
           setTimeout(() => {
             this.sendUpdateSignal();
           }, 200);
@@ -126,9 +137,17 @@ export class HandleSteps {
       index: this.currentIndex,
       element
     };
+    // this.focusElement(element);
     setTimeout(() => {
       this.sendUpdateSignal();
     }, 200);
+  }
+
+  focusElement(element: HTMLElement) {
+    if (this.waitingForUser) return;
+    setTimeout(() => {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }, 300);
   }
 
   private sendUpdateSignal() {
