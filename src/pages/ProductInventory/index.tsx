@@ -14,7 +14,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
@@ -324,63 +324,54 @@ const InventoryProduct = () => {
   };
 
   const getQueryString = (isExport = false) => {
-    let tempPlantId =
-      plantId === 'All'
-        ? plantOptions
-          .filter((d) => d.optionValue !== 'All')
-          .map((d) => d.optionValue)
-          .toString()
-        : plantId;
+    let tempPlantId = plantId === 'All' ? plantOptions.filter((d) => d.optionValue !== 'All').map((d) => d.optionValue).toString() : plantId;
 
-    let deepFilter = '';
-    if (!isExport) {
+    let deepFilter = `?warehouse=${tempPlantId}&page=${page}&limit=${limit}`;
+    if (isExport) {
       deepFilter = `?warehouse=${tempPlantId}`;
-      deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
-    } else {
-      deepFilter = `&warehouse=${tempPlantId}`;
     }
 
     if (storageLocationId) {
       deepFilter = `${deepFilter}&storageLocation=${storageLocationId}`;
     }
 
-    let filterById = [];
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
     if (fromProductMaster?.product) {
-      filterById.push({ field: '_id', term: fromProductMaster.product });
-    }
-    if (filterById.length > 0) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+      filterByIds.push({ field: '_id', term: fromProductMaster.product });
     }
 
-    const updatedFilters = [];
     if (!user?.user?.brandPolicy?.showSerializedProduct) {
-      updatedFilters.push({ field: 'serializedProduct', term: 'No' });
-    }
-    if (showExpenseItem && !deepFilter?.includes('expenseItem')) {
-      updatedFilters.push({ field: 'expenseItem', term: expenseItemValue ? 'Yes' : 'No' });
+      deepFilters.push({ field: 'serializedProduct', term: 'No' });
     }
 
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
+    if (showExpenseItem) {
+      deepFilters.push({ field: 'expenseItem', term: expenseItemValue ? 'Yes' : 'No' });
     }
-    if (updatedFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
+    }
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
+
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
+
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and`;
+
+    return deepFilter;
   };
 
   const onSaveEdit = (data, row) => {
