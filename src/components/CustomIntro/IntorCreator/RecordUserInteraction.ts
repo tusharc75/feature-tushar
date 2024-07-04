@@ -58,11 +58,11 @@ export class RecordUserInteraction {
     console.log('started capturing');
     this.isListening = true;
     const message = this.createElement('p', {
-      className: 'text-[50px] text-gray-300 z-[99999999] dark:text-gray-600 fixed font-bold animate-pulse',
+      className: 'text-[50px] text-gray-500 z-[99999999] dark:text-gray-600 fixed font-bold animate-pulse',
       innerText: 'Capturing...'
     });
 
-    message.style.cssText = 'top: 50%; left: 50%; z-[1305] transform: translateX(-50%); pointer-events: none;';
+    message.style.cssText = 'top: 50%; left: 0;right:0; text-align:center; pointer-events: none;';
     document.body.appendChild(message);
     this.startCapturingMessageElement = message;
   }
@@ -71,10 +71,10 @@ export class RecordUserInteraction {
     console.log('stopped capturing');
     this.isListening = false;
     const message = this.createElement('p', {
-      className: 'text-[50px] text-gray-300 z-[99999999] dark:text-gray-600 fixed font-bold animate-pulse',
+      className: 'text-[50px] text-gray-500 z-[99999999] dark:text-gray-600 fixed font-bold animate-pulse',
       innerText: 'Stoped Capturing...'
     });
-    message.style.cssText = 'top: 50%; left: 50%; transform: translateX(-50%); pointer-events: none;';
+    message.style.cssText = 'top: 50%; left: 0;right:0; text-align:center; pointer-events: none;';
     document.body.appendChild(message);
     message.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 1000, iterations: 1 });
     document.body.removeChild(this.startCapturingMessageElement!);
@@ -161,13 +161,12 @@ export class RecordUserInteraction {
       this.highlightHTMLElement = highlightHTMLElement;
       document.body.appendChild(highlightHTMLElement);
     }
-    const selectedElement = document.querySelector(selector);
+    const selectedElement = document.querySelector(selector) as HTMLElement;
     if (element !== selectedElement) {
       color = 'background: rgba(255,0,0,0.5)';
     }
-    const elementBoundingBox = selectedElement.getBoundingClientRect();
     if (this.isListening && !this.isDialogOpen) {
-      highlightHTMLElement.style.cssText = `top: ${elementBoundingBox.top}px; left: ${elementBoundingBox.left}px; width: ${elementBoundingBox.width}px; height: ${elementBoundingBox.height}px; pointer-events: none; ${color}`;
+      highlightHTMLElement.style.cssText = `top: ${selectedElement.offsetTop}px; left: ${selectedElement.offsetLeft}px; width: ${selectedElement.offsetWidth}px; height: ${selectedElement.offsetHeight}px; pointer-events: none; ${color}`;
     } else {
       highlightHTMLElement.style.cssText = `top: ${0}px; left: ${0}px; width: ${0}px; height: ${0}px; pointer-events: none;`;
     }
@@ -265,13 +264,13 @@ export class RecordUserInteraction {
       }
     });
     const div = this.createElement('div', {
-      className: 'col-span-2 flex items-center'
+      className: 'col-span-2 flex items-center gap-2'
     });
 
     const waitForUserInteractionCheckBox = this.createElement('input', {
       type: 'checkbox',
       id: 'waitForUserInteraction',
-      className: 'form-checkbox h-5 w-5 text-indigo-500',
+      className: 'form-checkbox h-5 w-5 text-indigo-500 cursor-pointer',
       onchange: (e) => {
         const target = e.target as HTMLInputElement;
         this.currentStep.waitForUserClick = target.checked;
@@ -279,7 +278,7 @@ export class RecordUserInteraction {
     });
     const label = this.createElement('label', {
       innerText: 'Wait for user interaction',
-      className: 'inline-flex items-center',
+      className: 'inline-flex items-center cursor-pointer',
       htmlFor: 'waitForUserInteraction'
     });
     div.append(waitForUserInteractionCheckBox, label);
