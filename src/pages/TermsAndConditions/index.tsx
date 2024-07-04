@@ -12,7 +12,7 @@ import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource, termsAndCondition } from '../../constants/helpers';
+import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, sidebarResource, termsAndCondition } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageTermsAndCondition from './ManageTermsAndCondition';
@@ -140,7 +140,7 @@ const TermsAndCondition = () => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = permissions?.termsAndConditions?.isDelete && finalObject?.ownerId === user?.user?._id;
+          finalObject['canDelete'] = permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, finalObject?.ownerId);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.termsAndConditions?.isUpdate;
           return finalObject;

@@ -14,7 +14,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { WORK_ORDER_STATUS, WORK_ORDER_TYPE, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
+import { WORK_ORDER_STATUS, WORK_ORDER_TYPE, checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, workOrder } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWorkOrder from './ManageWorkOrder';
@@ -96,7 +96,7 @@ const WorkOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete && finalObject?.ownerId === user?.user?._id && !data?.deleted;
+          finalObject['canDelete'] = permissions?.workOrder?.isDelete && u?.canDelete && checkIsAllowedToDelete(user, sidebarResource.workOrder, finalObject?.ownerId) && !data?.deleted;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

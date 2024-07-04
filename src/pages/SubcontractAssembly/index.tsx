@@ -11,7 +11,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import DeleteIcon from '@material-ui/icons/Delete';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
@@ -148,7 +148,7 @@ const SubcontractAssembly = () => {
           let rows = data?.map((u: any) => {
             let finalObject: any = prepareDataForGrid(u);
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-            finalObject['canDelete'] = permissions?.subcontractAssembly?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+            finalObject['canDelete'] = permissions?.subcontractAssembly?.isDelete && checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, finalObject?.ownerId) && u?.canDelete;
             return {
               ...finalObject
             };
