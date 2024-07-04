@@ -15,7 +15,7 @@ import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { getObjKeysWithValues } from '../../../constants/helpers';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields ,fetch_child_resource_fields_perm} from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
 const QuoteBuilder = ({
@@ -63,7 +63,8 @@ const QuoteBuilder = ({
   }, [sentToCustomer, DOAData]);
 
   const fetchFields = async () => {
-    var data = await fetch_child_resource_fields(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false);
+    var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, false); 
+    data = data?.filter((f) => f?.isRead);
     const newColumns = generateColumns(
       renderedFrom,
       data?.map((e) => {
