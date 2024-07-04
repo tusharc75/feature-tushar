@@ -13,7 +13,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSurveys from './ManageSurveys';
@@ -143,7 +143,7 @@ const Survey = () => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.surveys?.isUpdate;
-          finalObject['canDelete'] = permissions?.surveys.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          finalObject['canDelete'] = permissions?.surveys.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

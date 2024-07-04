@@ -18,7 +18,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferInventory } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferInventory from './ManageTransferInventory';
 import axios, { CancelTokenSource } from 'axios';
@@ -124,7 +124,7 @@ const TransferInventory = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.transferInventory?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          finalObject['canDelete'] = permissions?.transferInventory?.isDelete && checkIsAllowedToDelete(user, sidebarResource.transferInventory, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
