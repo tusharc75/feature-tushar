@@ -40,7 +40,6 @@ export class RecordUserInteraction {
       this.addEventListeners();
       this.createQuestionDialog();
     }
-    console.log(this);
   }
 
   private addEventListeners() {
@@ -165,8 +164,9 @@ export class RecordUserInteraction {
     if (element !== selectedElement) {
       color = 'background: rgba(255,0,0,0.5)';
     }
+    const htmlBox = selectedElement.getBoundingClientRect();
     if (this.isListening && !this.isDialogOpen) {
-      highlightHTMLElement.style.cssText = `top: ${selectedElement.offsetTop}px; left: ${selectedElement.offsetLeft}px; width: ${selectedElement.offsetWidth}px; height: ${selectedElement.offsetHeight}px; pointer-events: none; ${color}`;
+      highlightHTMLElement.style.cssText = `top: ${htmlBox.top}px; left: ${htmlBox.left}px; width: ${selectedElement.offsetWidth}px; height: ${selectedElement.offsetHeight}px; pointer-events: none; ${color}`;
     } else {
       highlightHTMLElement.style.cssText = `top: ${0}px; left: ${0}px; width: ${0}px; height: ${0}px; pointer-events: none;`;
     }

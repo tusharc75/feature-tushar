@@ -46,9 +46,10 @@ const CustomIntro = () => {
   const open = Boolean(anchorEl);
 
   useEffect(() => {
+    console.log('hello');
     if (!stepData) return () => handleSteps?.current?.removeListeners();
     const currentUrl = getCurrentUrl();
-    if (stepData[currentUrl]) {
+    if (stepData[currentUrl] && !handleSteps.current) {
       setTutorialPresent(currentUrl);
       handleSteps.current = new HandleSteps({
         steps: stepData[currentUrl].steps,
@@ -61,6 +62,7 @@ const CustomIntro = () => {
         handleSteps.current = null;
       };
     }
+
     return () => handleSteps.current?.removeListeners();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location]);
@@ -104,7 +106,7 @@ const CustomIntro = () => {
       {handleSteps.current?.started && currentStepData && !isWaiting && (
         <div className="">
           <div
-            className="backdrop absolute inset-0 z-[1300] bg-black/50 mix-blend-hard-light"
+            className="backdrop absolute inset-0 z-[1301] bg-black/50 mix-blend-hard-light"
             style={{ height: handleSteps.current?.documentHeight }}
           >
             {currentStepData.element && (
@@ -138,7 +140,7 @@ const CustomIntro = () => {
               }
             ]}
           >
-            <div className="relative z-[1301] mt-3 min-w-[300px] max-w-[300px] rounded-md bg-[var(--dark-secondary,white)] p-2 shadow-md">
+            <div className="relative z-[1302] mt-3 min-w-[300px] max-w-[300px] rounded-md bg-[var(--dark-secondary,white)] p-2 shadow-md">
               <div className="mb-2 flex items-center justify-between gap-2 pb-1 [border-bottom:1px_solid_var(--common-border-color)]">
                 <p className=" truncate text-[16px] font-semibold ">{currentStepData.title}</p>
                 <IconButton size="small" onClick={handlePopoverClose}>

@@ -39,7 +39,6 @@ export class HandleSteps {
       window.requestAnimationFrame(() => {
         if (!entries[0]) return;
         const height = entries[0].target.clientHeight;
-        console.log('Body height changed:', height);
         this.documentHeight = height;
         if (this.started) {
           this.getCurrentStep(true);
@@ -71,17 +70,18 @@ export class HandleSteps {
   }
   finish() {
     this.reset();
-    this.sendUpdateSignal();
   }
   reset() {
     this.started = false;
     this.finished = false;
     this.currentIndex = -1;
+    this.sendUpdateSignal();
   }
   next() {
     if (this.currentIndex === this.steps.length - 1) return;
     this.currentIndex++;
     this.getCurrentStep();
+    console.log(this);
   }
   previous() {
     if (this.currentIndex === 0) return;
@@ -101,7 +101,7 @@ export class HandleSteps {
           clearInterval(this.interval);
           this.message = 'Element not found';
           this.error = true;
-          this.sendUpdateSignal();
+          this.reset();
         }
         element = document.querySelector(activeStep.target) as HTMLElement;
         if (element) {
@@ -112,10 +112,10 @@ export class HandleSteps {
             index: this.currentIndex,
             element
           };
+          clearInterval(this.interval);
           setTimeout(() => {
             this.sendUpdateSignal();
-          }, 50);
-          clearInterval(this.interval);
+          }, 200);
         }
       }, 1000);
     }
@@ -128,7 +128,7 @@ export class HandleSteps {
     };
     setTimeout(() => {
       this.sendUpdateSignal();
-    }, 50);
+    }, 200);
   }
 
   private sendUpdateSignal() {

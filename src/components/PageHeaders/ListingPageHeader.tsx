@@ -218,7 +218,7 @@ const ListingPageHeader = ({
                       variant={'contained'}
                       color="primary"
                       size="small"
-                      id={'add-button'}
+                      id={showSearchInMobile ? 'dialog-add-button' : 'add-button'}
                       disabled={addButtonLoading || addButtonDisabled}
                       {...restOfAddButtonProps}
                       onClick={(e) => {
@@ -245,7 +245,7 @@ const ListingPageHeader = ({
                             variant={'outlined'}
                             color="default"
                             size="small"
-                            id={'action-button'}
+                            id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
                             className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
                             disabled={actionButtonLoading || actionButtonDisabled}
                             {...restOfActionButtonProps}

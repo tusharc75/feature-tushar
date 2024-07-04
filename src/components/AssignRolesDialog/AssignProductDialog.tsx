@@ -1,7 +1,7 @@
 import { Box, Dialog } from '@material-ui/core';
 import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -290,4 +290,4 @@ const AssignProductDialog = ({
   );
 };
 
-export default AssignProductDialog;
+export default React.memo(AssignProductDialog);

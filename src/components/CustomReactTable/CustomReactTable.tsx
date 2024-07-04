@@ -115,7 +115,9 @@ const CustomReactTable = ({
     dispatch,
     state,
     isClientSideGrid,
-    toggleExpandChange
+    toggleExpandChange,
+    resource,
+    renderedFrom
   });
 
   const [searchQuery] = useStore((store) => store[SEARCH]);
@@ -596,7 +598,7 @@ const CustomReactTable = ({
       </div>
       <DragOverlay>
         {activeHeader && (
-          <span className="react-table-v8 block overflow-hidden max-h-[45px] [&_.drag-handle]:!cursor-grabbing">
+          <span className="react-table-v8 block max-h-[45px] overflow-hidden [&_.drag-handle]:!cursor-grabbing">
             <DraggableHeader overlayMode={true} {...activeHeader} />
           </span>
         )}
