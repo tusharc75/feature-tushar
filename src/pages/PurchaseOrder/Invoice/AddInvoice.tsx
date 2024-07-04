@@ -76,6 +76,11 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
         }
       }}
       fullWidth
+      PaperProps={{
+        component: 'form',
+        'aria-autocomplete': 'none',
+        autoCorrect: 'off'
+      }}
     >
       <CustomDialogHeader
         title={invoiceData ? 'Edit Invoice' : 'Add Invoice'}
@@ -96,7 +101,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
           validate={validate}
         >
           {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <Form autoComplete="off" autoCorrect="off" noValidate>
+            <>
               <CustomDialogContent>
                 <Grid container spacing={2}>
                   <Grid xs={12} md={12} sm={12} item>
@@ -154,7 +159,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
                   Save
                 </CustomButton>
               </CustomDialogFooter>
-            </Form>
+            </>
           )}
         </Formik>
       </MuiPickersUtilsProvider>

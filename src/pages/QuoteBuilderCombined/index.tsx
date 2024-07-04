@@ -36,6 +36,7 @@ import routes from './../../components/Helpers/Routes';
 import AllVersionStatus from './AllVersionStatus';
 import ManageQuoteDialog from './ManageQuote/ManageQuoteDialog';
 import './style.scss';
+import axios, { CancelTokenSource } from 'axios';
 
 const types = [
   {
@@ -203,7 +204,9 @@ const QuoteBuilders = () => {
   };
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [
     search,
     page,
@@ -323,13 +326,13 @@ const QuoteBuilders = () => {
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     if (selectedEntity) {
       dispatch({ type: 'loading', loading: true });
       const queryString = getQueryString();
 
       axiosInstance()
-        .get(`${qbApi}${queryString}`)
+        .get(`${qbApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data, count } }) => {
           let clonedData = {};
           let rows = data.map((u) => {
@@ -573,7 +576,7 @@ const QuoteBuilders = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
+            onSelect={() => { }}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -654,7 +657,7 @@ const QuoteBuilders = () => {
           quoteId={showVersionsDialog.id}
           quoteData={showVersionsDialog.quoteData}
           quotePermissions={permissions?.quoteBuilder}
-          fetchQuoteData={() => {}}
+          fetchQuoteData={() => { }}
           handleChangeVersionFromAllVersion={(versionNumber) => {
             history.push(`quotes/detail/${showVersionsDialog.id}`, {
               versionNumber: `${versionNumber}`,

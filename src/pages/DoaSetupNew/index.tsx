@@ -6,6 +6,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import BoxWithBorder from 'src/components/BoxWithBorder';
 import ManageDoa from './ManageDoa';
 import DoaStepper from './Stepper';
+import axios, { CancelTokenSource } from 'axios';
 
 const DoaSetup = ({ resource, entity }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -19,13 +20,15 @@ const DoaSetup = ({ resource, entity }) => {
 
   useEffect(() => {
     if (entity) {
-      fetchData();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     }
   }, [entity]);
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     axiosInstance()
-      .get(`/doa-setup?entity=${entity}&resource=${resource}`)
+      .get(`/doa-setup?entity=${entity}&resource=${resource}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         setDoaData(data);
       })

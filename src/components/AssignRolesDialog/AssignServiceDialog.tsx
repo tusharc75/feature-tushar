@@ -59,9 +59,9 @@ const AssignServiceDialog = ({
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
   const fetchGridColumns = async () => {
@@ -223,6 +223,7 @@ const AssignServiceDialog = ({
       />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
+          showSearchInMobile={true}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}

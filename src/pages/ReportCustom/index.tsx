@@ -19,9 +19,10 @@ import { Menu, MenuItem, Box } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import axios, { CancelTokenSource } from 'axios';
 
 const CustomReport = () => {
-  
+
   const renderedFrom = 'custom-report';
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
@@ -44,7 +45,9 @@ const CustomReport = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [selectedEntity]);
 
   const fetchGridColumns = () => {
@@ -105,10 +108,10 @@ const CustomReport = () => {
     )
   };
 
-  const fetchData = async () => {
+  const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`custom-report`)
+      .get(`custom-report`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let count = data?.length;
         let rows = data?.map((u) => {

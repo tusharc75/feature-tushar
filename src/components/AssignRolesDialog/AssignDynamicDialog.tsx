@@ -33,9 +33,9 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
@@ -47,11 +47,11 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
       });
   };
 
-  const fetchData = (cencelToken) => {
+  const fetchData = (cancelTokenSource) => {
     if (ids?.length > 25) {
       fetchDataPost();
     } else {
-      fetchDataGet(cencelToken);
+      fetchDataGet(cancelTokenSource);
     }
   };
 
@@ -215,6 +215,7 @@ const AssignDynamicDialog = ({ onSuccess, handleClose, resource, isSubmitting, i
       />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
+          showSearchInMobile={true}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}

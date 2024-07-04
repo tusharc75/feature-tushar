@@ -13,7 +13,15 @@ import routes from '../Helpers/Routes';
 import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
-const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids = [], isSubmitting = false, hideQty = false }) => {
+const AssignPackageDialog = ({
+  onSuccess,
+  handleClose,
+  packageType = null,
+  customerAccount = null,
+  ids = [],
+  isSubmitting = false,
+  hideQty = false
+}) => {
   const renderedFrom = `${camelCase(routes.packages?.title)}_Assign`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -45,9 +53,9 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
   ];
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchData(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
@@ -125,6 +133,9 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
+    if (customerAccount) {
+      deepFilter = `${deepFilter}&customerAccount=${customerAccount}`;
+    }
     if (search) {
       deepFilter = `${deepFilter}&search=${search}`;
     }
@@ -166,6 +177,7 @@ const AssignPackageDialog = ({ onSuccess, handleClose, packageType = null, ids =
       <CustomDialogHeader title={`Assign ${routes.packages.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader
+          showSearchInMobile={true}
           searchValue={search}
           onSearch={handleSearch}
           isActionButtonVisible={false}

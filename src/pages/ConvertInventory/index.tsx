@@ -64,9 +64,9 @@ const ConvertInventory = () => {
 
   useEffect(() => {
     if (warehouseId) {
-      const cencelToken = axios.CancelToken.source();
-      fetchProductInventory(cencelToken);
-      return () => cencelToken.cancel();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchProductInventory(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     }
   }, [search, warehouseId, page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, storageLocationId]);
 
@@ -225,13 +225,11 @@ const ConvertInventory = () => {
           }
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
-          isActionButtonVisible={permissions?.inventoryToAsset?.isUpdate}
+          isActionButtonVisible={false}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           isAddButtonVisible={false}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}

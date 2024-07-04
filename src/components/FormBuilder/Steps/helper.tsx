@@ -134,6 +134,12 @@ export const resourcePolicy = [
                 fieldLabel: "Hide Asset Change Status",
                 type: "checkBox",
                 defaultValue: false
+            },
+            {
+                fieldName: "customerAccountWisePackages",
+                fieldLabel: "Customer Account Wise Packages",
+                type: "checkBox",
+                defaultValue: false
             }
         ]
     },

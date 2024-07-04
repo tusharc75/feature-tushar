@@ -96,6 +96,8 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
 							_id: d.uniqueId,
 							materialId: d.materialId,
 							productName: d.productName,
+							totalQty: d.qty,
+							assetQty: d.assetQty,
 							qty: d.qty - d?.assetQty,
 						}))
 					}}
@@ -114,22 +116,36 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
 													<div className="grid gap-[15px] sm:gap-[18px]">
 														{values.material.map((data, index) => (
 															<div
-																style={{ border: '1.5px solid var(--common-border-color)', display: 'flex' }}
+																style={{ border: '1.5px solid var(--common-border-color)' }}
 																className="rounded-[6px] pt-[17px] px-[23px] pb-[21px] grid sm:grid-cols-[24px,1fr] md:gap-[29px] gap-[15px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
 																key={index}
 															>
-																<Grid container spacing={2} direction="row">
-																	<Grid item lg={4} md={4}>
-																		<Box display={'flex'} justifyContent={'start'} alignItems={'center'}>
-																			<div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
-																				<p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
-																			</div>
-																			<div className="pl-10">
-																				{data?.productName}
-																			</div>
-																		</Box>
-																	</Grid>
-																	<Grid item lg={4} md={4}>
+																<div className="bg-[var(--new\_theme\_color)] w-[24px] h-[24px] rounded-[6px] flex items-center justify-center">
+																	<p className="text-white text-[13px] font-[700] leading-none">{index + 1}</p>
+																</div>
+																<div>
+																	<div
+																		style={{ borderBottom: '1px solid var(--common-border-color)' }}
+																		className="flex flex-wrap border-b  border-b-[var(--common-border-color)] gap-[20px] md:gap-[61px] pb-[9px]"
+																	>
+																		<span>
+																			<span className="text-[var(--primary-text)] font-semibold">Quantity: </span>
+																			{data?.totalQty}
+																		</span>
+																		<span>
+																			<span className="text-[var(--primary-text)] font-semibold">Received: </span>
+																			{data?.assetQty || 0}
+																		</span>
+																	</div>
+																	<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
+																		<TextField
+																			variant="outlined"
+																			name={`${data?._id}`}
+																			label={'Product'}
+																			value={data?.productName}
+																			size="small"
+																			disabled
+																		/>
 																		<TextField
 																			fullWidth
 																			label="Quantity"
@@ -151,8 +167,8 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
 																			error={validate([data])?.qty}
 																			helperText={validate([data]).qty ? validate([data]).qty : ''}
 																		/>
-																	</Grid>
-																</Grid>
+																	</div>
+																</div>
 															</div>
 														))}
 													</div>

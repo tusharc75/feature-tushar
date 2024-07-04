@@ -19,6 +19,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageDriverMaster from './ManageDriverMaster';
 import { ListingPageHeader } from 'src/components/PageHeaders';
+import axios, { CancelTokenSource } from 'axios';
 
 const DriverMaster = () => {
   const renderedFrom = camelCase(routes?.driverMaster.title);
@@ -93,12 +94,12 @@ const DriverMaster = () => {
     )
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
 
     axiosInstance()
-      .get(`${routes?.driverMaster.path}${queryString}`)
+      .get(`${routes?.driverMaster.path}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(
         ({
           data: {
@@ -196,7 +197,9 @@ const DriverMaster = () => {
   }, []);
 
   useEffect(() => {
-    fetchData();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const ActionMenuItems = () => {

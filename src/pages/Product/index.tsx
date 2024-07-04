@@ -24,6 +24,7 @@ import routes from '../../components/Helpers/Routes';
 import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
+import axios, { CancelTokenSource } from 'axios';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
@@ -89,7 +90,9 @@ const Product = () => {
 
   useEffect(() => {
     if (productColumns && productColumns.length) {
-      fetchData();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     }
   }, [page, limit, filters, sorting, search, selectedEntity, productCategory, productTemplate, productType, showFilteredRecordsOnly, productColumns]);
 
@@ -184,11 +187,11 @@ const Product = () => {
     )
   };
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${product.api}${queryString}`)
+      .get(`${product.api}${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data }) => {
         let rows = data?.data?.map((u) => {
           let finalObject = prepareDataForGrid(u);

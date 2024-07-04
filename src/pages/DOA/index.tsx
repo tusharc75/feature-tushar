@@ -11,6 +11,7 @@ import routes from '../../components/Helpers/Routes';
 import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import axios, { CancelTokenSource } from 'axios';
 
 const DOARequest = () => {
   const renderedFrom = camelCase(routes?.DOARequest.title);
@@ -91,15 +92,17 @@ const DOARequest = () => {
 
   useEffect(() => {
     if (renderCount > 0) {
-      fetchData();
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
-  const fetchData = () => {
+  const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`/doa-request${queryString}`)
+      .get(`/doa-request${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data.map((doa) => ({
           ...doa,

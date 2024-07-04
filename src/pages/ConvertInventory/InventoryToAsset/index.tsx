@@ -15,7 +15,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomAssetDialog from './CustomAssetDialog';
 
 const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocation = null }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
@@ -86,7 +85,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   };
 
   const getCurrentInventory = () => {
-    setLoadingInitialData(true)
+    setLoadingInitialData(true);
     let api = `${productInventory.api}/current-inventory?warehouse=${warehouse}&product=${product[0]._id}`;
     if (selectedStorageLocation) {
       api = `${api}&storageLocation=${selectedStorageLocation}`;
@@ -96,11 +95,11 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
         .get(api)
         .then(({ data: { data } }) => {
           setCurrentInventory(data);
-          setLoadingInitialData(false)
+          setLoadingInitialData(false);
         })
         .catch((err) => {
           setToastConfig(err);
-          setLoadingInitialData(false)
+          setLoadingInitialData(false);
         });
     }
   };
@@ -119,7 +118,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
           productName: e.productName,
           productCategory: e.productCategoryId,
           serialNumberIds: product > 1 ? [] : serialNumberIds.map((item) => item?._id),
-          qty: parseInt(values.qty),
+          qty: parseInt(values.qty)
         };
       }),
       qty: parseInt(values.qty),
@@ -140,8 +139,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
       if (parseInt(values?.qty) > validateQty) {
         errors['qty'] = 'Insufficient Quantity !';
       }
-    }
-    else if (product?.length > 1) {
+    } else if (product?.length > 1) {
       // Find the product with the minimum inventory
       const minInventoryProduct = product.reduce((minProduct, currentProduct) => {
         if (currentProduct.inventory < minProduct.inventory) {
@@ -174,16 +172,17 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   const handleConvert = (rows) => {
     setLoading(true);
     rows?.forEach((e) => {
-      delete e.qty
-    })
+      delete e.qty;
+    });
     const data = {
       qty: assetNumberDialog.qty,
       warehouse: assetNumberDialog.warehouse,
       storageLocation: assetNumberDialog.storageLocation,
       products: rows
-    }
-    axiosInstance().post(`${convertInventory.api}/convert-inventory-to-asset`, data)
-      .then(({ data: { data } }) => {
+    };
+    axiosInstance()
+      .post(`${convertInventory.api}/convert-inventory-to-asset`, data)
+      .then(({ data }) => {
         setLoading(false);
         setToastConfig({
           open: true,
@@ -197,7 +196,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
         setLoading(false);
         setToastConfig(error);
       });
-  }
+  };
 
   return (
     <Dialog
@@ -215,7 +214,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
       {!loadingInitialData ? (
         <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ touched, errors, setFieldValue, values }) => (
-            <Form autoComplete="off" autoCorrect="off" noValidate>
+            <Form autoComplete="off" autoCorrect="off" >
               <CustomDialogHeader
                 title={`Convert Inventory`}
                 showRequiredLabel={true}
@@ -320,7 +319,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
                 <Button color="primary" size="small" onClick={handleClose}>
                   Cancel
                 </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" >
+                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
                   Convert
                 </CustomButton>
               </CustomDialogFooter>

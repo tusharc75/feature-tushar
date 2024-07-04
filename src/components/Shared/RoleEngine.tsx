@@ -25,7 +25,7 @@ interface RoleProps {
   style?: React.CSSProperties;
   tier?: string;
   child?: boolean;
-  updateChildResource?: (resource: string, access: string, checked: boolean)=> void
+  updateChildResource?: (resource: string, access: string, checked: boolean) => void
 }
 
 const RoleEngine = (props: RoleProps) => {
@@ -150,20 +150,16 @@ const RoleEngine = (props: RoleProps) => {
       } else {
         _resource[propertyToUpdate] = isChecked;
       }
-
-      if (propertyToUpdate !== 'isDelete') {
-        newField
-          .filter((d) => d.fieldData.resource === _resource.name)
-          .forEach((_field) => {
-            if (isChecked === true) {
-              _field[propertyToUpdate] = !_resource[`${propertyToUpdate}Disabled`] && !_field[`${propertyToUpdate}Disabled`] && isChecked;
-            } else {
-              _field[propertyToUpdate] = isChecked;
-            }
-          });
+      if (['isRead', 'isCreate', 'isUpdate']?.includes(propertyToUpdate)) {
+        newField.filter((d) => d.fieldData.resource === _resource.name).forEach((_field) => {
+          if (isChecked === true) {
+            _field[propertyToUpdate] = !_resource[`${propertyToUpdate}Disabled`] && !_field[`${propertyToUpdate}Disabled`] && isChecked;
+          } else {
+            _field[propertyToUpdate] = isChecked;
+          }
+        });
       }
     });
-
     setResource(newResource);
     setField(newField);
   };
@@ -190,7 +186,7 @@ const RoleEngine = (props: RoleProps) => {
           if (access === 'isRead' && isCreateUpdateSelected) {
           } else {
             _resource[access] = event.target.checked;
-            if(!_resource?.parentResource){
+            if (!_resource?.parentResource) {
               if (updateChildResource) {
                 updateChildResource(_resource.name, access, event.target.checked);
               }

@@ -62,9 +62,9 @@ const AssignProductDialog = ({
   }, []);
 
   useEffect(() => {
-    const cencelToken = axios.CancelToken.source();
-    fetchProduct(cencelToken);
-    return () => cencelToken.cancel();
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchProduct(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly, tabValue]);
 
   const fetchGridColumns = async () => {
@@ -240,6 +240,7 @@ const AssignProductDialog = ({
       <CustomDialogContent isFooterPresent={false}>
         <>
           <ListingPageHeader
+            showSearchInMobile={true}
             searchValue={search}
             onSearch={handleSearch}
             isActionButtonVisible={false}
