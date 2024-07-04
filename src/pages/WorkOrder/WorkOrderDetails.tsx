@@ -26,6 +26,7 @@ import {
   MATERIAL_SUB_TYPE,
   WORK_ORDER_STATUS,
   WORK_ORDER_TYPE,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   repairJob,
   sidebarResource,
@@ -475,7 +476,7 @@ const WorkOrderDetails = () => {
       id: 'delete',
       type: 'menuItem',
       onClick: () => setShowConfirmBox(true),
-      isVisible: permissions?.workOrder?.isDelete && allowedToEdit && workOrderData?.canDelete && !workOrderData?.deleted,
+      isVisible: permissions?.workOrder?.isDelete && allowedToEdit && workOrderData?.canDelete && checkIsAllowedToDelete(user, sidebarResource.workOrder, workOrderData.owner.optionValue) && !workOrderData?.deleted,
       children: 'Delete'
     }
   ] as const;
