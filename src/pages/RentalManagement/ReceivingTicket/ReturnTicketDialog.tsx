@@ -73,7 +73,7 @@ const ReturnTicketDialog = ({ onClose, onSuccess, products, invoiceQtyData }) =>
               _id: d._id,
               product: d.productName,
               productId: d.productId,
-              returnQuantity: 0,
+              returnQuantity: d.qty - (invoiceQtyData?.find((i) => i?._id === d?.uniqueId)?.qty || 0) - (d?.consumeQty || 0),
               consumeQty: d.consumeQty,
               invoiceQty: invoiceQtyData?.find((i) => i?._id === d?.uniqueId)?.qty || 0,
               orderQuantity: d.qty || 0,

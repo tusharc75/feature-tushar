@@ -8,7 +8,7 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { PreviewDialog } from 'src/components/PreviewDownload/PreviewDialog';
 
-function PreviewDownload({ referenceIds }) {
+function PreviewDownloadMultiple({ referenceIds }) {
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -144,4 +144,4 @@ function PreviewDownload({ referenceIds }) {
   );
 }
 
-export default PreviewDownload;
+export default PreviewDownloadMultiple;
