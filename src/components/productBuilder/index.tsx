@@ -729,14 +729,14 @@ const ProductBuilder = (props) => {
           onClose={() => {
             setInlineBulkEdit(false);
           }}
-          data={dataRows}
+          data={selectedRecords}
           fields={fields}
-          columns={columns}
           extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
           handleSave={(products) => {
             handleSaveProduct(products);
           }}
           isSubmitting={isSubmitting}
+          referenceId={productBuilderId}
         />
       )}
       {openSupplierPriceDialog && (
