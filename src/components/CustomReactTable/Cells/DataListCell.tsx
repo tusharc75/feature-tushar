@@ -3,7 +3,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const getTitle = (data) => {
-  if (data.length) {
+  if (data?.length) {
     let restParams = data.map((o) => (o?.optionLabel ? o?.optionLabel : typeof o !== 'object' ? o : '')).join(', ');
     return restParams;
   }
