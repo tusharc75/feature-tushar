@@ -91,7 +91,6 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         })
         .catch((error) => {
           setIsSubmitting(false);
-          onClose();
           toastConfig.setToastConfig(error);
         });
     }
@@ -191,7 +190,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => {}}
+        onSubmit={() => { }}
       >
         {({ values }) => (
           <>

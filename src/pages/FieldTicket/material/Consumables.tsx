@@ -78,10 +78,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
       setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
     }
-    if (renderCount > 1) {
-      dispatch({ type: 'update', data: [] });
-    }
-    setRenderCount(renderCount + 1);
   }, [services]);
 
   const {
@@ -89,26 +85,24 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   }: any = useData();
 
   useEffect(() => {
+    var allowRequest = false;
+    if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
+      if (
+        (fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id)) ||
+        (fieldTicketData?.warehouse?.materialHandlers && fieldTicketData?.warehouse?.materialHandlers?.includes(user?.user?._id))
+      ) {
+        allowRequest = false;
+      } else {
+        allowRequest = true;
+      }
+    }
+    setConsumeRequest(allowRequest);
     fetchColumns();
   }, [fieldTicketData]);
 
   useEffect(() => {
-    if (columns && !dataRows?.length && tabValue === 0) {
-      var allowRequest = false;
-      if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-        if (
-          (fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id)) ||
-          (fieldTicketData?.warehouse?.materialHandlers && fieldTicketData?.warehouse?.materialHandlers?.includes(user?.user?._id))
-        ) {
-          allowRequest = false;
-        } else {
-          allowRequest = true;
-        }
-      }
-      setConsumeRequest(allowRequest);
-      fetchData();
-    }
-  }, [columns, renderCount, selectedServiceOption, tabValue]);
+    fetchData();
+  }, [selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
@@ -352,8 +346,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           productName: d.productName,
           productDescription: d.productDescription,
           productNumber: d.productNumber,
-          unit : d?.unitMain?.length ? d.unitMain : [],
-          pricingMethod : d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
+          unit: d?.unitMain?.length ? d.unitMain : [],
+          pricingMethod: d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
         }
         element.fieldTicketId = fieldTicketData?._id;
         element._id = id;
