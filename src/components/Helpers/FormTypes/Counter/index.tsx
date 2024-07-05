@@ -53,7 +53,7 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
       <Box border={1} borderColor="var(--common-border-color)" className="rounded-md  p-2">
         <div className="flex items-center justify-between gap-2">
           <Typography
-            className=" line-clamp-2 flex-grow "
+            className="line-clamp-2 flex-grow "
             title={label}
             variant="body2"
             style={{ fontWeight: '500' }}
@@ -61,21 +61,23 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
           >
             {label}
           </Typography>
-          <div className="flex w-[130px] flex-shrink-0 items-center gap-2 overflow-hidden rounded-md [border:1px_solid_var(--common-border-color)] md:w-[156px]">
+          <div className="flex w-[130px] flex-shrink-0 items-center gap-2 overflow-hidden">
             <IconButton
               color="secondary"
-              className=" !rounded-r-none !bg-[var(--new-theme-color)] hover:!opacity-80"
-              style={{ maxHeight: 40, color: 'white' }}
+              className="!rounded-r-none !bg-[var(--new-theme-color)] hover:!opacity-80"
+              style={{ maxHeight: 30, color: 'white' }}
               onClick={() => {
                 handleAddRemove('remove');
               }}
             >
               -
             </IconButton>
-            <TextField disabled value={values[name]?.length} size="small" />
+            <Box p={1}>
+              <span>{values[name]?.length}</span>
+            </Box>
             <IconButton
               className=" !rounded-l-none !bg-[var(--new-theme-color)] hover:!opacity-80"
-              style={{ maxHeight: 40, color: 'white' }}
+              style={{ maxHeight: 30, color: 'white' }}
               onClick={() => {
                 handleAddRemove();
               }}
