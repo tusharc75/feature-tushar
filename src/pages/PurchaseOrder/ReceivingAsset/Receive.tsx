@@ -156,10 +156,12 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
             errors.storageLocation = 'Storage Location is required';
           }
         }
-        if (parseInt(d.inventoryQuantity) && tempProduct?.serializedProduct && user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) {
+        if (tempProduct?.serializedProduct) {
           if (d.serialNumber?.length > parseInt(d.inventoryQuantity)) {
             errors['serialNumber'] = `Please enter serial numbers same as quantity`;
           }
+        }
+        if (parseInt(d.inventoryQuantity) && tempProduct?.serializedProduct && user?.user?.brandPolicy?.purchaseOrderSerializedAddInventory) {
           if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && parseInt(d.inventoryQuantity) !== d.serialNumber?.length) {
             errors['serialNumber'] = `Please enter serial numbers same as quantity`;
           }

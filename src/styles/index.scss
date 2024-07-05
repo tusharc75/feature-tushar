@@ -932,7 +932,7 @@ body::-webkit-scrollbar-thumb {
   border-radius: 2px;
   margin-left: 2px;
   color: var(--dark-secondary-text, #001520);
-  display: inline-block !important;
+  display: inline-block;
   text-align: right;
   align-items: inherit;
   font-weight: bold;
