@@ -38,9 +38,11 @@ function DataListCell({ field, original }) {
             {optionLabel}
           </h5>
 
+          <span className="show-in-export">{getTitle(more)}</span>
+
           {more?.length > 0 && (
             <HtmlTooltip title={getTitle(more)} enterTouchDelay={0}>
-              <span className="createdAtTime badge-date">
+              <span className="createdAtTime badge-date hide-in-export" data-hide-in-export="true">
                 <span className="hidden">&nbsp;&nbsp;</span>
                 {`+${more?.length} more..`}
               </span>
