@@ -84,7 +84,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
           supplierPartNumber: element?.supplierPartNumber,
           storageLocation: user?.user?.brandPolicy?.storageLocation ? element?.storageLocation?.optionValue : null,
           serializedProduct: element?.row?.serializedProduct || false,
-          assetQty: element?.row?.assetQty || 0,
+          assetQty: element?.assetIds?.length,
           assetIds: element?.assetIds?.map((s) => s?.optionValue),
           serialNumber: element?.serialNumber?.map((s) => s?.optionValue)
         });
@@ -202,7 +202,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
               materialId: d.materialId,
               detail: d.detail,
               storageLocation: purchaseOrderData?.storageLocation || null,
-              rejectQuantity: d.qty,
+              rejectQuantity: d.qty - (d?.rejectQuantity || 0),
               comment: '',
               supplierPartNumber: '',
               assetIds: [],
