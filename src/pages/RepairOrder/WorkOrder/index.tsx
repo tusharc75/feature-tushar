@@ -36,6 +36,7 @@ import {
   WORKORDER_SERVICE_STATUS,
   WORK_ORDER_STATUS,
   asyncForEach,
+  checkIsAllowedToDelete,
   repairOrder,
   sidebarResource,
   workOrder
@@ -56,12 +57,8 @@ const WorkOrder = ({
 }) => {
   const renderedFrom = 'repair_order_workorder';
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: {
-      user: { user },
-      permissions
-    }
-  } = useData();
+
+  const { state: { user, permissions } } = useData();
 
   const [columns, setColumns] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
@@ -169,7 +166,7 @@ const WorkOrder = ({
               <p className="text-truncate">{row.original?.detail}</p>
             )}
 
-            {user?.brandPolicy?.servicePrePost && row.original.type === 'service' && (
+            {user?.user?.brandPolicy?.servicePrePost && row.original.type === 'service' && (
               <>
                 {row?.original?.preWork ? (
                   <HtmlTooltip title="Pre Work Service">
@@ -381,7 +378,7 @@ const WorkOrder = ({
             )}
             {row?.original?.workOrder &&
               [MATERIAL_TYPE.service, MATERIAL_TYPE.serializedAsset]?.includes(row?.original?.type) &&
-              !user?.brandPolicy?.workOrderConsumableHide && (
+              !user?.user?.brandPolicy?.workOrderConsumableHide && (
                 <HtmlTooltip title="Add Products/Consumables">
                   <IconButton
                     size="small"
@@ -606,20 +603,22 @@ const WorkOrder = ({
       if (
         parent?.subRows?.length === 0 &&
         parent?.workOrder &&
+        permissions?.workOrder?.isDelete &&
+        checkIsAllowedToDelete(user, sidebarResource.workOrder, parent?.owner) &&
         ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(parent.workOrderStatus)
       ) {
         parent.canDelete = true;
       }
     });
 
-    if (isPostWorkService || (!repairOrderData.addQuotationStep && !user?.brandPolicy?.repairOrderPrice)) {
+    if (isPostWorkService || (!repairOrderData.addQuotationStep && !user?.user?.brandPolicy?.repairOrderPrice)) {
       if (rows?.some((e) => e.type === MATERIAL_TYPE.serializedAsset && e.serviceStatus === WORK_ORDER_STATUS.completed)) {
         setNextStep(true);
       } else {
         setNextStep(false);
       }
     } else {
-      if (repairOrderData.addQuotationStep || user?.brandPolicy?.repairOrderPrice) {
+      if (repairOrderData.addQuotationStep || user?.user?.brandPolicy?.repairOrderPrice) {
         if (
           data?.material?.filter(
             (e) =>
@@ -1071,7 +1070,7 @@ const WorkOrder = ({
             Assign Work Station
           </MenuItem>
         )}
-        {!resourcePolicy?.hideAddConsumables && !user?.brandPolicy?.workOrderConsumableHide && (
+        {!resourcePolicy?.hideAddConsumables && !user?.user?.brandPolicy?.workOrderConsumableHide && (
           <MenuItem
             disabled={
               selectedRecords?.filter((d) => d?.workOrder && [MATERIAL_TYPE.serializedAsset, MATERIAL_TYPE.service]?.includes(d.type))?.length > 0

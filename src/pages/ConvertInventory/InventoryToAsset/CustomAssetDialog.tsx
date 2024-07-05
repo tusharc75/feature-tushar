@@ -25,7 +25,6 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isMobile, isTablet } from 'react-device-detect';
 
 const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, resource }) => {
 
@@ -34,7 +33,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
     const [productList, setProductList] = useState(null);
     const [assetNumberTypeField, setAssetNumberTypeField] = useState(null);
 
-    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+    const [fullScreen, setFullScreen] = useState(true);
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
