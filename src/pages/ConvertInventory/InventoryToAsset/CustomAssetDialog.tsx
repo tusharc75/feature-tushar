@@ -25,6 +25,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, resource }) => {
 
@@ -33,7 +34,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
     const [productList, setProductList] = useState(null);
     const [assetNumberTypeField, setAssetNumberTypeField] = useState(null);
 
-    const [fullScreen, setFullScreen] = useState(true);
+    const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
     useEffect(() => {
         axiosInstance().get(`/field?resource=${serializedAsset.resource}`)
@@ -195,15 +196,6 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                 }
             }}
         >
-            <CustomDialogHeader
-                title={resource === sidebarResource.purchaseOrder ? 'Create/Assign Asset Numbers' : 'Assign Asset Numbers'}
-                onClose={handleClose}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                    setFullScreen((prevState) => !prevState);
-                }}
-                showManimizeMaximize={true}
-            ></CustomDialogHeader>
             {productList ?
                 <Formik
                     initialValues={{ products: productList }}
@@ -212,7 +204,17 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                     onSubmit={handleSubmit}
                 >
                     {({ submitForm, values, setValues, errors }) => (
-                        <>
+                        <Form autoComplete="off" autoCorrect="off" noValidate className="flex flex-col min-h-full">
+                            <CustomDialogHeader
+                                title={resource === sidebarResource.purchaseOrder ? 'Create/Assign Asset Numbers' : 'Assign Asset Numbers'}
+                                onClose={handleClose}
+                                isMinimized={!fullScreen}
+                                onMinimizeMaximize={() => {
+                                    setFullScreen((prevState) => !prevState);
+                                }}
+                                showManimizeMaximize={true}
+                            >
+                            </CustomDialogHeader>
                             <CustomDialogContent>
                                 <Box display="flex" justifyContent="space-between" alignItems="center">
                                     <Box mb={2} display="flex">
@@ -229,102 +231,100 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                                         </Box>
                                     </Box>
                                 </Box>
-                                <Form autoComplete="off" autoCorrect="off" noValidate>
-                                    <Box display="flex" flexDirection="column">
-                                        <TableContainer component={Paper}>
-                                            <Table aria-label="customized table">
-                                                <TableHead>
-                                                    <TableRow>
-                                                        <TableCell>Index</TableCell>
-                                                        <TableCell align="left">Product</TableCell>
-                                                        {resource === sidebarResource.purchaseOrder ?
-                                                            <TableCell align="left">Create Assets</TableCell> : null}
-                                                        {assetNumberTypeField ? (<TableCell>Asset Number Type *</TableCell>) : null}
-                                                        <TableCell align="left">Asset Number *</TableCell>
-                                                    </TableRow>
-                                                </TableHead>
-                                                <TableBody>
-                                                    <FieldArray
-                                                        name="products"
-                                                        render={(arrayHelpers) => (
-                                                            values?.products?.map((data, index) => (
-                                                                <TableRow key={index}>
-                                                                    <TableCell component="th" scope="row">
-                                                                        {data.index}
-                                                                    </TableCell>
-                                                                    <TableCell align="left">{data.productName}</TableCell>
-                                                                    {resource === sidebarResource.purchaseOrder ?
-                                                                        <TableCell align="left">
-                                                                            <Checkbox
-                                                                                checked={data?.createAsset}
-                                                                                onChange={(event) => {
-                                                                                    arrayHelpers.replace(index, {
-                                                                                        ...values.products[index],
-                                                                                        createAsset: event.target.checked,
-                                                                                        assetNumberType: ASSET_NUMBER_TYPE.manual,
-                                                                                    })
-                                                                                }}
-                                                                                inputProps={{ 'aria-label': 'primary checkbox' }}
-                                                                            />
-                                                                        </TableCell> : null}
-                                                                    {assetNumberTypeField &&
-                                                                        <TableCell align="left">
-                                                                            <Autocomplete
-                                                                                size="small"
-                                                                                value={data.assetNumberType}
-                                                                                getOptionLabel={(option: any) => (option ? option : '')}
-                                                                                options={assetNumberTypeField?.option?.map((e) => e.optionLabel)}
-                                                                                onChange={(_, newValue) => {
-                                                                                    arrayHelpers.replace(index, {
-                                                                                        ...values.products[index],
-                                                                                        ['assetNumberType']: newValue,
-                                                                                    });
-                                                                                }}
-                                                                                disabled={data.createAsset ? false : true}
-                                                                                disableClearable
-                                                                                renderInput={(params) => (
-                                                                                    <TextField
-                                                                                        {...params}
-                                                                                        variant="outlined"
-                                                                                        name={`assetNumberType_${index}`}
-                                                                                        label=""
-                                                                                        required
-                                                                                    />
-                                                                                )}
-                                                                            />
-                                                                        </TableCell>
-                                                                    }
+                                <Box display="flex" flexDirection="column">
+                                    <TableContainer component={Paper}>
+                                        <Table aria-label="customized table">
+                                            <TableHead>
+                                                <TableRow>
+                                                    <TableCell>Index</TableCell>
+                                                    <TableCell align="left">Product</TableCell>
+                                                    {resource === sidebarResource.purchaseOrder ?
+                                                        <TableCell align="left">Create Assets</TableCell> : null}
+                                                    {assetNumberTypeField ? (<TableCell>Asset Number Type *</TableCell>) : null}
+                                                    <TableCell align="left">Asset Number *</TableCell>
+                                                </TableRow>
+                                            </TableHead>
+                                            <TableBody>
+                                                <FieldArray
+                                                    name="products"
+                                                    render={(arrayHelpers) => (
+                                                        values?.products?.map((data, index) => (
+                                                            <TableRow key={index}>
+                                                                <TableCell component="th" scope="row">
+                                                                    {data.index}
+                                                                </TableCell>
+                                                                <TableCell align="left">{data.productName}</TableCell>
+                                                                {resource === sidebarResource.purchaseOrder ?
                                                                     <TableCell align="left">
-                                                                        <TextField
-                                                                            fullWidth
-                                                                            label=""
-                                                                            variant="outlined"
-                                                                            type="text"
-                                                                            size="small"
-                                                                            name={`assetNumber_${index}`}
-                                                                            disabled={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? true : false}
-                                                                            placeholder="Asset Number"
-                                                                            value={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? 'Auto Generate' : data.assetNumber}
-                                                                            onChange={(e) => {
+                                                                        <Checkbox
+                                                                            checked={data?.createAsset}
+                                                                            onChange={(event) => {
                                                                                 arrayHelpers.replace(index, {
                                                                                     ...values.products[index],
-                                                                                    ['assetNumber']: e.target.value
+                                                                                    createAsset: event.target.checked,
+                                                                                    assetNumberType: ASSET_NUMBER_TYPE.manual,
+                                                                                })
+                                                                            }}
+                                                                            inputProps={{ 'aria-label': 'primary checkbox' }}
+                                                                        />
+                                                                    </TableCell> : null}
+                                                                {assetNumberTypeField &&
+                                                                    <TableCell align="left">
+                                                                        <Autocomplete
+                                                                            size="small"
+                                                                            value={data.assetNumberType}
+                                                                            getOptionLabel={(option: any) => (option ? option : '')}
+                                                                            options={assetNumberTypeField?.option?.map((e) => e.optionLabel)}
+                                                                            onChange={(_, newValue) => {
+                                                                                arrayHelpers.replace(index, {
+                                                                                    ...values.products[index],
+                                                                                    ['assetNumberType']: newValue,
                                                                                 });
                                                                             }}
-                                                                            error={Boolean(errors[`assetNumber_${index}`])}
-                                                                            helperText={errors[`assetNumber_${index}`]}
-                                                                            required
+                                                                            disabled={data.createAsset ? false : true}
+                                                                            disableClearable
+                                                                            renderInput={(params) => (
+                                                                                <TextField
+                                                                                    {...params}
+                                                                                    variant="outlined"
+                                                                                    name={`assetNumberType_${index}`}
+                                                                                    label=""
+                                                                                    required
+                                                                                />
+                                                                            )}
                                                                         />
                                                                     </TableCell>
-                                                                </TableRow>
-                                                            ))
-                                                        )}
-                                                    />
-                                                </TableBody>
-                                            </Table>
-                                        </TableContainer>
-                                    </Box>
-                                </Form>
+                                                                }
+                                                                <TableCell align="left">
+                                                                    <TextField
+                                                                        fullWidth
+                                                                        label=""
+                                                                        variant="outlined"
+                                                                        type="text"
+                                                                        size="small"
+                                                                        name={`assetNumber_${index}`}
+                                                                        disabled={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? true : false}
+                                                                        placeholder="Asset Number"
+                                                                        value={data.assetNumberType === ASSET_NUMBER_TYPE.auto ? 'Auto Generate' : data.assetNumber}
+                                                                        onChange={(e) => {
+                                                                            arrayHelpers.replace(index, {
+                                                                                ...values.products[index],
+                                                                                ['assetNumber']: e.target.value
+                                                                            });
+                                                                        }}
+                                                                        error={Boolean(errors[`assetNumber_${index}`])}
+                                                                        helperText={errors[`assetNumber_${index}`]}
+                                                                        required
+                                                                    />
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    )}
+                                                />
+                                            </TableBody>
+                                        </Table>
+                                    </TableContainer>
+                                </Box>
                             </CustomDialogContent>
                             <CustomDialogFooter>
                                 <CustomButton
@@ -336,7 +336,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
                                     Submit
                                 </CustomButton>
                             </CustomDialogFooter>
-                        </>
+                        </Form>
                     )}
                 </Formik>
                 : <Box p={2} height={500}>
