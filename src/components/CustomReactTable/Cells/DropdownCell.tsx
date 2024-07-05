@@ -61,12 +61,12 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
                 key={o?.optionLabel}
                 link={o.optionValue && enableLink ? `${pathName}/${o.optionValue}` : null}
                 value={o?.optionLabel}
-                endComma={index !== data.length - 1}
+                endComma={index !== data?.length - 1}
                 startComma={index === 0}
               />
             )
           : typeof o !== 'string'
-            ? resultStrings.push(o, index !== data.length - 1 ? ', ' : '')
+            ? resultStrings.push(o, index !== data?.length - 1 ? ', ' : '')
             : ''
       );
 
