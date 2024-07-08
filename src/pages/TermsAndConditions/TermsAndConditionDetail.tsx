@@ -9,7 +9,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { checkIsAllowedToEdit, sidebarResource, termsAndCondition } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource, termsAndCondition } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -59,7 +59,7 @@ const TermsAndConditionDetail = () => {
 
      
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.termsAndConditions, data));
-      setAllowedToDelete(data.owner.optionValue === user?.user?._id);
+      setAllowedToDelete(permissions?.termsAndConditions?.isDelete && checkIsAllowedToDelete(user, sidebarResource.termsAndConditions, data.owner.optionValue));
 
       setTermsAndConditionData(data);
       setCustomizedRoutes([routes.termsAndConditions, { title: data?.name }]);
@@ -108,7 +108,7 @@ const TermsAndConditionDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.termsAndConditions?.isDelete && allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+              { allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
           </Box>
         </Box>

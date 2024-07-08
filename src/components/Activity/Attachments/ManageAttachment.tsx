@@ -273,8 +273,8 @@ export default function ManageAttachment({
                       <Grid container item xs={12}>
                         <Grid item xs={12}>
                           <div style={{ width: '100%' }}>
-                            <div className="flex flex-wrap gap-2">
-                              <div className="-ml-[0]">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <div className="ml-0">
                                 <FormTypes
                                   label=""
                                   name="fileUrl"

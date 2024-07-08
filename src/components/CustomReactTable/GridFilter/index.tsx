@@ -21,6 +21,7 @@ import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
 import { createFilterModel, fetchFieldOptions } from '../utils';
 import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
+import SingleLine from 'src/components/CustomReactTable/GridFilter/SingleLine';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -321,38 +322,53 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                         </Fragment>
                       ) : (
                         <Grid item xs={12} sm={6} md={6}>
-                    {field?.lookup && field.lookupResource ? (
-                        <AsyncDropdown
-                          key={field?._id}
-                          resource={field.lookupResource}
-                          errors={{}}
-                          touched={{}}
-                          multiple={true}
-                          value={formValues[field.fieldName] ?? []}
-                          onChange={(_, value) => {
-                            handleSelectFilter(field?.fieldName, value);
-                          }}
-                          fieldName={field.fieldName}
-                          fieldLabel={field.fieldLabel}
-                          required={false}
-                        />
-                      ) : (
-                          <FormTypes
-                            disabled={false}
-                            values={formValues}
-                            errors={{}}
-                            touched={{}}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={field.option}
-                            setFieldValue={handleSelectFilter}
-                            required={false}
-                            fullWidth
-                            size="small"
-                            fromFilter={true}
-                          />
-                      )}
+                          {field?.lookup && field.lookupResource ? (
+                            <AsyncDropdown
+                              key={field?._id}
+                              resource={field.lookupResource}
+                              errors={{}}
+                              touched={{}}
+                              multiple={true}
+                              value={formValues[field.fieldName] ?? []}
+                              onChange={(_, value) => {
+                                handleSelectFilter(field?.fieldName, value);
+                              }}
+                              fieldName={field.fieldName}
+                              fieldLabel={field.fieldLabel}
+                              required={false}
+                            />
+                          ) : field?.type === 'singleLine' || field?.type === 'lookUpDisplay' ? (
+                            <SingleLine
+                              key={field?._id}
+                              resource={resource}
+                              errors={{}}
+                              touched={{}}
+                              value={formValues[field.fieldName] ?? []}
+                              onChange={(_, value) => {
+                                handleSelectFilter(field?.fieldName, value);
+                              }}
+                              fieldName={field.fieldName}
+                              fieldLabel={field.fieldLabel}
+                              required={false}
+                              fieldData={field}
+                            />
+                          ) : (
+                            <FormTypes
+                              disabled={false}
+                              values={formValues}
+                              errors={{}}
+                              touched={{}}
+                              label={field.fieldLabel}
+                              name={field.fieldName}
+                              type={field.type}
+                              options={field.option}
+                              setFieldValue={handleSelectFilter}
+                              required={false}
+                              fullWidth
+                              size="small"
+                              fromFilter={true}
+                            />
+                          )}
                         </Grid>
                       )}
                     </Fragment>

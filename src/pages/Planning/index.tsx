@@ -19,7 +19,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { PLANNING_STATUS, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { PLANNING_STATUS, checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePlanning from './ManagePlanning';
@@ -211,7 +211,7 @@ const Planning = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.planning?.isUpdate;
           finalObject['canConvert'] = !u?.canDelete;
-          finalObject['canDelete'] = permissions?.planning?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          finalObject['canDelete'] = permissions?.planning?.isDelete && checkIsAllowedToDelete(user, sidebarResource.planning, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

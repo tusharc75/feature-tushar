@@ -17,6 +17,7 @@ import routes from 'src/components/Helpers/Routes';
 import {
   ACTIVITY_RESOURCE,
   SUBCONTRACT_ASSEMBLY_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   sidebarResource,
   subcontractAssemblySteps
@@ -84,7 +85,11 @@ const SubcontractAssemblyDetail = () => {
       } = await axiosInstance().get(`${routes.subcontractAssembly.path}/${id}`);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
-      setAllowedToDelete(permissions?.subcontractAssembly?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.subcontractAssembly?.isDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+          data?.canDelete
+      );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
         setCurrentStep(subcontractAssemblySteps?.length - 1);

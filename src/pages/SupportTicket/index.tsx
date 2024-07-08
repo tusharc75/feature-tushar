@@ -15,7 +15,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageSupportTicket from './ManageSupportTicket';
@@ -173,7 +173,7 @@ const SupportTicket = () => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = finalObject?.ownerId === user?.user?._id && finalObject?.status === 'Pending';
+          finalObject['canDelete'] = checkIsAllowedToDelete(user, sidebarResource.supportTicket, finalObject?.ownerId) && finalObject?.status === 'Pending';
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           return finalObject;
         });

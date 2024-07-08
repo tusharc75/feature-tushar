@@ -16,7 +16,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
 import Steps, { getIndex } from 'src/components/Steps';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, PURCHASE_REQUISITION_STATUS, checkIsAllowedToEdit, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, PURCHASE_REQUISITION_STATUS, checkIsAllowedToDelete, checkIsAllowedToEdit, purchaseRequisitionSteps, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -92,6 +92,7 @@ const PurchaseRequisitionDetail = () => {
       setCurrentStep(getIndex(data?.processStatus, stepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      setAllowedToDelete(permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue));
       setPurchaseRequisitionData(data);
       setCustomizedRoutes([routes.purchaseRequisition, { title: data?.purchaseRequisitionNumber }]);
 
@@ -187,7 +188,7 @@ const PurchaseRequisitionDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              {permissions?.purchaseRequisition?.isDelete && allowedToDelete && (
+              {allowedToDelete && (
                 <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
               )}
               <ActivityButton

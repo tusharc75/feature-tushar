@@ -24,6 +24,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   FIELD_TICKET_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   fieldTicket,
   fieldTicketSteps,
@@ -114,7 +115,7 @@ const FieldTicketDetail = () => {
       }
 
       setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, data));
-      setAllowedToDelete(permissions?.fieldTicket?.isDelete && data.owner.optionValue === user?.user?._id && data?.canDelete);
+      setAllowedToDelete(permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, data.owner.optionValue) && data?.canDelete);
       setFieldTicketData(data);
       setLoading(false);
     } catch (error) {

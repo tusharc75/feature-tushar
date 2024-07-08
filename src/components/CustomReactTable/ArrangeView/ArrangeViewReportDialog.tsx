@@ -405,8 +405,8 @@ const RenderListItem = (props: ItemProps) => {
       type: 'Column',
       index,
       props: { column, handleToggle, index }
-    },
-    disabled: column.disabled
+    }
+    // disabled: column.disabled
   });
 
   const style = {
@@ -425,7 +425,7 @@ const RenderListItem = (props: ItemProps) => {
       <div
         className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
           index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-        } ${column.disabled ? ' pointer-events-none opacity-65' : ''}`}
+        } `}
       >
         <ListItemIcon className={` cursor-grab pl-2 ${isDragging ? ' cursor-grabbing' : ''}`} {...attributes} {...listeners}>
           <DragHandle />

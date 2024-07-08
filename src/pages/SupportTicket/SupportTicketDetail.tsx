@@ -13,7 +13,7 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { SUPPORT_TICKET_STATUS } from 'src/constants/helpers';
+import { SUPPORT_TICKET_STATUS, checkIsAllowedToDelete, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -67,7 +67,7 @@ const SupportTicketDetail = () => {
         [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id) &&
         data?.status !== SUPPORT_TICKET_STATUS.completed;
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id && data?.status !== SUPPORT_TICKET_STATUS.completed);
+      setAllowedToDelete(checkIsAllowedToDelete(user, sidebarResource.supportTicket, data.owner.optionValue) && data?.status !== SUPPORT_TICKET_STATUS.completed);
       setSupportTicketData(data);
       setCustomizedRoutes([routes.supportTicket, { title: data?.supportTicketNumber }]);
       setLoading(false);

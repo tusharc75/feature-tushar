@@ -47,5 +47,38 @@ export const stepData: IntroStep = {
         waitForUserClick: false
       }
     ]
+  },
+  '/subcontract-assembly': {
+    name: 'Add subcontract',
+    steps: [
+      {
+        url: '/subcontract-assembly',
+        title: 'Add ',
+        target: '#add-button',
+        content: '',
+        waitForUserClick: false
+      },
+      {
+        target: '#field-supplier-account',
+        url: '/subcontract-assembly',
+        title: 'Select suplier',
+        content: '',
+        waitForUserClick: true
+      },
+      {
+        target: '#mui-25954',
+        url: '/subcontract-assembly',
+        title: 'select address',
+        content: '',
+        waitForUserClick: false
+      },
+      {
+        target: '#mui-19696',
+        url: '/subcontract-assembly',
+        title: '',
+        content: '',
+        waitForUserClick: false
+      }
+    ]
   }
 } as const;

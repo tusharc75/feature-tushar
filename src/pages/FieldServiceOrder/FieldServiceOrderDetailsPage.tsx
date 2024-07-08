@@ -27,6 +27,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import {
   ACTIVITY_RESOURCE,
   SERVICE_ORDER_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   fieldServiceOrder,
   serviceOrderSteps,
@@ -136,7 +137,7 @@ const ServiceOrderDetailsPage = () => {
       setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-        data.owner.optionValue === user?.user?._id &&
+        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
         data.canDelete &&
         ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
