@@ -6,20 +6,8 @@ import _ from 'lodash';
 const DisplayChips = (props) => {
   const { chipData, setChipData, selectedFilter, handleFilterOpen, clearSingleFilter, clearFilterAll, setIsFilterPresent, customFilters, columns } =
     props;
-  const [hiddenItems, setHiddenItems] = useState(0);
   const isAppliedFilterPresent = React.useMemo(() => Object.keys(selectedFilter || {}).length > 0, [selectedFilter]);
   const oldModalRef = React.useRef(null);
-
-  const containerRef = useRef(null);
-  const countRef = useRef(null);
-  const COUNT_PADDING = 10;
-
-  useEffect(() => {
-    setHiddenItems(0);
-    if (containerRef?.current) {
-      hideElementAndShowNumber(containerRef.current);
-    }
-  }, [chipData]);
 
   const chipDataSetter = (filterModel) => {
     if (filterModel) {
@@ -33,8 +21,8 @@ const DisplayChips = (props) => {
             element.filter.from && element.filter.to
               ? `${element.filter.from ? element.filter.from : null} - ${element.filter.to ? element.filter.to : null}`
               : element.filter.from || element.filter.to
-              ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
-              : null;
+                ? `${element.filter.from ? `${element.filter.from} (From Date)` : ''} ${element.filter.to ? `${element.filter.to} (To Date)` : ''}`
+                : null;
           const data = { title: currentColumn?.Header || _.startCase(keys[i]), value: dateValue, name: keys[i] };
           filterData.push(data);
         } else if (element.operator && element.condition1) {
@@ -64,41 +52,6 @@ const DisplayChips = (props) => {
     }
   }, [filterModel]);
 
-  const hideElementAndShowNumber = (container) => {
-    const childItems = [...container?.children];
-
-    childItems.forEach((item) => (item.style.display = 'inline-flex'));
-    let lastVisibleItem = null;
-    const hiddenItems = [];
-    for (let i = 0; i < childItems.length; i++) {
-      const item = childItems[i] as HTMLDivElement;
-      const isOverlapping = item.getBoundingClientRect().right >= container.getBoundingClientRect().right - COUNT_PADDING;
-      if (isOverlapping) {
-        hiddenItems.push(item);
-        if (!lastVisibleItem) {
-          lastVisibleItem = childItems[i - 1];
-        }
-      }
-    }
-    hiddenItems.forEach((item) => (item.style.display = 'none'));
-
-    const count = hiddenItems.length;
-    setHiddenItems(count);
-
-    const deltaX = lastVisibleItem?.offsetLeft + lastVisibleItem?.clientWidth;
-
-    if (countRef.current) {
-      countRef.current.style.cssText = `
-        left: ${deltaX + COUNT_PADDING}px;
-        display: ${count === 0 ? 'none' : 'block'};
-        position: absolute;
-        top: 50%;
-        transform: translateY(-50%);
-        cursor: pointer;
-        `;
-    }
-  };
-
   useEffect(() => {
     if (isAppliedFilterPresent || chipData?.length > 0) {
       setIsFilterPresent(true);
@@ -126,6 +79,7 @@ const DisplayChips = (props) => {
       {isAppliedFilterPresent ? (
         <div className="chip-container">
           <Chip
+            title={selectedFilter?.title}
             onClick={handleFilterOpen}
             className={'filter-chip'}
             deleteIcon={<CloseIcon />}
@@ -135,25 +89,18 @@ const DisplayChips = (props) => {
         </div>
       ) : (
         chipData?.length > 0 && (
-          <div className="chip-container" style={{ paddingRight: `${55 + COUNT_PADDING}px` }}>
-            <div className={'chip-group'} ref={containerRef}>
+          <div className="chip-container">
+            <div className={'chip-group'}>
               {chipData?.map((filter) => (
                 <Chip
                   onClick={handleFilterOpen}
                   className={'filter-chip'}
                   deleteIcon={<CloseIcon />}
                   label={`${filter?.title}=${getFilterValue(filter?.value)}`}
+                  title={`${filter?.title}=${getFilterValue(filter?.value)}`}
                   onDelete={() => clearSingleFilter(filter.name)}
                 />
               ))}
-            </div>
-
-            <div
-              ref={countRef}
-              style={{ cursor: 'pointer', position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
-              onClick={handleFilterOpen}
-            >
-              +{hiddenItems} more
             </div>
           </div>
         )

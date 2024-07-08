@@ -9,7 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -23,7 +23,7 @@ const ConvertInventory = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [warehouseId, setWarehouseId] = useState(null);
   const [storageLocationId, setStorageLocationId] = useState(null);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
@@ -77,19 +77,47 @@ const ConvertInventory = () => {
     let columns = [];
     let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
     columns = [...columns, ...newColumns];
-    columns?.forEach((e) => {
-      if (!['productName', 'serializedProduct'].includes(e.accessor)) {
-        e.show = false;
-      }
-    });
     columns.push({
       accessor: 'availableInventory',
       Header: 'Available Inventory',
       width: 120,
-      show: true,
+      disableFilters: true,
+      disableSortBy: true,
+      disabled: true,
       Cell: ({ row }) => <p className="text-truncate">{row.original.availableInventory}</p>
     });
-    columns = [...columns, ActionsRenderer];
+    columns.push({
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 100,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {permissions?.inventoryToAsset?.isUpdate && (
+            <Fragment>
+              <Box pl={1}>
+                <HtmlTooltip title="Convert Inventory">
+                  <IconButton
+                    size="small"
+                    aria-label="Clone"
+                    disabled={row?.original?.availableInventory ? false : true}
+                    onClick={() => {
+                      setInventory({ open: true, product: [row?.original] });
+                    }}
+                  >
+                    <CachedIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            </Fragment>
+          )}
+        </>
+      )
+    })
     setColumns(columns);
   };
 
@@ -130,66 +158,37 @@ const ConvertInventory = () => {
   };
 
   const getQueryString = () => {
-    let deepFilter = '';
-    deepFilter = `?warehouse=${warehouseId}`;
-    deepFilter = deepFilter + `&page=${page}&limit=${limit}`;
+
+    let deepFilter = `?warehouse=${warehouseId}&page=${page}&limit=${limit}`;
     if (storageLocationId) {
       deepFilter = `${deepFilter}&storageLocation=${storageLocationId}`;
     }
 
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
+
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
+
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify(selectedRecords.map((m) => m._id))}`;
     }
-    return `${deepFilter}&filterType=and`;
-  };
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        {permissions?.inventoryToAsset?.isUpdate && (
-          <Fragment>
-            <Box pl={1}>
-              <HtmlTooltip title="Convert Inventory">
-                <IconButton
-                  size="small"
-                  aria-label="Clone"
-                  disabled={row?.original?.availableInventory ? false : true}
-                  onClick={() => {
-                    setInventory({ open: true, product: [row?.original] });
-                  }}
-                >
-                  <CachedIcon fontSize="small" color="primary" />
-                </IconButton>
-              </HtmlTooltip>
-            </Box>
-          </Fragment>
-        )}
-      </>
-    )
+
+    return deepFilter;
   };
 
   const ActionMenuItems = () => {

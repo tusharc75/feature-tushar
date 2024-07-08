@@ -15,6 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomAssetDialog from './CustomAssetDialog';
 
 const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocation = null }) => {
+
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
@@ -203,7 +204,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
       fullWidth
       maxWidth="sm"
       open={true}
-      fullScreen={fullScreen || isMobile || isTablet}
+      fullScreen={fullScreen}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           handleClose();
@@ -214,7 +215,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
       {!loadingInitialData ? (
         <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ touched, errors, setFieldValue, values }) => (
-            <Form autoComplete="off" autoCorrect="off" >
+            <Form autoComplete="off" autoCorrect="off" className="flex flex-col min-h-full">
               <CustomDialogHeader
                 title={`Convert Inventory`}
                 showRequiredLabel={true}

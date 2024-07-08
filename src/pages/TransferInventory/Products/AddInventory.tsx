@@ -5,7 +5,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
@@ -63,7 +63,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
     axiosInstance()
-      .get(`${productInventory.api}?warehouse=${warehouse}&${queryString}`)
+      .get(`${productInventory.api}${queryString}`)
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u: any) => {
           const selectedData = selectedRecords.find((d: any) => d._id === u._id);
@@ -92,7 +92,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
   };
 
   const getQueryString = () => {
-    let deepFilter = `page=${page}&limit=${limit}`;
+    let deepFilter = `?warehouse=${warehouse}&page=${page}&limit=${limit}`;
 
     if (storageLocation) {
       deepFilter = deepFilter + `&storageLocation=${storageLocation}`;
@@ -102,22 +102,14 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
       deepFilter = deepFilter + `&ignoreIds=${JSON.stringify(ignoreIds)}`;
     }
 
-    const updatedFilters = [];
+    const { deepFilters } = gridFilterParser(filters);
+
     if (!user?.user?.brandPolicy?.showSerializedProduct) {
-      updatedFilters.push({ field: 'serializedProduct', term: 'No' });
+      deepFilters.push({ field: 'serializedProduct', term: 'No' });
     }
 
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-    }
-
-    if (updatedFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}`;
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
 
     if (showFilteredRecordsOnly) {

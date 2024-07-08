@@ -932,7 +932,7 @@ body::-webkit-scrollbar-thumb {
   border-radius: 2px;
   margin-left: 2px;
   color: var(--dark-secondary-text, #001520);
-  display: inline-block !important;
+  display: inline-block;
   text-align: right;
   align-items: inherit;
   font-weight: bold;
@@ -3471,6 +3471,7 @@ body {
     padding: 8px 3px !important;
     background-color: var(--new_theme_secondary_color) !important;
     border-radius: 3.09998px !important;
+    max-width: 250px;
     svg {
       color: #2a3042 !important;
     }
@@ -3478,15 +3479,10 @@ body {
 
   .chip-group {
     display: flex;
-    max-width: 700px;
     overflow: hidden;
+    flex-wrap: wrap;
     flex-grow: 1;
-    & > div {
-      margin-left: 8px;
-      &:first-of-type {
-        margin-left: 0;
-      }
-    }
+    gap: 8px;
   }
   .chip-container {
     display: flex;
@@ -3494,6 +3490,9 @@ body {
     flex-wrap: wrap;
     gap: 10px;
     position: relative;
+    * {
+      min-width: 0;
+    }
   }
 }
 

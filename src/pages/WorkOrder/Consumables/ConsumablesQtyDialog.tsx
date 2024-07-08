@@ -190,13 +190,13 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => {}}
+        onSubmit={() => { }}
       >
         {({ values }) => (
           <>
             <CustomDialogContent>
               {values?.products && values?.products?.length ? (
-                <Box className="min-[769px]:p-[16px] max-[768px]:py-[11px]">
+                <Box className="max-[768px]:py-[11px] min-[769px]:p-[16px]">
                   <Form>
                     <FieldArray
                       name="products"
@@ -306,7 +306,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                           <div className="min-[769px]:hidden">
                             {values?.products?.map((value: any, index) => (
                               <div
-                                className="rounded-[8px] mb-2 shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)] px-[20px] py-[15px] grid grid-cols-[1fr_3fr] gap-2 item"
+                                className="item mb-2 grid grid-cols-[1fr_3fr] gap-2 rounded-[8px] px-[20px] py-[15px] shadow-[0px_5.44444px_27.22222px_0px_rgba(0,_0,_0,_0.06)]"
                                 style={{ border: '1px solid var(--common-border-color)' }}
                                 key={value._id}
                               >
