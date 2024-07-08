@@ -292,7 +292,7 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
       }
       return d;
     });
-    if (resource === sidebarResource.user) {
+    if (resource === sidebarResource.user || resource === sidebarResource.employeeMaster) {
       modifiedColumn?.forEach((e) => {
         if (e.fieldName === 'firstName') {
           e.fieldName = 'concatedName';
