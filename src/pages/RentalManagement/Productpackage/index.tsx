@@ -29,7 +29,14 @@ import {
   getNestedSubRows
 } from '../../../components/RentalManagment/helper';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement } from '../../../constants/helpers';
+import {
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  deliveryTicket,
+  MATERIAL_TYPE,
+  RENTAL_STATUS,
+  rentalManagement
+} from '../../../constants/helpers';
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AssetAvailability from '../AssetAvailability';
 import RentalJobQtyDialog from './RentalJobQtyDialog';
@@ -312,6 +319,7 @@ const Productpackage = ({
     var nonSerializeAsset: any = [];
     var productSerialNumbers: any = [];
     var nextStepMessage = null;
+    const loadingTicketProducts: any = [];
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
       // data = data?.additionalCost;
@@ -319,6 +327,9 @@ const Productpackage = ({
     } else {
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
       const additionalData = await axiosInstance().get(`${rentalManagement.api}/additionalcost/${rentalManagementData._id}`);
+      const loadingTicketResult = await axiosInstance().get(
+        `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+      );
       data = response?.data?.data;
       additionalCosts = additionalData?.data?.data;
       additionalCosts = additionalCosts?.map((e: any) => {
@@ -328,6 +339,15 @@ const Productpackage = ({
       inventory = data.inventory?.filter((e) => !e.isReplaced);
       nonSerializeAsset = data.nonSerializeAsset;
       productSerialNumbers = data.productSerialNumbers;
+      loadingTicketResult?.data?.data?.forEach((element) => {
+        if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products?.length) {
+          element?.products?.forEach((ele) => {
+            loadingTicketProducts.push({
+              ...ele
+            });
+          });
+        }
+      });
     }
 
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
@@ -373,8 +393,24 @@ const Productpackage = ({
       parent.hideSelection =
         parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
       parent.nonSerializedQty =
-        parent.type === MATERIAL_TYPE.product && !parent.serializedProduct && parent.assetQty === 0 && parent?.status ? parent.qty : 0;
-      parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired);
+        parent.type === MATERIAL_TYPE.product &&
+        !parent.serializedProduct &&
+        parent.assetQty === 0 &&
+        parent?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          ? loadingTicketProducts
+              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+          : 0;
+      parent.subRows = generateNestedData(
+        data.material,
+        inventory,
+        nonSerializeAsset,
+        productSerialNumbers,
+        parent,
+        isPriceRequired,
+        loadingTicketProducts
+      );
       if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
         nextStepMessage = rentalManagementMessage.addProductInPackage;
       }
@@ -391,7 +427,7 @@ const Productpackage = ({
     dispatch({ type: 'loading', loading: false });
   };
 
-  const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired) => {
+  const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -420,8 +456,24 @@ const Productpackage = ({
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection = _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.nonSerializedQty =
-        _subRow.type === MATERIAL_TYPE.product && !_subRow.serializedProduct && _subRow.assetQty === 0 && _subRow?.status ? _subRow.qty : 0;
-      _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, productSerialNumbers, _subRow, isPriceRequired);
+        _subRow.type === MATERIAL_TYPE.product &&
+        !_subRow.serializedProduct &&
+        _subRow.assetQty === 0 &&
+        _subRow?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+          ? loadingTicketProducts
+              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+          : 0;
+      _subRow.subRows = generateNestedData(
+        material,
+        inventory,
+        nonSerializeAsset,
+        productSerialNumbers,
+        _subRow,
+        isPriceRequired,
+        loadingTicketProducts
+      );
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
