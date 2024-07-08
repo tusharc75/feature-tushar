@@ -40,6 +40,17 @@ const FormTypes = (props) => {
     }
   };
 
+  const handleCurrencyChangeWithConverterChange = (name, _currency, _unit, value) => {
+    const result = handleAutoCalculation(fieldData, fields, values, name, _currency, _unit, value);
+    if (setValues && Object.keys(result).length > 1) {
+      setValues({ ...values, ...result });
+    } else {
+      for (var x in result) {
+        setFieldValue([x], result[x]);
+      }
+    }
+  };
+
   return fieldData?.type === 'singleLine' ? (
     <TextField
       {...rest}
@@ -146,7 +157,18 @@ const FormTypes = (props) => {
           ? onChange
           : (e) => {
               if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                if (fieldData.displayCurrency.length > 1) {
+                if (fieldData?.isConverter) {
+                  handleCurrencyChangeWithConverterChange(
+                    name,
+                    currency,
+                    unit,
+                    e.target.value === ''
+                      ? 0
+                      : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                        ? e.target.value.replace(/,/g, '')
+                        : parseFloat(e.target.value.replace(/,/g, ''))
+                  );
+                } else if (fieldData.displayCurrency.length > 1) {
                   handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
                 } else {
                   handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));

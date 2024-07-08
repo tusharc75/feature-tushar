@@ -25,10 +25,13 @@ import routes from '../../../components/Helpers/Routes';
 import { fetch_rental_product_fields } from '../../../components/RentalManagment/helper';
 import {
   ASSET_STATUS,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
   INVENTORY_OWNER_TYPE,
   MATERIAL_TYPE,
   RENTAL_INTERNAL_ASSET_STATUS,
   TRANSFER_ASSET_STATUS,
+  deliveryTicket,
   rentalManagement,
   sidebarResource,
   treeToFlatArray
@@ -343,6 +346,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       var bulkAssetCreationProduct: any = [];
       var subleaseProduct: any = [];
       var offlineAssetErrorLog: any = [];
+      const loadingTicketProducts: any = [];
 
       if (isOffline) {
         data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -371,6 +375,10 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         const result = await axiosInstance().get(`${rentalManagement.api}/rental-related-transaction/${rentalManagementData._id}`);
         const transactionData = result?.data?.data;
 
+        const loadingTicketResult = await axiosInstance().get(
+          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
+        );
+
         if (permissions?.purchaseOrder?.isRead) {
           purchaseOrderProduct = transactionData?.purchaseOrder;
           setPurchaseOrderCount(purchaseOrderProduct?.length);
@@ -387,6 +395,16 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           transferAssets = transactionData?.transferAsset;
           setTransferAssetCount(transferAssets?.length);
         }
+
+        loadingTicketResult?.data?.data?.forEach((element) => {
+          if (element.ticketType === DELIVERY_TICKET_TYPE.loading && element?.products?.length) {
+            element?.products?.forEach((ele) => {
+              loadingTicketProducts.push({
+                ...ele
+              });
+            });
+          }
+        });
       }
 
       const material = data.material;
@@ -416,7 +434,13 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           : data.nonSerializeAsset?.filter((e) => e._id === parent._id).length +
           data?.nonSerializedInventory?.filter((n) => n?._id === parent?._id)?.reduce((sum, row) => row?.qty + sum, 0);
         parent.realAssetQty = parent.assetQty;
-        parent.realAssetAssignedQty = parent.type === MATERIAL_TYPE.product && !parent.serializedProduct && parent.assetAssignedQty === 0 && parent?.status ? parent.qty : parent.assetAssignedQty;
+        parent.realAssetAssignedQty =
+          parent.type === MATERIAL_TYPE.product && !parent.serializedProduct && parent.assetAssignedQty === 0 && parent?.status &&
+          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+          ? loadingTicketProducts
+              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+            : parent.assetAssignedQty;
         parent.isSublease = subleaseProduct?.some((e) => e.materialId === parent.materialId);
         parent.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === parent.materialId);
         parent.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === parent.materialId);
@@ -437,7 +461,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           subleaseProduct,
           purchaseOrderProduct,
           bulkAssetCreationProduct,
-          offlineAssetErrorLog
+          offlineAssetErrorLog,
+          loadingTicketProducts
         );
 
         parent.assetQty =
@@ -457,9 +482,9 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               : false
             : parent.subRows.length !== 0
               ? parent.assetAssignedQty ===
-              parent.subRows
-                .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
-                .reduce((sum, row) => (row.assetQty || 0) + sum, 0) || parent.subRows.every((d) => d.isValid)
+                  parent.subRows
+                    .filter((d) => !['asset', 'serialNumber']?.includes(d.type) && d.serializedProduct)
+                    .reduce((sum, row) => (row.assetQty || 0) + sum, 0) || parent.subRows.every((d) => d.isValid)
               : true;
 
         if (parent.subRows.length && parent.isValid) {
@@ -497,7 +522,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     subleaseProduct,
     purchaseOrderProduct,
     bulkAssetCreationProduct,
-    offlineAssetErrorLog
+    offlineAssetErrorLog,
+    loadingTicketProducts
   ) => {
     const subRows: any = [];
     const inventory_result = inventory?.filter((e) => e._id === parent._id);
@@ -611,11 +637,17 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
       _subRow.assetAssignedQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e?._id === _subRow._id)?.length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length +
-        nonSerializedInventory?.filter((n) => n?._id === _subRow?._id)?.reduce((sum, row) => row?.qty + sum, 0);
+          nonSerializedInventory?.filter((n) => n?._id === _subRow?._id)?.reduce((sum, row) => row?.qty + sum, 0);
       _subRow.realAssetQty = [MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package]?.includes(_subRow.type)
         ? _subRow.qty * parent.realAssetQty
         : 0;
-      _subRow.realAssetAssignedQty = _subRow.type === MATERIAL_TYPE.product && !_subRow.serializedProduct && _subRow.assetAssignedQty === 0 && _subRow?.status ? _subRow.qty : _subRow.assetAssignedQty;
+      _subRow.realAssetAssignedQty =
+        _subRow.type === MATERIAL_TYPE.product && !_subRow.serializedProduct && _subRow.assetAssignedQty === 0 && _subRow?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+        ? loadingTicketProducts
+            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+          : _subRow.assetAssignedQty;
       _subRow.isSublease = subleaseProduct?.some((e) => e.materialId === _subRow.materialId);
       _subRow.isPurchaseOrder = purchaseOrderProduct?.some((e) => e.productId === _subRow.materialId);
       _subRow.isBulkAssetCreation = bulkAssetCreationProduct?.some((e) => e.productId === _subRow.materialId);
@@ -636,7 +668,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
         subleaseProduct,
         purchaseOrderProduct,
         bulkAssetCreationProduct,
-        offlineAssetErrorLog
+        offlineAssetErrorLog,
+        loadingTicketProducts
       );
 
       _subRow.subRows = tempSubRows;

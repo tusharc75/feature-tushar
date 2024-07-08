@@ -422,15 +422,15 @@ const Consumables = ({
         open: true,
         type: 'error',
         message: user?.user?.brandPolicy?.workOrderConsumableRequest
-          ? 'Qty can not be less than consumed qty plus requested qty'
-          : 'Qty can not be less than consumed qty'
+          ? 'Quantity can not be less than consumed quantity plus requested quantity'
+          : 'Quantity can not be less than consumed quantity'
       });
       return;
     } else if (parseInt(inputField.qty) === 0) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: 'Qty can not be 0'
+        message: 'Quantity can not be 0'
       });
       return;
     }

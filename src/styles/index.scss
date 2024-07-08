@@ -939,6 +939,10 @@ body::-webkit-scrollbar-thumb {
   font-size: 0.6rem;
   border: 1px solid var(--common-border-color);
   margin-left: 10px;
+  max-width: fit-content;
+  @media all and (max-width: 768px) {
+    padding: 4px 6px;
+  }
 }
 
 .serchBox {

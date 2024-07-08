@@ -318,8 +318,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           serviceName: d.serviceName,
           serviceDescription: d.serviceDescription,
           competencyType: { optionLabel: d.competencyType, optionValue: d.competencyTypeId },
-          unit : d?.unitMain?.length ? d.unitMain : [],
-          pricingMethod : d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
+          unit: d?.unitMain?.length ? d.unitMain : [],
+          pricingMethod: d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
         }
         element.fieldTicketId = fieldTicketData?._id;
         material.push(element);
@@ -355,7 +355,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           element.unit = d.unit ? d.unit : '';
           element.pricingMethod = d.pricingMethod ? d.pricingMethod : '';
           element.qty = d.qty ? parseFloat(d.qty) : 1;
-          element.uniqueId = d._id; 
+          element.uniqueId = d._id;
           element.estimateStartDate = d?.estimateStartDate ? d?.estimateStartDate : new Date();
           element.estimateEndDate = d?.estimateEndDate ? d?.estimateEndDate : new Date();
           element.estimateJobDuration = d?.estimateJobDuration;
@@ -650,7 +650,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
-          message: 'Qty can not be 0'
+          message: 'Quantity cannot be zero'
         });
         return;
       }
@@ -906,7 +906,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           rentalId={fieldTicketData?.rentalJob?.optionValue}
           currency={fieldTicketData?.currency}
           isSubmitting={isSubmitting}
-          ids={dataRows?.map((row) => assignRentalDataDialog?.type===MATERIAL_TYPE.package ? row?.uniqueId : row?.materialId)}
+          ids={dataRows?.map((row) => assignRentalDataDialog?.type === MATERIAL_TYPE.package ? row?.uniqueId : row?.materialId)}
         />
       )}
     </>
