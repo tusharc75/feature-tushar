@@ -13,8 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
-import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
+import { CustomDialogTransition, dateTimeFormat, fieldTicket } from 'src/constants/helpers';
 
 function ViewLogs({ fieldTicketData, handleClose, fields }) {
   const renderedFrom = `${routes.fieldTicket.title}_logs`;
@@ -58,21 +57,21 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
           return row?.original['type'] ? <p className="text-truncate">{row?.original['type']}</p> : <NoDataCell />;
         }
       },
-     ...(permissions?.invoice?.isRead ? [{
+      ...(permissions?.invoice?.isRead ? [{
         accessor: 'invoice',
         Header: 'Invoice',
         width: 200,
         disabled: true,
         Cell: ({ row }) => {
           return row?.original['invoice'] ? (
-              <a className="link text-truncate" href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`} target="_blank" rel="noreferrer">
-                {row?.original['invoice']}
-              </a>
+            <a className="link text-truncate" href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`} target="_blank" rel="noreferrer">
+              {row?.original['invoice']}
+            </a>
           ) : (
             <NoDataCell />
           );
         }
-      }]: []),
+      }] : []),
       {
         accessor: 'user',
         Header: 'User',
