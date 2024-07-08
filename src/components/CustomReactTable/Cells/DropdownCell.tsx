@@ -1,4 +1,4 @@
-import { Popover } from '@material-ui/core';
+import { Popover, Popper } from '@material-ui/core';
 import { camelCase, isArray, isObject } from 'lodash';
 import { useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
@@ -20,10 +20,23 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
+    if (Boolean(anchorEl)) {
+      setAnchorEl(null);
+    } else {
+      setAnchorEl(event.currentTarget);
+    }
+  };
+  const handleMouseOver = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+    event.stopPropagation();
+    event.preventDefault();
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = (e: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     setAnchorEl(null);
   };
 
@@ -89,48 +102,35 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
           {more?.length > 0 && (
             <>
               <span
-                className="createdAtTime badge-date hide-in-export cursor-pointer"
+                className="createdAtTime badge-date hide-in-export max-w-fit cursor-pointer select-none !p-[4px_6px] md:!p-[0_6px]"
                 onClick={(e) => {
-                  e.preventDefault();
                   handleClick(e);
                 }}
                 data-hide-in-export="true"
-                onMouseOver={handleClick}
+                onMouseOver={handleMouseOver}
               >
                 {`+${more?.length} more..`}
               </span>
               <span className="show-in-export">{getTitle(more, isDataLink)}</span>
-              <Popover
-                open={open}
-                anchorEl={anchorEl}
-                onClose={handleClose}
-                anchorOrigin={{
-                  vertical: 'top',
-                  horizontal: 'center'
-                }}
-                transformOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'center'
-                }}
-                PaperProps={{
-                  style: {
-                    overflow: 'initial',
-                    padding: '10px 10px',
-                    transform: 'translateY(-11px)',
-                    minWidth: 100
-                  },
-                  onMouseLeave: handleClose
-                }}
-              >
-                <div className="relative translate-y-2 items-center text-center">
-                  <div className=" max-h-[200px] min-w-[100px] space-y-1 overflow-y-auto overflow-x-hidden">
-                    <ExternalLinkCell link={isDataLink ? `${pathName}/${optionValue}` : null} value={optionLabel} />
-                    {getTitle(more, isDataLink)}
+              <Popper open={open} anchorEl={anchorEl} placement="top">
+                <div
+                  className="min-w-[100px] rounded-md bg-[var(--dark-primary,white)] p-[10px] drop-shadow-lg [border:1px_solid_var(--common-border-color)] [filter:drop-shadow(0_4px_3px_rgb(0_0_0_/_0.07))_drop-shadow(0_2px_2px_rgb(0_0_0_/_0.06))]"
+                  style={{ transform: 'translateY(-11px)' }}
+                  onMouseLeave={handleClose}
+                >
+                  <div className="relative translate-y-2 items-center text-center">
+                    <div className=" max-h-[200px] min-w-[100px] space-y-1 overflow-y-auto overflow-x-hidden">
+                      <ExternalLinkCell link={isDataLink ? `${pathName}/${optionValue}` : null} value={optionLabel} />
+                      {getTitle(more, isDataLink)}
+                    </div>
+                    <div className="filler absolute -bottom-[43px] -left-[10px] -right-[10px] h-[48px] cursor-help"></div>
+                    <IoCaretDown
+                      size={24}
+                      className="absolute -bottom-[26px] left-0 right-0 z-10 mx-auto !stroke-[var(--common-border-color)] text-[var(--dark-primary,white)] "
+                    />
                   </div>
-                  <div className="filler absolute -bottom-[26px] -left-[10px] -right-[10px] h-[28px] "></div>
-                  <IoCaretDown size={24} className="absolute -bottom-[26px] left-0 right-0 z-10 mx-auto text-[var(--dark-primary,white)]" />
                 </div>
-              </Popover>
+              </Popper>
             </>
           )}
         </>
