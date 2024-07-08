@@ -1106,6 +1106,7 @@ export const removeEmptyKeys = (obj: object) => {
 
 /**
  * @param {Array} fields
+ * @param {boolean} validEmail
  */
 export const yupSchema = (fields: any[], validEmail = true) => {
   const schema = {};

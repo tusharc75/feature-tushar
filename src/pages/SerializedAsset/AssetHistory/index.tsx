@@ -10,7 +10,7 @@ import { dateTimeFormat, isObjectEmpty, serializedAsset, sidebarResource } from 
 import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
-import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { camelCase, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
@@ -307,18 +307,10 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
+    const { deepFilters } = gridFilterParser(filters);
 
-    const updatedFilters = [];
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-    }
     if (duration) {
-      updatedFilters.push({
+      deepFilters.push({
         field: 'date',
         term: {
           from: moment(duration?.from).format('MM/DD/YYYY'),
@@ -326,8 +318,8 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
         }
       });
     }
-    if (updatedFilters?.length > 0) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (deepFilters?.length > 0) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
