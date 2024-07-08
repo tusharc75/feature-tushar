@@ -6,7 +6,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { sortBy } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -90,18 +90,13 @@ const AddExistingProduct = (props) => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${selectedRecords?.map((m) => m._id)}`;
     }
-
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    
+    const { deepFilters } = gridFilterParser(filters);
+    
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
+    
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -116,7 +111,10 @@ const AddExistingProduct = (props) => {
       filterById.push({ field: 'productTemplate', term: productTemplate });
     }
     if (filterById.length) {
-      deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
+      deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById);
+    }
+    if (filterById?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
     return deepFilter;
   };

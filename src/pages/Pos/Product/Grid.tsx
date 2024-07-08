@@ -5,7 +5,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { gridLoadingTimeout, isObjectEmpty } from 'src/constants/helpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import { MdAddShoppingCart } from 'react-icons/md';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
 import { prepareDataForGrid } from '../../../constants/helpers';
@@ -114,16 +114,13 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
 
   const getQueryString = () => {
     let deepFilter = `&page=${page}&limit=${limit}`;
-    if (!isObjectEmpty(filters)) {
-      const updatedFilters = [];
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    
+    const { deepFilters } = gridFilterParser(filters);
+
+    if (deepFilters?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}&filterType=and`;
     }
+ 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -132,7 +129,10 @@ const ProductGridLayout = ({ renderedFrom, setAssignCartProductQty, plantId, sea
       filterById.push({ field: 'productCategory', term: productCategory });
     }
     if (filterById.length) {
-      deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById) + '&filterType=and';
+      deepFilter = deepFilter + '&filterById=' + JSON.stringify(filterById);
+    }
+    if (filterById?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
