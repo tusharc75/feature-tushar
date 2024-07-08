@@ -517,7 +517,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: response?.data?.data?.message
+          message: response?.data?.message
         });
       }
       fetchData();
@@ -537,13 +537,20 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const dataRow = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-
     if (inputField.hasOwnProperty('qty')) {
-      if (parseInt(inputField?.qty) === 0) {
+      if (parseInt(inputField.qty) === 0) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
-          message: 'Qty can not be 0'
+          message: 'Quantity cannot be zero'
+        });
+        return;
+      }
+      if (parseInt(inputField.qty) < (updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0)) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Quantity can not be less than consumed quantity'
         });
         return;
       }
