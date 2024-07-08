@@ -83,9 +83,9 @@ const ProductBuilder = (props) => {
   const [askSupplierPriceDialog, setAskSupplierPriceDialog] = useState(false);
   const [supplierContactData, setSupplierContactData] = useState([]);
   const [supplierData, setSupplierData] = useState(null);
-  const [inlineBulkEdit, setInlineBulkEdit] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [fields, setFields] = useState([])
+  const [inlineBulkEdit, setInlineBulkEdit] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fields, setFields] = useState([]);
   const { generateColumns } = useColumns();
 
   const {
@@ -149,7 +149,7 @@ const ProductBuilder = (props) => {
           fields = [...fields, ...ele.fields];
         });
         let newColumns = generateColumns(routes.product.title, fields, null, false, currency);
-        newColumns.forEach(column => {
+        newColumns.forEach((column) => {
           if (column?.accessor === 'productName') {
             column.cell = ({ row }) => (
               <span>
@@ -169,7 +169,7 @@ const ProductBuilder = (props) => {
                   <NoDataCell />
                 )}
               </span>
-            )
+            );
           }
         });
         columns = [...columns, ...newColumns];
@@ -177,7 +177,7 @@ const ProductBuilder = (props) => {
         if (stage && stage === 'product') {
           fields = fields.filter((t) => t.leval === 'product' || t.leval === 'product-custom' || t.leval === 'product-template');
         }
-        setFields(JSON.parse(JSON.stringify(fields)))
+        setFields(JSON.parse(JSON.stringify(fields)));
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns = sortBy(columns, function (item: any) {
           return levalOrderBy.indexOf(item.leval);
@@ -327,23 +327,23 @@ const ProductBuilder = (props) => {
       setProductId(null);
       setIsClone(false);
     } else {
-      setIsSubmitting(true)
+      setIsSubmitting(true);
       let data: any = {};
       data.product = rows;
       data._id = productBuilderId;
       axiosInstance()
         .put(`/productbuilder/updateProduct`, data)
         .then(() => {
-          setIsSubmitting(false)
+          setIsSubmitting(false);
           setProductId(null);
           setIsBulkEdit(false);
           setproductDataList([]);
           fetchProduct();
-          setInlineBulkEdit(false)
+          setInlineBulkEdit(false);
         })
         .catch((error) => {
-          setIsSubmitting(false)
-          setInlineBulkEdit(false)
+          setIsSubmitting(false);
+          setInlineBulkEdit(false);
           toastConfig.setToastConfig(error);
         });
     }
@@ -535,7 +535,7 @@ const ProductBuilder = (props) => {
         {stage === 'cost' && permissions?.isUpdate && fromQuote && (
           <MenuItem
             onClick={() => {
-              setInlineBulkEdit(true)
+              setInlineBulkEdit(true);
             }}
           >
             {isMobile && !isTablet ? '' : 'Bulk Edit New'}
@@ -727,15 +727,16 @@ const ProductBuilder = (props) => {
       {inlineBulkEdit && fromQuote && (
         <CustomEditableGrid
           onClose={() => {
-            setInlineBulkEdit(false)
+            setInlineBulkEdit(false);
           }}
-          data={dataRows}
+          data={selectedRecords}
           fields={fields}
-          currency={currency}
-          extraData={['productId']}
           extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
-          handleSave={(products) => { handleSaveProduct(products) }}
+          handleSave={(products) => {
+            handleSaveProduct(products);
+          }}
           isSubmitting={isSubmitting}
+          referenceId={productBuilderId}
         />
       )}
       {openSupplierPriceDialog && (

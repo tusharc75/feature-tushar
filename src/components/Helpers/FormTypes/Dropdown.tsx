@@ -644,6 +644,7 @@ function Dropdown({
                           ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
                           : null
                       }
+                      isRedirectToDetailPage={false}
                       onClose={() => setLookupDialog(false)}
                       onSuccess={(data) => {
                         setLookupDialog(false);
@@ -695,6 +696,7 @@ function Dropdown({
                           ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
                           : null
                       }
+                      isRedirectToDetailPage={false}
                       isClone={false}
                       wellMasterId={null}
                       onClose={() => setLookupDialog(false)}
@@ -749,6 +751,7 @@ function Dropdown({
                           ? { [fieldData?.lookupDependentOn]: values[fieldData?.lookupDependentOn] }
                           : null
                       }
+                      isRedirectToDetailPage={false}
                       isClone={false}
                       onClose={() => setLookupDialog(false)}
                       onSuccess={(data) => {

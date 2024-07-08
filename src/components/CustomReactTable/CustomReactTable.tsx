@@ -488,7 +488,7 @@ const CustomReactTable = ({
   return (
     <DndContext onDragEnd={onDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToHorizontalAxis]}>
       {exportTableView && (
-        <div className="hidden [&_.hide-in-export]:!hidden">
+        <div className="hidden [&_.hide-in-export]:!hidden [&_.show-in-export]:!block">
           <TableComponent
             ref={tableRef}
             virtualization={virtualization}
@@ -510,7 +510,7 @@ const CustomReactTable = ({
           />
         </div>
       )}
-      <div className="react-table-v8 ">
+      <div className="react-table-v8 [&_.show-in-export]:!hidden">
         <div className="table-container-v1" style={{ position: 'relative' }}>
           <GridHeader
             handleTableExport={handleTableExport}
@@ -596,7 +596,7 @@ const CustomReactTable = ({
       </div>
       <DragOverlay>
         {activeHeader && (
-          <span className="react-table-v8 block overflow-hidden max-h-[45px] [&_.drag-handle]:!cursor-grabbing">
+          <span className="react-table-v8 block max-h-[45px] overflow-hidden [&_.drag-handle]:!cursor-grabbing">
             <DraggableHeader overlayMode={true} {...activeHeader} />
           </span>
         )}

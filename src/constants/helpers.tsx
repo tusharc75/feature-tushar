@@ -1106,6 +1106,7 @@ export const removeEmptyKeys = (obj: object) => {
 
 /**
  * @param {Array} fields
+ * @param {boolean} validEmail
  */
 export const yupSchema = (fields: any[], validEmail = true) => {
   const schema = {};
@@ -2467,6 +2468,12 @@ export const REPORT_LIST = [
     type: 'purchaseOrderDetails'
   },
   {
+    title: 'Purchase Order Actual Received Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderActualReceivedDetails'
+  },
+  {
     title: 'Inventory Evaluation',
     permission: 'purchaseOrder',
     key: 'standardReport',
@@ -3229,6 +3236,14 @@ export const checkIsAllowedToEdit = (user, resource, data) => {
   }
 
   return isAllowedToEdit;
+};
+
+export const checkIsAllowedToDelete = (user, resource, owner) => {
+  let isAllowedToDelete = owner === user?.user?._id ? true : false;
+  if (user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource)) {
+    isAllowedToDelete = true;
+  }
+  return isAllowedToDelete;
 };
 
 export function changeItemIndex<T>(array: T[], item: T, sourceIndex: number, destinationIndex: number) {

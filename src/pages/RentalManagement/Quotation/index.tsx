@@ -25,7 +25,6 @@ const Quotation = ({
   setNextStep,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete,
   fetchQuotationData,
   quotationData,
   currentVersion,

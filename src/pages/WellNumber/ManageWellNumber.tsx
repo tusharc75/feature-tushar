@@ -194,7 +194,7 @@ const ManageWellNumber = ({ isClone = false, id = null, onClose, onSuccess, refe
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

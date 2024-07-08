@@ -17,7 +17,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import FieldDialog from './FieldDialog';
 import ManageSurveys from './ManageSurveys';
 import SurveysData from './SurveysData';
-import { checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
+import { checkIsAllowedToDelete, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const SurveysDetail = () => {
@@ -66,7 +66,7 @@ const SurveysDetail = () => {
       } = await axiosInstance().get(`/surveys/${id}`);
       
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.surveys, data));
-      setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+      setAllowedToDelete(permissions?.surveys?.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, data.owner.optionValue) && data?.canDelete);
       setHeadingLbl(data.surveyName);
       setSurveyData(data);
       setCustomizedRoutes([routes.surveys, { title: data?.surveyName }]);
@@ -138,7 +138,7 @@ const SurveysDetail = () => {
                 {isMobile && !isTablet ? <Edit /> : 'Edit'}
               </Button>
             )}
-            {permissions?.surveys?.isDelete && allowedToDelete && SurveyData?.canDelete && (
+            {allowedToDelete && (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             )}
           </Box>

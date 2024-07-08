@@ -52,7 +52,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
             data: { data }
           }
         }) => {
-          setIotDataPoints(data?.map((d) => d?.fieldName));
+          setIotDataPoints(data?.map((d) => ({ optionLabel: d?.minid ? d?.fieldLabel + '-' + d?.minid : d?.fieldLabel, optionValue: d?.fieldName })));
         }
       );
   };
@@ -257,19 +257,34 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                     fullWidth
                   />
                   {values?.custom && (
-                    <div className="conditions-container container-with-border p-2 sm:p-3 md:p-4 mb-2 sm:mb-3 md:mb-4">
+                    <div className="conditions-container container-with-border mb-2 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4">
                       <Box>
                         <Autocomplete
                           multiple
                           options={iotDataPoints}
                           freeSolo
                           fullWidth
+                          getOptionLabel={(option) => (option ? option.optionLabel : '')}
                           onChange={(e, newValues) => {
-                            setFieldValue('dataPoints', newValues);
+                            setFieldValue(
+                              'dataPoints',
+                              newValues?.map((v) => {
+                                if (v?.optionValue) {
+                                  return v?.optionValue;
+                                }
+                                return v;
+                              })
+                            );
                           }}
                           value={values.dataPoints}
                           renderTags={(value: readonly string[], getTagProps) =>
-                            value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+                            value.map((option: string, index: number) => (
+                              <Chip
+                                variant="outlined"
+                                label={iotDataPoints?.find((d) => d?.optionValue === option)?.optionLabel || ''}
+                                {...getTagProps({ index })}
+                              />
+                            ))
                           }
                           size="small"
                           renderInput={(params) => (
@@ -290,9 +305,9 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                           <Box pt={0.5} pb={0.5}>
                             {values?.dataPoints?.map((_dataPoint) => (
                               <Chip
-                                className="ml-1 cursor-pointer mb-1"
+                                className="mb-1 ml-1 cursor-pointer"
                                 key={_dataPoint}
-                                label={`${_dataPoint}`}
+                                label={`${iotDataPoints?.find((d) => d?.optionValue === _dataPoint)?.optionLabel || ''}`}
                                 onClick={() => handleAddDataPoint(_dataPoint, values, setFieldValue)}
                               />
                             ))}

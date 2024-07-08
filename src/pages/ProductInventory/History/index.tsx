@@ -10,7 +10,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { dateTimeFormat, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
@@ -61,7 +61,7 @@ const History = ({ product, warehouse, storageLocation }) => {
 
     const queryString = getQueryString();
 
-    const response = await axiosInstance().get(`/history/product-ledger/${product}${queryString}`);
+    const response = await axiosInstance().get(`/history/product-ledger/${queryString}`);
     let rows = response?.data?.data?.map((u) => {
       let finalObject: any = prepareDataForGrid(u, user);
       finalObject.type = capitalize(u.type);
@@ -75,7 +75,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}`;
+    let deepFilter = `${product}?page=${page}&limit=${limit}`;
 
     if (selectedWarehouse) {
       let tempWarehouse =
@@ -92,22 +92,13 @@ const History = ({ product, warehouse, storageLocation }) => {
     if (selectedStorageLocation) {
       deepFilter = `${deepFilter}&storageLocation=${selectedStorageLocation}`;
     }
-
-    let filterById = [];
-    if (filterById.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterById)}`;
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-    const updatedFilters = [];
-    if (!isObjectEmpty(filters)) {
-      Object.keys(filters).forEach((field) => {
-        updatedFilters.push({
-          field: field,
-          term: filters[field].filter
-        });
-      });
-    }
+  
     if (duration) {
-      updatedFilters.push({
+      deepFilters.push({
         field: 'date',
         term: {
           from: moment(duration?.from).format('MM/DD/YYYY'),
@@ -115,8 +106,11 @@ const History = ({ product, warehouse, storageLocation }) => {
         }
       });
     }
-    if (updatedFilters?.length > 0) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(updatedFilters))}&filterType=and`;
+    if (deepFilters?.length > 0) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;

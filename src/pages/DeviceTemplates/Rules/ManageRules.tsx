@@ -84,10 +84,17 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
 
   const findIotDataoints = () => {
     const query = [{ field: 'deviceTemplate', term: deviceTemplate }];
-    axiosInstance().get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&filterType=and`)
-      .then(({ data: { data: { data } } }) => {
-        setIotDataPoints(data?.map((d) => ({ optionLabel: d?.fieldLabel, optionValue: d?._id })));
-      });
+    axiosInstance()
+      .get(`${routes.iotDataPoints.path}?filterById=${JSON.stringify(query)}&filterType=and`)
+      .then(
+        ({
+          data: {
+            data: { data }
+          }
+        }) => {
+          setIotDataPoints(data?.map((d) => ({ optionLabel: d?.minid ? d?.fieldLabel + '-' + d?.minid : d?.fieldLabel, optionValue: d?._id })));
+        }
+      );
   };
 
   useEffect(() => {
@@ -184,7 +191,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
             {({ values, errors, touched, setFieldValue, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
-                  title={id ? isClone ? `Clone - ${initialValue?.ruleName}` : `Update Rule - ${initialValue?.ruleName}` : 'Create Rule'}
+                  title={id ? (isClone ? `Clone - ${initialValue?.ruleName}` : `Update Rule - ${initialValue?.ruleName}`) : 'Create Rule'}
                   onClose={(e, reason) => {
                     if (isEqual(initialValue, values)) {
                       onClose();
@@ -219,7 +226,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                           }}
                         />
                       </div>
-                      <div className="conditions-container container-with-border p-2 sm:p-3 md:p-4 mb-2 sm:mb-3 md:mb-4">
+                      <div className="conditions-container container-with-border mb-2 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4">
                         <h2 style={{ margin: 0 }} className="form-label-style mb-3">
                           Conditions
                         </h2>
@@ -229,11 +236,11 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                               <>
                                 {values?.condition?.map((cnd, i) => {
                                   return (
-                                    <Box className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr_auto] gap-2 items-center">
+                                    <Box className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr_auto]">
                                       <Box>
                                         <Autocomplete
                                           options={iotDataPoints}
-                                          getOptionLabel={(option) => option?.optionLabel}
+                                          getOptionLabel={(option) => option?.optionLabel || ''}
                                           value={iotDataPoints?.find((data) => data?.optionValue === values?.condition[i]?.dataPoint) ?? ''}
                                           fullWidth
                                           onChange={(e, newValue) => {
@@ -299,7 +306,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                                           }}
                                         />
                                       </Box>
-                                      <Box className=" max-w-fit ml-auto" display="flex" justifyContent="space-between" alignItems="center">
+                                      <Box className=" ml-auto max-w-fit" display="flex" justifyContent="space-between" alignItems="center">
                                         <IconButton size="small" aria-label="close" onClick={() => remove(i)}>
                                           <CloseIcon fontSize="small" color={'primary'} />
                                         </IconButton>
@@ -319,11 +326,11 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                           </FieldArray>
                         </div>
                       </div>
-                      <div className="actions-container container-with-border p-2 sm:p-3 md:p-4 mb-2 sm:mb-3 md:mb-4">
+                      <div className="actions-container container-with-border mb-2 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4">
                         <h2 style={{ margin: 0 }} className="form-label-style  mb-2">
                           Actions
                         </h2>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 items-center mb-2 min-h-[52px]">
+                        <div className="mb-2 flex min-h-[52px] flex-wrap items-center gap-x-4 gap-y-1">
                           <div className="min-w-[138px]">
                             <FormControlLabel
                               style={{ margin: 0 }}
@@ -341,7 +348,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                             />
                           </div>
                           {values['isEmailAlert'] && (
-                            <div className="flex-grow max-w-md min-w-[min(250px,100%)]">
+                            <div className="min-w-[min(250px,100%)] max-w-md flex-grow">
                               <UserDropdown
                                 name="emailAlertUsers"
                                 label="Email Alert Users"
@@ -358,7 +365,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                             </div>
                           )}
                         </div>
-                        <div className="flex flex-wrap gap-x-4 gap-y-1 items-center mb-2 min-h-[52px]">
+                        <div className="mb-2 flex min-h-[52px] flex-wrap items-center gap-x-4 gap-y-1">
                           <div className="min-w-[138px]">
                             <FormControlLabel
                               style={{ margin: 0 }}
@@ -376,7 +383,7 @@ export default function ManageRules({ deviceTemplate, open, isClone = false, id 
                             />
                           </div>
                           {values['isCreateTask'] && (
-                            <div className="flex-grow max-w-md min-w-[min(250px,100%)]">
+                            <div className="min-w-[min(250px,100%)] max-w-md flex-grow">
                               <UserDropdown
                                 name="taskAssignUsers"
                                 label="Task Assign Users"

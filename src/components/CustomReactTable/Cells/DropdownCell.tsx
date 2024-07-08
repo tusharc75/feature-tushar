@@ -54,21 +54,23 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
       const resultComponents = [];
       const resultStrings = [];
 
-      data.forEach((o) =>
+      data.forEach((o, index) =>
         o?.optionLabel
           ? resultComponents.push(
               <ExternalLinkCell
                 key={o?.optionLabel}
                 link={o.optionValue && enableLink ? `${pathName}/${o.optionValue}` : null}
                 value={o?.optionLabel}
+                endComma={index !== data?.length - 1}
+                startComma={index === 0}
               />
             )
           : typeof o !== 'string'
-            ? resultStrings.push(o)
+            ? resultStrings.push(o, index !== data?.length - 1 ? ', ' : '')
             : ''
       );
 
-      return [...resultComponents, resultStrings.join(' ')];
+      return [...resultComponents, resultStrings];
     }
     return '';
   };
@@ -87,16 +89,17 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
           {more?.length > 0 && (
             <>
               <span
-                className="createdAtTime badge-date cursor-pointer"
+                className="createdAtTime badge-date hide-in-export cursor-pointer"
                 onClick={(e) => {
                   e.preventDefault();
                   handleClick(e);
                 }}
+                data-hide-in-export="true"
                 onMouseOver={handleClick}
               >
-                <span className="hidden">&nbsp;&nbsp;</span>
                 {`+${more?.length} more..`}
               </span>
+              <span className="show-in-export">{getTitle(more, isDataLink)}</span>
               <Popover
                 open={open}
                 anchorEl={anchorEl}

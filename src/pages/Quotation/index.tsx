@@ -22,6 +22,7 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import routes from '../../components/Helpers/Routes';
 import {
   QUOTATION_TYPE,
+  checkIsAllowedToDelete,
   customerAccount,
   getDefaultMyRecordType,
   gridLoadingTimeout,
@@ -268,7 +269,7 @@ const Quotation = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.quotation?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+          finalObject['canDelete'] = permissions?.quotation?.isDelete && checkIsAllowedToDelete(user, sidebarResource.quotation, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

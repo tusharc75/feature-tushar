@@ -18,7 +18,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 
 
-const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null }) => {
+const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
   const {
     state: { user }
@@ -112,10 +112,9 @@ const ManagePadMaster = ({ onClose, onSuccess, isClone = false, id = null, refer
         .post(`${routes.padMaster?.path}`, values)
         .then(({ data: { data, message } }: any) => {
           setLoading(false);
-          if (referenceData) {
-            onSuccess(data);
-          } else {
+          if (isRedirectToDetailPage) {
             history.push(`${routes.padMasterDetail.path}/${data._id}`);
+          } else {
             onSuccess(data);
           }
           setSubmitting(true);

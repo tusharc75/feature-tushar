@@ -1,12 +1,154 @@
-
 export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
-	const schema = {};
-	values.forEach((element) => {
-		fields.forEach((input) => {
-			if (['singleLine', 'multiLine', 'percent', 'currencyAmount', 'dropDown', 'multiSelect', 'decimal', 'checkBox', 'date', 'dateTime']?.includes(input?.type) && input.required && !Boolean(element[`${input.fieldName}`])) {
-				schema[`${element._id}_${input.fieldName}`] = `${input.fieldLabel} is required`;
-			}
-		});
-	});
-	return schema;
+  const schema = {};
+  values.forEach((element) => {
+    fields.forEach((input) => {
+      if (input.required && !Boolean(element[`${input.fieldName}`])) {
+        schema[`${element._id}_${input.fieldName}`] = `${input.fieldLabel} is required`;
+      }
+    });
+  });
+  return schema;
+};
+
+export const generateColumn = (fields) => {
+  const newColumns: any = [];
+  const constColumns: any = [];
+  fields?.forEach((_field) => {
+    if (_field?.type === 'converter' || _field?.type === 'currencyAmount' || _field?.isConverter === true) {
+      if (_field?.type !== 'currencyAmount' && (_field?.type === 'converter' || _field?.isConverter === true)) {
+        _field?.displayUnits.forEach((_unit) => {
+          const fieldName = _field?.fieldName + '_' + _unit.toLowerCase();
+          const fieldLabel = _field?.fieldLabel + ' ' + _unit;
+          newColumns.push({
+            accessor: fieldName,
+            accessorKey: fieldName,
+            Header: fieldLabel,
+            id: fieldName,
+            unit: _unit,
+            minWidth: 180,
+            width: 200
+          });
+
+          constColumns.push({ ..._field, fieldName, fieldLabel });
+        });
+      } else if (_field?.type === 'currencyAmount' && (_field?.type === 'converter' || _field?.isConverter === true)) {
+        _field?.displayUnits.forEach((_unit) => {
+          _field?.displayCurrency.forEach((_currency) => {
+            const fieldName = _field?.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+            const fieldLabel = _field?.fieldLabel + ' ' + _unit + '/' + _currency;
+            newColumns.push({
+              accessor: fieldName,
+              accessorKey: fieldName,
+              Header: fieldLabel,
+              id: fieldName,
+              currency: _currency,
+              unit: _unit,
+              minWidth: 180,
+              width: 200
+            });
+            constColumns.push({ ..._field, fieldName, fieldLabel });
+          });
+        });
+      } else if (_field?.type === 'currencyAmount') {
+        _field?.displayCurrency.forEach((_currency) => {
+          const fieldName = _field?.fieldName + '_' + _currency.toLowerCase();
+          const fieldLabel = _field?.fieldLabel + ' ' + _currency;
+          newColumns.push({
+            accessor: fieldName,
+            accessorKey: fieldName,
+            Header: fieldLabel,
+            id: fieldName,
+            currency: _currency,
+            minWidth: 180,
+            width: 200
+          });
+          constColumns.push({ ..._field, fieldName, fieldLabel });
+        });
+      }
+    } else {
+      newColumns.push({
+        accessor: _field?.fieldName,
+        accessorKey: _field?.fieldName,
+        Header: _field?.fieldLabel,
+        id: _field?.fieldName,
+        minWidth: 220,
+        width: 250
+      });
+      constColumns.push(_field);
+    }
+  });
+
+  return { newColumns, constColumns };
+};
+
+export const generateRows = (data, fields) => {
+  const arr: any = [];
+  data?.forEach((_d) => {
+    const obj: any = {};
+    obj['_id'] = _d?._id;
+    fields?.forEach((_f) => {
+      if (_f.type === 'switch' || _f.type === 'checkBox') {
+        obj[_f.fieldName] = _d[_f.fieldName] ? _d[_f.fieldName] : false;
+      } else if (_f?.type === 'dropDown' && _f?.lookup) {
+        obj[_f?.fieldName] = _d[`${_f?.fieldName}Id`] ? _d[`${_f?.fieldName}Id`] : '';
+        delete _d[`${_f?.fieldName}Id`];
+      } else if (_f?.type === 'multiSelect') {
+        let value = [];
+        if (_f?.lookup) {
+          value = _d[`${_f?.fieldName}Id`] ? [_d[`${_f?.fieldName}Id`]] : [];
+          if (_d[`rest${_f?.fieldName}`]?.length > 0) {
+            _d[`rest${_f?.fieldName}`]?.forEach((e) => {
+              value.push(e?.optionValue);
+            });
+          }
+        } else {
+          value = _d[_f?.fieldName] ? _d[_f?.fieldName]?.split(',')?.map((e) => e?.trim()) : [];
+        }
+        obj[_f?.fieldName] = value;
+        delete _d[`${_f?.fieldName}Id`];
+        delete _d[`rest${_f?.fieldName}`];
+      } else if (_f?.type === 'freeStyleMultiSelect') {
+        obj[_f?.fieldName] = _d[_f?.fieldName] ? _d[_f?.fieldName] : [];
+      } else if (_f.type === 'converter' || _f.type === 'currencyAmount' || _f.isConverter === true) {
+        if (_f.type !== 'currencyAmount' && (_f.type === 'converter' || _f.isConverter === true)) {
+          _f.displayUnits &&
+            _f.displayUnits.forEach((_unit) => {
+              let fieldName = _f.fieldName + '_' + _unit.toLowerCase();
+              if (_f.fieldName.includes('_')) {
+                fieldName = _f.fieldName;
+              }
+              obj[fieldName] = _d[fieldName] ? _d[fieldName] : 0;
+            });
+        } else if (_f.type === 'currencyAmount' && (_f.type === 'converter' || _f.isConverter === true)) {
+          _f.displayCurrency &&
+            _f.displayCurrency.forEach((_currency) => {
+              _f.displayUnits &&
+                _f.displayUnits.forEach((_unit) => {
+                  let fieldName = _f.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
+                  if (_f.fieldName.includes('_')) {
+                    fieldName = _f.fieldName;
+                  }
+                  obj[fieldName] = _d[fieldName] ? _d[fieldName] : 0;
+                });
+            });
+        } else if (_f.type === 'currencyAmount') {
+          _f.displayCurrency &&
+            _f.displayCurrency.forEach((_currency) => {
+              let fieldName = _f.fieldName + '_' + _currency.toLowerCase();
+              if (_f.fieldName.includes('_')) {
+                fieldName = _f.fieldName;
+              }
+              obj[fieldName] = _d[fieldName] ? _d[fieldName] : 0;
+            });
+        }
+      } else if (_f.type === 'decimal' || _f.type === 'percent' || _f.type === 'formula') {
+        obj[_f.fieldName] = _d[_f.fieldName] || _d[_f.fieldName] === 0 ? _d[_f.fieldName] : 0;
+      } else {
+        obj[_f?.fieldName] = _d[_f?.fieldName] ? _d[_f?.fieldName] : '';
+      }
+    });
+    arr.push({ ..._d, ...obj });
+  });
+
+  return arr;
 };

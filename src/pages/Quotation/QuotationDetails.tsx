@@ -34,6 +34,7 @@ import {
   QUOTATION_STATUS,
   QUOTATION_TYPE,
   RENTAL_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   quotation,
   quotationProcessSteps,
@@ -537,7 +538,7 @@ const QuotationDetails = () => {
                         Delete Version-{currentVersion}
                       </MenuItem>
                     )}
-                  {permissions?.quotation?.isDelete && quotationData?.owner?.optionValue === user?.user?._id && quotationData?.canDelete && (
+                  {permissions?.quotation?.isDelete && checkIsAllowedToDelete(user, sidebarResource.quotation, quotationData.owner.optionValue) && quotationData?.canDelete && (
                     <MenuItem
                       onClick={() => {
                         setShowConfirmBox(true);
