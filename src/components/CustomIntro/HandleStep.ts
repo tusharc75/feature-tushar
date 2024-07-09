@@ -203,7 +203,7 @@ export class HandleSteps {
       }
       this.interval = setInterval(() => {
         this.getCurrentStep();
-      }, 1000);
+      }, 300);
     } else {
       this.findingElement = false;
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();

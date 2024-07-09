@@ -19,7 +19,7 @@ export * from 'src/components/CustomIntro/helper';
 export type WalkmeData = {
   name: string;
   steps: StepDefination[];
-  url: string;
+  urls: string[];
 };
 
 export type Step = NormalStep | HiddenStep;
@@ -209,7 +209,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
 
   useEffect(() => {
     const url = getCurrentUrl();
-    const stepsForCurrentPage = walkMeSteps?.filter((d) => d.url === url);
+    const stepsForCurrentPage = walkMeSteps?.filter((d) => d?.urls?.some((u) => u === url));
     setStepsForThisPage(stepsForCurrentPage);
     setFilteredSteps(stepsForCurrentPage);
   }, [walkMeSteps, location]);
