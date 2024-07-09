@@ -11,7 +11,17 @@ export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
 };
 
 export const generateColumn = (fields) => {
-  const newColumns: any = [];
+  const newColumns: any = [
+    {
+      accessor: 'index',
+      accessorKey: 'index',
+      Header: 'Index',
+      id: 'index',
+      sticky: 'left',
+      minWidth: 70,
+      width: 70
+    }
+  ];
   const constColumns: any = [];
   fields?.forEach((_field) => {
     if (_field?.type === 'converter' || _field?.type === 'currencyAmount' || _field?.isConverter === true) {
@@ -71,11 +81,21 @@ export const generateColumn = (fields) => {
         accessorKey: _field?.fieldName,
         Header: _field?.fieldLabel,
         id: _field?.fieldName,
-        minWidth: 220,
-        width: 250
+        minWidth: 260,
+        width: 280
       });
       constColumns.push(_field);
     }
+  });
+
+  newColumns.push({
+    accessor: 'action',
+    accessorKey: 'action',
+    Header: 'Action',
+    id: 'action',
+    sticky: 'right',
+    minWidth: 120,
+    width: 120
   });
 
   return { newColumns, constColumns };
@@ -83,8 +103,9 @@ export const generateColumn = (fields) => {
 
 export const generateRows = (data, fields) => {
   const arr: any = [];
-  data?.forEach((_d) => {
+  data?.forEach((_d, i) => {
     const obj: any = {};
+    obj['index'] = i + 1;
     obj['_id'] = _d?._id;
     fields?.forEach((_f) => {
       if (_f.type === 'switch' || _f.type === 'checkBox') {

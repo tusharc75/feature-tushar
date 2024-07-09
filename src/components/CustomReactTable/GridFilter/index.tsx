@@ -76,7 +76,23 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   };
 
   const handleSelectFilter = (name, value) => {
-    setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    const isArray = Array.isArray(value);
+    const isString = typeof value === 'string';
+    const isObject = typeof value === 'object';
+
+    if (isArray && value.length) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else if (isString && value) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else if (isObject && !isArray && value) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else {
+      setFormValues((prevState) => {
+        const newState = { ...prevState };
+        delete newState[name];
+        return newState;
+      });
+    }
   };
 
   const handleDuration = (timeFrameTemp, field) => {
@@ -160,7 +176,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   };
 
   const validate = (formValues = {}) => {
-    if (isEmpty(formValues)) return false;
+    //if (isEmpty(formValues)) return false;
     const field = coloums?.filter((c) => c?.type === 'date' || c?.type === 'dateTime');
     let isValid = true;
     field?.forEach((f) => {
@@ -186,7 +202,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       <Dialog
         maxWidth={'md'}
         open={true}
-        fullScreen={(isMobile && !isTablet) || isMobileView}
+        fullScreen={isMobile || isMobileView}
         fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
@@ -196,7 +212,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
         aria-describedby="Filter Dialog"
       >
         <CustomDialogHeader title={`Filters`} onClose={handleClose} showRequiredLabel={false} />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent>
           <Box pt={2} pb={2}>
             <Grid container spacing={2}>
               <Grid item xs={12}>

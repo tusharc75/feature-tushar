@@ -28,6 +28,7 @@ const ActivityButton = ({ referenceId, resource, resourceLabel = '', extraRelate
       <HideWhenOffline>
         <Button
           endIcon={<ArrowForwardIcon />}
+          id="collaborator-button"
           variant="contained"
           onClick={() => setActivityShow(!showActivity)}
           style={{ background: 'var(--new_theme_color)', color: 'white', boxShadow: 'unset' }}

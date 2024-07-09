@@ -28,6 +28,7 @@ import { useAppTheme } from 'src/constants/AppConfig';
 import { sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
+import { useData } from 'src/StateProvider/Provider';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 const localizer = momentLocalizer(moment);
@@ -35,61 +36,67 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-const FILTERS = [
-  {
-    label: 'Plant',
-    value: 'Warehouse',
-    key: 'warehouse'
-  },
-  {
-    label: 'Product',
-    value: 'Product',
-    key: 'product'
-  },
-  {
-    label: 'Asset',
-    value: 'Serialized Asset',
-    key: 'asset'
-  },
-  {
-    label: 'Service',
-    value: 'Service Master',
-    key: 'service'
-  },
-  {
-    label: 'Customer Account',
-    value: 'Customer Account',
-    key: 'customerAccount'
-  },
-  {
-    label: 'Competencies',
-    value: 'Competencies',
-    key: 'competencies'
-  }
-];
 
-const ASSET_FILTERS = [
-  {
-    label: 'Assets',
-    value: 'Serialized Asset',
-    key: 'assetIds'
-  }
-];
+function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
 
-const PRODUCT_FILTERS = [
-  {
-    label: `${routes.product.title}`,
-    value: 'Product',
-    key: 'product'
-  },
-  {
-    label: `${routes.warehouse.title}`,
-    value: 'Warehouse',
-    key: 'warehouse'
-  }
-];
+  const {
+    state: { permissions }
+  }: any = useData();
 
-function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString },ref) {
+  const FILTERS = [
+    ...(permissions?.warehouse?.isRead ? [{
+      label: routes.warehouse.title,
+      value: 'Warehouse',
+      key: 'warehouse'
+    }] : []),
+    ...(permissions?.product?.isRead ? [{
+      label: routes.product.title,
+      value: 'Product',
+      key: 'product'
+    }] : []),
+    ...(permissions?.serializedAsset?.isRead ? [{
+      label: routes.serializedAsset.title,
+      value: 'Serialized Asset',
+      key: 'asset'
+    }] : []),
+    ...(permissions?.serviceMaster?.isRead ? [{
+      label: routes.serviceMaster.title,
+      value: 'Service Master',
+      key: 'service'
+    }] : []),
+    ...(permissions?.customerAccount?.isRead ? [{
+      label: routes.customerAccount.title,
+      value: 'Customer Account',
+      key: 'customerAccount'
+    }] : []),
+    ...(permissions?.competencies?.isRead ? [{
+      label: routes.competencies.title,
+      value: 'Competencies',
+      key: 'competencies'
+    }] : []),
+  ];
+
+  const ASSET_FILTERS = [
+    {
+      label: routes.serializedAsset.title,
+      value: 'Serialized Asset',
+      key: 'assetIds'
+    }
+  ];
+
+  const PRODUCT_FILTERS = [
+    {
+      label: routes.product.title,
+      value: 'Product',
+      key: 'product'
+    },
+    {
+      label: routes.warehouse.title,
+      value: 'Warehouse',
+      key: 'warehouse'
+    }
+  ];
+
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
 
@@ -338,7 +345,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
@@ -750,7 +757,7 @@ const RenderTable = ({ data }) => {
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Number</TableCell>
+            <TableCell>Reference</TableCell>
             <TableCell>Qty</TableCell>
             <TableCell>{routes.warehouse.title}</TableCell>
             <TableCell>{routes.customerAccount.title}</TableCell>

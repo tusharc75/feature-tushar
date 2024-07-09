@@ -26,8 +26,7 @@ import ViewCost from 'src/pages/SubcontractAssembly/Receiving/ViewCost';
 import History from '../../ProductInventory/LedgerHistory';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
-import { CustomIntroWrapper } from 'src/components/CustomIntro';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog'
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, allowedToEdit }) => {
   const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Receiving`;
@@ -41,7 +40,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [viewCost, setViewCost] = useState({ open: false, data: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
-  const [showConformationReject, setShowConformationReject] = useState({ open: false, _id: null })
+  const [showConformationReject, setShowConformationReject] = useState({ open: false, _id: null });
 
   useEffect(() => {
     fetchFields();
@@ -122,24 +121,18 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
           return (
             <div className="flex items-center gap-2">
               {row?.original?.receivedQty <= 0 && (
-                <CustomIntroWrapper
-                  title={'Receive'}
-                  content={'Press this to receive the product'}
-                  disabled={row?.original?.canReceive && allowedToEdit ? false : true}
-                >
-                  <HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
-                    <IconButton
-                      size="small"
-                      aria-label="Receive"
-                      disabled={row?.original?.canReceive && allowedToEdit ? false : true}
-                      onClick={() => {
-                        setCostDialog({ open: true, _id: row?.original?._id });
-                      }}
-                    >
-                      <AddCircleOutline fontSize="small" color={row?.original?.canReceive && allowedToEdit ? 'primary' : 'disabled'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                </CustomIntroWrapper>
+                <HtmlTooltip title={row?.original?.canReceive ? 'Receive' : ''}>
+                  <IconButton
+                    size="small"
+                    aria-label="Receive"
+                    disabled={row?.original?.canReceive && allowedToEdit ? false : true}
+                    onClick={() => {
+                      setCostDialog({ open: true, _id: row?.original?._id });
+                    }}
+                  >
+                    <AddCircleOutline fontSize="small" color={row?.original?.canReceive && allowedToEdit ? 'primary' : 'disabled'} />
+                  </IconButton>
+                </HtmlTooltip>
               )}
               {row?.original?.receivedQty > 0 && allowedToEdit && ![SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status) && (
                 <HtmlTooltip title={'Revert'}>
@@ -148,7 +141,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                       size="small"
                       aria-label="Revert"
                       onClick={() => {
-                        setShowConformationReject({ open: true, _id: row?.original?._id })
+                        setShowConformationReject({ open: true, _id: row?.original?._id });
                       }}
                     >
                       <Autorenew fontSize="small" color="primary" />
@@ -264,7 +257,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
         setIsSubmitting(false);
         setShowConformationReject({ open: false, _id: null });
       });
-  }
+  };
 
   const previewDownloadProps = {
     fileName: `${routes.subcontractAssembly.title}-${subcontractAssemblyData?.subcontractAssemblyNumber}`,

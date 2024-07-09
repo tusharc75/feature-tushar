@@ -322,7 +322,7 @@ export default function Account(props) {
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
     if (menuType !== options[0]) {
-      deepFilters.push({ field: 'staticData.approved', term: type === 'Approved' });
+      deepFilters.push({ field: 'staticData.approved', term: menuType === 'Approved' });
     }
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;

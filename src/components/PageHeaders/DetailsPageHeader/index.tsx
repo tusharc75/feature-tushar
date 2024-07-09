@@ -5,14 +5,13 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';
 // import { MdExpandCircleDown } from 'react-icons/md';
 import { FaCircleChevronDown } from 'react-icons/fa6';
-import { CustomIntroWrapper } from 'src/components/CustomIntro';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
   placement?: 'left' | 'right';
-  introWrapper?: boolean,
-  introWrapperTitle?: string,
-  introWrapperContent?: string
+  introWrapper?: boolean;
+  introWrapperTitle?: string;
+  introWrapperContent?: string;
 } & ButtonProps;
 
 type DetailsPageHeaderProps = {
@@ -41,7 +40,15 @@ const DetailsPageHeader = ({
   hasXpadding = true
 }: DetailsPageHeaderProps) => {
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
-  const { tooltip: addButtonTooltip, onClick: addButtonOnClick, placement = 'left', introWrapper = false, introWrapperTitle = '', introWrapperContent = '', ...restOfAddButtonProps } = addButtonProps || {};
+  const {
+    tooltip: addButtonTooltip,
+    onClick: addButtonOnClick,
+    placement = 'left',
+    introWrapper = false,
+    introWrapperTitle = '',
+    introWrapperContent = '',
+    ...restOfAddButtonProps
+  } = addButtonProps || {};
 
   const [actionAnchorEl, setActionAnchorEl] = useState(null);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
@@ -70,33 +77,28 @@ const DetailsPageHeader = ({
   };
 
   return (
-    <div className={`flex details-page-header flex-wrap justify-between items-center gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
-      <div className="flex flex-wrap gap-2 items-center flex-grow">
+    <div className={`details-page-header flex flex-wrap items-center justify-between gap-2 py-2 ${hasXpadding ? 'px-2' : ''}`}>
+      <div className="flex flex-grow flex-wrap items-center gap-2">
         {isAddButtonVisible && placement === 'left' ? (
           <>
-            <CustomIntroWrapper
-              title={introWrapperTitle}
-              content={introWrapperContent}
-              disabled={!introWrapper}
-            >
-              <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
-                <span>
-                  <Button
-                    variant={isMobile ? 'text' : 'outlined'}
-                    color="primary"
-                    size="small"
-                    startIcon={isMobile ? null : <Add />}
-                    onClick={AddClick}
-                    {...restOfAddButtonProps}
-                    aria-controls="add-menu"
-                    className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
-                    endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
-                  >
-                    {isMobile ? <Add /> : 'Add'}
-                  </Button>
-                </span>
-              </HtmlTooltip>
-            </CustomIntroWrapper>
+            <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
+              <span>
+                <Button
+                  id={'add-menu-button'}
+                  variant={isMobile ? 'text' : 'outlined'}
+                  color="primary"
+                  size="small"
+                  startIcon={isMobile ? null : <Add />}
+                  onClick={AddClick}
+                  {...restOfAddButtonProps}
+                  aria-controls="add-menu"
+                  className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
+                  endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
+                >
+                  {isMobile ? <Add /> : 'Add'}
+                </Button>
+              </span>
+            </HtmlTooltip>
           </>
         ) : null}
         {isAddButtonVisible && (
@@ -111,13 +113,14 @@ const DetailsPageHeader = ({
             id="add-menu"
             open={Boolean(addAnchorEl)}
             onClose={closeAddMenu}
+            TransitionProps={{ unmountOnExit: true }}
           >
             <span onClick={closeAddMenu}>{addButtonMenuItems}</span>
           </Menu>
         )}
         {leftSideContents}
       </div>
-      <div className="flex flex-wrap gap-2 items-center ml-auto">
+      <div className="ml-auto flex flex-wrap items-center gap-2">
         {isAddButtonVisible && placement === 'right' ? (
           <>
             <HtmlTooltip title={addButtonTooltip ?? ''} arrow placement="top" enterTouchDelay={0}>
@@ -125,12 +128,13 @@ const DetailsPageHeader = ({
                 <Button
                   variant={isMobile ? 'text' : 'outlined'}
                   color="primary"
+                  id={'details-page-add-button'}
                   size="small"
                   startIcon={isMobile ? null : <Add />}
                   onClick={AddClick}
                   {...restOfAddButtonProps}
                   aria-controls="add-menu"
-                  className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
+                  className={`${isMobile ? 'btn-outline-v1  with-border !min-w-fit max-[600px]:[max-width:36px_!important]' : ''}`}
                   endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
                 >
                   {isMobile ? <Add /> : 'Add'}
@@ -148,16 +152,17 @@ const DetailsPageHeader = ({
                 <Button
                   variant={'outlined'}
                   color="default"
+                  id={'details-page-action-button'}
                   size="small"
                   onClick={ActionClick}
                   aria-controls="action-menu"
-                  className="new-dropdown-v1 min-h-[30px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important] max-[600px]:min-h-[32px]"
+                  className="new-dropdown-v1 min-h-[30px] max-[600px]:min-h-[32px] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]"
                   {...restOfActionButtonProps}
                 >
-                  <span className="max-[600px]:!w-[20px] max-[600px]:!h-[16px] max-[600px]:not-sr-only sr-only">
+                  <span className="sr-only max-[600px]:not-sr-only max-[600px]:!h-[16px] max-[600px]:!w-[20px]">
                     <FaCircleChevronDown size={16} className="" />
                   </span>
-                  <span className="max-[600px]:sr-only not-sr-only flex">
+                  <span className="not-sr-only flex max-[600px]:sr-only">
                     Actions <ExpandMore fontSize="small" />
                   </span>
                 </Button>
@@ -175,6 +180,7 @@ const DetailsPageHeader = ({
                 vertical: 'top',
                 horizontal: 'right'
               }}
+              TransitionProps={{ unmountOnExit: true }}
               id="add-menu"
               open={Boolean(actionAnchorEl)}
               onClose={closeActionMenu}

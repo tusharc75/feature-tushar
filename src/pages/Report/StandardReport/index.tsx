@@ -138,7 +138,7 @@ const Report = () => {
             }
             else if (type === 'in-used-serialized-asset') {
                 newColumns?.forEach((e) => {
-                    if (['rentalJob', 'customerAccount', 'billingAddress', 'shippingAddress']?.includes(e.accessor)) {
+                    if (['billingAddress', 'shippingAddress']?.includes(e.accessor)) {
                         e.disableFilters = true;
                         e.disableSortBy = true;
                     }

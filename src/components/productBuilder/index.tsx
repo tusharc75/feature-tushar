@@ -327,26 +327,41 @@ const ProductBuilder = (props) => {
       setProductId(null);
       setIsClone(false);
     } else {
-      setIsSubmitting(true);
       let data: any = {};
       data.product = rows;
       data._id = productBuilderId;
       axiosInstance()
         .put(`/productbuilder/updateProduct`, data)
         .then(() => {
-          setIsSubmitting(false);
           setProductId(null);
           setIsBulkEdit(false);
           setproductDataList([]);
           fetchProduct();
-          setInlineBulkEdit(false);
         })
         .catch((error) => {
-          setIsSubmitting(false);
-          setInlineBulkEdit(false);
           toastConfig.setToastConfig(error);
         });
     }
+  };
+
+  const handleSaveProductInlineBulk = (rows) => {
+    setIsSubmitting(true);
+
+    let data: any = {};
+    data.product = rows;
+    data._id = productBuilderId;
+    axiosInstance()
+      .put(`/productbuilder/updateproduct-inline-bulk`, data)
+      .then(() => {
+        setIsSubmitting(false);
+        fetchProduct();
+        setInlineBulkEdit(false);
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        setInlineBulkEdit(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleDelete = () => {
@@ -573,7 +588,7 @@ const ProductBuilder = (props) => {
           {permissions?.isUpdate && (
             <ImportExportLinks
               module="builder"
-              permission={permissions.quoteBuilder}
+              permission={permissions}
               api={'productbuilder'}
               refrenceId={productBuilderId}
               onSuccessfulImport={(isImportedSuccessfully) => {
@@ -733,7 +748,7 @@ const ProductBuilder = (props) => {
           fields={fields}
           extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
           handleSave={(products) => {
-            handleSaveProduct(products);
+            handleSaveProductInlineBulk(products);
           }}
           isSubmitting={isSubmitting}
           referenceId={productBuilderId}

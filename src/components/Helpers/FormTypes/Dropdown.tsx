@@ -72,7 +72,7 @@ const ListboxComponent = React.forwardRef<HTMLDivElement>(function ListboxCompon
   const itemData = React.Children.toArray(children);
   const containerWidth = useRef<number>(1);
   const isMobile = useMediaQuery('(max-width:600px)', { noSsr: true });
-  const itemSize = isMobile ? 48 : 36;
+  const itemSize = isMobile ? 37 : 38;
 
   const sizeMap = useRef<{ [key: number]: number }>({});
   const setSize = useCallback((index, size) => {
@@ -478,32 +478,32 @@ function Dropdown({
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                      if (isSelectedAll) {
-                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
-                      } else {
-                        onChange(e, value, reason);
-                      }
-                    }
-                    : (e, value: any, reason) => {
-                      if (setFieldValue) {
                         const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-
                         if (isSelectedAll) {
-                          // If "Select All" is selected, set all other options as values
-                          setFieldValue(
-                            name,
-                            dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
-                          );
+                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
                         } else {
-                          // Remove "Select All" if it was selected and set the values accordingly
-                          setFieldValue(
-                            name,
-                            value.map((val) => val.optionValue)
-                          );
+                          onChange(e, value, reason);
                         }
                       }
-                    }
+                    : (e, value: any, reason) => {
+                        if (setFieldValue) {
+                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+
+                          if (isSelectedAll) {
+                            // If "Select All" is selected, set all other options as values
+                            setFieldValue(
+                              name,
+                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                            );
+                          } else {
+                            // Remove "Select All" if it was selected and set the values accordingly
+                            setFieldValue(
+                              name,
+                              value.map((val) => val.optionValue)
+                            );
+                          }
+                        }
+                      }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -537,26 +537,26 @@ function Dropdown({
                   onChange
                     ? onChange
                     : (e, val) => {
-                      if (setFieldValue) {
-                        handleChange(name, val && val.optionValue ? val.optionValue : '');
-                        const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                        fieldChange?.forEach((val: any) => {
-                          setFieldValue(val.fieldName, val.value);
-                        });
-                        const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                        if (filterFields?.length) {
-                          filterFields?.forEach((ele: any) => {
-                            if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                              if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                              } else {
-                                setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                              }
-                            }
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
                           });
+                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                          if (filterFields?.length) {
+                            filterFields?.forEach((ele: any) => {
+                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                                } else {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                }
+                              }
+                            });
+                          }
                         }
                       }
-                    }
                 }
                 selectOnFocus
                 clearOnBlur

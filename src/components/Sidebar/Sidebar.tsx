@@ -204,6 +204,7 @@ function SideBar({ location }) {
                           history.push(listItem.link);
                         }
                       }}
+                      id={`sidbar-parent-item-${listItem.name.split(' ').join('-')}`}
                     >
                       <span
                         className={cn(
@@ -247,6 +248,7 @@ function SideBar({ location }) {
                               button
                               selected={pathnames?.includes(lowerCase(item.name))}
                               className={`${styles.subListItems} `}
+                              id={`sidebar-item-${(item.resourceLabel || item.name).split(' ').join('-')}`}
                               style={{ gap: 32 }}
                             >
                               <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">

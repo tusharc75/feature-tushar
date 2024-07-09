@@ -26,6 +26,10 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
   const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [roleRemoveConfirmBox, setRoleRemoveConfirmBox] = useState({ open: false, data: null });
+
   const toastConfig = useContext(CustomToastContext);
 
   useEffect(() => {
@@ -49,6 +53,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
       user: userId,
       entities: entityArray
     };
+    setIsSubmitting(true)
     axiosInstance()
       .put(`/user/assign-entity`, dataObj)
       .then(() => {
@@ -57,9 +62,12 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
           type: 'success',
           open: true
         });
+        setIsSubmitting(false)
+        setRoleRemoveConfirmBox({ open: false, data: null })
         onSuccess();
       })
       .catch((error) => {
+        setIsSubmitting(false)
         toastConfig.setToastConfig(error);
       });
   };
@@ -138,7 +146,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to un-assign  ${currentEntity?.entity?.entityName} ?`}
+          message={`Are you sure you want to un-assign ${currentEntity?.entity?.entityName} ?`}
           onClose={() => {
             setShowConfirmBox(false);
           }}
@@ -225,7 +233,6 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                   </Grid>
                 </Grid>
               </Box>
-
               <Grid container spacing={1}>
                 <Grid item xs={12} sm={12} md={4}>
                   <BoxWithBorder
@@ -245,9 +252,9 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                           <UserRoles
                             permissions={permissions}
                             data={currentEntity.role}
-                            unassignRole={handleUnassignRole}
-                            loggedInUser={loggedInUser}
-                            currentUserId={userId}
+                            unassignRole={(data) => {
+                              setRoleRemoveConfirmBox({ open: true, data: data })
+                            }}
                           />
                         )}
                       </Box>
@@ -265,8 +272,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => {}}
-                      setResource={() => {}}
+                      setField={() => { }}
+                      setResource={() => { }}
                     />
                   </BoxWithBorder>
                 </Grid>
@@ -274,6 +281,19 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
             </Box>
           </>
         </Box>
+        {roleRemoveConfirmBox.open && (
+          <ConfirmationDialog
+            open={roleRemoveConfirmBox.open}
+            message={`Are you sure you want to unassign ${roleRemoveConfirmBox?.data?.name} ?`}
+            onClose={() => {
+              setRoleRemoveConfirmBox({ open: false, data: null })
+            }}
+            onOk={() => {
+              handleUnassignRole(roleRemoveConfirmBox.data)
+            }}
+            okBtnLoading={isSubmitting}
+          />
+        )}
       </BoxWithBorder>
     </>
   );

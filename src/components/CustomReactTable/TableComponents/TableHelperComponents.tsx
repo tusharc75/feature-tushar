@@ -370,7 +370,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
       title={typeof columnDef.header === 'string' ? columnDef.header : ''}
       colSpan={header.colSpan}
       className={`th text-truncate table-header overflow-hidden  ${columnDef.sticky ? 'z-10' : ''} bg-[var(--dark-primary,_white)] ${
-        overlayMode ? 'border font-semibold text-[13px]' : ''
+        overlayMode ? 'border text-[13px] font-semibold' : ''
       } `}
       ref={setNodeRef}
       style={{
@@ -383,12 +383,12 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
       }}
     >
       <div
-        className={`flex items-center pos-rel flex-grow  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${
+        className={`pos-rel flex flex-grow items-center  ${column.id === 'selection' ? 'justify-center' : 'justify-between pr-[16px]'} ${
           isDragging ? ' opacity-50 [outline:4px_dashed_var(--common-border-color)]' : ''
         }`}
       >
         <div
-          className={`d-flex gap-2 align-items-center ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
+          className={`d-flex align-items-center gap-2 ${column.id === 'selection' ? 'justify-center' : 'justify-between'} ${
             header.column.getCanSort() && columnDef.disableSortBy !== true ? 'cursor-pointer' : ''
           }`}
           onClick={columnDef.disableSortBy !== true ? header.column.getToggleSortingHandler() : null}
@@ -426,7 +426,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
           </>
         ) : null}
         {isNotDraggable || header.column.getIsResizing() ? null : (
-          <div {...attributes} {...listeners} className={`drag-icon mr-2 drag-handle ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}>
+          <div {...attributes} {...listeners} className={`drag-icon drag-handle mr-2 ${isDragging ? ' cursor-grabbing' : 'cursor-grab'}`}>
             <DragIndicator className="text-[16px]" />
           </div>
         )}
@@ -470,9 +470,10 @@ export const CellRenderer = ({
   const CellShell = ({ children, className = '', ...others }) => {
     return (
       <TableCell
+        id={cell.id}
         key={cell.id}
-        className={`td p-0 [&>*]:h-[45px] [&>*]:flex [&>*]:items-center [&>*]:p-[5px_8px] h-[45px] overflow-hidden ${className}
-        ${columnDef.sticky ? 'bg-[var(--dark-primary,_white)] z-10' : ''} 
+        className={`td h-[45px] overflow-hidden p-0 [&>*]:flex [&>*]:h-[45px] [&>*]:items-center [&>*]:p-[5px_8px] ${className}
+        ${columnDef.sticky ? 'z-10 bg-[var(--dark-primary,_white)]' : ''} 
         ${setWholeRowsCellColor ? setWholeRowsCellColor(row.original) + ' td-color' : ''} ${stickyClassName}`}
         style={{
           minWidth: cell.column.getSize(),
@@ -525,7 +526,7 @@ export const CellRenderer = ({
                     target.blur();
                   }
                 }}
-                className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
                 onChange={(e) => {
                   setCellValue(e.target.value || '');
                 }}
@@ -631,7 +632,7 @@ export const CellRenderer = ({
             ) : columnDef?.type === 'date' ? (
               <input
                 type="date"
-                className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
                 value={cellValue && !isNaN(Date.parse(cellValue)) ? new Date(cellValue).toISOString().split('T')[0] : ''}
                 onKeyDown={(e) => {
                   const target = e.target as HTMLInputElement;
@@ -671,7 +672,7 @@ export const CellRenderer = ({
                     target.blur();
                   }
                 }}
-                className="dark:text-[white] appearance-none w-full focus-within:outline-[var(--new-theme-color)] bg-[transparent] outline-[transparent] shadow-0 border-[0] px-[2px] py-[4px] [border-bottom:1px_solid_var(--common-border-color)_!important]"
+                className="shadow-0 w-full appearance-none border-[0] bg-[transparent] px-[2px] py-[4px] outline-[transparent] [border-bottom:1px_solid_var(--common-border-color)_!important] focus-within:outline-[var(--new-theme-color)] dark:text-[white]"
                 onChange={(e) => {
                   let value: any = e.target.value;
                   value = parseFloat(parseFloat(value)?.toFixed(cell?.column?.columnDef?.decimalPlaces || 0));
@@ -698,7 +699,7 @@ export const CellRenderer = ({
       return (
         <CellShell>
           <div className="w-full">
-            <div className="[border-bottom:1px_dashed_#8a8a8a] cursor-pointer flex w-full justify-between">
+            <div className="flex w-full cursor-pointer justify-between [border-bottom:1px_dashed_#8a8a8a]">
               <p>{flexRender(cell.column.columnDef.cell, cell.getContext())}</p>
               <span>
                 <Edit className="text-[rgba(0,0,0,0.3)] dark:text-[rgba(255,255,255,0.9)]" fontSize="small" />
@@ -715,7 +716,7 @@ export const CellRenderer = ({
       );
     default:
       return (
-        <CellShell className=" [&_*]:overflow-hidden [&_*]:max-w-full [&_*]:[-webkit-box-orient:vertical] [&_.MuiBox-root]:flex-shrink-0 [&_*]:[white-space:nowrap] [&_*]:[text-overflow:ellipsis] [&_*]:[-webkit-line-clamp:1] [&>*]:flex [&>*]:items-center ">
+        <CellShell className=" [&>*]:flex [&>*]:items-center [&_*]:max-w-full [&_*]:overflow-hidden [&_*]:[-webkit-box-orient:vertical] [&_*]:[-webkit-line-clamp:1] [&_*]:[text-overflow:ellipsis] [&_*]:[white-space:nowrap] [&_.MuiBox-root]:flex-shrink-0 ">
           {flexRender(cell.column.columnDef.cell, cell.getContext())}
         </CellShell>
       );
