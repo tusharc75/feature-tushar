@@ -1,5 +1,5 @@
 import { Step } from 'src/components/CustomIntro';
-import { getCurrentUrl } from 'src/components/CustomIntro/IntorCreator/helper';
+import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 
 export class RecordUserInteraction {
   startUrl: string;

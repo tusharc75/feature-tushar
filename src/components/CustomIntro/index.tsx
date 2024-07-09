@@ -8,12 +8,13 @@ import { FaArrowLeft, FaArrowRight, FaQuestion } from 'react-icons/fa';
 import { GiFinishLine } from 'react-icons/gi';
 import { useLocation } from 'react-router-dom';
 import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
-import { getCurrentUrl } from 'src/components/CustomIntro/IntorCreator/helper';
+import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useStore, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
 export * from 'src/components/CustomIntro/useSetWalkmeSteps';
+export * from 'src/components/CustomIntro/helper';
 
 export type WalkmeData = {
   name: string;

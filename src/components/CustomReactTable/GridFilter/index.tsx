@@ -76,7 +76,23 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   };
 
   const handleSelectFilter = (name, value) => {
-    setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    const isArray = Array.isArray(value);
+    const isString = typeof value === 'string';
+    const isObject = typeof value === 'object';
+
+    if (isArray && value.length) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else if (isString && value) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else if (isObject && !isArray && value) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else {
+      setFormValues((prevState) => {
+        const newState = { ...prevState };
+        delete newState[name];
+        return newState;
+      });
+    }
   };
 
   const handleDuration = (timeFrameTemp, field) => {
