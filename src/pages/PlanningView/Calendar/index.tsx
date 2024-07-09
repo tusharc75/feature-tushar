@@ -757,7 +757,7 @@ const RenderTable = ({ data }) => {
       <Table className="min-w-[530px]" aria-label="simple table" size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Number</TableCell>
+            <TableCell>Reference</TableCell>
             <TableCell>Qty</TableCell>
             <TableCell>{routes.warehouse.title}</TableCell>
             <TableCell>{routes.customerAccount.title}</TableCell>

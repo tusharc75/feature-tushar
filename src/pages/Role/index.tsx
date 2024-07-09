@@ -184,7 +184,7 @@ const Roles: FC = () => {
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}&type=2`;
-    
+
     const { deepFilters } = gridFilterParser(filters);
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}&filterType=and`;
@@ -433,7 +433,7 @@ const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDia
           userDialogOpen();
         }}
       >
-        Assign users
+        Assign Users
       </MenuItem>
       <MenuItem
         disabled={

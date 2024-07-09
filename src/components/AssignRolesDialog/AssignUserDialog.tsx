@@ -99,9 +99,11 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
     );
   };
 
+  console.log(users)
+
   return (
     <Dialog fullWidth maxWidth="xs" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title="Assign Users" />
+      <CustomDialogHeader title="Assign Users-Demo" />
       <CustomDialogContent>
         {loadingUsers ? (
           <Loader text="Loading Users" />
