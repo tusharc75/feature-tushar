@@ -274,7 +274,6 @@ const ManageRentalManagementDialog = ({
                               <Grid spacing={3} container>
                                 {form.sectionFields.map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    {console.log(field.fieldLabel, field.type, field.dataList, field?.lookup)}
                                     {field.fieldName === 'estimateStartDate' ? (
                                       <FormTypes
                                         {...field}
@@ -393,8 +392,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         fields={rentalData.fields}
