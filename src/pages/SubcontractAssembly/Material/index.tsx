@@ -19,8 +19,37 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import Consumables from 'src/pages/SubcontractAssembly/Material/Consumables';
+import { useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
+
+const deleteExistingProductViaAction: WalkmeData[] = [
+  {
+    name: 'Delete Existing Product',
+    urls: ['/subcontract-assembly/detail/:id?itemTab=1'],
+    steps: [
+      {
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Select a product',
+        target: '#subcontractAssembly_Material-table-checkbox-0',
+        content: ''
+      },
+      {
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Click on action button',
+        target: '#details-page-action-button',
+        content: ''
+      },
+      {
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Click on action button',
+        target: '#action-delete-menu-item',
+        content: ''
+      }
+    ]
+  }
+];
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
+  const { addWalkmeData, removeWalkmeDataByName } = useSetWalkmeData();
   const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -192,6 +221,12 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
       parent.productNumber = parent?.productDetail?.productNumber;
       parent.hideSelection = parent?.receivedQty > 0 || false;
     });
+
+    if (rows.length && rows[0].canDelete) {
+      addWalkmeData(deleteExistingProductViaAction);
+    } else {
+      removeWalkmeDataByName('Delete Existing Product');
+    }
     if (rows?.length) {
       setNextStep(true);
     }
@@ -211,6 +246,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
             });
             setDeleteData(obj);
           }}
+          id="action-delete-menu-item"
         >
           Delete
         </MenuItem>

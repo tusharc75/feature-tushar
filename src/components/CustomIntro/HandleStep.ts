@@ -11,10 +11,19 @@ export class HandleSteps {
   boundMousedown!: (e: MouseEvent) => void;
   currentStepData:
     | ({
-      positionData: DOMRect;
-      element: HTMLElement;
-      index: number;
-    } & Step)
+        positionData: {
+          bottom: number;
+          height: number;
+          left: number;
+          right: number;
+          top: number;
+          width: number;
+          x: number;
+          y: number;
+        };
+        element: HTMLElement;
+        index: number;
+      } & Step)
     | null;
   interval: NodeJS.Timeout;
   retry: number;
@@ -59,6 +68,7 @@ export class HandleSteps {
         }
       });
     });
+
     this.addEventListeners();
     this.resizeObserver.observe(document?.body);
   }
@@ -193,17 +203,21 @@ export class HandleSteps {
       }
       this.interval = setInterval(() => {
         this.getCurrentStep();
-      }, 1000);
+      }, 300);
     } else {
       this.findingElement = false;
-      this.currentStepData = {
-        ...activeStep,
-        positionData: element?.getBoundingClientRect(),
-        index: index,
-        element
-      };
-      this.attachNextListeners();
+      const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
+      const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
+      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+
       setTimeout(() => {
+        this.currentStepData = {
+          ...activeStep,
+          positionData,
+          index: index,
+          element
+        };
+        this.attachNextListeners();
         this.sendUpdateSignal();
       }, 200);
     }
