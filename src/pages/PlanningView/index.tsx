@@ -140,8 +140,6 @@ function PlanningView() {
   }: any = useData();
 
   const history = useHistory();
-  // const parsed = queryString.parse(history.location.search);
-  // const { }: any = parsed;
 
   const [resourceList, setResourceList] = useState([]);
   const [selectedResource, setSelectedResource] = useState(null);
@@ -167,7 +165,7 @@ function PlanningView() {
     }
   }, [resourceList, history?.location?.state?.resource]);
 
-  const onClickRefreshIcon = ()=>{
+  const onClickRefreshIcon = () => {
     if (ref?.current) {
       ref?.current?.fetchData();
     }
@@ -180,42 +178,43 @@ function PlanningView() {
           <Box className="nav-v1">
             <CustomBreadCrumbs routes={[{ title: routes.planningView.title, path: routes.planningView.path }]} />
           </Box>
-          <ImportExportLinks
-            permissions={permissions?.planningView}
-            module={routes.planningView.title}
-            api={routes.planningView.path}
-            afterImportCompleted={() => { }}
-            onExportToExcelSuccess={() => { }}
-            additionalParams={queryString}
-            onlyExport={true}
-          />
+          {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product &&
+            <ImportExportLinks
+              permissions={permissions?.planningView}
+              module={routes.planningView.title}
+              api={routes.planningView.path}
+              afterImportCompleted={() => { }}
+              onExportToExcelSuccess={() => { }}
+              additionalParams={queryString}
+              onlyExport={true}
+            />}
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px] ">
+            <HtmlTooltip title={`Refresh`} arrow placement="top" enterTouchDelay={0}>
+              <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
+                <RefreshIcon color="primary" />
+              </IconButton>
+            </HtmlTooltip>
             <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton size="small" onClick={() => setView('calendar')} disabled={view === 'calendar'}>
-                  <DateRangeIcon color="primary" className={`${view === 'calendar' ? ' opacity-45' : ''}`} />
+                  <DateRangeIcon color={view === 'calendar' ? "primary" : "disabled"} />
                 </IconButton>
               </span>
             </HtmlTooltip>
             <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton size="small" onClick={() => setView('table')} disabled={view === 'table'}>
-                  <FormatListNumbered color="primary" className={`${view === 'table' ? ' opacity-45' : ''}`} />
+                  <FormatListNumbered color={view === 'table' ? "primary" : "disabled"} />
                 </IconButton>
               </span>
             </HtmlTooltip>
-            <HtmlTooltip title={`Refresh`} arrow placement="top" enterTouchDelay={0}>
-            <IconButton size="small" aria-label="Clone" onClick={onClickRefreshIcon}>
-              <RefreshIcon color="primary" />
-            </IconButton>
-          </HtmlTooltip>
           </div>
           {view === 'calendar' ? (
-            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString} ref={ref}/>
+            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString} ref={ref} />
           ) : (
-            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString}/>
+            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString} />
           )}
         </Box>
       </Box>

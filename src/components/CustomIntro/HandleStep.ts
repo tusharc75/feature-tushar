@@ -11,10 +11,10 @@ export class HandleSteps {
   boundMousedown!: (e: MouseEvent) => void;
   currentStepData:
     | ({
-        positionData: DOMRect;
-        element: HTMLElement;
-        index: number;
-      } & Step)
+      positionData: DOMRect;
+      element: HTMLElement;
+      index: number;
+    } & Step)
     | null;
   interval: NodeJS.Timeout;
   retry: number;
@@ -59,9 +59,6 @@ export class HandleSteps {
         }
       });
     });
-    // const otherFocusedElements = document.querySelector(':focus-within');
-    // console.log(otherFocusedElements);
-
     this.addEventListeners();
     this.resizeObserver.observe(document?.body);
   }
@@ -86,7 +83,6 @@ export class HandleSteps {
         newSteps.push({ title: data.title, content: data.content, target: data.target, url: data.url, isHiddenStep: false });
       }
     }
-    console.log(newSteps);
     return newSteps;
   }
 
@@ -113,7 +109,6 @@ export class HandleSteps {
   }
   handleNextOnValueChange(e: FocusEvent) {
     const target = e.target as HTMLInputElement;
-    console.log(target);
     if (target?.value?.trim()) {
       this.next();
     }
@@ -161,7 +156,6 @@ export class HandleSteps {
   }
   next() {
     if (this.currentIndex === this.steps.length - 1) {
-      console.log('finished');
       this.reset();
     }
     this.currentIndex++;

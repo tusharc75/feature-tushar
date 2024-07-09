@@ -176,7 +176,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   };
 
   const validate = (formValues = {}) => {
-    if (isEmpty(formValues)) return false;
+    //if (isEmpty(formValues)) return false;
     const field = coloums?.filter((c) => c?.type === 'date' || c?.type === 'dateTime');
     let isValid = true;
     field?.forEach((f) => {
