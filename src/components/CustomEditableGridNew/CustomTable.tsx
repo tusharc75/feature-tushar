@@ -112,7 +112,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                       {['index']?.includes(cell.column.id) ? (
                         <div className="full-height-cell">{cell.render('Cell')}</div>
                       ) : ['action']?.includes(cell.column.id) ? (
-                        <div>
+                        <div className="mt-[10px]">
                           <HtmlTooltip title={'Clone'}>
                             <span>
                               <IconButton
