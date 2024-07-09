@@ -99,11 +99,10 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
     );
   };
 
-  console.log(users)
 
   return (
     <Dialog fullWidth maxWidth="xs" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title="Assign Users-Demo" />
+      <CustomDialogHeader title="Assign Users" showRequiredLabel={false} />
       <CustomDialogContent>
         {loadingUsers ? (
           <Loader text="Loading Users" />
@@ -134,7 +133,7 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
                       }}
                     />
                   </ListItemIcon>
-                  <ListItemText primary={user.firstName}/>
+                  <ListItemText primary={`${user?.firstName} ${user?.lastName}`} />
                 </ListItem>
               ))}
             </List>
@@ -147,7 +146,12 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
         <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
           Cancel
         </Button>
-        <Button disabled={!selectedUsers.length || isAssigning} onClick={handleAssignRoles} color="primary" size="small" variant="contained">
+        <Button
+          disabled={!selectedUsers.length || isAssigning}
+          onClick={handleAssignRoles}
+          color="primary"
+          size="small"
+          variant="contained">
           {isAssigning ? <CircularProgress size={22} /> : 'Save'}
         </Button>
       </CustomDialogFooter>
