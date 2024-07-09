@@ -212,6 +212,7 @@ const SubcontractAssemblyDetail = () => {
           addWalkmeData(walkmeData);
         } else {
           removeWalkmeDataByName('Add Existing Product');
+          removeWalkmeDataByName('Delete Existing Product');
         }
       })
       .catch((error) => {

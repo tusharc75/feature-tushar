@@ -21,30 +21,32 @@ import { FiExternalLink } from 'react-icons/fi';
 import Consumables from 'src/pages/SubcontractAssembly/Material/Consumables';
 import { useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
 
-const deleteExistingProductViaAction: WalkmeData = {
-  name: 'Delete Existing Product',
-  urls: ['/subcontract-assembly/detail/:id?itemTab=1'],
-  steps: [
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Select a product',
-      target: '#subcontractAssembly_Material-table-checkbox-0',
-      content: ''
-    },
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Click on action button',
-      target: '#details-page-action-button',
-      content: ''
-    },
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Click on action button',
-      target: '#action-delete-menu-item',
-      content: ''
-    }
-  ]
-};
+const deleteExistingProductViaAction: WalkmeData[] = [
+  {
+    name: 'Delete Existing Product',
+    urls: ['/subcontract-assembly/detail/:id?itemTab=1'],
+    steps: [
+      {
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Select a product',
+        target: '#subcontractAssembly_Material-table-checkbox-0',
+        content: ''
+      },
+      {
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Click on action button',
+        target: '#details-page-action-button',
+        content: ''
+      },
+      {
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Click on action button',
+        target: '#action-delete-menu-item',
+        content: ''
+      }
+    ]
+  }
+];
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
   const { addWalkmeData, removeWalkmeDataByName } = useSetWalkmeData();
@@ -221,7 +223,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
     });
 
     if (rows.length && rows[0].canDelete) {
-      addWalkmeData([deleteExistingProductViaAction]);
+      addWalkmeData(deleteExistingProductViaAction);
     } else {
       removeWalkmeDataByName('Delete Existing Product');
     }
