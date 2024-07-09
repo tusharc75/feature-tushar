@@ -25,7 +25,7 @@ export type Step = NormalStep | HiddenStep;
 
 export type StepDefination = {
   title: ReactNode;
-  content: ReactNode;
+  content?: ReactNode;
   target: string;
   url: string;
   nextOnUserClicks?: number;
@@ -34,14 +34,14 @@ export type StepDefination = {
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
 };
 
-type NormalStep = {
+export type NormalStep = {
   title: ReactNode;
-  content: ReactNode;
+  content?: ReactNode;
   target: string;
   url: string;
   isHiddenStep: false;
 };
-type HiddenStep = {
+export type HiddenStep = {
   target: string;
   isHiddenStep: true;
   nextOnUserClicks?: number;
@@ -79,7 +79,11 @@ const CustomIntro = () => {
     handleSteps.current?.start();
   };
 
-  const currentStepData = handleSteps?.current?.currentStepData;
+  const currentStepData = handleSteps?.current?.currentStepData as {
+    positionData: DOMRect;
+    element: HTMLElement;
+    index: number;
+  } & NormalStep;
   const isLastStep = handleSteps?.current?.isLastStep();
   const isFirstStep = handleSteps?.current?.isFirstStep();
   const isFindingElement = handleSteps?.current?.findingElement;
@@ -133,13 +137,17 @@ const CustomIntro = () => {
           >
             <div className="relative z-[1302] mt-3 min-w-[300px] max-w-[300px] rounded-md bg-[var(--dark-secondary,white)] p-2 shadow-md">
               <div className="mb-2 flex items-center justify-between gap-2 pb-1 [border-bottom:1px_solid_var(--common-border-color)]">
-                <p className=" truncate text-[16px] font-semibold ">{currentStepData.title}</p>
+                {currentStepData.title && <p className=" truncate text-[16px] font-semibold ">{currentStepData.title}</p>}
                 <IconButton size="small" onClick={handleReset}>
                   <Close />
                 </IconButton>
               </div>
-              <div className="p-2 text-gray-600 dark:text-gray-300">{currentStepData.content}</div>
-              <div className="footer flex justify-between gap-2 pt-2 [border-top:1px_solid_var(--common-border-color)]">
+              {currentStepData.content && (
+                <div className="mb-2 p-2 text-gray-600 [border-bottom:1px_solid_var(--common-border-color)] dark:text-gray-300">
+                  {currentStepData.content}
+                </div>
+              )}
+              <div className="footer flex justify-between gap-2 ">
                 {!isFirstStep ? (
                   <ThemeButton
                     color="secondary"
