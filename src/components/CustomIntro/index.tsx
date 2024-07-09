@@ -58,6 +58,7 @@ const CustomIntro = () => {
   const [_, setUpdateSignal] = useState<number>(0);
   let handleSteps = useRef<HandleSteps | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
   const arrowRef = useRef(null);
 
   const open = Boolean(anchorEl);

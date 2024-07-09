@@ -11,7 +11,16 @@ export class HandleSteps {
   boundMousedown!: (e: MouseEvent) => void;
   currentStepData:
     | ({
-        positionData: DOMRect;
+        positionData: {
+          bottom: number;
+          height: number;
+          left: number;
+          right: number;
+          top: number;
+          width: number;
+          x: number;
+          y: number;
+        };
         element: HTMLElement;
         index: number;
       } & Step)
@@ -59,8 +68,6 @@ export class HandleSteps {
         }
       });
     });
-    // const otherFocusedElements = document.querySelector(':focus-within');
-    // console.log(otherFocusedElements);
 
     this.addEventListeners();
     this.resizeObserver.observe(document?.body);
@@ -86,7 +93,6 @@ export class HandleSteps {
         newSteps.push({ title: data.title, content: data.content, target: data.target, url: data.url, isHiddenStep: false });
       }
     }
-    console.log(newSteps);
     return newSteps;
   }
 
@@ -113,7 +119,6 @@ export class HandleSteps {
   }
   handleNextOnValueChange(e: FocusEvent) {
     const target = e.target as HTMLInputElement;
-    console.log(target);
     if (target?.value?.trim()) {
       this.next();
     }
@@ -161,7 +166,6 @@ export class HandleSteps {
   }
   next() {
     if (this.currentIndex === this.steps.length - 1) {
-      console.log('finished');
       this.reset();
     }
     this.currentIndex++;
@@ -202,14 +206,18 @@ export class HandleSteps {
       }, 1000);
     } else {
       this.findingElement = false;
-      this.currentStepData = {
-        ...activeStep,
-        positionData: element?.getBoundingClientRect(),
-        index: index,
-        element
-      };
-      this.attachNextListeners();
+      const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
+      const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
+      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+
       setTimeout(() => {
+        this.currentStepData = {
+          ...activeStep,
+          positionData,
+          index: index,
+          element
+        };
+        this.attachNextListeners();
         this.sendUpdateSignal();
       }, 200);
     }
