@@ -58,6 +58,7 @@ const FormTypes = (props) => {
       disabled={disabled}
       variant="outlined"
       type={'text'}
+      autoComplete="off"
       required={required}
       name={name}
       value={values[name]}
@@ -72,6 +73,7 @@ const FormTypes = (props) => {
       type="text"
       multiline
       name={name}
+      autoComplete="off"
       required={required}
       disabled={disabled}
       rows={1}
@@ -115,6 +117,7 @@ const FormTypes = (props) => {
       multiple
       options={options}
       disabled={disabled}
+      limitTags={1}
       value={
         options.filter((data) => values[name]?.includes(data.optionValue))?.length > 0
           ? options.filter((data) => values[name]?.includes(data.optionValue))
@@ -215,6 +218,7 @@ const FormTypes = (props) => {
       margin="dense"
       name={name}
       required={required}
+      autoComplete="off"
       disabled={disabled}
       value={values[name]}
       error={Boolean(errors[`${values._id}_${name}`])}
@@ -275,6 +279,7 @@ const FormTypes = (props) => {
       type="number"
       variant="outlined"
       margin="dense"
+      autoComplete="off"
       disabled={disabled}
       required={required}
       name={name}
@@ -306,6 +311,7 @@ const FormTypes = (props) => {
       variant="outlined"
       type={'text'}
       margin="dense"
+      autoComplete="off"
       disabled={disabled}
       required={required}
       name={name}
