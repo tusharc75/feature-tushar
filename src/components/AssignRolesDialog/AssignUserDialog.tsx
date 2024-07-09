@@ -1,4 +1,4 @@
-import { Button, Checkbox, CircularProgress, Dialog, FormControl, FormControlLabel, Typography } from '@material-ui/core';
+import { Button, Checkbox, CircularProgress, Dialog, FormControl, FormControlLabel, List, ListItem, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -99,9 +99,11 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
     );
   };
 
+  console.log(users)
+
   return (
     <Dialog fullWidth maxWidth="xs" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
-      <CustomDialogHeader title="Assign Users" />
+      <CustomDialogHeader title="Assign Users-Demo" />
       <CustomDialogContent>
         {loadingUsers ? (
           <Loader text="Loading Users" />
@@ -116,6 +118,26 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
               isAddButtonVisible={false}
               setQueryString={false}
             />
+            <List style={{ padding: 0 }}>
+              {users.map((user) => (
+                <ListItem divider key={user._id}>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      onChange={(e) => {
+                        user.isChecked = e.target.checked;
+                        setSelectedUsers(users.filter((r) => r.isChecked).map((obj) => obj._id));
+                      }}
+                      checked={user.isChecked}
+                      inputProps={{
+                        'aria-labelledby': `checkbox-list-label-${user._id}`
+                      }}
+                    />
+                  </ListItemIcon>
+                  <ListItemText primary={user.firstName}/>
+                </ListItem>
+              ))}
+            </List>
           </>
         ) : (
           <Typography>All Users has been assigned</Typography>
