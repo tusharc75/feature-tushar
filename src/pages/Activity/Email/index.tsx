@@ -106,26 +106,27 @@ const Email = () => {
       {
         accessor: 'subject',
         Header: 'Subject',
-        show: true,
+        disabled: true,
         primaryField: true,
         Cell: ({ row }) => (
-          <span
-            className="link cursor-pointer"
-            onClick={(e) => {
-              if (permissions?.email?.isUpdate) {
-                setOpenViewEmail(true);
-                setEmailId(row.original.id);
-              }
-            }}
-          >
-            <p> {row.original?.subject ?? '(no subject) '} </p>
-          </span>
+          <div>
+            <span
+              className="link cursor-pointer"
+              onClick={(e) => {
+                if (permissions?.email?.isUpdate) {
+                  setOpenViewEmail(true);
+                  setEmailId(row.original.id);
+                }
+              }}
+            >
+              <p> {row.original?.subject ?? '(no subject) '} </p>
+            </span>
+          </div>
         )
       },
       {
         accessor: 'to',
         Header: 'Recipient',
-        show: true,
         disabled: true,
         Cell: ({ row }) => (
           <span>{typeof row.original?.to === 'string' ? <span> {row.original?.to}</span> : <span>{getToEmailList(row.original?.to)}</span>}</span>
@@ -134,10 +135,9 @@ const Email = () => {
       {
         accessor: 'relatedTo',
         Header: 'Related To',
-        show: true,
         disabled: true,
-        filter: false,
-        sortable: false,
+        disableFilters: true,
+        disableSortBy: true,
         Cell: ({ row }) => (
           <>
             {row.original?.relatedTo && row.original?.relatedTo?.length > 0 ? (
@@ -146,7 +146,7 @@ const Email = () => {
                   <div className="flex items-center gap-2" key={d.name}>
                     <p>{d?.name}</p>
                     <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
                     <Chip color="primary" label={`${routes[d?.type]?.title}`} />
                   </div>
@@ -161,9 +161,9 @@ const Email = () => {
       {
         accessor: 'createdBy',
         Header: 'Created By',
-        show: true,
-        filter: false,
-        sortable: false,
+        disabled: true,
+        disableFilters: true,
+        disableSortBy: true,
         Cell: ({ row }) => (
           <p>
             {row.original?.createdByUser?.concatedName}
@@ -171,29 +171,28 @@ const Email = () => {
             <span className="createdAtTime badge-date">{displayDate(row.original?.createdByDate)}</span>
           </p>
         )
+      },
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 110,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <HtmlTooltip title={permissions.email.isDelete ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+                <DeleteIcon fontSize="small" color={permissions.email.isDelete ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        )
       }
     ];
-    setColumns([...column, ActionsRenderer]);
-  };
-
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 110,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <HtmlTooltip title={permissions.email.isDelete ? 'Delete' : deleteDisable}>
-        <span>
-          <IconButton disabled={!permissions.email.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
-            <DeleteIcon fontSize="small" color={permissions.email.isDelete ? 'error' : 'disabled'} />
-          </IconButton>
-        </span>
-      </HtmlTooltip>
-    )
+    setColumns(column);
   };
 
   useEffect(() => {
@@ -257,9 +256,8 @@ const Email = () => {
       });
   };
 
-  const handleChangeFilter = (e) => {
-    if (page !== 0) dispatch({ type: 'pageChange', page: 0 });
-    dispatch({ type: 'search', search: e.target.value });
+  const handleChangeFilter = (value) => {
+    setFilter(value);
   };
 
   const getToEmailList = (toList) => {
@@ -399,8 +397,8 @@ const Email = () => {
                 }}
               />
             }
-            searchValue={search}
-            onSearch={handleChangeFilter}
+            searchFilter={filter}
+            handleSearchFilter={handleChangeFilter}
             isActionButtonVisible={permissions.email?.isDelete}
             actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
             actionMenuItems={<ActionMenuItems />}
@@ -408,7 +406,6 @@ const Email = () => {
               setOpen(true);
             }}
             isAddButtonVisible={true}
-            setQueryString
           />
         )}
         {columns ? (

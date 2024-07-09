@@ -260,6 +260,9 @@ export const CreateCase = ({ relatedTo, caseId, handleClose, status, isMinimized
                                 label="Status"
                                 value={values['status']}
                                 name="status"
+                                onChange={(e) => {
+                                  setFieldValue('status', e.target.value);
+                                }}
                               >
                                 {statusList.map((_status, index) => (
                                   <MenuItem key={index} value={_status.status}>
