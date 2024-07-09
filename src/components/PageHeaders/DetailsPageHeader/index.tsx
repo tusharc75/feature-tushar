@@ -134,7 +134,7 @@ const DetailsPageHeader = ({
                   onClick={AddClick}
                   {...restOfAddButtonProps}
                   aria-controls="add-menu"
-                  className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
+                  className={`${isMobile ? 'btn-outline-v1  with-border !min-w-fit max-[600px]:[max-width:36px_!important]' : ''}`}
                   endIcon={isMobile ? null : addButtonOnClick ? null : <ExpandMore fontSize="small" />}
                 >
                   {isMobile ? <Add /> : 'Add'}
