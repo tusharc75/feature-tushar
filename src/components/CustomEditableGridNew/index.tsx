@@ -111,6 +111,7 @@ const CustomEditableGrid = ({ onClose, fields, data, extraDisabledFields, handle
                 <CustomTable
                   columns={columns}
                   flatRows={flatRows}
+                  setFlatRows={setFlatRows}
                   constColummns={constColummns}
                   fields={allFields}
                   extraDisabledFields={extraDisabledFields}
