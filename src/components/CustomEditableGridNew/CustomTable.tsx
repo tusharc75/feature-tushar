@@ -1,5 +1,7 @@
-import { TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
+import { IconButton, TableBody, TableCell, TableHead, TableRow } from '@material-ui/core';
 import MaUTable from '@material-ui/core/Table';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { useEffect, useState } from 'react';
 import {
   useTable,
@@ -14,9 +16,10 @@ import {
 } from 'react-table';
 import { useSticky } from 'react-table-sticky';
 import FormTypes from 'src/components/CustomEditableGridNew/FormTypes';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { getObjKeysWithValues } from 'src/constants/helpers';
 
-const CustomTable = ({ columns, flatRows, constColummns, fields, extraDisabledFields, error, updateData }) => {
+const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, extraDisabledFields, error, updateData }) => {
   const [displayRows, setDisplayRows] = useState([]);
 
   useEffect(() => {
@@ -33,6 +36,15 @@ const CustomTable = ({ columns, flatRows, constColummns, fields, extraDisabledFi
 
     let rows = tempRows.filter((e) => !e?.parentId || e.parentId === null);
     setDisplayRows(rows);
+  };
+
+  const handleClone = (row) => {
+    const _id = `${Date.now()}`;
+    setFlatRows([...flatRows, { ...row, id: _id, _id: _id, index: flatRows?.length + 1 }]);
+  };
+
+  const handleDelete = (row) => {
+    setFlatRows([...flatRows?.filter((r) => r?._id != row?._id)]);
   };
 
   const { getTableProps, rows, headerGroups, footerGroups, prepareRow, toggleRowExpanded, toggleAllRowsExpanded } = useTable(
@@ -66,7 +78,9 @@ const CustomTable = ({ columns, flatRows, constColummns, fields, extraDisabledFi
                 <TableCell key={`${index}-${column?.Header}`} {...column.getHeaderProps()} className="th text-truncate table-header overflow-initial">
                   <div className="d-flex align-items-center justify-content-space-between pos-rel">
                     <div className="d-flex align-items-center gap-2" {...column.getSortByToggleProps({ title: undefined })}>
-                      <span>{column.render('Header')}</span>
+                      <span title={column.render('Header')} className="text-truncate" style={{ maxWidth: `${column?.width - 15}px` }}>
+                        {column.render('Header')}
+                      </span>
                     </div>
                   </div>
                   <div {...column.getResizerProps()} className="resizer" />
@@ -95,24 +109,59 @@ const CustomTable = ({ columns, flatRows, constColummns, fields, extraDisabledFi
                       {...cell.getCellProps()}
                       className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}`}
                     >
-                      <FormTypes
-                        fieldData={fields?.find((f) => f?._id === fieldData?._id)}
-                        fields={fields}
-                        name={cell?.column?.accessorKey}
-                        values={row?.original}
-                        options={fieldData?.option || []}
-                        currency={cell?.column?.currency}
-                        unit={cell?.column?.unit}
-                        required={fieldData?.required}
-                        disabled={fieldData?.isUneditable || extraDisabledFields?.includes(fieldData?.fieldName)}
-                        setFieldValue={(name, value) => {
-                          updateData(row?.original, value, name);
-                        }}
-                        setValues={(value) => {
-                          updateData(row?.original, value);
-                        }}
-                        errors={error}
-                      />
+                      {['index']?.includes(cell.column.id) ? (
+                        <div className="full-height-cell">{cell.render('Cell')}</div>
+                      ) : ['action']?.includes(cell.column.id) ? (
+                        <div className="mt-[10px]">
+                          <HtmlTooltip title={'Clone'}>
+                            <span>
+                              <IconButton
+                                size="small"
+                                aria-label="Clone"
+                                onClick={() => {
+                                  handleClone(row?.original);
+                                }}
+                              >
+                                <FileCopyIcon fontSize="small" color={'primary'} />
+                              </IconButton>
+                            </span>
+                          </HtmlTooltip>
+
+                          <HtmlTooltip title={'Delete'}>
+                            <span>
+                              <IconButton
+                                size="small"
+                                aria-label="Delete"
+                                disabled={row?.original?.canDelete ? false : true}
+                                onClick={() => {
+                                  handleDelete(row?.original);
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+                              </IconButton>
+                            </span>
+                          </HtmlTooltip>
+                        </div>
+                      ) : (
+                        <FormTypes
+                          fieldData={fields?.find((f) => f?._id === fieldData?._id)}
+                          fields={fields}
+                          name={cell?.column?.accessorKey}
+                          values={row?.original}
+                          options={fieldData?.option || []}
+                          currency={cell?.column?.currency}
+                          unit={cell?.column?.unit}
+                          required={fieldData?.required}
+                          disabled={fieldData?.isUneditable || extraDisabledFields?.includes(fieldData?.fieldName)}
+                          setFieldValue={(name, value) => {
+                            updateData(row?.original, value, name);
+                          }}
+                          setValues={(value) => {
+                            updateData(row?.original, value);
+                          }}
+                          errors={error}
+                        />
+                      )}
                     </TableCell>
                   );
                 })}
