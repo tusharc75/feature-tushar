@@ -202,7 +202,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       <Dialog
         maxWidth={'md'}
         open={true}
-        fullScreen={(isMobile && !isTablet) || isMobileView}
+        fullScreen={isMobile || isMobileView}
         fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
@@ -212,7 +212,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
         aria-describedby="Filter Dialog"
       >
         <CustomDialogHeader title={`Filters`} onClose={handleClose} showRequiredLabel={false} />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent>
           <Box pt={2} pb={2}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
