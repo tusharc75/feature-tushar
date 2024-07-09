@@ -115,7 +115,9 @@ const CustomReactTable = ({
     dispatch,
     state,
     isClientSideGrid,
-    toggleExpandChange
+    toggleExpandChange,
+    resource,
+    renderedFrom
   });
 
   const [searchQuery] = useStore((store) => store[SEARCH]);

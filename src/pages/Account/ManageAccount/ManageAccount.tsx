@@ -152,10 +152,10 @@ export default function ManageAccount(props) {
                       isClone
                         ? `Clone - ${accountNameForClone}`
                         : isNew
-                        ? accountResource === 'customerAccount'
-                          ? `Add ${routes?.customerAccount?.title}`
-                          : `Add ${routes?.supplierAccount?.title}`
-                        : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ''}`
+                          ? accountResource === 'customerAccount'
+                            ? `Add ${routes?.customerAccount?.title}`
+                            : `Add ${routes?.supplierAccount?.title}`
+                          : `Editing ${accountData.initialValues.accountName ? accountData.initialValues.accountName : ''}`
                     }
                   />
                   <CustomDialogContent>
@@ -232,7 +232,7 @@ export default function ManageAccount(props) {
                                           }}
                                         />
                                       ) : field.fieldName === 'billingAddress' ? (
-                                        <div key={field.fieldName} className="flex gap-2 items-center">
+                                        <div key={field.fieldName} className="flex items-center gap-2">
                                           <Box style={{ flexGrow: 1 }}>
                                             <FormTypes
                                               isNew={isNew}
@@ -279,7 +279,7 @@ export default function ManageAccount(props) {
                                           ) : null}
                                         </div>
                                       ) : field.fieldName === 'shippingAddress' ? (
-                                        <div key={field.fieldName} className="flex gap-2 items-center">
+                                        <div key={field.fieldName} className="flex items-center gap-2">
                                           <div className="flex-grow">
                                             <FormTypes
                                               isNew={isNew}

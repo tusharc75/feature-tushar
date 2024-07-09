@@ -248,6 +248,7 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
 
 const FormTypes = (props) => {
   const theme = useTheme();
+  const tempProps = { ...props, id: props.id ? props.id : props.label ? `field-${props.label.toLowerCase().split(' ').join('-')}` : 'custom-field' };
   const {
     addAdditionalOption,
     productTemplateId,
@@ -291,7 +292,7 @@ const FormTypes = (props) => {
     setFields,
     fromFilter = false,
     ...rest
-  } = props;
+  } = tempProps;
 
   const [image, setImage] = React.useState<any>('');
   const [imageFileName, setImageFileName] = React.useState<any>('');

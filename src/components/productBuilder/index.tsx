@@ -351,18 +351,18 @@ const ProductBuilder = (props) => {
     data.product = rows;
     data._id = productBuilderId;
     axiosInstance()
-        .put(`/productbuilder/updateproduct-inline-bulk`, data)
-        .then(() => {
-          setIsSubmitting(false);
-          fetchProduct();
-          setInlineBulkEdit(false);
-        })
-        .catch((error) => {
-          setIsSubmitting(false);
-          setInlineBulkEdit(false);
-          toastConfig.setToastConfig(error);
-        });
-  }
+      .put(`/productbuilder/updateproduct-inline-bulk`, data)
+      .then(() => {
+        setIsSubmitting(false);
+        fetchProduct();
+        setInlineBulkEdit(false);
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        setInlineBulkEdit(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   const handleDelete = () => {
     let ids = [];
@@ -588,7 +588,7 @@ const ProductBuilder = (props) => {
           {permissions?.isUpdate && (
             <ImportExportLinks
               module="builder"
-              permission={permissions.quoteBuilder}
+              permission={permissions}
               api={'productbuilder'}
               refrenceId={productBuilderId}
               onSuccessfulImport={(isImportedSuccessfully) => {

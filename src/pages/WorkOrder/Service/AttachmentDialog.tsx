@@ -173,7 +173,7 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     <Box padding={1}>
-                      <div className="grid grid-cols-1 min-[600px]:grid-cols-2 gap-2 max-w-[950px]">
+                      <div className="grid max-w-[950px] grid-cols-1 gap-2 min-[600px]:grid-cols-2">
                         <TextField
                           variant="outlined"
                           type="text"
@@ -205,26 +205,28 @@ export default function AttachmentDialog({ workOrderId, uniqueServiceId, stepId,
                           value={values['attachmentType']}
                         />
                       </div>
-                      <div className="flex flex-wrap gap-2 my-2">
-                        <FormTypes
-                          label=""
-                          name="fileUrl"
-                          required={true}
-                          type="fileUpload"
-                          values={values}
-                          canEdit={canEdit}
-                          errors={errors}
-                          touched={touched}
-                          size="small"
-                          setFieldValue={(fname, file) => {
-                            setFieldValue('fileUrl', file);
-                            onUploadFile(file);
-                          }}
-                          doNotShowUploadedFile={true}
-                          imageOrFileUploadCompletePercentage={(completePercentage) => {
-                            setUploadingImageOrFileProgress(completePercentage);
-                          }}
-                        />
+                      <div className="my-2 flex flex-wrap gap-2">
+                        <div className="-ml-[0]">
+                          <FormTypes
+                            label=""
+                            name="fileUrl"
+                            required={true}
+                            type="fileUpload"
+                            values={values}
+                            canEdit={canEdit}
+                            errors={errors}
+                            touched={touched}
+                            size="small"
+                            setFieldValue={(fname, file) => {
+                              setFieldValue('fileUrl', file);
+                              onUploadFile(file);
+                            }}
+                            doNotShowUploadedFile={true}
+                            imageOrFileUploadCompletePercentage={(completePercentage) => {
+                              setUploadingImageOrFileProgress(completePercentage);
+                            }}
+                          />
+                        </div>
                         <CustomButton variant="contained" color="primary" disabled={!canEdit} onClick={() => setDocumentScanDialog(true)}>
                           Scan Document
                         </CustomButton>

@@ -17,6 +17,7 @@ export const generateColumn = (fields) => {
       accessorKey: 'index',
       Header: 'Index',
       id: 'index',
+      sticky: 'left',
       minWidth: 70,
       width: 70
     }
@@ -92,8 +93,9 @@ export const generateColumn = (fields) => {
     accessorKey: 'action',
     Header: 'Action',
     id: 'action',
-    minWidth: 160,
-    width: 180
+    sticky: 'right',
+    minWidth: 120,
+    width: 120
   });
 
   return { newColumns, constColumns };
