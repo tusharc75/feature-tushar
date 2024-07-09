@@ -32,23 +32,22 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
     filterDispatch({ type: 'resetIndex' });
   }, [search.trim() !== '', search]);
 
-
-  const handleFocusOnSlash = (e:KeyboardEvent) => {
-    if(!inputRef.current)return;
+  const handleFocusOnSlash = (e: KeyboardEvent) => {
+    if (!inputRef.current) return;
     const input = inputRef.current;
     const otherFocusedElements = document.querySelector(':focus-within');
-    if(otherFocusedElements) return;
-    if(input.matches(':focus-within')) return;
+    if (otherFocusedElements) return;
+    if (input.matches(':focus-within')) return;
     if (e.key === '/') {
       e.preventDefault();
       inputRef.current?.focus();
     }
-  }
-  
-  useEffect(()=>{
-    document.addEventListener('keydown', handleFocusOnSlash)
+  };
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleFocusOnSlash);
     return () => document.removeEventListener('keydown', handleFocusOnSlash);
-  },[])
+  }, []);
 
   useEffect(() => {
     let arr = [];
@@ -141,7 +140,7 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
             setSearch(searchedValue);
             handleSearch(searchedValue);
           }}
-          className=' dark:placeholder:text-gray-500 placeholder:text-[15px] placeholder:text-gray-400'
+          className=" placeholder:text-[15px] placeholder:text-gray-400 dark:placeholder:text-gray-500"
           style={{ borderRadius: showCloseButton ? '4px 4px 0 0' : '4px' }}
         />
         <IconButton className={styles.searchIcon}>

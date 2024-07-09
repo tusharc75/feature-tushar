@@ -18,28 +18,47 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import CustomIntro, { Step } from 'src/components/CustomIntro';
 import axios, { CancelTokenSource } from 'axios';
+import { WalkmeData, useSetWalkmeData } from 'src/components/CustomIntro';
 
-const steps: Step[] = [
+const stepData: WalkmeData[] = [
   {
-    title: 'Dummy Title 1',
-    content: (
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti molestias explicabo accusantium magnam quibusdam. Culpa amet natus aut
-        suscipit quam!
-      </p>
-    ),
-    target: '#add-button'
-  },
-  {
-    title: 'Dummy Title 2',
-    content: `Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatibus repellat commodi, aliquam possimus voluptatum cupiditate, magnam natus distinctio praesentium, explicabo quam incidunt. Eius, velit adipisci!`,
-    target: '#action-button'
+    name: 'Add subcontract',
+    url: '/subcontract-assembly',
+    steps: [
+      {
+        url: '/subcontract-assembly',
+        title: 'Add ',
+        target: '#add-button',
+        content: ''
+      },
+      {
+        target: '#field-supplier-account',
+        url: '/subcontract-assembly',
+        title: 'Select suplier',
+        content: '',
+        nextOnValueChange: true
+      },
+      {
+        target: '#field-warehouse',
+        url: '/subcontract-assembly',
+        title: 'select address',
+        content: '',
+        nextOnFocusOut: true
+      },
+      {
+        target: '#dialog-save-button',
+        url: '/subcontract-assembly',
+        title: 'Add subcontract',
+        content: ''
+      }
+    ]
   }
 ];
 
 const SubcontractAssembly = () => {
+  const { setWalkmeData } = useSetWalkmeData();
+
   const types = [
     {
       key: `My ${routes.subcontractAssembly.title}`,
@@ -71,6 +90,7 @@ const SubcontractAssembly = () => {
 
   useEffect(() => {
     fetchGridColumns();
+    setWalkmeData(stepData);
   }, []);
 
   useEffect(() => {
@@ -148,7 +168,10 @@ const SubcontractAssembly = () => {
           let rows = data?.map((u: any) => {
             let finalObject: any = prepareDataForGrid(u);
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-            finalObject['canDelete'] = permissions?.subcontractAssembly?.isDelete && checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, finalObject?.ownerId) && u?.canDelete;
+            finalObject['canDelete'] =
+              permissions?.subcontractAssembly?.isDelete &&
+              checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, finalObject?.ownerId) &&
+              u?.canDelete;
             return {
               ...finalObject
             };
@@ -305,8 +328,9 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.subcontractAssemblyNumber || ''
-              } ?`}
+            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
+              deleteRecord?.subcontractAssemblyNumber || ''
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -326,7 +350,6 @@ const SubcontractAssembly = () => {
           />
         )}
       </CustomContainer>
-      <CustomIntro steps={steps} />
     </section>
   );
 };

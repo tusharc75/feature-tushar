@@ -1,4 +1,4 @@
-import { Step } from 'src/components/CustomIntro';
+import { Step, StepDefination } from 'src/components/CustomIntro';
 const RETRY = 10; //in seconds
 
 export class HandleSteps {
@@ -19,12 +19,24 @@ export class HandleSteps {
   interval: NodeJS.Timeout;
   retry: number;
   message: string;
-  waitingForUser: boolean;
   error: boolean;
   resizeObserver: ResizeObserver;
-  constructor({ setUpdateSignal, steps }: { setUpdateSignal: React.Dispatch<React.SetStateAction<number>>; steps: Step[] }) {
+  waitedForClicks: number;
+  listenerAttachedElements: { elm: HTMLElement; event: keyof HTMLElementEventMap; func: any }[];
+  handleReset: () => void;
+  findingElement: boolean;
+  constructor({
+    setUpdateSignal,
+    steps,
+    onReset
+  }: {
+    setUpdateSignal: React.Dispatch<React.SetStateAction<number>>;
+    steps: StepDefination[];
+    onReset: () => void;
+  }) {
     this.setUpdateSignal = setUpdateSignal;
-    this.steps = steps;
+    this.handleReset = onReset;
+    this.steps = this.initializeStepData(steps);
     this.currentIndex = -1;
     this.started = false;
     this.finished = false;
@@ -34,7 +46,9 @@ export class HandleSteps {
     this.interval = null;
     this.message = '';
     this.error = false;
-    this.waitingForUser = false;
+    this.waitedForClicks = 0;
+    this.listenerAttachedElements = [];
+    this.findingElement = false;
     this.resizeObserver = new ResizeObserver((entries) => {
       window.requestAnimationFrame(() => {
         if (!entries[0]) return;
@@ -45,38 +59,96 @@ export class HandleSteps {
         }
       });
     });
+    // const otherFocusedElements = document.querySelector(':focus-within');
+    // console.log(otherFocusedElements);
 
     this.addEventListeners();
     this.resizeObserver.observe(document?.body);
   }
 
-  toggleWaitForUser() {
-    this.waitingForUser = this.steps[this.currentIndex - 1]?.waitForUserClick;
+  private initializeStepData(steps: StepDefination[]) {
+    const newSteps: Step[] = [];
+    for (const data of steps) {
+      if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data)) {
+        newSteps.push({
+          title: data.title,
+          content: data.content,
+          target: data.target,
+          url: data.url,
+          isHiddenStep: false
+        });
+        newSteps.push({
+          ...data,
+          target: data.target,
+          isHiddenStep: true
+        });
+      } else {
+        newSteps.push({ title: data.title, content: data.content, target: data.target, url: data.url, isHiddenStep: false });
+      }
+    }
+    console.log(newSteps);
+    return newSteps;
   }
 
   private addEventListeners() {
-    this.boundMousedown = this.handleMouseDown.bind(this);
+    this.boundMousedown = this.handleNextMouseDown.bind(this);
     window.addEventListener('mousedown', this.boundMousedown);
   }
   removeListeners() {
     window.removeEventListener('mousedown', this.boundMousedown);
   }
 
-  handleMouseDown(e: MouseEvent) {
-    // if (this.steps[this.currentIndex]?.waitForUserClick) {
-    //   this.waitingForUser = true;
-    // }
+  handleNextMouseDown(e: MouseEvent) {
+    if (this.currentStepData.isHiddenStep && this.currentStepData.element.contains(e.target as Node) && this.currentStepData.nextOnUserClicks) {
+      this.waitedForClicks += 1;
+      if (this.waitedForClicks >= this.currentStepData.nextOnUserClicks) {
+        this.next();
+        this.waitedForClicks = 0;
+      }
+    }
+  }
+
+  handleNextOnFocusOut(e: FocusEvent) {
+    this.next();
+  }
+  handleNextOnValueChange(e: FocusEvent) {
+    const target = e.target as HTMLInputElement;
+    console.log(target);
+    if (target?.value?.trim()) {
+      this.next();
+    }
+  }
+  handleNextOnKeyDown(e: KeyboardEvent) {
+    if (this.currentStepData.isHiddenStep && e.key === this.currentStepData.nextOnKeyPress) {
+      this.next();
+    }
+  }
+
+  attachNextListeners() {
+    if (!this.currentStepData.isHiddenStep) return;
+    const currData = this.currentStepData;
+
+    if (currData.nextOnFocusOut) {
+      currData.element.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
+      this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
+    }
+    if (currData.nextOnValueChange) {
+      currData.element.addEventListener('blur', this.handleNextOnValueChange.bind(this));
+      this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnValueChange.bind(this) });
+    }
+    if (currData.nextOnKeyPress) {
+      currData.element.addEventListener('keydown', this.handleNextOnKeyDown.bind(this));
+      this.listenerAttachedElements.push({ elm: currData.element, event: 'keydown', func: this.handleNextOnKeyDown.bind(this) });
+    }
+  }
+
+  removeNextListeners() {
+    this.listenerAttachedElements.map((d) => d.elm.removeEventListener(d.event, d.func));
   }
 
   start() {
     this.started = true;
-    if (this.waitingForUser) {
-      this.waitingForUser = false;
-      this.getCurrentStep();
-      this.sendUpdateSignal();
-    } else {
-      this.next();
-    }
+    this.next();
   }
   finish() {
     this.reset();
@@ -85,69 +157,62 @@ export class HandleSteps {
     this.started = false;
     this.finished = false;
     this.currentIndex = -1;
-    this.sendUpdateSignal();
+    this.handleReset();
   }
   next() {
-    if (this.currentIndex === this.steps.length - 1) this.reset();
+    if (this.currentIndex === this.steps.length - 1) {
+      console.log('finished');
+      this.reset();
+    }
     this.currentIndex++;
     this.getCurrentStep();
-    console.log(this);
+    this.removeNextListeners();
   }
   previous() {
-    if (this.currentIndex === 0) return;
+    if (this.currentIndex === 0) {
+      this.getCurrentStep();
+      return;
+    }
     this.currentIndex--;
+    if (this.steps[this.currentIndex]?.isHiddenStep) {
+      this.previous();
+    }
+    this.removeNextListeners();
     this.getCurrentStep();
   }
 
-  getCurrentStep(dirty = false) {
-    if (!this.steps[this.currentIndex]) return;
-    if (this.currentStepData?.index === this.currentIndex && !dirty) return this.currentStepData;
-    const activeStep = this.steps[this.currentIndex];
+  getCurrentStep(dirty = false, index = this.currentIndex) {
+    if (!this.steps[index]) return;
+    if (this.currentStepData?.index === index && !dirty) return this.currentStepData;
+    this.findingElement = true;
+    const activeStep = this.steps[index];
+    clearInterval(this.interval);
     let element = document.querySelector(activeStep.target) as HTMLElement;
+    this.sendUpdateSignal();
     if (!element) {
+      this.retry++;
+      if (this.retry >= RETRY) {
+        clearInterval(this.interval);
+        this.message = 'Element not found';
+        this.error = true;
+        this.reset();
+      }
       this.interval = setInterval(() => {
-        this.retry++;
-        if (this.retry >= RETRY) {
-          clearInterval(this.interval);
-          this.message = 'Element not found';
-          this.error = true;
-          this.reset();
-        }
-        element = document.querySelector(activeStep.target) as HTMLElement;
-        if (element) {
-          this.retry = 0;
-          this.currentStepData = {
-            ...activeStep,
-            positionData: element?.getBoundingClientRect(),
-            index: this.currentIndex,
-            element
-          };
-          clearInterval(this.interval);
-          // this.focusElement(element);
-          setTimeout(() => {
-            this.sendUpdateSignal();
-          }, 200);
-        }
+        this.getCurrentStep();
       }, 1000);
+    } else {
+      this.findingElement = false;
+      this.currentStepData = {
+        ...activeStep,
+        positionData: element?.getBoundingClientRect(),
+        index: index,
+        element
+      };
+      this.attachNextListeners();
+      setTimeout(() => {
+        this.sendUpdateSignal();
+      }, 200);
     }
-
-    this.currentStepData = {
-      ...activeStep,
-      positionData: element?.getBoundingClientRect(),
-      index: this.currentIndex,
-      element
-    };
-    // this.focusElement(element);
-    setTimeout(() => {
-      this.sendUpdateSignal();
-    }, 200);
-  }
-
-  focusElement(element: HTMLElement) {
-    if (this.waitingForUser) return;
-    setTimeout(() => {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }, 300);
   }
 
   private sendUpdateSignal() {

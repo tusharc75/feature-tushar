@@ -1,123 +1,109 @@
-import { IconButton, Popper } from '@material-ui/core';
+import { Dialog, DialogContent, IconButton, Popper, TextField } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
-import { MutableRefObject, ReactNode, useRef, useState } from 'react';
+import { KeyboardEvent, ReactNode, useRef, useState } from 'react';
 import { FaCaretUp } from 'react-icons/fa';
-import { useLocation } from 'react-router-dom';
-import { cn } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
 import React, { useEffect } from 'react';
 import { FaArrowLeft, FaArrowRight, FaQuestion } from 'react-icons/fa';
 import { GiFinishLine } from 'react-icons/gi';
 import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
-import { getCurrentUrl } from 'src/components/CustomIntro/IntorCreator/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { stepData } from 'src/components/CustomIntro/data';
+import { useStore, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
+import { useLocation } from 'react-router-dom';
+import { getCurrentUrl } from 'src/components/CustomIntro/IntorCreator/helper';
+export * from 'src/components/CustomIntro/useSetWalkmeSteps';
 
-export type IntroStep = {
-  [key: string]: {
-    name: string;
-    steps: Step[];
-  };
+export type WalkmeData = {
+  name: string;
+  steps: StepDefination[];
+  url: string;
 };
 
-export type Step = {
+export type Step = NormalStep | HiddenStep;
+
+export type StepDefination = {
   title: ReactNode;
   content: ReactNode;
   target: string;
   url: string;
-  waitForUserClick: boolean;
+  nextOnUserClicks?: number;
+  nextOnFocusOut?: boolean;
+  nextOnValueChange?: boolean;
+  nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+};
+
+type NormalStep = {
+  title: ReactNode;
+  content: ReactNode;
+  target: string;
+  url: string;
+  isHiddenStep: false;
+};
+type HiddenStep = {
+  target: string;
+  isHiddenStep: true;
+  nextOnUserClicks?: number;
+  nextOnFocusOut?: boolean;
+  nextOnValueChange?: boolean;
+  nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
 };
 
 const CustomIntro = () => {
-  const location = useLocation();
+  const [selectedIntro, setSelectedIntro] = useState<WalkmeData | null>(null);
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setUpdateSignal] = useState<number>(0);
-  const [tutorialPresent, setTutorialPresent] = useState<string>(null);
   let handleSteps = useRef<HandleSteps | null>(null);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const arrowRef = useRef(null);
 
-  const handlePopoverClose = () => {
-    handleSteps.current?.reset();
-    setAnchorEl(null);
-  };
-
   const open = Boolean(anchorEl);
 
-  useEffect(() => {
-    console.log('hello');
-    if (!stepData) return () => handleSteps?.current?.removeListeners();
-    const currentUrl = getCurrentUrl();
-    if (stepData[currentUrl] && !handleSteps.current) {
-      setTutorialPresent(currentUrl);
-      handleSteps.current = new HandleSteps({
-        steps: stepData[currentUrl].steps,
-        setUpdateSignal: setUpdateSignal
-      });
-    } else if (!handleSteps?.current?.started) {
-      setTutorialPresent(null);
-      return () => {
-        handleSteps?.current?.removeListeners();
-        handleSteps.current = null;
-      };
-    }
-
-    return () => handleSteps.current?.removeListeners();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [location]);
-
-  const handleFinish = () => {
-    setTutorialPresent(null);
+  const handleReset = () => {
     handleSteps?.current?.removeListeners();
+    setAnchorEl(null);
     handleSteps.current = null;
+    setSelectedIntro(null);
+  };
+
+  const handleStart = (intro: WalkmeData) => {
+    // const currentUrl = getCurrentUrl();
+    setSelectedIntro(intro);
+    handleSteps.current = new HandleSteps({
+      steps: intro.steps,
+      setUpdateSignal: setUpdateSignal,
+      onReset: handleReset
+    });
+    handleSteps.current?.start();
   };
 
   const currentStepData = handleSteps?.current?.currentStepData;
   const isLastStep = handleSteps?.current?.isLastStep();
   const isFirstStep = handleSteps?.current?.isFirstStep();
-  const isWaiting = handleSteps?.current?.waitingForUser;
-
-  // console.log(currentStepData, handleSteps?.current);
+  const isFindingElement = handleSteps?.current?.findingElement;
+  const isHiddenStep = currentStepData?.isHiddenStep;
 
   const handleNext = () => {
     currentStepData?.element.click();
     handleSteps.current?.next();
-    handleSteps.current?.toggleWaitForUser();
   };
 
-  if (handleSteps?.current?.error || !handleSteps) return null;
+  // console.log(handleSteps.current);
+
+  if (handleSteps?.current?.error || !handleSteps || isHiddenStep) return null;
 
   return (
     <>
-      <div
-        className={cn(
-          'floating-card fixed bottom-2 right-3 z-[1300]',
-          tutorialPresent && (!handleSteps.current?.started || isWaiting) ? 'not-sr-only' : 'sr-only'
-        )}
-      >
-        <button
-          onClick={() => {
-            handleSteps.current?.start();
-          }}
-          type="button"
-          className="group relative flex size-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:size-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
-        >
-          <span className="sr-only">Walk me</span>
-          <span className="absolute  inset-0 z-[-1] inline-flex size-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:size-14"></span>
-          <HtmlTooltip title={'Walk me'}>
-            <FaQuestion className=" block size-5 text-gray-600 transition-all duration-300 group-hover:size-7 dark:text-gray-200" />
-          </HtmlTooltip>
-        </button>
-      </div>
-
-      {handleSteps.current?.started && currentStepData && !isWaiting && (
+      {!selectedIntro && <SelectIntro handleStart={handleStart} />}
+      {handleSteps.current?.started && currentStepData && !isHiddenStep && (
         <div className="">
           <div
             className="backdrop absolute inset-0 z-[1301] bg-black/50 mix-blend-hard-light"
             style={{ height: handleSteps.current?.documentHeight }}
           >
-            {currentStepData.element && (
+            {currentStepData.element && !isFindingElement && (
               <div
                 ref={(ref) => setAnchorEl(ref)}
                 className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
@@ -150,7 +136,7 @@ const CustomIntro = () => {
             <div className="relative z-[1302] mt-3 min-w-[300px] max-w-[300px] rounded-md bg-[var(--dark-secondary,white)] p-2 shadow-md">
               <div className="mb-2 flex items-center justify-between gap-2 pb-1 [border-bottom:1px_solid_var(--common-border-color)]">
                 <p className=" truncate text-[16px] font-semibold ">{currentStepData.title}</p>
-                <IconButton size="small" onClick={handlePopoverClose}>
+                <IconButton size="small" onClick={handleReset}>
                   <Close />
                 </IconButton>
               </div>
@@ -187,7 +173,7 @@ const CustomIntro = () => {
                     iconForMobile={false}
                     onClick={() => {
                       handleNext();
-                      handleFinish();
+                      handleReset();
                     }}
                     endIcon={<GiFinishLine size={16} />}
                   >
@@ -197,9 +183,6 @@ const CustomIntro = () => {
               </div>
             </div>
           </Popper>
-          {/* <span ref={arrowRef} className="absolute text-[var(--dark-secondary,white)]  drop-shadow-md " style={{ ...arrowPosition }}>
-            <FaCaretUp size={30} />
-          </span> */}
         </div>
       )}
     </>
@@ -207,6 +190,95 @@ const CustomIntro = () => {
 };
 
 export default CustomIntro;
+
+const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void }) => {
+  const location = useLocation();
+  const [walkMeSteps] = useStore((store) => store[WALK_ME_STEPS]);
+  const [isStepsAvailable, setIsStepsAvailable] = useState(false);
+  const [filteredSteps, setFilteredSteps] = useState<WalkmeData[]>([]);
+  const [search, setSearch] = useState('');
+  const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    const url = getCurrentUrl();
+    const stepsForCurrentPage = walkMeSteps?.filter((d) => d.url === url);
+    setIsStepsAvailable(stepsForCurrentPage.length > 0);
+    setFilteredSteps(stepsForCurrentPage);
+  }, [walkMeSteps, location]);
+
+  const handleSearch = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearch(value);
+    if (value.trim() === '') {
+      setFilteredSteps(walkMeSteps);
+    } else {
+      setFilteredSteps((prev) => prev.filter((d) => d.name.toLowerCase().trim().includes(value.toLowerCase())));
+    }
+  };
+
+  if (!isStepsAvailable) return null;
+
+  return (
+    <>
+      <div className={cn('floating-card fixed bottom-2 right-3 z-[1300]')}>
+        <button
+          type="button"
+          className="group relative flex size-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:size-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
+          onClick={() => setOpen(true)}
+        >
+          <span className="sr-only">Walk me</span>
+          <span className="absolute  inset-0 z-[-1] inline-flex size-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:size-14"></span>
+          <HtmlTooltip title={'Walk me'}>
+            <FaQuestion className=" block size-5 text-gray-600 transition-all duration-300 group-hover:size-7 dark:text-gray-200" />
+          </HtmlTooltip>
+        </button>
+      </div>
+      <Dialog
+        open={open}
+        TransitionComponent={CustomDialogTransition}
+        keepMounted
+        onClose={() => setOpen(false)}
+        aria-labelledby="alert-dialog-slide-title"
+        aria-describedby="alert-dialog-slide-description"
+        fullWidth
+        maxWidth="xs"
+        PaperProps={{
+          style: { borderRadius: '16px' }
+        }}
+      >
+        <div className="p-[24px]">
+          <h6 className=" pb-[10px] text-[17px] font-bold leading-[1.57] text-[#2a3042] [border-bottom:1px_solid_var(--common-border-color)]  dark:text-[white]">
+            Select any topic
+          </h6>
+          <div className="pb-2 pt-3">
+            <TextField autoFocus label="Search topic..." variant="outlined" size="small" fullWidth onChange={handleSearch} value={search} />
+          </div>
+          <div className=" mt-4  h-[200px] space-y-3 overflow-y-auto">
+            {filteredSteps?.map((intro, index) => (
+              <button
+                className="flex max-w-fit cursor-pointer items-center gap-2 border-0 bg-transparent text-left font-medium leading-[1.83] text-[#2a3042] shadow-none transition-all hover:gap-3 hover:text-[var(--new-theme-color)] dark:text-[white]"
+                key={intro.name}
+                onClick={() => {
+                  handleStart(intro);
+                  setOpen(false);
+                }}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 13 13" fill="none">
+                  <path
+                    d="M6.50049 0H13.0005V6.5H12.188V1.39014L0.59082 12.981L0.0195312 12.4097L11.6104 0.8125H6.50049V0Z"
+                    fill="currentcolor"
+                    stroke="currentcolor"
+                  ></path>
+                </svg>
+                {intro.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      </Dialog>
+    </>
+  );
+};
 
 type CustomIntroWrapperProps = {
   title: ReactNode;
