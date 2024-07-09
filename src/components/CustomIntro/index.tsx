@@ -230,13 +230,13 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
       <div className={cn('floating-card fixed bottom-2 right-3 z-[1300]')}>
         <button
           type="button"
-          className="group relative flex size-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:size-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
+          className="group relative flex h-10 w-10 cursor-pointer items-center justify-center rounded-full bg-[white] text-gray-900 transition-all duration-300 [border:1px_solid_var(--common-border-color)] hover:h-14 hover:w-14 dark:bg-[var(--dark-primary)] dark:text-gray-200"
           onClick={() => setOpen(true)}
         >
           <span className="sr-only">Walk me</span>
-          <span className="absolute  inset-0 z-[-1] inline-flex size-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:size-14"></span>
+          <span className="absolute  inset-0 z-[-1] inline-flex h-10 w-10  animate-ping rounded-full bg-sky-400 opacity-75 group-hover:h-14 group-hover:w-14"></span>
           <HtmlTooltip title={'Walk me'}>
-            <FaQuestion className=" block size-5 text-gray-600 transition-all duration-300 group-hover:size-7 dark:text-gray-200" />
+            <FaQuestion className=" block h-5 w-5 text-gray-600 transition-all duration-300 group-hover:h-7 group-hover:w-7 dark:text-gray-200" />
           </HtmlTooltip>
         </button>
       </div>
