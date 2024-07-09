@@ -24,7 +24,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 const stepData: WalkmeData[] = [
   {
     name: 'Add subcontract',
-    url: '/subcontract-assembly',
+    urls: ['/subcontract-assembly'],
     steps: [
       {
         url: '/subcontract-assembly',
@@ -57,7 +57,7 @@ const stepData: WalkmeData[] = [
 ];
 
 const SubcontractAssembly = () => {
-  const { setWalkmeData } = useSetWalkmeData();
+  const { addWalkmeData } = useSetWalkmeData();
 
   const types = [
     {
@@ -90,7 +90,7 @@ const SubcontractAssembly = () => {
 
   useEffect(() => {
     fetchGridColumns();
-    setWalkmeData(stepData);
+    addWalkmeData(stepData);
   }, []);
 
   useEffect(() => {
