@@ -97,9 +97,9 @@ const ThemeButton = ({
             )
           ) : (
             <>
-              {startIcon && <span className="[&>svg]:-ml-[2px] [&>svg]:mr-2 [&>svg]:text-[18px] max-h-[16px]">{startIcon}</span>}
+              {startIcon && <span className="max-h-[16px] [&>svg]:-ml-[2px] [&>svg]:mr-2 [&>svg]:text-[18px]">{startIcon}</span>}
               {children} {loader}
-              {endIcon && <span className="[&>svg]:-mr-[2px] [&>svg]:ml-2 [&>svg]:text-[18px] max-h-[16px]">{endIcon}</span>}
+              {endIcon && <span className="max-h-[16px] [&>svg]:-mr-[2px] [&>svg]:ml-2 [&>svg]:text-[18px]">{endIcon}</span>}
             </>
           )}
         </Button>

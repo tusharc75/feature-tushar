@@ -25,18 +25,18 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
       }
       setDefaultOptions(option);
     }
-    delete values[`${name}_dataList`]
+    delete values[`${name}_dataList`];
   }, []);
 
   useEffect(() => {
     if (selectedOption) {
       if (type === 'multiSelect') {
-        setDefaultOptions(selectedOption)
+        setDefaultOptions(selectedOption);
       } else {
-        setDefaultOptions([selectedOption])
+        setDefaultOptions([selectedOption]);
       }
     }
-  }, [selectedOption])
+  }, [selectedOption]);
 
   const fetchOptions = useCallback(
     debounce(async (searchKey: string = '', page: number = 0, _ids = []) => {
@@ -53,7 +53,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
           searchKey
         )}`;
         if (_ids?.length > 0) {
-          query = `${query}&ids=${JSON.stringify(_ids)}`
+          query = `${query}&ids=${JSON.stringify(_ids)}`;
         }
         const {
           data: {
@@ -77,9 +77,9 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
 
   useEffect(() => {
     if (fieldData?.preFilters?.length > 0) {
-      fetchOptions('', 0, fieldData?.preFilters)
+      fetchOptions('', 0, fieldData?.preFilters);
     }
-  }, [fieldData])
+  }, [fieldData]);
 
   const handleInputChangeMulti = (event, value, reason) => {
     if (reason === 'input') {
@@ -129,7 +129,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                 getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
                 onChange={(e, val: any) => {
                   setFieldValue(name, val ? val.map((val) => val?.optionValue) : []);
-                  setSelectedOption(val ? val : [])
+                  setSelectedOption(val ? val : []);
                   setInputValues('');
                 }}
                 forcePopupIcon={true}
@@ -186,7 +186,7 @@ const DataList = ({ InfoLabel, fieldData, rest, values, type, label, name, getLa
                 value={uniqBy([...options, ...defaultOptions], 'optionValue').find((data: any) => data.optionValue === values[name]) || ''}
                 onChange={(e, val) => {
                   setFieldValue(name, val ? val?.optionValue : '');
-                  setSelectedOption(val ? val : null)
+                  setSelectedOption(val ? val : null);
                 }}
                 selectOnFocus
                 clearOnBlur
