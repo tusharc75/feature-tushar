@@ -201,7 +201,7 @@ export default CustomIntro;
 const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void }) => {
   const location = useLocation();
   const [walkMeSteps] = useStore((store) => store[WALK_ME_STEPS]);
-  const [isStepsAvailable, setIsStepsAvailable] = useState(false);
+  const [stepsForThisPage, setStepsForThisPage] = useState<WalkmeData[]>([]);
   const [filteredSteps, setFilteredSteps] = useState<WalkmeData[]>([]);
   const [search, setSearch] = useState('');
   const [open, setOpen] = useState(false);
@@ -209,7 +209,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
   useEffect(() => {
     const url = getCurrentUrl();
     const stepsForCurrentPage = walkMeSteps?.filter((d) => d.url === url);
-    setIsStepsAvailable(stepsForCurrentPage.length > 0);
+    setStepsForThisPage(stepsForCurrentPage);
     setFilteredSteps(stepsForCurrentPage);
   }, [walkMeSteps, location]);
 
@@ -217,13 +217,13 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
     const value = e.target.value;
     setSearch(value);
     if (value.trim() === '') {
-      setFilteredSteps(walkMeSteps);
+      setFilteredSteps(stepsForThisPage);
     } else {
-      setFilteredSteps((prev) => prev.filter((d) => d.name.toLowerCase().trim().includes(value.toLowerCase())));
+      setFilteredSteps(() => stepsForThisPage.filter((d) => d.name.toLowerCase().trim().includes(value.toLowerCase())));
     }
   };
 
-  if (!isStepsAvailable) return null;
+  if (stepsForThisPage.length === 0) return null;
 
   return (
     <>
