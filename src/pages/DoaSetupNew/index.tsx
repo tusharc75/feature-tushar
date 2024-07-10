@@ -44,7 +44,7 @@ const DoaSetup = ({ resource, entity }) => {
           <Typography className="form-label-style-v1" component={'h3'}>
             {`${resource} DOA Details`}
           </Typography>
-          {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
+          {permissions.entity?.isUpdate && (
             <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setOpen(true)}>
               {doaData ? `Edit DOA` : `Add DOA`}
             </Button>

@@ -121,6 +121,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }) => {
           return (
             <DashBoardCardShell
               key={section.head}
+              id={`dashboard-card-${section.head.split(' ').join('-')}`}
               role="button"
               className={styles.singlecard}
               background={section.color}

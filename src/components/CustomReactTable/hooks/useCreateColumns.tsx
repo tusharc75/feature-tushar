@@ -14,7 +14,9 @@ export const useCreateColumns = ({
   dispatch,
   state,
   isClientSideGrid,
-  toggleExpandChange
+  toggleExpandChange,
+  resource,
+  renderedFrom
 }) => {
   const { dataRows: allRows } = state;
 
@@ -110,7 +112,7 @@ export const useCreateColumns = ({
         />
       ),
       cell: ({ row }) => (
-        <div className="mx-auto text-center justify-center">
+        <div className="mx-auto justify-center text-center">
           {row.original.hideSelection ? (
             <></>
           ) : (
@@ -118,7 +120,8 @@ export const useCreateColumns = ({
               {...{
                 checked: row.getIsSelected(),
                 indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler()
+                onChange: row.getToggleSelectedHandler(),
+                id: `${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`
               }}
               className="[&_svg]:[font-size:20px_!important]"
             />

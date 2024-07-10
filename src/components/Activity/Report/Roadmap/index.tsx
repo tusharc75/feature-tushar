@@ -124,15 +124,9 @@ function Roadmap({ type, filter }) {
               </Box>
             </div>
           </Box>
-          <Box
-            id="scrollDayLiner"
-            onScroll={onscroll}
-            border={1}
-            borderColor="var(--common-border-color)"
-            style={{ position: 'relative', overflow: 'auto' }}
-          >
+          <Box id="scrollDayLiner" onScroll={onscroll} border={1} borderColor="var(--common-border-color)" className="relative overflow-auto">
             <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={startDate} endDate={endDate} />
-            <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
+            <Box width="100%" height="calc(100% - 60px)" className="absolute inset-0 bottom-0 left-0 right-0 top-[60px] z-[1] w-full">
               <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
                 <CalendarList
                   fetchRoadmap={fetchRoadmap}
@@ -148,7 +142,7 @@ function Roadmap({ type, filter }) {
                 />
               </Box>
             </Box>
-            <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
+            <Box width={totalDay * dayPixel} height={'calc(100% - 60px)'} style={{ position: 'sticky', top: 60, bottom: 0 }}>
               <div ref={scrollRef}>
                 <Box
                   id="dayLiner"
@@ -159,7 +153,7 @@ function Roadmap({ type, filter }) {
                     width: dayPixel
                   }}
                 >
-                  <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="secondary.main" height={'100%'}></Box>
+                  <Box style={{ margin: 'auto' }} width={2} border={2} className="!border-green-500" height={'100%'}></Box>
                 </Box>
               </div>
             </Box>

@@ -1,121 +1,236 @@
-import { Step } from 'src/components/CustomIntro';
+import { Step, StepDefination } from 'src/components/CustomIntro';
+const RETRY = 10; //in seconds
 
-export class HandleStep {
+export class HandleSteps {
+  setUpdateSignal: any;
   steps: Step[];
-  setUpdateSignal: React.Dispatch<React.SetStateAction<number>>;
-  elements: HTMLElement[];
-  currentStepIndex: number;
-  itemPositions: DOMRect[];
+  currentIndex: number;
   started: boolean;
-  finished: boolean;
-  timeoutSignal: NodeJS.Timeout;
   documentHeight: number;
-  ready: boolean;
-  constructor({ steps, setUpdateSignal }: { steps: Step[]; setUpdateSignal: React.Dispatch<React.SetStateAction<number>> }) {
-    this.steps = steps;
-    this.elements = [];
-    this.itemPositions = [];
-    this.currentStepIndex = -1;
+  finished: boolean;
+  boundMousedown!: (e: MouseEvent) => void;
+  currentStepData:
+    | ({
+        positionData: {
+          bottom: number;
+          height: number;
+          left: number;
+          right: number;
+          top: number;
+          width: number;
+          x: number;
+          y: number;
+        };
+        element: HTMLElement;
+        index: number;
+      } & Step)
+    | null;
+  interval: NodeJS.Timeout;
+  retry: number;
+  message: string;
+  error: boolean;
+  resizeObserver: ResizeObserver;
+  waitedForClicks: number;
+  listenerAttachedElements: { elm: HTMLElement; event: keyof HTMLElementEventMap; func: any }[];
+  handleReset: () => void;
+  findingElement: boolean;
+  constructor({
+    setUpdateSignal,
+    steps,
+    onReset
+  }: {
+    setUpdateSignal: React.Dispatch<React.SetStateAction<number>>;
+    steps: StepDefination[];
+    onReset: () => void;
+  }) {
+    this.setUpdateSignal = setUpdateSignal;
+    this.handleReset = onReset;
+    this.steps = this.initializeStepData(steps);
+    this.currentIndex = -1;
     this.started = false;
     this.finished = false;
-    this.setUpdateSignal = setUpdateSignal;
-    this.timeoutSignal = null;
+    this.currentStepData = null;
     this.documentHeight = document?.body.offsetHeight;
-    this.ready = false;
+    this.retry = 0;
+    this.interval = null;
+    this.message = '';
+    this.error = false;
+    this.waitedForClicks = 0;
+    this.listenerAttachedElements = [];
+    this.findingElement = false;
+    this.resizeObserver = new ResizeObserver((entries) => {
+      window.requestAnimationFrame(() => {
+        if (!entries[0]) return;
+        const height = entries[0].target.clientHeight;
+        this.documentHeight = height;
+        if (this.started) {
+          this.getCurrentStep(true);
+        }
+      });
+    });
 
-    // initialize main class
-    this.init();
-    this.listeaners();
+    this.addEventListeners();
+    this.resizeObserver.observe(document?.body);
   }
 
-  listeaners() {
-    window.addEventListener('resize', this.init.bind(this));
+  private initializeStepData(steps: StepDefination[]) {
+    const newSteps: Step[] = [];
+    for (const data of steps) {
+      if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data)) {
+        newSteps.push({
+          title: data.title,
+          content: data.content,
+          target: data.target,
+          url: data.url,
+          isHiddenStep: false
+        });
+        newSteps.push({
+          ...data,
+          target: data.target,
+          isHiddenStep: true
+        });
+      } else {
+        newSteps.push({ title: data.title, content: data.content, target: data.target, url: data.url, isHiddenStep: false });
+      }
+    }
+    return newSteps;
+  }
+
+  private addEventListeners() {
+    this.boundMousedown = this.handleNextMouseDown.bind(this);
+    window.addEventListener('mousedown', this.boundMousedown);
   }
   removeListeners() {
-    window.removeEventListener('resize', this.init.bind(this));
+    window.removeEventListener('mousedown', this.boundMousedown);
+  }
+
+  handleNextMouseDown(e: MouseEvent) {
+    if (this.currentStepData.isHiddenStep && this.currentStepData.element.contains(e.target as Node) && this.currentStepData.nextOnUserClicks) {
+      this.waitedForClicks += 1;
+      if (this.waitedForClicks >= this.currentStepData.nextOnUserClicks) {
+        this.next();
+        this.waitedForClicks = 0;
+      }
+    }
+  }
+
+  handleNextOnFocusOut(e: FocusEvent) {
+    this.next();
+  }
+  handleNextOnValueChange(e: FocusEvent) {
+    const target = e.target as HTMLInputElement;
+    if (target?.value?.trim()) {
+      this.next();
+    }
+  }
+  handleNextOnKeyDown(e: KeyboardEvent) {
+    if (this.currentStepData.isHiddenStep && e.key === this.currentStepData.nextOnKeyPress) {
+      this.next();
+    }
+  }
+
+  attachNextListeners() {
+    if (!this.currentStepData.isHiddenStep) return;
+    const currData = this.currentStepData;
+
+    if (currData.nextOnFocusOut) {
+      currData.element.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
+      this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
+    }
+    if (currData.nextOnValueChange) {
+      currData.element.addEventListener('blur', this.handleNextOnValueChange.bind(this));
+      this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnValueChange.bind(this) });
+    }
+    if (currData.nextOnKeyPress) {
+      currData.element.addEventListener('keydown', this.handleNextOnKeyDown.bind(this));
+      this.listenerAttachedElements.push({ elm: currData.element, event: 'keydown', func: this.handleNextOnKeyDown.bind(this) });
+    }
+  }
+
+  removeNextListeners() {
+    this.listenerAttachedElements.map((d) => d.elm.removeEventListener(d.event, d.func));
+  }
+
+  start() {
+    this.started = true;
+    this.next();
+  }
+  finish() {
+    this.reset();
+  }
+  reset() {
+    this.started = false;
+    this.finished = false;
+    this.currentIndex = -1;
+    this.handleReset();
+  }
+  next() {
+    if (this.currentIndex === this.steps.length - 1) {
+      this.reset();
+    }
+    this.currentIndex++;
+    this.getCurrentStep();
+    this.removeNextListeners();
+  }
+  previous() {
+    if (this.currentIndex === 0) {
+      this.getCurrentStep();
+      return;
+    }
+    this.currentIndex--;
+    if (this.steps[this.currentIndex]?.isHiddenStep) {
+      this.previous();
+    }
+    this.removeNextListeners();
+    this.getCurrentStep();
+  }
+
+  getCurrentStep(dirty = false, index = this.currentIndex) {
+    if (!this.steps[index]) return;
+    if (this.currentStepData?.index === index && !dirty) return this.currentStepData;
+    this.findingElement = true;
+    const activeStep = this.steps[index];
+    clearInterval(this.interval);
+    let element = document.querySelector(activeStep.target) as HTMLElement;
+    this.sendUpdateSignal();
+    if (!element) {
+      this.retry++;
+      if (this.retry >= RETRY) {
+        clearInterval(this.interval);
+        this.message = 'Element not found';
+        this.error = true;
+        this.reset();
+      }
+      this.interval = setInterval(() => {
+        this.getCurrentStep();
+      }, 300);
+    } else {
+      this.findingElement = false;
+      const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
+      const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
+      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+
+      setTimeout(() => {
+        this.currentStepData = {
+          ...activeStep,
+          positionData,
+          index: index,
+          element
+        };
+        this.attachNextListeners();
+        this.sendUpdateSignal();
+      }, 200);
+    }
   }
 
   private sendUpdateSignal() {
     this.setUpdateSignal((prev) => (prev < 10 ? prev + 1 : 0));
   }
 
-  init() {
-    if (!this.steps) return;
-    clearTimeout(this.timeoutSignal);
-    this.documentHeight = document?.body.offsetHeight;
-    this.elements = [];
-    this.itemPositions = [];
-    for (const item of this.steps) {
-      if (typeof item.target === 'string') {
-        this.elements.push(document.querySelector(item.target));
-      } else {
-        this.elements.push(item.target);
-      }
-    }
-    setTimeout(() => {
-      this.getTargetPositions();
-    }, 0);
-    this.timeoutSignal = setTimeout(() => {
-      this.sendUpdateSignal();
-    }, 50);
-  }
-  getTargetPositions() {
-    const positions = [];
-    for (const element of this.elements) {
-      if (element) {
-        positions.push(element.getBoundingClientRect());
-      }
-    }
-    this.itemPositions = positions;
-    this.ready = true;
-    return positions;
-  }
-  getArrowPosition() {
-    const data = this.getActiveStepData();
-    if (!data) return { left: 0, top: 0 };
-    return {
-      top: data.positionData.top + data.positionData.height + 10,
-      left: data.positionData.left + data.positionData.width / 2 + 5
-    };
-  }
-  getActiveStepData() {
-    if (!this.started && this.finished) return null;
-    if (this.itemPositions[this.currentStepIndex] && this.steps[this.currentStepIndex]) {
-      return { positionData: this.itemPositions[this.currentStepIndex], ...this.steps[this.currentStepIndex] };
-    }
-    return null;
-  }
-
-  start() {
-    if (this.started) return;
-    this.started = true;
-    this.next();
-  }
-  next() {
-    if (this.currentStepIndex === this.steps.length - 1) {
-      this.reset();
-      return;
-    }
-    this.currentStepIndex++;
-    this.sendUpdateSignal();
-  }
-  prev() {
-    if (this.currentStepIndex === 0) return;
-    this.currentStepIndex--;
-    this.sendUpdateSignal();
-  }
-
   isLastStep() {
-    return this.steps.length - 1 === this.currentStepIndex;
+    return this.steps.length - 1 === this.currentIndex;
   }
   isFirstStep() {
-    return this.currentStepIndex === 0;
-  }
-
-  reset() {
-    this.sendUpdateSignal();
-    this.currentStepIndex = -1;
-    this.started = false;
-    this.finished = false;
+    return this.currentIndex === 0;
   }
 }

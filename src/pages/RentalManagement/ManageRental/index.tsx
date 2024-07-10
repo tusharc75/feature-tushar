@@ -17,7 +17,7 @@ import {
   setFieldsInAscendingOrder,
   yupSchema,
   RENTAL_STATUS,
-  GenerateResourceLineNumber,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
@@ -84,7 +84,9 @@ const ManageRentalManagementDialog = ({
             const { _id, brand, createdBy, entity, history, products, status, rentalJobName, updatedBy, ...rest } = data;
             rest['status'] = RENTAL_STATUS.new;
             rest['rentalJobName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-            fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName));
+            fieldsDataForCreate = fieldsDataForCreate?.filter(
+              (obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName)
+            );
             setCloneHeading(rentalJobName);
             setRentalData({
               fields: fieldsDataForCreate,
@@ -116,7 +118,9 @@ const ManageRentalManagementDialog = ({
           toastConfig.setToastConfig(error);
         }
       } else {
-        fieldsDataForCreate = fieldsDataForCreate?.filter((obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName));
+        fieldsDataForCreate = fieldsDataForCreate?.filter(
+          (obj) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(obj.fieldName)
+        );
         let initialData = getObjKeys('', fieldsDataForCreate);
         if (fieldsDataForCreate?.some((e) => e.fieldName === 'currency')) {
           initialData['currency'] = user.user?.brandCurrency;
@@ -358,9 +362,16 @@ const ManageRentalManagementDialog = ({
                                         {...field}
                                         fieldData={field}
                                         disabled={
-                                          field.fieldName === 'currency' ? rentalDetails && rentalDetails?.material?.length ? true : false
-                                            : field.fieldName === 'warehouse' ? rentalDetails && rentalDetails?.productInventory?.length ? true : false
-                                              : field.fieldName === 'customerAccount' ? isDisableCustomerAccount
+                                          field.fieldName === 'currency'
+                                            ? rentalDetails && rentalDetails?.material?.length
+                                              ? true
+                                              : false
+                                            : field.fieldName === 'warehouse'
+                                              ? rentalDetails && rentalDetails?.productInventory?.length
+                                                ? true
+                                                : false
+                                              : field.fieldName === 'customerAccount'
+                                                ? isDisableCustomerAccount
                                                 : rentalManagementId && field.disableOnEdit && !isClone
                                         }
                                         values={values}

@@ -27,12 +27,14 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-export default function MobileSteps({ nextButton, backButton, stepName }) {
+export default function MobileSteps({ nextButton, backButton, stepName, id }) {
   const classes = useStyles();
   return (
     <div className={classes.createLayout}>
       {backButton}
-      <span className={classes.stepLayout}>{stepName}</span>
+      <span className={classes.stepLayout} id={id}>
+        {stepName}
+      </span>
       {nextButton}
     </div>
   );

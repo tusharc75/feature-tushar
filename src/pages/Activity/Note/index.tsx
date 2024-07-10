@@ -2,13 +2,12 @@ import { Chip, Dialog, IconButton, MenuItem, TextField } from '@material-ui/core
 import Box from '@material-ui/core/Box';
 import { Delete as DeleteIcon } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
-
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -24,7 +23,7 @@ import CustomContainer from '../../../components/CustomContainer';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import NoDataCell from '../../../components/Helpers/NoDataCell';
 import routes from '../../../components/Helpers/Routes';
-import { CustomDialogTransition, displayDate, gridLoadingTimeout, isObjectEmpty, sidebarResource } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
 import { FiExternalLink } from 'react-icons/fi';
 
@@ -70,9 +69,7 @@ const Note = () => {
       {
         accessor: 'name',
         Header: 'Title',
-        show: true,
         disabled: true,
-        primaryField: true,
         Cell: ({ row }) => (
           <div>
             <span
@@ -91,11 +88,9 @@ const Note = () => {
       {
         accessor: 'relatedTo',
         Header: 'Related To',
-        show: true,
         disabled: true,
-        primaryField: true,
-        filter: false,
-        sortable: false,
+        disableFilters: true,
+        disableSortBy: true,
         Cell: ({ row }) => (
           <div>
             {row.original?.relatedTo && row.original?.relatedTo?.length > 0 ? (
@@ -104,7 +99,7 @@ const Note = () => {
                   <div className="flex items-center gap-2" key={d.name}>
                     <p> {d.name}</p>
                     <IconButton size="small" onClick={() => window.open(`${routes[d?.type].path}/detail/${d?.referenceId}`)}>
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                     </IconButton>
                     <Chip color="primary" label={`${routes[d?.type]?.title}`} />
                   </div>
@@ -116,47 +111,32 @@ const Note = () => {
           </div>
         )
       },
+      ...getStaticFields(),
       {
-        accessor: 'createdByDate',
-        Header: 'Created At',
-        filter: false,
-        sortable: false,
-        show: true,
-        Cell: ({ row }) => <div>{displayDate(row.original?.createdByDate)}</div>
-      },
-      {
-        accessor: 'updatedByDate',
-        Header: 'Updated At',
-        filter: false,
-        sortable: false,
-        show: true,
-        Cell: ({ row }) => (row.original?.updatedByDate ? <div>{displayDate(row.original?.updatedByDate)}</div> : <NoDataCell />)
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 110,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <>
+            <HtmlTooltip title={permissions?.note?.isDelete ? 'Delete' : deleteDisable}>
+              <span>
+                <IconButton disabled={!permissions?.note?.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+                  <DeleteIcon fontSize="small" color={permissions?.note?.isDelete ? 'error' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
+        )
       }
     ];
-    setColumns([...column, ActionsRenderer]);
+    setColumns(column);
   };
 
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 110,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        <HtmlTooltip title={permissions?.note?.isDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton disabled={!permissions?.note?.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
-              <DeleteIcon fontSize="small" color={permissions?.note?.isDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      </>
-    )
-  };
 
   useEffect(() => {
     if (referenceType) {
@@ -215,31 +195,18 @@ const Note = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     const queryString = getQueryString();
     dispatch({ type: 'loading', loading: true });
-    let apiUrl = `/note?filter=${JSON.stringify(filter)}${queryString}`;
-    axiosInstance()
-      .get(apiUrl, { cancelToken: cancelTokenSource?.token })
-      .then(({ data: { data } }) => {
-        let rows = data.map((u) => {
-          const { createdBy, updatedBy, ...restProperties } = u;
-          let res = {
-            ...restProperties,
-            id: u._id,
-            name: u.name,
-            createdBy: u.createdBy?.user,
-            createdByDate: u.createdBy?.date,
-            updatedBy: u.updatedBy?.user?.concatedName,
-            updatedByDate: u.updatedBy?.date,
-            isChecked: false,
-            canDelete: permissions?.note?.isDelete ? u.createdBy?.user === user?.user?._id : false
-          };
-          return res;
-        });
-
-        dispatch({ type: 'initialize', data: rows, count: data.length });
-        setTimeout(() => {
-          dispatch({ type: 'loading', loading: false });
-        }, gridLoadingTimeout);
-      })
+    let apiUrl = `/note?relatedTo=${JSON.stringify(filter?.map((e) => { return { type: e?.type, referenceId: e?._id, access: true } }))}${queryString}`;
+    axiosInstance().get(apiUrl, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
+      let rows = data?.data?.map((u) => {
+        let finalObject: any = prepareDataForGrid(u, user);
+        finalObject.canDelete = permissions?.note?.isDelete ? u.createdBy?.user === user?.user?._id : false
+        return finalObject;
+      });
+      dispatch({ type: 'initialize', data: rows, count: count });
+      setTimeout(() => {
+        dispatch({ type: 'loading', loading: false });
+      }, gridLoadingTimeout);
+    })
       .catch((err) => {
         toastConfig.setToastConfig(err);
         dispatch({ type: 'loading', loading: false });
@@ -251,7 +218,6 @@ const Note = () => {
 
     if (!isObjectEmpty(filters)) {
       const updatedFilters = [];
-
       Object.keys(filters).forEach((field) => {
         if (filters[field].filter?.toLowerCase() === 'me') {
           filters[field].filter = user?.user?.email;
@@ -360,7 +326,7 @@ const Note = () => {
                 }}
               />
             }
-            isActionButtonVisible={permissions?.productionOrder?.isDelete}
+            isActionButtonVisible={permissions?.note?.isDelete}
             searchFilter={filter}
             handleSearchFilter={handleChangeFilter}
             actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
@@ -439,7 +405,7 @@ const Note = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
-            // noteData={noteData}
+          // noteData={noteData}
           />
         </Dialog>
       )}

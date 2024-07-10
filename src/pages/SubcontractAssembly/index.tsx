@@ -1,4 +1,7 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -6,40 +9,56 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import { WalkmeData, useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
-import DeleteIcon from '@material-ui/icons/Delete';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import CustomIntro, { Step } from 'src/components/CustomIntro';
-import axios, { CancelTokenSource } from 'axios';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 
-const steps: Step[] = [
+const stepData: WalkmeData[] = [
   {
-    title: 'Dummy Title 1',
-    content: (
-      <p>
-        Lorem ipsum dolor sit amet consectetur adipisicing elit. Corrupti molestias explicabo accusantium magnam quibusdam. Culpa amet natus aut
-        suscipit quam!
-      </p>
-    ),
-    target: '#add-button'
-  },
-  {
-    title: 'Dummy Title 2',
-    content: `Lorem ipsum dolor sit, amet consectetur adipisicing elit. Voluptatibus repellat commodi, aliquam possimus voluptatum cupiditate, magnam natus distinctio praesentium, explicabo quam incidunt. Eius, velit adipisci!`,
-    target: '#action-button'
+    name: 'Add subcontract',
+    urls: ['/subcontract-assembly'],
+    steps: [
+      {
+        url: '/subcontract-assembly',
+        title: 'Add ',
+        target: '#add-button',
+        content: ''
+      },
+      {
+        target: '#field-supplier-account',
+        url: '/subcontract-assembly',
+        title: 'Select suplier',
+        content: '',
+        nextOnValueChange: true
+      },
+      {
+        target: '#field-warehouse',
+        url: '/subcontract-assembly',
+        title: 'select address',
+        content: '',
+        nextOnFocusOut: true
+      },
+      {
+        target: '#dialog-save-button',
+        url: '/subcontract-assembly',
+        title: 'Add subcontract',
+        content: ''
+      }
+    ]
   }
 ];
 
 const SubcontractAssembly = () => {
+  const { addWalkmeData } = useSetWalkmeData();
+
   const types = [
     {
       key: `My ${routes.subcontractAssembly.title}`,
@@ -71,6 +90,7 @@ const SubcontractAssembly = () => {
 
   useEffect(() => {
     fetchGridColumns();
+    addWalkmeData(stepData);
   }, []);
 
   useEffect(() => {
@@ -148,7 +168,10 @@ const SubcontractAssembly = () => {
           let rows = data?.map((u: any) => {
             let finalObject: any = prepareDataForGrid(u);
             finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-            finalObject['canDelete'] = permissions?.subcontractAssembly?.isDelete && checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, finalObject?.ownerId) && u?.canDelete;
+            finalObject['canDelete'] =
+              permissions?.subcontractAssembly?.isDelete &&
+              checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, finalObject?.ownerId) &&
+              u?.canDelete;
             return {
               ...finalObject
             };
@@ -305,8 +328,9 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.subcontractAssemblyNumber || ''
-              } ?`}
+            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
+              deleteRecord?.subcontractAssemblyNumber || ''
+            } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
@@ -326,7 +350,6 @@ const SubcontractAssembly = () => {
           />
         )}
       </CustomContainer>
-      {/* <CustomIntro steps={steps} /> */}
     </section>
   );
 };

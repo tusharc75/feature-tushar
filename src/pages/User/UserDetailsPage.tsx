@@ -68,7 +68,6 @@ import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
 import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSession from './UserSession';
-import UserSetupDialog from './UserSetupDialog';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -93,12 +92,9 @@ const UserDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
-  const [rolesLoading] = useState(false);
-  // const [userRelatedLoading, setUserRelatedLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [leadsRelatedData, setLeadsRelatedData] = useState(null);
   const [opportunityRelatedData, setOpportunityRelatedData] = useState(null);
@@ -107,13 +103,9 @@ const UserDetailsPage = () => {
   const [supplierAccountRelatedData, setSupplierAccountRelatedData] = useState(null);
   const [supplierContactRelatedData, setSupplierContactRelatedData] = useState(null);
   const [quotesRelatedData, setQuotesRelatedData] = useState(null);
-  const [userPermissions, setUserPermissions] = useState(null);
-  const [unionRoleData, setUnionRoleData] = useState(null);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
-  // const [isChangingPermission, setIsChangingPermission] = useState(false);
-  const [hasPermissionToUpdateApprovalProcess] = useState(permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
   const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
@@ -121,12 +113,10 @@ const UserDetailsPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
-  const [userList, setUserList] = useState<any[]>([]);
   const [orgChartData, setOrgChartData] = useState([]);
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([]);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
-  const [showSetupUserDialog, setShowSetupUserDialog] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allUsers, setAllUsers] = useState([]);
   const [generateAutoPassword, setGenerateAutoPassword] = useState(false);
@@ -140,11 +130,8 @@ const UserDetailsPage = () => {
     if (id) {
       getUserFields();
       fetchUserData();
-      getRoleUnion();
       fetchUserRelatedDetail();
     }
-    // userSetup === 'true' && setShowSetupUserDialog(true);
-    // eslint-disable-next-line
   }, [id]);
 
   useEffect(() => {
@@ -155,7 +142,7 @@ const UserDetailsPage = () => {
 
   useEffect(() => {
     if (roleAccessOfLoggedInUser?.length && userSetup === 'true') {
-      setShowSetupUserDialog(true);
+      setShowAssignEntityDialog(true);
     }
   }, [id, roleAccessOfLoggedInUser]);
 
@@ -216,7 +203,6 @@ const UserDetailsPage = () => {
         }
         handleMainPoints(data);
         const name = [data.firstName, data.lastName].filter((d) => d).join(' ');
-        setHeadingLbl(name);
         setUserData(data);
         setEntities(data.entities.filter((e) => e.role.length !== 0 || e.entity !== undefined));
         setGloabalRoles(data.role);
@@ -248,7 +234,6 @@ const UserDetailsPage = () => {
 
         setOrgChartData(orgChartData);
 
-        setUserPermissions(data?.permissions);
         setLoading(false);
       })
       .catch((error) => {
@@ -356,22 +341,6 @@ const UserDetailsPage = () => {
     setShowAssignEntityDialog(false);
   };
 
-  const getRoleUnion = () => {
-    axiosInstance()
-      .get(`/user/union-role/${id}`)
-      .then(({ data: { data } }) => {
-        setUnionRoleData(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-  /* Unassign role */
-  const handleUnassignRole = (rec) => {
-    setRoleDeleteRec(rec);
-    setShowConfirmBox(true);
-  };
-
   const unassignUserRole = () => {
     if (roleDeleteRec?._id) {
       const data = {
@@ -383,8 +352,6 @@ const UserDetailsPage = () => {
         .then(() => {
           setShowConfirmBox(false);
           fetchUserData();
-          setUnionRoleData(null);
-          getRoleUnion();
           toastConfig.setToastConfig({
             message: 'Role unassigned successfully',
             type: 'success',
@@ -395,35 +362,6 @@ const UserDetailsPage = () => {
           toastConfig.setToastConfig(err);
         });
     }
-  };
-  /**
-   *  Permissions Change Handle
-   */
-  const handleChangePermissions = (e) => {
-    setUserPermissions({
-      ...userPermissions,
-      [e.target.name]: e.target.checked
-    });
-    const newData = {
-      _id: id,
-      ...userPermissions,
-      [e.target.name]: e.target.checked
-    };
-    // setHasPermissionToUpdateApprovalProcess(false);
-    axiosInstance()
-      .put('/user/permission-setup', newData)
-      .then(({ data }) => {
-        // setHasPermissionToUpdateApprovalProcess(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((err) => {
-        // setHasPermissionToUpdateApprovalProcess(false);
-        toastConfig.setToastConfig(err);
-      });
   };
 
   const handleOpenDialog = () => {
@@ -529,7 +467,6 @@ const UserDetailsPage = () => {
                     {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
                     <CustomTab value={3} label={'User Session'} />
                     <CustomTab value={4} label={'Assigned Entity'} />
-                    <CustomTab value={5} label={'Approval Process'} />
                   </CustomTabs>
 
                   <TabPanel value={tabValue} index={0}>
@@ -656,55 +593,11 @@ const UserDetailsPage = () => {
                       </Grid>
                     </Grid>
                   </TabPanel>
-                  <TabPanel value={tabValue} index={5}>
-                    <div style={{ display: 'block' }}>
-                      <Box padding={2}>
-                        <FormControl component="fieldset" fullWidth>
-                          <FormGroup>
-                            {loading ? (
-                              [1, 2, 3, 4].map((i) => (
-                                <Box padding={1} marginBottom={2} display="flex" key={i}>
-                                  <Skeleton style={{ borderRadius: 16 }} width="30px" height="30px" />
-                                  <Box marginX={1} />
-                                  <Skeleton variant="text" width="80%" height="30px" />
-                                </Box>
-                              ))
-                            ) : userPermissions ? (
-                              Object.keys(userPermissions).map((key) => (
-                                <HtmlTooltip
-                                  title={
-                                    !hasPermissionToUpdateApprovalProcess
-                                      ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}`
-                                      : ''
-                                  }
-                                >
-                                  <FormControlLabel
-                                    key={key}
-                                    control={
-                                      <Switch
-                                        checked={userPermissions[key]}
-                                        name={key}
-                                        disabled={!hasPermissionToUpdateApprovalProcess}
-                                        onChange={handleChangePermissions}
-                                      />
-                                    }
-                                    label={key === 'doaSetup' ? 'DOA Setup' : startCase(key)}
-                                  />
-                                </HtmlTooltip>
-                              ))
-                            ) : (
-                              <Typography>There are no permissions</Typography>
-                            )}
-                          </FormGroup>
-                        </FormControl>
-                      </Box>
-                      <QuickLinks quickLinks={quickLinks} />
-                    </div>
-                  </TabPanel>
                 </>
               )}
             </Box>
             <div className="pt-3 ">
+              <QuickLinks quickLinks={quickLinks} />
               {permissions?.[opportunity.opportunityResource]?.isRead && (
                 <Box mb={2}>
                   <OpportunityAccordionInUserDetail
@@ -812,7 +705,6 @@ const UserDetailsPage = () => {
           open={openUpdateDialog}
           close={closeUpdateDialog}
           onSuccess={(obj) => {
-            setUserPermissions(obj?.permissions);
             setOpenUpdateDialog(false);
             fetchUserData();
           }}
@@ -831,13 +723,17 @@ const UserDetailsPage = () => {
             onSuccess={() => {
               handleCloseDialog();
               fetchUserData();
-              getRoleUnion();
             }}
           />
         </Dialog>
       )}
       {showAssignEntityDialog && (
-        <Dialog fullWidth maxWidth="xs" open={showAssignEntityDialog} onClose={entityDialogClose} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={showAssignEntityDialog}
+          onClose={entityDialogClose}
+          aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
             entitiesDialogOpen={showAssignEntityDialog}
             handleCloseDialog={entityDialogClose}
@@ -856,15 +752,12 @@ const UserDetailsPage = () => {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          // message={`Are you sure you want to delete this User ?`}
-          // onClose={() => setShowConfirmBox(false)}
-          // onOk={handleDeleteUser}
           message={
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-              : ''
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+                : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -890,35 +783,6 @@ const UserDetailsPage = () => {
             }}
           />
         </FullScreenDialog>
-      )}
-      {showSetupUserDialog && (
-        <UserSetupDialog
-          open={showSetupUserDialog}
-          close={() => {
-            history.push({
-              pathname: `/user/detail/${id}`,
-              search: ''
-            });
-            setShowSetupUserDialog(false);
-            fetchUserData();
-          }}
-          userIds={[id]}
-          onSuccess={() => {
-            setShowSetupUserDialog(false);
-            history.push({
-              pathname: `/user/detail/${id}`,
-              search: ''
-            });
-            fetchUserData();
-          }}
-          fetchUsers={() => fetchAllUsers()}
-          userList={userList}
-          selectedRecords={[{ ...userData }]}
-          isRoleSetUpPermission={permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
-          isApprovalProcess={isLoggedInUserBrandAdmin}
-          roleAccessIds={roleAccessOfLoggedInUser}
-          entityAccessIds={entityAccess}
-        />
       )}
       {showConfirmBox && deleteUserRec ? (
         <ResourceTransferDialog

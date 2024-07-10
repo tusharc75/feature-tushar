@@ -28,9 +28,9 @@ const WarningFilter = ({ warnings, checkedFilter, setCheckedFilter }: WarningFil
   return (
     <>
       <span className="relative">
-        <span className={`flex h-[6px] w-[6px] absolute -top-[3px] -left-[3px] z-10 ${checkedFilter ? '' : 'sr-only'}`}>
-          <span className="absolute -top-[3px] -left-[3px] animate-ping inline-flex rounded-full bg-sky-400 opacity-75 h-3 w-3"></span>
-          <span className="inline-flex rounded-full  bg-sky-500 w-full h-full"></span>
+        <span className={`absolute -left-[3px] -top-[3px] z-10 flex h-[6px] w-[6px] ${checkedFilter ? '' : 'sr-only'}`}>
+          <span className="absolute -left-[3px] -top-[3px] inline-flex h-3 w-3 animate-ping rounded-full bg-sky-400 opacity-75"></span>
+          <span className="inline-flex h-full  w-full rounded-full bg-sky-500"></span>
         </span>
         <ThemeButton
           size="small"
@@ -59,7 +59,7 @@ const WarningFilter = ({ warnings, checkedFilter, setCheckedFilter }: WarningFil
           horizontal: 'right'
         }}
       >
-        <h6 className="text-center px-2 py-2 text-[16px] font-semibold [border-bottom:1px_solid_var(--common-border-color)]">
+        <h6 className="px-2 py-2 text-center text-[16px] font-semibold [border-bottom:1px_solid_var(--common-border-color)]">
           Filter Items by warning
         </h6>
         <FormGroup>
