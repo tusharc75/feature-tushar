@@ -123,10 +123,10 @@ const Note = () => {
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            <HtmlTooltip title={permissions?.note?.isDelete ? 'Delete' : deleteDisable}>
+            <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
               <span>
-                <IconButton disabled={!permissions?.note?.isDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
-                  <DeleteIcon fontSize="small" color={permissions?.note?.isDelete ? 'error' : 'disabled'} />
+                <IconButton disabled={!row.original?.canDelete} size="small" aria-label="Delete" onClick={() => showConfirmBox(row.original)}>
+                  <DeleteIcon fontSize="small" color={row.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -197,9 +197,9 @@ const Note = () => {
     dispatch({ type: 'loading', loading: true });
     let apiUrl = `/note?relatedTo=${JSON.stringify(filter?.map((e) => { return { type: e?.type, referenceId: e?._id, access: true } }))}${queryString}`;
     axiosInstance().get(apiUrl, { cancelToken: cancelTokenSource?.token }).then(({ data: { data, count } }) => {
-      let rows = data?.data?.map((u) => {
+      let rows = data?.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
-        finalObject.canDelete = permissions?.note?.isDelete ? u.createdBy?.user === user?.user?._id : false
+        finalObject.canDelete = permissions?.note?.isDelete && finalObject?.createdById === user?.user?._id ? true : false
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
@@ -293,7 +293,7 @@ const Note = () => {
     return (
       <>
         <MenuItem
-          disabled={permissions?.note?.isDelete ? !selectedRecords.every((records) => records.canDelete) : true}
+          disabled={selectedRecords.some((e) => !e.canDelete) ? true : false}
           onClick={() => {
             showConfirmBox(selectedRecords);
           }}
@@ -346,7 +346,7 @@ const Note = () => {
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
-            showOnlyShowFilteredRecordSwitch={true}
+            showOnlyShowFilteredRecordSwitch={false}
             showFilters={false}
           />
         ) : (
