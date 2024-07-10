@@ -21,6 +21,7 @@ const SingleCard = ({ type, data, index, fetchBoard, setSelectedId, canUpdate, c
   const [anchorEl, setAnchorEl] = React.useState(null);
 
   const handleOpenMenu = (event) => {
+    event.preventDefault();
     event.stopPropagation();
     setAnchorEl(event.currentTarget);
   };

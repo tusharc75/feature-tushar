@@ -4,6 +4,10 @@ import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
 import { dateFormat } from '../../../../constants/helpers';
 
+moment.updateLocale('en', {
+  invalidDate: ''
+});
+
 const DaysBetweenDates = function (calendarType, startDate, endDate) {
   var dateList = [];
   if (calendarType === 'month' || calendarType === 'week') {
@@ -61,7 +65,7 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
         height={60}
         display="flex"
         width={totalDay * dayPixel}
-        className="sticky top-0 z-[2] bg-[var(--dark-primary, white)]"
+        className="bg-[var(--dark-primary, white)] sticky top-0 z-[2]"
         style={{ borderBottom: '1px solid var(--common-border-color)' }}
       >
         {calendarType === 'week'

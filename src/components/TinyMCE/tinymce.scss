@@ -1,3 +1,10 @@
 .tox-notifications-container {
-    display: none;
+  display: none;
+}
+
+.tox-toolbar.tox-toolbar--scrolling {
+  display: flex;
+  @media all and (max-width: 768px) {
+    flex-wrap: wrap !important;
+  }
 }
