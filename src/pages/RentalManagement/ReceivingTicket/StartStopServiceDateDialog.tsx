@@ -3,7 +3,7 @@ import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
 import moment from 'moment';
@@ -54,18 +54,18 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
   const validate = (values) => {
     const errors = {};
     if (type) {
-      if (minDate && values?.date < minDate) {
-        errors['date'] = `${type === 'start' ? 'Start' : 'End'} Date can't be less than ${moment(minDate).format('DD/MM/YYYY')}`;
+      if (minDate && normalizeDate(values?.date) < normalizeDate(minDate)) {
+        errors['date'] = `${type === 'start' ? 'Start' : 'End'} Date can't be less than ${displayDate(minDate)}`;
       }
     } else {
-      if (values?.endDate && values?.startDate > values.endDate) {
+      if (values?.endDate && normalizeDate(values?.startDate) > normalizeDate(values.endDate)) {
         errors['endDate'] = `End Date can't be less than Start Date`;
       }
-      if (minStartDate && values?.startDate < minStartDate) {
-        errors['startDate'] = `Start Date can't be less than ${moment(minStartDate).format('DD/MM/YYYY')}`;
+      if (minStartDate && normalizeDate(values?.startDate) < normalizeDate(minStartDate)) {
+        errors['startDate'] = `Start Date can't be less than ${displayDate(minStartDate)}`;
       }
-      if (maxEndDate && values?.endDate > maxEndDate) {
-        errors['endDate'] = `End Date can't be greater than ${moment(maxEndDate).format('DD/MM/YYYY')}`;
+      if (maxEndDate && normalizeDate(values?.endDate) > normalizeDate(maxEndDate)) {
+        errors['endDate'] = `End Date can't be greater than ${displayDate(maxEndDate)}`;
       }
     }
     return errors;
