@@ -14,8 +14,9 @@ export const useSetWalkmeData = () => {
     });
   };
 
-  const removeWalkmeDataByName = (name: string) => {
-    setWalkMeSteps({ [WALK_ME_STEPS]: data.filter((d) => d.name !== name) });
+  const removeWalkmeDataByName = (names: string | string[]) => {
+    if (typeof names === 'string') names = [names];
+    setWalkMeSteps({ [WALK_ME_STEPS]: data.filter((d) => !names.includes(d.name)) });
   };
 
   return { data, addWalkmeData, removeWalkmeDataByName };
