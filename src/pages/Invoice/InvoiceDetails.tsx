@@ -70,6 +70,7 @@ const InvoiceDetails = () => {
   const [isDownloading, setIsDownloading] = useState(false);
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [showReOpenConfirmBox, setShowReOpenConfirmBox] = useState(false);
 
   const invoiceProcessStepsNames = React.useMemo(() => {
     return invoiceProcessSteps.map((item) => item.name);
@@ -96,7 +97,7 @@ const InvoiceDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -132,7 +133,9 @@ const InvoiceDetails = () => {
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
-      setAllowedToDelete(permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) && data?.canDelete
+      );
       setInvoiceData(data);
       setLoading(false);
     } catch (error) {
@@ -189,6 +192,7 @@ const InvoiceDetails = () => {
       .then(({ data: { data } }) => {
         fetchInvoiceData();
         setShowClosedConfirmBox(false);
+        setShowReOpenConfirmBox(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -252,7 +256,8 @@ const InvoiceDetails = () => {
                   )}
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 {permissions?.invoice?.isUpdate &&
-                  allowedToEdit && [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
+                  allowedToEdit &&
+                  [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
                     <ButtonWithPulse
                       variant={'outlined'}
                       color="default"
@@ -265,6 +270,19 @@ const InvoiceDetails = () => {
                       Close
                     </ButtonWithPulse>
                   )}
+                {permissions?.invoice?.isUpdate && allowedToEdit && [INVOICE_STATUS.closed]?.includes(invoiceData?.status) && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setShowReOpenConfirmBox(true);
+                    }}
+                  >
+                    Re-Open
+                  </Button>
+                )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -367,6 +385,19 @@ const InvoiceDetails = () => {
           }}
           onOk={() => {
             handleChangeStatus(INVOICE_STATUS.closed);
+          }}
+        />
+      )}
+
+      {showReOpenConfirmBox && (
+        <ConfirmationDialog
+          open={showReOpenConfirmBox}
+          message={`Are you sure you want to re-open ${invoiceData?.invoiceNumber} ?`}
+          onClose={() => {
+            setShowReOpenConfirmBox(false);
+          }}
+          onOk={() => {
+            handleChangeStatus(INVOICE_STATUS.readyToInvoice);
           }}
         />
       )}
