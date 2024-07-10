@@ -102,7 +102,7 @@ const LeadDetailsPage = () => {
           const userId = user?.user?._id;
           handleMainPoints(data);
           let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
-        
+
           setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.lead, data));
           let dontHavePermissions = [];
 
@@ -120,10 +120,10 @@ const LeadDetailsPage = () => {
 
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-              user?.user?.permissions?.convertLeadToOpportunity &&
-              isAllowedToUpdate &&
-              data[processFieldName] &&
-              data[processFieldName].toLowerCase() === 'qualified'
+            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+            isAllowedToUpdate &&
+            data[processFieldName] &&
+            data[processFieldName].toLowerCase() === 'qualified'
           );
           setIsLeadAlreadyConvertedToOpportunity(
             data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false

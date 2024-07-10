@@ -1342,7 +1342,7 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
     const sidebarFieldsValues = Object.values(sidebarResource);
 
     if (data) {
-      const hasApproveAccountPermission = user.user.permissions.approveAccount;
+      const hasApproveAccountPermission = user?.role?.selectedEntity?.policy?.isApproveAccount ?? false;
       const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
 
       data.forEach((d) => {

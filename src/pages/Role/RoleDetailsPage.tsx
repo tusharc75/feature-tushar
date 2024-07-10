@@ -73,7 +73,9 @@ const RoleDetailsPage = () => {
     isRentalReopen: false,
     isPricingPurchaseOrder: false,
     isQuoteAskSupplierPrice: false,
-    isProductInventorySettings: false
+    isProductInventorySettings: false,
+    isApproveAccount: false,
+    isConvertLeadToOpportunity: false
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
@@ -81,7 +83,9 @@ const RoleDetailsPage = () => {
     sublease: false,
     purchaseOrder: false,
     quoteBuilder: false,
-    productInventory: false
+    productInventory: false,
+    customerAccount: false,
+    lead: false
   });
 
   const [isPolicyCheckBoxChecked, setIsPolicyCheckBoxChecked] = useState(false);
@@ -121,7 +125,17 @@ const RoleDetailsPage = () => {
       resource: sidebarResource.productInventory,
       fieldLabel: 'Product Inventory Settings',
       fieldName: 'isProductInventorySettings'
-    }
+    },
+    {
+      resource: sidebarResource.customerAccount,
+      fieldLabel: 'Approve Account',
+      fieldName: 'isApproveAccount'
+    },
+    {
+      resource: sidebarResource.lead,
+      fieldLabel: 'Convert Lead To Opportunity',
+      fieldName: 'isConvertLeadToOpportunity'
+    },
   ];
 
   const fieldOfPolicyResources = policyResources?.map((obj) => {
@@ -184,7 +198,9 @@ const RoleDetailsPage = () => {
         purchaseOrder: e.target.checked,
         sublease: e.target.checked,
         quoteBuilder: e.target.checked,
-        productInventory: e.target.checked
+        productInventory: e.target.checked,
+        customerAccount: e.target.checked,
+        lead: e.target.checked
       });
 
       SetPolicyFieldCheckBox({
@@ -193,7 +209,10 @@ const RoleDetailsPage = () => {
         isPricingSublease: e.target.checked,
         isRentalReopen: e.target.checked,
         isQuoteAskSupplierPrice: e.target.checked,
-        isProductInventorySettings: e.target.checked
+        isProductInventorySettings: e.target.checked,
+        isApproveAccount: e.target.checked,
+        isConvertLeadToOpportunity: e.target.checked
+
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
