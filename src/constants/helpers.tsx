@@ -533,7 +533,8 @@ export const RESOURCE_LABEL = {
   dataList: 'Data List',
   dataListitems: 'Data List Items',
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
-  managedPackages: 'Managed Packages'
+  managedPackages: 'Managed Packages',
+  integration: 'Integration',
 };
 
 export const CHILD_RESOURCE = {
