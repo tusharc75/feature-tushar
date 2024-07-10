@@ -47,7 +47,6 @@ const AssignEntityDialog = ({
   type,
   assignedEntity,
   regionalRole,
-  isRenderedFromUserSetUp = false,
   isRenderedFromContact = false,
   entityAccessIds = [],
   roleAccessIds = [],
@@ -350,10 +349,9 @@ const AssignEntityDialog = ({
   };
 
   return (<>
-    {!isRenderedFromUserSetUp && (
-      <CustomDialogHeader
-        title={regionalRole ? `Assign Role` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />
-    )}
+    <CustomDialogHeader
+      showRequiredLabel={false}
+      title={regionalRole ? `Assign Role` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />
     <CustomDialogContent>
       <div className="p-3 md:p-4">
         {!regionalRole ? (
@@ -444,11 +442,9 @@ const AssignEntityDialog = ({
       </div>
     </CustomDialogContent>
     <CustomDialogFooter>
-      {!isRenderedFromUserSetUp && (
-        <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
-          Cancel
-        </Button>
-      )}
+      <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        Cancel
+      </Button>
       <Button
         disabled={!selectedData?.length || !selectedRole?.length || isAssigning}
         onClick={isRenderedFromContact ? handleAccessPortal : handleAssignEntity}
@@ -457,7 +453,7 @@ const AssignEntityDialog = ({
         variant="contained"
         endIcon={isAssigning && <CircularProgress size={20} />}
       >
-        {isRenderedFromUserSetUp ? 'Save & Continue' : 'Save'}
+        {'Save'}
       </Button>
     </CustomDialogFooter>
   </>
