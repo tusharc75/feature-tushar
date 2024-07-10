@@ -107,7 +107,6 @@ const UserDetailsPage = () => {
   const [supplierAccountRelatedData, setSupplierAccountRelatedData] = useState(null);
   const [supplierContactRelatedData, setSupplierContactRelatedData] = useState(null);
   const [quotesRelatedData, setQuotesRelatedData] = useState(null);
-  const [userPermissions, setUserPermissions] = useState(null);
   const [unionRoleData, setUnionRoleData] = useState(null);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
@@ -248,7 +247,6 @@ const UserDetailsPage = () => {
 
         setOrgChartData(orgChartData);
 
-        setUserPermissions(data?.permissions);
         setLoading(false);
       })
       .catch((error) => {
@@ -396,35 +394,6 @@ const UserDetailsPage = () => {
         });
     }
   };
-  /**
-   *  Permissions Change Handle
-   */
-  const handleChangePermissions = (e) => {
-    setUserPermissions({
-      ...userPermissions,
-      [e.target.name]: e.target.checked
-    });
-    const newData = {
-      _id: id,
-      ...userPermissions,
-      [e.target.name]: e.target.checked
-    };
-    // setHasPermissionToUpdateApprovalProcess(false);
-    axiosInstance()
-      .put('/user/permission-setup', newData)
-      .then(({ data }) => {
-        // setHasPermissionToUpdateApprovalProcess(permissions.user.isUpdate && user?.user?.userType === userType.brandAdmin);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-      })
-      .catch((err) => {
-        // setHasPermissionToUpdateApprovalProcess(false);
-        toastConfig.setToastConfig(err);
-      });
-  };
 
   const handleOpenDialog = () => {
     setRolesDialogOpen(true);
@@ -529,7 +498,6 @@ const UserDetailsPage = () => {
                     {userData?.proxyDOA?.optionValue && <CustomTab value={2} label={'DOA Proxy'} />}
                     <CustomTab value={3} label={'User Session'} />
                     <CustomTab value={4} label={'Assigned Entity'} />
-                    <CustomTab value={5} label={'Approval Process'} />
                   </CustomTabs>
 
                   <TabPanel value={tabValue} index={0}>
@@ -656,55 +624,11 @@ const UserDetailsPage = () => {
                       </Grid>
                     </Grid>
                   </TabPanel>
-                  <TabPanel value={tabValue} index={5}>
-                    <div style={{ display: 'block' }}>
-                      <Box padding={2}>
-                        <FormControl component="fieldset" fullWidth>
-                          <FormGroup>
-                            {loading ? (
-                              [1, 2, 3, 4].map((i) => (
-                                <Box padding={1} marginBottom={2} display="flex" key={i}>
-                                  <Skeleton style={{ borderRadius: 16 }} width="30px" height="30px" />
-                                  <Box marginX={1} />
-                                  <Skeleton variant="text" width="80%" height="30px" />
-                                </Box>
-                              ))
-                            ) : userPermissions ? (
-                              Object.keys(userPermissions).map((key) => (
-                                <HtmlTooltip
-                                  title={
-                                    !hasPermissionToUpdateApprovalProcess
-                                      ? `You do not have permission to update ${key === 'doaSetup' ? 'DOA Setup' : startCase(key)}`
-                                      : ''
-                                  }
-                                >
-                                  <FormControlLabel
-                                    key={key}
-                                    control={
-                                      <Switch
-                                        checked={userPermissions[key]}
-                                        name={key}
-                                        disabled={!hasPermissionToUpdateApprovalProcess}
-                                        onChange={handleChangePermissions}
-                                      />
-                                    }
-                                    label={key === 'doaSetup' ? 'DOA Setup' : startCase(key)}
-                                  />
-                                </HtmlTooltip>
-                              ))
-                            ) : (
-                              <Typography>There are no permissions</Typography>
-                            )}
-                          </FormGroup>
-                        </FormControl>
-                      </Box>
-                      <QuickLinks quickLinks={quickLinks} />
-                    </div>
-                  </TabPanel>
                 </>
               )}
             </Box>
             <div className="pt-3 ">
+              <QuickLinks quickLinks={quickLinks} />
               {permissions?.[opportunity.opportunityResource]?.isRead && (
                 <Box mb={2}>
                   <OpportunityAccordionInUserDetail
@@ -812,7 +736,6 @@ const UserDetailsPage = () => {
           open={openUpdateDialog}
           close={closeUpdateDialog}
           onSuccess={(obj) => {
-            setUserPermissions(obj?.permissions);
             setOpenUpdateDialog(false);
             fetchUserData();
           }}
