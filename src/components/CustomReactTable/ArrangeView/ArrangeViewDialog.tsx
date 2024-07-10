@@ -273,6 +273,7 @@ const ArrangeViewDialog = (props: ArrangeColumnsProps) => {
                         <Switch
                           size="small"
                           checked={stateVisibleColumns[column.id]}
+                          disabled={column.disabled}
                           onChange={(e) => {
                             handleToggle(column, e);
                           }}

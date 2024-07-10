@@ -355,7 +355,7 @@ export default function useColumns() {
           cell: ({ row }) =>
             row?.original?.[field?.fieldName] ? (
               <h5 className="items-center [display:flex_!important] [flex-wrap:nowrap_!important]" title={`${row?.original?.[field?.fieldName]}`}>
-                <span title={row?.original?.[field?.fieldName]} className="line-clamp-1">
+                <span title={row?.original?.[field?.fieldName]} className="min-w-0 max-[768px]:line-clamp-1 md:!block md:!truncate">
                   {row?.original?.[field?.fieldName]}
                 </span>
                 <CopyToClipboard textToCopy={row?.original?.[field?.fieldName]} size={16} />
