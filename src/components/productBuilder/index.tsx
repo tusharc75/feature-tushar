@@ -33,6 +33,8 @@ import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
 import NoDataCell from '../Helpers/NoDataCell';
 import { Link } from 'react-router-dom';
 import CustomEditableGrid from 'src/components/CustomEditableGridNew';
+import { AiOutlineImport } from 'react-icons/ai';
+import { CustomImport } from 'src/components/productBuilder/CustomImport';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -86,6 +88,7 @@ const ProductBuilder = (props) => {
   const [inlineBulkEdit, setInlineBulkEdit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fields, setFields] = useState([]);
+  const [customImportDialog, setCustomImportDialog] = useState(false);
   const { generateColumns } = useColumns();
 
   const {
@@ -607,6 +610,20 @@ const ProductBuilder = (props) => {
               small={true}
             />
           )}
+          {permissions?.isUpdate && (
+            <Button
+              size="small"
+              variant="outlined"
+              component="span"
+              startIcon={<AiOutlineImport />}
+              onClick={() => {
+                setCustomImportDialog(true);
+              }}
+            >
+              Custom Import
+            </Button>
+          )}
+
           {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
             <Button
               variant="contained"
@@ -831,6 +848,18 @@ const ProductBuilder = (props) => {
           supplierContactData={supplierContactData}
           productBuilderId={productBuilderId}
           productDataList={productData?.product?.filter((data) => selectedRecords.some((rec) => rec._id === data._id))}
+        />
+      )}
+      {customImportDialog && (
+        <CustomImport
+          handleClose={() => {
+            setCustomImportDialog(false);
+          }}
+          onSuccess={() => {
+            setCustomImportDialog(false);
+            fetchProduct();
+          }}
+          refrenceId={productBuilderId}
         />
       )}
     </Box>
