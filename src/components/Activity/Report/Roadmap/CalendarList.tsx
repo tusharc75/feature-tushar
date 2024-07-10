@@ -2,7 +2,7 @@ import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import moment from 'moment';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { displayDate } from '../../../../constants/helpers';
 import ActivityModelHandler from '../../ActivityModelHandler';
@@ -33,50 +33,57 @@ export default function CalendarList(props) {
   const classes = useStyles();
   const [activityData, setActivityData] = useState(null);
 
-  const getTreeNodes = (activity) => {
-    return activity.map((data, index) => {
-      let children = [];
-      if (data.child && data.child.length) {
-        children = getTreeNodes(data.child);
-        children.push(<div></div>);
-      }
+  const getTreeNodes = useCallback(
+    (activity) => {
+      return activity.map((data, index) => {
+        let children = [];
+        if (data.child && data.child.length) {
+          children = getTreeNodes(data.child);
+          children.push(<div></div>);
+        }
+        const left = (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay;
+        const right = (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay;
 
-      let label = (
-        <Box width={'100%'} height={30} className="d-flex align-items-center">
-          <HtmlTooltip title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)} placement="right">
-            <Box
-              onClick={() => setActivityData({ id: data._id, type })}
-              minWidth={calendarType !== 'week' ? '100px' : ''}
-              height={20}
-              borderRadius="borderRadius"
-              display="flex"
-              style={{
-                position: 'absolute',
-                left: (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay + '%',
-                right: (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay + '%'
-              }}
-              bgcolor="secondary.main"
-              color="white"
-            ></Box>
-          </HtmlTooltip>
-        </Box>
-      );
+        let label = (
+          <Box width={'100%'} height={30} className="d-flex align-items-center">
+            <HtmlTooltip title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)} placement="right">
+              <Box
+                onClick={() => setActivityData({ id: data._id, type })}
+                minWidth={calendarType !== 'week' ? '100px' : ''}
+                height={20}
+                borderRadius="borderRadius"
+                display="flex"
+                style={{
+                  position: 'absolute',
+                  left: `${left}%`,
+                  right: `${right}%`,
+                  top: '50%',
+                  transform: 'translateY(-50%)'
+                }}
+                className="bg-green-500"
+                color="white"
+              ></Box>
+            </HtmlTooltip>
+          </Box>
+        );
 
-      return (
-        <TreeItem
-          key={index}
-          nodeId={data._id.toString()}
-          label={label}
-          children={children}
-          classes={{
-            group: classes.group,
-            iconContainer: classes.iconContainer,
-            label: classes.label
-          }}
-        />
-      );
-    });
-  };
+        return (
+          <TreeItem
+            key={index}
+            nodeId={data._id.toString()}
+            label={label}
+            children={children}
+            classes={{
+              group: classes.group,
+              iconContainer: classes.iconContainer,
+              label: classes.label
+            }}
+          />
+        );
+      });
+    },
+    [calendarType, classes.group, classes.iconContainer, classes.label, endDate, startDate, totalDay, type]
+  );
 
   let TreeNodes = getTreeNodes(activity);
   return (

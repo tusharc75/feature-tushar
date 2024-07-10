@@ -35,8 +35,49 @@ import { RiFlowChart } from 'react-icons/ri';
 import SubcontractAssemblyView from './View';
 
 import queryString from 'query-string';
+import { useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
+
+const walkmeData: WalkmeData[] = [
+  {
+    name: 'Add Existing Product',
+    urls: ['/subcontract-assembly/detail/:id', '/subcontract-assembly/detail/:id?itemTab=1', '/subcontract-assembly/detail/:id?itemTab=0'],
+    steps: [
+      {
+        url: '/subcontract-assembly/:id',
+        title: 'Go to details tab',
+        target: '#main-tab-1',
+        content: ''
+      },
+      {
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Click Add Button',
+        target: '#add-menu-button',
+        content: ''
+      },
+      {
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Add Existing Product',
+        target: '#add-existing-product-menu-item',
+        content: ''
+      },
+      {
+        target: '#Product-table-checkbox-0',
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Select a product',
+        content: ''
+      },
+      {
+        target: '#dialog-add-button',
+        url: '/subcontract-assembly/:id?itemTab=1',
+        title: 'Add Product',
+        content: ''
+      }
+    ]
+  }
+];
 
 const SubcontractAssemblyDetail = () => {
+  const { addWalkmeData, removeWalkmeDataByName } = useSetWalkmeData();
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -95,6 +136,11 @@ const SubcontractAssemblyDetail = () => {
         setCurrentStep(subcontractAssemblySteps?.length - 1);
       } else {
         setCurrentStep(getIndex(data?.processStatus, subcontractAssemblySteps));
+      }
+      if (data.processStatus === 'Add' && checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data)) {
+        addWalkmeData(walkmeData);
+      } else {
+        removeWalkmeDataByName('Add Existing Product');
       }
       setLoading(false);
     } catch (error) {
@@ -161,7 +207,14 @@ const SubcontractAssemblyDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => {
+        console.log(processStatus);
+        if (processStatus === 'Add') {
+          addWalkmeData(walkmeData);
+        } else {
+          removeWalkmeDataByName(['Add Existing Product', 'Delete Existing Product']);
+        }
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });

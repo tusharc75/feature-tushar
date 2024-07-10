@@ -26,8 +26,8 @@ export default function CopyToClipboard({ size = 12, textToCopy, ...rest }) {
   return (
     <>
       {textToCopy ? (
-        <HtmlTooltip title="✓ Copied to clipboard " open={show} arrow placement="top">
-          <span className="ml-2 cursor-pointer" style={{ minWidth: `${size}px` }} onClick={handleCopyToClipBoard} {...rest}>
+        <HtmlTooltip title="✓ Copied to clipboard " className="flex-shrink-0" open={show} arrow placement="top">
+          <span className="ml-2 cursor-pointer " style={{ minWidth: `${size}px` }} onClick={handleCopyToClipBoard} {...rest}>
             {copyIcon ? <MdContentCopy size={size} /> : <MdOutlineDone size={size} />}
           </span>
         </HtmlTooltip>

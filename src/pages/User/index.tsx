@@ -24,10 +24,8 @@ import ResourceTransferDialog from '../../components/ResourceTransferDialog';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import { checkSuperAdminAccess, gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
-import ApprovalProcessDialog from './ApprovalProcessDialog';
 import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
-import UserSetupDialog from './UserSetupDialog';
 
 const User: FC = () => {
   const renderedFrom = camelCase(routes?.user.title);
@@ -42,8 +40,6 @@ const User: FC = () => {
     state: { user, permissions }
   }: any = useData();
 
-  const [openUserSetupDialog, setOpenUserSetupDialog] = useState(false);
-  const [showApprovalProcessDialog, setShowApprovalProcessDialog] = useState(false);
   const [globalRolesDialogOpen, setGlobalRolesDialogOpen] = useState(false);
   const [regionalRolesDialogOpen, setRegionalRolesDialogOpen] = useState(false);
   const [renderCount, setRenderCount] = useState(0);
@@ -536,14 +532,6 @@ const User: FC = () => {
           Assign Brand Admin
         </MenuItem>
         <MenuItem
-          disabled={!(permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin && selectedRecords?.length)}
-          onClick={() => {
-            setShowApprovalProcessDialog(true);
-          }}
-        >
-          Set Approval Process
-        </MenuItem>
-        <MenuItem
           disabled={!(permissions?.user?.isUpdate && selectedRecords?.length)}
           onClick={() => {
             handleRegionalRolesOpenDialog();
@@ -558,14 +546,6 @@ const User: FC = () => {
           }}
         >
           Un-assign Entity
-        </MenuItem>
-        <MenuItem
-          disabled={!(isUserSetupPermission && selectedRecords?.length)}
-          onClick={() => {
-            setOpenUserSetupDialog(true);
-          }}
-        >
-          User Setup
         </MenuItem>
         {user?.user?.userType === userType.brandAdmin && (
           <MenuItem
@@ -621,26 +601,6 @@ const User: FC = () => {
           isUserSetupPermission={isUserSetupPermission}
         />
       )}
-
-      {openUserSetupDialog && (
-        <UserSetupDialog
-          open={openUserSetupDialog}
-          close={() => setOpenUserSetupDialog(false)}
-          userIds={selectedRecords.map((d) => d._id)}
-          onSuccess={() => {
-            setOpenUserSetupDialog(false);
-            fetchUsers();
-          }}
-          fetchUsers={() => fetchUsers()}
-          userList={userList}
-          selectedRecords={selectedRecords}
-          isRoleSetUpPermission={isRoleSetUpPermission}
-          isApprovalProcess={isLoggedInUserBrandAdmin}
-          roleAccessIds={roleAccessOfLoggedInUser}
-          entityAccessIds={entityAccess}
-        />
-      )}
-
       {globalRolesDialogOpen && (
         <Dialog fullWidth maxWidth="xs" open={globalRolesDialogOpen} onClose={handleGlobalRolesCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignRolesDialog
@@ -655,25 +615,6 @@ const User: FC = () => {
           />
         </Dialog>
       )}
-
-      {showApprovalProcessDialog && (
-        <Dialog
-          fullWidth
-          maxWidth="sm"
-          open={showApprovalProcessDialog}
-          onClose={() => setShowApprovalProcessDialog(false)}
-          aria-labelledby="set-approval-dialog"
-        >
-          <ApprovalProcessDialog
-            openApprovalProcessDialog={showApprovalProcessDialog}
-            hasPermissionToUpdateApprovalProcess={permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin}
-            onSuccess={() => setShowApprovalProcessDialog(false)}
-            handleCloseDialog={() => setShowApprovalProcessDialog(false)}
-            userIds={selectedRecords.map((user) => user._id)}
-          />
-        </Dialog>
-      )}
-
       {regionalRolesDialogOpen && (
         <Dialog fullWidth maxWidth="xs" open={regionalRolesDialogOpen} onClose={handleRegionalRolesCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog

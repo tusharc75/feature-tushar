@@ -151,8 +151,8 @@ const ListingPageHeader = ({
   };
 
   const shouldNotFlexWrap = useMemo(() => {
-    return (onSearch || handleSearchFilter) && (isAddButtonVisible || isActionButtonVisible) && !Boolean(rightSideContents);
-  }, [handleSearchFilter, isActionButtonVisible, isAddButtonVisible, onSearch, rightSideContents]);
+    return onSearch && (isAddButtonVisible || isActionButtonVisible) && !Boolean(rightSideContents);
+  }, [isActionButtonVisible, isAddButtonVisible, onSearch, rightSideContents]);
 
   const isLeftSidePresent = useMemo(() => {
     return Boolean(toggleButtonList) || Boolean(leftSideContents);
@@ -201,7 +201,7 @@ const ListingPageHeader = ({
           ) : null}
           {handleSearchFilter ? (
             <SearchFilter
-              className="w-full flex-grow sm:w-[unset] sm:min-w-[200px] sm:max-w-[400px]"
+              className=" w-[250px] flex-grow sm:w-[300] sm:min-w-[200px] sm:max-w-[400px]"
               handleChangeFilter={handleSearchFilter}
               filter={searchFilter}
               chip={{ size: 'small' }}

@@ -1,4 +1,5 @@
 import { Tooltip, withStyles, TooltipProps } from '@material-ui/core';
+import { cn } from 'src/constants/helpers';
 
 const TooltipWithStyle = withStyles((theme) => ({
   tooltip: {
@@ -10,10 +11,10 @@ const TooltipWithStyle = withStyles((theme) => ({
   }
 }))(Tooltip);
 
-const HtmlTooltip = ({ children, ...props }: TooltipProps) => {
+const HtmlTooltip = ({ children, className, ...props }: TooltipProps) => {
   return (
     <TooltipWithStyle {...props} enterTouchDelay={0} placement="top" arrow>
-      <span className="tooltip-asdfkljashdfkjas">{children}</span>
+      <span className={cn('tooltip-asdfkljashdfkjas', className)}>{children}</span>
     </TooltipWithStyle>
   );
 };
