@@ -1216,6 +1216,11 @@ const routes = {
         : RESOURCE_LABEL.managedPackages,
     path: '/managed-packages/detail'
   },
+  integration: {
+    title: storedRoutes && storedRoutes.integration && storedRoutes.integration?.title ? storedRoutes.integration?.title
+      : RESOURCE_LABEL.integration,
+    path: '/integration'
+  }
 };
 
 export default routes;

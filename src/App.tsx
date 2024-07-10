@@ -256,6 +256,7 @@ import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/Subcontract
 import ManagedPackages from 'src/pages/ManagedPackages';
 import ManagedPackagedDetail from 'src/pages/ManagedPackages/ManagedPackagesDetail';
 import CustomIntro from 'src/components/CustomIntro';
+import Integration from 'src/pages/Integration';
 
 var notificationInterval: any = null;
 
@@ -1130,6 +1131,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.managedPackagesDetail.path}/:id`}>
               <ManagedPackagedDetail />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.integration.path}`}>
+              <Integration />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
