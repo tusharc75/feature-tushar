@@ -537,45 +537,17 @@ const LeftSideContents = ({
 }) => {
   return (
     <>
-      <Autocomplete
-        fullWidth
-        options={resourceOptions}
-        getOptionLabel={(option) => option.optionLabel || ''}
-        value={resource}
-        className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
-        onChange={(event, newValue) => {
-          setResource(newValue);
-          if (newValue) {
-            //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
-          } else {
-            setFilter([]);
-          }
-        }}
-        size="small"
-        renderInput={(params) => (
-          <TextField
-            {...params}
-            className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
-            margin="none"
-            size="small"
-            label="Select Resource"
-            variant="outlined"
-          />
-        )}
-      />
-      {resource && resourceData && (
+      <div className="min-w-[200px] max-sm:flex-grow ">
         <Autocomplete
           fullWidth
-          disabled={loadingResources}
-          options={resourceData}
-          getOptionLabel={(option: any) => option.optionLabel || ''}
-          getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
-          className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
-          value={selectedResourceData}
+          options={resourceOptions}
+          getOptionLabel={(option) => option.optionLabel || ''}
+          value={resource}
+          className={`flex-grow sm:min-w-[200px] sm:max-w-[250px]`}
           onChange={(event, newValue) => {
-            setSelectedResourceData(newValue);
-            if (newValue?.optionValue) {
-              setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+            setResource(newValue);
+            if (newValue) {
+              //setFilter((prevState) => [...prevState, { type: newValue?.optionValue, name: newValue?.optionLabel, isAll: true }]);
             } else {
               setFilter([]);
             }
@@ -584,14 +556,46 @@ const LeftSideContents = ({
           renderInput={(params) => (
             <TextField
               {...params}
-              className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+              className={`flex-grow sm:min-w-[200px] sm:max-w-[250px]`}
               margin="none"
               size="small"
-              label={`Select ${resource.optionLabel}`}
+              label="Select Resource"
               variant="outlined"
             />
           )}
         />
+      </div>
+      {resource && resourceData && (
+        <div className="min-w-[250px] max-sm:flex-grow">
+          <Autocomplete
+            fullWidth
+            disabled={loadingResources}
+            options={resourceData}
+            getOptionLabel={(option: any) => option.optionLabel || ''}
+            getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
+            className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
+            value={selectedResourceData}
+            onChange={(event, newValue) => {
+              setSelectedResourceData(newValue);
+              if (newValue?.optionValue) {
+                setFilter((prevState) => [...prevState, { _id: newValue.optionValue, type: resource.optionValue, name: newValue.optionLabel }]);
+              } else {
+                setFilter([]);
+              }
+            }}
+            size="small"
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
+                margin="none"
+                size="small"
+                label={`Select ${resource.optionLabel}`}
+                variant="outlined"
+              />
+            )}
+          />
+        </div>
       )}
     </>
   );

@@ -353,6 +353,7 @@ const ReportArrangeView = (props: ArrangeColumnsProps) => {
                         ''
                       ) : (
                         <Switch
+                          disabled={column.disabled}
                           size="small"
                           checked={column.isVisible}
                           onChange={(e) => {

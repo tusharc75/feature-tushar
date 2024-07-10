@@ -40,12 +40,11 @@ export const Note = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
 
   const fetchNote = async (cancelTokenSource?: CancelTokenSource) => {
     setLoading(true);
-    axiosInstance()
-      .get(`/note?relatedTo=${JSON.stringify(relatedTo)}`, { cancelToken: cancelTokenSource?.token })
-      .then(({ data: { data } }) => {
+    axiosInstance().get(`/note?relatedTo=${JSON.stringify(relatedTo)}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data, count } }) => {
         setNotes(data);
-        onSetCount('Note', data.length);
-        setTimeout(() => setLoading(false), data.length ? 1000 : 1500);
+        onSetCount('Note', count);
+        setTimeout(() => setLoading(false), count ? 1000 : 1500);
       })
       .catch((err) => {
         setLoading(false);
