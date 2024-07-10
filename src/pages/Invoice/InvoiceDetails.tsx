@@ -97,7 +97,7 @@ const InvoiceDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
+      .then(({ data }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -270,7 +270,7 @@ const InvoiceDetails = () => {
                       Close
                     </ButtonWithPulse>
                   )}
-                {permissions?.invoice?.isUpdate && allowedToEdit && [INVOICE_STATUS.closed]?.includes(invoiceData?.status) && (
+                {permissions?.invoice?.isUpdate && allowedToEdit && invoiceData?.status === INVOICE_STATUS.closed && (
                   <Button
                     variant="outlined"
                     color="primary"
@@ -397,7 +397,7 @@ const InvoiceDetails = () => {
             setShowReOpenConfirmBox(false);
           }}
           onOk={() => {
-            handleChangeStatus(INVOICE_STATUS.readyToInvoice);
+            handleChangeStatus(INVOICE_STATUS.invoiced);
           }}
         />
       )}
