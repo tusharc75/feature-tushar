@@ -128,8 +128,8 @@ const SubcontractAssemblyDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
       setAllowedToDelete(
         permissions?.subcontractAssembly?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
-          data?.canDelete
+        checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+        data?.canDelete
       );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
@@ -208,7 +208,6 @@ const SubcontractAssemblyDetail = () => {
     axiosInstance()
       .put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
       .then(({ data }) => {
-        console.log(processStatus);
         if (processStatus === 'Add') {
           addWalkmeData(walkmeData);
         } else {

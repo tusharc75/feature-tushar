@@ -731,8 +731,8 @@ export default function AccountDetailPage(props) {
                         ? accountClass.mobile_button_layout_secondary
                         : ''
                       : isMobile
-                      ? accountClass.mobile_button_layout
-                      : ''
+                        ? accountClass.mobile_button_layout
+                        : ''
                   }
                   onClick={() => {
                     setShowApproveDisapproveConfirmBox(true);
@@ -760,11 +760,11 @@ export default function AccountDetailPage(props) {
               </>
             )}
             {permissions &&
-            permissions[accountResource] &&
-            permissions[accountResource].isDelete &&
-            accountData?.owner?.optionValue &&
-            user?.user?._id &&
-            accountData.owner.optionValue === user.user._id ? (
+              permissions[accountResource] &&
+              permissions[accountResource].isDelete &&
+              accountData?.owner?.optionValue &&
+              user?.user?._id &&
+              accountData.owner.optionValue === user.user._id ? (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
             ) : null}
             <ActivityButton referenceId={accountData?._id} resource={accountResource} resourceLabel={accountData?.accountName} />
@@ -1027,9 +1027,8 @@ export default function AccountDetailPage(props) {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Account ${
-            deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-          }`}
+          message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+            }`}
           onClose={() => {
             setShowConfirmBox(false);
             setDeleteAccountId({});
@@ -1086,7 +1085,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => {}}
+          handleAddressDataSource={() => { }}
         />
       ) : null}
 
@@ -1128,7 +1127,15 @@ export default function AccountDetailPage(props) {
             setShowAccountHierarchyInFullScreenDialog(false);
           }}
         >
-          <AccountHierarchy data={accountHierarchyData} currentAccountId={accountData._id} accountRoute={accountRoute} accountResource={accountResource} />
+          <AccountHierarchy
+            data={accountHierarchyData}
+            currentAccountId={accountData._id}
+            accountRoute={accountRoute}
+            accountResource={accountResource}
+            canUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate}
+            canCreate={permissions && permissions[accountResource] && permissions[accountResource].isCreate}
+            canDelete={permissions && permissions[accountResource] && permissions[accountResource].isDelete}
+          />
         </FullScreenDialog>
       )}
       {showCreateAccountDialog ? (
