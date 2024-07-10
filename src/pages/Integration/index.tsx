@@ -5,9 +5,10 @@ import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import { getColors } from '../Home/helpers';
 import styles from '../ReportMaster/index.module.scss';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
-import { useData } from "src/StateProvider/Provider";
-import { backendApi, SLACK_APP_CLIENT_ID, SLACK_APP_SCOPES } from "src/config";
 import { FaSlack } from 'react-icons/fa';
+import axiosInstance from "src/axios/axiosInstance";
+import { backendApi } from "src/config";
+import { useData } from "src/StateProvider/Provider";
 
 
 const Integration = () => {
@@ -16,10 +17,8 @@ const Integration = () => {
 
   const { state: { user } } = useData();
 
-
-  // const SLACK_APP_REDIRECT_URI = 'https://e5b6-110-226-207-215.ngrok-free.app/integration/slack/oauth/callback'; // This is for demo purpose, below will be the actual REDIRECT_URI
-  const SLACK_APP_REDIRECT_URI = `${backendApi}/integration/slack/oauth/callback`;
-
+  // const REDIRECT_URI = 'https://7e9e-2401-4900-826d-d47c-5eba-20b7-66e5-2e04.ngrok-free.app/integration/slack/oauth/callback'; //This is for demo purpose, below will be the actual REDIRECT_URI
+  const REDIRECT_URI = `${backendApi}/integration/slack/oauth/callback`;
 
   const integrationList = [
     {
@@ -28,14 +27,15 @@ const Integration = () => {
     }
   ];
 
-  const handleIntegrationClick = async (integrationKey) => {
+  const handleIntegration = async (integrationKey) => {
     if (integrationKey === 'slack') {
       try {
-
-        const SLACK_APP_OAUTH_URL = `https://slack.com/oauth/v2/authorize?client_id=${SLACK_APP_CLIENT_ID}&scope=${SLACK_APP_SCOPES}&redirect_uri=${SLACK_APP_REDIRECT_URI}&state=${user?.user?.brand}`;
-
-        window.location.href = SLACK_APP_OAUTH_URL;
-
+        const response = await axiosInstance().get('/integration/slack');
+        const slackAppClientId = response.data.data.slackAppClientId;
+        const scopes = encodeURIComponent('channels:read,chat:write,users:read'); // update this as needed
+        const state = encodeURIComponent(JSON.stringify({ brand: user?.user?.brand, frontendUrl: window.location.origin }));
+        const authorizationUrl = `https://slack.com/oauth/v2/authorize?client_id=${slackAppClientId}&scope=${scopes}&redirect_uri=${REDIRECT_URI}&state=${state}`;
+        window.location.href = authorizationUrl;
       } catch (error) {
         toastConfig.setToastConfig(error);
       }
@@ -58,13 +58,12 @@ const Integration = () => {
                     className={styles.cardInner}
                     minHeight={false}
                   >
-                    <FaSlack className={styles.floatIcon} size={"60"}/>
+                    <FaSlack className={styles.floatIcon} size={"60"} />
                     <Typography variant="h5">{integration.title}</Typography>
                     <div className={styles.integrateText}>
-                      <span>Click here to integrate</span> <HiArrowRight className={styles.arrow} onClick={() => handleIntegrationClick(integration.key)} />
+                      <span>Click here to integrate</span> <HiArrowRight className={styles.arrow} onClick={() => handleIntegration(integration.key)} />
                     </div>
                   </DashBoardCardShell>
-
                 </div>
               );
             })}
