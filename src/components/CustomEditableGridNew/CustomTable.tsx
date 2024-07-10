@@ -78,7 +78,11 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                 <TableCell key={`${index}-${column?.Header}`} {...column.getHeaderProps()} className="th text-truncate table-header overflow-initial">
                   <div className="d-flex align-items-center justify-content-space-between pos-rel">
                     <div className="d-flex align-items-center gap-2" {...column.getSortByToggleProps({ title: undefined })}>
-                      <span title={column.render('Header')} className="text-truncate" style={{ maxWidth: `${column?.width - 15}px` }}>
+                      <span
+                        title={column.render('Header')}
+                        className="text-truncate"
+                        style={{ maxWidth: `${column?.width - 15}px`, fontWeight: 600 }}
+                      >
                         {column.render('Header')}
                       </span>
                     </div>

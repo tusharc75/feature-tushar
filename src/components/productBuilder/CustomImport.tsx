@@ -21,6 +21,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
   const [productCategory, setProductCategory] = useState([]);
   const [productTemplate, setProductTemplate] = useState([]);
   const [priceTemplate, setPriceTemplate] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
   const [templateImportHeader, setTemplateImportHeaader] = useState([]);
   const [customImportHeader, setCustomImportHeaader] = useState([]);
   const [keyValue, setKeyValue] = useState([]);
@@ -104,6 +105,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
 
   const handleFileImport = (e) => {
     setCustomImportHeaader([]);
+    setIsUploading(true);
     let files = e.target.files[0];
     setFile(files);
     const reader = new FileReader();
@@ -124,6 +126,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
         return result;
       }, []);
       setCustomImportHeaader(headers);
+      setIsUploading(false);
     };
     reader.readAsArrayBuffer(files);
   };
@@ -337,7 +340,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
               </Grid>
             </Grid>
           </Grid>
-          {templateImportHeader?.length > 0 && customImportHeader?.length > 0 ? (
+          {isUploading ? (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          ) : templateImportHeader?.length > 0 && customImportHeader?.length ? (
             <TableContainer style={{ marginTop: '16px' }} component={Paper}>
               <Table aria-label="customized table">
                 <TableHead>
@@ -377,11 +384,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
                 </TableBody>
               </Table>
             </TableContainer>
-          ) : (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          )}
+          ) : null}
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button color="primary" size="small" onClick={handleClose}>
