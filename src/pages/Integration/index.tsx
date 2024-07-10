@@ -1,13 +1,13 @@
 import { useContext } from "react"
 import { Box, Typography } from '@material-ui/core';
 import { HiArrowRight } from 'react-icons/hi';
-import { ReportIcon } from 'src/assets/svg/svgIcons';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import { getColors } from '../Home/helpers';
 import styles from '../ReportMaster/index.module.scss';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import { useData } from "src/StateProvider/Provider";
 import { backendApi, SLACK_APP_CLIENT_ID, SLACK_APP_SCOPES } from "src/config";
+import { FaSlack } from 'react-icons/fa';
 
 
 const Integration = () => {
@@ -42,8 +42,6 @@ const Integration = () => {
     }
   };
 
-
-
   return (
     <div className="main-container-v1">
       <div className="detail-container-v1">
@@ -60,9 +58,11 @@ const Integration = () => {
                     className={styles.cardInner}
                     minHeight={false}
                   >
-                    <ReportIcon colors={colors.iconGradient} className={styles.floatIcon} />
-                    <Typography variant="h6">{integration.title}</Typography>
-                    Click here to integrate <HiArrowRight className={styles.arrow} onClick={() => handleIntegrationClick(integration.key)} />
+                    <FaSlack className={styles.floatIcon} size={"60"}/>
+                    <Typography variant="h5">{integration.title}</Typography>
+                    <div className={styles.integrateText}>
+                      <span>Click here to integrate</span> <HiArrowRight className={styles.arrow} onClick={() => handleIntegrationClick(integration.key)} />
+                    </div>
                   </DashBoardCardShell>
 
                 </div>
