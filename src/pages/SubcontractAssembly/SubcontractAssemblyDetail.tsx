@@ -208,11 +208,11 @@ const SubcontractAssemblyDetail = () => {
     axiosInstance()
       .put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
       .then(({ data }) => {
+        console.log(processStatus);
         if (processStatus === 'Add') {
           addWalkmeData(walkmeData);
         } else {
-          removeWalkmeDataByName('Add Existing Product');
-          removeWalkmeDataByName('Delete Existing Product');
+          removeWalkmeDataByName(['Add Existing Product', 'Delete Existing Product']);
         }
       })
       .catch((error) => {
