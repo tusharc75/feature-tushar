@@ -92,55 +92,49 @@ export default function AccountHierarchy({
       if (o?.accessor === 'accountName') {
         o.cell = ({ row }) => {
           return row.original['accountName'] ? (
-            <div className="text-truncate" style={{ display: 'flex', alignItems: 'center' }}>
+            <div className="flex items-center gap-2">
               {row.original._id === currentAccountId ? (
-                <span>{row.original.accountName}</span>
+                <span className="text-truncate" title={row.original.accountName} >{row.original.accountName}</span>
               ) : (
-                <Link className="link" to={`/${accountRoute}/detail/${row.original._id}`}>
+                <Link title={row.original.accountName} target='_blank' className="link text-truncate" to={`/${accountRoute}/detail/${row.original._id}`}>
                   {row.original.accountName}
                 </Link>
               )}
-              {row.original._id === currentAccountId ? (
+              {row.original._id === currentAccountId && (
                 <Chip
                   style={{ color: 'white', backgroundColor: '#298B88', padding: 4, fontWeight: 600 }}
                   label="Current"
                   size="small"
                   data-hide-in-export={true}
-                  className="ml-2"
                 />
-              ) : (
-                ''
               )}
-              {
-                <span style={{ display: 'flex', marginLeft: '4px' }}>
-                  <HtmlTooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
-                    <IconButton
-                      size="small"
-                      aria-label="Edit"
-                      disabled={!canUpdate || !row.original?.canEdit}
-                      onClick={() => handleUpdate(row.original)}
-                    >
-                      <EditOutlined fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                  <Box mt={1} ml="2" />
-                  <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
-                    <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
-                      <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
-                    <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
-                      <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
-                    </IconButton>
-                  </HtmlTooltip>
-                </span>
-              }
+              <HtmlTooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
+                <IconButton
+                  size="small"
+                  aria-label="Edit"
+                  disabled={!canUpdate || !row.original?.canEdit}
+                  onClick={() => handleUpdate(row.original)}
+                >
+                  <EditOutlined fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
+                <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
+                  <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
+                </IconButton>
+              </HtmlTooltip>
+              <HtmlTooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
+                <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
+                  <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
+                </IconButton>
+              </HtmlTooltip>
             </div>
           ) : (
             <NoDataCell />
           );
         };
+        o.width = 300
+        o.minWidth = 300
       }
     });
 
@@ -183,150 +177,6 @@ export default function AccountHierarchy({
     setColumns([...newColumns, ...getStaticFields()]);
   };
 
-  // const fetchGridColumns = () => {
-  //   let customColumns = [
-  //     {
-  //       accessor: 'accountName',
-  //       Header: 'Account Name',
-  //       width: 300,
-  //       Cell: ({ row }) => {
-  //         return row.original['accountName'] ? (
-  //           <div className="text-truncate" style={{ display: 'flex', alignItems: 'center' }}>
-  //             {row.original._id === currentAccountId ? (
-  //               <span>{row.original.accountName}</span>
-  //             ) : (
-  //               <Link className="link" to={`/${accountRoute}/detail/${row.original._id}`}>
-  //                 {row.original.accountName}
-  //               </Link>
-  //             )}
-  //             {row.original._id === currentAccountId ? (
-  //               <Chip
-  //                 style={{ color: 'white', backgroundColor: '#298B88', padding: 4, fontWeight: 600 }}
-  //                 label="Current"
-  //                 size="small"
-  //                 data-hide-in-export={true}
-  //                 className="ml-2"
-  //               />
-  //             ) : (
-  //               ''
-  //             )}
-  //             {
-  //               <span style={{ display: 'flex', marginLeft: '4px' }}>
-  //                 <HtmlTooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
-  //                   <IconButton
-  //                     size="small"
-  //                     aria-label="Edit"
-  //                     disabled={!canUpdate || !row.original?.canEdit}
-  //                     onClick={() => handleUpdate(row.original)}
-  //                   >
-  //                     <EditOutlined fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
-  //                   </IconButton>
-  //                 </HtmlTooltip>
-  //                 <Box mt={1} ml="2" />
-  //                 <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
-  //                   <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => onCreateNewAccount(row.original._id)}>
-  //                     <AddOutlined fontSize="small" color={canCreate ? 'primary' : 'disabled'} />
-  //                   </IconButton>
-  //                 </HtmlTooltip>
-  //                 <HtmlTooltip title={canDelete ? 'Delete' : "You don't have permission to delete"}>
-  //                   <IconButton size="small" aria-label="Add Account" disabled={!canCreate} onClick={() => handleDelete(row.original)}>
-  //                     <DeleteIcon fontSize="small" color={canCreate ? 'error' : 'disabled'} />
-  //                   </IconButton>
-  //                 </HtmlTooltip>
-  //               </span>
-  //             }
-  //           </div>
-  //         ) : (
-  //           <NoDataCell />
-  //         );
-  //       }
-  //     },
-  //     {
-  //       accessor: 'typeOfAccount',
-  //       Header: 'Type',
-  //       width: commonFieldWidth,
-  //       Cell: ({ row }) => {
-  //         return row.original['accountName'] ? (
-  //           <div>
-  //             <CustomRenderCell value={row.original.typeOfAccount} />
-  //           </div>
-  //         ) : (
-  //           <NoDataCell />
-  //         );
-  //       }
-  //     },
-  //     {
-  //       accessor: 'industry',
-  //       Header: 'Industry',
-  //       width: commonFieldWidth,
-  //       Cell: ({ row }) => {
-  //         return row.original['accountName'] ? (
-  //           <div>
-  //             <CustomRenderCell value={row.original.industry} />
-  //           </div>
-  //         ) : (
-  //           <NoDataCell />
-  //         );
-  //       }
-  //     },
-  //     {
-  //       accessor: 'typeOfBusiness',
-  //       Header: 'Type Of Business',
-  //       width: commonFieldWidth,
-  //       Cell: ({ row }) => {
-  //         return row.original['accountName'] ? (
-  //           <div>
-  //             <CustomRenderCell value={row.original.typeOfBusiness} />
-  //           </div>
-  //         ) : (
-  //           <NoDataCell />
-  //         );
-  //       }
-  //     },
-  //     {
-  //       accessor: 'parentAccountText',
-  //       Header: 'Parent Account',
-  //       width: commonFieldWidth,
-  //       Cell: ({ row }) => {
-  //         return row.original['accountName'] ? (
-  //           <div style={{ width: 'auto' }}>
-  //             {row.original.parentId === currentAccountId ? (
-  //               <span className="text-truncate ">{row.original.parentAccountText}</span>
-  //             ) : (
-  //               <Link
-  //                 title={row.original.parentAccountText}
-  //                 target={'_blank'}
-  //                 rel="noreferrer"
-  //                 className="link text-truncate"
-  //                 to={`/${accountRoute}/detail/${row.original.parentId}`}
-  //               >
-  //                 <CustomRenderCell value={row.original.parentAccountText} />
-  //               </Link>
-  //             )}
-  //           </div>
-  //         ) : (
-  //           <NoDataCell />
-  //         );
-  //       }
-  //     },
-  //     {
-  //       accessor: 'phone',
-  //       Header: 'Phone',
-  //       width: commonFieldWidth,
-  //       Cell: ({ row }) => {
-  //         return row.original['accountName'] ? (
-  //           <div>
-  //             <CustomRenderCell value={row.original.phone} isCopyToClipboard={true} />
-  //           </div>
-  //         ) : (
-  //           <NoDataCell />
-  //         );
-  //       }
-  //     }
-  //   ];
-  //   setColumns(customColumns);
-  // };
-
   return (
     <Box style={{ display: 'flex' }}>
       {columns ? (
@@ -344,7 +194,7 @@ export default function AccountHierarchy({
           />
         </Box>
       ) : (
-        <Box p={2} height={500}>
+        <Box height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}

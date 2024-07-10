@@ -533,7 +533,8 @@ export const RESOURCE_LABEL = {
   dataList: 'Data List',
   dataListitems: 'Data List Items',
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
-  managedPackages: 'Managed Packages'
+  managedPackages: 'Managed Packages',
+  integration: 'Integration',
 };
 
 export const CHILD_RESOURCE = {
@@ -3401,3 +3402,9 @@ export const gridSize = (type) => {
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const normalizeDate = (date) => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};
