@@ -537,7 +537,7 @@ const LeftSideContents = ({
 }) => {
   return (
     <>
-      <div className="min-w-[200px] max-[592px]:flex-grow">
+      <div className="min-w-[200px] max-sm:flex-grow ">
         <Autocomplete
           fullWidth
           options={resourceOptions}
@@ -566,7 +566,7 @@ const LeftSideContents = ({
         />
       </div>
       {resource && resourceData && (
-        <div className="min-w-[250px] max-[592px]:flex-grow">
+        <div className="min-w-[250px] max-sm:flex-grow">
           <Autocomplete
             fullWidth
             disabled={loadingResources}
