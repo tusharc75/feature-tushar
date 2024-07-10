@@ -61,7 +61,7 @@ const Leads = () => {
     leadName: null,
     message: null
   });
-  const hasPermissionToConvertInOpportunity = user?.user?.permissions?.convertLeadToOpportunity;
+  const hasPermissionToConvertInOpportunity = user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity ?? false;
 
   useEffect(() => {
     fetchGridColumns();
