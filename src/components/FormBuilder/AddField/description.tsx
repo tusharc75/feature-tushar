@@ -12,7 +12,7 @@ const Description = ({ values, setFieldValue }) => {
         onChange={(value) => {
           setFieldValue('htmlDescription', value);
         }}
-        initialValue={values['htmlDescription'] || ''}
+        initialValue={values}
         imageOrFileUploadCompletePercentage={(completePercentage) => {}}
         doNotShowUploadFile={true}
         usePublicUrlforFileUpload={true}

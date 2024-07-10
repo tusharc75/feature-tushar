@@ -32,6 +32,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
   const [changeFieldNameDialog, setChangeFieldNameDialog] = useState(false);
   const [dataList, setDataList] = useState([]);
   const [subFieldOpen, setSubFieldOpen] = useState(false);
+  const [htmlDescription, setHtmlDescription] = useState(values['htmlDescription'] || '');
 
   useEffect(() => {
     getLookupList();
@@ -504,7 +505,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
       )}
       {fieldData.type === 'signature' && <SignatureUser values={values} setFieldValue={setFieldValue} />}
       {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
-      {fieldData.type === 'description' && <Description values={values} setFieldValue={setFieldValue} />}
+      {fieldData.type === 'description' && <Description values={htmlDescription} setFieldValue={setFieldValue} />}
       {fieldData.type === 'counter' && (
         <Box mt={1}>
           <Button
