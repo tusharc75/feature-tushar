@@ -68,7 +68,6 @@ import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
 import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSession from './UserSession';
-import UserSetupDialog from './UserSetupDialog';
 
 const useStyles = makeStyles((theme) => ({
   dataValue: {
@@ -93,12 +92,9 @@ const UserDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(false);
   const [globalRoles, setGloabalRoles] = useState([]);
   const [rolesDialogOpen, setRolesDialogOpen] = useState(false);
-  const [rolesLoading] = useState(false);
-  // const [userRelatedLoading, setUserRelatedLoading] = useState(false);
   const [userData, setUserData] = useState(null);
   const [leadsRelatedData, setLeadsRelatedData] = useState(null);
   const [opportunityRelatedData, setOpportunityRelatedData] = useState(null);
@@ -107,12 +103,9 @@ const UserDetailsPage = () => {
   const [supplierAccountRelatedData, setSupplierAccountRelatedData] = useState(null);
   const [supplierContactRelatedData, setSupplierContactRelatedData] = useState(null);
   const [quotesRelatedData, setQuotesRelatedData] = useState(null);
-  const [unionRoleData, setUnionRoleData] = useState(null);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
 
-  // const [isChangingPermission, setIsChangingPermission] = useState(false);
-  const [hasPermissionToUpdateApprovalProcess] = useState(permissions?.user?.isUpdate && user?.user?.userType === userType.brandAdmin);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [deleteUserRec, setDeleteUserRec] = useState(undefined);
   const [roleDeleteRec, setRoleDeleteRec] = useState(undefined);
@@ -120,12 +113,10 @@ const UserDetailsPage = () => {
   const [mainPoints, setMainPoints] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [customizedRoutes, setCustomizedRoutes] = useState<any>([routes.user]);
-  const [userList, setUserList] = useState<any[]>([]);
   const [orgChartData, setOrgChartData] = useState([]);
   const [orgChartInFullScreenDialog, setOrgChartInFullScreenDialog] = useState(false);
   const [entities, setEntities] = useState<any[]>([]);
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
-  const [showSetupUserDialog, setShowSetupUserDialog] = useState(false);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allUsers, setAllUsers] = useState([]);
   const [generateAutoPassword, setGenerateAutoPassword] = useState(false);
@@ -139,11 +130,8 @@ const UserDetailsPage = () => {
     if (id) {
       getUserFields();
       fetchUserData();
-      getRoleUnion();
       fetchUserRelatedDetail();
     }
-    // userSetup === 'true' && setShowSetupUserDialog(true);
-    // eslint-disable-next-line
   }, [id]);
 
   useEffect(() => {
@@ -154,7 +142,7 @@ const UserDetailsPage = () => {
 
   useEffect(() => {
     if (roleAccessOfLoggedInUser?.length && userSetup === 'true') {
-      setShowSetupUserDialog(true);
+      setShowAssignEntityDialog(true);
     }
   }, [id, roleAccessOfLoggedInUser]);
 
@@ -215,7 +203,6 @@ const UserDetailsPage = () => {
         }
         handleMainPoints(data);
         const name = [data.firstName, data.lastName].filter((d) => d).join(' ');
-        setHeadingLbl(name);
         setUserData(data);
         setEntities(data.entities.filter((e) => e.role.length !== 0 || e.entity !== undefined));
         setGloabalRoles(data.role);
@@ -354,22 +341,6 @@ const UserDetailsPage = () => {
     setShowAssignEntityDialog(false);
   };
 
-  const getRoleUnion = () => {
-    axiosInstance()
-      .get(`/user/union-role/${id}`)
-      .then(({ data: { data } }) => {
-        setUnionRoleData(data);
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-      });
-  };
-  /* Unassign role */
-  const handleUnassignRole = (rec) => {
-    setRoleDeleteRec(rec);
-    setShowConfirmBox(true);
-  };
-
   const unassignUserRole = () => {
     if (roleDeleteRec?._id) {
       const data = {
@@ -381,8 +352,6 @@ const UserDetailsPage = () => {
         .then(() => {
           setShowConfirmBox(false);
           fetchUserData();
-          setUnionRoleData(null);
-          getRoleUnion();
           toastConfig.setToastConfig({
             message: 'Role unassigned successfully',
             type: 'success',
@@ -754,13 +723,17 @@ const UserDetailsPage = () => {
             onSuccess={() => {
               handleCloseDialog();
               fetchUserData();
-              getRoleUnion();
             }}
           />
         </Dialog>
       )}
       {showAssignEntityDialog && (
-        <Dialog fullWidth maxWidth="xs" open={showAssignEntityDialog} onClose={entityDialogClose} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          open={showAssignEntityDialog}
+          onClose={entityDialogClose}
+          aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
             entitiesDialogOpen={showAssignEntityDialog}
             handleCloseDialog={entityDialogClose}
@@ -779,15 +752,12 @@ const UserDetailsPage = () => {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          // message={`Are you sure you want to delete this User ?`}
-          // onClose={() => setShowConfirmBox(false)}
-          // onOk={handleDeleteUser}
           message={
             deleteUserRec
               ? `Are you sure you want to delete this User ${userData.firstName} ${userData.lastName} ?`
               : roleDeleteRec
-              ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
-              : ''
+                ? `Are you sure you want to unassign ${roleDeleteRec?.name} role from ${userData.firstName} ${userData.lastName} ?`
+                : ''
           }
           onClose={() => {
             setShowConfirmBox(false);
@@ -813,35 +783,6 @@ const UserDetailsPage = () => {
             }}
           />
         </FullScreenDialog>
-      )}
-      {showSetupUserDialog && (
-        <UserSetupDialog
-          open={showSetupUserDialog}
-          close={() => {
-            history.push({
-              pathname: `/user/detail/${id}`,
-              search: ''
-            });
-            setShowSetupUserDialog(false);
-            fetchUserData();
-          }}
-          userIds={[id]}
-          onSuccess={() => {
-            setShowSetupUserDialog(false);
-            history.push({
-              pathname: `/user/detail/${id}`,
-              search: ''
-            });
-            fetchUserData();
-          }}
-          fetchUsers={() => fetchAllUsers()}
-          userList={userList}
-          selectedRecords={[{ ...userData }]}
-          isRoleSetUpPermission={permissions?.role?.isUpdate && permissions?.entity?.isUpdate && permissions?.user?.isUpdate}
-          isApprovalProcess={isLoggedInUserBrandAdmin}
-          roleAccessIds={roleAccessOfLoggedInUser}
-          entityAccessIds={entityAccess}
-        />
       )}
       {showConfirmBox && deleteUserRec ? (
         <ResourceTransferDialog

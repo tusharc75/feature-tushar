@@ -291,9 +291,9 @@ const EntityDetailsPage = () => {
   const getRows = (data: []) => {
     const rows = data.length
       ? data.map((user: any) => ({
-          id: user._id,
-          name: `${user.firstName} ${user.lastName}`
-        }))
+        id: user._id,
+        name: `${user.firstName} ${user.lastName}`
+      }))
       : [];
 
     setUserList(rows);
@@ -346,7 +346,7 @@ const EntityDetailsPage = () => {
                 <Typography className="form-label-style-v1" component={'h3'}>
                   {'DOA Details '}
                 </Typography>
-                {permissions.entity?.isUpdate && user?.user?.permissions?.doaSetup && (
+                {permissions.entity?.isUpdate && (
                   <Button variant="contained" className="float-right-button-v1" color="primary" size="small" onClick={() => setDoaDialogOpen(true)}>
                     {doa.length > 0 ? 'Edit DOA' : 'Add DOA'}
                   </Button>
