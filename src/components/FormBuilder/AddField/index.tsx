@@ -14,465 +14,497 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import FormHelperText from '@material-ui/core/FormHelperText';
-import { object, string } from "yup";
-import { Formik, Form } from "formik";
-import { Vlookup } from "./vlookup";
-import { Formula } from "./formula";
-import { Converter } from "./converter";
-import { Currency } from "./currency";
-import { Option } from "../AddField/option";
-import { isMobile, isTablet } from "react-device-detect";
-import { CustomDialogTransition, fieldLabelToFieldName } from "../../../constants/helpers";
-import axiosInstance from "../../../axios/axiosInstance";
-import { checkFormula } from "../../../constants/formulaUtility";
-import ConfirmCancelDialog from "../../../components/ConfirmCancelDialog"
+import { object, string } from 'yup';
+import { Formik, Form } from 'formik';
+import { Vlookup } from './vlookup';
+import { Formula } from './formula';
+import { Converter } from './converter';
+import { Currency } from './currency';
+import { Option } from '../AddField/option';
+import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition, fieldLabelToFieldName } from '../../../constants/helpers';
+import axiosInstance from '../../../axios/axiosInstance';
+import { checkFormula } from '../../../constants/formulaUtility';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { camelCase } from 'lodash';
 
 const FieldSchema = object().shape({
-  type: string()
-    .required("please select field type"),
-  fieldLabel: string()
-    .required("please enter field label"),
+  type: string().required('please select field type'),
+  fieldLabel: string().required('please enter field label')
 });
 
 export const AddField = (props) => {
-
   const { fieldData, handleClose, handleAddField, fields, refrence, section } = props;
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false)
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
-  const [initialValues,] = useState(fieldData ? fieldData : {
-    sectionName: "", type: "singleLine", fieldLabel: "", required: false, isTooltip: false,
-    tooltipMessage: "", returnType: "decimal", decimalPlaces: 2, inputFields: [], option: [{ optionLabel: "Option 1", optionValue: "Option 1" }], formula: "return ", isvlookupReverse: false,
-    units: [], displayUnits: [], isConverter: false, isFormula: false, isMulitFormula: false, displayCurrency: refrence !== "formAdd" ? ["CUR"] : ["USD"]
-  });
+  const [initialValues] = useState(
+    fieldData
+      ? fieldData
+      : {
+          sectionName: '',
+          type: 'singleLine',
+          fieldLabel: '',
+          required: false,
+          isTooltip: false,
+          tooltipMessage: '',
+          returnType: 'decimal',
+          decimalPlaces: 2,
+          inputFields: [],
+          option: [{ optionLabel: 'Option 1', optionValue: 'Option 1' }],
+          formula: 'return ',
+          isvlookupReverse: false,
+          units: [],
+          displayUnits: [],
+          isConverter: false,
+          isFormula: false,
+          isMulitFormula: false,
+          displayCurrency: refrence !== 'formAdd' ? ['CUR'] : ['USD']
+        }
+  );
 
-  let new_fields = []
-  fields && fields.forEach(_field => {
-    if (_field.type !== "currencyAmount" && (_field.type === "converter" || _field.isConverter === true)) {
-      _field.displayUnits && _field.displayUnits.forEach(_unit => {
-        new_fields.push({ ..._field, fieldLabel: _field.fieldLabel + " " + _unit, fieldName: _field.fieldName + "_" + _unit.toLowerCase() })
-      })
-    }
-    else if (_field.type === "currencyAmount") {
-      _field.displayCurrency && _field.displayCurrency.forEach(_currency => {
-        if (_field.isConverter) {
-          _field.displayUnits && _field.displayUnits.forEach(_unit => {
-            new_fields.push({ ..._field, fieldLabel: _field.fieldLabel + " " + _unit, fieldName: _field.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase() })
-          })
-        }
-        else {
-          new_fields.push({ ..._field, fieldLabel: _field.fieldLabel + " " + _currency, fieldName: _field.fieldName + "_" + _currency.toLowerCase() })
-        }
-      })
-    }
-    else {
-      new_fields.push(_field)
-    }
-  })
+  let new_fields = [];
+  fields &&
+    fields.forEach((_field) => {
+      if (_field.type !== 'currencyAmount' && (_field.type === 'converter' || _field.isConverter === true)) {
+        _field.displayUnits &&
+          _field.displayUnits.forEach((_unit) => {
+            new_fields.push({ ..._field, fieldLabel: _field.fieldLabel + ' ' + _unit, fieldName: _field.fieldName + '_' + _unit.toLowerCase() });
+          });
+      } else if (_field.type === 'currencyAmount') {
+        _field.displayCurrency &&
+          _field.displayCurrency.forEach((_currency) => {
+            if (_field.isConverter) {
+              _field.displayUnits &&
+                _field.displayUnits.forEach((_unit) => {
+                  new_fields.push({
+                    ..._field,
+                    fieldLabel: _field.fieldLabel + ' ' + _unit,
+                    fieldName: _field.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase()
+                  });
+                });
+            } else {
+              new_fields.push({
+                ..._field,
+                fieldLabel: _field.fieldLabel + ' ' + _currency,
+                fieldName: _field.fieldName + '_' + _currency.toLowerCase()
+              });
+            }
+          });
+      } else {
+        new_fields.push(_field);
+      }
+    });
 
   const ref = useRef(null);
 
   const handleSave = (values) => {
-
-    let data: any = {}
-    data._id = fieldData && fieldData._id ? fieldData._id : parseInt((Math.random() * 100000).toString())
-    if (refrence === "builder") {
-      data.sectionName = values.sectionName
+    let data: any = {};
+    data._id = fieldData && fieldData._id ? fieldData._id : parseInt((Math.random() * 100000).toString());
+    if (['formAddInlineEdit', 'builder']?.includes(refrence)) {
+      data.sectionName = values.sectionName;
     }
-    data.type = values.type
-    data.fieldLabel = values.fieldLabel
-    data.fieldName = fieldLabelToFieldName(values.fieldLabel)
+    data.type = values.type;
+    data.fieldLabel = values.fieldLabel;
+    data.fieldName = fieldLabelToFieldName(values.fieldLabel);
 
-    if (refrence !== "custom") {
+    if (refrence !== 'custom') {
       if (fields.filter((t) => t.fieldName === data.fieldName).length) {
-        alert("Field name alredy exist")
-        return
+        alert('Field name alredy exist');
+        return;
       }
     }
 
-    data.required = values.required
-    data.isTooltip = values.isTooltip
-    data.tooltipMessage = values.tooltipMessage
-    data.isConverter = values.isConverter
-    data.isFormula = values.isFormula
-    data.isMulitFormula = values.isMulitFormula
+    data.required = values.required;
+    data.isTooltip = values.isTooltip;
+    data.tooltipMessage = values.tooltipMessage;
+    data.isConverter = values.isConverter;
+    data.isFormula = values.isFormula;
+    data.isMulitFormula = values.isMulitFormula;
 
-    if (values.type === "dropDown" || values.type === "multiSelect" || values.type === "radio" || values.type === "process") {
+    if (values.type === 'dropDown' || values.type === 'multiSelect' || values.type === 'radio' || values.type === 'process') {
       values.option.forEach((ele, index) => {
-        ele.order = index + 1
-        ele.default = false
+        ele.order = index + 1;
+        ele.default = false;
         if (index === 0) {
-          ele.default = true
+          ele.default = true;
         }
-      })
-      data.option = values.option
+      });
+      data.option = values.option;
     }
-    if (values.type === "decimal" || values.type === "converter" || values.type === "currencyAmount") {
-      data.decimalPlaces = values.decimalPlaces
+    if (values.type === 'decimal' || values.type === 'converter' || values.type === 'currencyAmount') {
+      data.decimalPlaces = values.decimalPlaces;
     }
     if (values.lookup) {
-      data.lookup = values.lookup
-      data.lookupResource = values.lookupResource
+      data.lookup = values.lookup;
+      data.lookupResource = values.lookupResource;
     }
-    if (values.type === "formula" || values.isFormula) {
-      data.formula = values.formula
-      data.inputFields = values.inputFields
-      data.returnType = values.returnType ? values.returnType : "decimal"
-      data.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2
+    if (values.type === 'formula' || values.isFormula) {
+      data.formula = values.formula;
+      data.inputFields = values.inputFields;
+      data.returnType = values.returnType ? values.returnType : 'decimal';
+      data.decimalPlaces = values.decimalPlaces ? values.decimalPlaces : 2;
     }
-    if (values.type === "vlookupDropdown") {
+    if (values.type === 'vlookupDropdown') {
       values.option.forEach((ele) => {
-        ele.optionValue = ele.optionLabel
-      })
-      data.option = values.option
-      data.vlookupInputFields = values.vlookupInputFields
-      data.isvlookupReverse = values.isvlookupReverse
+        ele.optionValue = ele.optionLabel;
+      });
+      data.option = values.option;
+      data.vlookupInputFields = values.vlookupInputFields;
+      data.isvlookupReverse = values.isvlookupReverse;
     }
-    if (values.type === "converter" || values.isConverter) {
-      data.unitoption = values.unitoption
-      data.units = values.units
-      data.displayUnits = values.displayUnits
-      data.formulaUnits = values.formulaUnits
+    if (values.type === 'converter' || values.isConverter) {
+      data.unitoption = values.unitoption;
+      data.units = values.units;
+      data.displayUnits = values.displayUnits;
+      data.formulaUnits = values.formulaUnits;
     }
-    if (values.type === "currencyAmount") {
-      data.displayCurrency = values.displayCurrency
+    if (values.type === 'currencyAmount') {
+      data.displayCurrency = values.displayCurrency;
     }
     if ((values.type === 'vlookupDropdown' || values.isVlookup) && (values.type === 'converter' || values.isConverter === true)) {
       data.vlookupOnConverter = values.vlookupOnConverter;
     }
-    if (values.type === "currencyAmount" && refrence === "formAdd") {
-      axiosInstance().get(`/converter?type=currency`).then((result: any) => {
-        data.currency = result.data.data.currency;
-        data.currencyoption = result.data.data.option;
-        handleAddField(data)
-      }).catch((error) => {
-      });
+    if (values.type === 'currencyAmount' && refrence === 'formAdd') {
+      axiosInstance()
+        .get(`/converter?type=currency`)
+        .then((result: any) => {
+          data.currency = result.data.data.currency;
+          data.currencyoption = result.data.data.option;
+          handleAddField(data);
+        })
+        .catch((error) => {});
+    } else {
+      handleAddField(data);
     }
-    else {
-      handleAddField(data)
-    }
-  }
+  };
 
   const onKeyPress = (event) => {
     if (event.which === 13) {
       event.preventDefault();
     }
-  }
+  };
 
   function validate(values) {
     const errors = {};
     if (values.type === 'formula' || values.isFormula === true) {
       if (!values.inputFields || values.inputFields.length === 0) {
-        errors["inputFields"] = "Please select input parameters";
+        errors['inputFields'] = 'Please select input parameters';
       }
       let inputValues = {};
-      values.inputFields && values.inputFields.forEach((_input) => {
-        inputValues[_input] = 1;
-      });
+      values.inputFields &&
+        values.inputFields.forEach((_input) => {
+          inputValues[_input] = 1;
+        });
       if (!checkFormula(values.formula, inputValues)) {
-        errors["formula"] = "Please enter valid formula";
+        errors['formula'] = 'Please enter valid formula';
       }
     }
     if (values.type === 'currencyAmount') {
       if (!values.displayCurrency || values.displayCurrency.length === 0) {
-        errors["displayCurrency"] = "Please select currency";
+        errors['displayCurrency'] = 'Please select currency';
       }
     }
     if (values.type === 'converter' || values.isConverter === true) {
       if (!values.units || values.units.length === 0) {
-        errors["units"] = "Please enter units";
+        errors['units'] = 'Please enter units';
       }
       if (!values.displayUnits || values.displayUnits.length === 0) {
-        errors["displayUnits"] = "Please select display unit";
+        errors['displayUnits'] = 'Please select display unit';
       }
     }
     if (values.isMulitFormula) {
       if (!values.formulaFields || values.formulaFields.length === 0) {
-        errors["formulaFields"] = "Please select formul fields";
+        errors['formulaFields'] = 'Please select formul fields';
       }
       if (!values.formulainputFields || values.formulainputFields.length === 0) {
-        errors["formulainputFields"] = "Please select input parameters";
+        errors['formulainputFields'] = 'Please select input parameters';
       }
       if (values.formulaFields && values.formulaFields.length) {
         let inputValues = {};
-        values.formulainputFields && values.formulainputFields.forEach((_input) => {
-          inputValues[_input] = 1;
-        });
+        values.formulainputFields &&
+          values.formulainputFields.forEach((_input) => {
+            inputValues[_input] = 1;
+          });
         Object.keys(values.formulaoption).forEach((_formula) => {
-          if (!checkFormula(values.formulaoption[_formula] ? values.formulaoption[_formula] : "", inputValues))
-            errors["formulaoption_" + _formula] = "Please enter valid formula";
+          if (!checkFormula(values.formulaoption[_formula] ? values.formulaoption[_formula] : '', inputValues))
+            errors['formulaoption_' + _formula] = 'Please enter valid formula';
         });
       }
     }
     if (values.type === 'vlookupDropdown' || values.isVlookup) {
       if (!values.vlookupInputFields || values.vlookupInputFields.length === 0) {
-        errors["vlookupInputFields"] = "Please select input parameters";
+        errors['vlookupInputFields'] = 'Please select input parameters';
+      }
+    }
+
+    if(refrence === 'formAddInlineEdit') {
+      if (!values.sectionName) {
+        errors['sectionName'] = 'Please select SectionName';
       }
     }
 
     return errors;
   }
 
-  return (<Dialog aria-labelledby="customized-dialog-title" fullWidth
-    fullScreen={isMobile || isTablet}
-    TransitionComponent={CustomDialogTransition}
-    disableEnforceFocus
-    maxWidth={"md"} open={true}
-    onClose={(e, reason) => {
-      if (reason !== 'backdropClick') {
-        setShowConfirmDialog(true)
-      }
-    }}
-  >
-    <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
-      {({ submitForm, touched, errors, setFieldValue, values }) => (
-        <Fragment>
-          <CustomDialogHeader title={fieldData ? "Update Field" : "Add Field"}
-            onClose={() => setShowConfirmDialog(true)}
-          ></CustomDialogHeader>
-          <CustomDialogContent>
-            <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress} >
-              {refrence === "builder" &&
-                <FormControl fullWidth margin="dense" variant="outlined" error={touched["sectionName"] && Boolean(errors["sectionName"])}>
-                  <InputLabel id="demo-simple-select-outlined-label">Section Name</InputLabel>
+  return (
+    <Dialog
+      aria-labelledby="customized-dialog-title"
+      fullWidth
+      fullScreen={isMobile || isTablet}
+      TransitionComponent={CustomDialogTransition}
+      disableEnforceFocus
+      maxWidth={'md'}
+      open={true}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          setShowConfirmDialog(true);
+        }
+      }}
+    >
+      <Formik innerRef={ref} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
+        {({ submitForm, touched, errors, setFieldValue, values }) => (
+          <Fragment>
+            <CustomDialogHeader title={fieldData ? 'Update Field' : 'Add Field'} onClose={() => setShowConfirmDialog(true)}></CustomDialogHeader>
+            <CustomDialogContent>
+              <Form autoComplete="off" autoCorrect="off" noValidate onKeyPress={onKeyPress}>
+                {['formAddInlineEdit', 'builder']?.includes(refrence) && (
+                  <FormControl fullWidth margin="dense" variant="outlined" error={touched['sectionName'] && Boolean(errors['sectionName'])}>
+                    <InputLabel id="demo-simple-select-outlined-label">Section Name</InputLabel>
+                    <Select
+                      labelId="demo-simple-select-outlined-label"
+                      id="demo-simple-select-outlined"
+                      value={values['sectionName']}
+                      onChange={(e) => setFieldValue('sectionName', e.target.value)}
+                      label="Section Name"
+                      name="sectionName"
+                    >
+                      {section && section.map((_section) => <MenuItem value={_section}>{_section}</MenuItem>)}
+                    </Select>
+                    <FormHelperText>{errors['sectionName']}</FormHelperText>
+                  </FormControl>
+                )}
+                <FormControl fullWidth margin="dense" variant="outlined">
+                  <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
                   <Select
                     labelId="demo-simple-select-outlined-label"
                     id="demo-simple-select-outlined"
-                    value={values["sectionName"]}
-                    onChange={(e) => setFieldValue("sectionName", e.target.value)}
-                    label="Section Name"
-                    name="sectionName"
+                    value={values['type']}
+                    onChange={(e) => setFieldValue('type', e.target.value)}
+                    label="Type"
+                    name="type"
+                    error={touched['type'] && Boolean(errors['type'])}
                   >
-                    {section && section.map((_section) => (
-                      <MenuItem value={_section}>{_section}</MenuItem>
-                    ))}
+                    <MenuItem value={'singleLine'}>Single Line</MenuItem>
+                    <MenuItem value={'multiLine'}>Multi-Line</MenuItem>
+                    <MenuItem value={'decimal'}>Decimal</MenuItem>
+                    <MenuItem value={'percent'}>Percent</MenuItem>
+                    <MenuItem value={'formula'}>Formula</MenuItem>
+                    <MenuItem value={'dropDown'}>Dropdown</MenuItem>
+                    <MenuItem value={'vlookupDropdown'}>Vlookup Dropdown</MenuItem>
+                    <MenuItem value={'converter'}>Converter</MenuItem>
+                    <MenuItem value={'currencyAmount'}>Currency Amount</MenuItem>
                   </Select>
-                  <FormHelperText>{errors["sectionName"]}</FormHelperText>
                 </FormControl>
-              }
-              <FormControl fullWidth margin="dense" variant="outlined">
-                <InputLabel id="demo-simple-select-outlined-label">Field Type</InputLabel>
-                <Select
-                  labelId="demo-simple-select-outlined-label"
-                  id="demo-simple-select-outlined"
-                  value={values["type"]}
-                  onChange={(e) => setFieldValue("type", e.target.value)}
-                  label="Type"
-                  name="type"
-                  error={touched["type"] && Boolean(errors["type"])}
-                >
-                  <MenuItem value={"singleLine"}>Single Line</MenuItem>
-                  <MenuItem value={"multiLine"}>Multi-Line</MenuItem>
-                  <MenuItem value={"decimal"}>Decimal</MenuItem>
-                  <MenuItem value={"percent"}>Percent</MenuItem>
-                  <MenuItem value={"formula"}>Formula</MenuItem>
-                  <MenuItem value={"dropDown"}>Dropdown</MenuItem>
-                  <MenuItem value={"vlookupDropdown"}>Vlookup Dropdown</MenuItem>
-                  <MenuItem value={"converter"}>Converter</MenuItem>
-                  <MenuItem value={"currencyAmount"}>Currency Amount</MenuItem>
-                </Select>
-              </FormControl>
-              <TextField
-                variant="outlined"
-                type="text"
-                label="Field Label"
-                required={true}
-                name="fieldLabel"
-                fullWidth
-                margin="dense"
-                value={values["fieldLabel"]}
-                error={touched["fieldLabel"] && Boolean(errors["fieldLabel"])}
-                helperText={touched["fieldLabel"] && errors["fieldLabel"]}
-                onChange={(e) => setFieldValue("fieldLabel", e.target.value.trimStart())}
-              />
+                <TextField
+                  variant="outlined"
+                  type="text"
+                  label="Field Label"
+                  required={true}
+                  name="fieldLabel"
+                  fullWidth
+                  margin="dense"
+                  value={values['fieldLabel']}
+                  error={touched['fieldLabel'] && Boolean(errors['fieldLabel'])}
+                  helperText={touched['fieldLabel'] && errors['fieldLabel']}
+                  onChange={(e) => setFieldValue('fieldLabel', e.target.value.trimStart())}
+                />
 
-              {(values["type"] === "decimal" || values["type"] === "formula" || values["type"] === "converter") &&
-                <Grid spacing={3} container>
-                  {values["type"] === "formula" && <Grid item xs={12} sm={6} md={6}>
-                    <FormControl fullWidth margin="dense" variant="outlined">
-                      <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                      <Select
-                        labelId="demo-simple-select-outlined-label"
-                        id="demo-simple-select-outlined"
-                        value={values["returnType"]}
-                        onChange={(e) => setFieldValue("returnType", e.target.value)}
-                        label="Return Type"
-                        name="returnType"
-                      >
-                        <MenuItem value="decimal">Decimal</MenuItem>
-                        <MenuItem value="string">String</MenuItem>
-                        <MenuItem value="boolean">Boolean</MenuItem>
-                      </Select>
-                    </FormControl>
+                {(values['type'] === 'decimal' || values['type'] === 'formula' || values['type'] === 'converter') && (
+                  <Grid spacing={3} container>
+                    {values['type'] === 'formula' && (
+                      <Grid item xs={12} sm={6} md={6}>
+                        <FormControl fullWidth margin="dense" variant="outlined">
+                          <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={values['returnType']}
+                            onChange={(e) => setFieldValue('returnType', e.target.value)}
+                            label="Return Type"
+                            name="returnType"
+                          >
+                            <MenuItem value="decimal">Decimal</MenuItem>
+                            <MenuItem value="string">String</MenuItem>
+                            <MenuItem value="boolean">Boolean</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
+                    {(values['type'] === 'decimal' || values['type'] === 'converter' || values['returnType'] === 'decimal') && (
+                      <Grid item xs={12} sm={6} md={6}>
+                        <FormControl fullWidth margin="dense" variant="outlined">
+                          <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={values['decimalPlaces']}
+                            onChange={(e) => setFieldValue('decimalPlaces', e.target.value)}
+                            label="Number of decimal places"
+                            name="decimalPlaces"
+                          >
+                            <MenuItem value={0}>0</MenuItem>
+                            <MenuItem value={1}>1</MenuItem>
+                            <MenuItem value={2}>2</MenuItem>
+                            <MenuItem value={3}>3</MenuItem>
+                            <MenuItem value={4}>4</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Grid>
+                    )}
                   </Grid>
-                  }
-                  {(values["type"] === "decimal" || values["type"] === "converter" || values["returnType"] === "decimal") &&
-                    <Grid item xs={12} sm={6} md={6}>
-                      <FormControl fullWidth margin="dense" variant="outlined">
-                        <InputLabel id="demo-simple-select-outlined-label">Number of decimal places</InputLabel>
-                        <Select
-                          labelId="demo-simple-select-outlined-label"
-                          id="demo-simple-select-outlined"
-                          value={values["decimalPlaces"]}
-                          onChange={(e) => setFieldValue("decimalPlaces", e.target.value)}
-                          label="Number of decimal places"
-                          name="decimalPlaces"
-                        >
-                          <MenuItem value={0}>0</MenuItem>
-                          <MenuItem value={1}>1</MenuItem>
-                          <MenuItem value={2}>2</MenuItem>
-                          <MenuItem value={3}>3</MenuItem>
-                          <MenuItem value={4}>4</MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>}
-                </Grid>}
+                )}
 
+                {values['type'] === 'currencyAmount' && (
+                  <Currency values={values} setFieldValue={setFieldValue} refrence={refrence} touched={touched} errors={errors} />
+                )}
 
-              {values["type"] === "currencyAmount" && <Currency
-                values={values}
-                setFieldValue={setFieldValue}
-                refrence={refrence}
-                touched={touched}
-                errors={errors}
-              />}
-
-              {(values["type"] === "currencyAmount" || values["type"] === "percent") &&
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="isFormula"
-                      checked={values["isFormula"]}
-                      onChange={(e) => {
-                        setFieldValue("isFormula", e.target.checked)
-                      }}
-                      color="primary"
-                    />
-                  }
-                  label="Formula"
-                />}
-
-              {(values["type"] === "formula" || values["isFormula"]) &&
-                <Formula
-                  fields={new_fields}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  _id={fieldData && fieldData._id ? fieldData._id : ""}
-                  touched={touched}
-                  errors={errors}
-                />}
-
-              {values["type"] === "vlookupDropdown" &&
-                <Vlookup
-                  fields={new_fields}
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  touched={touched}
-                  errors={errors}
-                  _id={fieldData && fieldData._id ? fieldData._id : ""}
-                />}
-
-              {(values["type"] === "currencyAmount" || values["type"] === "decimal") &&
-                <Fragment>
-                  <br></br>
+                {(values['type'] === 'currencyAmount' || values['type'] === 'percent') && (
                   <FormControlLabel
                     control={
                       <Checkbox
-                        name="isConverter"
-                        checked={values["isConverter"]}
+                        name="isFormula"
+                        checked={values['isFormula']}
                         onChange={(e) => {
-                          setFieldValue("isConverter", e.target.checked)
+                          setFieldValue('isFormula', e.target.checked);
                         }}
                         color="primary"
                       />
                     }
-                    label="Converter"
+                    label="Formula"
                   />
-                </Fragment>
-              }
-              {(values["type"] === "converter" || values["isConverter"]) && <Converter
-                fields={new_fields}
-                values={values}
-                setFieldValue={setFieldValue}
-                touched={touched}
-                errors={errors}
-              />}
+                )}
 
-              {((values["type"] === "dropDown" || values["type"] === "multiSelect" || values["type"] === "radio" || values["type"] === "process") && !values["lookup"]) &&
-                <Option
-                  values={values}
-                  setFieldValue={setFieldValue}
-                  fields={new_fields}
-                  _id={fieldData && fieldData._id ? fieldData._id : ""}
-                />}
-
-              <Box pt={1} pb={1}>
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="required"
-                      checked={values["required"]}
-                      onChange={(e) => setFieldValue("required", e.target.checked)}
-                      color="primary"
-                    />
-                  }
-                  label="Required"
-                />
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      name="isTooltip"
-                      checked={values["isTooltip"]}
-                      onChange={(e) => setFieldValue("isTooltip", e.target.checked)}
-                      color="primary"
-                    />
-                  }
-                  label="Show Tooltip"
-                />
-                {values["isTooltip"] &&
-                  <TextField
-                    variant="outlined"
-                    type="text"
-                    label="Tooltip Message"
-                    required={true}
-                    name="tooltipMessage"
-                    fullWidth
-                    margin="dense"
-                    value={values["tooltipMessage"]}
-                    error={touched["tooltipMessage"] && Boolean(errors["tooltipMessage"])}
-                    helperText={touched["tooltipMessage"] && errors["tooltipMessage"]}
-                    onChange={(e) => setFieldValue("tooltipMessage", e.target.value.trimStart())}
+                {(values['type'] === 'formula' || values['isFormula']) && (
+                  <Formula
+                    fields={new_fields}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    _id={fieldData && fieldData._id ? fieldData._id : ''}
+                    touched={touched}
+                    errors={errors}
                   />
-                }
-              </Box>
-            </Form>
-          </CustomDialogContent>
-          <CustomDialogFooter>
-            <Button size="small"
-              onClick={() => {
-                setShowConfirmDialog(true)
-              }}
-              color="primary">Cancel</Button>
-            <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">{fieldData ? "Update" : "Add"}</Button>
-          </CustomDialogFooter>
-          {
-            showConfirmDialog ?
+                )}
+
+                {values['type'] === 'vlookupDropdown' && (
+                  <Vlookup
+                    fields={new_fields}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    errors={errors}
+                    _id={fieldData && fieldData._id ? fieldData._id : ''}
+                  />
+                )}
+
+                {(values['type'] === 'currencyAmount' || values['type'] === 'decimal') && (
+                  <Fragment>
+                    <br></br>
+                    <FormControlLabel
+                      control={
+                        <Checkbox
+                          name="isConverter"
+                          checked={values['isConverter']}
+                          onChange={(e) => {
+                            setFieldValue('isConverter', e.target.checked);
+                          }}
+                          color="primary"
+                        />
+                      }
+                      label="Converter"
+                    />
+                  </Fragment>
+                )}
+                {(values['type'] === 'converter' || values['isConverter']) && (
+                  <Converter fields={new_fields} values={values} setFieldValue={setFieldValue} touched={touched} errors={errors} />
+                )}
+
+                {(values['type'] === 'dropDown' || values['type'] === 'multiSelect' || values['type'] === 'radio' || values['type'] === 'process') &&
+                  !values['lookup'] && (
+                    <Option values={values} setFieldValue={setFieldValue} fields={new_fields} _id={fieldData && fieldData._id ? fieldData._id : ''} />
+                  )}
+
+                <Box pt={1} pb={1}>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="required"
+                        checked={values['required']}
+                        onChange={(e) => setFieldValue('required', e.target.checked)}
+                        color="primary"
+                      />
+                    }
+                    label="Required"
+                  />
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        name="isTooltip"
+                        checked={values['isTooltip']}
+                        onChange={(e) => setFieldValue('isTooltip', e.target.checked)}
+                        color="primary"
+                      />
+                    }
+                    label="Show Tooltip"
+                  />
+                  {values['isTooltip'] && (
+                    <TextField
+                      variant="outlined"
+                      type="text"
+                      label="Tooltip Message"
+                      required={true}
+                      name="tooltipMessage"
+                      fullWidth
+                      margin="dense"
+                      value={values['tooltipMessage']}
+                      error={touched['tooltipMessage'] && Boolean(errors['tooltipMessage'])}
+                      helperText={touched['tooltipMessage'] && errors['tooltipMessage']}
+                      onChange={(e) => setFieldValue('tooltipMessage', e.target.value.trimStart())}
+                    />
+                  )}
+                </Box>
+              </Form>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <Button
+                size="small"
+                onClick={() => {
+                  setShowConfirmDialog(true);
+                }}
+                color="primary"
+              >
+                Cancel
+              </Button>
+              <Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
+                {fieldData ? 'Update' : 'Add'}
+              </Button>
+            </CustomDialogFooter>
+            {showConfirmDialog ? (
               <ConfirmCancelDialog
                 close={() => setShowConfirmDialog(false)}
                 open={showConfirmDialog}
                 onSave={() => {
-                  setShowConfirmDialog(false)
+                  setShowConfirmDialog(false);
                   submitForm();
                 }}
                 onClose={() => {
-                  setShowConfirmDialog(false)
-                  handleClose()
+                  setShowConfirmDialog(false);
+                  handleClose();
                 }}
-              /> : null
-          }
-        </Fragment>
-      )}
-    </Formik>
-  </Dialog>
+              />
+            ) : null}
+          </Fragment>
+        )}
+      </Formik>
+    </Dialog>
   );
-}
+};
