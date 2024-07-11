@@ -320,6 +320,35 @@ const FormTypes = (props) => {
       helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
       onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
     />
+  ) : fieldData?.type === 'formula' ? (
+    <TextField
+      {...rest}
+      disabled={disabled}
+      variant="outlined"
+      margin="dense"
+      type={fieldData?.returnType === 'decimal' ? 'number' : 'text'}
+      name={name}
+      autoComplete="off"
+      required={required}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      onChange={
+        onChange
+          ? onChange
+          : (e) => {
+              if (fieldData?.returnType === 'decimal') {
+                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+              } else {
+                handleChange(name, e.target.value);
+              }
+            }
+      }
+      InputProps={{
+        inputProps: { min: 0 },
+        readOnly: fieldData && fieldData.isUneditable ? true : false
+      }}
+    />
   ) : null;
 };
 
