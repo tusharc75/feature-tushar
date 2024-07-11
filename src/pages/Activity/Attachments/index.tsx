@@ -132,8 +132,8 @@ export default function Attachment() {
               return (
                 <div className="flex items-center gap-2" key={d.name}>
                   <p>{d.name}</p>
-                  <IconButton  size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  <IconButton size="small" onClick={() => redirectToResource(d?.type, d?.referenceId)}>
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
                   <Chip color="primary" label={`${routes[d?.type]?.title}`} />
                 </div>
@@ -538,6 +538,7 @@ export default function Attachment() {
               id: parent._id,
               fileUrl: parent.fileUrl,
               canEdit: parent.type === 'folder' ? true : parent?.canEdit,
+              canExpand: parent.type === 'folder',
               isChecked: false
             };
           });
@@ -557,7 +558,12 @@ export default function Attachment() {
 
   const fetchChildAttachment = async (id) => {
     const attachment = await axiosInstance().get(`/attachment/child/${id}`);
-    return attachment?.data?.data;
+    return attachment?.data?.data.map((d) => ({
+      ...d,
+      id: d._id,
+      canEdit: d.type === 'folder' ? true : d?.canEdit,
+      canExpand: d.type === 'folder'
+    }));
   };
 
   const generateNestedData = (data, parent) => {
@@ -772,8 +778,8 @@ export default function Attachment() {
                   referenceId: open.parentResource
                     ? open.parentResource?.referenceId
                     : resource && selectedResourceData
-                    ? selectedResourceData.optionValue
-                    : user?.user?._id,
+                      ? selectedResourceData.optionValue
+                      : user?.user?._id,
                   access: true
                 }
               ]}
@@ -867,7 +873,7 @@ const LeftSideContents = ({
         limitTags={1}
         options={resourceOptions || []}
         getOptionLabel={(option) => option.optionLabel || ''}
-        className={`sm:max-w-[250px] sm:min-w-[200px] flex-grow`}
+        className={`flex-grow sm:min-w-[200px] sm:max-w-[250px]`}
         fullWidth
         value={resource}
         onChange={(event, newValue) => {
@@ -896,7 +902,7 @@ const LeftSideContents = ({
           limitTags={1}
           disabled={loadingResources}
           options={resourceData || []}
-          className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+          className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
           getOptionLabel={(option: any) => option.optionLabel || ''}
           getOptionSelected={(option: any, value: any) => option.optionLabel === value.optionLabel}
           value={selectedResourceData}
@@ -913,7 +919,7 @@ const LeftSideContents = ({
             <TextField
               {...params}
               fullWidth
-              className={`sm:max-w-[270px] sm:min-w-[250px] flex-grow`}
+              className={`flex-grow sm:min-w-[250px] sm:max-w-[270px]`}
               margin="none"
               size="small"
               label={`Select ${resource.optionLabel}`}
