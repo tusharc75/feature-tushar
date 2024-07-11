@@ -1,25 +1,45 @@
-import { Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Checkbox, Dialog, FormControlLabel, Radio, RadioGroup, TextField } from '@material-ui/core';
 import CustomButton from '../Helpers/CustomButton';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
-import { useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { object, string } from 'yup';
+import { Form, Formik } from 'formik';
+
+const schema = object().shape({
+  name: string().required('Please enter name'),
+  access: string().oneOf(['private', 'everyone']).required("Please select access option")
+});
+
+const ACCESS_OPTIONS = {
+  private: "private",
+  everyone: "everyone"
+}
 
 export const ViewDialog = ({ columns, resource, handleSucess, viewData, handleClose }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const [name, setName] = useState(viewData?.name || '');
+  const [initialValue] = useState({
+    name: viewData?.name || '',
+    access: viewData?.access || ACCESS_OPTIONS.private
+  });
+ 
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = () => {
+  const handleSubmit = (values) => {
+    const data = {
+      name: values?.name,
+      access: values?.access,
+      columns: columns?.toString()
+    };
+   
+    setLoading(true);
     if (viewData?._id) {
       axiosInstance()
-        .put(`/pdf/view?resource=${resource}`, {
-          _id: viewData?._id,
-          name: name,
-          columns: columns?.toString()
-        })
+        .put(`/pdf/view?resource=${resource}`, {...data, _id: viewData?._id})
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -27,16 +47,15 @@ export const ViewDialog = ({ columns, resource, handleSucess, viewData, handleCl
             message: data.message
           });
           handleSucess()
+          setLoading(false);
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
+          setLoading(false);
         });
     } else {
       axiosInstance()
-        .post(`/pdf/view?resource=${resource}`, {
-          name: name,
-          columns: columns?.toString()
-        })
+        .post(`/pdf/view?resource=${resource}`, {...data})
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -44,9 +63,11 @@ export const ViewDialog = ({ columns, resource, handleSucess, viewData, handleCl
             message: data.message
           });
           handleSucess()
+          setLoading(false);
         })
         .catch((err) => {
           toastConfig.setToastConfig(err);
+          setLoading(false);
         });
     }
   };
@@ -70,38 +91,56 @@ export const ViewDialog = ({ columns, resource, handleSucess, viewData, handleCl
         }}
         showRequiredLabel={true}
       />
-      <CustomDialogContent>
-        <TextField
-          fullWidth
-          autoFocus
-          margin="dense"
-          type="text"
-          required
-          label="View Name"
-          name="viewName"
-          variant="outlined"
-          value={name}
-          onChange={(e) => {
-            setName(e.target.value);
-          }}
-        />
-      </CustomDialogContent>
-      <CustomDialogFooter>
-        <Button
-          size="small"
-          onClick={() => handleClose()}
-          color="primary">
-          Cancel
-        </Button>
-        <CustomButton
-          disabled={name?.trim() === ''}
-          variant="contained"
-          color="primary"
-          type="submit"
-          onClick={handleSubmit}>
-          Save
-        </CustomButton>
-      </CustomDialogFooter>
+      <Formik initialValues={initialValue} validateOnMount validationSchema={schema} onSubmit={handleSubmit}>
+        {({ submitForm, setFieldValue, values, touched, errors }) => (
+          <Fragment>
+            <CustomDialogContent>
+              <Form autoComplete="off" autoCorrect="off" noValidate>
+                <TextField
+                  fullWidth
+                  margin="dense"
+                  type="text"
+                  required
+                  label="Name"
+                  name="name"
+                  variant="outlined"
+                  value={values['name']}
+                  onChange={(e) => {
+                    setFieldValue('name', e.target.value);
+                  }}
+                  error={touched['name'] && Boolean(errors['name'])}
+                  helperText={touched['name'] && errors['name']}
+                />
+                <Box pt={1}>
+                  <RadioGroup row>
+                    <FormControlLabel
+                      control={<Radio
+                        checked={values['access'] === ACCESS_OPTIONS.private}
+                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)} name="private" />}
+                      label="Private"
+                    />
+                    <FormControlLabel
+                      control={<Radio
+                        checked={values['access'] === ACCESS_OPTIONS.everyone}
+                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)} name="everyone"
+                      />}
+                      label="Everyone"
+                    />
+                  </RadioGroup>
+                </Box>
+              </Form>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <Button size="small" color="primary" onClick={handleClose}>
+                Cancel
+              </Button>
+              <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm} disabled={loading}>
+                Save
+              </CustomButton>
+            </CustomDialogFooter>
+          </Fragment>
+        )}
+      </Formik>
     </Dialog>
   );
 };
