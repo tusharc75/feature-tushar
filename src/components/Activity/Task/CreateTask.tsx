@@ -152,7 +152,9 @@ export const CreateTask = ({
 
   function validate(values) {
     const errors = {};
-    if (moment(values.startDate) > moment(values.dueDate)) {
+    const dueDate = moment(values.dueDate, dateFormatForInputControl).startOf('day');
+    const startDate = moment(values.startDate, dateFormatForInputControl).startOf('day');
+    if (dueDate.isBefore(startDate) && !startDate.isSame(dueDate)) {
       errors['dueDate'] = 'Due date must greater then start date';
     }
     return errors;
@@ -186,7 +188,7 @@ export const CreateTask = ({
                                 <Button
                                   size="small"
                                   key={index}
-                                  className="cursor-pointer asdfasfdasdfas"
+                                  className="asdfasfdasdfas cursor-pointer"
                                   onClick={() => setId(_p._id)}
                                   color="primary"
                                 >
@@ -359,6 +361,7 @@ export const CreateTask = ({
                                       }}
                                       format={dateFormatForInputControl}
                                     />
+                                    {Boolean(errors['dueDate']) && <span className="text-[12px] text-red-500">{errors['dueDate']}</span>}
                                     {initialValues.createdBy && initialValues.createdBy.date && (
                                       <Box mt={1} color="text.secondary">
                                         <Typography variant="body2">Created {moment(initialValues.createdBy.date).format(dateFormat)}</Typography>
