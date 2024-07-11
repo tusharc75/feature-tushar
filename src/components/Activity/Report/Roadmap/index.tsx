@@ -52,7 +52,7 @@ function Roadmap({ type, filter }) {
 
   var dayPixel = 0;
   if (calendarType === 'month') {
-    dayPixel = 8.5;
+    dayPixel = 15;
   } else if (calendarType === 'week') {
     dayPixel = 35;
   } else {
