@@ -229,10 +229,6 @@ export const ViewEmail = ({
               subject: `Re: ${payload.subject}`,
               type: 'sender'
             };
-            console.log({
-              ...prev,
-              inboundEmails: [...prev.inboundEmails, newMail]
-            });
             return {
               ...prev,
               inboundEmails: [...prev.inboundEmails, newMail]
@@ -463,7 +459,7 @@ export const ViewEmail = ({
                                       <AttachmentThumbnail
                                         attachments={otherAttachments}
                                         canEdit={false}
-                                        handleDeleteAttachment={(attachment) => {}}
+                                        handleDeleteAttachment={(attachment) => { }}
                                       />
                                     }
                                     <ImageAttachments

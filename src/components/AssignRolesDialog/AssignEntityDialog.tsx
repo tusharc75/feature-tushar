@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   CircularProgress,
@@ -25,6 +26,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -61,9 +63,9 @@ const AssignEntityDialog = ({
   const [data, setData] = useState([]);
   const [dataConst, setDataConst] = useState([]);
   const [role, setRole] = useState([]);
-  const [roleConst, setRoleConst] = useState([]);
+  const [roleConst, setRoleConst] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
-  const [selectedData, setSelectedData] = useState(regionalRole ? [ids[1]] : []); //for regional role assignment only in entity ids[1] has the value of selected entity
+  const [selectedData, setSelectedData] = useState(regionalRole ? [ids[1]] : []);
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
@@ -240,7 +242,7 @@ const AssignEntityDialog = ({
       });
       setData(resultData);
     } else {
-      resultRole = roleConst.filter((data) => {
+      resultRole = roleConst?.filter((data) => {
         return data.name.toLowerCase().search(value.toLowerCase()) !== -1 || data.description.toLowerCase().search(value.toLowerCase()) !== -1;
       });
       setRole(resultRole);
@@ -415,7 +417,7 @@ const AssignEntityDialog = ({
           ) : (
             <Typography>{`All ${startCase(type)} has been assigned`}</Typography>
           )
-        ) : roleConst.length ? (
+        ) : roleConst ? roleConst?.length ? (
           <List style={{ padding: 0 }}>
             {role.map((d) => (
               <ListItem divider key={d._id}>
@@ -438,7 +440,9 @@ const AssignEntityDialog = ({
           </List>
         ) : (
           <Typography>{`All Region wide functional role has been assigned`}</Typography>
-        )}
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
       </div>
     </CustomDialogContent>
     <CustomDialogFooter>
