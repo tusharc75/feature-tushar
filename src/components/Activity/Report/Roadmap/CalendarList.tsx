@@ -46,23 +46,21 @@ export default function CalendarList(props) {
 
         let label = (
           <Box width={'100%'} height={30} className="d-flex align-items-center">
-            <HtmlTooltip title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)} placement="right">
-              <Box
-                onClick={() => setActivityData({ id: data._id, type })}
-                minWidth={calendarType !== 'week' ? '100px' : ''}
-                height={20}
-                borderRadius="borderRadius"
-                display="flex"
-                style={{
-                  position: 'absolute',
-                  left: `${left}%`,
-                  right: `${right}%`,
-                  top: '50%',
-                  transform: 'translateY(-50%)'
-                }}
-                className="bg-green-500"
-                color="white"
-              ></Box>
+            <HtmlTooltip
+              className="h-[20px] rounded-[4px] bg-green-500 text-white"
+              onClick={() => setActivityData({ id: data._id, type })}
+              style={{
+                position: 'absolute',
+                left: `${left}%`,
+                right: `${right}%`,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                minWidth: calendarType === 'week' ? '34px' : calendarType !== 'week' ? '100px' : ''
+              }}
+              title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)}
+              placement="right"
+            >
+              <span className="sr-only">{data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)}</span>
             </HtmlTooltip>
           </Box>
         );

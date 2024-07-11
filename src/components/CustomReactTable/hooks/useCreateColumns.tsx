@@ -24,8 +24,9 @@ export const useCreateColumns = ({
     if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
     dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: row.original._id });
     try {
-      const subRows = await fetchChildAttachment(row.original.id);
+      let subRows = await fetchChildAttachment(row.original.id);
       if (!subRows) return;
+
       insertChildRowIntoTable({ existingRows: allRows, subRowsToInsert: subRows, parentId: row.original.id, dispatch });
       row.toggleExpanded((data) => !data);
     } catch (error) {
@@ -67,7 +68,7 @@ export const useCreateColumns = ({
             marginLeft: `${row.depth * 15}px`
           }}
         >
-          {row.original.type === 'folder' || row.getCanExpand() ? (
+          {row.original.canExpand === true || row.getCanExpand() ? (
             <IconButton
               size="small"
               style={{ fontSize: 13 }}

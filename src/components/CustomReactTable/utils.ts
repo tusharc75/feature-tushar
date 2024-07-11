@@ -189,7 +189,11 @@ export const insertChildRowIntoTable = ({ existingRows, subRowsToInsert, parentI
 
   for (let row of updatedRows) {
     if (row._id === parentId) {
-      row.subRows = subRowsToInsert;
+      if (subRowsToInsert.length > 0) {
+        row.subRows = subRowsToInsert;
+      } else {
+        row.canExpand = false;
+      }
       break;
     } else if (row.subRows) {
       insertChildRowIntoTable({

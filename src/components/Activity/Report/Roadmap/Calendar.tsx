@@ -2,7 +2,6 @@ import React, { useEffect, memo } from 'react';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
-import { dateFormat } from '../../../../constants/helpers';
 
 moment.updateLocale('en', {
   invalidDate: ''
@@ -75,7 +74,7 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
                   <Typography variant="caption" color="textSecondary" display="block">
                     {moment(date).format('MMM YYYY').toUpperCase()}
                   </Typography>
-                  {Array.from(Array(moment(date).daysInMonth()), (data, index) => {
+                  {Array.from(Array(moment(date, 'YYYY-MM-DD').daysInMonth()), (data, index) => {
                     return (
                       <div
                         key={index}
@@ -88,10 +87,10 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
                         }}
                       >
                         <Typography variant="body2" color={'textSecondary'} display="block">
-                          {moment(moment(date).format('YYYY-MM') + '-' + (index + 1)).format('ddd')[0]}
+                          {moment(moment(date).add(index, 'd')).format('ddd')[0]}
                         </Typography>
                         <Typography variant="caption" color={'textSecondary'} display="block">
-                          {moment(moment(date).format('YYYY-MM') + '-' + (index + 1)).format('D')}
+                          {moment(moment(date).add(index, 'd')).format('D')}
                         </Typography>
                       </div>
                     );
