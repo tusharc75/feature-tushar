@@ -124,7 +124,7 @@ const Activity = (props) => {
   useEffect(() => {
     const options: any = [];
     ['Task', 'Event', 'Case', 'Note', 'Email', 'Attachment']?.forEach((item) => {
-      if (permissions[item?.toLowerCase()] && permissions[item?.toLowerCase()]?.isRead === true) {
+      if ((item === 'Event' && permissions?.task?.isRead) || (permissions[item?.toLowerCase()] && permissions[item?.toLowerCase()]?.isRead === true)) {
         options.push(item);
       }
     });
