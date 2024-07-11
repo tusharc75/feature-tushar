@@ -88,7 +88,7 @@ const Activity = (props) => {
     resourceId = '',
     resourceLabel = '',
     resource = '',
-    close = () => {}
+    close = () => { }
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -119,7 +119,17 @@ const Activity = (props) => {
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  const tabs = ['Task', 'Event', 'Case', 'Note', 'Email', 'Attachment'];
+  const [tabs, setTabs] = useState([]);
+
+  useEffect(() => {
+    const options: any = [];
+    ['Task', 'Event', 'Case', 'Note', 'Email', 'Attachment']?.forEach((item) => {
+      if (permissions[item?.toLowerCase()] && permissions[item?.toLowerCase()]?.isRead === true) {
+        options.push(item);
+      }
+    });
+    setTabs(options);
+  }, []);
 
   useEffect(() => {
     fetchUsersEmails();
