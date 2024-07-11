@@ -78,12 +78,9 @@ const DeliveryTicket = () => {
       );
       data = response?.data?.data;
     }
-    data = data.filter((e) => !['productInventory', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName));
-    let columns = [];
+    data = data.filter((e) => !['warehouse', 'customerAccount', 'supplierAccount', 'pickupFromType', 'deliveryToType'].includes(e?.fieldData?.fieldName));
     const newColumns = generateColumns(renderedFrom, data, `${routes.deliveryTicket.path}/detail`, true);
-
-    columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
-    columns = columns.filter((e) => !['warehouse', 'customerAccount', 'supplierAccount'].includes(e.field));
+    const columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
     columns.forEach((column) => {
       if (column.accessor === 'pickupFrom') {
         column.cell = ({ row }) => (
