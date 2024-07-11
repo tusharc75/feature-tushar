@@ -2,9 +2,9 @@ import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import moment from 'moment';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { displayDate } from '../../../../constants/helpers';
+import { cn, displayDate } from '../../../../constants/helpers';
 import ActivityModelHandler from '../../ActivityModelHandler';
 
 const useStyles = makeStyles((theme) => ({
@@ -41,21 +41,23 @@ export default function CalendarList(props) {
           children = getTreeNodes(data.child);
           children.push(<div></div>);
         }
-        const left = (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay;
+        const left = Math.abs((100 * moment(data.startDate).diff(startDate, 'days')) / totalDay);
         const right = (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay;
+        const width = 100 - (left + right);
 
         let label = (
           <Box width={'100%'} height={30} className="d-flex align-items-center">
             <HtmlTooltip
-              className="h-[20px] rounded-[4px] bg-green-500 text-white"
+              className={cn('h-[20px] rounded-[4px] bg-green-500 text-white')}
               onClick={() => setActivityData({ id: data._id, type })}
               style={{
+                maxWidth: calendarType !== 'week' ? `max(${width}%, 100px)` : 'unset',
                 position: 'absolute',
                 left: `${left}%`,
                 right: `${right}%`,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                minWidth: calendarType === 'week' ? '34px' : calendarType !== 'week' ? '100px' : ''
+                minWidth: calendarType !== 'week' ? `max(${width}%, 2px)` : '34px'
               }}
               title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)}
               placement="right"
@@ -80,10 +82,11 @@ export default function CalendarList(props) {
         );
       });
     },
-    [calendarType, classes.group, classes.iconContainer, classes.label, endDate, startDate, totalDay, type]
+    [calendarType, endDate, startDate, totalDay, type, classes]
   );
 
-  let TreeNodes = getTreeNodes(activity);
+  let TreeNodes = useMemo(() => getTreeNodes(activity), [activity, getTreeNodes]);
+
   return (
     <>
       <TreeView expanded={expanded} selected={selected} onNodeSelect={handleSelect}>
