@@ -99,6 +99,7 @@ const Steps = ({
     <div>
       {isMobile && !isTablet ? (
         <MobileSteps
+          id={steps[currentStep]?.title ? steps[currentStep]?.title : ''}
           stepName={`${
             activeStep + 1 > steps.length || isStepEnded
               ? 'Completed'
@@ -111,7 +112,7 @@ const Steps = ({
               color="primary"
               disabled={isNextButtonDisabled}
               endIcon={<AiOutlineRight />}
-              className="ml-1 MobileStep-next-back-button"
+              className="MobileStep-next-back-button ml-1"
               onClick={goNext}
             >
               {'Next'}
@@ -124,7 +125,7 @@ const Steps = ({
               color={'primary'}
               startIcon={<AiOutlineLeft />}
               disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
-              className={`mr-1 MobileStep-next-back-button `}
+              className={`MobileStep-next-back-button mr-1 `}
               onClick={goPrev}
             >
               {'Back'}
@@ -173,6 +174,8 @@ const Steps = ({
                 `}
                     style={{ '--line-color': i < currentStep ? 'var(--new_theme_color)' : 'unset' } as React.CSSProperties}
                     key={step.name}
+                    id={step.name}
+                    aria-disabled={i > currentStep && !isStepEnded}
                   >
                     {(isStepEnded || i < currentStep) && (
                       <Box className={styles.stepCompleteIcon}>

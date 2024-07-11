@@ -28,6 +28,7 @@ import {
   ACTIVITY_RESOURCE,
   CHILD_RESOURCE,
   INVOICE_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   invoice,
   invoiceProcessSteps,
@@ -63,11 +64,13 @@ const InvoiceDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [versionDialog, setVersionDialog] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
 
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
+  const [showReOpenConfirmBox, setShowReOpenConfirmBox] = useState(false);
 
   const invoiceProcessStepsNames = React.useMemo(() => {
     return invoiceProcessSteps.map((item) => item.name);
@@ -130,6 +133,9 @@ const InvoiceDetails = () => {
       setCustomizedRoutes([routes.invoice, { title: `${data.invoiceNumber}` }]);
 
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data));
+      setAllowedToDelete(
+        permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) && data?.canDelete
+      );
       setInvoiceData(data);
       setLoading(false);
     } catch (error) {
@@ -182,10 +188,11 @@ const InvoiceDetails = () => {
 
   const handleChangeStatus = (status) => {
     axiosInstance()
-      .patch(`${invoice.api}/status/${invoiceData._id}`, { status: status })
+      .patch(`${invoice.api}/status/${invoiceData._id}`, { status: status, prevStatus: invoiceData?.status })
       .then(({ data: { data } }) => {
         fetchInvoiceData();
         setShowClosedConfirmBox(false);
+        setShowReOpenConfirmBox(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -247,9 +254,10 @@ const InvoiceDetails = () => {
                       {isMobile && !isTablet ? <Edit /> : 'Edit'}
                     </Button>
                   )}
-                {permissions?.invoice?.isDelete && invoiceData?.canDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 {permissions?.invoice?.isUpdate &&
-                  allowedToEdit && [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
+                  allowedToEdit &&
+                  [INVOICE_STATUS.readyToInvoice, INVOICE_STATUS.invoiced].includes(invoiceData?.status) && (
                     <ButtonWithPulse
                       variant={'outlined'}
                       color="default"
@@ -262,6 +270,19 @@ const InvoiceDetails = () => {
                       Close
                     </ButtonWithPulse>
                   )}
+                {permissions?.invoice?.isUpdate && allowedToEdit && invoiceData?.status === INVOICE_STATUS.closed && (
+                  <Button
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    className={'btn-outline-v1'}
+                    onClick={() => {
+                      setShowReOpenConfirmBox(true);
+                    }}
+                  >
+                    Re-Open
+                  </Button>
+                )}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -364,6 +385,19 @@ const InvoiceDetails = () => {
           }}
           onOk={() => {
             handleChangeStatus(INVOICE_STATUS.closed);
+          }}
+        />
+      )}
+
+      {showReOpenConfirmBox && (
+        <ConfirmationDialog
+          open={showReOpenConfirmBox}
+          message={`Are you sure you want to re-open ${invoiceData?.invoiceNumber} ?`}
+          onClose={() => {
+            setShowReOpenConfirmBox(false);
+          }}
+          onOk={() => {
+            handleChangeStatus(INVOICE_STATUS.invoiced);
           }}
         />
       )}

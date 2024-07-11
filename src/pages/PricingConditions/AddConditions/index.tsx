@@ -330,14 +330,14 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             </MenuItem>
             {permissions?.competencies?.isRead && (
               <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddMaterialDialog({ open: true, materialType: 'competency' });
-              }}
-            >
-              Add Existing Competencies
-            </MenuItem>
-          )}
+                onClick={() => {
+                  closeAddActions();
+                  setAddMaterialDialog({ open: true, materialType: 'competency' });
+                }}
+              >
+                Add Existing Competencies
+              </MenuItem>
+            )}
           </Menu>
         </Box>
         <Box display="flex">
@@ -364,7 +364,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 },
                 {
                   title: 'Product Export',
-                  api: `${pricingCondition.api}/template?export=true&materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?export=true&materialType=product&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
                   type: 'export'
                 },
                 {
@@ -379,7 +379,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 },
                 {
                   title: 'Package Export',
-                  api: `${pricingCondition.api}/template?export=true&materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?export=true&materialType=package&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
                   type: 'export'
                 },
                 {
@@ -394,7 +394,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                 },
                 {
                   title: 'Service Export',
-                  api: `${pricingCondition.api}/template?export=true&materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}`,
+                  api: `${pricingCondition.api}/template?export=true&materialType=service&child=true&ids=${JSON.stringify([pricingConditionId])}&uniqueIds=${JSON.stringify(selectedRecords?.map((e) => e._id))}`,
                   type: 'export'
                 },
                 {
@@ -403,6 +403,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
                   type: 'import'
                 }
               ]}
+              ids={[pricingConditionId]}
             />
           </Box>
           <Box ml={2}>

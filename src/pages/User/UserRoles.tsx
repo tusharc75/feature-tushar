@@ -10,9 +10,8 @@ import {
 import { Link } from "react-router-dom";
 import DeleteIcon from "@material-ui/icons/Delete";
 import BoxWithBorder from "../../components/BoxWithBorder";
-// import { PERMISSION } from "../../constants/Roles";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
 
-// const rolesPermissions = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
@@ -29,14 +28,11 @@ interface props {
   unassignRole: Function;
   data: any;
   permissions: any;
-  loggedInUser: any;
-  currentUserId: any;
 }
 
-const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserId }: props) => {
-  const classes = useStyles();
+const UserRoles = ({ data, unassignRole, permissions }: props) => {
 
-  const isLoggedInUserBrandAdmin = 'userType' in loggedInUser;
+  const classes = useStyles();
 
   return (
     <div className={classes.root}>
@@ -44,28 +40,19 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
         <List style={{ padding: 0 }}>
           {data && data.length
             ? data.map((obj: any, i: string) => (
-              <BoxWithBorder
-                key={i}
-                style={{ padding: "0px" }}
-              >
+              <BoxWithBorder key={i} style={{ padding: "0px" }}    >
                 <ListItem>
                   <ListItemText
                     primary={
-                      <Typography
-                        title={obj.name || ""}
-                        className={permissions?.role?.isRead ? "link text-truncate" : "text-truncate"}
-                      >
-                        {
-                          permissions?.role?.isRead ?
-                            <Link to={`/role/detail/${obj._id}`}>
-                              {obj.name || ""}
-                            </Link>
-                            :
-                            <span>{obj.name || ""}</span>
+                      <Typography title={obj.name || ""} className={permissions?.role?.isRead ? "link text-truncate" : "text-truncate"}   >
+                        {permissions?.role?.isRead ?
+                          <Link to={`/role/detail/${obj._id}`}>
+                            {obj.name || ""}
+                          </Link>
+                          :
+                          <span>{obj.name || ""}</span>
                         }
-                      </Typography>
-
-                    }
+                      </Typography>}
                     secondary={
                       <Typography
                         color="textSecondary"
@@ -77,34 +64,19 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
                     }
                   />
                   {permissions?.user?.isUpdate && (
-                    <ListItemSecondaryAction
-                      className={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "cursor-stop" : "cursor-pointer"}
-                      title={
-                        currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin
-                          ? "Role can not be deleted"
-                          : "Unassign Role"
-                      }
-                    >
-                      <IconButton
-                        //disabled={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin}
-                        size="small"
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => unassignRole(obj)}
-                      // disabled={
-                      //   rolesPermissions.indexOf(obj?.permission) >= 0
-                      // }
-                      >
-                        <DeleteIcon
-                          // color={
-                          //   rolesPermissions.indexOf(obj?.permission) >= 0
-                          //     ? "disabled"
-                          //     : "error"
-                          // }
-                          color={"error"}
-                        //color={currentUserId === loggedInUser._id || !isLoggedInUserBrandAdmin ? "disabled" : "error"}
-                        />
-                      </IconButton>
+                    <ListItemSecondaryAction>
+                      <HtmlTooltip title={"Unassign Role"} >
+                        <IconButton
+                          size="small"
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() =>
+                            unassignRole(obj)
+                          }
+                        >
+                          <DeleteIcon color={"error"} />
+                        </IconButton>
+                      </HtmlTooltip>
                     </ListItemSecondaryAction>
                   )}
                 </ListItem>
@@ -113,7 +85,7 @@ const UserRoles = ({ data, unassignRole, permissions, loggedInUser, currentUserI
             : null}
         </List>
       </div>
-    </div>
+    </div >
   );
 };
 

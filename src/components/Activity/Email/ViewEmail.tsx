@@ -176,31 +176,30 @@ export const ViewEmail = ({
   };
 
   const fetchEmailDetail = async (cancelTokenSource?: CancelTokenSource) => {
-    if (emailId) {
-      setLoading(true);
-      axiosInstance()
-        .get(`/email/${emailId}`, { cancelToken: cancelTokenSource?.token })
-        .then(({ data: { data } }) => {
-          if (data.attachments && data.attachments.length) {
-            let otherAttachments = [];
-            let filteredAttachments = data.attachments.filter((url) => {
-              let isImageUrl = checkImageUrl(url);
-              if (!isImageUrl) {
-                data.file = url;
-                otherAttachments.push(url);
-              }
-              return isImageUrl;
-            });
-            setImageAttachments(filteredAttachments);
-            setOtherAttachments([...otherAttachments]);
-          }
-          setLoading(false);
-          setInitialValues(data);
-        })
-        .catch((err) => {
-          setLoading(false);
-        });
-    }
+    if (!emailId) return;
+    setLoading(true);
+    axiosInstance()
+      .get(`/email/${emailId}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
+        if (data.attachments && data.attachments.length) {
+          let otherAttachments = [];
+          let filteredAttachments = data.attachments.filter((url) => {
+            let isImageUrl = checkImageUrl(url);
+            if (!isImageUrl) {
+              data.file = url;
+              otherAttachments.push(url);
+            }
+            return isImageUrl;
+          });
+          setImageAttachments(filteredAttachments);
+          setOtherAttachments([...otherAttachments]);
+        }
+        setLoading(false);
+        setInitialValues(data);
+      })
+      .catch((err) => {
+        setLoading(false);
+      });
   };
 
   const emailReply = async (values) => {
@@ -215,16 +214,32 @@ export const ViewEmail = ({
     setSending(true);
     axiosInstance()
       .post(`/email/reply-to/${values._id}`, payload)
-      .then(() => {
+      .then((data) => {
         setSending(false);
-        fetchEmailDetail();
         setNewImageAttachments([]);
         setNewOtherAttachments([]);
+        setLoading(true);
+        setTimeout(() => {
+          setInitialValues((prev) => {
+            const newMail = {
+              attachments: payload.attachment,
+              date: new Date(),
+              from: user?.user?.email || '',
+              message: payload.message,
+              subject: `Re: ${payload.subject}`,
+              type: 'sender'
+            };
+            return {
+              ...prev,
+              inboundEmails: [...prev.inboundEmails, newMail]
+            };
+          });
+          setLoading(false);
+        }, 100);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setSending(false);
-        fetchEmailDetail();
       });
   };
 
@@ -249,6 +264,7 @@ export const ViewEmail = ({
       .post(api, body)
       .then(() => {
         setSending(false);
+
         if (fetchData) fetchData();
       })
       .catch((error) => {
@@ -443,7 +459,7 @@ export const ViewEmail = ({
                                       <AttachmentThumbnail
                                         attachments={otherAttachments}
                                         canEdit={false}
-                                        handleDeleteAttachment={(attachment) => {}}
+                                        handleDeleteAttachment={(attachment) => { }}
                                       />
                                     }
                                     <ImageAttachments

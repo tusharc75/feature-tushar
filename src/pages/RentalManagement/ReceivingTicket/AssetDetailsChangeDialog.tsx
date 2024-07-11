@@ -41,7 +41,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     let fieldsData = fields?.data?.data;
     setAllFields(JSON.parse(JSON.stringify(fieldsData)));
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
-    let fieldsDataForUpdate = fieldsData.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+    let fieldsDataForUpdate = fieldsData?.map((d: any) => d.fieldData);
     let values = {};
     let tempAssetData = [];
     const decimalField = [];

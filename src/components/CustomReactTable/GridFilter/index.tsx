@@ -21,6 +21,7 @@ import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
 import FormTypes from '../../Helpers/FormTypes';
 import { createFilterModel, fetchFieldOptions } from '../utils';
 import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
+import SingleLine from 'src/components/CustomReactTable/GridFilter/SingleLine';
 
 function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, currentFomValue, setCurrentFomValue, customFilters, dispatch }) {
   const isMobileView = useMediaQuery('(max-width:768px)');
@@ -75,7 +76,23 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   };
 
   const handleSelectFilter = (name, value) => {
-    setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    const isArray = Array.isArray(value);
+    const isString = typeof value === 'string';
+    const isObject = typeof value === 'object';
+
+    if (isArray && value.length) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else if (isString && value) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else if (isObject && !isArray && value) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else {
+      setFormValues((prevState) => {
+        const newState = { ...prevState };
+        delete newState[name];
+        return newState;
+      });
+    }
   };
 
   const handleDuration = (timeFrameTemp, field) => {
@@ -159,7 +176,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   };
 
   const validate = (formValues = {}) => {
-    if (isEmpty(formValues)) return false;
+    //if (isEmpty(formValues)) return false;
     const field = coloums?.filter((c) => c?.type === 'date' || c?.type === 'dateTime');
     let isValid = true;
     field?.forEach((f) => {
@@ -185,7 +202,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       <Dialog
         maxWidth={'md'}
         open={true}
-        fullScreen={(isMobile && !isTablet) || isMobileView}
+        fullScreen={isMobile || isMobileView}
         fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
@@ -195,7 +212,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
         aria-describedby="Filter Dialog"
       >
         <CustomDialogHeader title={`Filters`} onClose={handleClose} showRequiredLabel={false} />
-        <CustomDialogContent>
+        <CustomDialogContent isFooterPresent>
           <Box pt={2} pb={2}>
             <Grid container spacing={2}>
               <Grid item xs={12}>
@@ -321,38 +338,53 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                         </Fragment>
                       ) : (
                         <Grid item xs={12} sm={6} md={6}>
-                    {field?.lookup && field.lookupResource ? (
-                        <AsyncDropdown
-                          key={field?._id}
-                          resource={field.lookupResource}
-                          errors={{}}
-                          touched={{}}
-                          multiple={true}
-                          value={formValues[field.fieldName] ?? []}
-                          onChange={(_, value) => {
-                            handleSelectFilter(field?.fieldName, value);
-                          }}
-                          fieldName={field.fieldName}
-                          fieldLabel={field.fieldLabel}
-                          required={false}
-                        />
-                      ) : (
-                          <FormTypes
-                            disabled={false}
-                            values={formValues}
-                            errors={{}}
-                            touched={{}}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={field.option}
-                            setFieldValue={handleSelectFilter}
-                            required={false}
-                            fullWidth
-                            size="small"
-                            fromFilter={true}
-                          />
-                      )}
+                          {field?.lookup && field.lookupResource ? (
+                            <AsyncDropdown
+                              key={field?._id}
+                              resource={field.lookupResource}
+                              errors={{}}
+                              touched={{}}
+                              multiple={true}
+                              value={formValues[field.fieldName] ?? []}
+                              onChange={(_, value) => {
+                                handleSelectFilter(field?.fieldName, value);
+                              }}
+                              fieldName={field.fieldName}
+                              fieldLabel={field.fieldLabel}
+                              required={false}
+                            />
+                          ) : field?.type === 'singleLine' || field?.type === 'lookUpDisplay' ? (
+                            <SingleLine
+                              key={field?._id}
+                              resource={resource}
+                              errors={{}}
+                              touched={{}}
+                              value={formValues[field.fieldName] ?? []}
+                              onChange={(_, value) => {
+                                handleSelectFilter(field?.fieldName, value);
+                              }}
+                              fieldName={field.fieldName}
+                              fieldLabel={field.fieldLabel}
+                              required={false}
+                              fieldData={field}
+                            />
+                          ) : (
+                            <FormTypes
+                              disabled={false}
+                              values={formValues}
+                              errors={{}}
+                              touched={{}}
+                              label={field.fieldLabel}
+                              name={field.fieldName}
+                              type={field.type}
+                              options={field.option}
+                              setFieldValue={handleSelectFilter}
+                              required={false}
+                              fullWidth
+                              size="small"
+                              fromFilter={true}
+                            />
+                          )}
                         </Grid>
                       )}
                     </Fragment>

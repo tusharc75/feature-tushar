@@ -2,9 +2,9 @@ import { Box } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import moment from 'moment';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { displayDate } from '../../../../constants/helpers';
+import { cn, displayDate } from '../../../../constants/helpers';
 import ActivityModelHandler from '../../ActivityModelHandler';
 
 const useStyles = makeStyles((theme) => ({
@@ -33,52 +33,60 @@ export default function CalendarList(props) {
   const classes = useStyles();
   const [activityData, setActivityData] = useState(null);
 
-  const getTreeNodes = (activity) => {
-    return activity.map((data, index) => {
-      let children = [];
-      if (data.child && data.child.length) {
-        children = getTreeNodes(data.child);
-        children.push(<div></div>);
-      }
+  const getTreeNodes = useCallback(
+    (activity) => {
+      return activity.map((data, index) => {
+        let children = [];
+        if (data.child && data.child.length) {
+          children = getTreeNodes(data.child);
+          children.push(<div></div>);
+        }
+        const left = Math.abs((100 * moment(data.startDate).diff(startDate, 'days')) / totalDay);
+        const right = (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay;
+        const width = 100 - (left + right);
 
-      let label = (
-        <Box width={'100%'} height={30} className="d-flex align-items-center">
-          <HtmlTooltip title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)} placement="right">
-            <Box
+        let label = (
+          <Box width={'100%'} height={30} className="d-flex align-items-center">
+            <HtmlTooltip
+              className={cn('h-[20px] rounded-[4px] bg-green-500 text-white')}
               onClick={() => setActivityData({ id: data._id, type })}
-              minWidth={calendarType !== 'week' ? '100px' : ''}
-              height={20}
-              borderRadius="borderRadius"
-              display="flex"
               style={{
+                maxWidth: calendarType !== 'week' ? `max(${width}%, 100px)` : 'unset',
                 position: 'absolute',
-                left: (100 * moment(data.startDate).diff(startDate, 'days')) / totalDay + '%',
-                right: (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay + '%'
+                left: `${left}%`,
+                right: `${right}%`,
+                top: '50%',
+                transform: 'translateY(-50%)',
+                minWidth: calendarType !== 'week' ? `max(${width}%, 2px)` : '34px'
               }}
-              bgcolor="secondary.main"
-              color="white"
-            ></Box>
-          </HtmlTooltip>
-        </Box>
-      );
+              title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)}
+              placement="right"
+            >
+              <span className="sr-only">{data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)}</span>
+            </HtmlTooltip>
+          </Box>
+        );
 
-      return (
-        <TreeItem
-          key={index}
-          nodeId={data._id.toString()}
-          label={label}
-          children={children}
-          classes={{
-            group: classes.group,
-            iconContainer: classes.iconContainer,
-            label: classes.label
-          }}
-        />
-      );
-    });
-  };
+        return (
+          <TreeItem
+            key={index}
+            nodeId={data._id.toString()}
+            label={label}
+            children={children}
+            classes={{
+              group: classes.group,
+              iconContainer: classes.iconContainer,
+              label: classes.label
+            }}
+          />
+        );
+      });
+    },
+    [calendarType, endDate, startDate, totalDay, type, classes]
+  );
 
-  let TreeNodes = getTreeNodes(activity);
+  let TreeNodes = useMemo(() => getTreeNodes(activity), [activity, getTreeNodes]);
+
   return (
     <>
       <TreeView expanded={expanded} selected={selected} onNodeSelect={handleSelect}>

@@ -6,7 +6,8 @@ import { Autocomplete } from '@material-ui/lab';
 import { useEffect, useState } from 'react';
 
 const FormTypes = (props) => {
-  const { values, onChange, fieldData, currency, touched, errors, ...others } = props;
+  const tempProps = { ...props, id: props.id ? props.id : props.fieldData ? props.fieldData.split(' ').join('-') : 'field' };
+  const { values, onChange, fieldData, currency, touched, errors, ...others } = tempProps;
 
   const [options, setOptions] = useState([]);
 
@@ -119,7 +120,7 @@ const FormTypes = (props) => {
         />
       )}
     />
-  ) : fieldData?.type === 'decimal'    ? (
+  ) : fieldData?.type === 'decimal' ? (
     <TextField
       style={{ paddingRight: 1 }}
       variant="outlined"

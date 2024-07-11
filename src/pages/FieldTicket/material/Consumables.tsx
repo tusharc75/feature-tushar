@@ -78,10 +78,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     if (selectedServiceOption?.optionValue !== 'All' && !services?.some((s) => s?.materialId === selectedServiceOption?.optionValue)) {
       setSelectedServiceOption({ optionLabel: 'All', optionValue: 'All' });
     }
-    if (renderCount > 1) {
-      dispatch({ type: 'update', data: [] });
-    }
-    setRenderCount(renderCount + 1);
   }, [services]);
 
   const {
@@ -89,26 +85,24 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   }: any = useData();
 
   useEffect(() => {
+    var allowRequest = false;
+    if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
+      if (
+        (fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id)) ||
+        (fieldTicketData?.warehouse?.materialHandlers && fieldTicketData?.warehouse?.materialHandlers?.includes(user?.user?._id))
+      ) {
+        allowRequest = false;
+      } else {
+        allowRequest = true;
+      }
+    }
+    setConsumeRequest(allowRequest);
     fetchColumns();
   }, [fieldTicketData]);
 
   useEffect(() => {
-    if (columns && !dataRows?.length && tabValue === 0) {
-      var allowRequest = false;
-      if (user?.user?.brandPolicy?.workOrderConsumableRequest) {
-        if (
-          (fieldTicketData?.warehouse?.manager && fieldTicketData?.warehouse?.manager?.includes(user?.user?._id)) ||
-          (fieldTicketData?.warehouse?.materialHandlers && fieldTicketData?.warehouse?.materialHandlers?.includes(user?.user?._id))
-        ) {
-          allowRequest = false;
-        } else {
-          allowRequest = true;
-        }
-      }
-      setConsumeRequest(allowRequest);
-      fetchData();
-    }
-  }, [columns, renderCount, selectedServiceOption, tabValue]);
+    fetchData();
+  }, [selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
@@ -352,8 +346,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           productName: d.productName,
           productDescription: d.productDescription,
           productNumber: d.productNumber,
-          unit : d?.unitMain?.length ? d.unitMain : [],
-          pricingMethod : d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
+          unit: d?.unitMain?.length ? d.unitMain : [],
+          pricingMethod: d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
         }
         element.fieldTicketId = fieldTicketData?._id;
         element._id = id;
@@ -523,7 +517,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
-          message: response?.data?.data?.message
+          message: response?.data?.message
         });
       }
       fetchData();
@@ -543,13 +537,20 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const dataRow = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
-
     if (inputField.hasOwnProperty('qty')) {
-      if (parseInt(inputField?.qty) === 0) {
+      if (parseInt(inputField.qty) === 0) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
-          message: 'Qty can not be 0'
+          message: 'Quantity cannot be zero'
+        });
+        return;
+      }
+      if (parseInt(inputField.qty) < (updatedData?.consumedQty || 0) + (updatedData?.requestedQty || 0)) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Quantity can not be less than consumed quantity'
         });
         return;
       }

@@ -285,32 +285,32 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
           productCategory: item.productDetail?.productCategory,
           chartOfAccount: item.productDetail?.chartOfAccount
         };
-
-        res.subRows = [
-          ...(res?.subRows || []),
-          ...(serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)?.map((e, i) => ({
-            index: `${res.index}.${i + 1}`,
+        const subRows = []
+        serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)?.forEach((e) => {
+          subRows.push({
+            index: `${res.index}.${subRows?.length + 1}`,
             _id: e?._id,
             detail: e.assetNumber,
             type: MATERIAL_TYPE.serializedAsset,
             assetId: e?._id,
             hideSelection: true
-          })) || []),
-          ...(productSerialNumber?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)?.map((e, i) => ({
-            index: `${res.index}.${i + 1}`,
+          })
+        })
+        productSerialNumber?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)?.forEach((e) => {
+          subRows.push({
+            index: `${res.index}.${subRows?.length + 1}`,
             _id: e?._id,
             detail: e.serialNumber,
             type: 'Serial Number',
             assetId: e?._id,
             hideSelection: true
-          })) || [])
-        ];
+          })
+        })
+        res.subRows = subRows;
         res['assetQty'] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length;
         res['inventoryQty'] = item?.actualReceived
           ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
           : 0;
-
-
         tempMaterialserializedAssets[res?._id] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => {
           return { optionValue: e?._id, optionLabel: e?.detail }
         });

@@ -14,7 +14,9 @@ export const useCreateColumns = ({
   dispatch,
   state,
   isClientSideGrid,
-  toggleExpandChange
+  toggleExpandChange,
+  resource,
+  renderedFrom
 }) => {
   const { dataRows: allRows } = state;
 
@@ -22,8 +24,9 @@ export const useCreateColumns = ({
     if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
     dispatch({ type: 'loadingExpanderRowId', loadingExpanderRowId: row.original._id });
     try {
-      const subRows = await fetchChildAttachment(row.original.id);
+      let subRows = await fetchChildAttachment(row.original.id);
       if (!subRows) return;
+
       insertChildRowIntoTable({ existingRows: allRows, subRowsToInsert: subRows, parentId: row.original.id, dispatch });
       row.toggleExpanded((data) => !data);
     } catch (error) {
@@ -65,7 +68,7 @@ export const useCreateColumns = ({
             marginLeft: `${row.depth * 15}px`
           }}
         >
-          {row.original.type === 'folder' || row.getCanExpand() ? (
+          {row.original.canExpand === true || row.getCanExpand() ? (
             <IconButton
               size="small"
               style={{ fontSize: 13 }}
@@ -110,7 +113,7 @@ export const useCreateColumns = ({
         />
       ),
       cell: ({ row }) => (
-        <div className="mx-auto text-center justify-center">
+        <div className="mx-auto justify-center text-center">
           {row.original.hideSelection ? (
             <></>
           ) : (
@@ -118,7 +121,8 @@ export const useCreateColumns = ({
               {...{
                 checked: row.getIsSelected(),
                 indeterminate: row.getIsSomeSelected(),
-                onChange: row.getToggleSelectedHandler()
+                onChange: row.getToggleSelectedHandler(),
+                id: `${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`
               }}
               className="[&_svg]:[font-size:20px_!important]"
             />

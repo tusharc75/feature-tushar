@@ -65,11 +65,16 @@ const Board = ({ type, filter }) => {
     fetchBoard(cancelTokenSource);
     return () => cancelTokenSource.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [type, filter]);
+  }, [type, filter, selectedResourceData]);
 
   const fetchBoard = (cancelTokenSource?: CancelTokenSource) => {
+    let updatedFilter = [...(filter || [])];
+    if (selectedResourceData) {
+      updatedFilter.push({ _id: selectedResourceData.optionValue });
+    }
+
     axiosInstance()
-      .get(`/activity/board?type=${type}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
+      .get(`/activity/board?type=${type}&filter=${JSON.stringify(updatedFilter)}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         const groupedData = groupBy(data, 'status');
         const updatedData = [];
@@ -230,7 +235,7 @@ const Board = ({ type, filter }) => {
 
   return (
     <>
-      <Box className="grid grid-cols-1 md:grid-cols-2 gap-2 pb-[18px] max-w-[1008px]">
+      <Box className="grid max-w-[1008px] grid-cols-1 gap-2 pb-[18px] md:grid-cols-2">
         <Autocomplete
           fullWidth
           options={resourceOptions}
@@ -260,10 +265,10 @@ const Board = ({ type, filter }) => {
       </Box>
       <div className=" overflow-x-auto">
         <DndContext sensors={sensors} onDragStart={onDragStart} onDragOver={onDragOver} onDragEnd={onDragEnd}>
-          <ul className=" grid min-w-[960px] grid-cols-3 xl:grid-cols-4 gap-4 min-h-[500px] h-[calc(100vh-32vh)] overflow-auto">
+          <ul className=" grid h-[calc(100vh-32vh)] min-h-[500px] min-w-[960px] grid-cols-3 gap-4 overflow-auto xl:grid-cols-4">
             {loading ? (
               Array.from(Array(3).keys()).map((d) => (
-                <div key={d} className={`bg-[var(--dark-secondary,#f1f5ff)] rounded-[8px] group animate-pulse`} />
+                <div key={d} className={`group animate-pulse rounded-[8px] bg-[var(--dark-secondary,#f1f5ff)]`} />
               ))
             ) : (
               <>

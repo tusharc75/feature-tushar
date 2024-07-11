@@ -189,7 +189,11 @@ export const insertChildRowIntoTable = ({ existingRows, subRowsToInsert, parentI
 
   for (let row of updatedRows) {
     if (row._id === parentId) {
-      row.subRows = subRowsToInsert;
+      if (subRowsToInsert.length > 0) {
+        row.subRows = subRowsToInsert;
+      } else {
+        row.canExpand = false;
+      }
       break;
     } else if (row.subRows) {
       insertChildRowIntoTable({
@@ -292,7 +296,7 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
       }
       return d;
     });
-    if (resource === sidebarResource.user) {
+    if (resource === sidebarResource.user || resource === sidebarResource.employeeMaster) {
       modifiedColumn?.forEach((e) => {
         if (e.fieldName === 'firstName') {
           e.fieldName = 'concatedName';
@@ -412,6 +416,10 @@ export const createFilterModel = (formValues, coloums) => {
 
     switch (col.type) {
       case 'singleLine':
+        if (formValues[fieldName]) {
+          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
       case 'multiLine':
       case 'email':
       case 'mobileNumber':
@@ -429,7 +437,6 @@ export const createFilterModel = (formValues, coloums) => {
       case 'multiSelect':
       case 'dropDown':
         if ((col.lookup || col.dataList) && formValues[fieldName]) {
-          
           if (col.type === 'multiSelect' && formValues[fieldName]?.length > 0) {
             filterModel.set(fieldName, {
               operator: 'OR',

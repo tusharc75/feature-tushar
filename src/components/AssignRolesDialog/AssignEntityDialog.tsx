@@ -1,4 +1,5 @@
 import {
+  Box,
   Button,
   Checkbox,
   CircularProgress,
@@ -25,6 +26,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -47,7 +49,6 @@ const AssignEntityDialog = ({
   type,
   assignedEntity,
   regionalRole,
-  isRenderedFromUserSetUp = false,
   isRenderedFromContact = false,
   entityAccessIds = [],
   roleAccessIds = [],
@@ -62,9 +63,9 @@ const AssignEntityDialog = ({
   const [data, setData] = useState([]);
   const [dataConst, setDataConst] = useState([]);
   const [role, setRole] = useState([]);
-  const [roleConst, setRoleConst] = useState([]);
+  const [roleConst, setRoleConst] = useState(null);
   const [loadingData, setLoadingData] = useState(false);
-  const [selectedData, setSelectedData] = useState(regionalRole ? [ids[1]] : []); //for regional role assignment only in entity ids[1] has the value of selected entity
+  const [selectedData, setSelectedData] = useState(regionalRole ? [ids[1]] : []);
   const [selectedRole, setSelectedRole] = useState([]);
   const [isAssigning, setAssigning] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
@@ -187,7 +188,6 @@ const AssignEntityDialog = ({
     if (selectedData.length) {
       setAssigning(true);
       let dataObj: any;
-
       if (type === 'entity') {
         dataObj = {
           users: ids,
@@ -201,16 +201,23 @@ const AssignEntityDialog = ({
           roles: selectedRole
         };
       }
-      await axiosInstance()
-        .put(type === 'entity' ? `/user/assign-multiple-entities` : `/user/assign-regional-role`, dataObj)
+      await axiosInstance().put(type === 'entity' ? `/user/assign-multiple-entities` : `/user/assign-regional-role`, dataObj)
         .then(() => {
           setAssigning(false);
-          toastConfig.setToastConfig({
-            message: `${startCase(type)} assigned successfully`,
-            type: 'success',
-            open: true
-          });
-
+          if (regionalRole) {
+            toastConfig.setToastConfig({
+              message: `Role Assigned Successfully`,
+              type: 'success',
+              open: true
+            });
+          }
+          else {
+            toastConfig.setToastConfig({
+              message: `${startCase(type)} Assigned Successfully`,
+              type: 'success',
+              open: true
+            });
+          }
           onSuccess();
         })
         .catch((error) => {
@@ -235,7 +242,7 @@ const AssignEntityDialog = ({
       });
       setData(resultData);
     } else {
-      resultRole = roleConst.filter((data) => {
+      resultRole = roleConst?.filter((data) => {
         return data.name.toLowerCase().search(value.toLowerCase()) !== -1 || data.description.toLowerCase().search(value.toLowerCase()) !== -1;
       });
       setRole(resultRole);
@@ -343,125 +350,117 @@ const AssignEntityDialog = ({
     );
   };
 
-  return (
-    // <Dialog
-    //   fullWidth
-    //   maxWidth="sm"
-    //   open={entitiesDialogOpen}
-    //   onClose={handleCloseDialog}
-    //   aria-labelledby="assign-roles-dialog"
-    // >
-    <>
-      {!isRenderedFromUserSetUp && (
-        <CustomDialogHeader title={regionalRole ? `Assign role` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />
-      )}
-      <CustomDialogContent>
-        <div className="p-3 md:p-4">
-          {!regionalRole ? (
-            loadingData ? (
-              <Loader text={`Loading ${startCase(type)}`} />
-            ) : dataConst.length ? (
-              <>
-                <ListingPageHeader
-                  showSearchInMobile={true}
-                  leftSideContents={leftSideContents()}
-                  isActionButtonVisible={false}
-                  isAddButtonVisible={false}
-                  setQueryString={false}
-                  searchValue={search}
-                  onSearch={handleSearch}
-                />
+  return (<>
+    <CustomDialogHeader
+      showRequiredLabel={false}
+      title={regionalRole ? `Assign Role` : type === 'entity' ? 'Assign Entities - Roles' : `Assign  ${startCase(type)}`} />
+    <CustomDialogContent>
+      <div className="p-3 md:p-4">
+        {!regionalRole ? (
+          loadingData ? (
+            <Loader text={`Loading ${startCase(type)}`} />
+          ) : dataConst.length ? (
+            <>
+              <ListingPageHeader
+                showSearchInMobile={true}
+                leftSideContents={leftSideContents()}
+                isActionButtonVisible={false}
+                isAddButtonVisible={false}
+                setQueryString={false}
+                searchValue={search}
+                onSearch={handleSearch}
+              />
 
-                <div className="mt-3 grid gap-[20px]">
-                  {steps.map((label, index) => (
-                    <div key={label} className="relative">
-                      <h4 className="flex items-center gap-[18px] text-[14px] text-[var(--primary-text)] max-[600px]:ml-[6px]">
-                        <span className="grid h-[20px] w-[20px] place-items-center rounded-full bg-[--primary] text-[12px] text-white">
-                          {activeStep > index ? <Check className="block" style={{ fontSize: 14 }} /> : index + 1}
-                        </span>
-                        <span>{label}</span>
-                      </h4>
-                      {activeStep === index && (
-                        <div
-                          style={{ borderLeft: '1px dashed var(--common-border-color)' }}
-                          className="absolute left-[10px] top-[20px]  z-10 hidden h-full w-[2px] -translate-x-1/2 -translate-y-1/2 transform min-[600px]:block"
-                        ></div>
-                      )}
-                      <Collapse in={activeStep === index}>
-                        <div className="max-w-full  min-[600px]:ml-[35px]">
-                          <div className="max-w-full">{getStepContent(index)}</div>
-                          <div className={classes.actionsContainer}>
-                            <div>
-                              <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
-                                Back
+              <div className="mt-3 grid gap-[20px]">
+                {steps.map((label, index) => (
+                  <div key={label} className="relative">
+                    <h4 className="flex items-center gap-[18px] text-[14px] text-[var(--primary-text)] max-[600px]:ml-[6px]">
+                      <span className="grid h-[20px] w-[20px] place-items-center rounded-full bg-[--primary] text-[12px] text-white">
+                        {activeStep > index ? <Check className="block" style={{ fontSize: 14 }} /> : index + 1}
+                      </span>
+                      <span>{label}</span>
+                    </h4>
+                    {activeStep === index && (
+                      <div
+                        style={{ borderLeft: '1px dashed var(--common-border-color)' }}
+                        className="absolute left-[10px] top-[20px]  z-10 hidden h-full w-[2px] -translate-x-1/2 -translate-y-1/2 transform min-[600px]:block"
+                      ></div>
+                    )}
+                    <Collapse in={activeStep === index}>
+                      <div className="max-w-full  min-[600px]:ml-[35px]">
+                        <div className="max-w-full">{getStepContent(index)}</div>
+                        <div className={classes.actionsContainer}>
+                          <div>
+                            <Button size="small" disabled={activeStep === 0} onClick={handleBack} className={classes.button}>
+                              Back
+                            </Button>
+                            {activeStep !== steps.length - 1 && (
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                size="small"
+                                onClick={handleNext}
+                                disabled={selectedData.length === 0}
+                                className={classes.button}
+                              >
+                                Next
                               </Button>
-                              {activeStep !== steps.length - 1 && (
-                                <Button
-                                  variant="contained"
-                                  color="primary"
-                                  size="small"
-                                  onClick={handleNext}
-                                  disabled={selectedData.length === 0}
-                                  className={classes.button}
-                                >
-                                  Next
-                                </Button>
-                              )}
-                            </div>
+                            )}
                           </div>
                         </div>
-                      </Collapse>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <Typography>{`All ${startCase(type)} has been assigned`}</Typography>
-            )
-          ) : roleConst.length ? (
-            <List style={{ padding: 0 }}>
-              {role.map((d) => (
-                <ListItem divider key={d._id}>
-                  <ListItemIcon>
-                    <Checkbox
-                      edge="start"
-                      onChange={(e) => {
-                        d.isChecked = e.target.checked;
-                        setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
-                      }}
-                      checked={d.isChecked}
-                      inputProps={{
-                        'aria-labelledby': `checkbox-list-label-${d._id}`
-                      }}
-                    />
-                  </ListItemIcon>
-                  <ListItemText primary={d.name || ''} secondary={d.description || ''} />
-                </ListItem>
-              ))}
-            </List>
+                      </div>
+                    </Collapse>
+                  </div>
+                ))}
+              </div>
+            </>
           ) : (
-            <Typography>{`All Region wide functional role has been assigned`}</Typography>
-          )}
-        </div>
-      </CustomDialogContent>
-      <CustomDialogFooter>
-        {!isRenderedFromUserSetUp && (
-          <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
-            Cancel
-          </Button>
-        )}
-        <Button
-          disabled={!selectedData?.length || !selectedRole?.length}
-          onClick={isRenderedFromContact ? handleAccessPortal : handleAssignEntity}
-          color="primary"
-          size="small"
-          variant="contained"
-        >
-          {isAssigning ? <CircularProgress size={22} /> : isRenderedFromUserSetUp ? 'Save & Continue' : 'Save'}{' '}
-        </Button>
-      </CustomDialogFooter>
-      {/* </Dialog> */}
-    </>
+            <Typography>{`All ${startCase(type)} has been assigned`}</Typography>
+          )
+        ) : roleConst ? roleConst?.length ? (
+          <List style={{ padding: 0 }}>
+            {role.map((d) => (
+              <ListItem divider key={d._id}>
+                <ListItemIcon>
+                  <Checkbox
+                    edge="start"
+                    onChange={(e) => {
+                      d.isChecked = e.target.checked;
+                      setSelectedRole(role.filter((r) => r.isChecked).map((obj) => obj._id));
+                    }}
+                    checked={d.isChecked}
+                    inputProps={{
+                      'aria-labelledby': `checkbox-list-label-${d._id}`
+                    }}
+                  />
+                </ListItemIcon>
+                <ListItemText primary={d.name || ''} secondary={d.description || ''} />
+              </ListItem>
+            ))}
+          </List>
+        ) : (
+          <Typography>{`All Region wide functional role has been assigned`}</Typography>
+        ) : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>}
+      </div>
+    </CustomDialogContent>
+    <CustomDialogFooter>
+      <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
+        Cancel
+      </Button>
+      <Button
+        disabled={!selectedData?.length || !selectedRole?.length || isAssigning}
+        onClick={isRenderedFromContact ? handleAccessPortal : handleAssignEntity}
+        color="primary"
+        size="small"
+        variant="contained"
+        endIcon={isAssigning && <CircularProgress size={20} />}
+      >
+        {'Save'}
+      </Button>
+    </CustomDialogFooter>
+  </>
   );
 };
 

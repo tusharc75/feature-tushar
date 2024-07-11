@@ -2,6 +2,7 @@ import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
+import { uniq } from 'lodash';
 
 const localizer = momentLocalizer(moment);
 
@@ -27,43 +28,24 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
 
     const response = await axiosInstance().get(`/history/product-ledger/${product}${query}`);
     const response1 = await axiosInstance().get(`/product-inventory/product/upcoming-ledger/${product}${query}`);
-    let rows = [...response?.data?.data, ...response1?.data?.data];
 
-    // let qty = 0;
-    // rows.forEach((item) => {
-    //   if (item.type === 'credit') {
-    //     qty += item?.qty;
-    //   } else {
-    //     qty -= item?.qty;
-    //   }
-    //   item.finalInventory = qty;
-    // });
-
-    let datewise = [];
+    let datewise = [...response?.data?.data, ...response1?.data?.data];
     let datewiseData = [];
 
-    datewise = rows.sort((a, b) => {
-      let timeA = new Date(a.date).getTime();
-      let timeB = new Date(b.date).getTime();
-      return timeA - timeB;
-    });
-
-    datewise.forEach((d) => {
-      let sameDateData = datewise.filter((item) => {
-        return moment(item.date).format('MM-DD-YYYY') === moment(d.date).format('MM-DD-YYYY');
-      });
+    const uniqDate = uniq(datewise?.map((e) => moment(e.date).format('MM-DD-YYYY')))
+    uniqDate?.forEach((e) => {
+      let dayWiseRecord = datewise.filter((item) => moment(item.date).format('MM-DD-YYYY') === e);
       let lastFinalInventory;
-      if (sameDateData && sameDateData.length > 0) {
-        lastFinalInventory = sameDateData[sameDateData?.length - 1];
+      if (dayWiseRecord.length) {
+        lastFinalInventory = dayWiseRecord[0];
       }
-
-      if (lastFinalInventory.date === d.date && !lastFinalInventory?.isFinalInventory) {
+      if (lastFinalInventory) {
         datewiseData.push({
-          ...d,
+          ...lastFinalInventory,
           isFinalInventory: true
         });
       }
-    });
+    })
 
     datewise = [...datewiseData, ...datewise];
 
@@ -71,13 +53,13 @@ const CalendarView = ({ product, warehouse, storageLocation }) => {
       return {
         ...d,
         id: d?._id,
-        title: d?.isFinalInventory ? `Final Quantity (${d.finalInventory})` : `${d?.type === 'credit' ? '↑' : '↓'} ${d?.referenceType} (${d?.qty})`,
+        title: d?.isFinalInventory ? `Final Quantity (${d?.finalInventory || 0})` : `${d?.type === 'credit' ? '↑' : '↓'} ${d?.referenceType} (${d?.qty})`,
         start: new Date(d.date),
         end: new Date(d.date),
         allDay: true
       };
     });
-    
+
     setActivities(newData);
   };
 

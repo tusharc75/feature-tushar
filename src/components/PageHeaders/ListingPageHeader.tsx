@@ -151,8 +151,8 @@ const ListingPageHeader = ({
   };
 
   const shouldNotFlexWrap = useMemo(() => {
-    return (onSearch || handleSearchFilter) && (isAddButtonVisible || isActionButtonVisible) && !Boolean(rightSideContents);
-  }, [handleSearchFilter, isActionButtonVisible, isAddButtonVisible, onSearch, rightSideContents]);
+    return onSearch && (isAddButtonVisible || isActionButtonVisible) && !Boolean(rightSideContents);
+  }, [isActionButtonVisible, isAddButtonVisible, onSearch, rightSideContents]);
 
   const isLeftSidePresent = useMemo(() => {
     return Boolean(toggleButtonList) || Boolean(leftSideContents);
@@ -201,7 +201,7 @@ const ListingPageHeader = ({
           ) : null}
           {handleSearchFilter ? (
             <SearchFilter
-              className="w-full flex-grow sm:w-[unset] sm:min-w-[200px] sm:max-w-[400px]"
+              className=" w-[250px] flex-grow sm:w-[300] sm:min-w-[200px] sm:max-w-[400px]"
               handleChangeFilter={handleSearchFilter}
               filter={searchFilter}
               chip={{ size: 'small' }}
@@ -218,6 +218,7 @@ const ListingPageHeader = ({
                       variant={'contained'}
                       color="primary"
                       size="small"
+                      id={showSearchInMobile ? 'dialog-add-button' : 'add-button'}
                       disabled={addButtonLoading || addButtonDisabled}
                       {...restOfAddButtonProps}
                       onClick={(e) => {
@@ -244,6 +245,7 @@ const ListingPageHeader = ({
                             variant={'outlined'}
                             color="default"
                             size="small"
+                            id={showSearchInMobile ? 'dialog-action-button' : 'action-button'}
                             className={`new-dropdown-v1 [height:32px_!important] max-[600px]:[border:0px_!important] max-[600px]:[max-width:36px_!important]`}
                             disabled={actionButtonLoading || actionButtonDisabled}
                             {...restOfActionButtonProps}
@@ -274,6 +276,7 @@ const ListingPageHeader = ({
                         id="action-menu"
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
+                        TransitionProps={{ unmountOnExit: true }}
                       >
                         <span onClick={() => closeActions()}>{actionMenuItems}</span>
                       </Menu>

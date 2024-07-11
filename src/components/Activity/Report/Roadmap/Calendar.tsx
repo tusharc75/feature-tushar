@@ -2,7 +2,10 @@ import React, { useEffect, memo } from 'react';
 import Box from '@material-ui/core/Box';
 import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
-import { dateFormat } from '../../../../constants/helpers';
+
+moment.updateLocale('en', {
+  invalidDate: ''
+});
 
 const DaysBetweenDates = function (calendarType, startDate, endDate) {
   var dateList = [];
@@ -61,7 +64,7 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
         height={60}
         display="flex"
         width={totalDay * dayPixel}
-        className="sticky top-0 z-[2] bg-[var(--dark-primary, white)]"
+        className="bg-[var(--dark-primary, white)] sticky top-0 z-[2]"
         style={{ borderBottom: '1px solid var(--common-border-color)' }}
       >
         {calendarType === 'week'
@@ -71,7 +74,7 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
                   <Typography variant="caption" color="textSecondary" display="block">
                     {moment(date).format('MMM YYYY').toUpperCase()}
                   </Typography>
-                  {Array.from(Array(moment(date).daysInMonth()), (data, index) => {
+                  {Array.from(Array(moment(date, 'YYYY-MM-DD').daysInMonth()), (data, index) => {
                     return (
                       <div
                         key={index}
@@ -84,10 +87,10 @@ function Calendar({ calendarType, dayPixel, startDate, endDate }) {
                         }}
                       >
                         <Typography variant="body2" color={'textSecondary'} display="block">
-                          {moment(moment(date).format('YYYY-MM') + '-' + (index + 1)).format('ddd')[0]}
+                          {moment(moment(date).add(index, 'd')).format('ddd')[0]}
                         </Typography>
                         <Typography variant="caption" color={'textSecondary'} display="block">
-                          {moment(moment(date).format('YYYY-MM') + '-' + (index + 1)).format('D')}
+                          {moment(moment(date).add(index, 'd')).format('D')}
                         </Typography>
                       </div>
                     );

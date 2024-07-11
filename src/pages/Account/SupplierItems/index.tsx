@@ -297,6 +297,7 @@ const SupplierItems = ({ api, id, allowedToEdit, permission }) => {
           onSuccess={(data) => {
             const assignData = data?.map((item) => item.id);
             assignItems({ productCategories: assignData || [] });
+            setAssignDialog({ open: false, type: null, data: null });
           }}
           handleClose={() => {
             setAssignDialog({ open: false, type: null, data: null });

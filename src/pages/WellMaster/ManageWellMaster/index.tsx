@@ -25,7 +25,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
 
-const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, referenceData = null }) => {
+const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuccess, referenceData = null, isRedirectToDetailPage = true }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const {
@@ -133,10 +133,10 @@ const ManageWellMaster = ({ isClone = false, wellMasterId = null, onClose, onSuc
             type: 'success',
             message: message
           });
-          if (referenceData) {
-            onSuccess(data);
-          } else {
+          if (isRedirectToDetailPage) {
             history.push(`${routes.wellMasterDetail.path}/${data?._id}`);
+          } else {
+            onSuccess(data);
           }
         })
         .catch((error) => {

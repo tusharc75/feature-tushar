@@ -25,6 +25,7 @@ import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
   PRODUCTION_ORDER_STATUS,
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   productionOrder,
   productionOrderSteps,
@@ -129,7 +130,7 @@ const ProductionOrderDetails = () => {
         //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
         // }
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.productionOrder, data));
-        setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
+        setAllowedToDelete(permissions?.productionOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.productionOrder, data.owner.optionValue) && data?.canDelete);
         setProductionOrderData({ ...data });
       })
       .catch((err) => {
@@ -220,7 +221,7 @@ const ProductionOrderDetails = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.productionOrder?.isDelete && allowedToDelete && productionOrderData?.canDelete && (
+                { allowedToDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
               </>

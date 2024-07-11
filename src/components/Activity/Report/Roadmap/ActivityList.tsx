@@ -1,54 +1,45 @@
-import { useState } from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography, Box, Button, Dialog } from "@material-ui/core";
-import { TreeView, TreeItem } from "@material-ui/lab";
-import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
-import ChevronRightIcon from "@material-ui/icons/ChevronRight";
-import AddIcon from "@material-ui/icons/Add";
-import { isMobile, isTablet } from "react-device-detect";
-import ActivityModelHandler from "../../ActivityModelHandler";
-import { CreateTask } from "../../Task/CreateTask";
-import { CreateCase } from "../../Case/CreateCase";
-import { useData } from "../../../../StateProvider/Provider";
-import { CustomDialogTransition } from "../../../../constants/helpers";
+import { useState } from 'react';
+import { makeStyles } from '@material-ui/core/styles';
+import { Typography, Box, Button, Dialog } from '@material-ui/core';
+import { TreeView, TreeItem } from '@material-ui/lab';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ChevronRightIcon from '@material-ui/icons/ChevronRight';
+import AddIcon from '@material-ui/icons/Add';
+import { isMobile, isTablet } from 'react-device-detect';
+import ActivityModelHandler from '../../ActivityModelHandler';
+import { CreateTask } from '../../Task/CreateTask';
+import { CreateCase } from '../../Case/CreateCase';
+import { useData } from '../../../../StateProvider/Provider';
+import { CustomDialogTransition } from '../../../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
-    "&:hover > $content": {
-      backgroundColor: theme.palette.action.hover,
+    '&:hover > $content': {
+      backgroundColor: theme.palette.action.hover
     },
-    "&:focus > $content, &$selected > $content": {
+    '&:focus > $content, &$selected > $content': {
       backgroundColor: `var(--tree-view-bg-color, ${theme.palette.grey[400]})`,
-      color: "var(--tree-view-color)",
+      color: 'var(--tree-view-color)'
     },
-    "&:focus > $content $label, &:hover > $content $label, &$selected > $content $label":
-    {
-      backgroundColor: "transparent",
-    },
+    '&:focus > $content $label, &:hover > $content $label, &$selected > $content $label': {
+      backgroundColor: 'transparent'
+    }
   },
   label: {
-    paddingLeft: 0,
+    paddingLeft: 0
   },
   group: {
-    marginLeft: 0,
-  },
+    marginLeft: 0
+  }
 }));
 
 export default function ActivityList(props) {
   const classes = useStyles();
-  const {
-    type,
-    fetchRoadmap,
-    activity,
-    expanded,
-    selected,
-    handleToggle,
-    handleSelect,
-  } = props;
+  const { type, fetchRoadmap, activity, expanded, selected, handleToggle, handleSelect } = props;
   const {
     state: {
-      user: { user },
-    },
+      user: { user }
+    }
   } = useData();
   const [isCreate, setCreate] = useState(false);
   const [activityData, setActivityData] = useState(null);
@@ -67,11 +58,8 @@ export default function ActivityList(props) {
       }
 
       let label = (
-        <Box width={"100%"} height={30} className="d-flex align-items-center">
-          <Box
-            width={"100%"}
-            style={{ position: "absolute" }}
-          >
+        <Box width={'100%'} height={30} className="d-flex align-items-center">
+          <Box width={'100%'} style={{ position: 'absolute' }}>
             <Box onClick={() => setActivityData({ id: data._id, type })}>
               <Typography variant="body2" className="text-truncate">
                 {data.name}
@@ -88,7 +76,7 @@ export default function ActivityList(props) {
           label={label}
           children={children}
           classes={{
-            root: classes.root,
+            root: classes.root
           }}
         />
       );
@@ -111,12 +99,7 @@ export default function ActivityList(props) {
         })}
       </TreeView>
       <Box padding={1} width="100%">
-        <Button
-          style={{ justifyContent: "flex-start" }}
-          fullWidth
-          onClick={() => setCreate(true)}
-          startIcon={<AddIcon />}
-        >
+        <Button style={{ justifyContent: 'flex-start' }} fullWidth onClick={() => setCreate(true)} startIcon={<AddIcon />}>
           Create {type}
         </Button>
       </Box>
@@ -131,49 +114,45 @@ export default function ActivityList(props) {
       {isCreate && (
         <Dialog
           open={true}
-          fullScreen={fullScreen || (isMobile || isTablet)}
+          fullScreen={fullScreen || isMobile || isTablet}
           TransitionComponent={CustomDialogTransition}
           fullWidth
           maxWidth="md"
           onClose={(e, reason) => {
             if (reason !== 'backdropClick') {
-              closeDialog()
+              closeDialog();
               setFullScreen(false);
             }
           }}
         >
-          {type === "task" && (
+          {type === 'task' && (
             <CreateTask
               taskId={null}
-              relatedTo={[
-                { type: "user", referenceId: user._id, access: true },
-              ]}
+              relatedTo={[{ type: 'user', referenceId: user._id, access: true }]}
               handleClose={() => {
-                fetchRoadmap();
+                fetchRoadmap(false);
                 closeDialog();
-                setFullScreen(false)
+                setFullScreen(false);
               }}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
+                setFullScreen((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
             />
           )}
-          {type === "case" && (
+          {type === 'case' && (
             <CreateCase
               caseId={null}
-              relatedTo={[
-                { type: "user", referenceId: user._id, access: true },
-              ]}
+              relatedTo={[{ type: 'user', referenceId: user._id, access: true }]}
               handleClose={() => {
-                fetchRoadmap();
+                fetchRoadmap(false);
                 closeDialog();
-                setFullScreen(false)
+                setFullScreen(false);
               }}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
-                setFullScreen(prevState => !prevState)
+                setFullScreen((prevState) => !prevState);
               }}
               showManimizeMaximize={true}
             />

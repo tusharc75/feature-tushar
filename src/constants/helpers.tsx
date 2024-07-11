@@ -533,7 +533,8 @@ export const RESOURCE_LABEL = {
   dataList: 'Data List',
   dataListitems: 'Data List Items',
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
-  managedPackages: 'Managed Packages'
+  managedPackages: 'Managed Packages',
+  integration: 'Integration',
 };
 
 export const CHILD_RESOURCE = {
@@ -1106,6 +1107,7 @@ export const removeEmptyKeys = (obj: object) => {
 
 /**
  * @param {Array} fields
+ * @param {boolean} validEmail
  */
 export const yupSchema = (fields: any[], validEmail = true) => {
   const schema = {};
@@ -1341,7 +1343,7 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
     const sidebarFieldsValues = Object.values(sidebarResource);
 
     if (data) {
-      const hasApproveAccountPermission = user.user.permissions.approveAccount;
+      const hasApproveAccountPermission = user?.role?.selectedEntity?.policy?.isApproveAccount ?? false;
       const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
 
       data.forEach((d) => {
@@ -2467,6 +2469,12 @@ export const REPORT_LIST = [
     type: 'purchaseOrderDetails'
   },
   {
+    title: 'Purchase Order Actual Received Details',
+    permission: 'purchaseOrder',
+    key: 'standardReport',
+    type: 'purchaseOrderActualReceivedDetails'
+  },
+  {
     title: 'Inventory Evaluation',
     permission: 'purchaseOrder',
     key: 'standardReport',
@@ -3231,6 +3239,14 @@ export const checkIsAllowedToEdit = (user, resource, data) => {
   return isAllowedToEdit;
 };
 
+export const checkIsAllowedToDelete = (user, resource, owner) => {
+  let isAllowedToDelete = owner === user?.user?._id ? true : false;
+  if (user?.role?.selectedEntity?.superAdminAccessResource?.includes(resource)) {
+    isAllowedToDelete = true;
+  }
+  return isAllowedToDelete;
+};
+
 export function changeItemIndex<T>(array: T[], item: T, sourceIndex: number, destinationIndex: number) {
   const newArray = Array.from(array);
   newArray.splice(sourceIndex, 1); // remove the item at index
@@ -3386,3 +3402,9 @@ export const gridSize = (type) => {
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export const normalizeDate = (date) => {
+  const normalized = new Date(date);
+  normalized.setHours(0, 0, 0, 0);
+  return normalized;
+};

@@ -17,6 +17,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import {
+  checkIsAllowedToDelete,
   customerAccount,
   getDefaultMyRecordType,
   gridLoadingTimeout,
@@ -250,7 +251,7 @@ const RepairJob = () => {
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.repairJob?.isDelete && finalObject?.ownerId === user?.user?._id && u?.canDelete;
+        finalObject['canDelete'] = permissions?.repairJob?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairJob, finalObject?.ownerId) && u?.canDelete;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });

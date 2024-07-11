@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Grid, ThemeProvider, CssBaseline } from '@material-ui/core';
 import { Redirect, Route, Switch, useHistory } from 'react-router-dom';
 import { AnimatePresence } from 'framer-motion';
@@ -255,7 +255,8 @@ import SubcontractAssembly from 'src/pages/SubcontractAssembly';
 import SubcontractAssemblyDetail from 'src/pages/SubcontractAssembly/SubcontractAssemblyDetail';
 import ManagedPackages from 'src/pages/ManagedPackages';
 import ManagedPackagedDetail from 'src/pages/ManagedPackages/ManagedPackagesDetail';
-
+import CustomIntro from 'src/components/CustomIntro';
+import Integration from 'src/pages/Integration';
 
 var notificationInterval: any = null;
 
@@ -310,7 +311,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -1131,6 +1132,9 @@ function App() {
             <PrivateRoute exact path={`${routes.managedPackagesDetail.path}/:id`}>
               <ManagedPackagedDetail />
             </PrivateRoute>
+            <PrivateRoute exact path={`${routes.integration.path}`}>
+              <Integration />
+            </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
             </Route>
@@ -1162,6 +1166,7 @@ function App() {
         ) : (
           ''
         ))}
+      <CustomIntro />
     </ColorModeProvider>
   );
 }

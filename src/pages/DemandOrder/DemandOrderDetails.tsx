@@ -18,7 +18,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { ACTIVITY_RESOURCE, DEMAND_ORDER_STATUS, MATERIAL_TYPE, checkIsAllowedToEdit, demandOrder, sidebarResource } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, DEMAND_ORDER_STATUS, MATERIAL_TYPE, checkIsAllowedToDelete, checkIsAllowedToEdit, demandOrder, sidebarResource } from '../../constants/helpers';
 import ManageDemandOrderDialog from './ManageDemandOrderDialog';
 import Material from './Material';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
@@ -43,6 +43,7 @@ const DemandOrderDetails = () => {
   const [fields, setFields] = useState([]);
   const [tabValue, setTabValue] = useState(tab ? parseInt(tab) : 0);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [convertAnchorEl, setConvertAnchorEl] = useState(null);
   const [convertDialog, setConvertDialog] = useState({ open: false, type: '' })
 
@@ -74,6 +75,7 @@ const DemandOrderDetails = () => {
       const response: any = await axiosInstance().get(`${demandOrder.api}/${id}`);
       data = response?.data?.data;
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.demandOrder, data));
+      setAllowedToDelete(permissions?.demandOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.demandOrder, data.owner.optionValue));
       setDemandOrderData(data);
       setLoading(false);
     } catch (error) {
@@ -187,7 +189,7 @@ const DemandOrderDetails = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                {permissions?.demandOrder?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             )}
             <ActivityButton

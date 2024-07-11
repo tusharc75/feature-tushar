@@ -12,7 +12,16 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import SearchBox from 'src/components/Helpers/SearchBox';
-import { CustomDialogTransition, MATERIAL_TYPE, gridLoadingTimeout, isObjectEmpty, packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { ListingPageHeader } from 'src/components/PageHeaders';
+import {
+  CustomDialogTransition,
+  MATERIAL_TYPE,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  packages,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
 
 const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData, isAddingProducts, handleClose, addMaterial, rentalPolicyData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -44,18 +53,18 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
   const defaultColumns =
     type === MATERIAL_TYPE.product
       ? [
-        ...qtyColumn,
-        {
-          accessor: 'availableAssetCount',
-          Header: 'Available Asset',
-          minWidth: 180,
-          width: 180,
-          disabled: true,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
-        }
-      ]
+          ...qtyColumn,
+          {
+            accessor: 'availableAssetCount',
+            Header: 'Available Asset',
+            minWidth: 180,
+            width: 180,
+            disabled: true,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
+          }
+        ]
       : qtyColumn;
 
   useEffect(() => {
@@ -80,7 +89,6 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
   }, [search, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const getQueryString = () => {
-
     let deepFilter = `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}`;
 
     if (showFilteredRecordsOnly) {
@@ -197,28 +205,28 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
         <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
 
         <div className="listing-grid p-3">
-          <Box mb={2}>
-            <div className="flex items-center justify-end gap-2 ">
-              <SearchBox onChange={handleSearch} value={search} />
-              <Button
-                size="small"
-                color="primary"
-                onClick={() => {
-                  if (type === MATERIAL_TYPE.package && selectedRecords?.some((r) => r?.qty > 1)) {
-                    setShowConfirmationDialog(true);
-                  } else {
-                    addMaterial(selectedRecords);
-                  }
-                }}
-                variant="contained"
-                disabled={!selectedRecords?.length || isAddingProducts}
-                endIcon={isAddingProducts && <CircularProgress size={20} color="primary" />}
-              >
-                Add
-                {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-              </Button>
-            </div>
-          </Box>
+          <ListingPageHeader
+            showSearchInMobile={true}
+            searchValue={search}
+            onSearch={handleSearch}
+            isActionButtonVisible={false}
+            addButtonProps={{
+              disabled: !selectedRecords?.length || isAddingProducts,
+              loading: isAddingProducts,
+              iconsEnabled: false,
+              text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
+            }}
+            addButtonOnclick={() => {
+              if (type === MATERIAL_TYPE.package && selectedRecords?.some((r) => r?.qty > 1)) {
+                setShowConfirmationDialog(true);
+              } else {
+                addMaterial(selectedRecords);
+              }
+            }}
+            isAddButtonVisible={true}
+            setQueryString={false}
+          />
+
           {columns ? (
             <CustomReactTable
               height={'calc(100vh - 250px)'}

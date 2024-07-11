@@ -25,7 +25,6 @@ const Quotation = ({
   setNextStep,
   stepFullScreen,
   allowedToEdit,
-  allowedToDelete,
   fetchQuotationData,
   quotationData,
   currentVersion,
@@ -62,17 +61,20 @@ const Quotation = ({
     if (!material?.filter((e) => !e.parentId).some((d) => d[`finalPrice_${quotationData?.currency?.toLowerCase()}`])) {
       setNextStepToolTip(rentalManagementMessage.validPrice)
     }
-  }, [material]);
+    else if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer) {
+      setNextStepToolTip(rentalManagementMessage.acceptRejectQuotation);
+    }
+    else {
+      setNextStepToolTip(null)
+    }
+  }, [material, quotationData?.versions[currentVersion]?._id]);
 
   useEffect(() => {
     if (quotationData && quotationData?.versions[currentVersion]?._id) {
       fetchFields();
       fetchProductInventory();
     }
-    if (
-      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.buildingQuote ||
-      quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.waitingForSupplierPrice
-    ) {
+    if ([QUOTATION_STATUS.buildingQuote, QUOTATION_STATUS.waitingForSupplierPrice]?.includes(quotationData?.versions[currentVersion]?.status)) {
       setNextStep(false);
     }
     if (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
