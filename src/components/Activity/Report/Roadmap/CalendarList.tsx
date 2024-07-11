@@ -43,6 +43,7 @@ export default function CalendarList(props) {
         }
         const left = Math.abs((100 * moment(data.startDate).diff(startDate, 'days')) / totalDay);
         const right = (100 * endDate.diff(moment(data.dueDate), 'days')) / totalDay;
+        const width = 100 - (left + right);
 
         let label = (
           <Box width={'100%'} height={30} className="d-flex align-items-center">
@@ -50,13 +51,13 @@ export default function CalendarList(props) {
               className={cn('h-[20px] rounded-[4px] bg-green-500 text-white')}
               onClick={() => setActivityData({ id: data._id, type })}
               style={{
-                maxWidth: calendarType !== 'week' ? `max(${100 - Math.floor(left + right)}%, 100px)` : 'unset',
+                maxWidth: calendarType !== 'week' ? `max(${width}%, 100px)` : 'unset',
                 position: 'absolute',
                 left: `${left}%`,
                 right: `${right}%`,
                 top: '50%',
                 transform: 'translateY(-50%)',
-                minWidth: calendarType === 'week' ? '34px' : calendarType !== 'week' ? '100px' : ''
+                minWidth: calendarType !== 'week' ? `max(${width}%, 2px)` : '34px'
               }}
               title={data.status + ' - ' + displayDate(data.startDate) + ' - ' + displayDate(data.dueDate)}
               placement="right"
