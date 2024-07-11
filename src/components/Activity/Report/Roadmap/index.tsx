@@ -29,18 +29,18 @@ function Roadmap({ type, filter }) {
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
-    fetchRoadmap(cancelTokenSource);
+    fetchRoadmap(true, cancelTokenSource);
     return () => cancelTokenSource.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const fetchRoadmap = async (cancelTokenSource?: CancelTokenSource) => {
+  const fetchRoadmap = async (shouldScroll = false, cancelTokenSource?: CancelTokenSource) => {
     axiosInstance()
       .get(`/activity/roadmap?type=${type}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         setActivity(data.activity);
         setTreeList(data.treeList);
-        executeScroll();
+        if (shouldScroll) executeScroll();
       })
       .catch((err) => {});
   };
