@@ -46,8 +46,8 @@ function Roadmap({ type, filter }) {
   };
 
   let height = window.innerHeight - 250;
-  let startDate = moment('2023-01-01');
-  let endDate = moment('2025-12-31');
+  let startDate = moment('2023-01-01', 'YYYY-MM-DD');
+  let endDate = moment('2025-12-31', 'YYYY-MM-DD');
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
