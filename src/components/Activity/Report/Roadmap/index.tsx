@@ -34,7 +34,7 @@ function Roadmap({ type, filter }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const fetchRoadmap = async (shouldScroll = true, cancelTokenSource?: CancelTokenSource) => {
+  const fetchRoadmap = async (shouldScroll = false, cancelTokenSource?: CancelTokenSource) => {
     axiosInstance()
       .get(`/activity/roadmap?type=${type}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
