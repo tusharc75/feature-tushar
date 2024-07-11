@@ -19,7 +19,7 @@ const ActivityModelHandler = (props) => {
       onClose();
     } else {
       setActivityData(null);
-      fetchBoard();
+      fetchBoard(false);
     }
   };
 

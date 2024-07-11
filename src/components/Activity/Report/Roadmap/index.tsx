@@ -29,30 +29,30 @@ function Roadmap({ type, filter }) {
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
-    fetchRoadmap(cancelTokenSource);
+    fetchRoadmap(true, cancelTokenSource);
     return () => cancelTokenSource.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filter]);
 
-  const fetchRoadmap = async (cancelTokenSource?: CancelTokenSource) => {
+  const fetchRoadmap = async (shouldScroll = false, cancelTokenSource?: CancelTokenSource) => {
     axiosInstance()
       .get(`/activity/roadmap?type=${type}&filter=${JSON.stringify(filter)}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         setActivity(data.activity);
         setTreeList(data.treeList);
-        executeScroll();
+        if (shouldScroll) executeScroll();
       })
       .catch((err) => {});
   };
 
   let height = window.innerHeight - 250;
-  let startDate = moment('2023-01-01');
-  let endDate = moment('2025-12-31');
+  let startDate = moment('2023-01-01', 'YYYY-MM-DD');
+  let endDate = moment('2025-12-31', 'YYYY-MM-DD');
   let totalDay = endDate.diff(startDate, 'days');
 
   var dayPixel = 0;
   if (calendarType === 'month') {
-    dayPixel = 8.5;
+    dayPixel = 15;
   } else if (calendarType === 'week') {
     dayPixel = 35;
   } else {
