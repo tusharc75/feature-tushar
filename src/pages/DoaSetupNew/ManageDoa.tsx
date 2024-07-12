@@ -182,8 +182,8 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
     return data && data?.length > 0 ? (
       data?.map((_data, i) => (
         <Grid container spacing={1} key={i} alignItems="center">
-          <Grid item xs={1} md={1} lg={1}>
-            <span className="px-2">{i + 1}.</span>
+          <Grid item className="!flex-shrink-0">
+            <span className="block min-w-[26px] px-2">{i + 1}.</span>
           </Grid>
           <Grid item xs={6} md={5} lg={5}>
             <Autocomplete
@@ -237,7 +237,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
               />
             </Grid>
           )}
-          <Grid item xs={2} md={2} lg={2} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
+          <Grid item md={2} lg={2} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
             <Box mt={0.7}>
               <IconButton
                 size="small"
