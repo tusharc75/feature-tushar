@@ -717,7 +717,6 @@ const ProductBuilder = (props) => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchProduct}
             onSaveEdit={onCellValueChanged}
-            showOnlyShowFilteredRecordSwitch={true}
             isClientSideGrid={true}
             hideAction={!Editable}
             hideSelection={!Editable}
@@ -725,6 +724,7 @@ const ProductBuilder = (props) => {
               return (row[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (row[`qty`] || 0) === 0 ? 'error' : '';
             }}
             resource={sidebarResource.product}
+            hideExportTable={true}
           />
         ) : (
           <Box p={2} height={500}>
