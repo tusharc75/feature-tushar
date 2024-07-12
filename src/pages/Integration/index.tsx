@@ -1,7 +1,6 @@
-import { useContext } from "react"
-import { Box, Typography } from '@material-ui/core';
+import { useContext, useEffect, useState } from "react"
+import { Box, IconButton, Typography } from '@material-ui/core';
 import { HiArrowRight } from 'react-icons/hi';
-import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import { getColors } from '../Home/helpers';
 import styles from '../ReportMaster/index.module.scss';
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
@@ -9,6 +8,12 @@ import { FaSlack } from 'react-icons/fa';
 import axiosInstance from "src/axios/axiosInstance";
 import { backendApi } from "src/config";
 import { useData } from "src/StateProvider/Provider";
+import CustomBreadCrumbs from "src/components/CustomBreadCrumbs";
+import routes from "src/components/Helpers/Routes";
+import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
+import IntegrationCardShell from "src/pages/Integration/IntegrationCardShell";
+import HtmlTooltip from "src/components/CustomTooltipTitle";
+import { Delete, CheckBox } from '@material-ui/icons';
 
 
 const Integration = () => {
@@ -17,7 +22,9 @@ const Integration = () => {
 
   const { state: { user } } = useData();
 
-  // const REDIRECT_URI = 'https://7e9e-2401-4900-826d-d47c-5eba-20b7-66e5-2e04.ngrok-free.app/integration/slack/oauth/callback'; //This is for demo purpose, below will be the actual REDIRECT_URI
+  const [integratedApps, setIntegratedApps] = useState(null);
+
+  // const REDIRECT_URI = 'https://348c-2401-4900-5a5f-9e02-97ff-2d8-6bc6-b7d2.ngrok-free.app/integration/slack/oauth/callback'; //This is for demo purpose, below will be the actual REDIRECT_URI
   const REDIRECT_URI = `${backendApi}/integration/slack/oauth/callback`;
 
   const integrationList = [
@@ -42,33 +49,85 @@ const Integration = () => {
     }
   };
 
+  const handleRemoveIntegration = async (integratedId) => {
+    try {
+      const response = await axiosInstance().delete('/integration', { data: { _ids: [integratedId] } });
+      toastConfig.setToastConfig(response);
+      fetchIntegratedApps();
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  const fetchIntegratedApps = async () => {
+    try {
+      const response = await axiosInstance().get('/integration');
+      console.log(response?.data?.data);
+      setIntegratedApps(response.data.data || []);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
+
+  useEffect(() => {
+    fetchIntegratedApps();
+  }, []);
+
+
   return (
     <div className="main-container-v1">
+      <div className="headerbox-v1">
+        <CustomBreadCrumbs routes={[{ title: routes.integration.title }]} />
+      </div>
       <div className="detail-container-v1">
-        <Box className={styles.reportGrid}>
-          <>
-            {integrationList.map((integration: any, index: any) => {
-              const colors = getColors(index);
-              return (
-                <div key={index} className={styles.singleCard}>
-                  <DashBoardCardShell
-                    darkThemeBackgroundColor="var(--dark-secondary)"
-                    background={'#fff'}
-                    gradientColors={colors.gradient}
-                    className={styles.cardInner}
-                    minHeight={false}
-                  >
-                    <FaSlack className={styles.floatIcon} size={"60"} />
-                    <Typography variant="h5">{integration.title}</Typography>
-                    <div className={styles.integrateText}>
-                      <span>Click here to integrate</span> <HiArrowRight className={styles.arrow} onClick={() => handleIntegration(integration.key)} />
+        {
+          integratedApps !== null ?
+            <>
+              <Box className={styles.reportGrid}>
+                {integrationList.map((integration: any, index: any) => {
+                  const integratedApp = integratedApps.find(app => app.type === integration.key);
+                  const isIntegrated = Boolean(integratedApp);
+                  const colors = getColors(index);
+                  return (
+                    <div key={index} className={styles.singleCard}>
+                      <IntegrationCardShell
+                        darkThemeBackgroundColor="var(--dark-secondary)"
+                        background={'#fff'}
+                        gradientColors={colors.gradient}
+                        className={styles.cardInner}
+                        minHeight={false}
+                      >
+                        <FaSlack className={styles.floatIcon} size={"60"} />
+                        <Typography variant="h5">{integration.title}</Typography>
+                        {
+                          isIntegrated ?
+                            <div>
+                              Integrated <CheckBox />
+                            </div> :
+                            <div className={styles.integrateText} onClick={() => handleIntegration(integration.key)}>
+                              <span>Click here to integrate</span> <HiArrowRight className={styles.arrow} />
+                            </div>
+                        }
+                        <HtmlTooltip title="Remove Integration" style={{ position: 'absolute', top: 1, right: 10 }}>
+                          <IconButton
+                            disabled={!isIntegrated}
+                            aria-label="Delete"
+                            onClick={() => { handleRemoveIntegration(integratedApp._id) }}
+                          >
+                            <Delete fontSize="small" color={isIntegrated ? 'error' : 'disabled'} />
+                          </IconButton>
+                        </HtmlTooltip>
+                      </IntegrationCardShell>
                     </div>
-                  </DashBoardCardShell>
-                </div>
-              );
-            })}
-          </>
-        </Box>
+                  );
+                })}
+              </Box>
+            </> : <>
+              <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            </>
+        }
       </div>
     </div>
   );
