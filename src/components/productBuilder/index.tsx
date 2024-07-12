@@ -890,6 +890,7 @@ const ProductBuilder = (props) => {
             fetchProduct();
           }}
           refrenceId={productBuilderId}
+          currency={currency}
         />
       )}
     </Box>

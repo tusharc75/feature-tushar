@@ -1,5 +1,19 @@
 import { useContext, useEffect, useState } from 'react';
-import { Dialog, Button, Grid, TextField, TableBody, TableCell, TableHead, TableRow, TableContainer, Table, Box, Paper } from '@material-ui/core';
+import {
+  Dialog,
+  Button,
+  Grid,
+  TextField,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TableContainer,
+  Table,
+  Box,
+  Paper,
+  IconButton
+} from '@material-ui/core';
 import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import { AiOutlineImport } from 'react-icons/ai';
@@ -10,12 +24,16 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import _, { isEmpty } from 'lodash';
+import _, { isEmpty, uniqBy } from 'lodash';
 import { read, utils, write } from 'xlsx';
+import ControlPointIcon from '@material-ui/icons/ControlPoint';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { AddField } from 'src/components/FormBuilder/AddField';
 
-export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
+export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const toastConfig = useContext(CustomToastContext);
 
+  const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({ productCategory: '', productTemplate: '', priceTemplate: '' });
   const [productCategory, setProductCategory] = useState([]);
@@ -26,6 +44,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
   const [customImportHeader, setCustomImportHeaader] = useState([]);
   const [keyValue, setKeyValue] = useState([]);
   const [file, setFile] = useState();
+  const [addSystemColumn, setAddSystemColumn] = useState(false);
+  const [addedField, setAddedField] = useState([]);
 
   useEffect(() => {
     axiosInstance()
@@ -97,9 +117,21 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
     setKeyValue(_keyValue);
   }, [templateImportHeader, customImportHeader]);
 
+  const fetchTemplate = () => {
+    axiosInstance()
+      .get(`/productbuilder/custom-import-template?productTemplate=${values?.productTemplate}&priceTemplate=${values?.priceTemplate}`)
+      .then(({ data: { data } }) => {
+        setFields(data);
+        generateTemplateHeader(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   useEffect(() => {
     if (values?.productCategory && values?.productTemplate && values?.priceTemplate) {
-      generateTemplateHeader();
+      fetchTemplate();
     }
   }, [values]);
 
@@ -131,26 +163,46 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
     reader.readAsArrayBuffer(files);
   };
 
-  const generateTemplateHeader = async () => {
+  const generateTemplateHeader = (fields) => {
     setTemplateImportHeaader([]);
-    axiosInstance()
-      .get(
-        `/productbuilder/template?productCategory=${values?.productCategory}&productTemplate=${values?.productTemplate}&priceTemplate=${values?.priceTemplate}&refrenceId=${refrenceId}&returnHeader=${true}`
-      )
-      .then(({ data: { data } }) => {
-        let templateHeader = data || [];
-        templateHeader = templateHeader.reduce((result, curr) => {
-          if (curr == null) {
-            return result;
-          }
-          result.push({ value: curr, label: curr });
-          return result;
-        }, []);
-        setTemplateImportHeaader(templateHeader);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    const templateHeader: any = [];
+    fields?.forEach((_field) => {
+      if (_field?.type === 'converter' || _field?.type === 'currencyAmount' || _field?.isConverter === true) {
+        if (_field?.type !== 'currencyAmount' && (_field?.type === 'converter' || _field?.isConverter === true)) {
+          _field?.displayUnits?.forEach((_unit: any) => {
+            templateHeader.push(_field?.fieldLabel.toUpperCase() + ' ' + _unit.toUpperCase());
+          });
+        } else if (_field?.type === 'currencyAmount' && (_field?.type === 'converter' || _field?.isConverter === true)) {
+          _field?.displayUnits.forEach((_unit: any) => {
+            _field?.displayCurrency.forEach((_currency: any) => {
+              if (_currency === 'CUR') {
+                _currency = currency;
+              }
+              templateHeader.push(_field?.fieldLabel.toUpperCase() + ' ' + _currency.toUpperCase() + ' ' + _unit.toUpperCase());
+            });
+          });
+        } else if (_field?.type === 'currencyAmount') {
+          _field?.displayCurrency.forEach((_currency: any) => {
+            if (_currency === 'CUR') {
+              _currency = currency;
+            }
+            templateHeader.push(_field?.fieldLabel.toUpperCase() + ' ' + _currency.toUpperCase());
+          });
+        }
+      } else {
+        templateHeader.push(_field?.fieldLabel?.toUpperCase());
+      }
+    });
+
+    const _templateHeader = templateHeader.reduce((result, curr) => {
+      if (curr == null) {
+        return result;
+      }
+      result.push({ value: curr, label: curr });
+      return result;
+    }, []);
+
+    setTemplateImportHeaader(_templateHeader);
   };
 
   const handleCustomImport = () => {
@@ -213,6 +265,9 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
     formData.append('productCategory', values?.productCategory);
     formData.append('productTemplate', values?.productTemplate);
     formData.append('priceTemplate', values?.priceTemplate);
+    if(addedField?.length > 0){
+      formData.append('fields', JSON.stringify(addedField));
+    }
 
     axiosInstance()
       .post(`/productbuilder/import`, formData, {
@@ -248,152 +303,201 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId }) => {
   return (
     <>
       <Dialog open={true} onClose={handleClose} TransitionComponent={CustomDialogTransition} fullScreen={true} fullWidth maxWidth="md">
-        <CustomDialogHeader title="Custom File Import" onClose={handleClose} />
-        <CustomDialogContent>
-          <Grid container xs={12} lg={12} md={12} spacing={2}>
-            <Grid item lg={2} md={2}>
-              <Box display={'flex'} alignItems={'center'} mt={1}>
-                <Box>
-                  <input
-                    id={`customImportFile`}
-                    name={`customImportFile`}
-                    onChange={handleFileImport}
-                    style={{ display: 'none' }}
-                    onClick={(e: any) => (e.target.value = null)}
-                    type="file"
-                    accept=".xlsx,.csv"
-                    disabled={_.some(_.values(values), (v) => v === '')}
-                  />
-                  <label htmlFor={`customImportFile`}>
-                    <Button
-                      size="medium"
-                      variant="outlined"
-                      component="span"
+        <>
+          <CustomDialogHeader title="Custom File Import" onClose={handleClose} />
+          <CustomDialogContent>
+            <Grid container xs={12} lg={12} md={12} spacing={2}>
+              <Grid item lg={2} md={2}>
+                <Box display={'flex'} alignItems={'center'} mt={1}>
+                  <Box>
+                    <input
+                      id={`customImportFile`}
+                      name={`customImportFile`}
+                      onChange={handleFileImport}
+                      style={{ display: 'none' }}
+                      onClick={(e: any) => (e.target.value = null)}
+                      type="file"
+                      accept=".xlsx,.csv"
                       disabled={_.some(_.values(values), (v) => v === '')}
-                      startIcon={<AiOutlineImport />}
-                    >
-                      Import File
-                    </Button>
-                  </label>
+                    />
+                    <label htmlFor={`customImportFile`}>
+                      <Button
+                        size="medium"
+                        variant="outlined"
+                        component="span"
+                        disabled={_.some(_.values(values), (v) => v === '')}
+                        startIcon={<AiOutlineImport />}
+                      >
+                        Import File
+                      </Button>
+                    </label>
+                  </Box>
                 </Box>
-              </Box>
-            </Grid>
-            <Grid item lg={10} md={10}>
-              <Grid container spacing={2}>
-                <Grid item md={3} lg={3}>
-                  <Autocomplete
-                    id="product-category"
-                    options={productCategory}
-                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      productCategory?.filter((p) => p?.optionValue === values['productCategory'])?.length > 0
-                        ? productCategory?.filter((p) => p?.optionValue === values['productCategory'])[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setValues({ productCategory: val && val.optionValue ? val.optionValue : '', productTemplate: '', priceTemplate: '' });
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} margin="dense" variant="outlined" label="Product Category" placeholder="Product Category" />
-                    )}
-                  />
-                </Grid>
-                <Grid item md={3} lg={3}>
-                  <Autocomplete
-                    id="product-template"
-                    options={productTemplate}
-                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])?.length > 0
-                        ? productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '' });
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} margin="dense" variant="outlined" label="Product Template" placeholder="Product Template" />
-                    )}
-                  />
-                </Grid>
-                <Grid item md={3} lg={3}>
-                  <Autocomplete
-                    id="price-template"
-                    options={priceTemplate}
-                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])?.length > 0
-                        ? priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])[0]
-                        : ''
-                    }
-                    onChange={(e, val) => {
-                      setValues({ ...values, priceTemplate: val && val.optionValue ? val.optionValue : '' });
-                    }}
-                    renderInput={(params) => (
-                      <TextField {...params} margin="dense" variant="outlined" label="Price Template" placeholder="Price Template" />
-                    )}
-                  />
+              </Grid>
+              <Grid item lg={10} md={10}>
+                <Grid container spacing={2}>
+                  <Grid item md={3} lg={3}>
+                    <Autocomplete
+                      id="product-category"
+                      options={productCategory}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      value={
+                        productCategory?.filter((p) => p?.optionValue === values['productCategory'])?.length > 0
+                          ? productCategory?.filter((p) => p?.optionValue === values['productCategory'])[0]
+                          : ''
+                      }
+                      onChange={(e, val) => {
+                        setValues({ productCategory: val && val.optionValue ? val.optionValue : '', productTemplate: '', priceTemplate: '' });
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} margin="dense" variant="outlined" label="Product Category" placeholder="Product Category" />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item md={3} lg={3}>
+                    <Autocomplete
+                      id="product-template"
+                      options={productTemplate}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      value={
+                        productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])?.length > 0
+                          ? productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])[0]
+                          : ''
+                      }
+                      onChange={(e, val) => {
+                        setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '' });
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} margin="dense" variant="outlined" label="Product Template" placeholder="Product Template" />
+                      )}
+                    />
+                  </Grid>
+                  <Grid item md={3} lg={3}>
+                    <Autocomplete
+                      id="price-template"
+                      options={priceTemplate}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      value={
+                        priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])?.length > 0
+                          ? priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])[0]
+                          : ''
+                      }
+                      onChange={(e, val) => {
+                        setValues({ ...values, priceTemplate: val && val.optionValue ? val.optionValue : '' });
+                      }}
+                      renderInput={(params) => (
+                        <TextField {...params} margin="dense" variant="outlined" label="Price Template" placeholder="Price Template" />
+                      )}
+                    />
+                  </Grid>
                 </Grid>
               </Grid>
             </Grid>
-          </Grid>
-          {isUploading ? (
-            <Box p={2} height={500}>
-              <CommonSkeleton lenArray={[...Array(10).keys()]} />
-            </Box>
-          ) : templateImportHeader?.length > 0 && customImportHeader?.length ? (
-            <TableContainer style={{ marginTop: '16px' }} component={Paper}>
-              <Table aria-label="customized table">
-                <TableHead>
-                  <TableRow>
-                    <TableCell style={{ width: '50%' }}>System Columns</TableCell>
-                    <TableCell style={{ width: '50%' }}>Imported Excel Columns</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {templateImportHeader?.map((_key) => (
-                    <TableRow key={_key?.value}>
-                      <TableCell component="th" scope="row">
-                        {' '}
-                        {_key?.label}{' '}
+            {isUploading ? (
+              <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            ) : templateImportHeader?.length > 0 && customImportHeader?.length ? (
+              <TableContainer style={{ marginTop: '16px' }} component={Paper}>
+                <Table aria-label="customized table">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell style={{ width: '50%' }}>
+                        <div>
+                          <span>System Columns</span>
+                          <span style={{ marginLeft: '10px' }}>
+                            <HtmlTooltip enterTouchDelay={0} title={'Add System Column'}>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  setAddSystemColumn(true);
+                                }}
+                              >
+                                <ControlPointIcon fontSize="small" color="primary" />
+                              </IconButton>
+                            </HtmlTooltip>
+                          </span>
+                        </div>
                       </TableCell>
-                      <TableCell align="right">
-                        <Autocomplete
-                          size="small"
-                          id={_key?.value}
-                          options={customImportHeader}
-                          getOptionLabel={(option) => option?.label || ''}
-                          value={customImportHeader.find((_value) => {
-                            if (_value?.value === _key?.value) {
-                              return true;
-                            }
-                            return null;
-                          })}
-                          onChange={(event, newValue) => {
-                            setKeyValue([...keyValue, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
-                          }}
-                          style={{ maxWidth: '500px' }}
-                          renderInput={(params) => <TextField {...params} label="" variant="outlined" />}
-                        />
-                      </TableCell>
+                      <TableCell style={{ width: '50%' }}>Imported Excel Columns</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          ) : null}
-        </CustomDialogContent>
-        <CustomDialogFooter>
-          <Button color="primary" size="small" onClick={handleClose}>
-            Cancel
-          </Button>
-          <CustomButton onClick={handleCustomImport} variant="contained" color="primary" disabled={loading} loading={loading}>
-            Save
-          </CustomButton>
-        </CustomDialogFooter>
+                  </TableHead>
+                  <TableBody>
+                    {templateImportHeader?.map((_key) => (
+                      <TableRow key={_key?.value}>
+                        <TableCell component="th" scope="row">
+                          {' '}
+                          {_key?.label}{' '}
+                        </TableCell>
+                        <TableCell align="right">
+                          <Autocomplete
+                            size="small"
+                            id={_key?.value}
+                            options={customImportHeader}
+                            getOptionLabel={(option) => option?.label || ''}
+                            value={customImportHeader.find((_value) => {
+                              if (_value?.value === _key?.value) {
+                                return true;
+                              }
+                              return null;
+                            })}
+                            onChange={(event, newValue) => {
+                              setKeyValue([...keyValue, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
+                            }}
+                            style={{ maxWidth: '500px' }}
+                            renderInput={(params) => <TextField {...params} label="" variant="outlined" />}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : null}
+          </CustomDialogContent>
+          <CustomDialogFooter>
+            <Button color="primary" size="small" onClick={handleClose}>
+              Cancel
+            </Button>
+            <CustomButton
+              onClick={handleCustomImport}
+              variant="contained"
+              color="primary"
+              disabled={loading || !values?.productCategory || !values?.productTemplate || !values?.priceTemplate}
+              loading={loading}
+            >
+              Save
+            </CustomButton>
+          </CustomDialogFooter>
+          {addSystemColumn && (
+            <AddField
+              refrence="formAddInlineEdit"
+              fieldData={null}
+              handleClose={() => {
+                setAddSystemColumn(false);
+              }}
+              handleAddField={(_data) => {
+                _data.leval = 'price-builder-custom';
+                if (fields?.filter((_f) => _f.sectionName === _data?.sectionName).length) {
+                  if (fields?.filter((_f) => _f.sectionName === _data?.sectionName)[0].leval !== 'price-template') {
+                    _data.leval = 'product-builder-custom';
+                  }
+                }
+                setAddedField([...addedField, { ..._data }]);
+                setTemplateImportHeaader([
+                  ...templateImportHeader,
+                  { value: _data?.fieldLabel?.toUpperCase(), label: _data?.fieldLabel?.toUpperCase() }
+                ]);
+                setAddSystemColumn(false);
+              }}
+              fields={fields}
+              section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
+            />
+          )}
+        </>
       </Dialog>
     </>
   );
