@@ -159,7 +159,7 @@ const BigCalendar = () => {
                           `}
                         >
                           <Box
-                            className={`w-[12px] h-[12px] 
+                            className={`h-[12px] w-[12px] 
                             ${item === 'Event' ? 'bg-[rgba(236,_85,_0,_1)] ' : ''}
                             ${item === 'Task' ? 'bg-[var(--task-color,_rgba(4,_50,_161,_1))] ' : ''}
                             ${item === 'Case' ? 'bg-[rgba(165,_4,_43,_1)] ' : ''}
@@ -210,7 +210,7 @@ const BigCalendar = () => {
                   )}
                 </Popper>
               </div>
-              <div className="ml-auto min-w-[250px] md:flex-grow-0 flex-grow">
+              <div className="ml-auto min-w-[250px] flex-grow md:flex-grow-0">
                 <SearchFilter handleChangeFilter={handleChangeFilter} filter={filter} chip={{ size: 'small' }} activityName="calendar" />
               </div>
             </div>

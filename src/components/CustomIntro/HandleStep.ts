@@ -1,4 +1,6 @@
 import { Step, StepDefination } from 'src/components/CustomIntro';
+import { Observer } from 'src/components/CustomIntro/Observers';
+import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
 const RETRY = 10; //in seconds
 
 export class HandleSteps {
@@ -34,6 +36,7 @@ export class HandleSteps {
   listenerAttachedElements: { elm: HTMLElement; event: keyof HTMLElementEventMap; func: any }[];
   handleReset: () => void;
   findingElement: boolean;
+  attachedOvservers: Observer[];
   constructor({
     setUpdateSignal,
     steps,
@@ -50,13 +53,14 @@ export class HandleSteps {
     this.started = false;
     this.finished = false;
     this.currentStepData = null;
-    this.documentHeight = document?.body.offsetHeight;
+    this.documentHeight = document?.body.clientHeight;
     this.retry = 0;
     this.interval = null;
     this.message = '';
     this.error = false;
     this.waitedForClicks = 0;
     this.listenerAttachedElements = [];
+    this.attachedOvservers = [];
     this.findingElement = false;
     this.resizeObserver = new ResizeObserver((entries) => {
       window.requestAnimationFrame(() => {
@@ -138,8 +142,20 @@ export class HandleSteps {
       this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
     }
     if (currData.nextOnValueChange) {
-      currData.element.addEventListener('blur', this.handleNextOnValueChange.bind(this));
-      this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnValueChange.bind(this) });
+      const isAutoComplete = this.currentStepData.element.classList.contains('MuiAutocomplete-input');
+      // Track autocomplete via autocomplete observer
+      if (isAutoComplete) {
+        let validator = (value: string) => value.length > 0;
+        if (typeof this.currentStepData.nextOnValueChange === 'function') {
+          validator = this.currentStepData.nextOnValueChange;
+        }
+        const observer = new AutocompleteObserver(this, this.currentStepData.element, validator);
+        this.attachedOvservers.push(observer);
+      } else {
+        // Track Text input via blur event
+        currData.element.addEventListener('blur', this.handleNextOnValueChange.bind(this));
+        this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnValueChange.bind(this) });
+      }
     }
     if (currData.nextOnKeyPress) {
       currData.element.addEventListener('keydown', this.handleNextOnKeyDown.bind(this));
@@ -149,6 +165,7 @@ export class HandleSteps {
 
   removeNextListeners() {
     this.listenerAttachedElements.map((d) => d.elm.removeEventListener(d.event, d.func));
+    this.attachedOvservers.map((d) => d.disconnect());
   }
 
   start() {
@@ -208,7 +225,7 @@ export class HandleSteps {
       this.findingElement = false;
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
       const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
-      element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
+      // this.scrollToCurrentStep(element);
 
       setTimeout(() => {
         this.currentStepData = {
@@ -219,12 +236,16 @@ export class HandleSteps {
         };
         this.attachNextListeners();
         this.sendUpdateSignal();
-      }, 200);
+      }, 500);
     }
   }
 
   private sendUpdateSignal() {
     this.setUpdateSignal((prev) => (prev < 10 ? prev + 1 : 0));
+  }
+
+  scrollToCurrentStep(element: HTMLElement) {
+    element.scrollIntoView({ behavior: 'smooth', block: 'center', inline: 'center' });
   }
 
   isLastStep() {

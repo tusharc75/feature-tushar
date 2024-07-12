@@ -18,6 +18,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
+  const { selectedRecords } =state;
   const [addOpen, setAddOpen] = useState({ open: false, invoiceData: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
@@ -148,10 +149,31 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     );
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            const ids=selectedRecords.map(d=>d._id);
+            setShowDeleteConfirmBox(true);
+            setDeleteData(ids);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
-        <DetailsPageHeader isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} isActionButtonVisible={false} hasXpadding={false} />
+        <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
+          hasXpadding={false} />
       )}
       <Box>
         {columns ? (
@@ -163,6 +185,8 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
             renderedFrom={`po_invoice`}
             isClientSideGrid={true}
             refreshGrid={fetchData}
+            hideAction={!allowedToEdit}
+            hideSelection={!allowedToEdit}
           />
         ) : (
           <Box p={2} height={500}>
@@ -187,7 +211,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete  ? `}
+          message={`Are you sure you want to delete?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />
