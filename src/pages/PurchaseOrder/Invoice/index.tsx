@@ -151,7 +151,11 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   return (
     <Fragment>
       {allowedToEdit && (
-        <DetailsPageHeader isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} isActionButtonVisible={false} hasXpadding={false} />
+        <DetailsPageHeader
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          isActionButtonVisible={false}
+          hasXpadding={false} />
       )}
       <Box>
         {columns ? (
@@ -163,6 +167,8 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
             renderedFrom={`po_invoice`}
             isClientSideGrid={true}
             refreshGrid={fetchData}
+            hideAction={!allowedToEdit}
+            hideSelection={!allowedToEdit}
           />
         ) : (
           <Box p={2} height={500}>
@@ -187,7 +193,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialogRaw
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete  ? `}
+          message={`Are you sure you want to delete?`}
           onClose={() => setShowDeleteConfirmBox(false)}
           onOk={handleDelete}
         />
