@@ -14,7 +14,7 @@ import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import IntegrationCardShell from "src/pages/Integration/IntegrationCardShell";
 import HtmlTooltip from "src/components/CustomTooltipTitle";
 import { Delete, CheckBox } from '@material-ui/icons';
-
+import slackLogo from 'src/assets/slack-logo.png';
 
 const Integration = () => {
 
@@ -62,7 +62,6 @@ const Integration = () => {
   const fetchIntegratedApps = async () => {
     try {
       const response = await axiosInstance().get('/integration');
-      console.log(response?.data?.data);
       setIntegratedApps(response.data.data || []);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -97,12 +96,13 @@ const Integration = () => {
                         className={styles.cardInner}
                         minHeight={false}
                       >
-                        <FaSlack className={styles.floatIcon} size={"60"} />
+                        {/* <FaSlack className={styles.floatIcon} size={"60"} /> */}
+                        <img src={slackLogo} alt="Slack" className={styles.floatIcon} style={{ width: '60px', height: '60px' }} />
                         <Typography variant="h5">{integration.title}</Typography>
                         {
                           isIntegrated ?
-                            <div>
-                              Integrated <CheckBox />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <span>Integrated</span> <CheckBox />
                             </div> :
                             <div className={styles.integrateText} onClick={() => handleIntegration(integration.key)}>
                               <span>Click here to integrate</span> <HiArrowRight className={styles.arrow} />
