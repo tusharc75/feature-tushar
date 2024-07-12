@@ -598,7 +598,7 @@ const RenderTree: React.FC<TRenderTreeProps> = ({ tree, folderButtons, fileIconB
   );
 };
 
-const className = 'p-[9px_20px] rounded-[4px] shadow-[0px_3.47287px_34.72868px_0px_rgba(0,_0,_0,_0.08)] mb-[16px] dark:[border:1px_solid_#2c3151] ';
+const className = 'p-[9px_10px] rounded-[4px] shadow-[0px_3.47287px_34.72868px_0px_rgba(0,_0,_0,_0.08)] mb-[16px] dark:[border:1px_solid_#2c3151] ';
 
 type TFolderFilePRops = {
   iconButtons: (data: TNestedTree) => ReactNode;
@@ -656,7 +656,7 @@ const RenderFolder: React.FC<TFolderPRops> = ({ iconButtons, node, childNodes })
       </div>
       {childNodes ? (
         <Collapse in={open} unmountOnExit>
-          <div className="mt-[14px] pl-4">{childNodes}</div>
+          <div className="mt-[14px]">{childNodes}</div>
         </Collapse>
       ) : null}
     </div>
