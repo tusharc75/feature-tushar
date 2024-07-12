@@ -1,4 +1,4 @@
-import { useState, useContext } from 'react';
+import { useState, useContext, Fragment } from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -10,7 +10,7 @@ import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/picker
 import MomentUtils from '@date-io/moment';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { Formik, Form } from 'formik';
+import { Formik } from 'formik';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { dateFormat } from '../../../constants/helpers';
 
@@ -21,6 +21,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (values) => {
+    setLoading(true);
     if (invoiceData) {
       delete values?._id;
       axiosInstance()
@@ -32,6 +33,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
             message: data.message,
             severity: 'success'
           });
+          setLoading(false);
         })
         .catch((err) => {
           setLoading(false);
@@ -47,6 +49,7 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
             message: data.message,
             severity: 'success'
           });
+          setLoading(false);
         })
         .catch((err) => {
           setLoading(false);
@@ -95,13 +98,14 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
       ></CustomDialogHeader>
       <MuiPickersUtilsProvider utils={MomentUtils}>
         <Formik
+          enableReinitialize={true}
           initialValues={{ invoiceNumber: invoiceData?.invoiceNumber || '', invoiceDate: invoiceData?.invoiceDate || new Date() }}
           onSubmit={handleSubmit}
           validateOnMount
           validate={validate}
         >
-          {({ submitForm, touched, errors, setFieldValue, values }) => (
-            <>
+          {({ touched, errors, setFieldValue, values, submitForm }) => (
+            <Fragment>
               <CustomDialogContent>
                 <Grid container spacing={2}>
                   <Grid xs={12} md={12} sm={12} item>
@@ -155,11 +159,17 @@ const AddInvoice = ({ purchaseOrderId, invoiceData = null, handleClose, handleSu
                 >
                   Cancel
                 </Button>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit">
+                <CustomButton
+                  loading={loading}
+                  disabled={loading}
+                  variant="contained"
+                  type="button"
+                  onClick={submitForm}
+                  color="primary" >
                   Save
                 </CustomButton>
               </CustomDialogFooter>
-            </>
+            </Fragment>
           )}
         </Formik>
       </MuiPickersUtilsProvider>
