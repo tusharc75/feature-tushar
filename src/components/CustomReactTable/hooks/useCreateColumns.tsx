@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { IconButton, useMediaQuery } from '@material-ui/core';
 import { useMemo } from 'react';
 import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
 import { IndeterminateCheckbox, TColType } from '../TableComponents/TableHelperComponents';
@@ -19,6 +19,7 @@ export const useCreateColumns = ({
   renderedFrom
 }) => {
   const { dataRows: allRows } = state;
+  const isMobile = useMediaQuery('(max-width:768px)');
 
   const fetchChildAttachmentWrapper = async (row) => {
     if (!fetchChildAttachment || row.original[childrenProperty]?.length > 0) return;
@@ -65,7 +66,7 @@ export const useCreateColumns = ({
       cell: ({ row }) => (
         <div
           style={{
-            marginLeft: `${row.depth * 15}px`
+            marginLeft: isMobile ? 0 : `${row.depth * 15}px`
           }}
         >
           {row.original.canExpand === true || row.getCanExpand() ? (
