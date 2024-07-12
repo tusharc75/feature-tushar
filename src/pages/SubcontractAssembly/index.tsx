@@ -44,12 +44,12 @@ const stepData: WalkmeData[] = [
         url: '/subcontract-assembly',
         title: 'select address',
         content: '',
-        nextOnFocusOut: true
+        nextOnValueChange: true
       },
       {
         target: '#dialog-save-button',
         url: '/subcontract-assembly',
-        title: 'Add subcontract',
+        title: 'Save',
         content: ''
       }
     ]
