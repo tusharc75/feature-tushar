@@ -636,7 +636,6 @@ const Services = ({
 
       {columns ? (
         <CustomReactTable
-          height={'300px'}
           columns={columns}
           state={state}
           dispatch={dispatch}

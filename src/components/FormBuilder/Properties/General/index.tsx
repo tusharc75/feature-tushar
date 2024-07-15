@@ -503,7 +503,7 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
           />
         </Box>
       )}
-      {fieldData.type === 'signature' && <SignatureUser values={values} setFieldValue={setFieldValue} />}
+      {['signature', 'groupSignature'].includes(fieldData.type) && <SignatureUser values={values} setFieldValue={setFieldValue} />}
       {fieldData.type === 'decimal' && <MinMax values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} />}
       {fieldData.type === 'description' && <Description values={htmlDescription} setFieldValue={setFieldValue} />}
       {fieldData.type === 'counter' && (
