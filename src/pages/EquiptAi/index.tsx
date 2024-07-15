@@ -1,18 +1,10 @@
 import {
-  Box,
-  Button,
-  Grid,
   IconButton,
   List,
   ListItem,
-  ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
-  makeStyles,
   Menu,
   MenuItem,
-  TextField,
-  Typography,
   useMediaQuery
 } from '@material-ui/core';
 import React, { useContext, useEffect, useState } from 'react';
@@ -130,23 +122,20 @@ const EquiptAi = () => {
               isSidebarOpen && !isMobile ? '' : '-ml-[var(--sidebar-w)] w-[calc(100%_+_var(--sidebar-w))]'
             )}
           >
-            <div className="head relative flex min-h-[var(--head-h)] items-center gap-2">
-              {!isSidebarOpen && (
-                <>
-                  <HtmlTooltip title={isSidebarOpen ? 'Close Sidebar' : 'Open Sidebar'}>
-                    <IconButton size="small" onClick={() => setIsSidebarOpen((prev) => !prev)}>
-                      <FiSidebar />
-                    </IconButton>
-                  </HtmlTooltip>
-                  <HtmlTooltip title={'New chat'}>
-                    <IconButton size="small" onClick={() => hadleNewChat()}>
-                      <FiEdit />
-                    </IconButton>
-                  </HtmlTooltip>
-                </>
-              )}
-              <span className=" text-[18px] font-semibold">Equipt Ai</span>
-            </div>
+            {!isSidebarOpen && (
+              <div className="head relative flex min-h-[var(--head-h)] items-center gap-2">
+                <HtmlTooltip title={isSidebarOpen ? 'Close History' : 'Open History'}>
+                  <IconButton size="small" onClick={() => setIsSidebarOpen((prev) => !prev)}>
+                    <FiSidebar />
+                  </IconButton>
+                </HtmlTooltip>
+                <HtmlTooltip title={'New Chat'}>
+                  <IconButton size="small" onClick={() => hadleNewChat()}>
+                    <FiEdit />
+                  </IconButton>
+                </HtmlTooltip>
+              </div>
+            )}
             <DisplayMessages chats={chats} />
             <div className="absolute bottom-0 left-0 right-0 bg-[var(--dark-primary,white)] p-2">
               <div className="flex rounded-full p-2 [border:1px_solid_var(--common-border-color)]">
@@ -154,7 +143,7 @@ const EquiptAi = () => {
                   type="text"
                   name="question"
                   className="w-full border-0 bg-transparent px-4 text-[var(--primery-text)] outline-none"
-                  placeholder="Message Equipt Ai"
+                  placeholder="Message Equipt AI"
                   value={question}
                   onChange={(e) => {
                     setQuestion(e?.target?.value);
@@ -165,7 +154,6 @@ const EquiptAi = () => {
                     }
                   }}
                 />
-
                 <IconButton
                   style={{ borderRadius: 999, padding: '10px' }}
                   size="small"
@@ -176,7 +164,7 @@ const EquiptAi = () => {
                   <FaArrowUp className="text-white" />
                 </IconButton>
               </div>
-              <span className="mx-auto block pt-2 text-center text-[12px] text-gray-400">Equipt Ai can make mistakes. Check important info.</span>
+              <span className="mx-auto block pt-2 text-center text-[12px] text-gray-400">Equipt AI can make mistakes. Check important info.</span>
             </div>
           </div>
         </div>
@@ -288,7 +276,7 @@ type DisplayMessagesProps = {
 
 const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
   return (
-    <div className=" max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto">
+    <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto">
       {chats?.length ? (
         <>
           {chats?.map((chat, i) => {
