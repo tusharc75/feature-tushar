@@ -535,6 +535,7 @@ export const RESOURCE_LABEL = {
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
   managedPackages: 'Managed Packages',
   integration: 'Integration',
+  equiptAi: 'Equipt Ai'
 };
 
 export const CHILD_RESOURCE = {
