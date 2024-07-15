@@ -1263,6 +1263,11 @@ const routes = {
   equiptAi: {
     title: storedRoutes && storedRoutes.equiptAi && storedRoutes.equiptAi?.title ? storedRoutes.equiptAi?.title : RESOURCE_LABEL.equiptAi,
     path: '/equipt-ai'
+  },
+  workSpace: {
+    title: storedRoutes && storedRoutes.workSpace && storedRoutes.workSpace?.title ? storedRoutes.workSpace?.title
+      : RESOURCE_LABEL.workSpace,
+    path: '/work-space'
   }
 };
 
