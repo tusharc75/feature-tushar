@@ -32,8 +32,7 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
   const validate = () => {
     const err: any = {};
     const tch: any = {};
-
-    values[name]?.forEach((v, i) => {
+    (values[name] || [])?.forEach((v, i) => {
       fieldData?.subFields?.forEach((field) => {
         if (field?.required) {
           if (!v[field?.fieldName]) {
@@ -43,7 +42,6 @@ const Counter = ({ label, values, name, setFieldValue, fieldData, touched, error
         }
       });
     });
-
     setError(err);
     setTouch(tch);
   };
