@@ -216,7 +216,6 @@ const HistorySidebar = ({ setIsSidebarOpen, isSidebarOpen, hadleNewChat, chatHis
   };
 
   const handleDeleteWrapper = () => {
-    console.log(selectedChatHistory);
     handleCloseMenu();
     if (selectedChatHistory) handleDelete(selectedChatHistory);
   };
