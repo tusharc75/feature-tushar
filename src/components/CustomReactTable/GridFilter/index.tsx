@@ -40,13 +40,6 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   useEffect(() => {
     fetchAllColumns();
     fetchUserFilters();
-    // if (currentFomValue) {
-    //   for (const property in currentFomValue) {
-    //     if (isEmpty(currentFomValue[property])) {
-    //       delete currentFomValue[property];
-    //     }
-    //   }
-    // }
     if (selectedFilter) {
       setFormValues(selectedFilter?.filterValue || {});
     } else {
@@ -86,6 +79,8 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       setFormValues((prevState) => ({ ...prevState, [name]: value }));
     } else if (isObject && !isArray && value) {
       setFormValues((prevState) => ({ ...prevState, [name]: value }));
+    } else if (value && !isNaN(value)) {
+      setFormValues((prevState) => ({ ...prevState, [name]: value?.toString() }));
     } else {
       setFormValues((prevState) => {
         const newState = { ...prevState };

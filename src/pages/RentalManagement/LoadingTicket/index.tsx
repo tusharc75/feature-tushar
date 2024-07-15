@@ -92,7 +92,6 @@ const LoadingTicket = ({
   const { state, dispatch } = useTableReducer();
   const { selectedRecords, dataRows } = state;
 
-  const [downlodingFile, setDownlodingFile] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [statusToUpdate, setStatusToUpdate] = useState({ open: false, isUpdating: false, status: '', message: '' });
   const [anchorEl, setAnchorEl] = useState(null);
@@ -1035,12 +1034,14 @@ const LoadingTicket = ({
       if (action === rentalManagementActions.createLoadingTicket) {
         if (e.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingAlreadyCreated });
-        } else if (
-          e.type === 'Asset' &&
-          (![ASSET_STATUS.reserved, ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e?.status) ||
-            e?.rentalAssetStatus !== RENTAL_INTERNAL_ASSET_STATUS.reserved)
+        }
+        else if (e.type === 'Asset' &&
+          (![ASSET_STATUS.reserved, ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e?.status) || e?.rentalAssetStatus !== RENTAL_INTERNAL_ASSET_STATUS.reserved)
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingReservedAssetStatus });
+        }
+        else if (uniq(map(records, 'warehouseId')).length !== 1) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.repairSameWarehouse });
         }
       } else if (action === rentalManagementActions.deliveredToCustomer) {
         if (!e.hasOwnProperty('loadingTicketId')) {
@@ -1534,15 +1535,6 @@ const ActionButtonMenuItems = ({
   setShowConformationRevertTicket,
   setShowConformationCancleTicket
 }) => {
-  const checkUniqWarehouse = () => {
-    if (selectedRecords.length === 0) {
-      return true;
-    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
-      return false;
-    } else {
-      return true;
-    }
-  };
 
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -1573,7 +1565,7 @@ const ActionButtonMenuItems = ({
             }
           }
         }}
-        disabled={selectedRecords.length === 0 || checkUniqWarehouse()}
+        disabled={selectedRecords.length === 0}
       >
         Create Loading Ticket
       </MenuItem>

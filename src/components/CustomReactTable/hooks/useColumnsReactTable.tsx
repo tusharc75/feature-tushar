@@ -477,8 +477,6 @@ export default function useColumns() {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
-          disableFilters: true,
-          disableSortBy: true,
           cell: ({ row }) => (
             <div>
               <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>
@@ -505,8 +503,6 @@ export default function useColumns() {
       } else if (field.type === 'decimal') {
         column.push({
           ...commonFieldData,
-          disableFilters: true,
-          disableSortBy: true,
           editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (row.original[field.fieldName] ? <p>{row.original[field.fieldName]}</p> : <NoDataCell />),
           Footer: (info) => {
@@ -530,13 +526,13 @@ export default function useColumns() {
           disableFilters: true,
           disableSortBy: true,
           cell: ({ row }) => (
-          <div>
-            <GroupSignatureCell original={row?.original} field={field} />
-          </div>
+            <div>
+              <GroupSignatureCell original={row?.original} field={field} />
+            </div>
           )
         });
       }
-       else if (field.type === 'percent') {
+      else if (field.type === 'percent') {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
