@@ -9,7 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { injectFormFields, useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -56,7 +56,6 @@ const SubcontractAssembly = () => {
 
   useEffect(() => {
     fetchGridColumns();
-    addWalkmeData([addSubcontractStep]);
   }, []);
 
   useEffect(() => {
@@ -72,6 +71,7 @@ const SubcontractAssembly = () => {
     data = response?.data?.data;
 
     const newColumns = generateColumns(renderedFrom, data, routes.subcontractAssemblyDetail.path, true);
+    addWalkmeData([injectFormFields(addSubcontractStep, data)]);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 

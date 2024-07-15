@@ -30,6 +30,7 @@ export type StepDefination = {
   target: string;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
+  formFields?: boolean;
   nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
   skipIfValueExist?: boolean;
