@@ -1,29 +1,5 @@
 import { WalkmeData } from 'src/components/CustomIntro';
 
-export const addSubcontractStep: WalkmeData = {
-  name: 'Add subcontract',
-  url: '/subcontract-assembly',
-  steps: [
-    {
-      title: 'Add ',
-      target: '#add-button',
-      content: ''
-    },
-    {
-      target: '#field-supplier-account',
-      title: '',
-      content: '',
-      nextOnValueChange: true,
-      formFields: true
-    },
-    {
-      target: '#dialog-save-button',
-      title: 'Save',
-      content: ''
-    }
-  ]
-};
-
 export const addStepAddExistingProduct: WalkmeData = {
   name: 'Add Existing Product',
   url: '/subcontract-assembly/detail/:id',
