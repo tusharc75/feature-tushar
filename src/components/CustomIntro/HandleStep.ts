@@ -38,6 +38,7 @@ export class HandleSteps {
   handleReset: () => void;
   findingElement: boolean;
   attachedOvservers: Observer[];
+  clicked: boolean;
   constructor({
     setUpdateSignal,
     steps,
@@ -63,6 +64,7 @@ export class HandleSteps {
     this.listenerAttachedElements = [];
     this.attachedOvservers = [];
     this.findingElement = false;
+    this.clicked = false;
     this.resizeObserver = new ResizeObserver((entries) => {
       window.requestAnimationFrame(() => {
         if (!entries[0]) return;
@@ -189,6 +191,7 @@ export class HandleSteps {
   reset() {
     this.started = false;
     this.finished = false;
+    this.clicked = false;
     this.currentIndex = -1;
     this.handleReset();
   }
@@ -196,6 +199,9 @@ export class HandleSteps {
     if (this.currentIndex === this.steps.length - 1) {
       this.reset();
     }
+    // To debounce click only register first click
+    if (this.clicked) return;
+    this.clicked = true;
     this.currentIndex++;
     this.getCurrentStep();
     this.removeNextListeners();
@@ -205,6 +211,9 @@ export class HandleSteps {
       this.getCurrentStep();
       return;
     }
+    // To debounce click only register first click
+    if (this.clicked) return;
+    this.clicked = true;
     this.currentIndex--;
     if (this.steps[this.currentIndex]?.isHiddenStep) {
       this.previous();
@@ -248,6 +257,7 @@ export class HandleSteps {
       }
 
       setTimeout(() => {
+        this.clicked = false;
         this.currentStepData = {
           ...activeStep,
           positionData,

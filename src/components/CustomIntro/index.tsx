@@ -94,6 +94,8 @@ const CustomIntro = () => {
 
   const handleNext = () => {
     currentStepData?.element.click();
+
+    // this is to check for double click
     handleSteps.current?.next();
   };
 
