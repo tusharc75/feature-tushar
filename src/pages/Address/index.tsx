@@ -31,7 +31,7 @@ const Address = () => {
   }: any = useData();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageDialog, setShowManageDialog] = useState({ open: false });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
 
@@ -66,25 +66,6 @@ const Address = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {permissions?.address?.isCreate ? (
-          <HtmlTooltip title="Clone">
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setShowManageDialog({ open: true, isClone: true, idToClone: row.original._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color="primary" />
-            </IconButton>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip className="cursor-stop" title="You do not have permission to clone/create">
-            <IconButton aria-label="Clone" size="small">
-              <FileCopyIcon fontSize="small" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
         {permissions?.address?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
@@ -228,7 +209,7 @@ const Address = () => {
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
           addButtonOnclick={() => {
-            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+            setShowManageDialog({ open: true });
           }}
           isAddButtonVisible={permissions?.address?.isCreate}
         />
@@ -264,10 +245,10 @@ const Address = () => {
       )}
       {showManageDialog.open && (
         <ManageAddressDialog
-          onClose={() => setShowManageDialog({ open: false, isClone: false, idToClone: null })}
+          onClose={() => setShowManageDialog({ open: false })}
           onSuccess={() => {
             fetchData();
-            setShowManageDialog({ open: false, isClone: false, idToClone: null });
+            setShowManageDialog({ open: false });
           }}
         />
       )}
