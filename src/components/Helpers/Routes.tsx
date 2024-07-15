@@ -1220,6 +1220,11 @@ const routes = {
     title: storedRoutes && storedRoutes.integration && storedRoutes.integration?.title ? storedRoutes.integration?.title
       : RESOURCE_LABEL.integration,
     path: '/integration'
+  },
+  workSpace: {
+    title: storedRoutes && storedRoutes.workSpace && storedRoutes.workSpace?.title ? storedRoutes.workSpace?.title
+      : RESOURCE_LABEL.workSpace,
+    path: '/work-space'
   }
 };
 
