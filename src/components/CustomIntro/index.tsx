@@ -19,6 +19,7 @@ export * from 'src/components/CustomIntro/helper';
 export type WalkmeData = {
   name: string;
   steps: StepDefination[];
+  id: string;
   urls: string[];
 };
 
@@ -31,8 +32,10 @@ export type StepDefination = {
   url: string;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
-  nextOnValueChange?: boolean;
+  formFields?: boolean;
+  nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  skipIfValueExist?: boolean;
 };
 
 export type NormalStep = {
@@ -41,14 +44,16 @@ export type NormalStep = {
   target: string;
   url: string;
   isHiddenStep: false;
+  skipIfValueExist?: boolean;
 };
 export type HiddenStep = {
   target: string;
   isHiddenStep: true;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
-  nextOnValueChange?: boolean;
+  nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  skipIfValueExist?: boolean;
 };
 
 const CustomIntro = () => {
@@ -183,7 +188,6 @@ const CustomIntro = () => {
                       handleNext();
                       handleReset();
                     }}
-                    endIcon={<GiFinishLine size={16} />}
                   >
                     Finish
                   </ThemeButton>
@@ -255,9 +259,12 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
         }}
       >
         <div className="p-[24px]">
-          <h6 className=" pb-[10px] text-[17px] font-bold leading-[1.57] text-[#2a3042] [border-bottom:1px_solid_var(--common-border-color)]  dark:text-[white]">
-            Select any topic
-          </h6>
+          <div className="flex justify-between gap-2 pb-[10px] text-[#2a3042] [border-bottom:1px_solid_var(--common-border-color)] dark:text-[white]">
+            <h6 className="  text-[17px] font-bold leading-[1.57] ">Select any topic</h6>
+            <IconButton onClick={() => setOpen(false)} size="small">
+              <Close />
+            </IconButton>
+          </div>
           <div className="pb-2 pt-3">
             <TextField autoFocus label="Search topic..." variant="outlined" size="small" fullWidth onChange={handleSearch} value={search} />
           </div>

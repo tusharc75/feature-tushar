@@ -20,36 +20,10 @@ import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialo
 import { FiExternalLink } from 'react-icons/fi';
 import Consumables from 'src/pages/SubcontractAssembly/Material/Consumables';
 import { useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
-
-const deleteExistingProductViaAction: WalkmeData[] = [
-  {
-    name: 'Delete Existing Product',
-    urls: ['/subcontract-assembly/detail/:id?itemTab=1'],
-    steps: [
-      {
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Select a product',
-        target: '#subcontractAssembly_Material-table-checkbox-0',
-        content: ''
-      },
-      {
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Click on action button',
-        target: '#details-page-action-button',
-        content: ''
-      },
-      {
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Click on action button',
-        target: '#action-delete-menu-item',
-        content: ''
-      }
-    ]
-  }
-];
+import { addProductConsumable, deleteExistingProductViaAction } from 'src/pages/SubcontractAssembly/walkmeSteps';
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
-  const { addWalkmeData, removeWalkmeDataByName } = useSetWalkmeData();
+  const { addWalkmeData, removeWalkmeDataByid, removeWalkemeByfilterFunction } = useSetWalkmeData();
   const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -76,6 +50,10 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
       fetchMaterial();
     }
   }, [columns]);
+
+  useEffect(() => {
+    removeWalkemeByfilterFunction((data) => data.id.startsWith('subcontract-assembly_add-step'));
+  }, []);
 
   const fetchProductFields = async () => {
     let fields;
@@ -222,16 +200,19 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
       parent.hideSelection = parent?.receivedQty > 0 || false;
     });
 
-    if (rows.length && rows[0].canDelete) {
-      addWalkmeData(deleteExistingProductViaAction);
-    } else {
-      removeWalkmeDataByName('Delete Existing Product');
-    }
     if (rows?.length) {
       setNextStep(true);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+
+    if (rows.length && rows[0].canDelete) {
+      addWalkmeData([deleteExistingProductViaAction, addProductConsumable]);
+    } else if (!rows[0].canDelete) {
+      removeWalkmeDataByid(['subcontract-assembly_add-step-delete-existing-product']);
+    } else {
+      removeWalkmeDataByid(['subcontract-assembly_add-step-add-product-consumables', 'subcontract-assembly_add-step-delete-existing-product']);
+    }
   };
 
   const ActionButtonMenuItms = () => {

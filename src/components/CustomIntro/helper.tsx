@@ -1,3 +1,6 @@
+import { findIndex, startCase } from "lodash";
+import { StepDefination } from "src/components/CustomIntro";
+
 export const getCurrentUrl = () => {
   const url = window.location.pathname;
   const search = window.location.search;
@@ -30,4 +33,44 @@ export function elemToSelector(el: HTMLElement) {
   }
 
   return elemToSelector(el.parentNode as HTMLElement) + ' > ' + selector;
+}
+
+export function debounce<T extends (...args: any[]) => void>(func: T, timeout = 300): [(...args: Parameters<T>) => void, () => void] {
+  let timer: NodeJS.Timeout;
+  const debouncedFunc = (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, timeout);
+  };
+  const teardown = () => clearTimeout(timer);
+
+  return [debouncedFunc, teardown];
+}
+
+export const injectFormFields = (data, url, fields) => {
+
+  const ignoreField = ['currency', 'owner', 'pdfTemplate', 'billingAddress', 'shippingAddress']
+
+  let fieldsStpes: StepDefination[] = [];
+  fields?.forEach((e) => {
+    if (e?.fieldData?.required && !ignoreField?.includes(e?.fieldData?.fieldName) && !e?.fieldData?.isDefaultValue && !e?.fieldData?.isUneditable) {
+      fieldsStpes.push({
+        url: url,
+        title: `Select ${e?.fieldData?.fieldLabel}`,
+        target: `#field-${startCase(e?.fieldData?.fieldName)?.toLowerCase()?.replace(` `, `-`)}`,
+        content: '',
+        nextOnValueChange: true
+      })
+    }
+  })
+  const fieldIndex = findIndex(data?.steps, { formFields: true });
+  if (fieldIndex < 0 || fieldsStpes?.length === 0) {
+    return data;
+  }
+  else {
+    data?.steps?.splice(fieldIndex + 1, 0, ...fieldsStpes);
+    data.steps = data?.steps?.filter((e) => !e?.formFields)
+    return data;
+  }
 }

@@ -14,10 +14,14 @@ export const useSetWalkmeData = () => {
     });
   };
 
-  const removeWalkmeDataByName = (names: string | string[]) => {
+  const removeWalkmeDataByid = (names: string | string[]) => {
     if (typeof names === 'string') names = [names];
-    setWalkMeSteps({ [WALK_ME_STEPS]: data.filter((d) => !names.includes(d.name)) });
+    setWalkMeSteps({ [WALK_ME_STEPS]: data.filter((d) => !names.includes(d.id)) });
   };
 
-  return { data, addWalkmeData, removeWalkmeDataByName };
+  const removeWalkemeByfilterFunction = (filterFunction: (d: WalkmeData) => boolean) => {
+    setWalkMeSteps({ [WALK_ME_STEPS]: data.filter(filterFunction) });
+  };
+
+  return { data, addWalkmeData, removeWalkmeDataByid, removeWalkemeByfilterFunction };
 };

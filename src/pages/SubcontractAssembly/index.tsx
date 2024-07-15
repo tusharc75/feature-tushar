@@ -9,7 +9,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import { WalkmeData, useSetWalkmeData } from 'src/components/CustomIntro';
+import { injectFormFields, useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -19,42 +19,8 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
+import { addSubcontractStep } from 'src/pages/SubcontractAssembly/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-
-const stepData: WalkmeData[] = [
-  {
-    name: 'Add subcontract',
-    urls: ['/subcontract-assembly'],
-    steps: [
-      {
-        url: '/subcontract-assembly',
-        title: 'Add ',
-        target: '#add-button',
-        content: ''
-      },
-      {
-        target: '#field-supplier-account',
-        url: '/subcontract-assembly',
-        title: 'Select suplier',
-        content: '',
-        nextOnValueChange: true
-      },
-      {
-        target: '#field-warehouse',
-        url: '/subcontract-assembly',
-        title: 'select address',
-        content: '',
-        nextOnFocusOut: true
-      },
-      {
-        target: '#dialog-save-button',
-        url: '/subcontract-assembly',
-        title: 'Add subcontract',
-        content: ''
-      }
-    ]
-  }
-];
 
 const SubcontractAssembly = () => {
   const { addWalkmeData } = useSetWalkmeData();
@@ -90,7 +56,6 @@ const SubcontractAssembly = () => {
 
   useEffect(() => {
     fetchGridColumns();
-    addWalkmeData(stepData);
   }, []);
 
   useEffect(() => {
@@ -106,6 +71,7 @@ const SubcontractAssembly = () => {
     data = response?.data?.data;
 
     const newColumns = generateColumns(renderedFrom, data, routes.subcontractAssemblyDetail.path, true);
+    addWalkmeData([injectFormFields(addSubcontractStep, routes.subcontractAssembly.path, data)]);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
@@ -328,9 +294,8 @@ const SubcontractAssembly = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.subcontractAssemblyNumber || ''
-            } ?`}
+            message={`Are you sure you want to delete ${routes?.subcontractAssembly.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.subcontractAssemblyNumber || ''
+              } ?`}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);
