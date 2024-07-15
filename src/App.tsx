@@ -257,6 +257,7 @@ import ManagedPackages from 'src/pages/ManagedPackages';
 import ManagedPackagedDetail from 'src/pages/ManagedPackages/ManagedPackagesDetail';
 import CustomIntro from 'src/components/CustomIntro';
 import Integration from 'src/pages/Integration';
+import EquiptAi from 'src/pages/EquiptAi';
 import WorkSpace from 'src/pages/WorkSpace';
 
 var notificationInterval: any = null;
@@ -1135,6 +1136,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.equiptAi.path}`}>
+              <EquiptAi />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.workSpace.path}`}>
               <WorkSpace />

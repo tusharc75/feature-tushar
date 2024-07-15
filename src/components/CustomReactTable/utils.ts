@@ -270,6 +270,7 @@ export const getCellValue = (cell) => {
 };
 
 export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig = null }) => {
+
   const FILTER_NOT_APPLIED = [
     'fileUpload',
     'multiFileUpload',
@@ -277,9 +278,10 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
     'multiImageUpload',
     'richTextEditor',
     'signature',
+    'groupSignature',
     'colorPicker',
-    'number',
-    'decimal',
+    'counter',
+    'description',
     'switch'
   ];
 
@@ -404,6 +406,9 @@ export const createFilterModel = (formValues, coloums) => {
   const filterModel = new Map();
   const colNames = Object.keys(formValues);
 
+  console.log(coloums)
+  console.log(formValues)
+
   for (const col of coloums) {
     const fieldName = col?.fieldName;
 
@@ -426,6 +431,8 @@ export const createFilterModel = (formValues, coloums) => {
       case 'currency':
       case 'lookUpDisplay':
       case 'url':
+      case 'number':
+      case 'decimal':
         if (formValues[fieldName]) {
           filterModel.set(fieldName, { filter: formValues[fieldName] });
         }
@@ -482,6 +489,8 @@ export const createFilterModel = (formValues, coloums) => {
         console.warn('Unknown column type:', col.type);
     }
   }
+
+  console.log(filterModel)
 
   return Object.fromEntries(filterModel);
 };

@@ -57,7 +57,7 @@ const QuotePdfTemplate = () => {
         accessor: 'name',
         Header: 'Name',
         width: 120,
-        order: 1,
+        disabled: true,
         Cell: ({ row }) => (
           <>
             <Link className="link" to={`${routes.quotePdfTemplateDetail.path}/${row?.original?._id}`} title={row?.original?.name}>
@@ -70,62 +70,60 @@ const QuotePdfTemplate = () => {
         accessor: 'type',
         Header: 'Type',
         width: 120,
-        order: 2,
+        disabled: true,
         Cell: ({ row }) => <p className="text-truncate">{row.original.type}</p>
       },
       ...getStaticFields(),
-      ActionsRenderer
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 100,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => (
+          <>
+            <HtmlTooltip title="Preview">
+              <IconButton size="small" aria-label="Clone" className="md:mr-2" onClick={() => previewPdfTemplate(row?.original?._id)}>
+                <VisibilityIcon color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+            <HtmlTooltip title={permissions?.quotePdfTemplate?.isCreate ? 'Clone' : cloneDisable}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Clone"
+                  disabled={permissions?.quotePdfTemplate?.isCreate ? false : true}
+                  onClick={() => {
+                    CreateNew(row?.original?.id, true);
+                  }}
+                >
+                  <FileCopyIcon fontSize="small" color={permissions?.quotePdfTemplate?.isCreate ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+              <span>
+                <IconButton
+                  size="small"
+                  aria-label="Delete"
+                  disabled={row?.original?.canDelete ? false : true}
+                  onClick={() => {
+                    setDeleteRecord(row.original);
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+          </>
+        )
+      }
     ];
     setColumns(columns);
-  };
-
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        <HtmlTooltip title="Preview">
-          <IconButton size="small" aria-label="Clone" className="md:mr-2" onClick={() => previewPdfTemplate(row?.original?._id)}>
-            <VisibilityIcon color="primary" />
-          </IconButton>
-        </HtmlTooltip>
-        <HtmlTooltip title={permissions?.quotePdfTemplate?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={permissions?.quotePdfTemplate?.isCreate ? false : true}
-              onClick={() => {
-                CreateNew(row?.original?.id, true);
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.quotePdfTemplate?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      </>
-    )
   };
 
   const previewPdfTemplate = (templateId) => {

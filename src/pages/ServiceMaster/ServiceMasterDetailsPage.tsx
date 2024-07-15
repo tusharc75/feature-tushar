@@ -147,7 +147,7 @@ const ServiceMasterDetailsPage = () => {
                 <DetailsPage data={serviceMasterDetailData} fields={fields} />
                 <Box mb={2} mt={2}>
                   <Grid container spacing={2}>
-                    <Grid item xs={6}>
+                    <Grid item xs={12} sm={12} md={6} lg={6}>
                       <LeadTime referenceType={MATERIAL_TYPE.service} referenceId={id} referenceLabel={serviceMasterDetailData?.serviceName} />
                     </Grid>
                   </Grid>

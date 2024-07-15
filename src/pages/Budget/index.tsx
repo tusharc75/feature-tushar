@@ -24,7 +24,6 @@ const Budget = () => {
   const renderedFrom = camelCase(routes?.budget.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const history = useHistory();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();

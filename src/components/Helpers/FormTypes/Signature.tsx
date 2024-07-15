@@ -133,7 +133,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
   );
 };
 
-const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMessage, setFieldValue }) => {
+const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMessage, setFieldValue, disable = false }) => {
   const [openDialog, setOpenDialog] = React.useState(false);
 
   const handleSaveImage = (dataURL: string) => {
@@ -187,6 +187,7 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
               onClick={() => {
                 setOpenDialog(true);
               }}
+              disabled={disable}
               title="Add sign"
               color="primary"
               size="small"
@@ -198,7 +199,7 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
           </label>
 
           <IconButton
-            disabled={Boolean(!values[name])}
+            disabled={Boolean(!values[name]) || disable}
             title="Remove sign"
             className={Boolean(!values[name]) ? '' : 'errorColor'}
             size="small"

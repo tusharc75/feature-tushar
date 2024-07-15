@@ -1,9 +1,15 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
+import DeleteIcon from '@material-ui/icons/Delete';
+import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FiExternalLink } from 'react-icons/fi';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
+import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -11,75 +17,13 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, MATERIAL_TYPE, SUBCONTRACT_ASSEMBLY_STATUS } from 'src/constants/helpers';
-import EditIcon from '@material-ui/icons/Edit';
-import DeleteIcon from '@material-ui/icons/Delete';
-import axiosInstance from 'src/axios/axiosInstance';
-import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
-import { FiExternalLink } from 'react-icons/fi';
 import Consumables from 'src/pages/SubcontractAssembly/Material/Consumables';
-import { useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
-
-const deleteExistingProductViaAction: WalkmeData = {
-  name: 'Delete Existing Product',
-  urls: ['/subcontract-assembly/detail/:id?itemTab=1'],
-  steps: [
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Select a product',
-      target: '#subcontractAssembly_Material-table-checkbox-0',
-      content: ''
-    },
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Click on action button',
-      target: '#details-page-action-button',
-      content: ''
-    },
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Click on action button',
-      target: '#action-delete-menu-item',
-      content: ''
-    }
-  ]
-};
-
-const addProductConsumable: WalkmeData = {
-  name: 'Add Products/Consumables',
-  urls: ['/subcontract-assembly/detail/:id?itemTab=1'],
-  steps: [
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Select Product',
-      target: '#select-product-dropdown',
-      content: '',
-      nextOnValueChange: (val) => val !== 'All' && val.length > 0
-    },
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Click on Add',
-      target: '#add-consumable-button',
-      content: ''
-    },
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Select a product',
-      target: '#Product-table-checkbox-0',
-      content: ''
-    },
-    {
-      url: '/subcontract-assembly/:id?itemTab=1',
-      title: 'Add',
-      target: '#dialog-add-button',
-      content: ''
-    }
-  ]
-};
+import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
+import { addProductConsumable, addStepAddExistingProduct, deleteExistingProductViaAction } from 'src/pages/SubcontractAssembly/walkmeSteps';
+import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
-  const { addWalkmeData, removeWalkmeDataByName } = useSetWalkmeData();
+  const { setWalkmeData } = useSetWalkmeData();
   const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Material`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -252,19 +196,20 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
       parent.hideSelection = parent?.receivedQty > 0 || false;
     });
 
-    if (rows.length && rows[0].canDelete) {
-      addWalkmeData([deleteExistingProductViaAction, addProductConsumable]);
-    } else if (!rows[0].canDelete) {
-      removeWalkmeDataByName(['Delete Existing Product']);
-    } else {
-      removeWalkmeDataByName(['Add Products/Consumables', 'Delete Existing Product']);
-    }
-
     if (rows?.length) {
       setNextStep(true);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+
+    let walkmeData: WalkmeData[] = [addStepAddExistingProduct];
+
+    if (rows.length && rows[0].canDelete) {
+      walkmeData = [addStepAddExistingProduct, deleteExistingProductViaAction, addProductConsumable];
+    } else if (!rows[0].canDelete) {
+      walkmeData = [addStepAddExistingProduct, addProductConsumable];
+    }
+    setWalkmeData(walkmeData);
   };
 
   const ActionButtonMenuItms = () => {

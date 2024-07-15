@@ -5,7 +5,6 @@ import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
 import React, { useEffect } from 'react';
 import { FaArrowLeft, FaArrowRight, FaQuestion } from 'react-icons/fa';
-import { GiFinishLine } from 'react-icons/gi';
 import { useLocation } from 'react-router-dom';
 import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
 import { getCurrentUrl } from 'src/components/CustomIntro/helper';
@@ -13,13 +12,13 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useStore, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
-export * from 'src/components/CustomIntro/useSetWalkmeSteps';
 export * from 'src/components/CustomIntro/helper';
+export * from 'src/components/CustomIntro/useSetWalkmeSteps';
 
 export type WalkmeData = {
   name: string;
   steps: StepDefination[];
-  urls: string[];
+  url: string;
 };
 
 export type Step = NormalStep | HiddenStep;
@@ -28,19 +27,20 @@ export type StepDefination = {
   title: ReactNode;
   content?: ReactNode;
   target: string;
-  url: string;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
+  formFields?: boolean;
   nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  skipIfValueExist?: boolean;
 };
 
 export type NormalStep = {
   title: ReactNode;
   content?: ReactNode;
   target: string;
-  url: string;
   isHiddenStep: false;
+  skipIfValueExist?: boolean;
 };
 export type HiddenStep = {
   target: string;
@@ -49,6 +49,7 @@ export type HiddenStep = {
   nextOnFocusOut?: boolean;
   nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  skipIfValueExist?: boolean;
 };
 
 const CustomIntro = () => {
@@ -93,6 +94,8 @@ const CustomIntro = () => {
 
   const handleNext = () => {
     currentStepData?.element.click();
+
+    // this is to check for double click
     handleSteps.current?.next();
   };
 
@@ -208,7 +211,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
 
   useEffect(() => {
     const url = getCurrentUrl();
-    const stepsForCurrentPage = walkMeSteps?.filter((d) => d?.urls?.some((u) => u === url));
+    const stepsForCurrentPage = walkMeSteps?.filter((d) => url === d?.url);
     setStepsForThisPage(stepsForCurrentPage);
     setFilteredSteps(stepsForCurrentPage);
   }, [walkMeSteps, location]);

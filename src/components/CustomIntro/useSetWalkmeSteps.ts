@@ -7,17 +7,22 @@ export const useSetWalkmeData = () => {
 
   const addWalkmeData = (stepData: WalkmeData[]) => {
     const uniqueData = uniqBy([...data, ...stepData], function (d) {
-      return `${d.name}_${d.urls.join('_')}`;
+      return `${d.name}_${d.url}`;
     });
     setWalkMeSteps({
       [WALK_ME_STEPS]: uniqueData
     });
   };
 
-  const removeWalkmeDataByName = (names: string | string[]) => {
-    if (typeof names === 'string') names = [names];
-    setWalkMeSteps({ [WALK_ME_STEPS]: data.filter((d) => !names.includes(d.name)) });
+  const setWalkmeData = (stepData: WalkmeData[]) => {
+    setWalkMeSteps({
+      [WALK_ME_STEPS]: stepData
+    });
   };
 
-  return { data, addWalkmeData, removeWalkmeDataByName };
+  const removeWalkemeByfilterFunction = (filterFunction: (d: WalkmeData) => boolean) => {
+    setWalkMeSteps({ [WALK_ME_STEPS]: data.filter(filterFunction) });
+  };
+
+  return { data, setWalkmeData, addWalkmeData, removeWalkemeByfilterFunction };
 };

@@ -66,6 +66,7 @@ import RichTextEditor from './FormTypes/RichTextEditor';
 import Signature from './FormTypes/Signature';
 import { LOGIC } from '../FormBuilder/helper';
 import Description from './FormTypes/Description';
+import GroupSignature from 'src/components/Helpers/FormTypes/GroupSignature';
 
 type MultiFileType = {
   fileName: string;
@@ -2765,6 +2766,14 @@ const FormTypes = (props) => {
         isTooltip={isTooltip}
         tooltipMessage={tooltipMessage}
         setFieldValue={setFieldValue}
+      />
+    ) : type === 'groupSignature' ? (
+      <GroupSignature
+        label={label}
+        values={values}
+        name={name}
+        setFieldValue={setFieldValue}
+        fieldData={fieldData}
       />
     ) : type === 'counter' ? (
       <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
