@@ -5,7 +5,6 @@ import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
 import React, { useEffect } from 'react';
 import { FaArrowLeft, FaArrowRight, FaQuestion } from 'react-icons/fa';
-import { GiFinishLine } from 'react-icons/gi';
 import { useLocation } from 'react-router-dom';
 import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
 import { getCurrentUrl } from 'src/components/CustomIntro/helper';
@@ -13,8 +12,8 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { useStore, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
-export * from 'src/components/CustomIntro/useSetWalkmeSteps';
 export * from 'src/components/CustomIntro/helper';
+export * from 'src/components/CustomIntro/useSetWalkmeSteps';
 
 export type WalkmeData = {
   name: string;
@@ -29,7 +28,6 @@ export type StepDefination = {
   title: ReactNode;
   content?: ReactNode;
   target: string;
-  url: string;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
   nextOnValueChange?: boolean | ((value: string) => boolean);
@@ -41,7 +39,6 @@ export type NormalStep = {
   title: ReactNode;
   content?: ReactNode;
   target: string;
-  url: string;
   isHiddenStep: false;
   skipIfValueExist?: boolean;
 };
