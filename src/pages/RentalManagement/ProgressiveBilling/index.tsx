@@ -1,13 +1,7 @@
 import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, {
-  getStaticFields,
-  useColumns,
-  useTableReducer,
-  checkStaticField,
-  gridFilterParser
-} from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer, checkStaticField, gridFilterParser } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
@@ -23,7 +17,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
-const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice }) => {
+const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice, rentalPolicyData = null }) => {
   const renderedFrom = camelCase(routes?.invoice?.title);
   const toastConfig = useContext(CustomToastContext);
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
@@ -123,7 +117,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
-    
+
     const { deepFilters } = gridFilterParser(filters);
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}&filterType=and`;
@@ -220,9 +214,11 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
             hideSelection={true}
             isClientSideGrid={true}
           />
-        ) : <Box p={2} height={500}>
-          <CommonSkeleton lenArray={[...Array(10).keys()]} />
-        </Box>}
+        ) : (
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+          </Box>
+        )}
       </Grid>
       {createBillDialog.open && (
         <CreateBillingDialog
@@ -234,6 +230,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
             setCreateBillDialog({ open: false });
             fetchData();
           }}
+          policy={rentalPolicyData}
         />
       )}
       {viewBillDialog.open && (
