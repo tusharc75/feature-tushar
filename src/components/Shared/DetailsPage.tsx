@@ -183,6 +183,8 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
     } else if (input.type === 'counter') {
       text = '-';
+    } else if (input.type === 'groupSignature') {
+      text = '-';
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }

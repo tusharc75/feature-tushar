@@ -1,6 +1,7 @@
-import { Step, StepDefination } from 'src/components/CustomIntro';
+import { NormalStep, Step, StepDefination } from 'src/components/CustomIntro';
 import { Observer } from 'src/components/CustomIntro/Observers';
 import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
+import { TextInputObserver } from 'src/components/CustomIntro/Observers/TextInputObserver';
 const RETRY = 10; //in seconds
 
 export class HandleSteps {
@@ -80,21 +81,25 @@ export class HandleSteps {
   private initializeStepData(steps: StepDefination[]) {
     const newSteps: Step[] = [];
     for (const data of steps) {
+      const normalStep: NormalStep = {
+        title: data.title,
+        content: data.content,
+        target: data.target,
+        isHiddenStep: false
+      };
+      if (data.skipIfValueExist) {
+        normalStep.skipIfValueExist = data.skipIfValueExist;
+      }
+
       if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data)) {
-        newSteps.push({
-          title: data.title,
-          content: data.content,
-          target: data.target,
-          url: data.url,
-          isHiddenStep: false
-        });
+        newSteps.push(normalStep);
         newSteps.push({
           ...data,
           target: data.target,
           isHiddenStep: true
         });
       } else {
-        newSteps.push({ title: data.title, content: data.content, target: data.target, url: data.url, isHiddenStep: false });
+        newSteps.push(normalStep);
       }
     }
     return newSteps;
@@ -153,8 +158,12 @@ export class HandleSteps {
         this.attachedOvservers.push(observer);
       } else {
         // Track Text input via blur event
-        currData.element.addEventListener('blur', this.handleNextOnValueChange.bind(this));
-        this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnValueChange.bind(this) });
+        let validator = (value: string) => value.length > 0;
+        if (typeof this.currentStepData.nextOnValueChange === 'function') {
+          validator = this.currentStepData.nextOnValueChange;
+        }
+        const observer = new TextInputObserver(this, this.currentStepData.element, validator);
+        this.attachedOvservers.push(observer);
       }
     }
     if (currData.nextOnKeyPress) {
@@ -166,6 +175,8 @@ export class HandleSteps {
   removeNextListeners() {
     this.listenerAttachedElements.map((d) => d.elm.removeEventListener(d.event, d.func));
     this.attachedOvservers.map((d) => d.disconnect());
+    this.listenerAttachedElements = [];
+    this.attachedOvservers = [];
   }
 
   start() {
@@ -220,12 +231,21 @@ export class HandleSteps {
       }
       this.interval = setInterval(() => {
         this.getCurrentStep();
-      }, 300);
+      }, 1000);
     } else {
       this.findingElement = false;
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
       const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
       // this.scrollToCurrentStep(element);
+
+      // Check if value exist then move on to the next step
+      if (activeStep.skipIfValueExist) {
+        const inputElement = element as HTMLInputElement;
+        if (inputElement.value?.length > 0) {
+          this.next();
+          return;
+        }
+      }
 
       setTimeout(() => {
         this.currentStepData = {
