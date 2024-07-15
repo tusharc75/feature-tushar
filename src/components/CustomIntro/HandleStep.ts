@@ -1,4 +1,4 @@
-import { Step, StepDefination } from 'src/components/CustomIntro';
+import { NormalStep, Step, StepDefination } from 'src/components/CustomIntro';
 import { Observer } from 'src/components/CustomIntro/Observers';
 import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
 import { TextInputObserver } from 'src/components/CustomIntro/Observers/TextInputObserver';
@@ -81,21 +81,26 @@ export class HandleSteps {
   private initializeStepData(steps: StepDefination[]) {
     const newSteps: Step[] = [];
     for (const data of steps) {
+      const normalStep: NormalStep = {
+        title: data.title,
+        content: data.content,
+        target: data.target,
+        url: data.url,
+        isHiddenStep: false
+      };
+      if (data.skipIfValueExist) {
+        normalStep.skipIfValueExist = data.skipIfValueExist;
+      }
+
       if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data)) {
-        newSteps.push({
-          title: data.title,
-          content: data.content,
-          target: data.target,
-          url: data.url,
-          isHiddenStep: false
-        });
+        newSteps.push(normalStep);
         newSteps.push({
           ...data,
           target: data.target,
           isHiddenStep: true
         });
       } else {
-        newSteps.push({ title: data.title, content: data.content, target: data.target, url: data.url, isHiddenStep: false });
+        newSteps.push(normalStep);
       }
     }
     return newSteps;
@@ -233,6 +238,15 @@ export class HandleSteps {
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
       const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
       // this.scrollToCurrentStep(element);
+
+      // Check if value exist then move on to the next step
+      if (activeStep.skipIfValueExist) {
+        const inputElement = element as HTMLInputElement;
+        if (inputElement.value?.length > 0) {
+          this.next();
+          return;
+        }
+      }
 
       setTimeout(() => {
         this.currentStepData = {

@@ -22,21 +22,24 @@ export const addRentalJobsSteps: WalkmeData = {
       url: '/rental-management',
       title: 'Select well name',
       content: '',
-      nextOnValueChange: true
+      nextOnValueChange: true,
+      skipIfValueExist: true
     },
     {
       target: '#field-billing-address',
       url: '/rental-management',
       title: 'Select billing address',
       content: '',
-      nextOnValueChange: true
+      nextOnValueChange: true,
+      skipIfValueExist: true
     },
     {
       target: '#field-shipping-address',
       url: '/rental-management',
       title: 'Select shipping address',
       content: '',
-      nextOnValueChange: true
+      nextOnValueChange: true,
+      skipIfValueExist: true
     },
     {
       target: '#field-estimate-end-date',

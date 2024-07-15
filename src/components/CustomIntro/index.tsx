@@ -33,6 +33,7 @@ export type StepDefination = {
   nextOnFocusOut?: boolean;
   nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  skipIfValueExist?: boolean;
 };
 
 export type NormalStep = {
@@ -41,6 +42,7 @@ export type NormalStep = {
   target: string;
   url: string;
   isHiddenStep: false;
+  skipIfValueExist?: boolean;
 };
 export type HiddenStep = {
   target: string;
@@ -49,6 +51,7 @@ export type HiddenStep = {
   nextOnFocusOut?: boolean;
   nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  skipIfValueExist?: boolean;
 };
 
 const CustomIntro = () => {
