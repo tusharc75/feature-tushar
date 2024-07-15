@@ -1,33 +1,33 @@
-import { useState, useEffect, useContext, Fragment } from 'react';
-import { Formik, Form } from 'formik';
 import { Box, Button, Grid } from '@material-ui/core';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../components/Helpers/FormTypes';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import Dialog from '@material-ui/core/Dialog';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import moment from 'moment';
+import { Fragment, useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import axiosInstance from '../../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { useData } from '../../../StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CustomButton from '../../../components/Helpers/CustomButton';
+import FormTypes from '../../../components/Helpers/FormTypes';
+import routes from '../../../components/Helpers/Routes';
 import {
   CustomDialogTransition,
+  GenerateResourceLineNumber,
   getObjKeys,
   getObjKeysWithValues,
+  RENTAL_STATUS,
   rentalManagement,
   setFieldsInAscendingOrder,
-  yupSchema,
-  RENTAL_STATUS,
-  GenerateResourceLineNumber
+  yupSchema
 } from '../../../constants/helpers';
-import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { useHistory } from 'react-router-dom';
-import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEqual } from 'lodash';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
 
 const ManageRentalManagementDialog = ({
   isClone,
@@ -392,8 +392,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                             : null
                                         }
                                         fields={rentalData.fields}
@@ -427,6 +427,7 @@ const ManageRentalManagementDialog = ({
                 </Button>
                 <CustomButton
                   loading={loading}
+                  id="dialog-save-button"
                   variant="contained"
                   color="primary"
                   disabled={uploadingImageOrFileProgress > 0 || loading}

@@ -1,6 +1,7 @@
 import { Step, StepDefination } from 'src/components/CustomIntro';
 import { Observer } from 'src/components/CustomIntro/Observers';
 import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
+import { TextInputObserver } from 'src/components/CustomIntro/Observers/TextInputObserver';
 const RETRY = 10; //in seconds
 
 export class HandleSteps {
@@ -153,8 +154,12 @@ export class HandleSteps {
         this.attachedOvservers.push(observer);
       } else {
         // Track Text input via blur event
-        currData.element.addEventListener('blur', this.handleNextOnValueChange.bind(this));
-        this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnValueChange.bind(this) });
+        let validator = (value: string) => value.length > 0;
+        if (typeof this.currentStepData.nextOnValueChange === 'function') {
+          validator = this.currentStepData.nextOnValueChange;
+        }
+        const observer = new TextInputObserver(this, this.currentStepData.element, validator);
+        this.attachedOvservers.push(observer);
       }
     }
     if (currData.nextOnKeyPress) {
@@ -166,6 +171,8 @@ export class HandleSteps {
   removeNextListeners() {
     this.listenerAttachedElements.map((d) => d.elm.removeEventListener(d.event, d.func));
     this.attachedOvservers.map((d) => d.disconnect());
+    this.listenerAttachedElements = [];
+    this.attachedOvservers = [];
   }
 
   start() {
