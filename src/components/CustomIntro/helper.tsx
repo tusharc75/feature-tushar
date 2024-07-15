@@ -1,9 +1,9 @@
 import { findIndex, startCase } from 'lodash';
-import { StepDefination } from 'src/components/CustomIntro';
+import { StepDefination, WalkmeData } from 'src/components/CustomIntro';
 
 export const getCurrentUrl = () => {
   const url = window.location.pathname;
-  const search = window.location.search;
+  // const search = window.location.search;
   const hexPattern = /^[0-9a-fA-F]{24}$/;
   const splittedUrl = url.split('/');
   const newUrl = splittedUrl
@@ -15,7 +15,7 @@ export const getCurrentUrl = () => {
       }
     })
     .join('/');
-  return `${newUrl}${search}`;
+  return newUrl.endsWith('/') ? newUrl.slice(0, -1) : newUrl;
 };
 
 export function elemToSelector(el: HTMLElement) {
@@ -55,7 +55,7 @@ export const injectFormFields = (data, fields) => {
     if (e?.fieldData?.required && !ignoreField?.includes(e?.fieldData?.fieldName) && !e?.fieldData?.isDefaultValue && !e?.fieldData?.isUneditable) {
       fieldsStpes.push({
         title: `Select ${e?.fieldData?.fieldLabel}`,
-        target: `#field-${startCase(e?.fieldData?.fieldName)?.toLowerCase()?.replace(` `, `-`)}`,
+        target: `#field-${e?.fieldData?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
         content: '',
         nextOnValueChange: true,
         skipIfValueExist: true
@@ -71,3 +71,40 @@ export const injectFormFields = (data, fields) => {
     return data;
   }
 };
+
+export function createAddItemStepdata(route: { title: string; path: string }, fields: any[]) {
+  const { title, path } = route;
+  const ignoreField = ['currency', 'owner', 'pdfTemplate', 'billingAddress', 'shippingAddress'];
+  const walkmeData: WalkmeData = {
+    name: `Add ${title}`,
+    url: path,
+    steps: []
+  };
+
+  let fieldsStpes: StepDefination[] = [
+    {
+      title: `Add`,
+      target: '#add-button',
+      content: ''
+    }
+  ];
+  fields?.forEach((e) => {
+    if (e?.fieldData?.required && !ignoreField?.includes(e?.fieldData?.fieldName) && !e?.fieldData?.isDefaultValue && !e?.fieldData?.isUneditable) {
+      fieldsStpes.push({
+        title: `Select ${e?.fieldData?.fieldLabel}`,
+        target: `#field-${e?.fieldData?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
+        content: '',
+        nextOnValueChange: true,
+        skipIfValueExist: true
+      });
+    }
+  });
+  fieldsStpes.push({
+    target: '#dialog-save-button',
+    title: 'Save',
+    content: ''
+  });
+
+  walkmeData?.steps?.push(...fieldsStpes);
+  return walkmeData;
+}

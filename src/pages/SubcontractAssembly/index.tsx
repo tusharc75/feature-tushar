@@ -23,7 +23,7 @@ import { addSubcontractStep } from 'src/pages/SubcontractAssembly/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 
 const SubcontractAssembly = () => {
-  const { addWalkmeData } = useSetWalkmeData();
+  const { setWalkmeData } = useSetWalkmeData();
 
   const types = [
     {
@@ -71,7 +71,7 @@ const SubcontractAssembly = () => {
     data = response?.data?.data;
 
     const newColumns = generateColumns(renderedFrom, data, routes.subcontractAssemblyDetail.path, true);
-    addWalkmeData([injectFormFields(addSubcontractStep, data)]);
+    setWalkmeData([injectFormFields(addSubcontractStep, data)]);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
