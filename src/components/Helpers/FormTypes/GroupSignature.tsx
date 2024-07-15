@@ -11,7 +11,7 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
   }: any = useData();
   const [users, setUsers] = useState([]);
   const [selectedSignatureUsers, setSelectedSignatureUsers] = useState([]);
-console.log(user)
+  
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=User`)
@@ -73,7 +73,7 @@ console.log(user)
             values[name]?.map((value) => {
               const userName = selectedSignatureUsers?.find((ele)=> ele.optionValue===value.user)?.optionLabel;
               return (
-                <Box className="flex gap- items-center">
+                <Box className="flex justify-between items-center">
                   <Typography>{userName}</Typography>
                   <Signature
                     label={''}
