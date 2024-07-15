@@ -14,40 +14,10 @@ export const addSubcontractStep: WalkmeData = {
     {
       target: '#field-supplier-account',
       url: '/subcontract-assembly',
-      title: 'Select suplier',
-      content: '',
-      nextOnValueChange: true
-    },
-    {
-      target: '#field-shipping-address',
-      url: '/subcontract-assembly',
-      title: 'Shipping address',
+      title: '',
       content: '',
       nextOnValueChange: true,
-      skipIfValueExist: true
-    },
-    {
-      target: '#field-billing-address',
-      url: '/subcontract-assembly',
-      title: 'Billing address',
-      content: '',
-      nextOnValueChange: true,
-      skipIfValueExist: true
-    },
-    {
-      target: '#field-warehouse',
-      url: '/subcontract-assembly',
-      title: 'select address',
-      content: '',
-      nextOnValueChange: true
-    },
-    {
-      target: '#field-owner',
-      url: '/subcontract-assembly',
-      title: 'Select Owner',
-      content: '',
-      nextOnValueChange: true,
-      skipIfValueExist: true
+      formFields: true,
     },
     {
       target: '#dialog-save-button',
