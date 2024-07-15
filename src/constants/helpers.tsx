@@ -1185,6 +1185,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else if (input.type === 'counter') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'groupSignature') {
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
     }

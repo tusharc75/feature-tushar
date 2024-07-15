@@ -24,6 +24,10 @@ import { getGridMetaDataFromLocalStorage } from '../utils';
 import DataListCell from '../Cells/DataListCell';
 import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
 import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
+import { useState } from 'react';
+import CarouselDialog from 'src/components/CarouselDialog';
+import GroupSignature from 'src/components/Helpers/FormTypes/GroupSignature';
+import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -169,6 +173,8 @@ export default function useColumns() {
     state: { permissions, user }
   }: any = useData();
 
+  const [openCarousel, setOpenCarousel] = useState(false);
+console.log(openCarousel)
   const generateColumns = (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null) => {
     if (!currency) {
       currency = user?.user?.brandCurrency || 'USD';
@@ -523,7 +529,19 @@ export default function useColumns() {
           disableSortBy: true,
           cell: ({ row }) => (row.original[field.fieldName] ? <SignatureCell base64={row?.original[field.fieldName]} /> : <NoDataCell />)
         });
-      } else if (field.type === 'percent') {
+      } else if (field.type === 'groupSignature') {
+        column.push({
+          ...commonFieldData,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => (
+          <div>
+            <GroupSignatureCell original={row?.original} field={field} />
+          </div>
+          )
+        });
+      }
+       else if (field.type === 'percent') {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
