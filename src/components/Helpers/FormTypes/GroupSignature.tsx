@@ -3,12 +3,15 @@ import { Typography, TextField, Box } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import Signature from 'src/components/Helpers/FormTypes/Signature';
+import { useData } from 'src/StateProvider/Provider';
 
 const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
-
+  const {
+    state: { user }
+  }: any = useData();
   const [users, setUsers] = useState([]);
   const [selectedSignatureUsers, setSelectedSignatureUsers] = useState([]);
-
+  
   useEffect(() => {
     axiosInstance()
       .get(`/sa-formbuilder/lookup?lookupResource=User`)
@@ -68,8 +71,10 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
         <div className="flex flex-col flex-wrap gap-2">
           {values[name]?.length ?
             values[name]?.map((value) => {
+              const userName = selectedSignatureUsers?.find((ele)=> ele.optionValue===value.user)?.optionLabel;
               return (
-                <Box>
+                <Box className="flex justify-between items-center">
+                  <Typography>{userName}</Typography>
                   <Signature
                     label={''}
                     name={`signature`}
@@ -87,6 +92,7 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
                       });
                       setFieldValue(name, updatedData);
                     }}
+                    disable={user?.user?._id!==value.user}
                   />
                 </Box>
               );
