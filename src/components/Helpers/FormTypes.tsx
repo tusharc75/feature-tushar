@@ -2767,16 +2767,13 @@ const FormTypes = (props) => {
         tooltipMessage={tooltipMessage}
         setFieldValue={setFieldValue}
       />
-    ): type === 'groupSignature' ? (
+    ) : type === 'groupSignature' ? (
       <GroupSignature
         label={label}
         values={values}
         name={name}
-        touched={touched}
-        errors={errors}
         setFieldValue={setFieldValue}
-        signatureUsers = {fieldData.signatureUsers}
-        required={required}
+        fieldData={fieldData}
       />
     ) : type === 'counter' ? (
       <Counter label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} touched={touched} errors={errors} />
