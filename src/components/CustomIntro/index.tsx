@@ -19,6 +19,7 @@ export * from 'src/components/CustomIntro/helper';
 export type WalkmeData = {
   name: string;
   steps: StepDefination[];
+  id: string;
   urls: string[];
 };
 

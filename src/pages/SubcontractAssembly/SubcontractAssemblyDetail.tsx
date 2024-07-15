@@ -36,48 +36,10 @@ import SubcontractAssemblyView from './View';
 
 import queryString from 'query-string';
 import { useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
-
-const walkmeData: WalkmeData[] = [
-  {
-    name: 'Add Existing Product',
-    urls: ['/subcontract-assembly/detail/:id', '/subcontract-assembly/detail/:id?itemTab=1', '/subcontract-assembly/detail/:id?itemTab=0'],
-    steps: [
-      {
-        url: '/subcontract-assembly/:id',
-        title: 'Go to details tab',
-        target: '#main-tab-1',
-        content: ''
-      },
-      {
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Click Add Button',
-        target: '#add-menu-button',
-        content: ''
-      },
-      {
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Add Existing Product',
-        target: '#add-existing-product-menu-item',
-        content: ''
-      },
-      {
-        target: '#Product-table-checkbox-0',
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Select a product',
-        content: ''
-      },
-      {
-        target: '#dialog-add-button',
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Add Product',
-        content: ''
-      }
-    ]
-  }
-];
+import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
 
 const SubcontractAssemblyDetail = () => {
-  const { addWalkmeData, removeWalkmeDataByName } = useSetWalkmeData();
+  const { addWalkmeData, removeWalkmeDataByid } = useSetWalkmeData();
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -128,8 +90,8 @@ const SubcontractAssemblyDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
       setAllowedToDelete(
         permissions?.subcontractAssembly?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
-        data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+          data?.canDelete
       );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
@@ -137,12 +99,13 @@ const SubcontractAssemblyDetail = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, subcontractAssemblySteps));
       }
-      if (data.processStatus === 'Add' && checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data)) {
-        addWalkmeData(walkmeData);
-      } else {
-        removeWalkmeDataByName('Add Existing Product');
-      }
+
       setLoading(false);
+      if (data.processStatus === 'Add' && checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data)) {
+        addWalkmeData([addStepAddExistingProduct]);
+      } else {
+        removeWalkmeDataByid('subcontract-assembly_add-step-add-existing-product');
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -207,13 +170,7 @@ const SubcontractAssemblyDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {
-        if (processStatus === 'Add') {
-          addWalkmeData(walkmeData);
-        } else {
-          removeWalkmeDataByName(['Add Existing Product', 'Delete Existing Product']);
-        }
-      })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });

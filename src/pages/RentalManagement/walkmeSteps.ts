@@ -3,6 +3,7 @@ import { WalkmeData } from 'src/components/CustomIntro';
 export const addRentalJobsSteps: WalkmeData = {
   name: 'Add rental jobs',
   urls: ['/rental-management'],
+  id: 'add-rental-jobs',
   steps: [
     {
       url: '/rental-management',
