@@ -6,22 +6,19 @@ export const addSubcontractStep: WalkmeData = {
   urls: ['/subcontract-assembly'],
   steps: [
     {
-      url: '/subcontract-assembly',
       title: 'Add ',
       target: '#add-button',
       content: ''
     },
     {
       target: '#field-supplier-account',
-      url: '/subcontract-assembly',
       title: '',
       content: '',
       nextOnValueChange: true,
-      formFields: true,
+      formFields: true
     },
     {
       target: '#dialog-save-button',
-      url: '/subcontract-assembly',
       title: 'Save',
       content: ''
     }
@@ -34,32 +31,27 @@ export const addStepAddExistingProduct: WalkmeData = {
   urls: ['/subcontract-assembly/detail/:id', '/subcontract-assembly/detail/:id?itemTab=1', '/subcontract-assembly/detail/:id?itemTab=0'],
   steps: [
     {
-      url: '/subcontract-assembly/:id',
       title: 'Go to details tab',
       target: '#main-tab-1',
       content: ''
     },
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Click Add Button',
       target: '#add-menu-button',
       content: ''
     },
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Add Existing Product',
       target: '#add-existing-product-menu-item',
       content: ''
     },
     {
       target: '#Product-table-checkbox-0',
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Select a product',
       content: ''
     },
     {
       target: '#dialog-add-button',
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Add Product',
       content: ''
     }
@@ -72,19 +64,16 @@ export const deleteExistingProductViaAction: WalkmeData = {
   id: 'subcontract-assembly_add-step-delete-existing-product',
   steps: [
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Select a product',
       target: '#subcontractAssembly_Material-table-checkbox-0',
       content: ''
     },
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Click on action button',
       target: '#details-page-action-button',
       content: ''
     },
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Click on action button',
       target: '#action-delete-menu-item',
       content: ''
@@ -98,26 +87,22 @@ export const addProductConsumable: WalkmeData = {
   id: 'subcontract-assembly_add-step-add-product-consumables',
   steps: [
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Select Product',
       target: '#select-product-dropdown',
       content: '',
       nextOnValueChange: (val) => val !== 'All' && val.length > 0
     },
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Click on Add',
       target: '#add-consumable-button',
       content: ''
     },
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Select a product',
       target: '#Product-table-checkbox-0',
       content: ''
     },
     {
-      url: '/subcontract-assembly/:id?itemTab=1',
       title: 'Add',
       target: '#dialog-add-button',
       content: ''

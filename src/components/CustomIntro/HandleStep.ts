@@ -85,7 +85,6 @@ export class HandleSteps {
         title: data.title,
         content: data.content,
         target: data.target,
-        url: data.url,
         isHiddenStep: false
       };
       if (data.skipIfValueExist) {
@@ -232,7 +231,7 @@ export class HandleSteps {
       }
       this.interval = setInterval(() => {
         this.getCurrentStep();
-      }, 300);
+      }, 1000);
     } else {
       this.findingElement = false;
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
