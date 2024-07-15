@@ -24,9 +24,6 @@ import { getGridMetaDataFromLocalStorage } from '../utils';
 import DataListCell from '../Cells/DataListCell';
 import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
 import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
-import { useState } from 'react';
-import CarouselDialog from 'src/components/CarouselDialog';
-import GroupSignature from 'src/components/Helpers/FormTypes/GroupSignature';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
@@ -173,8 +170,6 @@ export default function useColumns() {
     state: { permissions, user }
   }: any = useData();
 
-  const [openCarousel, setOpenCarousel] = useState(false);
-console.log(openCarousel)
   const generateColumns = (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null) => {
     if (!currency) {
       currency = user?.user?.brandCurrency || 'USD';
