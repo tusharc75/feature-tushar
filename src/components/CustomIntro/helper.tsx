@@ -31,3 +31,16 @@ export function elemToSelector(el: HTMLElement) {
 
   return elemToSelector(el.parentNode as HTMLElement) + ' > ' + selector;
 }
+
+export function debounce<T extends (...args: any[]) => void>(func: T, timeout = 300): [(...args: Parameters<T>) => void, () => void] {
+  let timer: NodeJS.Timeout;
+  const debouncedFunc = (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, timeout);
+  };
+  const teardown = () => clearTimeout(timer);
+
+  return [debouncedFunc, teardown];
+}
