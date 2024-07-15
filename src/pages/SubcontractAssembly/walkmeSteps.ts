@@ -1,34 +1,8 @@
 import { WalkmeData } from 'src/components/CustomIntro';
 
-export const addSubcontractStep: WalkmeData = {
-  name: 'Add subcontract',
-  id: 'subcontract-assembly_add-subcontract',
-  urls: ['/subcontract-assembly'],
-  steps: [
-    {
-      title: 'Add ',
-      target: '#add-button',
-      content: ''
-    },
-    {
-      target: '#field-supplier-account',
-      title: '',
-      content: '',
-      nextOnValueChange: true,
-      formFields: true
-    },
-    {
-      target: '#dialog-save-button',
-      title: 'Save',
-      content: ''
-    }
-  ]
-};
-
 export const addStepAddExistingProduct: WalkmeData = {
   name: 'Add Existing Product',
-  id: 'subcontract-assembly_add-step-add-existing-product',
-  urls: ['/subcontract-assembly/detail/:id', '/subcontract-assembly/detail/:id?itemTab=1', '/subcontract-assembly/detail/:id?itemTab=0'],
+  url: '/subcontract-assembly/detail/:id',
   steps: [
     {
       title: 'Go to details tab',
@@ -60,8 +34,7 @@ export const addStepAddExistingProduct: WalkmeData = {
 
 export const deleteExistingProductViaAction: WalkmeData = {
   name: 'Delete Existing Product',
-  urls: ['/subcontract-assembly/detail/:id?itemTab=1'],
-  id: 'subcontract-assembly_add-step-delete-existing-product',
+  url: '/subcontract-assembly/detail/:id',
   steps: [
     {
       title: 'Select a product',
@@ -83,8 +56,7 @@ export const deleteExistingProductViaAction: WalkmeData = {
 
 export const addProductConsumable: WalkmeData = {
   name: 'Add Products/Consumables',
-  urls: ['/subcontract-assembly/detail/:id?itemTab=1'],
-  id: 'subcontract-assembly_add-step-add-product-consumables',
+  url: '/subcontract-assembly/detail/:id',
   steps: [
     {
       title: 'Select Product',

@@ -29,7 +29,7 @@ import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 
 const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, allowedToEdit }) => {
-  const { addWalkmeData, removeWalkmeDataByid, removeWalkemeByfilterFunction } = useSetWalkmeData();
+  const { setWalkmeData } = useSetWalkmeData();
   const renderedFrom = `${routes.subcontractAssembly.title}_LoadingTicket`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -49,7 +49,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
   }, [subcontractAssemblyData]);
 
   useEffect(() => {
-    removeWalkemeByfilterFunction((data) => data.id.startsWith('subcontract-assembly_loading-step'));
+    setWalkmeData([]);
   }, []);
 
   const fetchFields = async () => {
