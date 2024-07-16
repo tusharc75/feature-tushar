@@ -29,6 +29,7 @@ import { read, utils, write } from 'xlsx';
 import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
+import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddColumnDialog';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -45,7 +46,9 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [keyValue, setKeyValue] = useState([]);
   const [file, setFile] = useState();
   const [addSystemColumn, setAddSystemColumn] = useState(false);
+  const [addImportedColumn, setAddImportedColumn] = useState(false);
   const [addedField, setAddedField] = useState([]);
+  const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
 
   useEffect(() => {
     axiosInstance()
@@ -150,6 +153,26 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
       const jsonData = utils.sheet_to_json(ws, { header: 1 });
 
       let headers: any = jsonData[0];
+      setFieldLabelOptions(
+        headers?.map((e, i) => {
+          let type = 'singleLine';
+          let decimalPlaces = 2;
+          if (jsonData && jsonData[1] && jsonData[1][i]) {
+            if (typeof jsonData[1][i] === 'number') {
+              type = 'decimal';
+              const numStr = jsonData[1][i]?.toString();
+              if (numStr.includes('.')) {
+                decimalPlaces = numStr.split('.')[1].length;
+              }
+            }
+          }
+          return {
+            fieldLabel: e,
+            type: type,
+            ...(type === 'decimal' ? { decimalPlaces: decimalPlaces } : {})
+          };
+        })
+      );
       headers = headers?.reduce((result, curr) => {
         if (curr == null) {
           return result;
@@ -265,7 +288,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     formData.append('productCategory', values?.productCategory);
     formData.append('productTemplate', values?.productTemplate);
     formData.append('priceTemplate', values?.priceTemplate);
-    if(addedField?.length > 0){
+    if (addedField?.length > 0) {
       formData.append('fields', JSON.stringify(addedField));
     }
 
@@ -420,6 +443,18 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                               </IconButton>
                             </HtmlTooltip>
                           </span>
+                          <span style={{ marginLeft: '10px' }}>
+                            <HtmlTooltip enterTouchDelay={0} title={'Add From Imported Excel Column'}>
+                              <IconButton
+                                size="small"
+                                onClick={(e) => {
+                                  setAddImportedColumn(true);
+                                }}
+                              >
+                                <ControlPointIcon fontSize="small" color="primary" />
+                              </IconButton>
+                            </HtmlTooltip>
+                          </span>
                         </div>
                       </TableCell>
                       <TableCell style={{ width: '50%' }}>Imported Excel Columns</TableCell>
@@ -492,6 +527,30 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   { value: _data?.fieldLabel?.toUpperCase(), label: _data?.fieldLabel?.toUpperCase() }
                 ]);
                 setAddSystemColumn(false);
+              }}
+              fields={fields}
+              section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
+            />
+          )}
+          {addImportedColumn && (
+            <AddColumnDialog
+              fieldLabelOptions={fieldLabelOptions}
+              handleClose={() => {
+                setAddImportedColumn(false);
+              }}
+              handleAddField={(_data) => {
+                _data.leval = 'price-builder-custom';
+                if (fields?.filter((_f) => _f.sectionName === _data?.sectionName).length) {
+                  if (fields?.filter((_f) => _f.sectionName === _data?.sectionName)[0].leval !== 'price-template') {
+                    _data.leval = 'product-builder-custom';
+                  }
+                }
+                setAddedField([...addedField, { ..._data }]);
+                setTemplateImportHeaader([
+                  ...templateImportHeader,
+                  { value: _data?.fieldLabel?.toUpperCase(), label: _data?.fieldLabel?.toUpperCase() }
+                ]);
+                setAddImportedColumn(false);
               }}
               fields={fields}
               section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
