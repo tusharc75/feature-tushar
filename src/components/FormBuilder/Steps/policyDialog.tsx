@@ -30,7 +30,7 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
           fieldName: e.fieldName,
           fieldLabel: e.fieldLabel,
           type: e.type,
-          data: currentPolicy.hasOwnProperty(e.fieldName) ? currentPolicy[e.fieldName] : e.defaultValue,
+          data: currentPolicy && currentPolicy?.hasOwnProperty(e.fieldName) ? currentPolicy[e.fieldName] : e.defaultValue,
           fields: e?.fields || []
         };
       })
