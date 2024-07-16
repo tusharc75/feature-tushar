@@ -306,8 +306,8 @@ type DisplayMessagesProps = {
 const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
   const toastConfig = useContext(CustomToastContext);
   const containerRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState(false);
-  const speakerInstance = useRef<Speak>(new Speak(setLoading)).current;
+  const [speakerState, setSpeakerState] = useState({ isPlaying: false, isPaused: false, isFinished: false, isLoading: false });
+  const speakerInstance = useRef<Speak>(new Speak(setSpeakerState)).current;
   const [currentIndex, setCurrentIndex] = useState<number>(null);
 
   useEffect(() => {
@@ -316,6 +316,21 @@ const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
       speakerInstance.stop();
     };
   }, [chats, speakerInstance]);
+
+  const RenderIcon = () => {
+    if (speakerState.isLoading) {
+      return <CgSpinner className=" animate-spin " />;
+    }
+    if (speakerState.isPlaying) {
+      return <HiOutlineSpeakerXMark size={15} />;
+    }
+    if (speakerState.isFinished) {
+      return <HiOutlineSpeakerWave size={15} />;
+    }
+    if (speakerState.isPaused) {
+      return <HiOutlineSpeakerWave size={15} />;
+    }
+  };
 
   return (
     <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto scroll-smooth" ref={containerRef}>
@@ -361,23 +376,18 @@ const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
                         style={{ width: 30, height: 30, borderRadius: 8 }}
                         onClick={() => {
                           if (speakerInstance.text === chat?.content) {
-                            speakerInstance.stop();
-                            setCurrentIndex(null);
+                            if (speakerState.isPaused) {
+                              speakerInstance.resume();
+                            } else {
+                              speakerInstance.pause();
+                            }
                           } else {
-                            speakerInstance.play(chat?.content);
                             setCurrentIndex(i);
+                            speakerInstance.play(chat?.content);
                           }
                         }}
                       >
-                        {currentIndex === i ? (
-                          loading ? (
-                            <CgSpinner className=" animate-spin " />
-                          ) : (
-                            <HiOutlineSpeakerXMark size={15} />
-                          )
-                        ) : (
-                          <HiOutlineSpeakerWave size={15} />
-                        )}
+                        {currentIndex === i ? <RenderIcon /> : <HiOutlineSpeakerWave size={15} />}
                       </IconButton>
                     </div>
                   </div>
