@@ -108,7 +108,7 @@ const Workspace = () => {
                     minHeight: '100%'
                   }}
                 >
-                  {selectedChannel && (<Channel channelData={selectedChannel} fetchChannels={fetchChannels} />)}
+                  {selectedChannel && (<Channel channelId={selectedChannel?._id} />)}
                 </Box>
               </Grid>
             </Grid>
