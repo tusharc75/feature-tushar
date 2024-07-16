@@ -80,7 +80,8 @@ const LoadingTicket = ({
   allowUpdateStatus,
   checkProgressiveBilling,
   stepFullScreen,
-  rentalPolicyData
+  rentalPolicyData,
+  hideDeliveryTicketDelivered
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const classes = useStyles();
@@ -1204,7 +1205,8 @@ const LoadingTicket = ({
               handelProcessTickets,
               setAddSerializedAssetDialog,
               setShowConformationRevertTicket,
-              setShowConformationCancleTicket
+              setShowConformationCancleTicket,
+              hideDeliveryTicketDelivered
             }}
           />
         }
@@ -1533,7 +1535,8 @@ const ActionButtonMenuItems = ({
   handelProcessTickets,
   setAddSerializedAssetDialog,
   setShowConformationRevertTicket,
-  setShowConformationCancleTicket
+  setShowConformationCancleTicket,
+  hideDeliveryTicketDelivered
 }) => {
 
   const checkUniqStatus = () => {
@@ -1569,7 +1572,7 @@ const ActionButtonMenuItems = ({
       >
         Create Loading Ticket
       </MenuItem>
-      {user?.user?.brandPolicy?.rentalOnFieldStep ? null : (
+      {user?.user?.brandPolicy?.rentalOnFieldStep || hideDeliveryTicketDelivered ? null : (
         <MenuItem
           onClick={() => {
             if (!validateAction(rentalManagementActions.deliveredToCustomer)) {
@@ -1726,15 +1729,16 @@ const ActionButtonMenuItems = ({
           Replace Asset
         </MenuItem>
       )}
-      <MenuItem
-        onClick={() => {
-          if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
-            setShowConformationRevertTicket(true);
-          }
-        }}
-      >
-        Cancel Specific Line Items
-      </MenuItem>
+      {!hideDeliveryTicketDelivered &&
+        <MenuItem
+          onClick={() => {
+            if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
+              setShowConformationRevertTicket(true);
+            }
+          }}
+        >
+          Cancel Specific Line Items
+        </MenuItem>}
       <MenuItem
         onClick={() => {
           if (!validateAction(rentalManagementActions.cancelLoadingTicket)) {

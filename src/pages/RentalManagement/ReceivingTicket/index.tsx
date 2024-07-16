@@ -97,7 +97,8 @@ const ReceivingTicket = ({
   allowUpdateStatus,
   stepFullScreen,
   checkProgressiveBilling,
-  rentalPolicyData
+  rentalPolicyData,
+  hideDeliveryTicketDelivered
 }) => {
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
@@ -1727,7 +1728,8 @@ const ReceivingTicket = ({
               columns,
               rentalManagementData,
               rentalPolicyData,
-              setTransferAnotherPackageialog
+              setTransferAnotherPackageialog,
+              hideDeliveryTicketDelivered
             }}
           />
         }
@@ -2281,7 +2283,8 @@ const ActionButtonMenuItems = ({
   currentStep,
   columns,
   rentalManagementData,
-  setTransferAnotherPackageialog
+  setTransferAnotherPackageialog,
+  hideDeliveryTicketDelivered
 }) => {
 
   const checkUniqStatus = () => {
@@ -2525,7 +2528,7 @@ const ActionButtonMenuItems = ({
 
   return (
     <>
-      {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
+      {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && !hideDeliveryTicketDelivered && (
         <MenuItem
           onClick={() => {
             if (!validateAction(rentalManagementActions.deliveredToCustomer)) {
@@ -2706,7 +2709,7 @@ const ActionButtonMenuItems = ({
             )}
           </>
         )}
-      {currentStep === RENTAL_STEPS.receiving && (
+      {currentStep === RENTAL_STEPS.receiving && !hideDeliveryTicketDelivered && (
         <MenuItem
           onClick={() => {
             if (!validateAction(rentalManagementActions.receiveItems)) {
@@ -2742,7 +2745,6 @@ const ActionButtonMenuItems = ({
             {`Transfer to another ${routes.packages.title}`}
           </MenuItem>
         )}
-
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (
         <MenuItem
           onClick={() => {
@@ -2820,15 +2822,17 @@ const ActionButtonMenuItems = ({
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <>
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(rentalManagementActions.cancelInTransitTicket)) {
-                  setShowConformationRevertTicket(true);
-                }
-              }}
-            >
-              Cancel Specific Line Items
-            </MenuItem>
+            {!hideDeliveryTicketDelivered &&
+              <MenuItem
+                onClick={() => {
+                  if (!validateAction(rentalManagementActions.cancelInTransitTicket)) {
+                    setShowConformationRevertTicket(true);
+                  }
+                }}
+              >
+                Cancel Specific Line Items
+              </MenuItem>
+            }
             <MenuItem
               onClick={() => {
                 if (!validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
