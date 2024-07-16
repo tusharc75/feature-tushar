@@ -1,24 +1,22 @@
 import { IconButton, List, ListItem, ListItemText, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { BsStars } from 'react-icons/bs';
+import { FaArrowUp } from 'react-icons/fa6';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import { BsStars } from 'react-icons/bs';
-import { FaArrowUp } from 'react-icons/fa6';
-import { PiSpeakerHighBold } from 'react-icons/pi';
 
-import { cn, copyTextToClipboard } from 'src/constants/helpers';
-import { FiEdit, FiSidebar } from 'react-icons/fi';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
-import { FaShare } from 'react-icons/fa';
-import { LuCopy } from 'react-icons/lu';
 import { BiDislike } from 'react-icons/bi';
-import { Speak } from 'src/pages/EquiptAi/Speak';
+import { FaShare } from 'react-icons/fa';
+import { FiEdit, FiSidebar } from 'react-icons/fi';
+import { LuCopy } from 'react-icons/lu';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { cn, copyTextToClipboard } from 'src/constants/helpers';
 
 const EquiptAi = () => {
   const toastConfig = useContext(CustomToastContext);
