@@ -91,9 +91,13 @@ const ManageDeliveryTicket = ({
   }, [initialData, assets]);
 
   const findValidationDate = async () => {
+    let last = 1;
+    if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading) {
+      last = 2;
+    }
     const {
       data: { data }
-    } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: 1 });
+    } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: last });
     var lastDate: any = new Date();
     if (data?.date) {
       lastDate = new Date(data?.date);
