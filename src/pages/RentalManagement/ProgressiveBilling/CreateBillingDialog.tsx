@@ -18,7 +18,8 @@ import {
   invoice,
   rentalManagement,
   MATERIAL_TYPE,
-  ASSET_STATUS
+  ASSET_STATUS,
+  sidebarResource
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -37,7 +38,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
-const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy = null }) => {
+const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -50,17 +51,32 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
   const [material, setMaterial] = useState([]);
   const [orginalMaterial, setOrginalMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [endDate, setEndDate] = useState<any>(policy?.invoiceCurrentDateAutoSelect ? new Date() : null);
+  const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [isApplingDate, setIsApplingDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
+  const [resourceData, setResourceData] = useState(null);
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
+      .then(({ data: { data } }) => {
+        setResourceData(data);
+        if (data?.policy?.invoiceCurrentDateAutoSelect) {
+          setEndDate(new Date());
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
 
   useEffect(() => {
     fetchFields();
@@ -419,13 +435,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
-          parent.type === MATERIAL_TYPE.serializedAsset ||
-          parent.type === MATERIAL_TYPE.manualEntry
+        parent.type === MATERIAL_TYPE.serializedAsset ||
+        parent.type === MATERIAL_TYPE.manualEntry
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
     });
-    if (policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
+    if (resourceData?.policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
       handleApplyDate(rows, material);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -772,8 +788,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
                           title={
                             !Boolean(
                               selectedRecords &&
-                              selectedRecords?.length &&
-                              (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                selectedRecords?.length &&
+                                (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                             )
                               ? 'Please select product to apply'
                               : ''
@@ -787,8 +803,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
                                 isApplingDate ||
                                 !Boolean(
                                   selectedRecords &&
-                                  selectedRecords?.length &&
-                                  (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                    selectedRecords?.length &&
+                                    (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
                               }
                               size="small"

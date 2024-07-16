@@ -17,7 +17,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
-const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice, rentalPolicyData = null }) => {
+const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice }) => {
   const renderedFrom = camelCase(routes?.invoice?.title);
   const toastConfig = useContext(CustomToastContext);
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
@@ -230,7 +230,6 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
             setCreateBillDialog({ open: false });
             fetchData();
           }}
-          policy={rentalPolicyData}
         />
       )}
       {viewBillDialog.open && (
