@@ -1008,7 +1008,7 @@ const Productpackage = ({
           ids={[]}
         />
       )}
-      {addExistingProductDialog.open && [MATERIAL_TYPE.product, MATERIAL_TYPE.service]?.includes(addExistingProductDialog?.type) && (
+      {addExistingProductDialog.open && [MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(addExistingProductDialog?.type) && (
         <AddExistingProductInventory
           type={addExistingProductDialog.type}
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}

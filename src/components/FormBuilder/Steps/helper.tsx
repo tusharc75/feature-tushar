@@ -105,6 +105,12 @@ export const resourcePolicy = [
             fieldLabel: 'Sum(Decimal Field)',
             type: 'checkBox',
             defaultValue: false
+          },
+          {
+            fieldName: 'autoIncrementDecimalField',
+            fieldLabel: 'Auto Increment(Decimal Field)',
+            type: 'checkBox',
+            defaultValue: false
           }
         ],
         defaultValue: []
