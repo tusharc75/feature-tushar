@@ -406,9 +406,6 @@ export const createFilterModel = (formValues, coloums) => {
   const filterModel = new Map();
   const colNames = Object.keys(formValues);
 
-  console.log(coloums)
-  console.log(formValues)
-
   for (const col of coloums) {
     const fieldName = col?.fieldName;
 
@@ -489,8 +486,6 @@ export const createFilterModel = (formValues, coloums) => {
         console.warn('Unknown column type:', col.type);
     }
   }
-
-  console.log(filterModel)
 
   return Object.fromEntries(filterModel);
 };

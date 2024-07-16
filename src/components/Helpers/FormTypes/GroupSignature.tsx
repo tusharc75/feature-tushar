@@ -18,10 +18,11 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
       .then(({ data: { data } }) => {
         setUsers(data['User']);
         let selectedUsers = []
+        let fieldValue = [];
         if (!values[name]) {
           selectedUsers = data['User']?.filter((user) => [...fieldData?.signatureUsers].includes(user.optionValue)) || [];
           setSelectedSignatureUsers(selectedUsers);
-          const fieldValue = selectedUsers.map((ele) => {
+           fieldValue = selectedUsers.map((ele) => {
             return {
               user: ele.optionValue,
               signature: ''
@@ -29,9 +30,16 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
           })
           setFieldValue(name, fieldValue);
         } else {
-          const userIds = values[name]?.map((ele) => ele.user);
+          const userIds = values[name]?.map((ele) => ele.user?._id);
+          fieldValue = values[name]?.map((ele) => {
+            return {
+              ...ele,
+              user: ele?.user?._id,
+            }
+          });
           selectedUsers = data['User']?.filter((user) => [...userIds].includes(user.optionValue));
           setSelectedSignatureUsers(selectedUsers);
+          setFieldValue(name, fieldValue);
         }
 
       })

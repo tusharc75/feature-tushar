@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import Carousel from 'react-material-ui-carousel';
+import { Link } from 'react-router-dom';
+import routes from 'src/components/Helpers/Routes';
 
 function GroupSignatureCell({ field, original }) {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
@@ -21,7 +23,7 @@ function GroupSignatureCell({ field, original }) {
 
   const open = Boolean(anchorEl);
 
-  const signatures = original[field.fieldName]?.filter((ele)=> ele.user && ele.signature)?.map((e)=> e.signature) ?? [];
+  const signatures = original[field.fieldName]?.filter((ele)=> ele.user && ele.signature) ?? [];
 
   return (
     <div>
@@ -39,10 +41,10 @@ function GroupSignatureCell({ field, original }) {
                     <Carousel
                             strictIndexing
                             animation="slide"
-                            autoPlay={signatures.length > 1 && !open ? true : false}
+                            autoPlay={false}
                             // navButtonsAlwaysInvisible
                             cycleNavigation={signatures.length > 1 ? true : false}
-                            indicators={signatures.length > 1 ? true : false}
+                            indicators={false}
                             timeout={150}
                             navButtonsProps={{
                               style: {
@@ -52,12 +54,21 @@ function GroupSignatureCell({ field, original }) {
                               }
                             }}
                           >
-                            {signatures?.map((image: any, i) => (
-                                <img className="object-contain h-20 w-20" src={image}/>
+                            {signatures?.map((signatureUser: any, i) => (
+                              <div className="flex flex-col items-center gap-1">
+                                <Link to={`${routes?.userDetail?.path}/${signatureUser?.user?._id}`}
+                                    target="_blank"
+                                    className="link"
+                                    rel="noopener noreferrer">
+                                    {signatureUser?.user?.concatedName}
+                                  </Link>
+                                <img className="object-contain h-20 w-20" src={signatureUser?.signature}/>
+                              </div>
+                                
                             ))}
                         </Carousel>
                         </div>
-                    <div className="filler absolute -bottom-[43px] -left-[10px] -right-[10px] h-[48px] cursor-help"></div>
+                    <div className="filler absolute -bottom-[43px] -left-[10px] -right-[10px] h-[48px]"></div>
                     <IoCaretDown
                       size={24}
                       className="absolute -bottom-[26px] left-0 right-0 z-10 mx-auto !stroke-[var(--common-border-color)] text-[var(--dark-primary,white)] "
