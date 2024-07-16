@@ -202,7 +202,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -318,15 +318,14 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
-
   const updateProcessStatus = async (processStatus) => {
     if (isOffline) {
       await updateRentalProcessStatus(id, processStatus);
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -441,9 +440,8 @@ const RentalManagementDetailsPage = () => {
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                   </Button>
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
-                    versionNotClonned && (rentalManagementData?.addQuotationStep ||
-                      user?.user?.brandPolicy?.rentalQuotation
-                    ) && (
+                    versionNotClonned &&
+                    (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (
                       <Button
                         className="btn-outline-v1"
                         variant="contained"
@@ -489,8 +487,7 @@ const RentalManagementDetailsPage = () => {
                   )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
-                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
-                    (
+                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
                         <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Edit'}>
                           <span>
@@ -573,12 +570,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -597,12 +594,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -689,16 +686,10 @@ const RentalManagementDetailsPage = () => {
             />
           </TabPanel>
           <TabPanel value={tabValue} index={3}>
-            <ProgressiveBilling
-              rentalId={id}
-              rentalManagementData={rentalManagementData}
-              allowCreateInvoice={allowedToEdit} />
+            <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={allowedToEdit} />
           </TabPanel>
           <TabPanel value={tabValue} index={4}>
-            <RentalManagementViews
-              rentalName={rentalManagementData?.rentalJobName}
-              rentalId={id}
-              status={rentalManagementData?.status} />
+            <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
           </TabPanel>
         </Box>
         {showConfirmBox && (
