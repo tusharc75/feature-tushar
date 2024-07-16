@@ -50,7 +50,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
   const [material, setMaterial] = useState([]);
   const [orginalMaterial, setOrginalMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [endDate, setEndDate] = useState<any>(policy?.progressiveBillingCurrentDateAutoSelect ? new Date() : null);
+  const [endDate, setEndDate] = useState<any>(policy?.invoiceCurrentDateAutoSelect ? new Date() : null);
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [isApplingDate, setIsApplingDate] = useState(false);
@@ -419,13 +419,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
-        parent.type === MATERIAL_TYPE.serializedAsset ||
-        parent.type === MATERIAL_TYPE.manualEntry
+          parent.type === MATERIAL_TYPE.serializedAsset ||
+          parent.type === MATERIAL_TYPE.manualEntry
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
     });
-    if (policy?.progressiveBillingCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
+    if (policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
       handleApplyDate(rows, material);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -772,8 +772,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
                           title={
                             !Boolean(
                               selectedRecords &&
-                                selectedRecords?.length &&
-                                (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                              selectedRecords?.length &&
+                              (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                             )
                               ? 'Please select product to apply'
                               : ''
@@ -787,8 +787,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
                                 isApplingDate ||
                                 !Boolean(
                                   selectedRecords &&
-                                    selectedRecords?.length &&
-                                    (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                  selectedRecords?.length &&
+                                  (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
                               }
                               size="small"

@@ -144,10 +144,10 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
-        fieldName: 'progressiveBillingCurrentDateAutoSelect',
-        fieldLabel: 'Progressive Billing Current Date Auto Select',
+        fieldName: 'invoiceCurrentDateAutoSelect',
+        fieldLabel: 'Invoice Current Date Auto Select',
         type: 'checkBox',
-        defaultValue: true
+        defaultValue: false
       }
     ]
   }

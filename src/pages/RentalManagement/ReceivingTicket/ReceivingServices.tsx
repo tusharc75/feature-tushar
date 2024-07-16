@@ -15,7 +15,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -23,9 +23,17 @@ import moment from 'moment';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
+import CustomMessageDialog from 'src/components/MessageDialog';
 
-const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, rentalPolicyData, setOpenMessageDialog, renderedFrom }) => {
+const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords }) => {
+
+
+  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services`;
+
   const toastConfig = useContext(CustomToastContext);
+
+  const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
+
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false });
@@ -38,7 +46,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
   }, [rentalManagementData]);
 
   useEffect(() => {
-      fetchData();
+    fetchData();
   }, [services]);
 
   const fetchColumns = () => {
@@ -50,8 +58,22 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         width: 100,
         disabled: true,
         Cell: ({ row }) => (
-          <div>
+          <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.index}</h5>
+            {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
+              <HtmlTooltip title={'View Service Logs'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setServiceLogDialog({ open: true, data: row?.original });
+                    }}
+                  >
+                    <VisibilityIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            ) : null}
           </div>
         )
       },
@@ -139,43 +161,13 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           )
       },
     ];
-   
-    const ActionColumn: any = [
-      {
-        accessor: 'action',
-        Header: 'Actions',
-        width: 150,
-        minWidth: 100,
-        sticky: 'right',
-        disableFilters: true,
-        disableSortBy: true,
-        canDrag: false,
-        Cell: ({ row }: any) => (
-          <>
-           {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
-              <HtmlTooltip title={'View Service Logs'}>
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setServiceLogDialog({ open: true, data: row?.original });
-                    }}
-                  >
-                    <VisibilityIcon fontSize="small" color="primary" />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
-            ) : null}
-          </>
-        )
-      }
-    ];
-
-    setColumns([...column, ...ActionColumn]);
+    setColumns(column);
   };
 
   const fetchData = async () => {
     try {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      dispatch({ type: 'loading', loading: true });
       dispatch({ type: 'initialize', data: services, count: services?.length });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -186,13 +178,12 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
 
   const handleSubmitChangeDates = (values, type: string = '') => {
     let data;
-      setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
-      data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
-      data['type'] = type;
-      data['date'] = values.date;
-    
-    axiosInstance()
-      .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
+    setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
+    data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
+    data['type'] = type;
+    data['date'] = values.date;
+
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {
         toastConfig.setToastConfig({
           open: true,
@@ -209,28 +200,27 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
   };
 
   return (
-    <Box mt={4}>
-      <CustomTabs value={tabValue} onChange={()=> {}} style={{ marginBottom: -1 }}>
+    <Box mt={1}>
+      <CustomTabs value={tabValue} onChange={() => { }} style={{ marginBottom: -1 }}>
         <CustomTab value={0} label={'Services'} primaryColor={true} />
       </CustomTabs>
       <TabPanel value={tabValue} index={0}>
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-        <DetailsPageHeader
-        isAddButtonVisible={false}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={
-          <ActionButtonMenuItems
-            {...{
-              selectedRecords,
-              setOpenMessageDialog,
-              setServiceConfirmationDialog,
-              rentalPolicyData,
-            }}
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={allowedToEdit}
+            actionButtonMenuItems={
+              <ActionButtonMenuItems
+                {...{
+                  selectedRecords,
+                  setOpenMessageDialog,
+                  setServiceConfirmationDialog,
+                }}
+              />
+            }
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            hasXpadding
           />
-        }
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        hasXpadding
-      />
           <Grid container spacing={2}>
             <Grid item xs={12} md={12} sm={12}>
               {columns ? (
@@ -242,7 +232,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
                   renderedFrom={`${renderedFrom}_services`}
                   isClientSideGrid={true}
                   hideSelection={!allowedToEdit}
-                  hideAction={!allowedToEdit}
+                  hideAction={true}
                   refreshGrid={fetchRecords}
                 />
               ) : (
@@ -254,6 +244,15 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           </Grid>
         </Box>
       </TabPanel>
+      {openMessageDialog.open && (
+        <CustomMessageDialog
+          open={openMessageDialog.open}
+          errorMessages={openMessageDialog.errorMessages}
+          onClose={() => {
+            setOpenMessageDialog({ open: false, errorMessages: [] });
+          }}
+        />
+      )}
       {serviceLogDialog.open && (
         <ServiceLogDialog
           rentalId={rentalManagementData?._id}
@@ -263,7 +262,9 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
           }}
-          onSuccess={fetchRecords}
+          onSuccess={() => {
+            fetchRecords()
+          }}
           renderedFrom={renderedFrom}
         />
       )}
@@ -291,19 +292,18 @@ const ActionButtonMenuItems = ({
   selectedRecords,
   setOpenMessageDialog,
   setServiceConfirmationDialog,
-  rentalPolicyData,
 }) => {
 
   const validateAction = (action) => {
     const errorMessages = [];
-    var records = selectedRecords;
-    records.forEach((e) => {
+    selectedRecords.forEach((e) => {
       if (action === rentalManagementActions.startService) {
         const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
         if (!isEmpty(serviceLogEntry)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
         }
-      } else if (action === rentalManagementActions.stopService) {
+      }
+      else if (action === rentalManagementActions.stopService) {
         const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
         if (!serviceLogEntry) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
@@ -317,32 +317,26 @@ const ActionButtonMenuItems = ({
     return false;
   };
 
-  return (
-    <>
-      
-      {rentalPolicyData?.showServiceOnFieldStep && (
-        <>
-          <MenuItem
-            onClick={() => {
-              if (!validateAction(rentalManagementActions.startService)) {
-                setServiceConfirmationDialog({ open: true, type: 'start' });
-              }
-            }}
-          >
-            Start Service(s)
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              if (!validateAction(rentalManagementActions.stopService)) {
-                setServiceConfirmationDialog({ open: true, type: 'stop' });
-              }
-            }}
-          >
-            Stop Service(s)
-          </MenuItem>
-        </>
-      )}
-    </>
+  return (<>
+    <MenuItem
+      onClick={() => {
+        if (!validateAction(rentalManagementActions.startService)) {
+          setServiceConfirmationDialog({ open: true, type: 'start' });
+        }
+      }}
+    >
+      Start Service(s)
+    </MenuItem>
+    <MenuItem
+      onClick={() => {
+        if (!validateAction(rentalManagementActions.stopService)) {
+          setServiceConfirmationDialog({ open: true, type: 'stop' });
+        }
+      }}
+    >
+      Stop Service(s)
+    </MenuItem>
+  </>
   );
 };
 
