@@ -36,7 +36,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
 
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
-  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false });
+  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false, minStartDate: null });
   const [serviceLogDialog, setServiceLogDialog] = useState({ open: false, data: null });
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -181,7 +181,9 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
     setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
     data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
     data['type'] = type;
-    data['date'] = values.date;
+    // data['date'] = values.date;
+    data['startDate'] = values.startDate;
+    data['endDate'] = values.endDate;
 
     axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {
@@ -190,12 +192,12 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           message: response?.data?.message,
           type: 'success'
         });
-        setServiceConfirmationDialog({ open: false, type: null, loading: false });
+        setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
         fetchRecords();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setServiceConfirmationDialog({ open: false, type: null, loading: false });
+        setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
       });
   };
 
@@ -274,12 +276,13 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           type={serviceConfirmationDialog.type}
           open={serviceConfirmationDialog.open}
           onClose={() => {
-            setServiceConfirmationDialog({ open: false, type: null, loading: false });
+            setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
           }}
           handleSubmit={(val) => {
             handleSubmitChangeDates(val, serviceConfirmationDialog.type);
           }}
           loading={serviceConfirmationDialog.loading}
+          minStartDate={serviceConfirmationDialog.minStartDate}
         />
       )}
     </Box>
@@ -294,31 +297,31 @@ const ActionButtonMenuItems = ({
   setServiceConfirmationDialog,
 }) => {
 
-  const validateAction = (action) => {
-    const errorMessages = [];
-    selectedRecords.forEach((e) => {
-      if (action === rentalManagementActions.startService) {
-        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-        if (!isEmpty(serviceLogEntry)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
-        }
-      }
-      else if (action === rentalManagementActions.stopService) {
-        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-        if (!serviceLogEntry) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
-        }
-      }
-    });
-    if (errorMessages?.length) {
-      setOpenMessageDialog({ open: true, errorMessages: errorMessages });
-      return true;
-    }
-    return false;
-  };
+  // const validateAction = (action) => {
+  //   const errorMessages = [];
+  //   selectedRecords.forEach((e) => {
+  //     if (action === rentalManagementActions.startService) {
+  //       const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+  //       if (!isEmpty(serviceLogEntry)) {
+  //         errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
+  //       }
+  //     }
+  //     else if (action === rentalManagementActions.stopService) {
+  //       const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+  //       if (!serviceLogEntry) {
+  //         errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
+  //       }
+  //     }
+  //   });
+  //   if (errorMessages?.length) {
+  //     setOpenMessageDialog({ open: true, errorMessages: errorMessages });
+  //     return true;
+  //   }
+  //   return false;
+  // };
 
   return (<>
-    <MenuItem
+    {/* <MenuItem
       onClick={() => {
         if (!validateAction(rentalManagementActions.startService)) {
           setServiceConfirmationDialog({ open: true, type: 'start' });
@@ -335,6 +338,21 @@ const ActionButtonMenuItems = ({
       }}
     >
       Stop Service(s)
+    </MenuItem> */}
+    <MenuItem onClick={() => {
+      const dates = [];
+      selectedRecords?.forEach((d: any) => {
+        d?.serviceLog?.forEach((l: any) => {
+          dates.push(new Date(l.endDate));
+        })
+      })
+      let date = null;
+      if (dates?.length) {
+        date = new Date(Math.max(...dates));
+      }
+      setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
+    }}>
+      Start/Stop Service(s)
     </MenuItem>
   </>
   );
