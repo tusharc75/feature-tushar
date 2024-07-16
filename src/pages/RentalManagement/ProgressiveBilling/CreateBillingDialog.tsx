@@ -69,7 +69,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
       .then(({ data: { data } }) => {
         setResourceData(data);
-        if (data?.policy?.progressiveBillingCurrentDateAutoSelect) {
+        if (data?.policy?.invoiceCurrentDateAutoSelect) {
           setEndDate(new Date());
         }
       })
@@ -441,7 +441,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           : true;
       parent.subRows = generateNestedData(material, parent);
     });
-    if (resourceData?.policy?.progressiveBillingCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
+    if (resourceData?.policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
       handleApplyDate(rows, material);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
