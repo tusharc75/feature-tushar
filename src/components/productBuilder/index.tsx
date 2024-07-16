@@ -96,7 +96,6 @@ const ProductBuilder = (props) => {
   const [supplierData, setSupplierData] = useState(null);
   const [inlineBulkEdit, setInlineBulkEdit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [customImportDialog, setCustomImportDialog] = useState(false);
   const { generateColumns } = useColumns();
 
   const {
@@ -628,20 +627,12 @@ const ProductBuilder = (props) => {
                 fetchProduct();
               }}
               small={true}
-            />
-          )}
-          {permissions?.isUpdate && (
-            <Button
-              size="small"
-              variant="outlined"
-              component="span"
-              startIcon={<AiOutlineImport />}
-              onClick={() => {
-                setCustomImportDialog(true);
+              isCustomImport={true}
+              onSuccessCustomImport={() => {
+                fetchProduct();
               }}
-            >
-              Custom Import
-            </Button>
+              currency={currency}
+            />
           )}
 
           {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
@@ -878,19 +869,6 @@ const ProductBuilder = (props) => {
           supplierContactData={supplierContactData}
           productBuilderId={productBuilderId}
           productDataList={productData?.product?.filter((data) => selectedRecords.some((rec) => rec._id === data._id))}
-        />
-      )}
-      {customImportDialog && (
-        <CustomImport
-          handleClose={() => {
-            setCustomImportDialog(false);
-          }}
-          onSuccess={() => {
-            setCustomImportDialog(false);
-            fetchProduct();
-          }}
-          refrenceId={productBuilderId}
-          currency={currency}
         />
       )}
     </Box>
