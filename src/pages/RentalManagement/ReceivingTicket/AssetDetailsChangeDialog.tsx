@@ -58,12 +58,15 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
         product = data?.product?.optionValue;
       }
       let initialValues = getObjKeysWithValues(data, fieldsDataForUpdate);
-      if (statusPolicy?.sumDecimalField) {
+      if (statusPolicy?.sumDecimalField || statusPolicy?.autoIncrementDecimalField) {
         fieldsDataForUpdate?.forEach((e) => {
-          if (e?.type === 'decimal') {
+          if (e?.type === 'decimal' && statusPolicy?.sumDecimalField) {
             decimalField.push(e.fieldName);
             initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
             initialValues[e.fieldName] = 0;
+          }
+          else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
+            initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
           }
         });
       }
