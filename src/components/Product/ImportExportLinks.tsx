@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem, Box } from '@material-ui/core';
+import { Divider, IconButton, makeStyles, useMediaQuery, Menu, MenuItem, Box, Button } from '@material-ui/core';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import axiosInstance from '../../axios/axiosInstance';
 import { downloadExcel } from '../../constants/helpers';
@@ -9,6 +9,10 @@ import { isEmpty } from 'lodash';
 import { useEffect } from 'react';
 import { ImportIcon, ExportIcon, DownloadIcon } from 'src/assets/svg/svgIcons';
 import { useData } from 'src/StateProvider/Provider';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
+import { MdImportExport } from 'react-icons/md';
+import { CustomImport } from 'src/components/productBuilder/CustomImport';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -44,12 +48,15 @@ export default function ImportExportLinks({
   recordsToExport = 0,
   exportSelectedRecords = null,
   isExportAllOrSomeFeature = false,
-  onExportToExcelSuccess = () => { },
+  onExportToExcelSuccess = () => {},
   total = 0,
   additionalParams = null,
   extraImportExportLinks = [],
   inverted = false,
-  small = false
+  small = false,
+  isCustomImport = false,
+  onSuccessCustomImport = () => {},
+  currency = 'USD'
 }) {
   const classes = useStyles();
   const isMobile = useMediaQuery('(max-width: 960px)');
@@ -58,6 +65,7 @@ export default function ImportExportLinks({
   const [isSelection, setIsSelection] = useState(false);
   const [isUpladDialog, setIsUploadDialog] = useState(false);
   const [anchorExtraEl, setAnchorExtraEl] = useState(null);
+  const [customImportDialog, setCustomImportDialog] = useState(false);
 
   const [imptExptDnldMenuDta, setImptExptDnldMenuDta] = useState({ anchorEl: null, action: null, open: false });
 
@@ -341,7 +349,8 @@ export default function ImportExportLinks({
   };
 
   const handleDownloadTemplate = () => {
-    axiosInstance().get(`${api}/template`, { responseType: 'arraybuffer' })
+    axiosInstance()
+      .get(`${api}/template`, { responseType: 'arraybuffer' })
       .then((response) => {
         const fileName = response.headers['content-disposition'].split('filename=')[1];
         downloadExcel(response.data, fileName);
@@ -349,7 +358,7 @@ export default function ImportExportLinks({
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
-  }
+  };
 
   const ImportInput = (
     <input
@@ -368,131 +377,159 @@ export default function ImportExportLinks({
   );
 
   return (
-    <div className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${inverted ? 'inverted' : ''}`} >
-      <div className={classes.linksContainer}>
-        {permission?.isCreate && (
-          permissions?.productCategory?.isRead ?
-            <label
-              onClick={(e) => {
-                if (api === 'product') {
-                  handleOpenMenu(e, 'import');
-                } else {
-                  setIsSelection(true);
-                  setIsUploadDialog(true);
-                  handleClose();
-                }
-              }}
-              htmlFor={api === 'product' ? '' : 'importFromExcel'}
-              className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
-            >
-              Import from Excel
-              <ImportIcon />
-            </label>
-            : <>
-              {ImportInput}
-              <label htmlFor="importFromExcel" className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}>
-                <span>Import from Excel</span>
+    <div
+      className={`${module !== 'builder' ? classes.root : classes.custom_root} ${small ? '[padding-right:0_!important]' : ''} ${inverted ? 'inverted' : ''}`}
+    >
+      {!isCustomImport ? (
+        <div className={classes.linksContainer}>
+          {permission?.isCreate &&
+            (permissions?.productCategory?.isRead ? (
+              <label
+                onClick={(e) => {
+                  if (api === 'product') {
+                    handleOpenMenu(e, 'import');
+                  } else {
+                    setIsSelection(true);
+                    setIsUploadDialog(true);
+                    handleClose();
+                  }
+                }}
+                htmlFor={api === 'product' ? '' : 'importFromExcel'}
+                className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
+              >
+                Import from Excel
+                <ImportIcon />
               </label>
-            </>
-        )}
-        <label
-          onClick={(e) => {
-            if (api === 'product') {
-              handleOpenMenu(e, 'export');
-            } else {
-              exportToExcel();
-            }
-          }}
-          className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
-        >
-          Export to Excel
-          {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? ' (All)' : ` (${recordsToExport})`) : null}
-          <ExportIcon />
-        </label>
-        <label
-          onClick={(e) => {
-            if (api === 'product') {
-              handleOpenMenu(e, 'download');
-            } else {
-              if (permissions?.productCategory?.isRead) {
-                setIsSelection(true);
+            ) : (
+              <>
+                {ImportInput}
+                <label htmlFor="importFromExcel" className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}>
+                  <span>Import from Excel</span>
+                </label>
+              </>
+            ))}
+          <label
+            onClick={(e) => {
+              if (api === 'product') {
+                handleOpenMenu(e, 'export');
+              } else {
+                exportToExcel();
               }
-              else {
-                handleDownloadTemplate()
-              }
-            }
-          }}
-          className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
-        >
-          Download Template
-          <DownloadIcon />
-        </label>
-        {extraImportExportLinks?.length > 0 && api !== 'product' && (
-          <>
-            <Menu
-              id="import-export-extra-links"
-              getContentAnchorEl={null}
-              anchorEl={anchorExtraEl}
-              keepMounted
-              open={Boolean(anchorExtraEl)}
-              onClose={handleExtraClose}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'right'
-              }}
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'right'
-              }}
-            >
-              {extraImportExportLinks?.map((d, idx) => {
-                if (d.type === 'import') {
-                  return (
-                    <MenuItem>
-                      <input
-                        onClick={(e: any) => (e.target.value = null)}
-                        id={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}
-                        name={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}
-                        onChange={(e) => {
-                          uploadExtraData(e, d.api);
-                        }}
-                        accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
-                        style={{
-                          opacity: '0',
-                          position: 'absolute',
-                          zIndex: -1
-                        }}
-                        type="file"
-                      />
-                      <label htmlFor={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}>{d.title}</label>
-                    </MenuItem>
-                  );
+            }}
+            className={` new-headerbox-button-v1 ${small ? 'small' : ''}`}
+          >
+            Export to Excel
+            {isExportAllOrSomeFeature ? (recordsToExport === 0 || recordsToExport === total ? ' (All)' : ` (${recordsToExport})`) : null}
+            <ExportIcon />
+          </label>
+          <label
+            onClick={(e) => {
+              if (api === 'product') {
+                handleOpenMenu(e, 'download');
+              } else {
+                if (permissions?.productCategory?.isRead) {
+                  setIsSelection(true);
                 } else {
-                  return (
-                    <MenuItem
-                      onClick={() => {
-                        exportToExcel(d.api);
-                        handleExtraClose();
-                      }}
-                    >
-                      {d.title}
-                    </MenuItem>
-                  );
+                  handleDownloadTemplate();
                 }
-              })}
-            </Menu>
-            <Box ml={1} />
-            <IconButton onClick={handleExtraClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
-              <IoIosArrowDropdown />
-            </IconButton>
-          </>
-        )}
-      </div>
+              }
+            }}
+            className={`new-headerbox-button-v1 ${small ? 'small' : ''}`}
+          >
+            Download Template
+            <DownloadIcon />
+          </label>
+          {extraImportExportLinks?.length > 0 && api !== 'product' && (
+            <>
+              <Menu
+                id="import-export-extra-links"
+                getContentAnchorEl={null}
+                anchorEl={anchorExtraEl}
+                keepMounted
+                open={Boolean(anchorExtraEl)}
+                onClose={handleExtraClose}
+                anchorOrigin={{
+                  vertical: 'bottom',
+                  horizontal: 'right'
+                }}
+                transformOrigin={{
+                  vertical: 'top',
+                  horizontal: 'right'
+                }}
+              >
+                {extraImportExportLinks?.map((d, idx) => {
+                  if (d.type === 'import') {
+                    return (
+                      <MenuItem>
+                        <input
+                          onClick={(e: any) => (e.target.value = null)}
+                          id={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}
+                          name={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}
+                          onChange={(e) => {
+                            uploadExtraData(e, d.api);
+                          }}
+                          accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                          style={{
+                            opacity: '0',
+                            position: 'absolute',
+                            zIndex: -1
+                          }}
+                          type="file"
+                        />
+                        <label htmlFor={`${d.title}-${idx + 2}`.replace(/\s+/g, '')}>{d.title}</label>
+                      </MenuItem>
+                    );
+                  } else {
+                    return (
+                      <MenuItem
+                        onClick={() => {
+                          exportToExcel(d.api);
+                          handleExtraClose();
+                        }}
+                      >
+                        {d.title}
+                      </MenuItem>
+                    );
+                  }
+                })}
+              </Menu>
+              <Box ml={1} />
+              <IconButton onClick={handleExtraClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
+                <IoIosArrowDropdown />
+              </IconButton>
+            </>
+          )}
+        </div>
+      ) : (
+        <HtmlTooltip title={'Import/Export'} placement="top" arrow enterTouchDelay={0}>
+          <span>
+            <Button
+              onClick={(e) => handleClick(e)}
+              endIcon={<ArrowDropDownIcon />}
+              variant={'outlined'}
+              color="primary"
+              aria-controls="simple-menu"
+              aria-haspopup="true"
+              className="min-h-[32px]"
+              size="small"
+            >
+              {isMobile ? (
+                <>
+                  <MdImportExport size={20} />
+                </>
+              ) : (
+                'Import/Export'
+              )}
+            </Button>
+          </span>
+        </HtmlTooltip>
+      )}
       {isMobile && (
         <IconButton onClick={handleClick} className={`expand-icon-v1`} style={{ padding: '3px' }}>
           <IoIosArrowDropdown />
         </IconButton>
       )}
+
       <Menu
         id="import-export-links"
         anchorEl={anchorEl}
@@ -509,8 +546,8 @@ export default function ImportExportLinks({
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        {permission?.isCreate && (
-          permissions?.productCategory?.isRead ?
+        {permission?.isCreate &&
+          (permissions?.productCategory?.isRead ? (
             <MenuItem
               onClick={() => {
                 setIsSelection(true);
@@ -522,14 +559,14 @@ export default function ImportExportLinks({
                 Import from Excel
               </label>
             </MenuItem>
-            :
+          ) : (
             <MenuItem>
               {ImportInput}
               <label htmlFor="importFromExcel" className="cursor-pointer">
                 Import from Excel
               </label>
             </MenuItem>
-        )}
+          ))}
         <MenuItem
           onClick={() => {
             exportToExcel();
@@ -542,15 +579,24 @@ export default function ImportExportLinks({
           onClick={() => {
             if (permissions?.productCategory?.isRead) {
               setIsSelection(true);
-            }
-            else {
-              handleDownloadTemplate()
+            } else {
+              handleDownloadTemplate();
             }
             handleClose();
           }}
         >
           Download Template
         </MenuItem>
+        {isCustomImport && permission?.isUpdate && (
+          <MenuItem
+            onClick={() => {
+              setCustomImportDialog(true)
+              handleClose();
+            }}
+          >
+            Custom Import
+          </MenuItem>
+        )}
         {extraImportExportLinks?.map((d, idx) => {
           if (d.type === 'import') {
             return (
@@ -596,6 +642,19 @@ export default function ImportExportLinks({
             setIsSelection(false);
           }}
           api={api}
+        />
+      )}
+       {customImportDialog && (
+        <CustomImport
+          handleClose={() => {
+            setCustomImportDialog(false);
+          }}
+          onSuccess={() => {
+            setCustomImportDialog(false);
+            onSuccessCustomImport()
+          }}
+          refrenceId={refrenceId}
+          currency={currency}
         />
       )}
       {imptExptDnldMenuDta.open && <RenderButtonMenu />}
