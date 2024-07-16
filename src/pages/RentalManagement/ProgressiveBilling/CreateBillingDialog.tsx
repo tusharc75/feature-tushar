@@ -322,10 +322,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           let values: any = {};
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
-          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+            values['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
           }
+          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
 
           if (element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
@@ -360,44 +360,42 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     data.material = newMaterial;
 
     if (invoiceData?.length) {
-      data.material = data?.material
-        ?.map((e) => {
-          let materialData: any = { ...e };
+      data.material = data?.material?.map((e) => {
+        let materialData: any = { ...e };
 
-          let pMethod = materialData?.pricingMethod?.split(',') || [];
-          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(m));
+        let pMethod = materialData?.pricingMethod?.split(',') || [];
+        pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(m));
 
-          if (!['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
-            let tempTotalPrevQty = invoiceData
-              .map((obj) => {
-                let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
-                if (tempQty) return tempQty;
-              })
-              .filter((d) => d);
+        if (!['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
+          let tempTotalPrevQty = invoiceData
+            .map((obj) => {
+              let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
+              if (tempQty) return tempQty;
+            })
+            .filter((d) => d);
 
-            tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
-            let values = { qty: materialData.qty - tempTotalPrevQty };
-            const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
-            materialData = { ...materialData, ...calValues };
-          }
+          tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
+          let values = { qty: materialData.qty - tempTotalPrevQty };
+          const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
+          materialData = { ...materialData, ...calValues };
+        }
 
-          const product = invoicedProducts?.find((p) => p._id === e._id);
-          if (product) {
-            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-            materialData.actualStartDate = actualEndDate;
-          } else {
-            materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
-          }
-          materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
+        const product = invoicedProducts?.find((p) => p._id === e._id);
+        if (product) {
+          const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+          materialData.actualStartDate = actualEndDate;
+        } else {
+          materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
+        }
+        materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
 
-          const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
-          if (row) {
-            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-            setEndDate(actualEndDate);
-          }
-          return materialData;
-        })
-        .filter((d) => d.qty > 0);
+        const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
+        if (row) {
+          const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+          setEndDate(actualEndDate);
+        }
+        return materialData;
+      }).filter((d) => d.qty > 0);
     }
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
@@ -435,8 +433,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
-        parent.type === MATERIAL_TYPE.serializedAsset ||
-        parent.type === MATERIAL_TYPE.manualEntry
+          parent.type === MATERIAL_TYPE.serializedAsset ||
+          parent.type === MATERIAL_TYPE.manualEntry
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
@@ -638,10 +636,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
               }))
           );
         } else {
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+            values['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
           }
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }
         element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
@@ -788,8 +786,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                           title={
                             !Boolean(
                               selectedRecords &&
-                                selectedRecords?.length &&
-                                (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                              selectedRecords?.length &&
+                              (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                             )
                               ? 'Please select product to apply'
                               : ''
@@ -803,8 +801,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                                 isApplingDate ||
                                 !Boolean(
                                   selectedRecords &&
-                                    selectedRecords?.length &&
-                                    (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                  selectedRecords?.length &&
+                                  (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
                               }
                               size="small"
