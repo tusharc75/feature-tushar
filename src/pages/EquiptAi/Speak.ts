@@ -1,5 +1,14 @@
 import React from 'react';
 
+type State = React.Dispatch<
+  React.SetStateAction<{
+    isPlaying: boolean;
+    isPaused: boolean;
+    isFinished: boolean;
+    isLoading: boolean;
+  }>
+>;
+
 export class Speak {
   utterance: SpeechSynthesisUtterance;
   isPaused: boolean;
@@ -8,18 +17,20 @@ export class Speak {
   voices: SpeechSynthesisVoice[];
   text: string;
   isPlaying: boolean;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  constructor(setLoading: React.Dispatch<React.SetStateAction<boolean>>, voice: number = 4) {
+  isEnded: boolean;
+  setSpeakerState: State;
+  constructor(setSpeakerState: State, voice: number = 4) {
     this.isPaused = false;
     this.text = '';
     this.utterance = new SpeechSynthesisUtterance(this.text);
     this.synth = window.speechSynthesis;
     this.isPlaying = false;
+    this.isEnded = false;
     this.voice = voice;
     this.voices = this.getEnglishVoices();
     this.utterance.voice = this.getPreferredVoice();
     this.utterance.volume = 1;
-    this.setLoading = setLoading;
+    this.setSpeakerState = setSpeakerState;
   }
 
   getEnglishVoices() {
@@ -29,6 +40,8 @@ export class Speak {
   }
 
   play(text: string) {
+    this.isEnded = false;
+    this.setSpeakerState((prev) => ({ ...prev, isFinished: false, isLoading: true, isPlaying: false, isPaused: false }));
     if (this.isPaused) this.isPaused = false;
     if (this.synth.speaking) this.synth.cancel();
     this.getEnglishVoices();
@@ -40,17 +53,24 @@ export class Speak {
     this.utterance.rate = 1.2;
     this.utterance.voice = this.getPreferredVoice();
     this.synth.speak(this.utterance);
-    this.setLoading(true);
     this.utterance.addEventListener('start', () => {
       this.isPlaying = true;
-      setTimeout(() => {
-        this.setLoading(false);
-      }, 0);
+      this.setSpeakerState((prev) => ({ ...prev, isLoading: false, isPlaying: true }));
     });
     this.utterance.addEventListener('end', () => {
+      this.setSpeakerState((prev) => ({ ...prev, isFinished: true, isPlaying: false, isLoading: false, isPaused: false }));
+      this.reset();
       this.isPlaying = false;
-      this.setLoading(false);
+      this.isEnded = true;
     });
+  }
+  reset() {
+    this.isPaused = false;
+    this.text = '';
+    this.utterance = new SpeechSynthesisUtterance(this.text);
+    this.synth = window.speechSynthesis;
+    this.isPlaying = false;
+    this.isEnded = false;
   }
 
   getPreferredVoice() {
@@ -63,6 +83,7 @@ export class Speak {
   }
   pause() {
     if (!this.isPaused) {
+      this.setSpeakerState((prev) => ({ ...prev, isPaused: true, isPlaying: false }));
       this.isPaused = true;
       this.synth.pause();
       this.isPlaying = false;
@@ -70,6 +91,7 @@ export class Speak {
   }
   resume() {
     if (this.isPaused) {
+      this.setSpeakerState((prev) => ({ ...prev, isPlaying: true, isPaused: false }));
       this.isPaused = false;
       this.synth.resume();
       this.isPlaying = true;
@@ -80,7 +102,7 @@ export class Speak {
     this.isPaused = true;
     this.isPlaying = false;
     this.utterance = null;
-    this.setLoading(false);
+    this.setSpeakerState((prev) => ({ ...prev, isFinished: false, isPlaying: false, isLoading: false, isPaused: false }));
   }
   changeVoice(voice: number) {
     this.voice = voice;
