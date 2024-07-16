@@ -317,8 +317,6 @@ const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
     };
   }, [chats, speakerInstance]);
 
-  console.log(speakerInstance);
-
   return (
     <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto scroll-smooth" ref={containerRef}>
       {chats ? (
