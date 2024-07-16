@@ -1,13 +1,5 @@
-import {
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Menu,
-  MenuItem,
-  useMediaQuery
-} from '@material-ui/core';
-import React, { useContext, useEffect, useState } from 'react';
+import { IconButton, List, ListItem, ListItemText, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
@@ -16,12 +8,17 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import { BsStars } from 'react-icons/bs';
 import { FaArrowUp } from 'react-icons/fa6';
+import { PiSpeakerHighBold } from 'react-icons/pi';
 
-import { cn } from 'src/constants/helpers';
+import { cn, copyTextToClipboard } from 'src/constants/helpers';
 import { FiEdit, FiSidebar } from 'react-icons/fi';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
+import { FaShare } from 'react-icons/fa';
+import { LuCopy } from 'react-icons/lu';
+import { BiDislike } from 'react-icons/bi';
+import { Speak } from 'src/pages/EquiptAi/Speak';
 
 const EquiptAi = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,7 +28,7 @@ const EquiptAi = () => {
   const [question, setQuestion] = useState('');
   const [chatHistory, setChatHistory] = useState(null);
   const [chatId, setChatId] = useState(null);
-  const [chats, setChats] = useState([]);
+  const [chats, setChats] = useState(null);
 
   useEffect(() => {
     fetchChatHistory();
@@ -106,34 +103,40 @@ const EquiptAi = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.equiptAi.title }]} />
       </div>
-      <CustomContainer>
-        <div className="relative flex h-[calc(100vh-152px)] min-h-[600px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:250px]">
+      <CustomContainer className="!p-0">
+        <div className="relative flex h-[calc(100vh-99px)] min-h-[600px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:250px]">
           <HistorySidebar
             chatHistory={chatHistory}
             hadleNewChat={hadleNewChat}
             isSidebarOpen={isSidebarOpen}
             setIsSidebarOpen={setIsSidebarOpen}
+            chatId={chatId}
             getOneChatHistory={getOneChatHistory}
             handleDelete={handleDelete}
           />
           <div
             className={cn(
-              'relative min-h-full flex-grow transition-all duration-300',
-              isSidebarOpen && !isMobile ? '' : '-ml-[var(--sidebar-w)] w-[calc(100%_+_var(--sidebar-w))]'
+              'relative min-h-full flex-grow p-[15px] transition-all duration-300 md:p-[25px]',
+              isSidebarOpen && !isMobile ? '' : 'ml-[calc(var(--sidebar-w)_*_-1_-_11px)] w-[calc(100%_+_var(--sidebar-w))]'
             )}
           >
             {!isSidebarOpen && (
-              <div className="head relative flex min-h-[var(--head-h)] items-center gap-2">
-                <HtmlTooltip title={isSidebarOpen ? 'Close History' : 'Open History'}>
-                  <IconButton size="small" onClick={() => setIsSidebarOpen((prev) => !prev)}>
-                    <FiSidebar />
-                  </IconButton>
-                </HtmlTooltip>
-                <HtmlTooltip title={'New Chat'}>
-                  <IconButton size="small" onClick={() => hadleNewChat()}>
-                    <FiEdit />
-                  </IconButton>
-                </HtmlTooltip>
+              <div className="head mb-3 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <HtmlTooltip title={isSidebarOpen ? 'Close Sidebar' : 'Open Sidebar'}>
+                    <IconButton size="small" onClick={() => setIsSidebarOpen((prev) => !prev)} style={{ padding: 8 }}>
+                      <FiSidebar />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={'New Chat'}>
+                    <IconButton size="small" onClick={() => hadleNewChat()} style={{ padding: 8 }}>
+                      <FiEdit />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
+                <IconButton size="small" style={{ padding: 8 }}>
+                  <FaShare />
+                </IconButton>
               </div>
             )}
             <DisplayMessages chats={chats} />
@@ -155,7 +158,7 @@ const EquiptAi = () => {
                   }}
                 />
                 <IconButton
-                  style={{ borderRadius: 999, padding: '10px' }}
+                  style={{ borderRadius: 999, padding: 10 }}
                   size="small"
                   disabled={question ? false : true}
                   onClick={askQuestion}
@@ -182,6 +185,7 @@ type HistorySidebarProps = {
   chatHistory: ChatHistory[];
   getOneChatHistory: (id: string) => void;
   handleDelete: (id: string) => void;
+  chatId: string | null;
 };
 
 type ChatHistory = {
@@ -189,7 +193,15 @@ type ChatHistory = {
   title: string;
 };
 
-const HistorySidebar = ({ setIsSidebarOpen, isSidebarOpen, hadleNewChat, chatHistory, getOneChatHistory, handleDelete }: HistorySidebarProps) => {
+const HistorySidebar = ({
+  setIsSidebarOpen,
+  isSidebarOpen,
+  hadleNewChat,
+  chatHistory,
+  getOneChatHistory,
+  handleDelete,
+  chatId
+}: HistorySidebarProps) => {
   const [selectedChatHistory, setSelectedChatHistory] = useState<string>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
 
@@ -211,30 +223,44 @@ const HistorySidebar = ({ setIsSidebarOpen, isSidebarOpen, hadleNewChat, chatHis
   return (
     <aside
       className={cn(
-        'z-10 min-h-full w-[var(--sidebar-w)] flex-shrink-0  rounded-lg bg-[var(--dark-primary,white)] transition-transform duration-300 [border:1px_solid_var(--common-border-color)]',
+        'z-10 min-h-full w-[var(--sidebar-w)] flex-shrink-0  bg-[#f2f2f2] px-3 transition-transform duration-300 dark:bg-[#070712]',
         isSidebarOpen ? '[transform:translateX(0)]' : '[transform:translateX(calc(var(--sidebar-w)_*_-1))]'
       )}
     >
-      <div className="head flex min-h-[var(--head-h)] items-center justify-between gap-2 px-4">
+      <div className="head flex min-h-[var(--head-h)] items-center justify-between gap-2 ">
         <HtmlTooltip title={isSidebarOpen ? 'Close Sidebar' : 'Open Sidebar'}>
-          <IconButton size="small" onClick={() => setIsSidebarOpen((prev) => !prev)}>
+          <IconButton size="small" onClick={() => setIsSidebarOpen((prev) => !prev)} style={{ padding: 8 }}>
             <FiSidebar />
           </IconButton>
         </HtmlTooltip>
         <HtmlTooltip title={'New chat'}>
-          <IconButton size="small" onClick={() => hadleNewChat()}>
+          <IconButton size="small" onClick={() => hadleNewChat()} style={{ padding: 8 }}>
             <FiEdit />
           </IconButton>
         </HtmlTooltip>
       </div>
-      <div className="body max-h-[calc(100%_-_var(--head-h))] overflow-y-auto px-1">
+      <div className="body max-h-[calc(100%_-_var(--head-h))] overflow-y-auto">
         <List dense>
-          {chatHistory?.length ? (
+          {chatHistory ? (
             <>
               {chatHistory?.map((history) => (
-                <ListItem button onClick={() => getOneChatHistory(history._id)} key={history._id} className="group" style={{ borderRadius: 8 }}>
+                <ListItem
+                  button
+                  onClick={() => getOneChatHistory(history._id)}
+                  key={history._id}
+                  className="group"
+                  style={{ borderRadius: 8, padding: '4px 8px' }}
+                  selected={chatId === history._id}
+                >
                   <ListItemText primary={<span className="line-clamp-1">{history.title}</span>} />
-                  <div className="absolute right-2 pl-6 opacity-0 [background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] group-hover:opacity-100 dark:[background-image:linear-gradient(270deg,_#212134_60%,_transparent_100%)] ">
+                  <div
+                    className={cn(
+                      'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
+                      chatId === history._id
+                        ? '[background-image:linear-gradient(270deg,_#dfdfdf_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#2f2f38_60%,_transparent_100%)]'
+                        : '[background-image:linear-gradient(270deg,_#e8e8e8_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#1a1a25_60%,_transparent_100%)]'
+                    )}
+                  >
                     <IconButton edge="end" aria-label="delete" size="small" onClick={(event) => handleOpenMenu(event, history._id)}>
                       <MoreHorizIcon />
                     </IconButton>
@@ -275,19 +301,54 @@ type DisplayMessagesProps = {
 };
 
 const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
+  const toastConfig = useContext(CustomToastContext);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
+  }, [chats]);
+
   return (
-    <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto">
-      {chats?.length ? (
+    <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto scroll-smooth" ref={containerRef}>
+      {chats ? (
         <>
           {chats?.map((chat, i) => {
+            const isLastChat = i === chats.length - 1;
             return (
               <div key={i}>
                 <div className="m-[18px_20px] ml-auto w-fit max-w-[75%] rounded-md bg-[#f4f4f4] p-[10px_20px] text-right dark:bg-[var(--dark-secondary)]">
                   {chat?.message}
                 </div>
-                <div className="m-[18px_20px] flex  max-w-[75%] items-start gap-2 rounded-md p-[10px_20px]">
+                <div className="group m-[18px_20px]  flex max-w-[75%] items-start gap-2 rounded-md p-[10px_20px]">
                   <BsStars className="flex-shrink-0 text-[var(--new-theme-color)]" size={25} />
-                  {chat?.content}
+                  <div>
+                    {chat?.content}
+                    <div
+                      className={cn(
+                        'mt-1 flex max-w-fit items-center gap-2 transition-opacity',
+                        isLastChat ? '' : 'rounded-xl p-[3px] opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
+                      )}
+                    >
+                      <IconButton
+                        size="small"
+                        style={{ width: 30, height: 30, borderRadius: 8 }}
+                        onClick={() =>
+                          copyTextToClipboard(chat?.content, () => {
+                            toastConfig.setToastConfig({
+                              open: true,
+                              type: 'success',
+                              message: `Text copied!`
+                            });
+                          })
+                        }
+                      >
+                        <LuCopy size={15} />
+                      </IconButton>
+                      <IconButton size="small" style={{ width: 30, height: 30, borderRadius: 8 }}>
+                        <BiDislike size={15} />
+                      </IconButton>
+                    </div>
+                  </div>
                 </div>
               </div>
             );

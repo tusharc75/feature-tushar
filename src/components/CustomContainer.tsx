@@ -1,30 +1,33 @@
-import { Container, ContainerProps, CssBaseline } from "@material-ui/core";
+import { Container, CssBaseline } from '@material-ui/core';
+import { cn } from 'src/constants/helpers';
 
 type CustomContainerProps = {
-  children: React.ReactNode,
-  styles?: React.CSSProperties,
-  maxWidth?: any | string,
-  minHeight?: any,
-  padding?: number | string,
-};
+  children: React.ReactNode;
+  styles?: React.CSSProperties;
+  maxWidth?: any | string;
+  minHeight?: any;
+  padding?: number | string;
+} & React.HTMLAttributes<HTMLDivElement>;
 
-const CustomContainer = (props:CustomContainerProps) => {
-  const { children, styles, maxWidth, minHeight, padding } = props;
+const CustomContainer = (props: CustomContainerProps) => {
+  const { children, styles, maxWidth, minHeight, padding, className, ...rest } = props;
 
   return (
     <>
       <CssBaseline />
       {!maxWidth ? (
-        <div className="main-container" style={{ ...styles }}>
+        <div className={cn('main-container', className)} style={{ ...styles }} {...rest}>
           {children}
         </div>
       ) : (
-        <Container className="main-container"
+        <Container
+          className={cn('main-container', className)}
           maxWidth={maxWidth}
+          {...rest}
           style={{
-            minHeight: minHeight ? "100%" : "calc(100vh - 65px)",
-            padding: padding || "",
-            ...styles,
+            minHeight: minHeight ? '100%' : 'calc(100vh - 65px)',
+            padding: padding || '',
+            ...styles
           }}
         >
           {children}
@@ -33,8 +36,6 @@ const CustomContainer = (props:CustomContainerProps) => {
     </>
   );
 };
-
-
 
 export default CustomContainer;
 
