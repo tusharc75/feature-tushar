@@ -330,6 +330,7 @@ const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
     if (speakerState.isPaused) {
       return <HiOutlineSpeakerWave size={15} />;
     }
+    return <HiOutlineSpeakerWave size={15} />;
   };
 
   return (
