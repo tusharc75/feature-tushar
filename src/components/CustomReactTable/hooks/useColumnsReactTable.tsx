@@ -533,8 +533,7 @@ export default function useColumns() {
             </div>
           )
         });
-      }
-      else if (field.type === 'percent') {
+      } else if (field.type === 'percent') {
         column.push({
           ...commonFieldData,
           editable: Boolean(field?.isColumnEditable),
