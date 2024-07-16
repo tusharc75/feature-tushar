@@ -68,12 +68,11 @@ import ReturnTicketDialog from './ReturnTicketDialog';
 import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
 import ChangeAssetsDetailsDialog from './ChangeAssetsDetailsDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import ServiceLogDialog from './ServiceLogDialog';
-import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
 import TransferToAnotherPackageDialog from 'src/pages/RentalManagement/ReceivingTicket/TransferToAnotherPackageDialog';
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
+import ReceivingServices from './ReceivingServices';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -128,7 +127,6 @@ const ReceivingTicket = ({
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
   const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false });
-  const [serviceLogDialog, setServiceLogDialog] = useState({ open: false, data: null });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
@@ -144,8 +142,8 @@ const ReceivingTicket = ({
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {} });
   const [assetsData, setAssetsData] = useState([]);
   const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
-  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false });
   const [transferAnotherPackageDialog, setTransferAnotherPackageialog] = useState(false)
+  const [serviceData,setServiceData] = useState([]);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -265,7 +263,7 @@ const ReceivingTicket = ({
           `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}`
         );
         deliveryTicketList = result?.data?.data;
-
+      
         const productResponse = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalManagementData._id}`);
         material = productResponse?.data?.data?.material;
         nonSerializeAsset = productResponse?.data?.data?.nonSerializeAsset;
@@ -639,7 +637,7 @@ const ReceivingTicket = ({
             productAssets.push(s);
           });
       }
-
+   
       productAssets.forEach((d) => {
         if (d.type === 'Asset') {
           const parentId = material?.find((e) => e._id === d.uniqueId)?.parentId;
@@ -694,8 +692,20 @@ const ReceivingTicket = ({
       productAssets?.forEach((e, index) => {
         e.index = index + 1;
       });
-
-      dispatch({ type: 'initialize', data: productAssets, count: productAssets?.length });
+      const updatedServices = productAssets?.filter((e)=> e.type===MATERIAL_TYPE.service).map((e, idx) => {
+        return {
+          ...e,
+          index: idx+1
+        }
+      });
+      const updatedAssetProducts = productAssets?.filter((e)=> e.type!==MATERIAL_TYPE.service).map((e, idx) => {
+        return {
+          ...e,
+          index: idx+1
+        }
+      });
+      setServiceData(updatedServices);
+      dispatch({ type: 'initialize', data: updatedAssetProducts, count: updatedAssetProducts?.length });
       setTimeout(() => {
         dispatch({ type: 'loading', loading: false });
       }, gridLoadingTimeout);
@@ -789,9 +799,6 @@ const ReceivingTicket = ({
               onClick={() => {
                 if (row.original.type === 'Asset') {
                   window.open(`${routes.serializedAssetDetail.path}/${row?.original?._id}`);
-                }
-                else if (row.original.type === MATERIAL_TYPE.service) {
-                  window.open(`${routes.serviceMasterDetail.path}/${row?.original?.materialId}`);
                 }
                 else if (row.original.type === 'Product') {
                   window.open(`${routes.productDetail.path}/${row?.original?.materialId}`);
@@ -1120,20 +1127,6 @@ const ReceivingTicket = ({
                     }}
                   >
                     <Edit fontSize="small" color={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? 'primary' : 'inherit'} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
-            ) : null}
-            {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
-              <HtmlTooltip title={'View Service Logs'}>
-                <span>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setServiceLogDialog({ open: true, data: row?.original });
-                    }}
-                  >
-                    <VisibilityIcon fontSize="small" color="primary" />
                   </IconButton>
                 </span>
               </HtmlTooltip>
@@ -1519,12 +1512,7 @@ const ReceivingTicket = ({
 
   const handleSubmitChangeDates = (values, type: string = '') => {
     let data;
-    if (type) {
-      setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
-      data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
-      data['type'] = type;
-      data['date'] = values.date;
-    } else {
+    
       if (!openChangeActualDateDialog.data) return;
       setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
       data = {
@@ -1533,7 +1521,7 @@ const ReceivingTicket = ({
       };
       if (values.manualStartDate) data.startDate = values.manualStartDate;
       if (values.manualEndDate) data.endDate = values.manualEndDate;
-    }
+    
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {
@@ -1543,12 +1531,10 @@ const ReceivingTicket = ({
           type: 'success'
         });
         setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
-        setServiceConfirmationDialog({ open: false, type: null, loading: false });
         fetchRecords();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setServiceConfirmationDialog({ open: false, type: null, loading: false });
         setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
       });
   };
@@ -1767,7 +1753,6 @@ const ReceivingTicket = ({
               currentStep,
               columns,
               rentalManagementData,
-              setServiceConfirmationDialog,
               rentalPolicyData,
               setTransferAnotherPackageialog
             }}
@@ -2177,20 +2162,6 @@ const ReceivingTicket = ({
           okBtnLoading={okBtnLoading}
         />
       )}
-      {serviceConfirmationDialog.open && (
-        <StartStopServiceDateDialog
-          data={selectedRecords}
-          type={serviceConfirmationDialog.type}
-          open={serviceConfirmationDialog.open}
-          onClose={() => {
-            setServiceConfirmationDialog({ open: false, type: null, loading: false });
-          }}
-          handleSubmit={(val) => {
-            handleSubmitChangeDates(val, serviceConfirmationDialog.type);
-          }}
-          loading={serviceConfirmationDialog.loading}
-        />
-      )}
       {openChangeActualDateDialog.open && (
         <ChangeActualDateDialog
           data={openChangeActualDateDialog.data}
@@ -2283,19 +2254,6 @@ const ReceivingTicket = ({
           }}
         />
       )}
-      {serviceLogDialog.open && (
-        <ServiceLogDialog
-          rentalId={rentalManagementData?._id}
-          id={serviceLogDialog?.data?.uniqueId}
-          assetNumber={serviceLogDialog?.data?.assetNumber}
-          open={serviceLogDialog?.open}
-          onClose={() => {
-            setServiceLogDialog({ open: false, data: null });
-          }}
-          onSuccess={fetchRecords}
-          renderedFrom={renderedFrom}
-        />
-      )}
 
       {transferAnotherPackageDialog && (
         <TransferToAnotherPackageDialog
@@ -2309,6 +2267,17 @@ const ReceivingTicket = ({
           selectedAssets={selectedRecords}
           rentalManagementData={rentalManagementData}
           assetPolicyData={assetPolicyData}
+        />
+      )}
+      {serviceData?.length>0 && (
+      <ReceivingServices
+        services={serviceData}
+        rentalManagementData={rentalManagementData}
+        fetchRecords={fetchRecords}
+        allowedToEdit={allowedToEdit} 
+        rentalPolicyData={rentalPolicyData}
+        setOpenMessageDialog={ setOpenMessageDialog}
+        renderedFrom={renderedFrom}
         />
       )}
     </>
@@ -2342,8 +2311,6 @@ const ActionButtonMenuItems = ({
   currentStep,
   columns,
   rentalManagementData,
-  setServiceConfirmationDialog,
-  rentalPolicyData,
   setTransferAnotherPackageialog
 }) => {
   const checkUniqWarehouse = () => {
@@ -2578,16 +2545,6 @@ const ActionButtonMenuItems = ({
         } else if ([ASSET_STATUS.inUse].includes(e.status) && [RENTAL_INTERNAL_ASSET_STATUS.inUse].includes(e.rentalAssetStatus)) {
         } else {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.onlySwapInUseAssets });
-        }
-      } else if (action === rentalManagementActions.startService) {
-        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-        if (!isEmpty(serviceLogEntry)) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
-        }
-      } else if (action === rentalManagementActions.stopService) {
-        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-        if (!serviceLogEntry) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
         }
       }
     });
@@ -3003,28 +2960,6 @@ const ActionButtonMenuItems = ({
             Change Well Number
           </MenuItem>
         )}
-      {rentalPolicyData?.showServiceOnFieldStep && selectedRecords?.every((e) => e.type === MATERIAL_TYPE.service) && (
-        <>
-          <MenuItem
-            onClick={() => {
-              if (!validateAction(rentalManagementActions.startService)) {
-                setServiceConfirmationDialog({ open: true, type: 'start' });
-              }
-            }}
-          >
-            Start Service(s)
-          </MenuItem>
-          <MenuItem
-            onClick={() => {
-              if (!validateAction(rentalManagementActions.stopService)) {
-                setServiceConfirmationDialog({ open: true, type: 'stop' });
-              }
-            }}
-          >
-            Stop Service(s)
-          </MenuItem>
-        </>
-      )}
     </>
   );
 };
