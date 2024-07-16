@@ -700,7 +700,7 @@ const ReceivingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber', 'position', 'wellNumber']
+          fieldNames: ['serialNumber', 'position', 'wellNumber', 'warehouse']
         }
       ]
     });
@@ -892,7 +892,7 @@ const ReceivingTicket = ({
       },
       {
         accessor: 'warehouse',
-        Header: 'Plant',
+        Header: assetFields?.find((f) => f.fieldName === 'warehouse')?.fieldLabel || 'Plant',
         Cell: ({ row }) =>
           row?.original?.warehouse ? (
             <div className="flex items-center gap-2">
@@ -2283,15 +2283,6 @@ const ActionButtonMenuItems = ({
   rentalManagementData,
   setTransferAnotherPackageialog
 }) => {
-  const checkUniqWarehouse = () => {
-    if (selectedRecords.length === 0) {
-      return false;
-    } else if (uniq(map(selectedRecords, 'warehouseId')).length === 1) {
-      return true;
-    } else {
-      return false;
-    }
-  };
 
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -2400,6 +2391,9 @@ const ActionButtonMenuItems = ({
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotValidStatus });
         }
+        else if (uniq(map(records, 'warehouseId')).length !== 1) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.repairSameWarehouse });
+        }
       } else if (action === rentalManagementActions.receiveItems) {
         if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
@@ -2458,7 +2452,7 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.notSubleaseAsset });
         } else if (![ASSET_STATUS.underReview, ASSET_STATUS.scrap, ASSET_STATUS.needRecert, ASSET_STATUS.needRepair].includes(e.status)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairCanForThisAsset });
-        } else if (!checkUniqWarehouse()) {
+        } else if (uniq(map(records, 'warehouseId')).length !== 1) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.repairSameWarehouse });
         }
       } else if (action === rentalManagementActions.transferToAnotherRental) {
@@ -2686,7 +2680,6 @@ const ActionButtonMenuItems = ({
               </MenuItem>
             ) : null}
             <MenuItem
-              disabled={!checkUniqWarehouse()}
               onClick={() => {
                 if (!validateAction(rentalManagementActions.createReturnTicket)) {
                   if (selectedRecords?.every((e) => e.type === 'Asset')) {

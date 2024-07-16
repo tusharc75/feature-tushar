@@ -479,7 +479,7 @@ const LoadingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached']
+          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached', 'warehouse']
         }
       ]
     });
@@ -670,7 +670,7 @@ const LoadingTicket = ({
     },
     {
       accessor: 'warehouse',
-      Header: 'Plant',
+      Header: findHeader(columnHeader?.assetFields, 'warehouse') || 'Plant',
       Cell: ({ row }) =>
         row?.original?.warehouse ? (
           <div className="flex items-center gap-2">
