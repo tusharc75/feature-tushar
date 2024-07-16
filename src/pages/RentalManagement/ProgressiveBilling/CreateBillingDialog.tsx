@@ -19,7 +19,8 @@ import {
   rentalManagement,
   MATERIAL_TYPE,
   ASSET_STATUS,
-  sidebarResource
+  sidebarResource,
+  treeToFlatArray
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -490,7 +491,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   };
 
   const handleApplyDate = async (allRows = [], rawMaterial = []) => {
-    const records = allRows?.length > 0 ? [...allRows] : [...selectedRecords];
+    const records = allRows?.length > 0 ? [...treeToFlatArray(allRows, 'subRows')] : [...selectedRecords];
     const _material = rawMaterial?.length > 0 ? rawMaterial : material;
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
