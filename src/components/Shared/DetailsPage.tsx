@@ -27,6 +27,7 @@ import CarouselDialog from '../CarouselDialog';
 import { camelCase } from 'lodash';
 import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
 import { PreviewFile } from 'src/components/PreviewFile';
+import routes from 'src/components/Helpers/Routes';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -216,7 +217,7 @@ const Details = (props: DetailProps) => {
     setFormsData(customData);
   };
 
-  const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload'].includes(type);
+  const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload', 'groupSignature'].includes(type);
 
   /**
    * Render Link  or Typography component
@@ -447,7 +448,23 @@ const Details = (props: DetailProps) => {
                                 <Image style={{ fontSize: 30 }} />
                               </Avatar>
                             </Box>
-                          ) : (
+                          ) : 
+                          field.fieldData.type === 'groupSignature' ? (
+                            <div className="flex flex-col mx-1">
+                              {initialVals[field.fieldData.fieldName]?.map((ele)=> (
+                                <div className={`flex justify-between items-center ${ele?.signature ? '' : 'my-2'}`}>
+                                  <Link to={`${routes?.userDetail?.path}/${ele?.user?._id}`}
+                                    target="_blank"
+                                    className="link"
+                                    rel="noopener noreferrer">
+                                    {ele?.user?.concatedName}
+                                  </Link>
+                               { ele?.signature ? <img className="h-12 w-14 object-contain" src={ele.signature} /> : '-'}
+                                </div>
+                              ))}
+                            </div>
+                          ) : 
+                          (
                             <Box display="flex" alignItems="center" className="formdata-text-v1">
                               {renderData(initialVals, field.fieldData)}
                             </Box>

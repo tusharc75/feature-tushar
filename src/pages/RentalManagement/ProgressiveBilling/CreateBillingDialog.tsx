@@ -18,7 +18,8 @@ import {
   invoice,
   rentalManagement,
   MATERIAL_TYPE,
-  ASSET_STATUS
+  ASSET_STATUS,
+  sidebarResource
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -37,7 +38,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
-const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy = null }) => {
+const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -50,17 +51,32 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
   const [material, setMaterial] = useState([]);
   const [orginalMaterial, setOrginalMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [endDate, setEndDate] = useState<any>(policy?.progressiveBillingCurrentDateAutoSelect ? new Date() : null);
+  const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
   const [appliedDate, setAppliedDate] = useState(false);
   const [isApplingDate, setIsApplingDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
+  const [resourceData, setResourceData] = useState(null);
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    axiosInstance()
+      .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
+      .then(({ data: { data } }) => {
+        setResourceData(data);
+        if (data?.policy?.invoiceCurrentDateAutoSelect) {
+          setEndDate(new Date());
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
 
   useEffect(() => {
     fetchFields();
@@ -306,10 +322,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
           let values: any = {};
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
-          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+            values['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
           }
+          const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
 
           if (element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
@@ -344,44 +360,42 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
     data.material = newMaterial;
 
     if (invoiceData?.length) {
-      data.material = data?.material
-        ?.map((e) => {
-          let materialData: any = { ...e };
+      data.material = data?.material?.map((e) => {
+        let materialData: any = { ...e };
 
-          let pMethod = materialData?.pricingMethod?.split(',') || [];
-          pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(m));
+        let pMethod = materialData?.pricingMethod?.split(',') || [];
+        pMethod = pMethod.map((m) => m?.trim()).find((m) => !['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(m));
 
-          if (!['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
-            let tempTotalPrevQty = invoiceData
-              .map((obj) => {
-                let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
-                if (tempQty) return tempQty;
-              })
-              .filter((d) => d);
+        if (!['Per Day', 'Per Week', 'Per Month', 'Per Barrel'].includes(materialData?.pricingMethod) || materialData?.pricingMethod === pMethod) {
+          let tempTotalPrevQty = invoiceData
+            .map((obj) => {
+              let tempQty = obj.material?.find((ele) => ele._id === materialData._id)?.qty;
+              if (tempQty) return tempQty;
+            })
+            .filter((d) => d);
 
-            tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
-            let values = { qty: materialData.qty - tempTotalPrevQty };
-            const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
-            materialData = { ...materialData, ...calValues };
-          }
+          tempTotalPrevQty = tempTotalPrevQty.reduce((a, b) => a + b, 0);
+          let values = { qty: materialData.qty - tempTotalPrevQty };
+          const calValues = autoCalculateSpecificFields(values, { ...materialData, ...values }, allFields);
+          materialData = { ...materialData, ...calValues };
+        }
 
-          const product = invoicedProducts?.find((p) => p._id === e._id);
-          if (product) {
-            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-            materialData.actualStartDate = actualEndDate;
-          } else {
-            materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
-          }
-          materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
+        const product = invoicedProducts?.find((p) => p._id === e._id);
+        if (product) {
+          const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+          materialData.actualStartDate = actualEndDate;
+        } else {
+          materialData.actualStartDate = materialData.manualStartDate ? materialData.manualStartDate : new Date().setDate(new Date().getDate() + 1);
+        }
+        materialData.actualStartDate = new Date(materialData.actualStartDate)?.toISOString();
 
-          const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
-          if (row) {
-            const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
-            setEndDate(actualEndDate);
-          }
-          return materialData;
-        })
-        .filter((d) => d.qty > 0);
+        const row: any = invoiceData[0]?.material.find((m) => m._id === e._id);
+        if (row) {
+          const actualEndDate = new Date(product?.endDate)?.setDate(new Date(product?.endDate)?.getDate() + 1);
+          setEndDate(actualEndDate);
+        }
+        return materialData;
+      }).filter((d) => d.qty > 0);
     }
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
@@ -419,13 +433,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
       parent.qtyDisplay = parent.qty;
       parent.isEditable =
         ['Per Day', 'Per Week', 'Per Month'].includes(parent?.pricingMethod) ||
-        parent.type === MATERIAL_TYPE.serializedAsset ||
-        parent.type === MATERIAL_TYPE.manualEntry
+          parent.type === MATERIAL_TYPE.serializedAsset ||
+          parent.type === MATERIAL_TYPE.manualEntry
           ? false
           : true;
       parent.subRows = generateNestedData(material, parent);
     });
-    if (policy?.progressiveBillingCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
+    if (resourceData?.policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
       handleApplyDate(rows, material);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -622,10 +636,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
               }))
           );
         } else {
-          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            calValues['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+            values['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
           }
+          calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }
         element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
@@ -772,8 +786,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
                           title={
                             !Boolean(
                               selectedRecords &&
-                                selectedRecords?.length &&
-                                (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                              selectedRecords?.length &&
+                              (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                             )
                               ? 'Please select product to apply'
                               : ''
@@ -787,8 +801,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess, policy 
                                 isApplingDate ||
                                 !Boolean(
                                   selectedRecords &&
-                                    selectedRecords?.length &&
-                                    (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                  selectedRecords?.length &&
+                                  (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
                               }
                               size="small"
