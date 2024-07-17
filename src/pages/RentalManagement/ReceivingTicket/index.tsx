@@ -2394,9 +2394,6 @@ const ActionButtonMenuItems = ({
         ) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.receivingNotValidStatus });
         }
-        else if (uniq(map(records, 'warehouseId')).length !== 1) {
-          errorMessages.push({ index: e.index, message: rentalManagementMessage.repairSameWarehouse });
-        }
       } else if (action === rentalManagementActions.receiveItems) {
         if (!e?.hasOwnProperty('loadingTicketId')) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.loadingNotCreated });
