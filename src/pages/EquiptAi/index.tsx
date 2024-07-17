@@ -33,7 +33,7 @@ const EquiptAi = () => {
   const [chatId, setChatId] = useState(null);
   const [chats, setChats] = useState(null);
   const [chatTitle, setChatTitle] = useState('');
- 
+
   useEffect(() => {
     fetchChatHistory();
   }, []);
@@ -105,33 +105,33 @@ const EquiptAi = () => {
 
   const handleExportChat = async () => {
     try {
-      const colName = ['Message', 'Content']
+      const colName = ['Message', 'Content'];
 
       const wb = xlsx.utils.book_new();
       const ws = xlsx.utils.aoa_to_sheet([colName]);
-      
+
       chats.forEach((item, index) => {
         const rowIndex = index + 1;
-        xlsx.utils.sheet_add_aoa(ws, [[item.message, item.content]], { origin: `A${rowIndex+1}` });
+        xlsx.utils.sheet_add_aoa(ws, [[item.message, item.content]], { origin: `A${rowIndex + 1}` });
       });
 
       for (let col = 0; col < colName.length; col++) {
         const cellRef = xlsx.utils.encode_cell({ r: 0, c: col });
         ws[cellRef].s = {
           font: { bold: true },
-          alignment: { horizontal: 'center' },
+          alignment: { horizontal: 'center' }
         };
       }
-     
+
       for (let row = 1; row <= chats.length; row++) {
         for (let col = 0; col < colName.length; col++) {
           const cellRef = xlsx.utils.encode_cell({ r: row, c: col });
           ws[cellRef].s = {
-            alignment: { horizontal: 'left', vertical: 'center', wrapText: true, truncation: true, },
+            alignment: { horizontal: 'left', vertical: 'center', wrapText: true, truncation: true }
           };
         }
       }
-   
+
       ws['!cols'] = [{ wch: 40 }, { wch: 100 }];
 
       xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
@@ -140,7 +140,6 @@ const EquiptAi = () => {
       toastConfig.setToastConfig(err);
     }
   };
-
 
   return (
     <section className="main-container-v1">
@@ -180,10 +179,10 @@ const EquiptAi = () => {
                 </div>
               )}
               <div className="ml-auto">
-              <HtmlTooltip title={'Download Chat'}>
-                <IconButton size="small" style={{ padding: 8 }} onClick={()=> handleExportChat()}>
-                <DownloadIcon />
-                </IconButton>
+                <HtmlTooltip title={'Download Chat'}>
+                  <IconButton size="small" style={{ padding: 8 }} onClick={() => handleExportChat()}>
+                    <DownloadIcon />
+                  </IconButton>
                 </HtmlTooltip>
               </div>
             </div>
@@ -355,7 +354,7 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
   const [speakerState, setSpeakerState] = useState({ isPlaying: false, isPaused: false, isFinished: false, isLoading: false });
   const speakerInstance = useRef<Speak>(new Speak(setSpeakerState)).current;
   const [currentIndex, setCurrentIndex] = useState<number>(null);
-  const [openFeedbackDialog, setOpenFeedbackDialog] = useState({open: false, data: null});
+  const [openFeedbackDialog, setOpenFeedbackDialog] = useState({ open: false, data: null });
 
   useEffect(() => {
     containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
@@ -401,47 +400,50 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
                         isLastChat ? '' : 'rounded-xl p-[3px] opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
                       )}
                     >
-                    <HtmlTooltip title={speakerState.isPlaying ? 'Stop' : 'Read Aloud'}>
-                      <IconButton
-                        size="small"
-                        style={{ width: 30, height: 30, borderRadius: 8 }}
-                        onClick={() => {
-                          if (speakerInstance.text === chat?.content) {
-                            if (speakerState.isPaused) {
-                              speakerInstance.play(chat?.content);
+                      <HtmlTooltip title={speakerState.isPlaying ? 'Stop' : 'Read Aloud'}>
+                        <IconButton
+                          size="small"
+                          style={{ width: 30, height: 30, borderRadius: 8 }}
+                          onClick={() => {
+                            if (speakerInstance.text === chat?.content) {
+                              if (speakerState.isPaused) {
+                                speakerInstance.play(chat?.content);
+                              } else {
+                                speakerInstance.pause();
+                              }
                             } else {
-                              speakerInstance.pause();
+                              setCurrentIndex(i);
+                              speakerInstance.play(chat?.content);
                             }
-                          } else {
-                            setCurrentIndex(i);
-                            speakerInstance.play(chat?.content);
+                          }}
+                        >
+                          {currentIndex === i ? <RenderIcon /> : <HiOutlineSpeakerWave size={15} />}
+                        </IconButton>
+                      </HtmlTooltip>
+                      <HtmlTooltip title={'Copy'}>
+                        <IconButton
+                          size="small"
+                          style={{ width: 30, height: 30, borderRadius: 8 }}
+                          onClick={() =>
+                            copyTextToClipboard(chat?.content, () => {
+                              toastConfig.setToastConfig({
+                                open: true,
+                                type: 'success',
+                                message: `Text copied!`
+                              });
+                            })
                           }
-                        }}
-                      >
-                        {currentIndex === i ? <RenderIcon /> : <HiOutlineSpeakerWave size={15} />}
-                      </IconButton>
-                    </HtmlTooltip>
-                    <HtmlTooltip title={'Copy'}>
-                      <IconButton
-                        size="small"
-                        style={{ width: 30, height: 30, borderRadius: 8 }}
-                        onClick={() =>
-                          copyTextToClipboard(chat?.content, () => {
-                            toastConfig.setToastConfig({
-                              open: true,
-                              type: 'success',
-                              message: `Text copied!`
-                            });
-                          })
-                        }
-                      >
-                        <LuCopy size={15} />
-                      </IconButton>
-                    </HtmlTooltip>
-                    <HtmlTooltip title={'Bad Response'}>
-                      <IconButton size="small" style={{ width: 30, height: 30, borderRadius: 8 }}>
-                        <BiDislike size={15} onClick={()=> setOpenFeedbackDialog({open: true, data: { message: chat.message, content: chat.content }})} />
-                      </IconButton>
+                        >
+                          <LuCopy size={15} />
+                        </IconButton>
+                      </HtmlTooltip>
+                      <HtmlTooltip title={'Bad Response'}>
+                        <IconButton size="small" style={{ width: 30, height: 30, borderRadius: 8 }}>
+                          <BiDislike
+                            size={15}
+                            onClick={() => setOpenFeedbackDialog({ open: true, data: { message: chat.message, content: chat.content } })}
+                          />
+                        </IconButton>
                       </HtmlTooltip>
                     </div>
                   </div>
@@ -465,11 +467,9 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
           ))}
         </>
       )}
-       {
-        openFeedbackDialog.open && (
-          <AiChatFeedback handleClose={()=> setOpenFeedbackDialog({open: false, data: null})} chatData = {openFeedbackDialog.data} chatId={chatId} />
-        )
-      }
+      {openFeedbackDialog.open && (
+        <AiChatFeedback handleClose={() => setOpenFeedbackDialog({ open: false, data: null })} chatData={openFeedbackDialog.data} chatId={chatId} />
+      )}
     </div>
   );
 };
