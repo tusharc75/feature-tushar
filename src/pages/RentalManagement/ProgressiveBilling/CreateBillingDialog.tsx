@@ -30,7 +30,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
 import MomentUtils from '@date-io/moment';
-import { autoCalculateSpecificFields, calculateActualJobDurationUsingServiceLog } from 'src/constants/formulaUtility';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { camelCase, isEmpty, startCase } from 'lodash';
@@ -38,6 +38,22 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
+
+const calculateServiceDays = (serviceLogs: any[], startDate: any, endDate: any) => {
+  const logs = serviceLogs?.filter(s => s.endDate);
+  if (!logs?.length) return 0;
+  const uniqueDates = new Set<string>();
+  serviceLogs.forEach(log => {
+    const logStartDate = new Date(log.startDate);
+    const logEndDate = new Date(log.endDate);
+    for (let date = logStartDate; date <= logEndDate; date.setDate(date.getDate() + 1)) {
+      if (moment(date).isBetween(moment(startDate), moment(endDate))) {
+        uniqueDates.add(date.toISOString().split('T')[0]);
+      }
+    }
+  });
+  return { duration: uniqueDates.size, endDate: logs[logs?.length - 1]?.endDate };
+}
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_create_invoice`;
@@ -324,7 +340,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            values['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+            const { duration }: any = calculateServiceDays(element?.serviceLog, values['actualEndDate'], values['manualEndDate']);
+            values['actualJobDuration'] = duration;
           }
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
@@ -638,7 +655,12 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           );
         } else {
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            values['actualJobDuration'] = calculateActualJobDurationUsingServiceLog(element?.serviceLog);
+            const { duration, endDate }: any = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
+            values['actualEndDate'] = endDate;
+            values['actualJobDuration'] = duration;
+            if (!duration) {
+              element.invalidDate = true;
+            }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }

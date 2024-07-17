@@ -6,6 +6,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Visibility } from '@material-ui/icons';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import Members from './Members';
+import Messages from './Messages';
 
 const Channel = ({ channelId }) => {
   const [memberDialog, setMemberDialog] = useState(false);
@@ -29,7 +30,7 @@ const Channel = ({ channelId }) => {
     <Box>
       {channelData ? <>
         <Box display="flex" alignItems="center" justifyContent="space-between" padding={2}>
-          <Typography variant="h6">{channelData.title}</Typography>
+          <Typography variant="h6">{channelData?.title}</Typography>
           <HtmlTooltip title={'View Members'}>
             <span>
               <IconButton color="primary" onClick={() => setMemberDialog(true)}>
@@ -41,6 +42,7 @@ const Channel = ({ channelId }) => {
         <Typography>
           {channelData.description}
         </Typography>
+        <Messages channelId={channelData?._id} />
       </> : <>
         <CommonSkeleton lenArray={[...Array(2).keys()]} />
       </>}

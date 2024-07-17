@@ -1264,6 +1264,10 @@ const routes = {
     title: storedRoutes && storedRoutes.equiptAi && storedRoutes.equiptAi?.title ? storedRoutes.equiptAi?.title : RESOURCE_LABEL.equiptAi,
     path: '/equipt-ai'
   },
+  trainAiModel: {
+    title: storedRoutes && storedRoutes.trainAiModel && storedRoutes.trainAiModel?.title ? storedRoutes.trainAiModel?.title : RESOURCE_LABEL.trainAiModel,
+    path: '/train-ai-model'
+  },
   workSpace: {
     title: storedRoutes && storedRoutes.workSpace && storedRoutes.workSpace?.title ? storedRoutes.workSpace?.title
       : RESOURCE_LABEL.workSpace,

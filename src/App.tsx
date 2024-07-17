@@ -10,7 +10,7 @@ import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNo
 import queryString from 'query-string';
 import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
-import { termsAndCondition, customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
+import { customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
 import PrivateRoute from './components/PrivateRoute';
 import { useData } from './StateProvider/Provider';
@@ -114,9 +114,7 @@ import TransferInventory from './pages/TransferInventory';
 import TransferInventoryDetailPage from './pages/TransferInventory/TransferInventoryDetailPage';
 import Zone from './pages/zone';
 import ZoneDetailPage from './pages/zone/ZoneDetailPage';
-import { Button, Snackbar } from '@material-ui/core';
 import { registerSW } from 'virtual:pwa-register';
-import MuiAlert from '@material-ui/lab/Alert';
 import WellMaster from './pages/WellMaster';
 import DashboardBuilder from './pages/DashboardBuilder/DashboardManager';
 import DashboardsList from './pages/DashboardBuilder';
@@ -259,6 +257,7 @@ import CustomIntro from 'src/components/CustomIntro';
 import Integration from 'src/pages/Integration';
 import EquiptAi from 'src/pages/EquiptAi';
 import WorkSpace from 'src/pages/WorkSpace';
+import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 
 var notificationInterval: any = null;
 
@@ -313,7 +312,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -1136,6 +1135,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.trainAiModel.path}`}>
+              <TrainAiModel />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.equiptAi.path}`}>
               <EquiptAi />
