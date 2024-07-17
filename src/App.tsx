@@ -259,6 +259,7 @@ import CustomIntro from 'src/components/CustomIntro';
 import Integration from 'src/pages/Integration';
 import EquiptAi from 'src/pages/EquiptAi';
 import WorkSpace from 'src/pages/WorkSpace';
+import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 
 var notificationInterval: any = null;
 
@@ -1136,6 +1137,9 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.integration.path}`}>
               <Integration />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.trainAiModel.path}`}>
+              <TrainAiModel />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.equiptAi.path}`}>
               <EquiptAi />
