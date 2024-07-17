@@ -1022,6 +1022,10 @@ const Productpackage = ({
           isAssigning={isSubmitting}
           handleClose={() => setAddExistingAssets(false)}
           handleSucess={handleAddAsset}
+          handleSuccessInUseAsset={() => {
+            setAddExistingAssets(false);
+            fetchData();
+          }}
         />
       )}
       {addExistingProductDialog.open && [MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(addExistingProductDialog?.type) && (

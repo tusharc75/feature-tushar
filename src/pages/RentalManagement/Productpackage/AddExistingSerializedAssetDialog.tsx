@@ -9,7 +9,15 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { gridLoadingTimeout, prepareDataForGrid, rentalManagement, serializedAsset, sidebarResource, transferAsset } from 'src/constants/helpers';
+import {
+  deliveryTicket,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  rentalManagement,
+  serializedAsset,
+  sidebarResource,
+  transferAsset
+} from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import axios, { CancelTokenSource } from 'axios';
@@ -18,7 +26,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { map, uniq } from 'lodash';
 import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
 
-const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, isAssigning, referenceData = null }) => {
+const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuccessInUseAsset, isAssigning, referenceData = null }) => {
   const renderedFrom = `${routes.serializedAsset.title}_rentalJob_selected`;
   const toastConfig = useContext(CustomToastContext);
 
@@ -195,7 +203,6 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, isAssigni
       .then(({ data }) => {
         setIsSubmitting(false);
         handleAdd();
-        setShowTransferAssetDialog(false);
       })
       .catch((error) => {
         setIsSubmitting(false);
@@ -206,18 +213,21 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, isAssigni
   const handleAutoTransferAssets = () => {
     setIsSubmitting(true);
     axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${referenceData.rentalJob}/in-use-assets`, {
+      .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, {
         assets: selectedRecords?.map((r) => ({
-          _id: r?._id,
+          _id: null,
+          asset: r?._id,
+          product: r?.productId,
           rentalJob: r?.loadingTicket?.rentalJob?.optionValue,
           ...(r?.loadingTicket?.assets?.find((ele) => ele.asset === r?._id)
             ? { uniqueId: r?.loadingTicket?.assets?.find((ele) => ele.asset === r?._id)?.uniqueId }
             : {})
-        }))
+        })),
+        rentalJob: referenceData?.rentalJob
       })
       .then(({ data }) => {
         setIsSubmitting(false);
-        handleAdd();
+        handleSuccessInUseAsset();
         setInuseAssetConfirmBox(false);
       })
       .catch((error) => {
@@ -285,7 +295,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, isAssigni
               variant="contained"
               color="primary"
               size="small"
-              disabled={isAssigning || selectedRecords?.length === 0}
+              disabled={isAssigning || isSubmitting || selectedRecords?.length === 0}
               onClick={() => {
                 if (checkMTRValidation) {
                   if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
@@ -308,11 +318,11 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, isAssigni
             variant="contained"
             color="primary"
             size="small"
-            disabled={isAssigning || selectedRecords?.length === 0}
+            disabled={isSubmitting || selectedRecords?.length === 0}
             onClick={() => {
               setInuseAssetConfirmBox(true);
             }}
-            endIcon={isAssigning && <CircularProgress size={20} />}
+            endIcon={isSubmitting && <CircularProgress size={20} />}
           >
             Add {selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''}
           </Button>
@@ -388,6 +398,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, isAssigni
           transferAssetId={null}
           onClose={() => setShowTransferAssetDialog(false)}
           onSuccess={(data) => {
+            setShowTransferAssetDialog(false);
             handleAddAssetToTransferAsset(data?._id);
           }}
           referenceId={referenceData?.rentalJob}
