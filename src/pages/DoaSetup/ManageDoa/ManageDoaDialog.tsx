@@ -426,7 +426,7 @@ const DoaDialog = ({
                                 <FieldArray
                                   name="users"
                                   render={(arrayHelpers) => (
-                                    <div>
+                                    <div className="grid gap-5">
                                       {values.users && values.users.length > 0 ? (
                                         values.users.map((userVal, index) => (
                                           <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center" key={index}>

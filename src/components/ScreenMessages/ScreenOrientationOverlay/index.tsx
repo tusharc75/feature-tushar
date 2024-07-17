@@ -53,6 +53,8 @@ const ScreenOrientationOverlay: FC<ScreenOrientationOverlayProps> = ({ displayOn
     return () => (document.body.style.overflow = null);
   }, [shouldDisplay]);
 
+  if (!import.meta.env.PROD) return null;
+
   return (
     <>
       {shouldDisplay &&

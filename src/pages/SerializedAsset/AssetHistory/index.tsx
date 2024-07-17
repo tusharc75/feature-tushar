@@ -24,7 +24,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
   });
-  const [column, setColumn] = useState([])
+  const [column, setColumn] = useState([]);
 
   const {
     state: { permissions }
@@ -43,9 +43,9 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-              row.original.type === 'Receiving Ticket' ||
-              row.original.type === 'Return Ticket' ||
-              row.original.type === 'Delivery Ticket' ? (
+            row.original.type === 'Receiving Ticket' ||
+            row.original.type === 'Return Ticket' ||
+            row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -291,13 +291,18 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     }
   ];
 
-  useEffect(()=>{
-    let statusChangeFieldColumns = []
-    statusChangeFieldColumns  = uniq(resourceData?.policy?.statusChangeFields?.flatMap(ele => ele.fields))
-    let statusChangeFields = fields?.filter((ele)=>[...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName))
-    let extraColumns = generateColumns(renderedFrom, statusChangeFields?.filter(_field => !columns?.map(c => c?.accessor).includes(_field?.fieldData?.fieldName)), routes.serializedAssetDetail.path, true);
-    setColumn([...columns, ...extraColumns])
-  },[])
+  useEffect(() => {
+    let statusChangeFieldColumns = [];
+    statusChangeFieldColumns = uniq(resourceData?.policy?.statusChangeFields?.flatMap((ele) => ele.fields));
+    let statusChangeFields = fields?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName));
+    let extraColumns = generateColumns(
+      renderedFrom,
+      statusChangeFields?.filter((_field) => !columns?.map((c) => c?.accessor).includes(_field?.fieldData?.fieldName)),
+      routes.serializedAssetDetail.path,
+      true
+    );
+    setColumn([...columns, ...extraColumns]);
+  }, []);
 
   useEffect(() => {
     if (id) {
@@ -334,7 +339,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       .get(`/history/inventory/${id}${queryString}`)
       .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
-          ...((({ assetData, ...rest }) => rest)(u)), 
+          ...(({ assetData, ...rest }) => rest)(u),
           ...u?.assetData,
           _id: index + 1,
           id: index + 1,
@@ -352,19 +357,18 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       });
   };
 
-
   return (
     <Box>
-      <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
+      <Box className="flex flex-wrap items-center justify-between gap-3">
         <Box className="max-w-[800px]">
           <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
         </Box>
         <ImportExportLinks
           permissions={permissions?.history}
-          module={"Asset History"}
+          module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => { }}
-          onExportToExcelSuccess={() => { }}
+          afterImportCompleted={() => {}}
+          onExportToExcelSuccess={() => {}}
           additionalParams={getQueryString()}
           onlyExport={true}
         />
@@ -391,5 +395,3 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
 };
 
 export default AssetHistory;
-
-

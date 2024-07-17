@@ -20,19 +20,8 @@ export default function OrgChartContainer({ data, onClick, updateChart = null, s
   };
 
   return (
-    <Fragment>
-      {isInContact && (
-        <div style={{ float: 'right' }}>
-          <Button
-            size="small"
-            variant="contained"
-            onClick={setShowAddContact}
-            color="primary">
-            Add Contacts
-          </Button>
-        </div>
-      )}
-      <div className="custom-orgchart">
+    <div className="flex flex-wrap items-start gap-2">
+      <div className="custom-orgchart mx-auto">
         <OrgChart
           positions={positions}
           getOrgChart={getOrgChart}
@@ -42,6 +31,13 @@ export default function OrgChartContainer({ data, onClick, updateChart = null, s
           google={google}
         />
       </div>
-    </Fragment>
+      {isInContact && (
+        <div>
+          <Button size="small" variant="contained" onClick={setShowAddContact} color="primary">
+            Add Contacts
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
