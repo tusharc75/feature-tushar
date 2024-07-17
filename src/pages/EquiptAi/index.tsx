@@ -1,6 +1,6 @@
 import { IconButton, List, ListItem, ListItemText, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { forwardRef, useContext, useEffect, useRef, useState } from 'react';
 import { BsStars } from 'react-icons/bs';
 import { FaArrowUp } from 'react-icons/fa6';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -12,7 +12,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { Delete } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { BiDislike } from 'react-icons/bi';
-import { FaShare } from 'react-icons/fa';
 import { FiEdit, FiSidebar } from 'react-icons/fi';
 import { LuCopy } from 'react-icons/lu';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -22,6 +21,7 @@ import { Speak } from 'src/pages/EquiptAi/Speak';
 import { CgSpinner } from 'react-icons/cg';
 import AiChatFeedback from 'src/pages/EquiptAi/AiChatFeedback';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
+import xlsx from 'xlsx-js-style';
 
 const EquiptAi = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -33,7 +33,7 @@ const EquiptAi = () => {
   const [chatId, setChatId] = useState(null);
   const [chats, setChats] = useState(null);
   const [chatTitle, setChatTitle] = useState('');
-
+ 
   useEffect(() => {
     fetchChatHistory();
   }, []);
@@ -103,17 +103,39 @@ const EquiptAi = () => {
     setChats([]);
   };
 
-  const handleDownloadPDF = async () => {
+  const handleExportChat = async () => {
     try {
-      const response = await axiosInstance().post(`/generative-ai/chat/download/${chatId}`,null, {
-        responseType: 'blob'
+      const colName = ['Message', 'Content']
+
+      const wb = xlsx.utils.book_new();
+      const ws = xlsx.utils.aoa_to_sheet([colName]);
+      
+      chats.forEach((item, index) => {
+        const rowIndex = index + 1;
+        xlsx.utils.sheet_add_aoa(ws, [[item.message, item.content]], { origin: `A${rowIndex+1}` });
       });
+
+      for (let col = 0; col < colName.length; col++) {
+        const cellRef = xlsx.utils.encode_cell({ r: 0, c: col });
+        ws[cellRef].s = {
+          font: { bold: true },
+          alignment: { horizontal: 'center' },
+        };
+      }
      
-      const fileURL = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
-      const link = document.createElement('a');
-      link.href = fileURL;
-      link.setAttribute('download', `${chatTitle}.pdf`);
-      link.click();
+      for (let row = 1; row <= chats.length; row++) {
+        for (let col = 0; col < colName.length; col++) {
+          const cellRef = xlsx.utils.encode_cell({ r: row, c: col });
+          ws[cellRef].s = {
+            alignment: { horizontal: 'left', vertical: 'center', wrapText: true, truncation: true, },
+          };
+        }
+      }
+   
+      ws['!cols'] = [{ wch: 40 }, { wch: 100 }];
+
+      xlsx.utils.book_append_sheet(wb, ws, 'Sheet1');
+      xlsx.writeFile(wb, `${chatTitle}.xlsx`);
     } catch (err) {
       toastConfig.setToastConfig(err);
     }
@@ -159,7 +181,7 @@ const EquiptAi = () => {
               )}
               <div className="ml-auto">
               <HtmlTooltip title={'Download Chat'}>
-                <IconButton size="small" style={{ padding: 8 }} onClick={()=> handleDownloadPDF()}>
+                <IconButton size="small" style={{ padding: 8 }} onClick={()=> handleExportChat()}>
                 <DownloadIcon />
                 </IconButton>
                 </HtmlTooltip>
