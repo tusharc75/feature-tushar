@@ -6,7 +6,6 @@ import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
@@ -44,6 +43,7 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import AddExistingProductInventory from 'src/pages/RentalManagement/Productpackage/AddExistingProductInventory';
 import { FiExternalLink } from 'react-icons/fi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import AddExistingSerializedAssetDialog from 'src/pages/RentalManagement/Productpackage/AddExistingSerializedAssetDialog';
 
 const Productpackage = ({
   rentalManagementData,
@@ -198,7 +198,15 @@ const Productpackage = ({
                 {!isOffline && allowedToEdit && !quotationApproved && (
                   <HtmlTooltip title="Add">
                     <IconButton
-                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, type: row.original?.type, top: event.clientY, bottom: event.clientX })}
+                      onClick={(event) =>
+                        setAddchildDialog({
+                          open: true,
+                          parentId: row.original?._id,
+                          type: row.original?.type,
+                          top: event.clientY,
+                          bottom: event.clientX
+                        })
+                      }
                       size="small"
                       color="primary"
                     >
@@ -362,16 +370,17 @@ const Productpackage = ({
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.manualEntry
-            ? parent.detail
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail
+            ? parent.serviceDetail?.serviceName
             : parent.packageDetail?.packageName
-        }`;
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.manualEntry
+              ? parent.detail
+              : parent.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -389,18 +398,18 @@ const Productpackage = ({
       parent.assetQty = parent.serializedProduct
         ? inventory?.filter((e) => e._id === parent._id).length + productSerialNumbers?.filter((e) => e._id === parent._id).length
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
-        data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
+          data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.hideSelection =
         parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length ? true : parent?.status ? true : false;
       parent.nonSerializedQty =
         parent.type === MATERIAL_TYPE.product &&
-          !parent.serializedProduct &&
-          parent.assetQty === 0 &&
-          parent?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
+        !parent.serializedProduct &&
+        parent.assetQty === 0 &&
+        parent?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
-            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === parent?._id && e?.product === parent?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       parent.subRows = generateNestedData(
         data.material,
@@ -431,14 +440,15 @@ const Productpackage = ({
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.service
-        ? _subRow.serviceDetail?.serviceName
-        : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow.packageDetail?.packageName
-          : _subRow.type === MATERIAL_TYPE.product
-            ? _subRow.productDetail?.productName
-            : ''
-        } `;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow.serviceDetail?.serviceName
+          : _subRow.type === MATERIAL_TYPE.package
+            ? _subRow.packageDetail?.packageName
+            : _subRow.type === MATERIAL_TYPE.product
+              ? _subRow.productDetail?.productName
+              : ''
+      } `;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -456,13 +466,13 @@ const Productpackage = ({
       _subRow.hideSelection = _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
-          !_subRow.serializedProduct &&
-          _subRow.assetQty === 0 &&
-          _subRow?.status &&
-          loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
+        !_subRow.serializedProduct &&
+        _subRow.assetQty === 0 &&
+        _subRow?.status &&
+        loadingTicketProducts?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)?.length > 0
           ? loadingTicketProducts
-            ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
-            ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
+              ?.filter((e) => e?.uniqueId === _subRow?._id && e?.product === _subRow?.materialId)
+              ?.reduce((sum, row) => sum + (row?.qty || 0), 0)
           : 0;
       _subRow.subRows = generateNestedData(
         material,
@@ -999,13 +1009,19 @@ const Productpackage = ({
         />
       )}
       {addExistingAssets && (
-        <AssignSerializedAssetDialog
-          reference={'rentalJob'}
-          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue, rentalJob: rentalManagementData._id }}
+        <AddExistingSerializedAssetDialog
+          referenceData={{
+            warehouse: rentalManagementData?.warehouse,
+            rentalJob: rentalManagementData._id,
+            wellName: rentalManagementData?.wellName,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
+            afeNumber: rentalManagementData?.afeNumber
+          }}
           isAssigning={isSubmitting}
           handleClose={() => setAddExistingAssets(false)}
           handleSucess={handleAddAsset}
-          ids={[]}
         />
       )}
       {addExistingProductDialog.open && [MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(addExistingProductDialog?.type) && (
@@ -1058,7 +1074,7 @@ const Productpackage = ({
             >
               Add Existing Products
             </MenuItem>
-            {addchildDialog.type === MATERIAL_TYPE.package &&
+            {addchildDialog.type === MATERIAL_TYPE.package && (
               <MenuItem
                 onClick={() => {
                   setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
@@ -1067,17 +1083,17 @@ const Productpackage = ({
               >
                 Add Existing Packages
               </MenuItem>
-            }
-            {permissions?.serviceMaster?.isRead && addchildDialog.type === MATERIAL_TYPE.package &&
+            )}
+            {permissions?.serviceMaster?.isRead && addchildDialog.type === MATERIAL_TYPE.package && (
               <MenuItem
                 onClick={() => {
-                  setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.service, parentId: addchildDialog.parentId })
-                  setAddchildDialog({ open: false, parentId: null, type: null, top: null, bottom: null })
-                }
-                }
+                  setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.service, parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, type: null, top: null, bottom: null });
+                }}
               >
                 Add Existing Services
-              </MenuItem>}
+              </MenuItem>
+            )}
           </MenuList>
         </Popover>
       )}
