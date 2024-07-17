@@ -108,7 +108,6 @@ const RentalManagement = () => {
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.rentalManagement}&entity=${selectedEntity}&view=true`);
       data = response?.data?.data;
-      console.log(createAddItemStepdata(routes.rentalManagement, data));
       setWalkmeData([createAddItemStepdata(routes.rentalManagement, data)]);
       try {
         insertUpdate(objectStore.resource, sidebarResource.rentalManagement, data);

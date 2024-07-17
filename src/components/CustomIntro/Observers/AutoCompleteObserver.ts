@@ -22,7 +22,6 @@ export class AutocompleteObserver extends Observer {
       }
     }
     if (!this.attributeTracker['aria-controls'] && this.attributeTracker['value'] && this.valiDator(this.attributeTracker['value'])) {
-      console.log(this.handleSteps);
       this.handleSteps.next();
       this.disconnect();
     }

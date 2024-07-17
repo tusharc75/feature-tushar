@@ -87,7 +87,8 @@ export class HandleSteps {
         title: data.title,
         content: data.content,
         target: data.target,
-        isHiddenStep: false
+        isHiddenStep: false,
+        nextButtonName: data.nextButtonName
       };
       if (data.skipIfValueExist) {
         normalStep.skipIfValueExist = data.skipIfValueExist;
@@ -268,6 +269,7 @@ export class HandleSteps {
         element
       };
 
+      // Settimeout with 0 sec delay will move these function calls to js task queue and will execute later
       setTimeout(() => {
         this.attachNextListeners();
         this.sendUpdateSignal();

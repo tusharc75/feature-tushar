@@ -216,21 +216,21 @@ const TableComponent = forwardRef(function (
           overflow: loading ? 'hidden' : 'auto',
           height: height ?? '100%'
         }}
-        className="border z-10 bg-[var(--dark-primary,_white)] isolate max-[900px]:min-h-[500px]"
+        className="isolate z-10 border bg-[var(--dark-primary,_white)] max-[900px]:min-h-[500px]"
         ref={virtualization ? parentRef : undefined}
       >
         {!loading && !error && rows.length === 0 && initialDataLoaded && (
           <>
-            <Box className=" w-fit h-fit absolute m-auto inset-0 top-[46px] flex justify-center items-center -z-10 select-none">
-              <div className=" px-10 py-5 rounded-lg text-center">
+            <Box className=" absolute inset-0 top-[46px] -z-10 m-auto flex h-fit w-fit select-none items-center justify-center">
+              <div className=" rounded-lg px-10 py-5 text-center">
                 <p>No data found</p>
               </div>
             </Box>
           </>
         )}
         {(loading || error || !initialDataLoaded) && (
-          <Box className="bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)] w-full h-full z-50 absolute inset-0 flex justify-center items-center">
-            <div className="bg-[white] dark:bg-[var(--dark-secondary)] px-10 py-5 rounded-lg text-center shadow-md">
+          <Box className="absolute inset-0 z-50 flex h-full w-full items-center justify-center bg-[rgba(255,255,255,0.2)] dark:bg-[rgba(0,0,0,0.1)]">
+            <div className="rounded-lg bg-[white] px-10 py-5 text-center shadow-md dark:bg-[var(--dark-secondary)]">
               {error ? (
                 <>
                   <Error className="mx-auto mb-2" />
@@ -246,16 +246,16 @@ const TableComponent = forwardRef(function (
           </Box>
         )}
 
-        <MaUTable ref={tableRef} size="small" className="tableWrap table sticky" style={styles}>
+        <MaUTable ref={tableRef} size="small" className="tableWrap sticky table" style={styles}>
           <TableHead
             style={{
               overflowY: 'auto',
               overflowX: 'hidden'
             }}
-            className="header sticky top-0 bg-[var(--dark-primary,_white)] z-[11]"
+            className="header sticky top-0 z-[11] bg-[var(--dark-primary,_white)]"
           >
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow className="tr sticky top-0 bg-[var(--dark-primary,_white)] z-[11] " key={headerGroup.id}>
+              <TableRow className="tr sticky top-0 z-[11] bg-[var(--dark-primary,_white)] " key={headerGroup.id}>
                 <SortableContext items={headerGroup.headers.map((header) => header.column.columnDef.id)} strategy={horizontalListSortingStrategy}>
                   {headerGroup.headers.map((header) => {
                     if (exportTableView && excludedColumns.includes(header.column.columnDef.id)) return null;
@@ -297,7 +297,7 @@ const TableComponent = forwardRef(function (
                         const colSize = header.getSize();
                         return (
                           <th
-                            className={`bg-[var(--dark-primary,_white)] sticky bottom-0`}
+                            className={`sticky bottom-0 bg-[var(--dark-primary,_white)]`}
                             style={{
                               ...style,
                               position: 'sticky',

@@ -1,4 +1,4 @@
-import { findIndex, startCase } from 'lodash';
+import { findIndex } from 'lodash';
 import { StepDefination, WalkmeData } from 'src/components/CustomIntro';
 
 export const getCurrentUrl = () => {
@@ -72,9 +72,25 @@ export const injectFormFields = (data, fields) => {
   }
 };
 
+export function generateFormFieldSteps(fields: any[], ignoreField?: string[]) {
+  let fieldsStpes: StepDefination[] = [];
+  fields?.forEach((e) => {
+    if (e?.fieldData?.required && !ignoreField?.includes(e?.fieldData?.fieldName) && !e?.fieldData?.isDefaultValue && !e?.fieldData?.isUneditable) {
+      fieldsStpes.push({
+        title: `Select ${e?.fieldData?.fieldLabel}`,
+        target: `#field-${e?.fieldData?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
+        content: '',
+        nextOnValueChange: true,
+        skipIfValueExist: true
+      });
+    }
+  });
+  return fieldsStpes;
+}
+
 export function createAddItemStepdata(route: { title: string; path: string }, fields: any[]) {
   const { title, path } = route;
-  const ignoreField = ['currency', 'owner', 'pdfTemplate', 'billingAddress', 'shippingAddress'];
+  const ignoreField = ['currency', 'owner', 'pdfTemplate'];
   const walkmeData: WalkmeData = {
     name: `Add ${title}`,
     url: path,
@@ -88,17 +104,7 @@ export function createAddItemStepdata(route: { title: string; path: string }, fi
       content: ''
     }
   ];
-  fields?.forEach((e) => {
-    if (e?.fieldData?.required && !ignoreField?.includes(e?.fieldData?.fieldName) && !e?.fieldData?.isDefaultValue && !e?.fieldData?.isUneditable) {
-      fieldsStpes.push({
-        title: `Select ${e?.fieldData?.fieldLabel}`,
-        target: `#field-${e?.fieldData?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
-        content: '',
-        nextOnValueChange: true,
-        skipIfValueExist: true
-      });
-    }
-  });
+  fieldsStpes.push(...generateFormFieldSteps(fields, ignoreField));
   fieldsStpes.push({
     target: '#dialog-save-button',
     title: 'Save',
