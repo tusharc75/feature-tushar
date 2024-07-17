@@ -177,8 +177,8 @@ export class HandleSteps {
   removeNextListeners() {
     this.listenerAttachedElements.map((d) => d.elm.removeEventListener(d.event, d.func));
     this.attachedOvservers.map((d) => d.disconnect());
-    this.listenerAttachedElements = [];
-    this.attachedOvservers = [];
+    // this.listenerAttachedElements = [];
+    // this.attachedOvservers = [];
   }
 
   start() {
@@ -199,6 +199,7 @@ export class HandleSteps {
     if (this.currentIndex === this.steps.length - 1) {
       this.reset();
     }
+
     // To debounce click only register first click
     if (this.clicked) return;
     this.clicked = true;
@@ -236,8 +237,10 @@ export class HandleSteps {
         clearInterval(this.interval);
         this.message = 'Element not found';
         this.error = true;
+
         this.reset();
       }
+
       this.interval = setInterval(() => {
         this.getCurrentStep();
       }, 1000);
@@ -251,22 +254,24 @@ export class HandleSteps {
       if (activeStep.skipIfValueExist) {
         const inputElement = element as HTMLInputElement;
         if (inputElement.value?.length > 0) {
+          this.clicked = false;
           this.next();
           return;
         }
       }
 
+      this.clicked = false;
+      this.currentStepData = {
+        ...activeStep,
+        positionData,
+        index: index,
+        element
+      };
+
       setTimeout(() => {
-        this.clicked = false;
-        this.currentStepData = {
-          ...activeStep,
-          positionData,
-          index: index,
-          element
-        };
         this.attachNextListeners();
         this.sendUpdateSignal();
-      }, 500);
+      }, 0);
     }
   }
 
