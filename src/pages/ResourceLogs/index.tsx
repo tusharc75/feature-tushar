@@ -121,7 +121,7 @@ const ResourceLogs = () => {
                     setSelectedAction(newValue);
                   }}
                   size="small"
-                  renderInput={(params) => <TextField {...params} label={'Select Action'} variant="outlined" />}
+                  renderInput={(params) => <TextField {...params} label={'Select Operation'} variant="outlined" />}
                 />
                 <Autocomplete
                   options={userOptions}

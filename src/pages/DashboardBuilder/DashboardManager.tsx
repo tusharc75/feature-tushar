@@ -17,6 +17,7 @@ import Builder from './Builder';
 import DashboardItem from './DashboardItem';
 import DashboardView from './DashboardView';
 import { IFormDataType, baseURL } from './builderHelpers';
+import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 
 const DashboardBuilder = () => {
   const history = useHistory();
@@ -104,26 +105,26 @@ const DashboardBuilder = () => {
     const dataToExport =
       formData?.length > 0
         ? {
-            name: values?.name.trim(),
-            charts: formData
-          }
+          name: values?.name.trim(),
+          charts: formData
+        }
         : {
-            name: '',
-            charts: [
-              {
-                graphyType: '', // Valid types ["Chart", "Map", "Table"]
-                chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
-                column: 6,
-                chartTitle: '',
-                kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
-                hasFilters: false,
-                hasTableView: false,
-                hasExport: false,
-                statusOptions: [],
-                filters: []
-              }
-            ]
-          };
+          name: '',
+          charts: [
+            {
+              graphyType: '', // Valid types ["Chart", "Map", "Table"]
+              chartType: '', // Valid types ["Pie", "Line", "Bar", "Doughnut"]
+              column: 6,
+              chartTitle: '',
+              kpi: { name: '', kpi: '', resource: '', id: 0, graphType: '', chartType: '' },
+              hasFilters: false,
+              hasTableView: false,
+              hasExport: false,
+              statusOptions: [],
+              filters: []
+            }
+          ]
+        };
     let blob = new Blob([JSON.stringify(dataToExport)], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, `${values?.name || 'Dashboard Fields'}.json`);
   };
@@ -211,7 +212,8 @@ const DashboardBuilder = () => {
 
   const sensors = useDndSensors();
 
-  return (
+  return (<>
+    <DeviceMessage />
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
@@ -338,6 +340,7 @@ const DashboardBuilder = () => {
         </Box>
       </Box>
     </Box>
+  </>
   );
 };
 
