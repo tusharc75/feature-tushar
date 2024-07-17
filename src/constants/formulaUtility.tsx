@@ -613,19 +613,6 @@ export const autoCalculateSpecificFields = (inputValues: any, values: any, field
     return returnvalues
 }
 
-export const calculateActualJobDurationUsingServiceLog = (serviceLogs: any[]) => {
-    const logs = serviceLogs?.filter(s => s.endDate);
-    if(!logs?.length) return 0;
-    const uniqueDates = new Set<string>();
-    serviceLogs.forEach(log => {
-        const startDate = new Date(log.startDate);
-        const endDate = new Date(log.endDate);
-        for (let date = startDate; date <= endDate; date.setDate(date.getDate() + 1)) {
-            uniqueDates.add(date.toISOString().split('T')[0]);
-        }
-    });
-    return uniqueDates.size;
-}
 
 export const checkFormulaLoop = (fields) => {
     try {
