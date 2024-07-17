@@ -71,12 +71,12 @@ const Comments = ({ handleClose, chatData, chatId }) => {
         </Grid>
       </CustomDialogContent>
       <CustomDialogFooter>
-      <CustomButton disabled={comment === '' || loading} loading={loading} variant="contained" color="primary" size="small" onClick={handleSubmit}>
-              Add
-      </CustomButton>
-        <Button variant="outlined" color="primary" size="small" onClick={handleClose}>
+      <Button variant="outlined" color="primary" size="small" onClick={handleClose}>
           Cancel
-        </Button>
+       </Button>
+      <CustomButton disabled={comment === '' || loading} loading={loading} variant="contained" color="primary" size="small" onClick={handleSubmit}>
+            Save
+      </CustomButton>
       </CustomDialogFooter>
     </Dialog>
   );
