@@ -20,6 +20,8 @@ import { cn, copyTextToClipboard } from 'src/constants/helpers';
 import { HiOutlineSpeakerWave, HiOutlineSpeakerXMark } from 'react-icons/hi2';
 import { Speak } from 'src/pages/EquiptAi/Speak';
 import { CgSpinner } from 'react-icons/cg';
+import AiChatFeedback from 'src/pages/EquiptAi/AiChatFeedback';
+import { DownloadIcon } from 'src/assets/svg/svgIcons';
 
 const EquiptAi = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -30,6 +32,7 @@ const EquiptAi = () => {
   const [chatHistory, setChatHistory] = useState(null);
   const [chatId, setChatId] = useState(null);
   const [chats, setChats] = useState(null);
+  const [chatTitle, setChatTitle] = useState('');
 
   useEffect(() => {
     fetchChatHistory();
@@ -50,6 +53,7 @@ const EquiptAi = () => {
       .get(`/generative-ai/chat/${chatId}`)
       .then(({ data: { data } }) => {
         setChats(data?.history);
+        setChatTitle(data?.title);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -99,6 +103,23 @@ const EquiptAi = () => {
     setChats([]);
   };
 
+  const handleDownloadPDF = async () => {
+    try {
+      const response = await axiosInstance().post(`/generative-ai/chat/download/${chatId}`,null, {
+        responseType: 'blob'
+      });
+     
+      const fileURL = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = fileURL;
+      link.setAttribute('download', `${chatTitle}.pdf`);
+      link.click();
+    } catch (err) {
+      toastConfig.setToastConfig(err);
+    }
+  };
+
+
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -137,12 +158,14 @@ const EquiptAi = () => {
                 </div>
               )}
               <div className="ml-auto">
-                <IconButton size="small" style={{ padding: 8 }}>
-                  <FaShare />
+              <HtmlTooltip title={'Download Chat'}>
+                <IconButton size="small" style={{ padding: 8 }} onClick={()=> handleDownloadPDF()}>
+                <DownloadIcon />
                 </IconButton>
+                </HtmlTooltip>
               </div>
             </div>
-            <DisplayMessages chats={chats} />
+            <DisplayMessages chats={chats} chatId={chatId} chatTitle={chatTitle} />
             <div className="absolute bottom-0 left-0 right-0 bg-[var(--dark-primary,white)] p-2">
               <div className="flex rounded-full p-2 [border:1px_solid_var(--common-border-color)]">
                 <input
@@ -301,14 +324,17 @@ const HistorySidebar = ({
 
 type DisplayMessagesProps = {
   chats: { message: string; content: string }[];
+  chatId: string;
+  chatTitle: string;
 };
 
-const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
+const DisplayMessages = ({ chats, chatId, chatTitle }: DisplayMessagesProps) => {
   const toastConfig = useContext(CustomToastContext);
   const containerRef = useRef<HTMLDivElement>(null);
   const [speakerState, setSpeakerState] = useState({ isPlaying: false, isPaused: false, isFinished: false, isLoading: false });
   const speakerInstance = useRef<Speak>(new Speak(setSpeakerState)).current;
   const [currentIndex, setCurrentIndex] = useState<number>(null);
+  const [openFeedbackDialog, setOpenFeedbackDialog] = useState({open: false, data: null});
 
   useEffect(() => {
     containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
@@ -354,6 +380,27 @@ const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
                         isLastChat ? '' : 'rounded-xl p-[3px] opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
                       )}
                     >
+                    <HtmlTooltip title={speakerState.isPlaying ? 'Stop' : 'Read Aloud'}>
+                      <IconButton
+                        size="small"
+                        style={{ width: 30, height: 30, borderRadius: 8 }}
+                        onClick={() => {
+                          if (speakerInstance.text === chat?.content) {
+                            if (speakerState.isPaused) {
+                              speakerInstance.play(chat?.content);
+                            } else {
+                              speakerInstance.pause();
+                            }
+                          } else {
+                            setCurrentIndex(i);
+                            speakerInstance.play(chat?.content);
+                          }
+                        }}
+                      >
+                        {currentIndex === i ? <RenderIcon /> : <HiOutlineSpeakerWave size={15} />}
+                      </IconButton>
+                    </HtmlTooltip>
+                    <HtmlTooltip title={'Copy'}>
                       <IconButton
                         size="small"
                         style={{ width: 30, height: 30, borderRadius: 8 }}
@@ -369,27 +416,12 @@ const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
                       >
                         <LuCopy size={15} />
                       </IconButton>
+                    </HtmlTooltip>
+                    <HtmlTooltip title={'Bad Response'}>
                       <IconButton size="small" style={{ width: 30, height: 30, borderRadius: 8 }}>
-                        <BiDislike size={15} />
+                        <BiDislike size={15} onClick={()=> setOpenFeedbackDialog({open: true, data: { message: chat.message, content: chat.content }})} />
                       </IconButton>
-                      <IconButton
-                        size="small"
-                        style={{ width: 30, height: 30, borderRadius: 8 }}
-                        onClick={() => {
-                          if (speakerInstance.text === chat?.content) {
-                            if (speakerState.isPaused) {
-                              speakerInstance.resume();
-                            } else {
-                              speakerInstance.pause();
-                            }
-                          } else {
-                            setCurrentIndex(i);
-                            speakerInstance.play(chat?.content);
-                          }
-                        }}
-                      >
-                        {currentIndex === i ? <RenderIcon /> : <HiOutlineSpeakerWave size={15} />}
-                      </IconButton>
+                      </HtmlTooltip>
                     </div>
                   </div>
                 </div>
@@ -412,6 +444,11 @@ const DisplayMessages = ({ chats }: DisplayMessagesProps) => {
           ))}
         </>
       )}
+       {
+        openFeedbackDialog.open && (
+          <AiChatFeedback handleClose={()=> setOpenFeedbackDialog({open: false, data: null})} chatData = {openFeedbackDialog.data} chatTitle={chatTitle} chatId={chatId} />
+        )
+      }
     </div>
   );
 };
