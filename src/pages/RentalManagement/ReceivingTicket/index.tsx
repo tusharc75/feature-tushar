@@ -138,7 +138,7 @@ const ReceivingTicket = ({
 
   const [columns, setColumns] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {} });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {}, ticketType: null });
   const [assetsData, setAssetsData] = useState([]);
   const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
   const [transferAnotherPackageDialog, setTransferAnotherPackageialog] = useState(false)
@@ -1143,7 +1143,7 @@ const ReceivingTicket = ({
       if (selectedRecords[0].warehouseId && ticketType === DELIVERY_TICKET_TYPE.return) {
         data['deliveryTo'] = selectedRecords[0].warehouseId;
         data['deliveryToAddress'] = selectedRecords[0].currentLocation;
-        data['isDeliveryToDisable'] = true;
+        //data['isDeliveryToDisable'] = true;
       } else {
         data['deliveryTo'] = rentalManagementData?.warehouse?.optionValue;
         data['deliveryToAddress'] = rentalManagementData?.warehouse?.address;
@@ -1177,7 +1177,7 @@ const ReceivingTicket = ({
 
     const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
-      setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, referenceData: data });
+      setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, referenceData: data, ticketType: ticketType });
     } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     }
@@ -1921,11 +1921,12 @@ const ReceivingTicket = ({
           ids={selectedRecords?.filter((e) => e.type === 'Asset')?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={setAssetsData}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null })}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null })}
           onSuccess={() => {
             const referenceData = openAssetDataDialog.referenceData;
-            setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null });
-            setShowTicketDialog({ open: true, ticketType: DELIVERY_TICKET_TYPE.receiving, data: referenceData });
+            const ticketType = openAssetDataDialog.ticketType;
+            setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null });
+            setShowTicketDialog({ open: true, ticketType: ticketType, data: referenceData });
           }}
         />
       )}
@@ -2691,7 +2692,7 @@ const ActionButtonMenuItems = ({
                 }
               }}
             >
-              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Non-Chargeable)` : `Create Return Ticket (Non-Chargeable)`}
+              Create Return Ticket (Non-Chargeable)
             </MenuItem>
             {permissions?.sublease?.isRead && (
               <MenuItem
