@@ -1,6 +1,6 @@
 import { IconButton, List, ListItem, ListItemText, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import React, { forwardRef, useContext, useEffect, useRef, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { BsStars } from 'react-icons/bs';
 import { FaArrowUp } from 'react-icons/fa6';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -187,7 +187,7 @@ const EquiptAi = () => {
                 </HtmlTooltip>
               </div>
             </div>
-            <DisplayMessages chats={chats} chatId={chatId} chatTitle={chatTitle} />
+            <DisplayMessages chats={chats} chatId={chatId} />
             <div className="absolute bottom-0 left-0 right-0 bg-[var(--dark-primary,white)] p-2">
               <div className="flex rounded-full p-2 [border:1px_solid_var(--common-border-color)]">
                 <input
@@ -347,10 +347,9 @@ const HistorySidebar = ({
 type DisplayMessagesProps = {
   chats: { message: string; content: string }[];
   chatId: string;
-  chatTitle: string;
 };
 
-const DisplayMessages = ({ chats, chatId, chatTitle }: DisplayMessagesProps) => {
+const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
   const toastConfig = useContext(CustomToastContext);
   const containerRef = useRef<HTMLDivElement>(null);
   const [speakerState, setSpeakerState] = useState({ isPlaying: false, isPaused: false, isFinished: false, isLoading: false });
@@ -468,7 +467,7 @@ const DisplayMessages = ({ chats, chatId, chatTitle }: DisplayMessagesProps) => 
       )}
        {
         openFeedbackDialog.open && (
-          <AiChatFeedback handleClose={()=> setOpenFeedbackDialog({open: false, data: null})} chatData = {openFeedbackDialog.data} chatTitle={chatTitle} chatId={chatId} />
+          <AiChatFeedback handleClose={()=> setOpenFeedbackDialog({open: false, data: null})} chatData = {openFeedbackDialog.data} chatId={chatId} />
         )
       }
     </div>

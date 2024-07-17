@@ -5,11 +5,10 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { TextField, Button, Grid } from '@material-ui/core';
-import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 
-const Comments = ({ handleClose, chatData, chatTitle, chatId }) => {
+const Comments = ({ handleClose, chatData, chatId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [comment, setComment] = useState('');
   const [loading, setLoading] = useState(false);
@@ -50,7 +49,7 @@ const Comments = ({ handleClose, chatData, chatTitle, chatId }) => {
       aria-labelledby="comments-dialog"
     >
       <CustomDialogHeader
-        title={`Feedback-${chatTitle}`}
+        title={`Feedback`}
         showRequiredLabel={false}
         onClose={handleClose}
         showManimizeMaximize={false}
