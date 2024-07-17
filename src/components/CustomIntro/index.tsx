@@ -33,6 +33,7 @@ export type StepDefination = {
   nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
   skipIfValueExist?: boolean;
+  nextButtonName?: string;
 };
 
 export type NormalStep = {
@@ -41,6 +42,7 @@ export type NormalStep = {
   target: string;
   isHiddenStep: false;
   skipIfValueExist?: boolean;
+  nextButtonName?: string;
 };
 export type HiddenStep = {
   target: string;
@@ -50,6 +52,7 @@ export type HiddenStep = {
   nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
   skipIfValueExist?: boolean;
+  nextButtonName?: string;
 };
 
 const CustomIntro = () => {
@@ -175,7 +178,7 @@ const CustomIntro = () => {
                     }}
                     endIcon={<FaArrowRight size={16} />}
                   >
-                    Next
+                    {currentStepData.nextButtonName || 'Next'}
                   </ThemeButton>
                 ) : (
                   <ThemeButton
@@ -187,7 +190,7 @@ const CustomIntro = () => {
                       handleReset();
                     }}
                   >
-                    Finish
+                    {currentStepData.nextButtonName || 'Finish'}
                   </ThemeButton>
                 )}
               </div>

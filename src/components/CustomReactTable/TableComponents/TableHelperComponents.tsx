@@ -234,7 +234,7 @@ export function Filter({ column, table }: { column: Column<any, unknown>; table:
 
 // Checkbox
 interface CustomCheckBoxProps extends CheckboxProps {
-  indeterminate: any;
+  indeterminate?: any;
   from?: string;
   style?: React.CSSProperties;
 }

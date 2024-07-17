@@ -108,19 +108,24 @@ export const useCreateColumns = ({
           {...{
             checked: table.getIsAllRowsSelected(),
             indeterminate: table.getIsSomeRowsSelected(),
-            onChange: table.getToggleAllRowsSelectedHandler()
+            onChange: table.getToggleAllRowsSelectedHandler(),
+            id: `${(resource || renderedFrom).split(' ').join('-')}-table-select-all-checkbox`
           }}
           className="mx-auto text-center [&_svg]:[font-size:20px] "
         />
       ),
       cell: ({ row }) => (
-        <div className="mx-auto justify-center text-center">
+        <div
+          className="mx-auto justify-center text-center"
+          key={`${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`}
+        >
           {row.original.hideSelection ? (
             <></>
           ) : (
             <IndeterminateCheckbox
               {...{
                 checked: row.getIsSelected(),
+                value: row.getIsSelected() ? true : false,
                 indeterminate: row.getIsSomeSelected(),
                 onChange: row.getToggleSelectedHandler(),
                 id: `${(resource || renderedFrom).split(' ').join('-')}-table-checkbox-${row.index || 0}`
