@@ -3313,10 +3313,12 @@ body {
 .form-head-v1 {
   padding: 16px 28px;
   background: #f1f5ff;
+  gap: 8px;
   border-radius: 4.06331px 4.06331px 0px 0px;
   display: flex;
   align-items: center;
   position: relative;
+  justify-content: space-between;
   [data-mode='dark'] & {
     background: #282845;
   }
@@ -3326,15 +3328,13 @@ body {
     font-size: 14px;
     line-height: 1.05;
     color: #2a3042;
+    min-width: 0;
     [data-mode='dark'] & {
       color: #fff;
     }
   }
   .float-right-button-v1 {
-    position: absolute;
-    top: 50%;
-    right: 28px;
-    transform: translateY(-50%);
+    min-width: max-content !important;
   }
 }
 
@@ -4344,4 +4344,11 @@ div[role='presentation'].MuiAutocomplete-popper {
   li {
     list-style: none;
   }
+}
+.MuiPaper-root.MuiStepper-root.MuiStepper-horizontal.MuiStepper-alternativeLabel.MuiPaper-elevation0 {
+  overflow: auto;
+  padding-block: 10px !important;
+}
+span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alternativeLabel {
+  min-width: 90px;
 }
