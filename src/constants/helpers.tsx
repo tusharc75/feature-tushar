@@ -29,6 +29,7 @@ import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
+import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -390,7 +391,8 @@ export const sidebarResource = {
   resourceDoaRequest: 'Resource Doa Request',
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
-  managedPackages: 'Managed Packages'
+  managedPackages: 'Managed Packages',
+  trainAiModel: 'Train Ai Model'
 };
 
 export const primaryFields = {
@@ -535,6 +537,7 @@ export const RESOURCE_LABEL = {
   managedPackages: 'Managed Packages',
   integration: 'Integration',
   equiptAi: 'Equipt Ai',
+  trainAiModel: 'Train Ai Model',
   workSpace: 'Work Space'
 };
 
@@ -836,6 +839,13 @@ export const purchaseOrder = {
   route: '/purchase-order',
   permission: 'purchaseOrder',
   resource: 'purchaseOrder'
+};
+
+export const trainAiModel = {
+  api: '/train-ai-model',
+  route: '/train-ai-model',
+  permission: 'trainAiModel',
+  resource: 'trainAiModel'
 };
 
 export const sublease = {

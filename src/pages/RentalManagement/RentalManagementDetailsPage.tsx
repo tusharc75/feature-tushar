@@ -24,6 +24,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
@@ -90,6 +91,7 @@ const RentalManagementDetailsPage = () => {
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
+  const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState([]);
 
@@ -136,6 +138,7 @@ const RentalManagementDetailsPage = () => {
     }
     if (!isOffline) {
       fetchAssetStatusRights();
+      checkDeliveryTicketFields()
     }
     checkProgressiveBilling();
   }, [id]);
@@ -202,8 +205,27 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
+
+  const checkDeliveryTicketFields = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.deliveryTicket}&view=true`)
+      .then(({ data: { data } }) => {
+        if (data?.length) {
+          data?.some((o) => {
+            if (o?.fieldData?.fieldName === 'status') {
+              if (o?.fieldData?.option?.find((e) => e.default)?.optionValue === DELIVERY_TICKET_STATUS.delivered) {
+                setHideDeliveryTicketDelivered(true);
+              }
+              return true;
+            }
+          });
+        }
+      })
+      .catch((err) => { });
+  };
+
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
@@ -324,8 +346,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+        .then(({ data }) => { })
+        .catch((error) => { });
     }
   };
 
@@ -401,6 +423,7 @@ const RentalManagementDetailsPage = () => {
         setIsDownloading(false);
       });
   };
+
 
   return (
     <>
@@ -570,12 +593,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -594,12 +617,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -645,6 +668,7 @@ const RentalManagementDetailsPage = () => {
                   stepFullScreen={stepFullScreen}
                   checkProgressiveBilling={checkProgressiveBilling}
                   rentalPolicyData={resourceData?.policy}
+                  hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
                 />
               )}
               {['On Field', 'Receiving Ticket']?.includes(rentalSteps[currentStep]?.name) && rentalManagementData && (
@@ -661,6 +685,7 @@ const RentalManagementDetailsPage = () => {
                   allowUpdateStatus={allowUpdateStatus}
                   checkProgressiveBilling={checkProgressiveBilling}
                   rentalPolicyData={resourceData?.policy}
+                  hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (

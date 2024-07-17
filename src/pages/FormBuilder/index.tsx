@@ -41,6 +41,7 @@ const FormBuilder = () => {
         accessor: 'resourceLabel',
         Header: 'Resource Label',
         width: 120,
+        primaryField: true,
         Cell: ({ row }) => (
           <div>
             <Link className="text-truncate link" to={'/form-builder/' + row?.original?.resource}>
