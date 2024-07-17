@@ -50,8 +50,8 @@ const DashBoards = () => {
       {
         accessor: 'name',
         Header: 'Dashboard Name',
-        width: 185,
-        sticky: 'left',
+        width: 200,
+        primaryField: true,
         Cell: ({ row }) => (
           <div>
             <Link className="link" to={`dashboard-master/${row?.original?._id}`}>

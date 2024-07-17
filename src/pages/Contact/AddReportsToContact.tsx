@@ -91,7 +91,6 @@ export default function AddReportsToContact({ open, isSubmitting, onClose,
                                             autoHighlight
                                             getOptionLabel={(option: any) => option?.concatedName || ''}
                                             getOptionSelected={(option: any, val: any) => (option ? option?._id === val?._id : false)}
-                                            //onChange={(_, val: any) => { setReportsToContact({ ...val }) }}
                                             onChange={(_, val: any) => {
                                                 setFieldValue("reportsToContact", val);
                                             }}

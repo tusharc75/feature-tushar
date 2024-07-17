@@ -80,7 +80,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
     } else if (isObject && !isArray && value) {
       setFormValues((prevState) => ({ ...prevState, [name]: value }));
     } else if (value && !isNaN(value)) {
-      setFormValues((prevState) => ({ ...prevState, [name]: value?.toString() }));
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
     } else {
       setFormValues((prevState) => {
         const newState = { ...prevState };
