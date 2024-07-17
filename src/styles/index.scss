@@ -4352,3 +4352,37 @@ div[role='presentation'].MuiAutocomplete-popper {
 span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alternativeLabel {
   min-width: 90px;
 }
+
+@media screen and (max-width: 601px) {
+  table.mobile-optimised-table {
+    word-wrap: break-word;
+  }
+  table.mobile-optimised-table thead {
+    position: absolute;
+    left: -999em;
+    top: -999em;
+  }
+  table.mobile-optimised-table td {
+    display: flex;
+    gap: 8px;
+    padding: 8px 10px;
+    width: 100%;
+  }
+  table.mobile-optimised-table tbody,
+  table.mobile-optimised-table tr {
+    display: block;
+  }
+  .mobile-optimised-table td:before {
+    content: attr(data-th);
+    display: block;
+    font-weight: bold;
+    margin: 0 0 2px;
+  }
+  table.mobile-optimised-table tbody {
+    display: grid;
+    gap: 8px;
+  }
+  .mobile-optimised-table tbody tr {
+    width: 100%;
+  }
+}
