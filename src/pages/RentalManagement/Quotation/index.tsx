@@ -19,6 +19,7 @@ import { VscVersions } from 'react-icons/vsc';
 import { fetch_rental_quotation_fields } from 'src/components/RentalManagment/helper';
 import { rentalManagementMessage } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const Quotation = ({
   rentalManagementData,
@@ -305,31 +306,27 @@ const Quotation = ({
       {allowedToEdit && (
         <>
           {allFields?.some(f => f?.fieldName === "finalPrice" && f?.isRead) && (
-            <Button
+            <ThemeButton
+              iconForMobile={<GiReceiveMoney />}
+              tooltip="Summary"
+              startIcon={<GiReceiveMoney />}
               onClick={() => {
                 setShowQuotationSummaryDialog(true);
               }}
-              variant="outlined"
-              size="small"
-              startIcon={<GiReceiveMoney />}
-              color="primary"
             >
               Summary
-            </Button>
+            </ThemeButton>
           )}
-          <Button
-            variant={isMobile ? 'text' : 'outlined'}
-            color="primary"
-            size="small"
-            className={'btn-outline-v1'}
+          <ThemeButton
+            iconForMobile={<VscVersions />}
+            tooltip={`Version : ${currentVersion}`}
+            startIcon={<VscVersions />}
             onClick={() => {
               setShowAllVersionStatus(true);
             }}
-            style={isMobile ? { color: '#43aeaa' } : {}}
-            startIcon={isMobile ? null : <VscVersions />}
           >
-            {isMobile ? <VscVersions size={20} /> : `Version : ${currentVersion}`}
-          </Button>
+            {`Version : ${currentVersion}`}
+          </ThemeButton>
         </>
       )}
     </>
@@ -349,7 +346,7 @@ const Quotation = ({
                 size="small"
                 color="primary"
               >
-                Process Quotation
+                {isMobile ? `Process` : `Process Quotation`}
               </Button>
             ) : quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.sentToCustomer ? (
               <Button

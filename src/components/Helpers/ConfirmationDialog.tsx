@@ -43,10 +43,10 @@ export default function ConfirmationDialogRaw({ onClose, onOk, open, message, ok
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
       <DialogActions>
-        <Button size="small" autoFocus onClick={onClose} color="primary">
+        <Button id={'confirmation-dialog-cancel-button'} size="small" autoFocus onClick={onClose} color="primary">
           {!cancelText ? 'Cancel' : cancelText}
         </Button>
-        <Button size="small" onClick={onOk} disabled={okBtnLoading} color="primary">
+        <Button id={'confirmation-dialog-confirm-button'} size="small" onClick={onOk} disabled={okBtnLoading} color="primary">
           {okBtnLoading ? <CircularProgress style={{ marginRight: '8px' }} size={20} color="inherit" /> : null}
           {!forwardText ? 'Confirm' : forwardText}
         </Button>

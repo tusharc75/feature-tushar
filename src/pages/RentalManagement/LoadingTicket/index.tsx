@@ -1281,6 +1281,9 @@ const LoadingTicket = ({
             setShowTicketDialog({ open: false, data: {} });
             fetchRecords();
             fetchRentalData();
+            if (hideDeliveryTicketDelivered) {
+              checkProgressiveBilling()
+            }
           }}
         />
       )}

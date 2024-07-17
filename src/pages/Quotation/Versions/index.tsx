@@ -44,6 +44,7 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
       Header: 'Version',
       width: 200,
       primaryField: true,
+      disabled: true,
       Cell: ({ row }) => {
         return row.original?.version ? (
           referenceType === 'rentalJob' || referenceType === 'repairOrder' ? (

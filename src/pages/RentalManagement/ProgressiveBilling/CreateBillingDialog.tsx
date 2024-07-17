@@ -39,20 +39,20 @@ import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
-const calculateServiceDays = (serviceLogs: any[], startDate: any, endDate: any) => {
-  const logs = serviceLogs?.filter(s => s.endDate);
+const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
+  const logs = serviceLog?.filter(s => s.endDate);
   if (!logs?.length) return 0;
   const uniqueDates = new Set<string>();
-  serviceLogs.forEach(log => {
+  serviceLog.forEach(log => {
     const logStartDate = new Date(log.startDate);
     const logEndDate = new Date(log.endDate);
     for (let date = logStartDate; date <= logEndDate; date.setDate(date.getDate() + 1)) {
-      if (moment(date).isBetween(moment(startDate), moment(endDate))) {
+      if (moment(date).isBetween(moment(startDate), moment(endDate)), null, '[]') {
         uniqueDates.add(date.toISOString().split('T')[0]);
       }
     }
   });
-  return { duration: uniqueDates.size, endDate: logs[logs?.length - 1]?.endDate };
+  return uniqueDates.size;
 }
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
@@ -299,7 +299,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     data?.material?.forEach((d) => {
       if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
         d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
-      } else if (d?.type === MATERIAL_TYPE.package && d?.packageDetail?.packageType === 'Service' && d?.parentId === null && !d?.actualStartDate) {
+      } else if (d?.type === MATERIAL_TYPE.package && !d?.actualStartDate) {
         d['actualStartDate'] = d?.estimateStartDate;
       }
       if (returnTicketProducts[d?.materialId] > 0) {
@@ -340,8 +340,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            const { duration }: any = calculateServiceDays(element?.serviceLog, values['actualEndDate'], values['manualEndDate']);
-            values['actualJobDuration'] = duration;
+            values['actualJobDuration'] = calculateServiceDays(element?.serviceLog, element['actualStartDate'], values['actualEndDate']);
           }
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
@@ -591,6 +590,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }
         }
 
+        if (element?.type === MATERIAL_TYPE.service && element?.serviceLog?.length && element?.actualEndDate) {
+          tempValues.actualEndDate = element?.actualEndDate;
+        }
+
         let priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
 
         const priceField = allFields?.find((e) => e.fieldName === 'price');
@@ -655,10 +658,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           );
         } else {
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            const { duration, endDate }: any = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
-            values['actualEndDate'] = endDate;
-            values['actualJobDuration'] = duration;
-            if (!duration) {
+            values['actualJobDuration'] = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
+            if (!values['actualJobDuration']) {
               element.invalidDate = true;
             }
           }
@@ -713,6 +714,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       delete element?.subRows;
       delete element?.manualEndDate;
       delete element?.isAppliedBill;
+      delete element?.serviceLog;
       if (element.type !== MATERIAL_TYPE.manualEntry) {
         delete element?.description;
       }

@@ -284,7 +284,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                         </Typography>
                       </Box>
                       }
-                      {data?.status==='Send' && 
+                       
                       <div className="flex gap-3">
                       <Box className="min-w-0  line-clamp-1" title={data?.supplierAccount ? data?.supplierAccount?.optionLabel : ''}>
                         <Typography variant="subtitle2">
@@ -318,7 +318,7 @@ const PriceRequestDialog = ({ handleClose, quoteData, onSuccess, type, versionId
                       </Typography>
                     </Box>
                     </div>
-                      }
+                      
                     </div>
                       {((type === 'Customer' && data?.status === 'Request') || (type === 'Supplier' && data?.status === 'Submit')) && (
                         

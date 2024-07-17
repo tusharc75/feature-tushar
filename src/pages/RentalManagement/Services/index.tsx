@@ -31,6 +31,7 @@ import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import Technicians from './Technicians';
 import { FiExternalLink } from 'react-icons/fi';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 
 const Services = ({
   rentalManagementData,
@@ -45,6 +46,7 @@ const Services = ({
   rentalPolicyData
 }: any) => {
   const toastConfig = useContext(CustomToastContext);
+  const { setWalkmeData } = useSetWalkmeData();
   const {
     state: { user, permissions }
   }: any = useData();
@@ -77,6 +79,7 @@ const Services = ({
   useEffect(() => {
     fetchFields();
     fetchData();
+    setWalkmeData([]);
   }, []);
 
   useEffect(() => {
