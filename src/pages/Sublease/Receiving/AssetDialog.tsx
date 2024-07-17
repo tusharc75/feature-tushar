@@ -209,9 +209,9 @@ const AssetDialog = ({ products, loading, handleClose, handleSuccess, subleaseId
 												<TableHead>
 													<TableRow>
 														<TableCell width="10%">Index</TableCell>
-														<TableCell width="30%" align="left">Product</TableCell>
-														<TableCell width="30%" align="left">Asset Number Type *</TableCell>
-														<TableCell width="30%" align="left">Asset Number *</TableCell>
+														<TableCell width="30%" align="left" className="min-w-[200px]">Product</TableCell>
+														<TableCell width="30%" align="left" className="min-w-[200px]">Asset Number Type *</TableCell>
+														<TableCell width="30%" align="left" className="min-w-[200px]">Asset Number *</TableCell>
 													</TableRow>
 												</TableHead>
 												<TableBody>
