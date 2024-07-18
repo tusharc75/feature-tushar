@@ -54,8 +54,6 @@ const Messages = ({ channelId }) => {
       socket.emit('joinChannel', channelId);
 
       socket.on('receiveMessage', (newMessage) => {
-        console.log("hello");
-        console.log(newMessage);
         setMessages((prevMessages) => [...prevMessages, newMessage]);
       });
 
