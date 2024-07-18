@@ -33,7 +33,7 @@ import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, isEmpty, startCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -47,7 +47,7 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
     const logStartDate = new Date(log.startDate);
     const logEndDate = new Date(log.endDate);
     for (let date = logStartDate; date <= logEndDate; date.setDate(date.getDate() + 1)) {
-      if (moment(date).isBetween(moment(startDate), moment(endDate)), null, '[]') {
+      if (moment(date).isBetween(moment(startDate), moment(endDate), null, '[]')) {
         uniqueDates.add(date.toISOString().split('T')[0]);
       }
     }

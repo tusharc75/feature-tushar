@@ -350,6 +350,7 @@ const ActionButtonMenuItems = ({
       if (dates?.length) {
         date = new Date(Math.max(...dates));
       }
+      date = new Date().setDate(new Date(date).getDate() + 1)
       setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
     }}>
       Start/Stop Service(s)
