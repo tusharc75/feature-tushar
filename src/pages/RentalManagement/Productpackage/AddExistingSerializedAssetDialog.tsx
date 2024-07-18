@@ -448,7 +448,6 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
           }}
         />
       )}
-
       {inuseAssetConfirmBox && (
         <ConfirmationDialog
           open={inuseAssetConfirmBox}
@@ -458,10 +457,10 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+            if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
               setOpenAssetDataDialog({
                 open: true,
-                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
+                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)
               });
             } else {
               handleAutoTransferAssets();
@@ -469,12 +468,11 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
           }}
         />
       )}
-
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
           ids={selectedRecords?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
