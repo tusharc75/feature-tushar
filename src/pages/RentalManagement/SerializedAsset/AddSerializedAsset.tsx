@@ -475,32 +475,31 @@ const AddSerializedAsset = ({
                   <Box style={{ display: 'inline' }}>
                     {serializedProducts.length > 0
                       ? serializedProducts.map((d) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className={`cursor-pointer ${
-                              selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                        <Box
+                          m={0.5}
+                          p={1}
+                          border={1}
+                          className={`cursor-pointer ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                             }`}
-                            borderColor="var(--common-border-color)"
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
+                          borderColor="var(--common-border-color)"
+                          onClick={() => {
+                            if (selectedProduct === d.id) {
+                              setSelectedProduct(null);
+                            } else {
+                              setSelectedProduct(d.id);
+                            }
+                          }}
+                          style={{ display: 'inline-block' }}
+                        >
+                          {d?.qty < 0 ? (
+                            <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                          ) : d?.qty === 0 ? (
+                            <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                          ) : (
+                            <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                          )}
+                        </Box>
+                      ))
                       : null}
                   </Box>
                 </Box>
@@ -740,10 +739,10 @@ const AddSerializedAsset = ({
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            if (assetPolicyData?.policy?.statusChangeFields?.find((e) => [ASSET_STATUS.reserved].includes(e?.status))) {
+            if (assetPolicyData?.policy?.statusChangeFields?.find((e) => e.status === ASSET_STATUS.underReview)) {
               setOpenAssetDataDialog({
                 open: true,
-                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
+                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)
               });
             } else {
               handleAutoTransferAssets();
@@ -763,7 +762,7 @@ const AddSerializedAsset = ({
         <AssetDetailsChangeDialog
           ids={selectedRecords?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

@@ -24,6 +24,7 @@ import { rentalManagementActions, rentalManagementMessage } from 'src/constants/
 import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords }) => {
 
@@ -57,6 +58,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         minWidth: 100,
         width: 100,
         disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.index}</h5>
@@ -81,6 +83,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         accessor: 'assetNumber',
         Header: 'Details',
         disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <p className="text-truncate">{row?.original?.assetNumber}</p>
@@ -349,8 +352,8 @@ const ActionButtonMenuItems = ({
       let date = null;
       if (dates?.length) {
         date = new Date(Math.max(...dates));
+        date = new Date().setDate(new Date(date).getDate() + 1)
       }
-      date = new Date().setDate(new Date(date).getDate() + 1)
       setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
     }}>
       Start/Stop Service(s)
