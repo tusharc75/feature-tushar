@@ -10,6 +10,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import {
+  ASSET_STATUS,
   deliveryTicket,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -25,6 +26,7 @@ import { Autocomplete } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
 import { map, uniq } from 'lodash';
 import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
+import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 
 const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuccessInUseAsset, isAssigning, referenceData = null }) => {
   const renderedFrom = `${routes.serializedAsset.title}_rentalJob_selected`;
@@ -49,9 +51,12 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
   const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inuseAssetConfirmBox, setInuseAssetConfirmBox] = useState(false);
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
 
   useEffect(() => {
     fetchGridColumns();
+    fetchPolicy();
   }, []);
 
   const fetchGridColumns = () => {
@@ -62,6 +67,19 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
         setColumns([...newColumns, ...getStaticFields()]);
       });
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   useEffect(() => {
@@ -169,8 +187,8 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
     }
   };
 
-  const handleAdd = () => {
-    handleSucess(selectedRecords);
+  const handleAdd = (assetData = null) => {
+    handleSucess(selectedRecords, assetData);
   };
 
   const checkUniqWarehouse = () => {
@@ -210,19 +228,31 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
       });
   };
 
-  const handleAutoTransferAssets = () => {
+  const handleAutoTransferAssets = (assetsData = null) => {
+    const assetsAdd: any = [];
+    selectedRecords?.forEach((item) => {
+      const obj: any = {};
+      obj._id = null;
+      obj.asset = item?._id;
+      obj.product = item?.productId;
+      obj.rentalJob = item?.loadingTicket?.rentalJob?.optionValue;
+      const rentalAsset = item?.loadingTicket?.assets?.find((ele) => ele.asset === item?._id);
+      if (rentalAsset) {
+        obj.uniqueId = rentalAsset?.uniqueId;
+      }
+      if (assetsData) {
+        const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+        if (matchedAsset) {
+          const { _id, ...assetData } = matchedAsset;
+          obj.assetData = assetData;
+        }
+      }
+      assetsAdd.push(obj);
+    });
     setIsSubmitting(true);
     axiosInstance()
       .post(`${deliveryTicket.api}/auto-transfer-inuse-assets`, {
-        assets: selectedRecords?.map((r) => ({
-          _id: null,
-          asset: r?._id,
-          product: r?.productId,
-          rentalJob: r?.loadingTicket?.rentalJob?.optionValue,
-          ...(r?.loadingTicket?.assets?.find((ele) => ele.asset === r?._id)
-            ? { uniqueId: r?.loadingTicket?.assets?.find((ele) => ele.asset === r?._id)?.uniqueId }
-            : {})
-        })),
+        assets: assetsAdd,
         rentalJob: referenceData?.rentalJob
       })
       .then(({ data }) => {
@@ -297,7 +327,12 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
               size="small"
               disabled={isAssigning || isSubmitting || selectedRecords?.length === 0}
               onClick={() => {
-                if (checkMTRValidation) {
+                if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                  setOpenAssetDataDialog({
+                    open: true,
+                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
+                  });
+                } else if (checkMTRValidation) {
                   if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                     setMtrConfirmBox(true);
                   } else {
@@ -423,8 +458,33 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            handleAutoTransferAssets();
+            if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+              setOpenAssetDataDialog({
+                open: true,
+                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
+              });
+            } else {
+              handleAutoTransferAssets();
+            }
           }}
+        />
+      )}
+
+      {openAssetDataDialog.open && (
+        <AssetDetailsChangeDialog
+          ids={selectedRecords?.map((e) => e._id)}
+          statusPolicy={openAssetDataDialog.statusPolicy}
+          setAssetsData={() => {}}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+          onSuccess={(data) => {
+            if (Number(tabValue) === 2) {
+              handleAutoTransferAssets(data);
+            } else {
+              handleAdd(data);
+            }
+            setOpenAssetDataDialog({ open: false, statusPolicy: null });
+          }}
+          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
         />
       )}
     </Dialog>
