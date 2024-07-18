@@ -408,7 +408,7 @@ const AddSerializedAsset = ({
       });
   };
 
-  const handleAutoTransferAssets = () => {
+  const handleAutoTransferAssets = (assetsData = null) => {
     const assetsAdd: any = [];
     selectedProducts?.forEach((e: any) => {
       if (e.type === 'product') {
@@ -424,6 +424,13 @@ const AddSerializedAsset = ({
             const rentalAsset = result[0].loadingTicket?.assets?.find((ele) => ele.asset === result[0]._id);
             if (rentalAsset) {
               obj.uniqueId = rentalAsset?.uniqueId;
+            }
+            if (assetsData) {
+              const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+              if (matchedAsset) {
+                const { _id, ...assetData } = matchedAsset;
+                obj.assetData = assetData;
+              }
             }
             assetsAdd.push(obj);
             result[0].isCounted = true;
@@ -537,7 +544,7 @@ const AddSerializedAsset = ({
                 )}
               </Grid>
               <Grid item xs={12} md={5}>
-                <Box className="flex flex-wrap justify-end items-center gap-2">
+                <Box className="flex flex-wrap items-center justify-end gap-2">
                   <SearchBox
                     onChange={handleSearch}
                     className="small-searchbar ml-auto"
@@ -580,8 +587,11 @@ const AddSerializedAsset = ({
                           style={{ minWidth: 'max-content' }}
                           onClick={() => {
                             if (referenceType === 'Rental Job') {
-                              if (user?.user?.brandPolicy?.serializedAssetCertification &&
-                                selectedRecords?.some((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+                              if (
+                                user?.user?.brandPolicy?.serializedAssetCertification &&
+                                selectedRecords?.some(
+                                  (e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime()
+                                )
                               ) {
                                 setCertificateExpireAlert({
                                   open: true,
@@ -590,18 +600,18 @@ const AddSerializedAsset = ({
                                     ?.map((e) => e.assetNumber)
                                     ?.toString()
                                 });
-                              }
-                              else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
-                                setOpenAssetDataDialog({ open: true, statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) })
-                              }
-                              else if (checkMTRValidation) {
+                              } else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                                setOpenAssetDataDialog({
+                                  open: true,
+                                  statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
+                                });
+                              } else if (checkMTRValidation) {
                                 if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                                   setMtrConfirmBox(true);
                                 } else {
                                   addSerializedAsset(selectedRecords);
                                 }
-                              }
-                              else {
+                              } else {
                                 addSerializedAsset(selectedRecords);
                               }
                             } else {
@@ -729,7 +739,14 @@ const AddSerializedAsset = ({
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            handleAutoTransferAssets();
+            if (assetPolicyData?.policy?.statusChangeFields?.find((e) => e.status === ASSET_STATUS.underReview)) {
+              setOpenAssetDataDialog({
+                open: true,
+                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)
+              });
+            } else {
+              handleAutoTransferAssets();
+            }
           }}
         />
       )}
@@ -748,7 +765,11 @@ const AddSerializedAsset = ({
           setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
           onSuccess={(data) => {
-            addSerializedAsset(selectedRecords, false, data);
+            if (Number(tabValue) === 2) {
+              handleAutoTransferAssets(data);
+            } else {
+              addSerializedAsset(selectedRecords, false, data);
+            }
             setOpenAssetDataDialog({ open: false, statusPolicy: null });
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
