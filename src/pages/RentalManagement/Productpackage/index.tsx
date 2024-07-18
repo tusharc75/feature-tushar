@@ -544,12 +544,24 @@ const Productpackage = ({
     }
   };
 
-  const handleAddAsset = async (rows) => {
+  const handleAddAsset = async (rows, assetsData = null) => {
     setIsSubmitting(true);
-    const assetIds = rows?.map((item) => item._id);
+    const assetsAdd: any = [];
+    rows?.forEach((row) => {
+      const obj: any = {};
+      obj._id = row?._id;
+      if (assetsData) {
+        const matchedAsset = assetsData?.find((asset) => asset._id === obj?._id);
+        if (matchedAsset) {
+          const { _id, ...assetData } = matchedAsset;
+          obj.assetData = assetData;
+        }
+      }
+      assetsAdd.push(obj);
+    });
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
-        ids: assetIds
+        ids: assetsAdd
       })
       .then(() => {
         setAddExistingAssets(false);
