@@ -6,7 +6,6 @@ import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
@@ -44,6 +43,7 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import AddExistingProductInventory from 'src/pages/RentalManagement/Productpackage/AddExistingProductInventory';
 import { FiExternalLink } from 'react-icons/fi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import AddExistingSerializedAssetDialog from 'src/pages/RentalManagement/Productpackage/AddExistingSerializedAssetDialog';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { addExistingProduct, deleteAddedProduct, generateAddChildProduct, generateAddStepEditProduct } from 'src/pages/RentalManagement/walkmeSteps';
 
@@ -1036,13 +1036,23 @@ const Productpackage = ({
         />
       )}
       {addExistingAssets && (
-        <AssignSerializedAssetDialog
-          reference={'rentalJob'}
-          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue, rentalJob: rentalManagementData._id }}
+        <AddExistingSerializedAssetDialog
+          referenceData={{
+            warehouse: rentalManagementData?.warehouse,
+            rentalJob: rentalManagementData._id,
+            wellName: rentalManagementData?.wellName,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
+            afeNumber: rentalManagementData?.afeNumber
+          }}
           isAssigning={isSubmitting}
           handleClose={() => setAddExistingAssets(false)}
           handleSucess={handleAddAsset}
-          ids={[]}
+          handleSuccessInUseAsset={() => {
+            setAddExistingAssets(false);
+            fetchData();
+          }}
         />
       )}
       {addExistingProductDialog.open && [MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(addExistingProductDialog?.type) && (
