@@ -5,15 +5,13 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import io, { Socket } from 'socket.io-client';
 import { backendApi } from 'src/config';
-import { useData } from 'src/StateProvider/Provider';
 
 const Messages = ({ channelId }) => {
   const [messages, setMessages] = useState(null);
   const [message, setMessage] = useState('');
+  const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [socket, setSocket] = useState<Socket>(null);
-
-  const { state: { user } }: any = useData();
 
   const token = localStorage.getItem('token');
 
@@ -29,21 +27,29 @@ const Messages = ({ channelId }) => {
     setSocket(s);
   }, [token]);
 
-  const fetchMessages = async () => {
+  const fetchMessages = async (after: string = null) => {
     try {
-      const { data } = await axiosInstance().get(`/work-space/channel/${channelId}/message`);
-      setMessages(data?.data || []);
+      let api = `/work-space/channel/${channelId}/message`;
+      if (after) {
+        api += `?after=${after}`;
+      }
+      const { data } = await axiosInstance().get(api);
+      if (after) {
+        setMessages((prevMessages) => [...prevMessages, ...data.data || []]);
+      } else {
+        setMessages(data?.data || []);
+      }
+      if (data?.data?.length > 0) setLastMessageId(data.data[data.data.length - 1]?._id);
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
   };
 
-  const postMessage = () => {
+  const postMessage = async () => {
     try {
-      if (socket && message.trim()) {
-        socket.emit('sendMessage', { channelId, message, user: { _id: user?.user?._id, name: user?.user?.firstName + ' ' + user?.user?.lastName, brand: user?.user?.brand } });
-        setMessage('');
-      }
+      await axiosInstance().post('/work-space/channel/message', { channelId, message });
+      setMessage('');
+      socket.emit('newMessagePosted', { channelId });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -53,9 +59,7 @@ const Messages = ({ channelId }) => {
     if (socket) {
       socket.emit('joinChannel', channelId);
 
-      socket.on('receiveMessage', (newMessage) => {
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-      });
+      socket.on('fetchNewMessage', () => { fetchMessages(lastMessageId) });
 
       return () => {
         socket.emit('leaveChannel', channelId);
