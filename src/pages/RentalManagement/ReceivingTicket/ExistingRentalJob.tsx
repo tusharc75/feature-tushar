@@ -269,16 +269,10 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         } else {
           isOnlyAssetAdd = true;
         }
-        if (
-          assetPolicyData?.policy?.statusChangeFields?.find(
-            (ele) => ele.status === (isOnlyAssetAdd ? ASSET_STATUS.reserved : ASSET_STATUS.underReview)
-          )
-        ) {
+        if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
           setOpenAssetDataDialog({
             open: true,
-            statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find(
-              (ele) => ele.status === (isOnlyAssetAdd ? ASSET_STATUS.reserved : ASSET_STATUS.underReview)
-            ),
+            statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
             isOnlyAssetAdd: isOnlyAssetAdd,
             data: { _id: rentalData._id, deliveryTo: rentalData.customerAccount, deliveryToAddress: rentalData.shippingAddress }
           });
@@ -321,16 +315,10 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
                 } else {
                   isOnlyAssetAdd = true;
                 }
-                if (
-                  assetPolicyData?.policy?.statusChangeFields?.find(
-                    (ele) => ele.status === (isOnlyAssetAdd ? ASSET_STATUS.reserved : ASSET_STATUS.underReview)
-                  )
-                ) {
+                if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
                   setOpenAssetDataDialog({
                     open: true,
-                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find(
-                      (ele) => ele.status === (isOnlyAssetAdd ? ASSET_STATUS.reserved : ASSET_STATUS.underReview)
-                    ),
+                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
                     isOnlyAssetAdd: isOnlyAssetAdd,
                     data: {
                       _id: selectedRecords[0]?._id,
