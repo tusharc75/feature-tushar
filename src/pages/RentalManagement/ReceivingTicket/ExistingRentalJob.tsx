@@ -40,7 +40,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {}, rentalJob: null });
   const [showRentalDialog, setShowRentalDialog] = useState({ open: false, data: {} });
   const [assetsAdd, setAssetsAdd] = useState([]);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, isOnlyAssetAdd: false, data: null });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, data: null });
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -269,11 +269,10 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         } else {
           isOnlyAssetAdd = true;
         }
-        if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
+        if (!isOnlyAssetAdd && assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
           setOpenAssetDataDialog({
             open: true,
             statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
-            isOnlyAssetAdd: isOnlyAssetAdd,
             data: { _id: rentalData._id, deliveryTo: rentalData.customerAccount, deliveryToAddress: rentalData.shippingAddress }
           });
         } else {
@@ -315,11 +314,10 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
                 } else {
                   isOnlyAssetAdd = true;
                 }
-                if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
+                if (!isOnlyAssetAdd && assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
                   setOpenAssetDataDialog({
                     open: true,
                     statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
-                    isOnlyAssetAdd: isOnlyAssetAdd,
                     data: {
                       _id: selectedRecords[0]?._id,
                       deliveryTo: selectedRecords[0]?.customerAccountId,
@@ -394,10 +392,10 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           ids={productInventory?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={() => {}}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, isOnlyAssetAdd: false, data: null })}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, data: null })}
           onSuccess={(_assetData) => {
-            handleCreateReceivingTicket(openAssetDataDialog.data, openAssetDataDialog.isOnlyAssetAdd, _assetData);
-            setOpenAssetDataDialog({ open: false, statusPolicy: null, isOnlyAssetAdd: false, data: null });
+            handleCreateReceivingTicket(openAssetDataDialog.data, false, _assetData);
+            setOpenAssetDataDialog({ open: false, statusPolicy: null, data: null });
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
         />

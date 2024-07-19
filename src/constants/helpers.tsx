@@ -3462,3 +3462,5 @@ export function copyTextToClipboard(text: string, callBack: (text: string) => vo
     }
   );
 }
+
+export const HIDDEN_FIELD_TYPE = ['description'];

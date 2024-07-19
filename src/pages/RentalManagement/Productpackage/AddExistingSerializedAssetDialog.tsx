@@ -327,12 +327,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
               size="small"
               disabled={isAssigning || isSubmitting || selectedRecords?.length === 0}
               onClick={() => {
-                if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
-                  setOpenAssetDataDialog({
-                    open: true,
-                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
-                  });
-                } else if (checkMTRValidation) {
+                if (checkMTRValidation) {
                   if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                     setMtrConfirmBox(true);
                   } else {
@@ -472,14 +467,10 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
         <AssetDetailsChangeDialog
           ids={selectedRecords?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
           onSuccess={(data) => {
-            if (Number(tabValue) === 2) {
-              handleAutoTransferAssets(data);
-            } else {
-              handleAdd(data);
-            }
+            handleAutoTransferAssets(data);
             setOpenAssetDataDialog({ open: false, statusPolicy: null });
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
