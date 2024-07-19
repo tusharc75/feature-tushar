@@ -107,6 +107,11 @@ const RoleDetailsPage = () => {
       fieldName: 'isRentalReopen'
     },
     {
+      resource: sidebarResource.rentalManagement,
+      fieldLabel: 'Allow Service Perform',
+      fieldName: 'isAllowServicePerformRentalManagement'
+    },
+    {
       resource: sidebarResource.sublease,
       fieldLabel: 'Pricing Information',
       fieldName: 'isPricingSublease'
