@@ -47,7 +47,6 @@ import AddExistingSerializedAssetDialog from 'src/pages/RentalManagement/Product
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import {
   generateAddExistingProduct,
-  deleteAddedProduct,
   generateAddChildProduct,
   generateAddStepEditProduct,
   generateDeleteAddedProductSteps,
