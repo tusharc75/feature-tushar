@@ -15,7 +15,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { getResourceLabel, gridLoadingTimeout, prepareDataForGrid } from '../../constants/helpers';
+import { getResourceLabel, gridLoadingTimeout, HIDDEN_FIELD_TYPE, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
 
@@ -72,7 +72,7 @@ const DynamicForm = () => {
   const fetchGridColumns = async () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${resource}`);
-    data = response?.data?.data;
+    data = response?.data?.data?.filter((d) => !HIDDEN_FIELD_TYPE.includes(d?.fieldData?.type));
     const newColumns = generateColumns(renderedFrom, data, detailPagePath, true);
     if (newColumns?.some((ele) => ele.accessor === 'owner')) {
       setShowToggleButtons(true);

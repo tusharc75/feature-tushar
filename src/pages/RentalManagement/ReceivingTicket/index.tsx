@@ -1978,6 +1978,7 @@ const ReceivingTicket = ({
             setIsExistingRentalJob(false);
             fetchRecords();
           }}
+          assetPolicyData={assetPolicyData}
         />
       )}
       {showRemoveAssetFromReceivingTicketDialog && (

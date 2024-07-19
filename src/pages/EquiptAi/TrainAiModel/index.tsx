@@ -110,7 +110,7 @@ const TrainAiModel = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.trainAiModel?.isDelete && checkIsAllowedToDelete(user, sidebarResource.trainAiModel, finalObject?.ownerId) && u?.canDelete && !u?.deleted;
+          finalObject['canDelete'] = permissions?.trainAiModel?.isDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

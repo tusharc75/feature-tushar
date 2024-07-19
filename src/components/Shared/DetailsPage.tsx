@@ -15,12 +15,14 @@ import {
   formatAmountWithCurrency,
   getFileIconSrc,
   getObjKeysWithValues,
-  getUniqueCurrencies
+  getUniqueCurrencies,
+  HIDDEN_FIELD_TYPE
 } from '../../constants/helpers';
 import { useData } from '../../StateProvider/Provider';
 import CarouselDialog from '../CarouselDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
 import CopyToClipboard from '../Helpers/CopyToClipboard';
+import { FiExternalLink } from 'react-icons/fi';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -98,7 +100,7 @@ const Details = (props: DetailProps) => {
 
   useEffect(() => {
     sortArray();
-    const fieldData = fields.map((f) => f.fieldData);
+    const fieldData = fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData);
     const vals = getObjKeysWithValues(data, fieldData);
     fieldData?.forEach((e) => {
       if (e.type === 'lookUpDisplay') {
@@ -190,10 +192,11 @@ const Details = (props: DetailProps) => {
    */
   const sortArray = () => {
     const sections = [];
-
-    const allFields = fields.sort((a, b) => {
-      return a.fieldData.order - b.fieldData.order;
-    });
+    const allFields = fields
+      ?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))
+      ?.sort((a, b) => {
+        return a.fieldData.order - b.fieldData.order;
+      });
 
     allFields.forEach((field) => {
       if (!sections.includes(field.fieldData.sectionName)) {
@@ -287,7 +290,7 @@ const Details = (props: DetailProps) => {
         const Icon = getFileIconSrc(value || '');
         if (value === '-' || Array.isArray(value)) return value;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 p-[8.6px_10px] pt-0">
             <Icon />
             <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
               <span className={`text-truncate tooltip-asdfkljashdfkjas text-gray-500 dark:text-gray-400`}>{value}</span>
@@ -300,7 +303,7 @@ const Details = (props: DetailProps) => {
         const files = Array.isArray(value) ? value : [];
         if (files.length > 0) {
           return (
-            <div className="space-y-2">
+            <div className="space-y-2 p-[8.6px_10px] pt-0">
               {files.map((d) => {
                 const Icon = getFileIconSrc(d.fileName || '');
                 return (
@@ -431,7 +434,7 @@ const Details = (props: DetailProps) => {
 
                         <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
                           {field.fieldData.type === 'imageUpload' ? (
-                            <Box marginTop={1} marginBottom={4}>
+                            <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
                               <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
                                 <Image style={{ fontSize: 30 }} />
                               </Avatar>
@@ -448,14 +451,20 @@ const Details = (props: DetailProps) => {
                                     index % 2 === 0 ? 'md:[border-right:1px_solid_var(--common-border-color)]' : ''
                                   )}
                                 >
-                                  <Link
-                                    to={`${routes?.userDetail?.path}/${ele?.user?._id}`}
-                                    target="_blank"
-                                    className="link"
-                                    rel="noopener noreferrer"
-                                  >
-                                    {ele?.user?.concatedName}
-                                  </Link>
+                                  <div className="flex items-center gap-2">
+                                    <p title={ele?.user?.concatedName} className={`text-truncate font-normal`}>
+                                      {ele?.user?.concatedName}
+                                    </p>
+                                    <Link
+                                      title={ele?.user?.concatedName}
+                                      to={`${routes?.userDetail?.path}/${ele?.user?._id}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={'mt-1 max-h-fit flex-shrink-0'}
+                                    >
+                                      <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
+                                    </Link>
+                                  </div>
                                   <div className="flex h-[48px] items-center">
                                     {ele?.signature ? (
                                       <img alt={ele?.user?.concatedName} className="h-12 w-14 object-contain" src={ele.signature} />

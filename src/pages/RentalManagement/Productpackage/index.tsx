@@ -6,7 +6,6 @@ import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
@@ -44,6 +43,7 @@ import AdditionalCostDialog from './AdditionalCostDialog';
 import AddExistingProductInventory from 'src/pages/RentalManagement/Productpackage/AddExistingProductInventory';
 import { FiExternalLink } from 'react-icons/fi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import AddExistingSerializedAssetDialog from 'src/pages/RentalManagement/Productpackage/AddExistingSerializedAssetDialog';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import {
   generateAddExistingProduct,
@@ -586,12 +586,24 @@ const Productpackage = ({
     }
   };
 
-  const handleAddAsset = async (rows) => {
+  const handleAddAsset = async (rows, assetsData = null) => {
     setIsSubmitting(true);
-    const assetIds = rows?.map((item) => item._id);
+    const assetsAdd: any = [];
+    rows?.forEach((row) => {
+      const obj: any = {};
+      obj._id = row?._id;
+      if (assetsData) {
+        const matchedAsset = assetsData?.find((asset) => asset._id === obj?._id);
+        if (matchedAsset) {
+          const { _id, ...assetData } = matchedAsset;
+          obj.assetData = assetData;
+        }
+      }
+      assetsAdd.push(obj);
+    });
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
-        ids: assetIds
+        ids: assetsAdd
       })
       .then(() => {
         setAddExistingAssets(false);
@@ -1078,13 +1090,23 @@ const Productpackage = ({
         />
       )}
       {addExistingAssets && (
-        <AssignSerializedAssetDialog
-          reference={'rentalJob'}
-          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue, rentalJob: rentalManagementData._id }}
+        <AddExistingSerializedAssetDialog
+          referenceData={{
+            warehouse: rentalManagementData?.warehouse,
+            rentalJob: rentalManagementData._id,
+            wellName: rentalManagementData?.wellName,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
+            afeNumber: rentalManagementData?.afeNumber
+          }}
           isAssigning={isSubmitting}
           handleClose={() => setAddExistingAssets(false)}
           handleSucess={handleAddAsset}
-          ids={[]}
+          handleSuccessInUseAsset={() => {
+            setAddExistingAssets(false);
+            fetchData();
+          }}
         />
       )}
       {addExistingProductDialog.open && [MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(addExistingProductDialog?.type) && (

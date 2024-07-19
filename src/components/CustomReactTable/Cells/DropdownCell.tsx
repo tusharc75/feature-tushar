@@ -91,7 +91,7 @@ function DropdownCell({ permissions, permissionForLinks, field, original }) {
   const isDataLink = permissions[permissionForLinks[field?.lookupResource]]?.isRead || permissions[camelCase(field?.lookupResource)]?.isRead;
 
   return (
-    <div>
+    <div className="flex items-center">
       {optionLabel ? (
         <>
           {more?.length > 0 ? (

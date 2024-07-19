@@ -408,7 +408,7 @@ const AddSerializedAsset = ({
       });
   };
 
-  const handleAutoTransferAssets = () => {
+  const handleAutoTransferAssets = (assetsData = null) => {
     const assetsAdd: any = [];
     selectedProducts?.forEach((e: any) => {
       if (e.type === 'product') {
@@ -424,6 +424,13 @@ const AddSerializedAsset = ({
             const rentalAsset = result[0].loadingTicket?.assets?.find((ele) => ele.asset === result[0]._id);
             if (rentalAsset) {
               obj.uniqueId = rentalAsset?.uniqueId;
+            }
+            if (assetsData) {
+              const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+              if (matchedAsset) {
+                const { _id, ...assetData } = matchedAsset;
+                obj.assetData = assetData;
+              }
             }
             assetsAdd.push(obj);
             result[0].isCounted = true;
@@ -735,7 +742,14 @@ const AddSerializedAsset = ({
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            handleAutoTransferAssets();
+            if (assetPolicyData?.policy?.statusChangeFields?.find((e) => e.status === ASSET_STATUS.underReview)) {
+              setOpenAssetDataDialog({
+                open: true,
+                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)
+              });
+            } else {
+              handleAutoTransferAssets();
+            }
           }}
         />
       )}
@@ -754,7 +768,11 @@ const AddSerializedAsset = ({
           setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
           onSuccess={(data) => {
-            addSerializedAsset(selectedRecords, false, data);
+            if (Number(tabValue) === 2) {
+              handleAutoTransferAssets(data);
+            } else {
+              addSerializedAsset(selectedRecords, false, data);
+            }
             setOpenAssetDataDialog({ open: false, statusPolicy: null });
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
