@@ -10,56 +10,34 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import CustomButton from '../../../components/Helpers/CustomButton';
 import routes from '../../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import {
-  CustomDialogTransition,
-  setFieldsInAscendingOrder,
-  trainAiModel,
-} from '../../../constants/helpers';
+import { CustomDialogTransition, sidebarResource } from '../../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
-import FormTypes from '../../../components/Helpers/FormTypes';
+import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
-import { useHistory } from 'react-router-dom';
-import { useData } from '../../../StateProvider/Provider';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
-const ManageTrainAiModel = ({
-  isClone = false,
-  trainAiModelId = null,
-  onClose,
-  onSuccess
-}) => {
-  const history = useHistory();
+const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { user, selectedEntity, permissions }
-  }: any = useData();
 
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-
   useEffect(() => {
-    axiosInstance()
-      .get('/field?resource=Train Ai Model')
+    axiosInstance().get(`/field?resource=${sidebarResource.trainAiModel}`)
       .then(({ data: { data } }) => {
         let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
         if (trainAiModelId) {
-          axiosInstance()
-            .get(`/generative-ai/feed-data/` + trainAiModelId)
-            .then(({ data: { data } }) => {
-                setInitialData({
-                  fields: fieldsDataForUpdate,
-                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
-                }); 
-            })
+          axiosInstance().get(`/generative-ai/feed-data/` + trainAiModelId).then(({ data: { data } }) => {
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: getObjKeysWithValues(data, fieldsDataForUpdate)
+            });
+          })
             .catch((error) => {
               toastConfig.setToastConfig(error);
             });
@@ -70,35 +48,37 @@ const ManageTrainAiModel = ({
             values: createValues
           });
         }
-      })
-      .catch((error) => {
+      }).catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }, [trainAiModelId]);
 
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
-
   const handleSubmit = (values) => {
     setLoading(true);
-    if (trainAiModelId && isClone === false) {
+    if (trainAiModelId) {
       values._id = trainAiModelId;
-      axiosInstance()
-        .put('/generative-ai/feed-data', values)
-        .then(({ data: { data } }) => {
-          setLoading(false);
-          onSuccess();
-        })
-        .catch((error) => {
-          setLoading(false);
-          toastConfig.setToastConfig(error);
+      axiosInstance().put('/generative-ai/feed-data', values).then(({ data }) => {
+        setLoading(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
         });
+      }).catch((error) => {
+        setLoading(false);
+        toastConfig.setToastConfig(error);
+      });
     }
     else {
-      axiosInstance().post('/generative-ai/feed-data', values).then(({ data: { data } }) => {
+      axiosInstance().post('/generative-ai/feed-data', values).then(({ data }) => {
         setLoading(false);
-        onSuccess(data);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
       }).catch((error) => {
         setLoading(false);
         toastConfig.setToastConfig(error);
@@ -132,9 +112,9 @@ const ManageTrainAiModel = ({
       }}
       fullWidth
     >
-      {formsData && formsData.length ? (
+      {initialData.fields && initialData.fields.length ? (
         <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
-          {({ values, errors, touched, setFieldValue,handleSubmit }) => (
+          {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Fragment>
               <CustomDialogHeader
                 title={
@@ -152,43 +132,15 @@ const ManageTrainAiModel = ({
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData.length > 0 &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12}>
-                                  <FormTypes
-                                    {...field}
-                                    disabled={(Boolean(trainAiModelId) && field.disableOnEdit && !isClone)}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    fieldData={field}
-                                    fields={initialData.fields}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                  />
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
