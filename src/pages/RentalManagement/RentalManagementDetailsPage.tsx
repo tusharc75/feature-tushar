@@ -50,8 +50,11 @@ import SerializedAsset from './SerializedAsset';
 import Services from './Services';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
 
 const RentalManagementDetailsPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -138,9 +141,14 @@ const RentalManagementDetailsPage = () => {
     }
     if (!isOffline) {
       fetchAssetStatusRights();
-      checkDeliveryTicketFields()
+      checkDeliveryTicketFields();
     }
     checkProgressiveBilling();
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(generateAddExistingProduct(true).steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
+    }
   }, [id]);
 
   const checkProgressiveBilling = () => {
@@ -205,7 +213,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const checkDeliveryTicketFields = () => {
@@ -223,9 +231,8 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
-
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
@@ -346,8 +353,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -423,7 +430,6 @@ const RentalManagementDetailsPage = () => {
         setIsDownloading(false);
       });
   };
-
 
   return (
     <>
@@ -593,12 +599,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -617,12 +623,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
