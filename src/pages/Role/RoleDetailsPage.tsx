@@ -75,7 +75,8 @@ const RoleDetailsPage = () => {
     isQuoteAskSupplierPrice: false,
     isProductInventorySettings: false,
     isApproveAccount: false,
-    isConvertLeadToOpportunity: false
+    isConvertLeadToOpportunity: false,
+    isAllowServicePerformRentalManagement:false,
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
@@ -216,8 +217,8 @@ const RoleDetailsPage = () => {
         isQuoteAskSupplierPrice: e.target.checked,
         isProductInventorySettings: e.target.checked,
         isApproveAccount: e.target.checked,
-        isConvertLeadToOpportunity: e.target.checked
-
+        isConvertLeadToOpportunity: e.target.checked,
+        isAllowServicePerformRentalManagement:e.target.checked
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
