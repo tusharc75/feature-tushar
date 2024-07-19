@@ -187,8 +187,8 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
     }
   };
 
-  const handleAdd = (assetData = null) => {
-    handleSucess(selectedRecords, assetData);
+  const handleAdd = () => {
+    handleSucess(selectedRecords);
   };
 
   const checkUniqWarehouse = () => {

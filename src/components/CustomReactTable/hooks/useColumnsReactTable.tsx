@@ -390,7 +390,7 @@ export default function useColumns() {
           disableFilters: true,
           disableSortBy: true,
           cell: ({ row }) => {
-            return <MultiFileCell data={row.original?.multiFileUpload} />;
+            return <MultiFileCell data={row.original?.[field?.fieldName]} />;
           }
         });
       } else if (field?.type === 'fileUpload') {
@@ -400,8 +400,8 @@ export default function useColumns() {
           disableFilters: true,
           disableSortBy: true,
           cell: ({ row }) => {
-            if (!row.original?.fileUpload) return <NoDataCell />;
-            return <MultiFileCell data={[{ fileName: row.original?.fileUpload, size: '' }]} />;
+            if (!row.original?.[field?.fieldName]) return <NoDataCell />;
+            return <MultiFileCell data={[{ fileName: row.original?.[field?.fieldName], size: '' }]} />;
           }
         });
       } else if (field?.type === 'multiImageUpload') {
@@ -411,8 +411,8 @@ export default function useColumns() {
           disableFilters: true,
           disableSortBy: true,
           cell: ({ row }) => {
-            if (!row.original.multiImageUpload) return <NoDataCell />;
-            return <MultiImageCell images={row.original?.multiImageUpload?.split(' , ') || []} />;
+            if (!row.original?.[field?.fieldName]) return <NoDataCell />;
+            return <MultiImageCell images={row.original?.[field?.fieldName]?.split(' , ') || []} />;
           }
         });
       } else if (field?.type === 'date') {

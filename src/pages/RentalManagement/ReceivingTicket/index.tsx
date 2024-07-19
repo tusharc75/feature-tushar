@@ -2309,7 +2309,6 @@ const ActionButtonMenuItems = ({
   setTransferAnotherPackageialog,
   hideDeliveryTicketDelivered
 }) => {
-
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
       return false;
@@ -2534,17 +2533,17 @@ const ActionButtonMenuItems = ({
   };
 
   const getParentPackageId = (uniqueId) => {
-    const product = rentalManagementData?.material?.find(d => d?._id === uniqueId)
+    const product = rentalManagementData?.material?.find((d) => d?._id === uniqueId);
     if (!product?.parentId) {
-      return
+      return;
     }
-    const data = rentalManagementData?.material?.find(d => d?._id === product?.parentId)
+    const data = rentalManagementData?.material?.find((d) => d?._id === product?.parentId);
     if (!data?.parentId) {
-      return data?.materialId
+      return data?.materialId;
     } else {
-      getParentPackageId(data?.parentId)
+      getParentPackageId(data?.parentId);
     }
-  }
+  };
 
   return (
     <>
@@ -2681,54 +2680,54 @@ const ActionButtonMenuItems = ({
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-          <>
+        <>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(rentalManagementActions.createReceivingTicket)) {
+                handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+              }
+            }}
+          >
+            {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+          </MenuItem>
+          {selectedRecords.length &&
+          selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+            selectedRecords?.length ? (
             <MenuItem
               onClick={() => {
-                if (!validateAction(rentalManagementActions.createReceivingTicket)) {
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                setShowRemoveAssetFromReceivingTicketDialog(true);
+              }}
+            >
+              Remove Receiving Ticket
+            </MenuItem>
+          ) : null}
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(rentalManagementActions.createReturnTicket)) {
+                if (selectedRecords?.every((e) => e.type === 'Asset')) {
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                } else {
+                  setShowQtyDialog({ open: true, data: null });
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+                }
+              }
+            }}
+          >
+            Create Return Ticket (Non-Chargeable)
+          </MenuItem>
+          {permissions?.sublease?.isRead && (
+            <MenuItem
+              onClick={() => {
+                if (!validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
+                  handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
                 }
               }}
             >
-              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+              Create Delivery Ticket for Supplier
             </MenuItem>
-            {selectedRecords.length &&
-              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
-              selectedRecords?.length ? (
-              <MenuItem
-                onClick={() => {
-                  setShowRemoveAssetFromReceivingTicketDialog(true);
-                }}
-              >
-                Remove Receiving Ticket
-              </MenuItem>
-            ) : null}
-            <MenuItem
-              onClick={() => {
-                if (!validateAction(rentalManagementActions.createReturnTicket)) {
-                  if (selectedRecords?.every((e) => e.type === 'Asset')) {
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
-                  } else {
-                    setShowQtyDialog({ open: true, data: null });
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
-                  }
-                }
-              }}
-            >
-              Create Return Ticket (Non-Chargeable)
-            </MenuItem>
-            {permissions?.sublease?.isRead && (
-              <MenuItem
-                onClick={() => {
-                  if (!validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
-                  }
-                }}
-              >
-                Create Delivery Ticket for Supplier
-              </MenuItem>
-            )}
-          </>
-        )}
+          )}
+        </>
+      )}
       {currentStep === RENTAL_STEPS.receiving && !hideDeliveryTicketDelivered && (
         <MenuItem
           onClick={() => {
@@ -2754,12 +2753,12 @@ const ActionButtonMenuItems = ({
           </MenuItem>
         )}
       {checkUniqStatus() &&
-        selectedRecords?.every(r => r?.loadingTicketId) &&
-        !selectedRecords?.some(r => r?.receivingTicketId || r?.returnTicketId) &&
-        selectedRecords?.map(r => getParentPackageId(r?.uniqueId))?.every(_id => _id === getParentPackageId(selectedRecords[0]?.uniqueId)) && (
+        selectedRecords?.every((r) => r?.loadingTicketId) &&
+        !selectedRecords?.some((r) => r?.receivingTicketId || r?.returnTicketId) &&
+        selectedRecords?.map((r) => getParentPackageId(r?.uniqueId))?.every((_id) => _id === getParentPackageId(selectedRecords[0]?.uniqueId)) && (
           <MenuItem
             onClick={() => {
-              setTransferAnotherPackageialog(true)
+              setTransferAnotherPackageialog(true);
             }}
           >
             {`Transfer to another ${routes.packages.title}`}
@@ -2841,29 +2840,29 @@ const ActionButtonMenuItems = ({
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-          <>
-            {!hideDeliveryTicketDelivered &&
-              <MenuItem
-                onClick={() => {
-                  if (!validateAction(rentalManagementActions.cancelInTransitTicket)) {
-                    setShowConformationRevertTicket(true);
-                  }
-                }}
-              >
-                Cancel Specific Line Items
-              </MenuItem>
-            }
+        <>
+          {!hideDeliveryTicketDelivered && (
             <MenuItem
               onClick={() => {
-                if (!validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
-                  setShowConformationCancleTicket({ open: true });
+                if (!validateAction(rentalManagementActions.cancelInTransitTicket)) {
+                  setShowConformationRevertTicket(true);
                 }
               }}
             >
-              Cancel Receiving/Return Ticket(s)
+              Cancel Specific Line Items
             </MenuItem>
-          </>
-        )}
+          )}
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
+                setShowConformationCancleTicket({ open: true });
+              }
+            }}
+          >
+            Cancel Receiving/Return Ticket(s)
+          </MenuItem>
+        </>
+      )}
       {selectedRecords?.filter(
         (f) =>
           f.type === 'Product' &&

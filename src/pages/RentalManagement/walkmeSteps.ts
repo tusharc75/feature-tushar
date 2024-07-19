@@ -1,6 +1,7 @@
-import { WalkmeData } from 'src/components/CustomIntro';
+import { generateFormFieldSteps, StepDefination, WalkmeData } from 'src/components/CustomIntro';
+import routes from 'src/components/Helpers/Routes';
 
-export const addExistingProduct: WalkmeData = {
+export const generateAddExistingProduct = (waitForStepInsertion = false): WalkmeData => ({
   name: 'Add Existing Product',
   url: '/rental-management/detail/:id',
   steps: [
@@ -24,26 +25,33 @@ export const addExistingProduct: WalkmeData = {
     },
     {
       target: '#dialog-add-button',
-      title: 'Add'
+      title: 'Add',
+      waitForStepInsertion: waitForStepInsertion
     }
   ]
+});
+
+export const nextButtonStep: StepDefination = {
+  target: '#step-next-button',
+  title: 'Next',
+  waitForStepInsertion: false
 };
 
-export const deleteAddedProduct: WalkmeData = {
+export const generateDeleteAddedProductSteps = (index: number, waitForStepInsertion = false): WalkmeData => ({
   name: 'Delete added Product',
   url: '/rental-management/detail/:id',
   steps: [
     {
-      target: '#rentalJobs_grid-1-table-checkbox-0',
+      target: `#rentalJobs_grid-1-table-checkbox-${index}`,
       title: 'Select a product'
     },
     { target: '#details-page-action-button', title: 'Actions' },
     { target: '#delete-menu-item', title: 'Delete' },
-    { target: '#confirmation-dialog-confirm-button', title: 'Confirm' }
+    { target: '#confirmation-dialog-confirm-button', title: 'Confirm', waitForStepInsertion }
   ]
-};
+});
 
-export const generateAddChildProduct = (index: number): WalkmeData => ({
+export const generateAddChildProduct = (index: number, waitForStepInsertion = false): WalkmeData => ({
   name: 'Add Child Product',
   url: '/rental-management/detail/:id',
   steps: [
@@ -61,12 +69,13 @@ export const generateAddChildProduct = (index: number): WalkmeData => ({
     },
     {
       target: '#dialog-add-button',
-      title: 'Add'
+      title: 'Add',
+      waitForStepInsertion
     }
   ]
 });
 
-export const generateAddStepEditProduct = (index: number): WalkmeData => ({
+export const generateAddStepEditProduct = (index: number, waitForStepInsertion = false): WalkmeData => ({
   name: 'Edit Product',
   url: '/rental-management/detail/:id',
   steps: [
@@ -80,7 +89,123 @@ export const generateAddStepEditProduct = (index: number): WalkmeData => ({
     {
       target: '#rental-job-qty-dialog-save-button',
       title: 'Save',
-      nextButtonName: 'Save'
+      nextButtonName: 'Save',
+      waitForStepInsertion
     }
   ]
 });
+
+export const generateAssignStepAssignSerializedAsset = (index: number, waitForStepInsertion = false): WalkmeData => ({
+  name: `Assign ${routes.serializedAsset.title}`,
+  url: '/rental-management/detail/:id',
+  steps: [
+    {
+      target: `#rental_management_serialized_asset-table-checkbox-${index}`,
+      title: 'Select Product'
+    },
+    {
+      target: '#assign-serialized-asset-button',
+      title: 'Assign',
+      nextButtonName: 'Assign',
+      willOpenDialog: true
+    },
+    {
+      target: '#serialized-products-0',
+      title: 'Select Product'
+    },
+    {
+      target: '#serializedAssets_assign-table-checkbox-0',
+      title: 'Select Asset'
+    },
+    {
+      target: '#add-to-job-button',
+      title: 'Add to Job',
+      waitForEnable: true
+    },
+    {
+      target: '#asset-details-change-dialog-save-button',
+      title: 'Save',
+      waitForStepInsertion
+    }
+  ]
+});
+
+export const generateLoadingStepCreateTicketSteps = (index: number, insertMTRConfirmation = true, waitForStepInsertion = false): WalkmeData => {
+  const data: WalkmeData = {
+    name: 'Create Ticket',
+    url: '/rental-management/detail/:id',
+    steps: [
+      {
+        target: `#rentalJobs_grid-3-table-checkbox-${index}`,
+        title: 'Select a product'
+      },
+      { target: '#details-page-action-button', title: 'Actions' },
+      { target: '#create-loding-ticket-menu-item', title: 'Create Ticket', waitForStepInsertion: !insertMTRConfirmation && waitForStepInsertion }
+    ]
+  };
+
+  if (insertMTRConfirmation) {
+    data.steps.push({ target: '#confirmation-dialog-confirm-button', title: 'Confirm', waitForStepInsertion: insertMTRConfirmation });
+  }
+
+  data.steps.push({ title: 'Save', target: '#manage-ticket-dialog-save-button', waitForStepInsertion });
+
+  return data;
+};
+
+export const generateDeliveredToCustomer = (index: number, waitForStepInsertion = false): WalkmeData => {
+  const data: WalkmeData = {
+    name: 'Deliver To Customer',
+    url: '/rental-management/detail/:id',
+    steps: [
+      {
+        target: `#rentalJobs_grid-3-table-checkbox-${index}`,
+        title: 'Select a product'
+      },
+      { target: '#details-page-action-button', title: 'Actions' },
+      { target: '#delivered-to-customer-menu-item', title: 'Create Ticket', waitForStepInsertion }
+    ]
+  };
+  return data;
+};
+
+export const generateCreateReceivingTicket = (index: number): WalkmeData => {
+  const data: WalkmeData = {
+    name: 'Create Receiving Ticket',
+    url: '/rental-management/detail/:id',
+    steps: [
+      {
+        target: `#rentalJobs_grid-4-table-checkbox-${index}`,
+        title: 'Select a product'
+      },
+      { target: '#details-page-action-button', title: 'Actions' },
+      { target: '#create-receiving-ticket-menu-item', title: 'Create Receiving Ticket' },
+      { target: '#confirmation-dialog-confirm-button', title: 'Confirm', waitForStepInsertion: true }
+    ]
+  };
+  return data;
+};
+
+export const createRentalJobsFlow = (fields: any): WalkmeData => {
+  const ignoreField = ['currency', 'owner', 'pdfTemplate'];
+
+  const data: WalkmeData = {
+    name: `Add ${routes.rentalManagement.title}`,
+    url: '/rental-management',
+    type: 'flow',
+    steps: [
+      {
+        title: `Add`,
+        target: '#add-button'
+      },
+      ...generateFormFieldSteps(fields, ignoreField),
+      {
+        target: '#dialog-save-button',
+        title: 'Save',
+        nextButtonName: 'Create',
+        waitForStepInsertion: true
+      }
+    ]
+  };
+  return data;
+};

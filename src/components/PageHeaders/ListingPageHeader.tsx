@@ -10,6 +10,7 @@ import HtmlTooltip from '../CustomTooltipTitle';
 import SearchBox from '../Helpers/SearchBox';
 import HideWhenOffline from '../HideWhenOffline';
 import { cn } from 'src/constants/helpers';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 type ButtonPropsWithExtraData = {
   tooltip?: string;
@@ -66,6 +67,7 @@ const ListingPageHeader = ({
   actionMenuItems,
   showSearchInMobile = false
 }: ListingPageHeaderProps) => {
+  const walkmeInstance = useGetWalkmeInstance();
   const isMobile = useMediaQuery('(max-width:600px)');
   const history = useHistory();
   const [anchorEl, setAnchorEl] = useState(null);
@@ -276,7 +278,7 @@ const ListingPageHeader = ({
                         id="action-menu"
                         open={Boolean(anchorEl)}
                         onClose={closeActions}
-                        TransitionProps={{ unmountOnExit: true }}
+                        TransitionProps={{ unmountOnExit: true, timeout: walkmeInstance ? 0 : 200 }}
                       >
                         <span onClick={() => closeActions()}>{actionMenuItems}</span>
                       </Menu>
