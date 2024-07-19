@@ -47,7 +47,6 @@ import AddExistingSerializedAssetDialog from 'src/pages/RentalManagement/Product
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import {
   generateAddExistingProduct,
-  deleteAddedProduct,
   generateAddChildProduct,
   generateAddStepEditProduct,
   generateDeleteAddedProductSteps,
@@ -586,24 +585,12 @@ const Productpackage = ({
     }
   };
 
-  const handleAddAsset = async (rows, assetsData = null) => {
+  const handleAddAsset = async (rows) => {
     setIsSubmitting(true);
-    const assetsAdd: any = [];
-    rows?.forEach((row) => {
-      const obj: any = {};
-      obj._id = row?._id;
-      if (assetsData) {
-        const matchedAsset = assetsData?.find((asset) => asset._id === obj?._id);
-        if (matchedAsset) {
-          const { _id, ...assetData } = matchedAsset;
-          obj.assetData = assetData;
-        }
-      }
-      assetsAdd.push(obj);
-    });
+    const assetIds = rows?.map((item) => item._id);
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
-        ids: assetsAdd
+        ids: assetIds
       })
       .then(() => {
         setAddExistingAssets(false);
