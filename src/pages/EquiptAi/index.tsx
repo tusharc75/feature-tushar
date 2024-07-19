@@ -382,7 +382,7 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
     return <HiOutlineSpeakerWave size={15} />;
   };
   
-  if(!chatId && !chats.length){
+  if(!chatId && !chats?.length){
     return (
       <div className="w-full h-[calc(100%_-_var(--head-h)_-_100px)] flex justify-center items-center"><BsStars className="text-[var(--new-theme-color)]" size={40} /></div>
     )
