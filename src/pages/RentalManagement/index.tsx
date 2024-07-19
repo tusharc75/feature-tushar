@@ -35,6 +35,7 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
 import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
+import { createRentalJobsFlow } from 'src/pages/RentalManagement/walkmeSteps';
 
 const RentalManagement = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -108,7 +109,7 @@ const RentalManagement = () => {
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.rentalManagement}&entity=${selectedEntity}&view=true`);
       data = response?.data?.data;
-      setWalkmeData([createAddItemStepdata(routes.rentalManagement, data)]);
+      setWalkmeData([createRentalJobsFlow(data)]);
       try {
         insertUpdate(objectStore.resource, sidebarResource.rentalManagement, data);
       } catch (e) {

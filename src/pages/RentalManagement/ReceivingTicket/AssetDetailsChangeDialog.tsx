@@ -18,8 +18,15 @@ import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
 import { read, utils, writeFile } from 'xlsx';
 
-export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPolicy, ids, setAssetsData, staticLookUpFilters = {}, productsDefaultData = [] }) {
-
+export default function AssetDetailsChangeDialog({
+  onClose,
+  onSuccess,
+  statusPolicy,
+  ids,
+  setAssetsData,
+  staticLookUpFilters = {},
+  productsDefaultData = []
+}) {
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -33,9 +40,8 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
   }, []);
 
   const fetchFields = async () => {
-
-    const data = await axiosInstance().get(`${serializedAsset.api}?getById=${JSON.stringify((ids))}`);
-    const assetData = data?.data?.data
+    const data = await axiosInstance().get(`${serializedAsset.api}?getById=${JSON.stringify(ids)}`);
+    const assetData = data?.data?.data;
 
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     let fieldsData = fields?.data?.data;
@@ -48,7 +54,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
     let i = 0;
     let j = 0;
     let index = null;
-    let product = assetData?.length > 0 ? assetData[0]?.product?.optionValue : ''
+    let product = assetData?.length > 0 ? assetData[0]?.product?.optionValue : '';
 
     assetData?.forEach((data) => {
       if (product !== data?.product?.optionValue) {
@@ -64,8 +70,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
             decimalField.push(e.fieldName);
             initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
             initialValues[e.fieldName] = 0;
-          }
-          else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
+          } else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
             initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
           }
         });
@@ -75,11 +80,11 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
 
       const assetDefaultData = productsDefaultData?.find((e) => e.materialId === data?.product?.optionValue)?.assetDefaultData;
       if (!index) {
-        index = assetDefaultData?.length > 0 ? assetDefaultData[0]?.qty : null
+        index = assetDefaultData?.length > 0 ? assetDefaultData[0]?.qty : null;
       }
       if (index === i) {
         j = j + 1;
-        index = index + assetDefaultData[j]?.qty
+        index = index + assetDefaultData[j]?.qty;
         i = 0;
       }
 
@@ -91,8 +96,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
               if (assetDefaultData[j][key] && field) {
                 if (field?.type === 'multiSelect' && isString(assetDefaultData[j][key])) {
                   initialValues[key] = [assetDefaultData[j][key]];
-                }
-                else {
+                } else {
                   initialValues[key] = assetDefaultData[j][key];
                 }
               }
@@ -101,7 +105,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
         }
       }
       tempAssetData.push(initialValues);
-      i = i + 1
+      i = i + 1;
     });
     values['assetData'] = tempAssetData;
     setDecimalFields(decimalField);
@@ -109,7 +113,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       if (element?.lookup && staticLookUpFilters[element?.fieldName] && isArray(staticLookUpFilters[element?.fieldName])) {
         element.option = element.option?.filter((ele) => staticLookUpFilters[element?.fieldName]?.includes(ele.optionValue));
       }
-    })
+    });
     setInitialData({
       fields: fieldsDataForUpdate,
       values: values
@@ -124,22 +128,21 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       fieldsDataReset = allFields.filter((d) => statusPolicy?.fieldsReset?.includes(d.fieldData.fieldName)).map((d: any) => d.fieldData);
     }
     values?.assetData?.forEach((ele) => {
-      const obj: any = { _id: ele._id }
+      const obj: any = { _id: ele._id };
       statusPolicy?.fields?.forEach((fieldName) => {
         if (statusPolicy?.sumDecimalField && decimalFields?.includes(fieldName)) {
-          obj[fieldName] = parseFloat(ele[fieldName] || 0) + parseFloat(ele[`${fieldName}_orignal`] || 0)
+          obj[fieldName] = parseFloat(ele[fieldName] || 0) + parseFloat(ele[`${fieldName}_orignal`] || 0);
+        } else {
+          obj[fieldName] = ele[fieldName];
         }
-        else {
-          obj[fieldName] = ele[fieldName]
-        }
-      })
+      });
       let resetValues = {};
       if (fieldsDataReset?.length) {
-        resetValues = getObjKeys('', fieldsDataReset)
+        resetValues = getObjKeys('', fieldsDataReset);
       }
-      data.push({ ...obj, ...resetValues })
-    })
-    setAssetsData(data)
+      data.push({ ...obj, ...resetValues });
+    });
+    setAssetsData(data);
     onSuccess(data);
     setSubmitting(false);
   };
@@ -193,11 +196,13 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
       };
     });
 
-    const field_option_label = initialData?.fields?.filter(f => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map(field => {
-      return [...field?.option?.map(o => ({ [field?.fieldLabel]: o?.optionLabel }))]
-    })
+    const field_option_label = initialData?.fields
+      ?.filter((f) => f?.type === 'dropDown' || f?.type === 'multiSelect')
+      ?.map((field) => {
+        return [...field?.option?.map((o) => ({ [field?.fieldLabel]: o?.optionLabel }))];
+      });
 
-    const maxLength = Math.max(...field_option_label.map(arr => arr.length));
+    const maxLength = Math.max(...field_option_label.map((arr) => arr.length));
     const json_data_value = [];
 
     for (let i = 0; i < maxLength; i++) {
@@ -212,7 +217,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
 
     const header1 = ['Asset Number', ...initialData?.fields?.map((f) => f?.fieldLabel)];
 
-    const header2 = initialData?.fields?.filter(f => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map(f => f?.fieldLabel)
+    const header2 = initialData?.fields?.filter((f) => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map((f) => f?.fieldLabel);
 
     const ws = utils.json_to_sheet(json_data);
     const ws_value = utils.json_to_sheet(json_data_value);
@@ -250,7 +255,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
             : ''
           : '';
       } else if (field?.type === 'singleLine') {
-        data = `${data}`
+        data = `${data}`;
       }
       return { index, fieldName: field?.fieldName, value: data };
     } else {
@@ -348,13 +353,13 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
                           {values?.assetData?.map((data, index) => (
                             <div
                               style={{ border: '1.5px solid var(--common-border-color)' }}
-                              className=" flex flex-col rounded-[6px] pt-[17px] px-[23px] pb-[21px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
+                              className=" flex flex-col rounded-[6px] px-[23px] pb-[21px] pt-[17px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)]"
                               key={index}
                             >
                               <div>
-                                <span className="text-[var(--primary-text)] font-semibold">{data.assetNumber}</span>
+                                <span className="font-semibold text-[var(--primary-text)]">{data.assetNumber}</span>
                               </div>
-                              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-[20px] md:gap-[25px] mt-[28px]">
+                              <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (
                                   <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
                                     <FormTypes
@@ -393,6 +398,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
                 <Button
                   size="small"
                   color="primary"
+                  id={'asset-details-change-dialog-cancel-button'}
                   disabled={submitting}
                   onClick={() => {
                     if (isEqual(initialData.values, values)) onClose();
@@ -408,6 +414,7 @@ export default function AssetDetailsChangeDialog({ onClose, onSuccess, statusPol
                   size="small"
                   type="submit"
                   onClick={submitForm}
+                  id={'asset-details-change-dialog-save-button'}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
                   {' '}

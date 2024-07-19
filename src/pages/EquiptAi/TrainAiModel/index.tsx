@@ -1,7 +1,6 @@
 import { Box, MenuItem } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
-import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -17,14 +16,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { checkIsAllowedToDelete, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
-import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { deleteDisable } from 'src/constants/messageHelpers';
 import ManageTrainAiModel from './ManageTrainAiModel';
-import axios, { CancelTokenSource } from 'axios';
 
 const TrainAiModel = () => {
 
   let renderedFrom = camelCase(routes.trainAiModel?.title);
+
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -32,7 +31,7 @@ const TrainAiModel = () => {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   let { referenceId }: any = queryString.parse(history.location.search);
-  const [showManageTrainAiModelDialog, setShowManageTrainAiModelDialog] = useState({ open: false, isClone: false, idToClone: null });
+  const [showManageTrainAiModelDialog, setShowManageTrainAiModelDialog] = useState({ open: false });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
@@ -49,8 +48,7 @@ const TrainAiModel = () => {
   }, [page, limit, filters, sorting, search, selectedEntity, showFilteredRecordsOnly]);
 
   const fetchGridColumns = () => {
-    axiosInstance()
-      .get(`/field?resource=${sidebarResource.trainAiModel}`)
+    axiosInstance().get(`/field?resource=${sidebarResource.trainAiModel}`)
       .then(({ data: { data } }) => {
         let newColumns = generateColumns(renderedFrom, data, routes.trainAiModel.path, true);
         setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
@@ -67,37 +65,21 @@ const TrainAiModel = () => {
     disableSortBy: true,
     canDrag: false,
     Cell: ({ row }) => (
-      <>
-        <HtmlTooltip title={permissions?.trainAiModel?.isCreate ? 'Clone' : cloneDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              disabled={permissions?.trainAiModel?.isCreate ? false : true}
-              onClick={() => {
-                setShowManageTrainAiModelDialog({ open: true, isClone: true, idToClone: row.original._id });
-              }}
-            >
-              <FileCopyIcon fontSize="small" color={permissions?.trainAiModel?.isCreate ? 'primary' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-        <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
-          <span>
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              disabled={row?.original?.canDelete ? false : true}
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
-            </IconButton>
-          </span>
-        </HtmlTooltip>
-      </>
+      <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : deleteDisable}>
+        <span>
+          <IconButton
+            size="small"
+            aria-label="Delete"
+            disabled={row?.original?.canDelete ? false : true}
+            onClick={() => {
+              setDeleteRecord(row.original);
+              setShowDeleteConfirmBox(true);
+            }}
+          >
+            <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
+          </IconButton>
+        </span>
+      </HtmlTooltip>
     )
   };
 
@@ -113,6 +95,7 @@ const TrainAiModel = () => {
           finalObject['canDelete'] = permissions?.trainAiModel?.isDelete;
           return finalObject;
         });
+        console.log(rows)
         dispatch({ type: 'initialize', data: rows, count: count });
       })
       .catch((error) => {
@@ -130,25 +113,19 @@ const TrainAiModel = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-
-    
     if (referenceId) {
       filterByIds.push({ field: 'rentalJob', term: referenceId });
     }
-
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
-
     if (filterByIds?.length || deepFilters?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
     }
-
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -160,8 +137,6 @@ const TrainAiModel = () => {
     }
     return deepFilter;
   };
-
- 
 
   const handleDelete = () => {
     let ids = [];
@@ -211,18 +186,15 @@ const TrainAiModel = () => {
         <ListingPageHeader
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => {
-            setShowManageTrainAiModelDialog({ open: true, isClone: false, idToClone: null });
+            setShowManageTrainAiModelDialog({ open: true });
           }}
           isAddButtonVisible={permissions?.trainAiModel?.isCreate}
           setQueryString={false}
         />
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
@@ -234,7 +206,6 @@ const TrainAiModel = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.trainAiModel}
-            setWholeRowsCellColor={(rowData) => (rowData.deleted ? 'error' : '')}
           />
         ) : (
           <Box p={2} height={500}>
@@ -244,11 +215,9 @@ const TrainAiModel = () => {
       </CustomContainer>
       {showManageTrainAiModelDialog.open && (
         <ManageTrainAiModel
-          isClone={showManageTrainAiModelDialog.isClone}
-          trainAiModelId={showManageTrainAiModelDialog.idToClone}
-          onClose={() => setShowManageTrainAiModelDialog({ open: false, isClone: false, idToClone: null })}
+          onClose={() => setShowManageTrainAiModelDialog({ open: false })}
           onSuccess={() => {
-            setShowManageTrainAiModelDialog({ open: false, isClone: false, idToClone: null });
+            setShowManageTrainAiModelDialog({ open: false });
             fetchData();
           }}
         />

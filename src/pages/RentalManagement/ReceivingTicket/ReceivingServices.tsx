@@ -25,6 +25,7 @@ import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/Service
 import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { isMobile, isTablet } from 'react-device-detect';
+import { useData } from '../../../StateProvider/Provider';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords }) => {
 
@@ -34,6 +35,10 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
   const toastConfig = useContext(CustomToastContext);
 
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
+
+    const {
+    state: { user }
+  }: any = useData();
 
   const [columns, setColumns] = useState(null);
   const [tabValue, setTabValue] = useState(0);
@@ -213,7 +218,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           <DetailsPageHeader
             isAddButtonVisible={false}
-            isActionButtonVisible={allowedToEdit}
+            isActionButtonVisible={allowedToEdit && user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
             actionButtonMenuItems={
               <ActionButtonMenuItems
                 {...{
@@ -236,7 +241,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
                   dispatch={dispatch}
                   renderedFrom={`${renderedFrom}_services`}
                   isClientSideGrid={true}
-                  hideSelection={!allowedToEdit}
+                  hideSelection={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
                   hideAction={true}
                   refreshGrid={fetchRecords}
                 />
