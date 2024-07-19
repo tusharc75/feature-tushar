@@ -689,6 +689,10 @@ const ReceivingTicket = ({
             s.assetNumber = s?.serviceDetail?.serviceName;
             s.startDate = s?.actualStartDate;
             s.endDate = s?.actualEndDate;
+            const parent = material?.find((e) => e._id === s?.parentId);
+            if (parent) {
+              s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+            }
             services.push(s);
           });
       }
