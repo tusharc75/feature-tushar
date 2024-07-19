@@ -4,7 +4,14 @@ import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTab
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, Dialog } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomDialogTransition, gridLoadingTimeout, deliveryTicket, rentalManagement, ASSET_STATUS, DELIVERY_TICKET_STATUS } from '../../../constants/helpers';
+import {
+  CustomDialogTransition,
+  gridLoadingTimeout,
+  deliveryTicket,
+  rentalManagement,
+  ASSET_STATUS,
+  DELIVERY_TICKET_STATUS
+} from '../../../constants/helpers';
 import { useData } from '../../../StateProvider/Provider';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -21,8 +28,9 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import ManageRentalManagementDialog from '../ManageRental';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 
-const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onClose, onSuccess }) => {
+const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onClose, onSuccess, assetPolicyData = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, selectedEntity }
@@ -32,6 +40,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {}, rentalJob: null });
   const [showRentalDialog, setShowRentalDialog] = useState({ open: false, data: {} });
   const [assetsAdd, setAssetsAdd] = useState([]);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, isOnlyAssetAdd: false, data: null });
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -95,7 +104,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     });
   };
 
-  const handleCreateReceivingTicket = async (rentalData, isOnlyAssetAdd) => {
+  const handleCreateReceivingTicket = async (rentalData, isOnlyAssetAdd, assetsData = null) => {
     const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalData._id}`);
     const assetsAdd = [];
     const inventory = JSON.parse(JSON.stringify(productInventory.filter((e) => e.type === 'Asset')));
@@ -117,6 +126,13 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
             obj._id = e._id;
             obj.inventory = result[0]._id;
             obj.product = e.materialId;
+            if (assetsData) {
+              const matchedAsset = assetsData?.find((asset) => asset._id === obj.inventory);
+              if (matchedAsset) {
+                const { _id, ...assetData } = matchedAsset;
+                obj.assetData = assetData;
+              }
+            }
             assetsAdd.push(obj);
             result[0].isCounted = true;
           }
@@ -174,17 +190,26 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       if (referenceData?.processor?.optionValue) {
         tempInitialData['deliveryPerson'] = referenceData?.processor?.optionValue;
       }
-      tempInitialData['assets'] = productInventory?.filter((e) => e.type === 'Asset')?.map((d) => { return { asset: d._id, uniqueId: d?.uniqueId } });
+      tempInitialData['assets'] = productInventory
+        ?.filter((e) => e.type === 'Asset')
+        ?.map((d) => {
+          return { asset: d._id, uniqueId: d?.uniqueId };
+        });
       tempInitialData['products'] = [];
-      productInventory?.filter((e) => e.type === 'Product')?.forEach((ele) => {
-        tempInitialData['products'].push({ product: ele._id, qty: ele.qty });
-      });
+      productInventory
+        ?.filter((e) => e.type === 'Product')
+        ?.forEach((ele) => {
+          tempInitialData['products'].push({ product: ele._id, qty: ele.qty });
+        });
       tempInitialData['status'] = DELIVERY_TICKET_STATUS.delivered;
-      axiosInstance().post(`${deliveryTicket.api}`, tempInitialData).then(({ data }) => {
-        handleCreateLoadingTicketAddAsstes(data?.data, rentalData._id, assetsAdd);
-      }).catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+      axiosInstance()
+        .post(`${deliveryTicket.api}`, tempInitialData)
+        .then(({ data }) => {
+          handleCreateLoadingTicketAddAsstes(data?.data, rentalData._id, assetsAdd);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
 
       // const data = {}
       // data["ticketName"] = referenceData.rentalJobName;
@@ -213,16 +238,19 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     deliveryTicketData._id = data._id;
     deliveryTicketData.rentalJob = rentalJob;
     deliveryTicketData.ticketType = DELIVERY_TICKET_TYPE.loading;
-    axiosInstance().post(`${rentalManagement.api}/${rentalJob}/inventory`, { products: assets }).then(({ data }) => {
-      axiosInstance().post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData)
-        .then(({ data }) => {
-          setShowTicketDialog({ open: false, ticketType: '', data: {}, rentalJob: null });
-          onSuccess();
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    })
+    axiosInstance()
+      .post(`${rentalManagement.api}/${rentalJob}/inventory`, { products: assets })
+      .then(({ data }) => {
+        axiosInstance()
+          .post(`${deliveryTicket.api}/auto-create-ticket`, deliveryTicketData)
+          .then(({ data }) => {
+            setShowTicketDialog({ open: false, ticketType: '', data: {}, rentalJob: null });
+            onSuccess();
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -241,10 +269,25 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         } else {
           isOnlyAssetAdd = true;
         }
-        handleCreateReceivingTicket(
-          { _id: rentalData._id, deliveryTo: rentalData.customerAccount, deliveryToAddress: rentalData.shippingAddress },
-          isOnlyAssetAdd
-        );
+        if (
+          assetPolicyData?.policy?.statusChangeFields?.find(
+            (ele) => ele.status === (isOnlyAssetAdd ? ASSET_STATUS.reserved : ASSET_STATUS.underReview)
+          )
+        ) {
+          setOpenAssetDataDialog({
+            open: true,
+            statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find(
+              (ele) => ele.status === (isOnlyAssetAdd ? ASSET_STATUS.reserved : ASSET_STATUS.underReview)
+            ),
+            isOnlyAssetAdd: isOnlyAssetAdd,
+            data: { _id: rentalData._id, deliveryTo: rentalData.customerAccount, deliveryToAddress: rentalData.shippingAddress }
+          });
+        } else {
+          handleCreateReceivingTicket(
+            { _id: rentalData._id, deliveryTo: rentalData.customerAccount, deliveryToAddress: rentalData.shippingAddress },
+            isOnlyAssetAdd
+          );
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -278,14 +321,33 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
                 } else {
                   isOnlyAssetAdd = true;
                 }
-                handleCreateReceivingTicket(
-                  {
-                    _id: selectedRecords[0]?._id,
-                    deliveryTo: selectedRecords[0]?.customerAccountId,
-                    deliveryToAddress: selectedRecords[0]?.shippingAddressId
-                  },
-                  isOnlyAssetAdd
-                );
+                if (
+                  assetPolicyData?.policy?.statusChangeFields?.find(
+                    (ele) => ele.status === (isOnlyAssetAdd ? ASSET_STATUS.reserved : ASSET_STATUS.underReview)
+                  )
+                ) {
+                  setOpenAssetDataDialog({
+                    open: true,
+                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find(
+                      (ele) => ele.status === (isOnlyAssetAdd ? ASSET_STATUS.reserved : ASSET_STATUS.underReview)
+                    ),
+                    isOnlyAssetAdd: isOnlyAssetAdd,
+                    data: {
+                      _id: selectedRecords[0]?._id,
+                      deliveryTo: selectedRecords[0]?.customerAccountId,
+                      deliveryToAddress: selectedRecords[0]?.shippingAddressId
+                    }
+                  });
+                } else {
+                  handleCreateReceivingTicket(
+                    {
+                      _id: selectedRecords[0]?._id,
+                      deliveryTo: selectedRecords[0]?.customerAccountId,
+                      deliveryToAddress: selectedRecords[0]?.shippingAddressId
+                    },
+                    isOnlyAssetAdd
+                  );
+                }
               }}
               variant={'contained'}
               disabled={selectedRecords.length > 1 || selectedRecords.length === 0}
@@ -336,6 +398,20 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           onSuccess={(data) => {
             cloneRentalDetail(data);
           }}
+        />
+      )}
+
+      {openAssetDataDialog.open && (
+        <AssetDetailsChangeDialog
+          ids={productInventory?.map((e) => e._id)}
+          statusPolicy={openAssetDataDialog.statusPolicy}
+          setAssetsData={() => {}}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, isOnlyAssetAdd: false, data: null })}
+          onSuccess={(_assetData) => {
+            handleCreateReceivingTicket(openAssetDataDialog.data, openAssetDataDialog.isOnlyAssetAdd, _assetData);
+            setOpenAssetDataDialog({ open: false, statusPolicy: null, isOnlyAssetAdd: false, data: null });
+          }}
+          staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
         />
       )}
     </Dialog>
