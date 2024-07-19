@@ -10,13 +10,21 @@ import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
 import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { useStore, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
+import { useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
 export * from 'src/components/CustomIntro/helper';
 export * from 'src/components/CustomIntro/useSetWalkmeSteps';
 
+export type StateWalkmeInstance = {
+  name: string;
+  type?: 'flow' | 'normal' | undefined;
+  instance: HandleSteps;
+  handleNext: () => void;
+};
+
 export type WalkmeData = {
   name: string;
+  type?: 'flow' | 'normal' | undefined;
   steps: StepDefination[];
   url: string;
 };
@@ -34,6 +42,9 @@ export type StepDefination = {
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
   skipIfValueExist?: boolean;
   nextButtonName?: string;
+  waitForEnable?: boolean;
+  willOpenDialog?: boolean;
+  waitForStepInsertion?: boolean;
 };
 
 export type NormalStep = {
@@ -43,6 +54,9 @@ export type NormalStep = {
   isHiddenStep: false;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
+  waitForEnable?: boolean;
+  willOpenDialog?: boolean;
+  waitForStepInsertion?: boolean;
 };
 export type HiddenStep = {
   target: string;
@@ -53,11 +67,17 @@ export type HiddenStep = {
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
   skipIfValueExist?: boolean;
   nextButtonName?: string;
+  waitForEnable?: boolean;
+  willOpenDialog?: boolean;
+  waitForStepInsertion?: boolean;
 };
+
+let timeout: NodeJS.Timeout;
 
 const CustomIntro = () => {
   const [selectedIntro, setSelectedIntro] = useState<WalkmeData | null>(null);
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_s, setWalkMeInstance] = useStore((store) => store[WALK_ME_INSTANCE]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setUpdateSignal] = useState<number>(0);
   let handleSteps = useRef<HandleSteps | null>(null);
@@ -68,10 +88,37 @@ const CustomIntro = () => {
   const open = Boolean(anchorEl);
 
   const handleReset = () => {
+    if (isWaiting) return;
     handleSteps?.current?.removeListeners();
     setAnchorEl(null);
     handleSteps.current = null;
     setSelectedIntro(null);
+    setWalkMeInstance({ [WALK_ME_INSTANCE]: null });
+  };
+
+  const handleNext = (checkForStepInsertion = true) => {
+    if (checkForStepInsertion) {
+      currentStepData?.element.click();
+      if (currentStepData?.waitForStepInsertion) {
+        handleSteps.current?.pause();
+        return;
+      }
+    } else {
+      handleSteps.current.resume();
+    }
+
+    clearTimeout(timeout);
+    if (currentStepData?.willOpenDialog) {
+      // check if dialog will open then wait for 500ms to let dialog open properly
+      timeout = setTimeout(() => {
+        handleSteps.current?.next();
+      }, 500);
+    } else {
+      // wait for any layout change
+      timeout = setTimeout(() => {
+        handleSteps.current?.next();
+      }, 100);
+    }
   };
 
   const handleStart = (intro: WalkmeData) => {
@@ -82,6 +129,15 @@ const CustomIntro = () => {
       setUpdateSignal: setUpdateSignal,
       onReset: handleReset
     });
+    setWalkMeInstance({
+      [WALK_ME_INSTANCE]: {
+        name: intro.name,
+        instance: handleSteps.current,
+        type: intro.type,
+        handleNext: () => handleNext(false)
+      }
+    });
+
     handleSteps.current?.start();
   };
 
@@ -92,15 +148,9 @@ const CustomIntro = () => {
   } & NormalStep;
   const isLastStep = handleSteps?.current?.isLastStep();
   const isFirstStep = handleSteps?.current?.isFirstStep();
-  const isFindingElement = handleSteps?.current?.findingElement;
+  const isWaiting = handleSteps?.current?.waiting;
+  const isFindingElement = handleSteps?.current?.findingElement || isWaiting;
   const isHiddenStep = currentStepData?.isHiddenStep;
-
-  const handleNext = () => {
-    currentStepData?.element.click();
-
-    // this is to check for double click
-    handleSteps.current?.next();
-  };
 
   if (handleSteps?.current?.error || !handleSteps || isHiddenStep) return null;
 
@@ -116,7 +166,7 @@ const CustomIntro = () => {
             {currentStepData.element && !isFindingElement && (
               <div
                 ref={(ref) => setAnchorEl(ref)}
-                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
+                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten transition-all duration-200"
                 onClick={() => {
                   handleNext();
                 }}
@@ -159,6 +209,7 @@ const CustomIntro = () => {
                 {!isFirstStep ? (
                   <ThemeButton
                     color="secondary"
+                    disabled={isWaiting}
                     iconForMobile={false}
                     onClick={() => handleSteps.current?.previous()}
                     startIcon={<FaArrowLeft size={16} />}
@@ -168,7 +219,7 @@ const CustomIntro = () => {
                 ) : (
                   <span></span>
                 )}
-                {!isLastStep ? (
+                {!isLastStep || isWaiting || currentStepData.waitForStepInsertion ? (
                   <ThemeButton
                     borderColor="none"
                     color="primary"
@@ -176,6 +227,7 @@ const CustomIntro = () => {
                     onClick={() => {
                       handleNext();
                     }}
+                    disabled={isWaiting}
                     endIcon={<FaArrowRight size={16} />}
                   >
                     {currentStepData.nextButtonName || 'Next'}
@@ -185,6 +237,7 @@ const CustomIntro = () => {
                     borderColor="none"
                     color="primary"
                     iconForMobile={false}
+                    disabled={isWaiting}
                     onClick={() => {
                       handleNext();
                       handleReset();

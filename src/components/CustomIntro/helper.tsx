@@ -88,6 +88,22 @@ export function generateFormFieldSteps(fields: any[], ignoreField?: string[]) {
   return fieldsStpes;
 }
 
+export function generateStepsFormfieldData(fields: any[], ignoreField?: string[]) {
+  let fieldsStpes: StepDefination[] = [];
+  fields?.forEach((e) => {
+    if (e?.required && !ignoreField?.includes(e?.fieldName) && !e?.isDefaultValue && !e?.isUneditable) {
+      fieldsStpes.push({
+        title: `Select ${e?.fieldLabel}`,
+        target: `#field-${e?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
+        content: '',
+        nextOnValueChange: true,
+        skipIfValueExist: true
+      });
+    }
+  });
+  return fieldsStpes;
+}
+
 export function createAddItemStepdata(route: { title: string; path: string }, fields: any[]) {
   const { title, path } = route;
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];

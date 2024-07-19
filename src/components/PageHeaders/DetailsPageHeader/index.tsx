@@ -5,6 +5,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import PreviewDownload from 'src/components/PreviewDownload';
 // import { MdExpandCircleDown } from 'react-icons/md';
 import { FaCircleChevronDown } from 'react-icons/fa6';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 type ButtonPropsWithTooltip = {
   tooltip?: string;
@@ -39,6 +40,7 @@ const DetailsPageHeader = ({
   rightSideContents,
   hasXpadding = true
 }: DetailsPageHeaderProps) => {
+  const walkmeInstance = useGetWalkmeInstance();
   const { tooltip: actionButtonTooltip, onClick: actionButtonOnClick, ...restOfActionButtonProps } = actionButtonProps || {};
   const {
     tooltip: addButtonTooltip,
@@ -113,7 +115,7 @@ const DetailsPageHeader = ({
             id="add-menu"
             open={Boolean(addAnchorEl)}
             onClose={closeAddMenu}
-            TransitionProps={{ unmountOnExit: true }}
+            TransitionProps={{ unmountOnExit: true, timeout: walkmeInstance ? 0 : 200 }}
           >
             <span onClick={closeAddMenu}>{addButtonMenuItems}</span>
           </Menu>
@@ -180,7 +182,7 @@ const DetailsPageHeader = ({
                 vertical: 'top',
                 horizontal: 'right'
               }}
-              TransitionProps={{ unmountOnExit: true }}
+              TransitionProps={{ unmountOnExit: true, timeout: walkmeInstance ? 0 : 200 }}
               id="add-menu"
               open={Boolean(actionAnchorEl)}
               onClose={closeActionMenu}

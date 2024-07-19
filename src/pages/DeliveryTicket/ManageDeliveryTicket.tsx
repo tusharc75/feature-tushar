@@ -40,6 +40,7 @@ import {
   setFieldsInAscendingOrder
 } from './../../constants/helpers';
 import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
+import { generateFormFieldSteps, generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const ManageDeliveryTicket = ({
   onClose,
@@ -49,13 +50,13 @@ const ManageDeliveryTicket = ({
   referenceType = null,
   referenceData = null,
   assets = null,
-  products = null,
+  products = null
 }) => {
   const {
     state: { user }
   }: any = useData();
   const toastConfig = useContext(CustomToastContext);
-
+  const walkmeInstance = useGetWalkmeInstance();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -83,6 +84,15 @@ const ManageDeliveryTicket = ({
   const [showAddressDialog, setShowAddressDialog] = useState(false);
   const [addressType, setAddressType] = useState('');
   const [createDateMin, setCreateDateMin] = useState(new Date());
+  const isStepDataSet = useRef(false);
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields.length > 0) {
+      isStepDataSet.current = true;
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
 
   useEffect(() => {
     if (initialData?.fields?.some((field) => field?.fieldName === 'createDate') && assets?.length) {
@@ -246,6 +256,8 @@ const ManageDeliveryTicket = ({
         const response = await axiosInstance().get(`/field?resource=${sidebarResource['deliveryTicket']}`);
         data = response?.data?.data;
       }
+      if (walkmeInstance) {
+      }
       let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
       let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
       if (deliveryTicketId) {
@@ -335,7 +347,7 @@ const ManageDeliveryTicket = ({
               obj.uniqueId = ele.uniqueId;
             }
             if (ele?.productSerialNumbers?.length > 0) {
-              obj.serialNumber = ele?.productSerialNumbers?.map(s => s?.serialNumber)
+              obj.serialNumber = ele?.productSerialNumbers?.map((s) => s?.serialNumber);
             }
             tempInitialData['products'].push(obj);
           });
@@ -463,8 +475,6 @@ const ManageDeliveryTicket = ({
   const onCollabOwnerMultiselectOpen = (selectedOwnerId) => {
     setCollaboratorData(getCollaboratorDropdownDataSource(selectedOwnerId, ownerCollaboratorData));
   };
-
-
 
   const handleSubmit = async (values) => {
     if (isOffline) {
@@ -629,10 +639,11 @@ const ManageDeliveryTicket = ({
                     onClose();
                   }
                 }}
-                title={`${deliveryTicketId
-                  ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
-                  : `Create Transaction Ticket`
-                  }`}
+                title={`${
+                  deliveryTicketId
+                    ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
+                    : `Create Transaction Ticket`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -686,11 +697,11 @@ const ManageDeliveryTicket = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                      //minDate={new Date()}
-                                      //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                      // maxDate={
-                                      //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
-                                      //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
+                                        //minDate={new Date()}
+                                        //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                        // maxDate={
+                                        //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
+                                        //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                       />
                                     ) : field.fieldName === 'createDate' ? (
                                       <FormTypes
@@ -1012,6 +1023,7 @@ const ManageDeliveryTicket = ({
                 <Button
                   variant="outlined"
                   color="primary"
+                  id={'manage-ticket-dialog-cancel-button'}
                   size="small"
                   disabled={isSubmitting || loading}
                   onClick={() => {
@@ -1030,6 +1042,7 @@ const ManageDeliveryTicket = ({
                   variant="contained"
                   color="primary"
                   type="submit"
+                  id={'manage-ticket-dialog-save-button'}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
