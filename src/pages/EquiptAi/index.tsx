@@ -43,7 +43,8 @@ const EquiptAi = () => {
       .get('/generative-ai/chat')
       .then(({ data: { data } }) => {
         setChatHistory(data);
-        getOneChatHistory(data[0]?._id);
+        setChatId(null);
+        setChats([]);
       });
   };
 
@@ -179,16 +180,18 @@ const EquiptAi = () => {
                 </div>
               )}
               <div className="ml-auto">
+                {chats?.length ? (
                 <HtmlTooltip title={'Download Chat'}>
                   <IconButton size="small" style={{ padding: 8 }} onClick={() => handleExportChat()}>
                     <DownloadIcon />
                   </IconButton>
                 </HtmlTooltip>
+              ): null}
               </div>
             </div>
             <DisplayMessages chats={chats} chatId={chatId} />
             <div className="absolute bottom-0 left-0 right-0 bg-[var(--dark-primary,white)] p-2">
-              <div className="flex rounded-full p-2 [border:1px_solid_var(--common-border-color)]">
+              <div className="flex rounded-full p-2 bg-[#f2f2f2] [border:1px_solid_var(--common-border-color)]">
                 <input
                   type="text"
                   name="question"
@@ -378,7 +381,12 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
     }
     return <HiOutlineSpeakerWave size={15} />;
   };
-
+  
+  if(!chatId && !chats.length){
+    return (
+      <div className="w-full h-[calc(100%_-_var(--head-h)_-_100px)] flex justify-center items-center"><BsStars className="text-[var(--new-theme-color)]" size={40} /></div>
+    )
+  }
   return (
     <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto scroll-smooth" ref={containerRef}>
       {chats ? (
