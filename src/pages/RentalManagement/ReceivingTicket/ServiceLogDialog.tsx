@@ -17,10 +17,7 @@ import { Edit } from '@material-ui/icons';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 
-const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess, owner }) => {
-  const {
-    state: { user }
-  }: any = useData();
+const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess, allowedToEdit }) => {
 
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
@@ -43,7 +40,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       const serviceLogData = response?.data?.data;
 
       serviceLogData?.forEach((log)=>{
-        if(maxInvoiceDate && log.endDate<=maxInvoiceDate){
+        if((maxInvoiceDate && log.endDate<=maxInvoiceDate) || !allowedToEdit){
           log.canEdit = false;
         }else{
           log.canEdit = true;
@@ -197,11 +194,11 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       Cell: ({ row }) => {
         return (
           <>
-            <HtmlTooltip title={row?.original?.canEdit && user?.user?._id === owner ?`Update - Start Date/End Date` : 'Invoice already created'}>
+            <HtmlTooltip title={row?.original?.canEdit ?`Update - Start Date/End Date` : 'Invoice already created'}>
               <span>
                 <IconButton
                   size="small"
-                  disabled={!row?.original?.canEdit || user?.user?._id !== owner}
+                  disabled={!row?.original?.canEdit}
                   onClick={() => {
                     let minStartDate = null, maxEndDate = null;
                     dataRows?.forEach((d: any, index: number) => {
@@ -219,7 +216,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
                     setEditDateDialog({ open: true, loading: false, minStartDate: minStartDate, maxEndDate: maxEndDate, data: row?.original });
                   }}
                 >
-                  <Edit fontSize="small" color={row?.original?.canEdit && user?.user?._id === owner ? 'primary' : 'disabled'} />
+                  <Edit fontSize="small" color={row?.original?.canEdit ? 'primary' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
