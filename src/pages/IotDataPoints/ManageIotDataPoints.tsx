@@ -1,4 +1,17 @@
-import { Box, Button, Chip, CircularProgress, Dialog, Grid, TextField, Typography } from '@material-ui/core';
+import {
+  Box,
+  Button,
+  Chip,
+  CircularProgress,
+  Dialog,
+  FormControl,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+  Typography
+} from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useRef, useState } from 'react';
@@ -88,6 +101,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
 
             const tempInitialData: any = isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields);
             tempInitialData.formula = tempData?.formula || '';
+            tempInitialData.returnType = tempData?.returnType || 'decimal';
             tempInitialData.dataPoints = tempData?.dataPoints || [];
             setInitialData({
               fields: fields,
@@ -109,6 +123,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
           });
         }
         tempInitialData.formula = '';
+        tempInitialData.returnType = 'decimal';
         tempInitialData.dataPoints = [];
         setInitialData({
           fields: fieldsDataForCreate,
@@ -149,6 +164,9 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
       }
       if (values.formula === '') {
         errors['formula'] = 'Please enter Formula';
+      }
+      if (values.returnType === '') {
+        errors['returnType'] = 'Please select return type';
       }
       let dataPoints = {};
       values?.dataPoints?.forEach((_input) => {
@@ -345,6 +363,22 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                           </Button>
                         </Grid>
                       </Grid>
+                      <Box>
+                        <FormControl fullWidth margin="dense" variant="outlined" size="small">
+                          <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                          <Select
+                            labelId="demo-simple-select-outlined-label"
+                            id="demo-simple-select-outlined"
+                            value={values['returnType']}
+                            onChange={(e) => setFieldValue('returnType', e.target.value)}
+                            label="Return Type"
+                            name="returnType"
+                          >
+                            <MenuItem value="decimal">Decimal</MenuItem>
+                            <MenuItem value="string">String</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
                     </div>
                   )}
                 </Form>
