@@ -12,9 +12,10 @@ type SidebarProps = {
   setSelectedChannel: React.Dispatch<React.SetStateAction<TChannel>>;
   setCreateChannelDialog: React.Dispatch<React.SetStateAction<boolean>>;
   handleDeleteChannels: (ids: string[]) => void;
+  mobScreen: boolean;
 };
 
-const Sidebar = ({ channels, selectedChannel, setSelectedChannel, setCreateChannelDialog, handleDeleteChannels }: SidebarProps) => {
+const Sidebar = ({ channels, selectedChannel, setSelectedChannel, setCreateChannelDialog, handleDeleteChannels, mobScreen }: SidebarProps) => {
   const [isExpanded, setIsExpanded] = useState(true);
   const [channelMenuData, setChannelMenuData] = React.useState<{ anchor: null | HTMLElement; selected: TChannel; openConfirmDialog: boolean } | null>(
     null
@@ -22,7 +23,12 @@ const Sidebar = ({ channels, selectedChannel, setSelectedChannel, setCreateChann
 
   return (
     <>
-      <div className="min-h-full w-[300px] max-w-[300px] flex-shrink-0 flex-grow bg-[#f2f2f2] p-2 transition-transform duration-300 [border-right:1px_solid_var(--common-border-color)] dark:bg-[#070712]">
+      <div
+        className={cn(
+          'min-h-full flex-shrink-0 flex-grow bg-[#f2f2f2] p-2 transition-transform duration-300 [border-right:1px_solid_var(--common-border-color)] dark:bg-[#070712]',
+          mobScreen ? 'w-full' : ' w-[300px] max-w-[300px]'
+        )}
+      >
         <div className="flex items-center px-2">
           <IconButton
             onClick={() => {
@@ -38,37 +44,45 @@ const Sidebar = ({ channels, selectedChannel, setSelectedChannel, setCreateChann
           <Collapse in={isExpanded}>
             <List dense>
               {channels.map((c, index) => (
-                <ListItem
-                  button
-                  key={c._id}
-                  style={{ borderRadius: '6px' }}
-                  selected={selectedChannel?._id === c._id}
-                  onClick={() => setSelectedChannel(c)}
-                  className="group"
-                >
-                  <ListItemText id={`channel-${index}`} primary={<span className="font-medium">{c.title}</span>} />
-                  <div
-                    className={cn(
-                      'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
-                      selectedChannel?._id === c._id
-                        ? '[background-image:linear-gradient(270deg,_#dfdfdf_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#2f2f38_60%,_transparent_100%)]'
-                        : '[background-image:linear-gradient(270deg,_#e8e8e8_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#1a1a25_60%,_transparent_100%)]'
-                    )}
+                <>
+                  {mobScreen && <span className="block [border-bottom:1px_solid_var(--common-border-color)]"></span>}
+                  <ListItem
+                    button
+                    key={c._id}
+                    style={{ borderRadius: '6px' }}
+                    selected={selectedChannel?._id === c._id}
+                    onClick={() => setSelectedChannel(c)}
+                    className="group"
                   >
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      size="small"
-                      onClick={(e) => {
-                        setChannelMenuData({ anchor: e.currentTarget, selected: c, openConfirmDialog: false });
-                      }}
+                    <ListItemText id={`channel-${index}`} primary={<span className="font-semibold">{c.title}</span>} />
+                    <div
+                      className={cn(
+                        'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
+                        selectedChannel?._id === c._id
+                          ? '[background-image:linear-gradient(270deg,_#dfdfdf_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#2f2f38_60%,_transparent_100%)]'
+                          : '[background-image:linear-gradient(270deg,_#e8e8e8_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#1a1a25_60%,_transparent_100%)]'
+                      )}
                     >
-                      <MoreHoriz />
-                    </IconButton>
-                  </div>
-                </ListItem>
+                      <IconButton
+                        edge="end"
+                        aria-label="delete"
+                        size="small"
+                        onClick={(e) => {
+                          setChannelMenuData({ anchor: e.currentTarget, selected: c, openConfirmDialog: false });
+                        }}
+                      >
+                        <MoreHoriz />
+                      </IconButton>
+                    </div>
+                  </ListItem>
+                </>
               ))}
             </List>
+            {channels?.length === 0 && (
+              <div>
+                <h6 className="py-[60px] text-center text-[25px] text-gray-400 dark:text-gray-600">No channels found</h6>
+              </div>
+            )}
           </Collapse>
         ) : (
           <div className="m-3">

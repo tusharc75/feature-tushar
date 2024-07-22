@@ -72,7 +72,7 @@ const SendMessage = ({ channelId, socket }: SendMessageProps) => {
               'help',
               'wordcount'
             ],
-            toolbar: `undo redo | blocks | bold italic link | alignleft aligncenter bullist numlist| removeformat | help`,
+            toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
             content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
           }}
         />
