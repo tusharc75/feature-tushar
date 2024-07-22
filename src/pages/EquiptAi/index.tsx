@@ -33,6 +33,7 @@ const EquiptAi = () => {
   const [chatId, setChatId] = useState(null);
   const [chats, setChats] = useState(null);
   const [chatTitle, setChatTitle] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     fetchChatHistory();
@@ -62,26 +63,22 @@ const EquiptAi = () => {
   };
 
   const askQuestion = () => {
-    const body: any = {
-      question: question
-    };
+    const tempChat = [...chats]
+    setChats([...chats, { message: question, content: null }]);
+    const body: any = { question: question };
     setQuestion('');
     if (chatId) {
       body._id = chatId;
     }
-
-    axiosInstance()
-      .post('/generative-ai/chat/ask', body)
-      .then(({ data: { data } }) => {
-        if (data) {
-          setChatId(data?._id);
-          const message = data?.history;
-          setChats([...chats, message]);
-        }
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().post('/generative-ai/chat/ask', body).then(({ data: { data } }) => {
+      if (data) {
+        setChatId(data?._id);
+        const message = data?.history;
+        setChats([...tempChat, message]);
+      }
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const handleDelete = (id: string) => {
@@ -181,12 +178,12 @@ const EquiptAi = () => {
               )}
               <div className="ml-auto">
                 {chats?.length ? (
-                <HtmlTooltip title={'Download Chat'}>
-                  <IconButton size="small" style={{ padding: 8 }} onClick={() => handleExportChat()}>
-                    <DownloadIcon />
-                  </IconButton>
-                </HtmlTooltip>
-              ): null}
+                  <HtmlTooltip title={'Download Chat'}>
+                    <IconButton size="small" style={{ padding: 8 }} onClick={() => handleExportChat()}>
+                      <DownloadIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                ) : null}
               </div>
             </div>
             <DisplayMessages chats={chats} chatId={chatId} />
@@ -381,10 +378,12 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
     }
     return <HiOutlineSpeakerWave size={15} />;
   };
-  
-  if(!chatId && !chats?.length){
+
+  if (!chatId && !chats?.length) {
     return (
-      <div className="w-full h-[calc(100%_-_var(--head-h)_-_100px)] flex justify-center items-center"><BsStars className="text-[var(--new-theme-color)]" size={40} /></div>
+      <div className="w-full h-[calc(100%_-_var(--head-h)_-_100px)] flex justify-center items-center">
+        <BsStars className="text-[var(--new-theme-color)]" size={40} />
+      </div>
     )
   }
   return (
@@ -400,61 +399,70 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
                 </div>
                 <div className="group m-[18px_20px]  flex max-w-[75%] items-start gap-2 rounded-md p-[10px_20px]">
                   <BsStars className="flex-shrink-0 text-[var(--new-theme-color)]" size={25} />
-                  <div>
-                    {chat?.content}
-                    <div
-                      className={cn(
-                        'mt-1 flex max-w-fit items-center gap-2 transition-opacity',
-                        isLastChat ? '' : 'rounded-xl p-[3px] opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
-                      )}
-                    >
-                      <HtmlTooltip title={speakerState.isPlaying ? 'Stop' : 'Read Aloud'}>
-                        <IconButton
-                          size="small"
-                          style={{ width: 30, height: 30, borderRadius: 8 }}
-                          onClick={() => {
-                            if (speakerInstance.text === chat?.content) {
-                              if (speakerState.isPaused) {
-                                speakerInstance.play(chat?.content);
+                  {chat?.content ?
+                    <div>
+                      {chat?.content}
+                      <div
+                        className={cn(
+                          'mt-1 flex max-w-fit items-center gap-2 transition-opacity',
+                          isLastChat ? '' : 'rounded-xl p-[3px] opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100'
+                        )}
+                      >
+                        <HtmlTooltip title={speakerState.isPlaying ? 'Stop' : 'Read Aloud'}>
+                          <IconButton
+                            size="small"
+                            style={{ width: 30, height: 30, borderRadius: 8 }}
+                            onClick={() => {
+                              if (speakerInstance.text === chat?.content) {
+                                if (speakerState.isPaused) {
+                                  speakerInstance.play(chat?.content);
+                                } else {
+                                  speakerInstance.pause();
+                                }
                               } else {
-                                speakerInstance.pause();
+                                setCurrentIndex(i);
+                                speakerInstance.play(chat?.content);
                               }
-                            } else {
-                              setCurrentIndex(i);
-                              speakerInstance.play(chat?.content);
+                            }}
+                          >
+                            {currentIndex === i ? <RenderIcon /> : <HiOutlineSpeakerWave size={15} />}
+                          </IconButton>
+                        </HtmlTooltip>
+                        <HtmlTooltip title={'Copy'}>
+                          <IconButton
+                            size="small"
+                            style={{ width: 30, height: 30, borderRadius: 8 }}
+                            onClick={() =>
+                              copyTextToClipboard(chat?.content, () => {
+                                toastConfig.setToastConfig({
+                                  open: true,
+                                  type: 'success',
+                                  message: `Text copied!`
+                                });
+                              })
                             }
-                          }}
-                        >
-                          {currentIndex === i ? <RenderIcon /> : <HiOutlineSpeakerWave size={15} />}
-                        </IconButton>
-                      </HtmlTooltip>
-                      <HtmlTooltip title={'Copy'}>
-                        <IconButton
-                          size="small"
-                          style={{ width: 30, height: 30, borderRadius: 8 }}
-                          onClick={() =>
-                            copyTextToClipboard(chat?.content, () => {
-                              toastConfig.setToastConfig({
-                                open: true,
-                                type: 'success',
-                                message: `Text copied!`
-                              });
-                            })
-                          }
-                        >
-                          <LuCopy size={15} />
-                        </IconButton>
-                      </HtmlTooltip>
-                      <HtmlTooltip title={'Bad Response'}>
-                        <IconButton size="small" style={{ width: 30, height: 30, borderRadius: 8 }}>
-                          <BiDislike
-                            size={15}
-                            onClick={() => setOpenFeedbackDialog({ open: true, data: { message: chat.message, content: chat.content } })}
-                          />
-                        </IconButton>
-                      </HtmlTooltip>
+                          >
+                            <LuCopy size={15} />
+                          </IconButton>
+                        </HtmlTooltip>
+                        <HtmlTooltip title={'Bad Response'}>
+                          <IconButton size="small" style={{ width: 30, height: 30, borderRadius: 8 }}>
+                            <BiDislike
+                              size={15}
+                              onClick={() => setOpenFeedbackDialog({ open: true, data: { message: chat.message, content: chat.content } })}
+                            />
+                          </IconButton>
+                        </HtmlTooltip>
+                      </div>
                     </div>
-                  </div>
+                    : <div>
+                      <div className="m-[10px_10px] rounded-md bg-[#f4f4f4] p-[10px_10px] text-right dark:bg-[var(--dark-secondary)]">
+                        <Skeleton width={300} height={15} />
+                      </div>
+                      <div className="m-[10px_10px] rounded-md bg-[#f4f4f4] p-[10px_10px] text-right dark:bg-[var(--dark-secondary)]">
+                        <Skeleton width={300} height={15} />
+                      </div>
+                    </div>}
                 </div>
               </div>
             );
@@ -476,7 +484,10 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
         </>
       )}
       {openFeedbackDialog.open && (
-        <AiChatFeedback handleClose={() => setOpenFeedbackDialog({ open: false, data: null })} chatData={openFeedbackDialog.data} chatId={chatId} />
+        <AiChatFeedback
+          handleClose={() => setOpenFeedbackDialog({ open: false, data: null })}
+          chatData={openFeedbackDialog.data}
+          chatId={chatId} />
       )}
     </div>
   );

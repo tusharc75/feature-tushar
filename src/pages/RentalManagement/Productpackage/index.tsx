@@ -44,8 +44,14 @@ import AddExistingProductInventory from 'src/pages/RentalManagement/Productpacka
 import { FiExternalLink } from 'react-icons/fi';
 import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
 import AddExistingSerializedAssetDialog from 'src/pages/RentalManagement/Productpackage/AddExistingSerializedAssetDialog';
-import { useSetWalkmeData } from 'src/components/CustomIntro';
-import { addExistingProduct, deleteAddedProduct, generateAddChildProduct, generateAddStepEditProduct } from 'src/pages/RentalManagement/walkmeSteps';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import {
+  generateAddExistingProduct,
+  generateAddChildProduct,
+  generateAddStepEditProduct,
+  generateDeleteAddedProductSteps,
+  nextButtonStep
+} from 'src/pages/RentalManagement/walkmeSteps';
 
 const Productpackage = ({
   rentalManagementData,
@@ -60,6 +66,7 @@ const Productpackage = ({
   rentalPolicyData
 }) => {
   const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -97,7 +104,7 @@ const Productpackage = ({
 
   useEffect(() => {
     fetchFields();
-    setWalkmeData([addExistingProduct]);
+    setWalkmeData([generateAddExistingProduct()]);
   }, []);
 
   useEffect(() => {
@@ -439,21 +446,55 @@ const Productpackage = ({
       setNextStep(true);
       setNextStepToolTip(null);
     }
+    addWalkmeData(rows);
 
+    dispatch({ type: 'initialize', data: rows, count: rows?.length });
+    dispatch({ type: 'loading', loading: false });
+  };
+
+  const addWalkmeData = (rows: any[]) => {
     // Adding Step Data
+
     if (rows?.length > 0) {
-      let stepData = [addExistingProduct, deleteAddedProduct];
+      let stepData = [generateAddExistingProduct()];
+      const stepDataAdded = {
+        stepEditProduct: false,
+        addChildProduct: false,
+        deleteAddedProduct: false,
+        addExistingProduct: true
+      };
       for (let i = 0; i < rows.length; i++) {
         const r = rows[i];
         if (r.type !== MATERIAL_TYPE.manualEntry && !isOffline && allowedToEdit && !quotationApproved) {
-          stepData.push(generateAddStepEditProduct(i), generateAddChildProduct(i));
-          break;
+          if (!stepDataAdded.stepEditProduct && !r.isValid) {
+            stepData.push(generateAddStepEditProduct(i));
+            stepDataAdded.stepEditProduct = true;
+            if (walkmeInstance && walkmeInstance.type === 'flow') {
+              const steps = generateAddStepEditProduct(i).steps;
+              steps.push(nextButtonStep, { ...nextButtonStep, waitForStepInsertion: true });
+              walkmeInstance.instance.push(steps);
+              walkmeInstance.handleNext();
+            }
+          } else if (!stepDataAdded.stepEditProduct) {
+            stepDataAdded.stepEditProduct = true;
+            if (walkmeInstance && walkmeInstance.type === 'flow') {
+              const steps = [nextButtonStep, { ...nextButtonStep, waitForStepInsertion: true }];
+              walkmeInstance.instance.push(steps);
+              walkmeInstance.handleNext();
+            }
+          }
+          if (!stepDataAdded.addChildProduct) {
+            stepData.push(generateAddChildProduct(i));
+            stepDataAdded.addChildProduct = true;
+          }
+          if (!stepDataAdded.deleteAddedProduct && r.hideSelection === false) {
+            stepData.push(generateDeleteAddedProductSteps(i));
+            stepDataAdded.deleteAddedProduct = true;
+          }
         }
       }
       setWalkmeData(stepData);
     }
-    dispatch({ type: 'initialize', data: rows, count: rows?.length });
-    dispatch({ type: 'loading', loading: false });
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts) => {
@@ -544,24 +585,12 @@ const Productpackage = ({
     }
   };
 
-  const handleAddAsset = async (rows, assetsData = null) => {
+  const handleAddAsset = async (rows) => {
     setIsSubmitting(true);
-    const assetsAdd: any = [];
-    rows?.forEach((row) => {
-      const obj: any = {};
-      obj._id = row?._id;
-      if (assetsData) {
-        const matchedAsset = assetsData?.find((asset) => asset._id === obj?._id);
-        if (matchedAsset) {
-          const { _id, ...assetData } = matchedAsset;
-          obj.assetData = assetData;
-        }
-      }
-      assetsAdd.push(obj);
-    });
+    const assetIds = rows?.map((item) => item._id);
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
-        ids: assetsAdd
+        ids: assetIds
       })
       .then(() => {
         setAddExistingAssets(false);

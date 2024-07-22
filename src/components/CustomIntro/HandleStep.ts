@@ -1,11 +1,12 @@
 import { NormalStep, Step, StepDefination } from 'src/components/CustomIntro';
 import { Observer } from 'src/components/CustomIntro/Observers';
 import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
+import { DisableObserver } from 'src/components/CustomIntro/Observers/DisableObserver';
 import { TextInputObserver } from 'src/components/CustomIntro/Observers/TextInputObserver';
-const RETRY = 10; //in seconds
+const RETRY = 20; //in seconds
 
 export class HandleSteps {
-  setUpdateSignal: any;
+  private setUpdateSignal: any;
   steps: Step[];
   currentIndex: number;
   started: boolean;
@@ -39,6 +40,7 @@ export class HandleSteps {
   findingElement: boolean;
   attachedOvservers: Observer[];
   clicked: boolean;
+  waiting: boolean;
   constructor({
     setUpdateSignal,
     steps,
@@ -58,13 +60,14 @@ export class HandleSteps {
     this.documentHeight = document?.body.clientHeight;
     this.retry = 0;
     this.interval = null;
-    this.message = '';
-    this.error = false;
     this.waitedForClicks = 0;
     this.listenerAttachedElements = [];
     this.attachedOvservers = [];
     this.findingElement = false;
+    this.error = false;
     this.clicked = false;
+    this.waiting = false;
+    this.message = '';
     this.resizeObserver = new ResizeObserver((entries) => {
       window.requestAnimationFrame(() => {
         if (!entries[0]) return;
@@ -78,34 +81,6 @@ export class HandleSteps {
 
     this.addEventListeners();
     this.resizeObserver.observe(document?.body);
-  }
-
-  private initializeStepData(steps: StepDefination[]) {
-    const newSteps: Step[] = [];
-    for (const data of steps) {
-      const normalStep: NormalStep = {
-        title: data.title,
-        content: data.content,
-        target: data.target,
-        isHiddenStep: false,
-        nextButtonName: data.nextButtonName
-      };
-      if (data.skipIfValueExist) {
-        normalStep.skipIfValueExist = data.skipIfValueExist;
-      }
-
-      if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data)) {
-        newSteps.push(normalStep);
-        newSteps.push({
-          ...data,
-          target: data.target,
-          isHiddenStep: true
-        });
-      } else {
-        newSteps.push(normalStep);
-      }
-    }
-    return newSteps;
   }
 
   private addEventListeners() {
@@ -141,10 +116,19 @@ export class HandleSteps {
     }
   }
 
-  attachNextListeners() {
+  attachObservers() {
+    const currStepData = this.currentStepData;
+    if (!currStepData) return;
+
+    // All steps
+    if (currStepData.waitForEnable) {
+      const observer = new DisableObserver(this, this.currentStepData.element);
+      this.attachedOvservers.push(observer);
+    }
+
+    // Hidden steps
     if (!this.currentStepData.isHiddenStep) return;
     const currData = this.currentStepData;
-
     if (currData.nextOnFocusOut) {
       currData.element.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
       this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
@@ -160,7 +144,7 @@ export class HandleSteps {
         const observer = new AutocompleteObserver(this, this.currentStepData.element, validator);
         this.attachedOvservers.push(observer);
       } else {
-        // Track Text input via blur event
+        // Track Text input via observer
         let validator = (value: string) => value.length > 0;
         if (typeof this.currentStepData.nextOnValueChange === 'function') {
           validator = this.currentStepData.nextOnValueChange;
@@ -175,11 +159,11 @@ export class HandleSteps {
     }
   }
 
-  removeNextListeners() {
+  removeNextObservers() {
     this.listenerAttachedElements.map((d) => d.elm.removeEventListener(d.event, d.func));
     this.attachedOvservers.map((d) => d.disconnect());
-    // this.listenerAttachedElements = [];
-    // this.attachedOvservers = [];
+    this.listenerAttachedElements = [];
+    this.attachedOvservers = [];
   }
 
   start() {
@@ -202,11 +186,13 @@ export class HandleSteps {
     }
 
     // To debounce click only register first click
-    if (this.clicked) return;
+    if (this.clicked || this.waiting) return;
+
     this.clicked = true;
     this.currentIndex++;
+
     this.getCurrentStep();
-    this.removeNextListeners();
+    this.removeNextObservers();
   }
   previous() {
     if (this.currentIndex === 0) {
@@ -220,7 +206,7 @@ export class HandleSteps {
     if (this.steps[this.currentIndex]?.isHiddenStep) {
       this.previous();
     }
-    this.removeNextListeners();
+    this.removeNextObservers();
     this.getCurrentStep();
   }
 
@@ -246,6 +232,7 @@ export class HandleSteps {
         this.getCurrentStep();
       }, 1000);
     } else {
+      this.retry = 0;
       this.findingElement = false;
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
       const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
@@ -271,14 +258,81 @@ export class HandleSteps {
 
       // Settimeout with 0 sec delay will move these function calls to js task queue and will execute later
       setTimeout(() => {
-        this.attachNextListeners();
+        this.attachObservers();
         this.sendUpdateSignal();
       }, 0);
     }
   }
 
-  private sendUpdateSignal() {
+  private initializeStepData(steps: StepDefination[]) {
+    const newSteps: Step[] = [];
+    for (const data of steps) {
+      const normalStep: NormalStep = {
+        title: data.title,
+        content: data.content,
+        target: data.target,
+        isHiddenStep: false,
+        nextButtonName: data.nextButtonName,
+        willOpenDialog: data.willOpenDialog,
+        waitForStepInsertion: data.waitForStepInsertion
+      };
+      if (data.skipIfValueExist) {
+        normalStep.skipIfValueExist = data.skipIfValueExist;
+      }
+
+      if (['nextOnUserClicks', 'nextOnFocusOut', 'nextOnValueChange', 'nextOnKeyPress'].some((d) => d in data)) {
+        newSteps.push(normalStep);
+        newSteps.push({
+          ...data,
+          target: data.target,
+          isHiddenStep: true
+        });
+      } else {
+        newSteps.push(normalStep);
+      }
+    }
+    return newSteps;
+  }
+
+  push(steps: StepDefination[]) {
+    this.steps.push(...this.initializeStepData(steps));
+  }
+  insert(steps: StepDefination[], index: number) {
+    this.steps.splice(index, 0, ...this.initializeStepData(steps));
+  }
+  insertAtCurrentIndex(steps: StepDefination[]) {
+    this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps));
+  }
+  pop() {
+    this.steps.pop();
+  }
+  shift() {
+    this.steps.shift();
+  }
+  unshift(steps: StepDefination[]) {
+    this.steps.unshift(...this.initializeStepData(steps));
+  }
+  splice(start: number, deleteCount: number, steps: StepDefination[]) {
+    this.steps.splice(start, deleteCount, ...this.initializeStepData(steps));
+  }
+  sort(compareFn?: (a: Step, b: Step) => number) {
+    this.steps.sort(compareFn);
+  }
+  reverse() {
+    this.steps.reverse();
+  }
+
+  sendUpdateSignal() {
     this.setUpdateSignal((prev) => (prev < 10 ? prev + 1 : 0));
+  }
+
+  pause() {
+    this.waiting = true;
+    this.sendUpdateSignal();
+  }
+  resume() {
+    this.waiting = false;
+    this.sendUpdateSignal();
   }
 
   scrollToCurrentStep(element: HTMLElement) {
