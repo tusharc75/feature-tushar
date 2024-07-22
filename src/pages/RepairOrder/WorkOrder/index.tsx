@@ -712,7 +712,7 @@ const WorkOrder = ({
       .post(`${workOrder.api}/service`, data)
       .then(() => {
         setAddServicesDialog({ open: false, new: false });
-        if (isPostWorkService && (repairOrderData?.addQuotationStep || repairOrderData?.addConsumablesQuotation)) {
+        if (isPostWorkService && repairOrderData?.addQuotationStep) {
           setReviseQuotation(true);
         }
         fetchData();
