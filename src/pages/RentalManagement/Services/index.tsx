@@ -332,7 +332,8 @@ const Services = ({
         parent.assetQty = parent.serializedProduct
           ? inventory?.filter((e) => e._id === parent._id).length
           : nonSerializeAsset?.filter((e) => e._id === parent._id).length;
-        parent.hideSelection = parent.assetQty > 0 ? true : parent?.status ? true : false;
+        parent.hideSelection =
+          parent.assetQty > 0 ? true : parent?.status ? true : parent.type === MATERIAL_TYPE.service && parent?.serviceLog ? true : false;
         parent.subRows = generateNestedData(data.material, inventory, nonSerializeAsset, parent, isPriceRequired);
         if (parent.type === MATERIAL_TYPE.package && parent.subRows?.length === 0 && !nextStepMessage) {
           nextStepMessage = rentalManagementMessage.addServiceInPackage;
@@ -394,7 +395,8 @@ const Services = ({
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
-      _subRow.hideSelection = _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
+      _subRow.hideSelection =
+        _subRow.assetQty > 0 ? true : _subRow?.status ? true : _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? true : false;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, isPriceRequired);
     });
     if (subRows.length === 0 && parent.type === 'package') {
