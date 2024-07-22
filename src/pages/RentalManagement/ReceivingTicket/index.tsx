@@ -125,7 +125,7 @@ const ReceivingTicket = ({
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
-  const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false });
+  const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false, bulkUpdate: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
@@ -1486,13 +1486,27 @@ const ReceivingTicket = ({
 
   const handleSubmitChangeDates = (values, type: string = '') => {
     let data;
-
     if (!openChangeActualDateDialog.data) return;
+    
     setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
-    data = {
-      ids: [openChangeActualDateDialog?.data?.uniqueId],
-      asset: openChangeActualDateDialog?.data?._id?.split('_')[0]
-    };
+    
+    if(openChangeActualDateDialog.bulkUpdate){
+      let ids = [], asset = [];
+      selectedRecords?.forEach((ele)=>{
+        ids.push(ele.uniqueId);
+        asset.push(ele._id?.split('_')[0])
+      })
+      data = {
+        ids: ids,
+        asset: asset
+      };
+    }else{
+      data = {
+        ids: [openChangeActualDateDialog?.data?.uniqueId],
+        asset: [openChangeActualDateDialog?.data?._id?.split('_')[0]]
+      };
+    }
+   
     if (values.manualStartDate) data.startDate = values.manualStartDate;
     if (values.manualEndDate) data.endDate = values.manualEndDate;
 
@@ -1504,12 +1518,12 @@ const ReceivingTicket = ({
           message: response?.data?.message,
           type: 'success'
         });
-        setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+        setOpenChangeActualDateDialog({ open: false, data: null, loading: false, bulkUpdate: false });
         fetchRecords();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+        setOpenChangeActualDateDialog({ open: false, data: null, loading: false, bulkUpdate: false });
       });
   };
 
@@ -1729,7 +1743,9 @@ const ReceivingTicket = ({
               rentalManagementData,
               rentalPolicyData,
               setTransferAnotherPackageialog,
-              hideDeliveryTicketDelivered
+              hideDeliveryTicketDelivered,
+              openChangeActualDateDialog,
+              setOpenChangeActualDateDialog
             }}
           />
         }
@@ -2143,8 +2159,9 @@ const ReceivingTicket = ({
           data={openChangeActualDateDialog.data}
           open={openChangeActualDateDialog.open}
           loading={openChangeActualDateDialog.loading}
+          bulkUpdate={openChangeActualDateDialog.bulkUpdate}
           onClose={() => {
-            setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+            setOpenChangeActualDateDialog({ open: false, data: null, loading: false, bulkUpdate: false });
           }}
           handleSubmit={handleSubmitChangeDates}
         />
@@ -2285,7 +2302,9 @@ const ActionButtonMenuItems = ({
   columns,
   rentalManagementData,
   setTransferAnotherPackageialog,
-  hideDeliveryTicketDelivered
+  hideDeliveryTicketDelivered,
+  openChangeActualDateDialog,
+  setOpenChangeActualDateDialog
 }) => {
 
   const checkUniqStatus = () => {
@@ -2523,6 +2542,10 @@ const ActionButtonMenuItems = ({
       getParentPackageId(data?.parentId)
     }
   }
+
+  const validateStartEndBulkUpdate = ()=>{
+    return selectedRecords?.every((ele)=> ele.type==='Asset' && ele.isAllowedStartDate && ele.isAllowedEndDate);
+}
 
   return (
     <>
@@ -2890,6 +2913,15 @@ const ActionButtonMenuItems = ({
             }}
           >
             Change Well Number
+          </MenuItem>
+        )}
+        {selectedRecords?.length > 0 && validateStartEndBulkUpdate() && (
+          <MenuItem
+            onClick={() => {
+              setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: {isAllowedStartDate: true, isAllowedEndDate: true, manualEndDate: new Date(), manualStartDate: new Date()}, bulkUpdate: true});
+            }}
+          >
+            Update - Start Date/End Date
           </MenuItem>
         )}
     </>
