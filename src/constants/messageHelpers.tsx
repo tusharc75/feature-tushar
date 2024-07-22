@@ -27,6 +27,7 @@ export const rentalManagementActions = {
     createRepairOrder: 'Create Repair Order',
     transferToAnotherRental: 'Transfer to another Rental',
     swapInUseAssets: 'Swap In-Use Assets',
+    updateStartDateEndDate: 'Update Start Date/End Date',
     startService: 'Start Service',
     stopService: 'Stop Service'
 };
@@ -81,7 +82,11 @@ export const rentalManagementMessage = {
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
     serviceAlreadyStarted: 'Service already in progress',
     serviceNotstarted: 'Service not started yet',
-    serviceCannotbeSelect: `Service cannot be select for this action`
+    serviceCannotbeSelect: `Service cannot be select for this action`,
+    canNotChangeStartDateEndDate: `Can not change Start Date/End Date`,
+    canNotChangeStartDate: `Can not change Start Date`,
+    canNotChangeEndDate: `Can not change End Date`
+
 };
 
 export const subleaseActions = {
