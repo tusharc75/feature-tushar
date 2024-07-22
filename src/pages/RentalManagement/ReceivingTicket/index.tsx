@@ -125,7 +125,7 @@ const ReceivingTicket = ({
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
-  const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false });
+  const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, loading: false, bulkUpdate: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
@@ -1504,13 +1504,27 @@ const ReceivingTicket = ({
 
   const handleSubmitChangeDates = (values, type: string = '') => {
     let data;
-
     if (!openChangeActualDateDialog.data) return;
+    
     setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
-    data = {
-      ids: [openChangeActualDateDialog?.data?.uniqueId],
-      asset: openChangeActualDateDialog?.data?._id?.split('_')[0]
-    };
+
+    if(openChangeActualDateDialog.bulkUpdate){
+      let ids = [], asset = [];
+      selectedRecords?.forEach((ele)=>{
+        ids.push(ele.uniqueId);
+        asset.push(ele._id?.split('_')[0])
+      })
+      data = {
+        ids: ids,
+        asset: asset
+      };
+    }else{
+      data = {
+        ids: [openChangeActualDateDialog?.data?.uniqueId],
+        asset: [openChangeActualDateDialog?.data?._id?.split('_')[0]]
+      };
+    }
+   
     if (values.manualStartDate) data.startDate = values.manualStartDate;
     if (values.manualEndDate) data.endDate = values.manualEndDate;
 
@@ -1522,12 +1536,12 @@ const ReceivingTicket = ({
           message: response?.data?.message,
           type: 'success'
         });
-        setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+        setOpenChangeActualDateDialog({ open: false, data: null, loading: false, bulkUpdate: false });
         fetchRecords();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
-        setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+        setOpenChangeActualDateDialog({ open: false, data: null, loading: false, bulkUpdate: false });
       });
   };
 
@@ -1757,7 +1771,9 @@ const ReceivingTicket = ({
               rentalManagementData,
               rentalPolicyData,
               setTransferAnotherPackageialog,
-              hideDeliveryTicketDelivered
+              hideDeliveryTicketDelivered,
+              openChangeActualDateDialog,
+              setOpenChangeActualDateDialog
             }}
           />
         }
@@ -2169,8 +2185,9 @@ const ReceivingTicket = ({
           data={openChangeActualDateDialog.data}
           open={openChangeActualDateDialog.open}
           loading={openChangeActualDateDialog.loading}
+          bulkUpdate={openChangeActualDateDialog.bulkUpdate}
           onClose={() => {
-            setOpenChangeActualDateDialog({ open: false, data: null, loading: false });
+            setOpenChangeActualDateDialog({ open: false, data: null, loading: false, bulkUpdate: false });
           }}
           handleSubmit={handleSubmitChangeDates}
         />
@@ -2311,7 +2328,9 @@ const ActionButtonMenuItems = ({
   columns,
   rentalManagementData,
   setTransferAnotherPackageialog,
-  hideDeliveryTicketDelivered
+  hideDeliveryTicketDelivered,
+  openChangeActualDateDialog,
+  setOpenChangeActualDateDialog
 }) => {
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -2548,6 +2567,29 @@ const ActionButtonMenuItems = ({
       getParentPackageId(data?.parentId);
     }
   };
+
+  const validateStartEndBulkUpdate = ()=>{
+    return selectedRecords?.every((ele)=> ele.type==='Asset' && ele.isAllowedStartDate && ele.isAllowedEndDate);
+}
+
+const getMinMaxDates = ()=> {
+  const minMaxDates = selectedRecords?.reduce((acc, ele) => {
+    if (ele?.manualStartDate) {
+      const startDate = new Date(ele?.manualStartDate);
+      if (!acc.minStartDate || startDate < acc.minStartDate) {
+        acc.minStartDate = startDate;
+      }
+    }
+    if (ele?.manualEndDate) {
+      const endDate = new Date(ele?.manualEndDate);
+      if (!acc.maxEndDate || endDate > acc.maxEndDate) {
+        acc.maxEndDate = endDate;
+      }
+    }
+    return acc;
+  }, { minStartDate: null, maxEndDate: null });
+  return minMaxDates
+}
 
   return (
     <>
@@ -2915,6 +2957,16 @@ const ActionButtonMenuItems = ({
             }}
           >
             Change Well Number
+          </MenuItem>
+        )}
+        {selectedRecords?.length > 0 && validateStartEndBulkUpdate() && (
+          <MenuItem
+            onClick={() => {
+              const { minStartDate, maxEndDate } = getMinMaxDates();
+              setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: {isAllowedStartDate: true, isAllowedEndDate: true, manualEndDate: maxEndDate.toISOString(), manualStartDate: minStartDate.toISOString()}, bulkUpdate: true});
+            }}
+          >
+            Update - Start Date/End Date
           </MenuItem>
         )}
     </>

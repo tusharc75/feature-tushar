@@ -11,7 +11,7 @@ import { useData } from 'src/StateProvider/Provider';
 import DurationFilter from 'src/components/DurationFilter';
 import moment from 'moment';
 import CustomReactTable, { gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { camelCase, uniq } from 'lodash';
+import { camelCase, cloneDeep, uniq } from 'lodash';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 
 const AssetHistory = ({ id, status, resourceData, fields }) => {
@@ -294,7 +294,15 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
   useEffect(() => {
     let statusChangeFieldColumns = [];
     statusChangeFieldColumns = uniq(resourceData?.policy?.statusChangeFields?.flatMap((ele) => ele.fields));
-    let statusChangeFields = fields?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName));
+    let statusChangeFields = fields
+      ?.filter((ele) => [...statusChangeFieldColumns]?.includes(ele.fieldData.fieldName))
+      .map((field) => {
+        const f = cloneDeep(field);
+        const fieldData = f.fieldData;
+        fieldData.fieldName = `assetData.${fieldData.fieldName}`;
+        f.fieldData = fieldData;
+        return f;
+      });
     let extraColumns = generateColumns(
       renderedFrom,
       statusChangeFields?.filter((_field) => !columns?.map((c) => c?.accessor).includes(_field?.fieldData?.fieldName)),
@@ -340,7 +348,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       .then(({ data: { data, count } }) => {
         data = data?.map((u, index) => ({
           ...(({ assetData, ...rest }) => rest)(u),
-          ...u?.assetData,
+          ...Object.keys(u?.assetData).reduce((acc, k) => ({ ...acc, [`assetData.${k}`]: u.assetData[k] }), {}),
           _id: index + 1,
           id: index + 1,
           reference: u?.reference?.optionLabel,
