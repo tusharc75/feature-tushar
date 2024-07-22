@@ -1507,7 +1507,7 @@ const ReceivingTicket = ({
     if (!openChangeActualDateDialog.data) return;
     
     setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
-    
+
     if(openChangeActualDateDialog.bulkUpdate){
       let ids = [], asset = [];
       selectedRecords?.forEach((ele)=>{
@@ -2572,6 +2572,25 @@ const ActionButtonMenuItems = ({
     return selectedRecords?.every((ele)=> ele.type==='Asset' && ele.isAllowedStartDate && ele.isAllowedEndDate);
 }
 
+const getMinMaxDates = ()=> {
+  const minMaxDates = selectedRecords?.reduce((acc, ele) => {
+    if (ele?.manualStartDate) {
+      const startDate = new Date(ele?.manualStartDate);
+      if (!acc.minStartDate || startDate < acc.minStartDate) {
+        acc.minStartDate = startDate;
+      }
+    }
+    if (ele?.manualEndDate) {
+      const endDate = new Date(ele?.manualEndDate);
+      if (!acc.maxEndDate || endDate > acc.maxEndDate) {
+        acc.maxEndDate = endDate;
+      }
+    }
+    return acc;
+  }, { minStartDate: null, maxEndDate: null });
+  return minMaxDates
+}
+
   return (
     <>
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && !hideDeliveryTicketDelivered && (
@@ -2943,7 +2962,8 @@ const ActionButtonMenuItems = ({
         {selectedRecords?.length > 0 && validateStartEndBulkUpdate() && (
           <MenuItem
             onClick={() => {
-              setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: {isAllowedStartDate: true, isAllowedEndDate: true, manualEndDate: new Date(), manualStartDate: new Date()}, bulkUpdate: true});
+              const { minStartDate, maxEndDate } = getMinMaxDates();
+              setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: {isAllowedStartDate: true, isAllowedEndDate: true, manualEndDate: maxEndDate.toISOString(), manualStartDate: minStartDate.toISOString()}, bulkUpdate: true});
             }}
           >
             Update - Start Date/End Date
