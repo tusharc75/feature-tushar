@@ -21,7 +21,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
   const {
     state: { user }
   }: any = useData();
-  
+
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
 
@@ -201,7 +201,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
               <span>
                 <IconButton
                   size="small"
-                  disabled={!row?.original?.canEdit}
+                  disabled={!row?.original?.canEdit || user?.user?._id !== owner}
                   onClick={() => {
                     let minStartDate = null, maxEndDate = null;
                     dataRows?.forEach((d: any, index: number) => {
@@ -219,7 +219,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
                     setEditDateDialog({ open: true, loading: false, minStartDate: minStartDate, maxEndDate: maxEndDate, data: row?.original });
                   }}
                 >
-                  <Edit fontSize="small" color={row?.original?.canEdit ? 'primary' : 'disabled'} />
+                  <Edit fontSize="small" color={row?.original?.canEdit && user?.user?._id === owner ? 'primary' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
