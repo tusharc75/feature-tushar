@@ -4386,3 +4386,10 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
     width: 100%;
   }
 }
+.send-message {
+  .tox-edit-area {
+    iframe.tox-edit-area__iframe {
+      background-color: transparent;
+    }
+  }
+}

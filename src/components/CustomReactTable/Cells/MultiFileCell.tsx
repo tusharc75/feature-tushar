@@ -40,7 +40,22 @@ export const MultiFileCell = ({ data }: { data: { fileName: string; size: string
   if (fileIcons.length > 0)
     return (
       <div className="flex max-w-full overflow-hidden">
-        <span className="[&_.button-span]:hidden">{fileIcons[0]}</span>
+        <span
+          className="[&_.button-span]:hidden"
+          onMouseOver={(e) => {
+            if (fileIcons.length === 1) {
+              handleClick(e);
+            }
+          }}
+          onClick={(e) => {
+            e.preventDefault();
+            if (fileIcons.length === 1) {
+              handleClick(e);
+            }
+          }}
+        >
+          {fileIcons[0]}
+        </span>
         {fileIcons.length > 1 && (
           <span
             className=" createdAtTime badge-date flex-shrink-0 cursor-pointer"
