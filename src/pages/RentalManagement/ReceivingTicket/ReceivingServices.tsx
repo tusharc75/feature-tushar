@@ -276,6 +276,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
             fetchRecords()
           }}
           renderedFrom={renderedFrom}
+          owner={rentalManagementData?.owner?.optionValue}
         />
       )}
       {serviceConfirmationDialog.open && (

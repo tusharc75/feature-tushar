@@ -15,9 +15,13 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Edit } from '@material-ui/icons';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
+import { useData } from 'src/StateProvider/Provider';
 
-const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess }) => {
-
+const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess, owner }) => {
+  const {
+    state: { user }
+  }: any = useData();
+  
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
 
@@ -193,7 +197,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       Cell: ({ row }) => {
         return (
           <>
-            <HtmlTooltip title={row?.original?.canEdit ?`Update - Start Date/End Date` : 'Invoice already created'}>
+            <HtmlTooltip title={row?.original?.canEdit && user?.user?._id === owner ?`Update - Start Date/End Date` : 'Invoice already created'}>
               <span>
                 <IconButton
                   size="small"
