@@ -18,6 +18,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
+  const { selectedRecords } =state;
   const [addOpen, setAddOpen] = useState({ open: false, invoiceData: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteData, setDeleteData] = useState(null);
@@ -148,13 +149,30 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     );
   };
 
+  const actionButtonMenuItems = () => {
+    return (
+      <>
+        <MenuItem
+          onClick={() => {
+            const ids=selectedRecords.map(d=>d._id);
+            setShowDeleteConfirmBox(true);
+            setDeleteData(ids);
+          }}
+        >
+          {`Delete (${selectedRecords.length})`}
+        </MenuItem>
+      </>
+    );
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
         <DetailsPageHeader
           isAddButtonVisible={true}
           addButtonMenuItems={addButtonMenuItems()}
-          isActionButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={actionButtonMenuItems()}
           hasXpadding={false} />
       )}
       <Box>

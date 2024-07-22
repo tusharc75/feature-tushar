@@ -38,13 +38,19 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
       <CustomDialogContent isFooterPresent={false}>
         <div className="p-3">
           {changes?.length ? (
-            <TableContainer component={Paper}>
-              <Table aria-label="customized table">
+            <TableContainer component={Paper} elevation={0} className="">
+              <Table aria-label="customized table" className="mb-3 [border:1px_solid_var(--common-border-color)]">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Field Name</TableCell>
-                    <TableCell>Old Value</TableCell>
-                    <TableCell>New Value</TableCell>
+                    <TableCell scope="col" component={'th'} className="min-w-[200px]">
+                      Field Name
+                    </TableCell>
+                    <TableCell scope="col" component={'th'} className="min-w-[200px]">
+                      Old Value
+                    </TableCell>
+                    <TableCell scope="col" component={'th'} className="min-w-[200px]">
+                      New Value
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -52,19 +58,19 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                     return (
                       data?.fieldLabel && (
                         <TableRow key={index}>
-                          <TableCell>{data?.fieldLabel}</TableCell>
-                          <TableCell>
+                          <TableCell data-th="Field Name">{data?.fieldLabel}</TableCell>
+                          <TableCell data-th="Old Value">
                             {data?.oldValue ? (
                               data?.type === 'date' ? (
                                 moment(data?.oldValue).format(dateFormat)
                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                 <p
-                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' :''}text-truncate`}
+                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''}text-truncate`}
                                   title={data?.oldValue?.label}
                                   onClick={() => {
-                                    if(permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)
-                                    }}
+                                    if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`);
+                                  }}
                                 >
                                   {data?.oldValue?.label}
                                 </p>
@@ -75,18 +81,18 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                               <NoDataCell />
                             )}
                           </TableCell>
-                          <TableCell>
+                          <TableCell data-th="New Value">
                             {data?.newValue ? (
                               data?.type === 'date' ? (
                                 moment(data?.newValue).format(dateFormat)
                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                 <p
-                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' :''} text-truncate`}
+                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}
                                   title={data?.newValue?.label}
                                   onClick={() => {
-                                    
-                                    if(permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}}
+                                    if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`);
+                                  }}
                                 >
                                   {data?.newValue?.label}
                                 </p>
@@ -160,11 +166,14 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                                 moment(data?.oldValue).format(dateFormat)
                                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                                 <p
-                                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' :''} text-truncate`}
+                                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}
                                                   title={data?.oldValue?.label}
                                                   onClick={() => {
-                                                    if(permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`)}}
+                                                    if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                                      window.open(
+                                                        `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`
+                                                      );
+                                                  }}
                                                 >
                                                   {data?.oldValue?.label}
                                                 </p>
@@ -181,11 +190,14 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                                 moment(data?.newValue).format(dateFormat)
                                               ) : data?.type === 'dropDown' && data?.lookup ? (
                                                 <p
-                                                className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' :''} text-truncate`}
+                                                  className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''} text-truncate`}
                                                   title={data?.newValue?.label}
                                                   onClick={() => {
-                                                    if(permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                                    window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`)}}
+                                                    if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                                      window.open(
+                                                        `${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`
+                                                      );
+                                                  }}
                                                 >
                                                   {data?.newValue?.label}
                                                 </p>

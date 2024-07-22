@@ -91,16 +91,20 @@ const DisplayChips = (props) => {
         chipData?.length > 0 && (
           <div className="chip-container">
             <div className={'chip-group'}>
-              {chipData?.map((filter) => (
-                <Chip
-                  onClick={handleFilterOpen}
-                  className={'filter-chip'}
-                  deleteIcon={<CloseIcon />}
-                  label={`${filter?.title}=${getFilterValue(filter?.value)}`}
-                  title={`${filter?.title}=${getFilterValue(filter?.value)}`}
-                  onDelete={() => clearSingleFilter(filter.name)}
-                />
-              ))}
+              {chipData?.map((filter) => {
+                const filterValue = getFilterValue(filter?.value);
+                if (!filterValue) return null;
+                return (
+                  <Chip
+                    onClick={handleFilterOpen}
+                    className={'filter-chip'}
+                    deleteIcon={<CloseIcon />}
+                    label={`${filter?.title}=${filterValue}`}
+                    title={`${filter?.title}=${filterValue}`}
+                    onDelete={() => clearSingleFilter(filter.name)}
+                  />
+                );
+              })}
             </div>
           </div>
         )

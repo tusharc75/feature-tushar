@@ -1,83 +1,44 @@
 import { Box, Button, Grid } from '@material-ui/core';
 import { Edit } from '@material-ui/icons';
-import { camelCase } from 'lodash';
+import { Skeleton } from '@material-ui/lab';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { RiFlowChart } from 'react-icons/ri';
 import { useHistory, useParams } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import DetailsPage from '../../components/Shared/DetailsPage';
 import ActivityButton from 'src/components/Activity/ActivityButton';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import ContentFullScreen from 'src/components/ContentFullScreen';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
+import Steps, { getIndex } from 'src/components/Steps';
 import {
   ACTIVITY_RESOURCE,
-  SUBCONTRACT_ASSEMBLY_STATUS,
   checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   sidebarResource,
+  SUBCONTRACT_ASSEMBLY_STATUS,
   subcontractAssemblySteps
 } from 'src/constants/helpers';
-import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
-import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
-import Steps, { getIndex } from 'src/components/Steps';
-import ContentFullScreen from 'src/components/ContentFullScreen';
-import Material from 'src/pages/SubcontractAssembly/Material';
 import LoadingTicket from 'src/pages/SubcontractAssembly/LoadingTicket';
+import ManageSubcontractAssembly from 'src/pages/SubcontractAssembly/ManageSubcontractAssembly';
+import Material from 'src/pages/SubcontractAssembly/Material';
 import Receiving from 'src/pages/SubcontractAssembly/Receiving';
-import { Skeleton } from '@material-ui/lab';
-import ButtonWithPulse from 'src/components/ButtonWithPulse';
-import { RiFlowChart } from 'react-icons/ri';
+import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
+import DetailsPage from '../../components/Shared/DetailsPage';
 import SubcontractAssemblyView from './View';
 
 import queryString from 'query-string';
-import { useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
-
-const walkmeData: WalkmeData[] = [
-  {
-    name: 'Add Existing Product',
-    urls: ['/subcontract-assembly/detail/:id', '/subcontract-assembly/detail/:id?itemTab=1', '/subcontract-assembly/detail/:id?itemTab=0'],
-    steps: [
-      {
-        url: '/subcontract-assembly/:id',
-        title: 'Go to details tab',
-        target: '#main-tab-1',
-        content: ''
-      },
-      {
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Click Add Button',
-        target: '#add-menu-button',
-        content: ''
-      },
-      {
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Add Existing Product',
-        target: '#add-existing-product-menu-item',
-        content: ''
-      },
-      {
-        target: '#Product-table-checkbox-0',
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Select a product',
-        content: ''
-      },
-      {
-        target: '#dialog-add-button',
-        url: '/subcontract-assembly/:id?itemTab=1',
-        title: 'Add Product',
-        content: ''
-      }
-    ]
-  }
-];
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
 
 const SubcontractAssemblyDetail = () => {
-  const { addWalkmeData, removeWalkmeDataByName } = useSetWalkmeData();
+  const { setWalkmeData } = useSetWalkmeData();
   const { id } = useParams();
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -128,8 +89,8 @@ const SubcontractAssemblyDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
       setAllowedToDelete(
         permissions?.subcontractAssembly?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
-        data?.canDelete
+          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+          data?.canDelete
       );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
@@ -137,12 +98,11 @@ const SubcontractAssemblyDetail = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, subcontractAssemblySteps));
       }
-      if (data.processStatus === 'Add' && checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data)) {
-        addWalkmeData(walkmeData);
-      } else {
-        removeWalkmeDataByName('Add Existing Product');
-      }
+
       setLoading(false);
+      if (data.processStatus === 'Add' && checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data)) {
+        setWalkmeData([addStepAddExistingProduct]);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -158,6 +118,9 @@ const SubcontractAssemblyDetail = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     history.push(`?itemTab=${newValue}`);
+    if (newValue === 0) {
+      setWalkmeData([addStepAddExistingProduct]);
+    }
     setTabValue(newValue);
   };
 
@@ -207,13 +170,7 @@ const SubcontractAssemblyDetail = () => {
   const updateProcessStatus = async (processStatus) => {
     axiosInstance()
       .put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {
-        if (processStatus === 'Add') {
-          addWalkmeData(walkmeData);
-        } else {
-          removeWalkmeDataByName(['Add Existing Product', 'Delete Existing Product']);
-        }
-      })
+      .then(({ data }) => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -232,7 +189,7 @@ const SubcontractAssemblyDetail = () => {
                 {permissions?.subcontractAssembly?.isUpdate &&
                   allowedToEdit &&
                   [SUBCONTRACT_ASSEMBLY_STATUS.inProgress].includes(subcontractAssemblyData?.status) &&
-                  subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
+                  subcontractAssemblyData?.material?.length>0 && subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
                     <ButtonWithPulse
                       variant={'outlined'}
                       color="default"

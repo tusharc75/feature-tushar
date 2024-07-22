@@ -277,9 +277,10 @@ export const fetchFieldOptions = async ({ resource, sidebarResource, toastConfig
     'multiImageUpload',
     'richTextEditor',
     'signature',
+    'groupSignature',
     'colorPicker',
-    'number',
-    'decimal',
+    'counter',
+    'description',
     'switch'
   ];
 
@@ -425,8 +426,16 @@ export const createFilterModel = (formValues, coloums) => {
       case 'mobileNumber':
       case 'currency':
       case 'lookUpDisplay':
+      case 'url':
+
         if (formValues[fieldName]) {
           filterModel.set(fieldName, { filter: formValues[fieldName] });
+        }
+        break;
+      case 'number':
+      case 'decimal':
+        if (formValues[fieldName]) {
+          filterModel.set(fieldName, { filter: formValues[fieldName]?.toString() });
         }
         break;
       case 'year':
@@ -467,8 +476,8 @@ export const createFilterModel = (formValues, coloums) => {
         }
         break;
       case 'checkBox':
-        if (formValues[fieldName] === true || formValues[fieldName] === false) {
-          filterModel.set(fieldName, { filter: formValues[fieldName] === true ? 'Yes' : 'No' });
+        if (formValues[fieldName] === true || formValues[fieldName] === false || formValues[fieldName] === 'true') {
+          filterModel.set(fieldName, { filter: formValues[fieldName] === true || formValues[fieldName] === 'true' ? 'Yes' : 'No' });
         }
         break;
       case 'location':

@@ -227,7 +227,12 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       });
     }
 
-    const sections = uniq(map(fields?.filter(f => f?.isRead), 'sectionName'));
+    const sections = uniq(
+      map(
+        fields?.filter((f) => f?.isRead),
+        'sectionName'
+      )
+    );
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
@@ -278,31 +283,34 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         priceData = await calculatePrice(rentalManagementData, material);
       }
 
-      selectedProducts?.filter((d) => !selectedProducts.some((obj) => obj._id === d.parentId))?.forEach((element) => {
-        const rateResult = priceData?.filter((e) =>
-          e.materialId === element.materialId &&
-          e.materialType === element.type &&
-          e.unit === (values['unit'] || element.unit) &&
-          e.pricingMethod === (values['pricingMethod'] || element.pricingMethod)
-        );
+      selectedProducts
+        ?.filter((d) => !selectedProducts.some((obj) => obj._id === d.parentId))
+        ?.forEach((element) => {
+          const rateResult = priceData?.filter(
+            (e) =>
+              e.materialId === element.materialId &&
+              e.materialType === element.type &&
+              e.unit === (values['unit'] || element.unit) &&
+              e.pricingMethod === (values['pricingMethod'] || element.pricingMethod)
+          );
 
-        const tempRate = {};
-        if (rateResult.length && rateResult[0].mrp) {
-          tempRate[priceFieldName] = rateResult[0].mrp;
-        }
+          const tempRate = {};
+          if (rateResult.length && rateResult[0].mrp) {
+            tempRate[priceFieldName] = rateResult[0].mrp;
+          }
 
-        const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll);
-        rows.push({ ...element, ...calValues });
+          const calValues = autoCalculateSpecificFields(values, { ...element, ...values, ...tempRate }, fieldAll);
+          rows.push({ ...element, ...calValues });
 
-        const child: any = resetValueZero(material, allFields, element._id);
-        rows = [...rows, ...child];
-        if (element.parentId) {
-          var parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId);
-          const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id);
-          parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency);
-          rows = [...rows, ...parent];
-        }
-      });
+          const child: any = resetValueZero(material, allFields, element._id);
+          rows = [...rows, ...child];
+          if (element.parentId) {
+            var parent: any = unionBy(rows, material, '_id').filter((e) => e._id === element.parentId);
+            const sameParent: any = unionBy(rows, material, '_id').filter((e) => e.parentId === element.parentId && e._id !== element._id);
+            parent = sumOnParent(parent, [...sameParent, { ...element, ...calValues }], allFields, currency);
+            rows = [...rows, ...parent];
+          }
+        });
 
       //Code for Bulk Update Only Product in Packages
       let packageProducts = selectedProducts.filter((ele) => ele.parentId !== null && !selectedProducts.some((f) => f._id === ele.parentId));
@@ -329,8 +337,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
         updatedRows.push({ _id: ele._id, ...getObjKeysWithValues(ele, allFields) });
       });
       handleSaveData(updatedRows);
-    }
-    else {
+    } else {
       if (rowData.parentId && !showConfirmationDialog && isRateRequired) {
         setShowConfirmationDialog(true);
       } else {
@@ -438,7 +445,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
           innerRef={ref}
           enableReinitialize={true}
           initialValues={initialData.values}
-          validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
+          validationSchema={yupSchema(initialData.fields?.filter((f) => f?.isRead))}
           validateOnMount
           validate={validate}
           onSubmit={handleSubmit}
@@ -513,11 +520,20 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                           setFieldValue={(name, value) => {
                                             setFieldValue(name, value);
                                           }}
-                                          options={field.fieldName === 'pricingCondition' ? priceConditionList :
-                                            field.fieldName === 'pricingMethod' ? priceMethodList : field.option}
+                                          options={
+                                            field.fieldName === 'pricingCondition'
+                                              ? priceConditionList
+                                              : field.fieldName === 'pricingMethod'
+                                                ? priceMethodList
+                                                : field.option
+                                          }
                                           onChange={(e, val) => {
                                             const value = val && val.optionValue ? val.optionValue : '';
-                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState({ ...values, [field.fieldName]: value }, priceConditionListConst, priceMethodListConst)
+                                            const { tempPriceCondition, tempPricingMethod } = updateRateChangeState(
+                                              { ...values, [field.fieldName]: value },
+                                              priceConditionListConst,
+                                              priceMethodListConst
+                                            );
                                             if (values['pricingCondition']) {
                                               if (!tempPriceCondition?.find((e) => e.optionValue === values['pricingCondition'])) {
                                                 setFieldValue('pricingCondition', '');
@@ -529,13 +545,26 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                                                 setFieldValue('pricingMethod', '');
                                               }
                                             }
-                                            let priceValue
+                                            let priceValue;
                                             if (field.fieldName === 'pricingCondition') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === value && d.pricingMethod === values['pricingMethod'] && d.unit === values['unit']
+                                              );
                                             } else if (field.fieldName === 'pricingMethod') {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === value && d.unit === values['unit']);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === value &&
+                                                  d.unit === values['unit']
+                                              );
                                             } else {
-                                              priceValue = priceConditionListConst?.find((d) => d.conditionId === values['pricingCondition'] && d.pricingMethod === values['pricingMethod'] && d.unit === value);
+                                              priceValue = priceConditionListConst?.find(
+                                                (d) =>
+                                                  d.conditionId === values['pricingCondition'] &&
+                                                  d.pricingMethod === values['pricingMethod'] &&
+                                                  d.unit === value
+                                              );
                                             }
                                             let priceFieldName = 'price_' + rentalManagementData?.currency?.toLowerCase();
                                             const result = autoCalculateSpecificFields(
@@ -665,6 +694,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                 <Button
                   size="small"
                   color="primary"
+                  id="rental-job-qty-dialog-close-button"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -682,6 +712,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                     variant="contained"
                     color="primary"
                     type="submit"
+                    id="rental-job-qty-dialog-save-and-next-button"
                     onClick={() => {
                       setSaveAndNext(true);
                       submitForm();
@@ -697,6 +728,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
                   variant="contained"
                   color="primary"
                   type="submit"
+                  id="rental-job-qty-dialog-save-button"
                   onClick={() => {
                     setSaveAndNext(false);
                     submitForm();

@@ -7,7 +7,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import moment from 'moment';
 
-const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) => {
+const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpdate }) => {
 
   function validate(values) {
     const errors = {};
@@ -23,7 +23,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
 
   return (
     <Dialog
-      open={open}
+      open={true}
       TransitionComponent={CustomDialogTransition}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
@@ -52,7 +52,7 @@ const ChangeActualDateDialog = ({ data, open, onClose, handleSubmit, loading }) 
         }}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form >
-            <CustomDialogHeader title={data?.assetNumber || ''} onClose={onClose} />
+            <CustomDialogHeader title={bulkUpdate ? 'Update Start Date/End Date' : data?.assetNumber ? data?.assetNumber : ''} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>

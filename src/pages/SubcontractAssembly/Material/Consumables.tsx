@@ -4,7 +4,14 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CHILD_RESOURCE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, MATERIAL_TYPE, deliveryTicket, sidebarResource } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  MATERIAL_TYPE,
+  deliveryTicket,
+  sidebarResource
+} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem, TextField } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -25,7 +32,6 @@ import { FiExternalLink } from 'react-icons/fi';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
 
 const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, material, fetchMaterial, stepFullScreen, productFields }) => {
-
   const renderedFrom = `${camelCase(routes?.subcontractAssembly.title)}_Consumables`;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -105,7 +111,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
               {allowedToEdit && row?.original?.canEdit ? (
                 <p
                   onClick={() => {
-                    setIsConsumableEdit({ open: true, data: row?.original })
+                    setIsConsumableEdit({ open: true, data: row?.original });
                   }}
                   className="link text-truncate"
                   title={row?.original[e?.fieldName]}
@@ -157,7 +163,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
                 aria-label="Delete"
                 disabled={!row?.original?.canEdit}
                 onClick={() => {
-                  setIsConsumableEdit({ open: true, data: row?.original })
+                  setIsConsumableEdit({ open: true, data: row?.original });
                 }}
               >
                 <EditIcon fontSize="small" color={row?.original?.canEdit ? 'primary' : 'disabled'} />
@@ -196,26 +202,26 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
       );
       let deliveryTicketProducts = [];
       result?.data?.data?.forEach((e) => {
-        deliveryTicketProducts = [...deliveryTicketProducts, ...e.products]
-      })
+        deliveryTicketProducts = [...deliveryTicketProducts, ...e.products];
+      });
 
-      let rows = material?.filter((ele: any) => ele.parentId)
+      let rows = material?.filter((ele: any) => ele.parentId);
       rows?.forEach((parent, i) => {
         parent.productName = parent?.productDetail?.productName;
         parent.productDescription = parent?.productDetail?.productDescription;
         parent.productNumber = parent?.productDetail?.productNumber;
-        parent.canEdit = !deliveryTicketProducts?.some((ele: any) => ele?.product === parent?.materialId && ele?.uniqueId === parent?._id)
-        parent.canDelete = parent.canEdit
+        parent.canEdit = !deliveryTicketProducts?.some((ele: any) => ele?.product === parent?.materialId && ele?.uniqueId === parent?._id);
+        parent.canDelete = parent.canEdit;
         parent.parent = parent?.parentId;
         parent.parentId = null;
       });
-      setAllConsumables(rows)
+      setAllConsumables(rows);
       if (selectedProductOption?.optionValue !== 'All') {
-        rows = rows?.filter((ele: any) => ele.parent === selectedProductOption?.optionValue)
+        rows = rows?.filter((ele: any) => ele.parent === selectedProductOption?.optionValue);
       }
       rows?.forEach((e, i) => {
-        e.index = i + 1
-      })
+        e.index = i + 1;
+      });
       dispatch({ type: 'initialize', data: rows || [], count: rows?.length || 0 });
       dispatch({ type: 'loading', loading: false });
     } catch (error) {
@@ -271,9 +277,9 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
     rows?.forEach((element: any) => {
       if (element.parent) {
         element.parentId = element.parent;
-        delete element.parent
+        delete element.parent;
       }
-    })
+    });
     try {
       setSubmitting(true);
       await axiosInstance().put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material`, { material: rows });
@@ -290,7 +296,6 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
     dispatch({ type: 'update', data: [] });
     setTabValue(newValue);
   };
-
 
   const actionButtonMenuItems = () => {
     return (
@@ -324,6 +329,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
             fullWidth
             options={productOption ? productOption : []}
             autoHighlight
+            id={'select-product-dropdown'}
             value={selectedProductOption}
             getOptionLabel={(option: any) => option?.optionLabel || ''}
             getOptionSelected={(option, val) => (option ? option?.optionLabel === val?.optionLabel : false)}
@@ -337,8 +343,8 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
                 rows = allConsumables?.filter((ele) => ele.parent === value.optionValue);
               }
               rows?.forEach((e, i) => {
-                e.index = i + 1
-              })
+                e.index = i + 1;
+              });
               dispatch({ type: 'update', data: rows });
               setSelectedProductOption(value);
             }}
@@ -353,7 +359,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
         <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
           <DetailsPageHeader
             isAddButtonVisible={selectedProductOption?.optionValue !== 'All' && !selectedProductOption?.receivedQty}
-            addButtonProps={{ onClick: () => setConsumablesDialog(true) }}
+            addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-consumable-button' }}
             actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.length) }}
             actionButtonMenuItems={actionButtonMenuItems()}
             hasXpadding

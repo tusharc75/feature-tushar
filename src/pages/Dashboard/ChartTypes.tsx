@@ -377,7 +377,7 @@ const ChartTypes = ({
                   currency={globalFilters.currency || currency}
                 />
               ) : chart.graphType === 'Map' ? (
-                <MapView height={isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
+                <MapView height={fullScreen ? window.innerHeight - 200 : isScreenSmall ? 350 : chart.column <= 6 ? 400 : 500} data={chartData} />
               ) : (
                 <>
                   <Chart

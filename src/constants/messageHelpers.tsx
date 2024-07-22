@@ -27,6 +27,7 @@ export const rentalManagementActions = {
     createRepairOrder: 'Create Repair Order',
     transferToAnotherRental: 'Transfer to another Rental',
     swapInUseAssets: 'Swap In-Use Assets',
+    updateStartDateEndDate: 'Update Start Date/End Date',
     startService: 'Start Service',
     stopService: 'Stop Service'
 };
@@ -73,7 +74,7 @@ export const rentalManagementMessage = {
     rentalProductConsumed: 'Product already consumed',
     rentalStatusCompleteCancelReceiving: 'Receiving Ticket can only be canceled for assets/consumables that have Complete/Return Rental Asset Status',
     repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
-    repairSameWarehouse: `Selected assets must be in same ${routes.warehouse.title} to perform this action`,
+    repairSameWarehouse: `Selected records must be in same ${routes.warehouse.title} to perform this action`,
     transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
     transferRentalForAssetSame: 'Only all In-Use or Available/Under Review assets can be transfered at a time',
     onlySwapAssets: 'Only Assets can be swapped',
@@ -81,7 +82,11 @@ export const rentalManagementMessage = {
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
     serviceAlreadyStarted: 'Service already in progress',
     serviceNotstarted: 'Service not started yet',
-    serviceCannotbeSelect: `Service cannot be select for this action`
+    serviceCannotbeSelect: `Service cannot be select for this action`,
+    canNotChangeStartDateEndDate: `Can not change Start Date/End Date`,
+    canNotChangeStartDate: `Can not change Start Date`,
+    canNotChangeEndDate: `Can not change End Date`
+
 };
 
 export const subleaseActions = {

@@ -55,19 +55,20 @@ const History = ({ id }) => {
       primaryField: true,
       disableFilters: true,
       disableSortBy: true,
+      disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.reference?.optionValue ? (
             <div className="flex items-center gap-2">
               <div>{row?.original?.reference?.optionLabel}</div>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${selectedResource.path}/${row?.original?.reference?.optionValue}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  window.open(`${selectedResource.path}/${row?.original?.reference?.optionValue}`);
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             </div>
           ) : (
             <NoDataCell />
@@ -80,6 +81,7 @@ const History = ({ id }) => {
       Header: routes.warehouse.title,
       minWidth: 200,
       width: 200,
+      disabled: true,
       Cell: ({ row }) => (
         <div>
           {row?.original?.warehouse ? (
@@ -154,26 +156,7 @@ const History = ({ id }) => {
           )}
         </>
       )
-    },
-    // {
-    //   accessor: 'status',
-    //   Header: 'Status',
-    //   minWidth: 150,
-    //   width: 150,
-    //   disableFilters: true,
-    //   disableSortBy: true,
-    //   Cell: ({ row }) => (
-    //     <>
-    //       {row?.original?.status ? (
-    //         <h5 className="text-truncate" title={row?.original?.status}>
-    //           {row?.original?.status}
-    //         </h5>
-    //       ) : (
-    //         <NoDataCell />
-    //       )}
-    //     </>
-    //   )
-    // }
+    }
   ];
 
   useEffect(() => {

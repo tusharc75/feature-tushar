@@ -56,9 +56,10 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
     'multiImageUpload',
     'richTextEditor',
     'signature',
+    'groupSignature',
     'colorPicker',
-    'number',
-    'decimal',
+    'counter',
+    'description',
     'switch'
   ];
 
@@ -195,7 +196,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
         continue;
       }
 
-      if (['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency', 'lookUpDisplay']?.includes(col.type) && formValues[fieldName]) {
+      if (['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency', 'lookUpDisplay', 'decimal', 'number']?.includes(col.type) && formValues[fieldName]) {
         filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
@@ -427,8 +428,8 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
                                 betweenDate && betweenDate[`from_${field.fieldName}`]
                                   ? betweenDate[`from_${field.fieldName}`]
                                   : formValues[`from_${field.fieldName}`]
-                                  ? formValues[`from_${field.fieldName}`]
-                                  : new Date()
+                                    ? formValues[`from_${field.fieldName}`]
+                                    : new Date()
                               }
                             />
                           </Grid>
