@@ -1,13 +1,13 @@
-import { useAppTheme } from 'src/constants/AppConfig';
-import React, { FC, ReactElement, useState } from 'react';
-import { withStyles } from '@material-ui/core/styles';
-import { Dialog, Box, Typography, IconButton, DialogContent } from '@material-ui/core';
-import MuiDialogTitle from '@material-ui/core/DialogTitle';
-import MuiDialogContent from '@material-ui/core/DialogContent';
-import styles from './dashboardModal.module.scss';
-import CloseIcon from '@material-ui/icons/Close';
+import { Box, Dialog, DialogActions, IconButton, Typography } from '@material-ui/core';
 import type { DialogProps } from '@material-ui/core/Dialog';
-import { FiMinimize2, FiMaximize2 } from 'react-icons/fi';
+import MuiDialogContent from '@material-ui/core/DialogContent';
+import MuiDialogTitle from '@material-ui/core/DialogTitle';
+import { withStyles } from '@material-ui/core/styles';
+import CloseIcon from '@material-ui/icons/Close';
+import React, { FC, ReactElement, ReactNode, useState } from 'react';
+import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
+import { useAppTheme } from 'src/constants/AppConfig';
+import styles from './dashboardModal.module.scss';
 // node_modules/@material-ui/core/Dialog/Dialog.d.ts
 
 export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -16,13 +16,22 @@ export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
   handleRoutes?: (any) => string;
   dialogProps?: Omit<DialogProps, 'open'>;
   open?: boolean;
+  contentMaxHeight?: string;
+  footer?: ReactNode;
 }
 
 export interface ModalHead {
   title: string | ReactElement;
-  icon: ReactElement;
+  icon?: ReactElement;
+  description?: ReactNode;
   fullScreenOption?: boolean;
 }
+
+const CustomDialogContent = withStyles((theme) => ({
+  root: {
+    padding: theme.spacing(2)
+  }
+}))(MuiDialogContent);
 
 const DashboardModal: FC<ModalProps> = ({
   modalHead,
@@ -32,14 +41,12 @@ const DashboardModal: FC<ModalProps> = ({
   children = null,
   className = '',
   open = undefined,
+  contentMaxHeight = '250px',
+  footer,
   ...props
 }) => {
   const [themeColor] = useAppTheme();
-  const DialogContent = withStyles((theme) => ({
-    root: {
-      padding: theme.spacing(2)
-    }
-  }))(MuiDialogContent);
+
   const [maximized, setMaximized] = useState<boolean>(dialogProps?.fullScreen || false);
 
   const toggleMaximized = () => {
@@ -84,10 +91,17 @@ const DashboardModal: FC<ModalProps> = ({
       >
         <MuiDialogTitle disableTypography className={styles.modalHead}>
           <Box className={styles.modalIconAndName}>
-            <Box className={styles.modalIcon}>{modalHead?.icon}</Box>
-            <Typography variant="h6" className={styles.modalTitle}>
-              {modalHead?.title}
-            </Typography>
+            {modalHead?.icon && <Box className={styles.modalIcon}>{modalHead?.icon}</Box>}
+            <div className="flex-grow">
+              <Typography variant="h6" className={styles.modalTitle}>
+                {modalHead?.title}
+              </Typography>
+              {modalHead?.description && (
+                <Typography variant="body2" className="mt-1 text-gray-500 dark:text-gray-400">
+                  {modalHead.description}
+                </Typography>
+              )}
+            </div>
           </Box>
           <Box className={styles.modalHeadActions}>
             {modalHead?.fullScreenOption ? (
@@ -100,10 +114,18 @@ const DashboardModal: FC<ModalProps> = ({
             </IconButton>
           </Box>
         </MuiDialogTitle>
-        <DialogContent className={`${styles.dialogContent} ${className}`} style={{ maxHeight: maximized ? 'calc(100vh - 135px)' : '250px' }}>
+        <CustomDialogContent
+          className={`${styles.dialogContent} ${className}`}
+          style={{ maxHeight: maximized ? 'calc(100vh - 135px)' : contentMaxHeight }}
+        >
           {children && children}
-        </DialogContent>
+        </CustomDialogContent>
       </Box>
+      {footer && (
+        <DialogActions style={{ background: 'var(--dark-primary, white)', borderTop: '1px solid var(--common-border-color)', paddingBlock: '' }}>
+          {footer}
+        </DialogActions>
+      )}
     </Dialog>
   );
 };
