@@ -29,8 +29,6 @@ const Workspace = () => {
     fetchChannels();
   };
 
-  console.log(channels);
-
   return (
     <>
       <div className="main-container-v1">
@@ -39,14 +37,28 @@ const Workspace = () => {
         </div>
         <CustomContainer className="!p-0">
           <div className="flex h-[calc(100vh-98px)] min-h-[600px] overflow-hidden rounded-lg">
-            <Sidebar
-              channels={channels}
-              selectedChannel={selectedChannel}
-              setSelectedChannel={setSelectedChannel}
-              setCreateChannelDialog={setCreateChannelDialog}
-              handleDeleteChannels={handleDeleteChannels}
-            />
-            <MessagePanel selectedChannel={selectedChannel} />
+            {mobScreen && !selectedChannel ? (
+              <Sidebar
+                channels={channels}
+                selectedChannel={selectedChannel}
+                setSelectedChannel={setSelectedChannel}
+                setCreateChannelDialog={setCreateChannelDialog}
+                handleDeleteChannels={handleDeleteChannels}
+                mobScreen={mobScreen}
+              />
+            ) : (
+              !mobScreen && (
+                <Sidebar
+                  channels={channels}
+                  selectedChannel={selectedChannel}
+                  setSelectedChannel={setSelectedChannel}
+                  setCreateChannelDialog={setCreateChannelDialog}
+                  handleDeleteChannels={handleDeleteChannels}
+                  mobScreen={mobScreen}
+                />
+              )
+            )}
+            <MessagePanel setSelectedChannel={setSelectedChannel} selectedChannel={selectedChannel} mobScreen={mobScreen} />
           </div>
         </CustomContainer>
         {createChannelDialog && (
