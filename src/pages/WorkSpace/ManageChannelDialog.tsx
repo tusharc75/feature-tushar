@@ -12,6 +12,7 @@ import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import CustomButton from '../../components/Helpers/CustomButton';
 import { object, string } from 'yup';
+import DashboardModal from 'src/components/DashboardModal';
 
 const ManageChannel = ({ onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -19,13 +20,13 @@ const ManageChannel = ({ onClose, onSuccess }) => {
   const validationSchema = object().shape({
     title: string().required('Please enter Channel name'),
     description: string(),
-    access: string().required('Please select access type'),
+    access: string().required('Please select access type')
   });
 
   const initialValues = {
     title: '',
     description: '',
-    access: 'public',
+    access: 'public'
   };
 
   const [loading, setLoading] = useState(false);
@@ -33,12 +34,12 @@ const ManageChannel = ({ onClose, onSuccess }) => {
   const [isSubmitting, setSubmitting] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-
   const handleSubmit = async (values) => {
     setSubmitting(true);
     let updatedValues = { ...values };
 
-    await axiosInstance().post('/work-space/channel', updatedValues)
+    await axiosInstance()
+      .post('/work-space/channel', updatedValues)
       .then(({ data }) => {
         setLoading(false);
         setSubmitting(false);
@@ -57,7 +58,6 @@ const ManageChannel = ({ onClose, onSuccess }) => {
       });
   };
 
-
   const handleScroll = (errors) => {
     const err = Object.keys(errors);
     if (err.length) {
@@ -71,38 +71,63 @@ const ManageChannel = ({ onClose, onSuccess }) => {
   };
 
   return (
-    <Dialog
-      maxWidth="md"
-      fullScreen={fullScreen || isMobile || isTablet}
-      TransitionComponent={CustomDialogTransition}
-      aria-labelledby="customized-dialog-title"
-      open={true}
-      fullWidth
-      onClose={(e, reason) => {
-        if (reason !== 'backdropClick') {
-          setShowConfirmDialog(true);
-        }
-      }}
-    >
+    <>
       <Formik initialValues={initialValues} validationSchema={validationSchema} onSubmit={handleSubmit}>
         {({ values, errors, setFieldValue, touched, submitForm }) => (
-          <Fragment>
-            <CustomDialogHeader
-              onClose={() => {
-                if (!isEqual(values, initialValues)) {
-                  setShowConfirmDialog(true);
-                } else {
-                  onClose();
-                }
-              }}
-              title={`Create Channel`}
-              isMinimized={!fullScreen}
-              onMinimizeMaximize={() => {
-                setFullScreen((prevState) => !prevState);
-              }}
-              showManimizeMaximize={true}
-            />
-            <CustomDialogContent>
+          <DashboardModal
+            handleClose={() => {
+              if (!isEqual(values, initialValues)) {
+                setShowConfirmDialog(true);
+              } else {
+                onClose();
+              }
+            }}
+            open={true}
+            dialogProps={{
+              fullScreen: fullScreen || isMobile || isTablet,
+              maxWidth: 'sm',
+              TransitionComponent: CustomDialogTransition
+            }}
+            modalHead={{
+              title: `Create Channel`,
+              fullScreenOption: true
+            }}
+            footer={
+              <>
+                <Button
+                  variant="outlined"
+                  color="primary"
+                  size="small"
+                  disabled={isSubmitting || loading}
+                  onClick={() => {
+                    if (!isEqual(values, initialValues)) {
+                      setShowConfirmDialog(true);
+                    } else {
+                      onClose();
+                    }
+                  }}
+                >
+                  Cancel
+                </Button>
+                <CustomButton
+                  disabled={isSubmitting || loading}
+                  loading={loading}
+                  variant="contained"
+                  color="primary"
+                  type="submit"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleScroll(errors);
+                    submitForm();
+                  }}
+                >
+                  {' '}
+                  Save
+                </CustomButton>
+              </>
+            }
+          >
+            <Fragment>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box padding={1}>
                   <Grid container spacing={3}>
@@ -140,75 +165,39 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                       />
                     </Grid>
                     <Grid item xs={12} md={6} sm={6}>
-                      <FormLabel component="legend" required={true}>Access</FormLabel>
-                      <RadioGroup
-                        row
-                        name="access"
-                        value={values.access}
-                        onChange={(e) => setFieldValue('access', e.target.value)}
-                      >
+                      <FormLabel component="legend" required={true}>
+                        Access
+                      </FormLabel>
+                      <RadioGroup row name="access" value={values.access} onChange={(e) => setFieldValue('access', e.target.value)}>
                         <FormControlLabel value="public" control={<Radio />} label="Public" />
                         <FormControlLabel value="private" control={<Radio />} label="Private" />
                       </RadioGroup>
-                      {touched.access && errors.access && (
-                        <div style={{ color: 'red', marginTop: 8 }}>{errors.access}</div>
-                      )}
+                      {touched.access && errors.access && <div style={{ color: 'red', marginTop: 8 }}>{errors.access}</div>}
                     </Grid>
                   </Grid>
                 </Box>
               </Form>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                disabled={isSubmitting || loading}
-                onClick={() => {
-                  if (!isEqual(values, initialValues)) {
-                    setShowConfirmDialog(true);
-                  } else {
+              <div className="flex items-center justify-end gap-2"></div>
+              {showConfirmDialog ? (
+                <ConfirmCancelDialog
+                  close={() => setShowConfirmDialog(false)}
+                  open={showConfirmDialog}
+                  onSave={() => {
+                    setShowConfirmDialog(false);
+                    handleScroll(errors);
+                    submitForm();
+                  }}
+                  onClose={() => {
+                    setShowConfirmDialog(false);
                     onClose();
-                  }
-                }}
-              >
-                Cancel
-              </Button>
-              <CustomButton
-                disabled={isSubmitting || loading}
-                loading={loading}
-                variant="contained"
-                color="primary"
-                type="submit"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleScroll(errors);
-                  submitForm();
-                }}
-              >
-                {' '}
-                Save
-              </CustomButton>
-            </CustomDialogFooter>
-            {showConfirmDialog ? (
-              <ConfirmCancelDialog
-                close={() => setShowConfirmDialog(false)}
-                open={showConfirmDialog}
-                onSave={() => {
-                  setShowConfirmDialog(false);
-                  handleScroll(errors);
-                  submitForm();
-                }}
-                onClose={() => {
-                  setShowConfirmDialog(false);
-                  onClose();
-                }}
-              />
-            ) : null}
-          </Fragment>
+                  }}
+                />
+              ) : null}
+            </Fragment>
+          </DashboardModal>
         )}
       </Formik>
-    </Dialog >
+    </>
   );
 };
 
