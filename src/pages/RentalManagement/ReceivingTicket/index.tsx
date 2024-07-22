@@ -1507,7 +1507,7 @@ const ReceivingTicket = ({
     if (!openChangeActualDateDialog.data) return;
     
     setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, loading: true });
-    
+
     if(openChangeActualDateDialog.bulkUpdate){
       let ids = [], asset = [];
       selectedRecords?.forEach((ele)=>{
@@ -2572,23 +2572,24 @@ const ActionButtonMenuItems = ({
     return selectedRecords?.every((ele)=> ele.type==='Asset' && ele.isAllowedStartDate && ele.isAllowedEndDate);
 }
 
-let minStartDate = null;
-let maxEndDate = null;
-
-selectedRecords?.forEach((ele) => {
-  if (ele?.manualStartDate) {
-    const startDate = new Date(ele?.manualStartDate);
-    if (!minStartDate || startDate < minStartDate) {
-      minStartDate = startDate;
+const getMinMaxDates = ()=> {
+  const minMaxDates = selectedRecords?.reduce((acc, ele) => {
+    if (ele?.manualStartDate) {
+      const startDate = new Date(ele?.manualStartDate);
+      if (!acc.minStartDate || startDate < acc.minStartDate) {
+        acc.minStartDate = startDate;
+      }
     }
-  }
-  if (ele?.manualEndDate) {
-    const endDate = new Date(ele?.manualEndDate);
-    if (!maxEndDate || endDate > maxEndDate) {
-      maxEndDate = endDate;
+    if (ele?.manualEndDate) {
+      const endDate = new Date(ele?.manualEndDate);
+      if (!acc.maxEndDate || endDate > acc.maxEndDate) {
+        acc.maxEndDate = endDate;
+      }
     }
-  }
-});
+    return acc;
+  }, { minStartDate: null, maxEndDate: null });
+  return minMaxDates
+}
 
   return (
     <>
@@ -2961,6 +2962,7 @@ selectedRecords?.forEach((ele) => {
         {selectedRecords?.length > 0 && validateStartEndBulkUpdate() && (
           <MenuItem
             onClick={() => {
+              const { minStartDate, maxEndDate } = getMinMaxDates();
               setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: {isAllowedStartDate: true, isAllowedEndDate: true, manualEndDate: maxEndDate.toISOString(), manualStartDate: minStartDate.toISOString()}, bulkUpdate: true});
             }}
           >
