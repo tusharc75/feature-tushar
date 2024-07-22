@@ -2572,6 +2572,24 @@ const ActionButtonMenuItems = ({
     return selectedRecords?.every((ele)=> ele.type==='Asset' && ele.isAllowedStartDate && ele.isAllowedEndDate);
 }
 
+let minStartDate = null;
+let maxEndDate = null;
+
+selectedRecords?.forEach((ele) => {
+  if (ele?.manualStartDate) {
+    const startDate = new Date(ele?.manualStartDate);
+    if (!minStartDate || startDate < minStartDate) {
+      minStartDate = startDate;
+    }
+  }
+  if (ele?.manualEndDate) {
+    const endDate = new Date(ele?.manualEndDate);
+    if (!maxEndDate || endDate > maxEndDate) {
+      maxEndDate = endDate;
+    }
+  }
+});
+
   return (
     <>
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && !hideDeliveryTicketDelivered && (
@@ -2943,7 +2961,7 @@ const ActionButtonMenuItems = ({
         {selectedRecords?.length > 0 && validateStartEndBulkUpdate() && (
           <MenuItem
             onClick={() => {
-              setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: {isAllowedStartDate: true, isAllowedEndDate: true, manualEndDate: new Date(), manualStartDate: new Date()}, bulkUpdate: true});
+              setOpenChangeActualDateDialog({ ...openChangeActualDateDialog, open: true, data: {isAllowedStartDate: true, isAllowedEndDate: true, manualEndDate: maxEndDate.toISOString(), manualStartDate: minStartDate.toISOString()}, bulkUpdate: true});
             }}
           >
             Update - Start Date/End Date
