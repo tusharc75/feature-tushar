@@ -414,11 +414,11 @@ const Productpackage = ({
         : nonSerializeAsset?.filter((e) => e._id === parent._id).length +
           data?.nonSerializedInventory?.filter((d) => d?._id === parent?._id)?.reduce((sum, row) => sum + row?.qty || 0, 0);
       parent.hideSelection =
-        parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
+        parent.type === MATERIAL_TYPE.service && parent?.serviceLog
           ? true
-          : parent?.status
+          : parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
             ? true
-            : parent.type === MATERIAL_TYPE.service && parent?.serviceLog
+            : parent?.status
               ? true
               : false;
       parent.nonSerializedQty =
@@ -531,7 +531,7 @@ const Productpackage = ({
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
       _subRow.hideSelection =
-        _subRow?.assetQty > 0 ? true : _subRow?.status ? true : _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? true : false;
+        _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? true : _subRow?.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.nonSerializedQty =
         _subRow.type === MATERIAL_TYPE.product &&
         !_subRow.serializedProduct &&
