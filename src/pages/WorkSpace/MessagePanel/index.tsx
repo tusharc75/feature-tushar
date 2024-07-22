@@ -1,5 +1,5 @@
 import { IconButton } from '@material-ui/core';
-import { Visibility } from '@material-ui/icons';
+import { ArrowBack, Visibility } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -13,9 +13,11 @@ import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
 
 type MessagePanelProps = {
   selectedChannel: TChannel | null;
+  mobScreen: boolean;
+  setSelectedChannel: React.Dispatch<React.SetStateAction<TChannel>>;
 };
 
-const MessagePanel = ({ selectedChannel }: MessagePanelProps) => {
+const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: MessagePanelProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
@@ -52,8 +54,6 @@ const MessagePanel = ({ selectedChannel }: MessagePanelProps) => {
     return () => setChannelData(null);
   }, [selectedChannel, fetchChannelData]);
 
-  console.log(channelData);
-
   return (
     <>
       <div className="relative flex-grow">
@@ -61,7 +61,14 @@ const MessagePanel = ({ selectedChannel }: MessagePanelProps) => {
           <>
             <div className="head p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <h5 className="text-[18px] font-bold">{selectedChannel.title}</h5>
+                <div className="flex items-center gap-2">
+                  {mobScreen && (
+                    <IconButton size={'small'} onClick={() => setSelectedChannel(null)}>
+                      <ArrowBack />
+                    </IconButton>
+                  )}
+                  <h5 className="text-[18px] font-bold">{selectedChannel.title}</h5>
+                </div>
                 <HtmlTooltip
                   title={
                     <span className="block w-[200px] py-2 text-center">
