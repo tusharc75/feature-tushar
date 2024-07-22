@@ -1,4 +1,5 @@
-import React, { forwardRef } from 'react';
+import { Slide } from '@material-ui/core';
+import { TransitionProps } from '@material-ui/core/transitions';
 import {
   AddBox,
   ArrowDownward,
@@ -16,20 +17,19 @@ import {
   Search,
   ViewColumn
 } from '@material-ui/icons';
-import { object, string, array, boolean, number } from 'yup';
-import moment from 'moment';
-import currencies from './currency_with_country.json';
-import { TransitionProps } from '@material-ui/core/transitions';
-import { Slide } from '@material-ui/core';
-import { camelCase, isArray, kebabCase, lowerFirst, orderBy, uniqBy } from 'lodash';
-import { stepIconInterface } from 'src/components/Steps/icons';
-import { v4 as uuid } from 'uuid';
+import clsx, { ClassValue } from 'clsx';
+import { camelCase, isArray, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
+import moment from 'moment';
+import React, { forwardRef } from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { ClassValue } from 'clsx';
-import clsx from 'clsx';
+import { stepIconInterface } from 'src/components/Steps/icons';
 import { twMerge } from 'tailwind-merge';
+import { v4 as uuid } from 'uuid';
+import { array, boolean, number, object, string } from 'yup';
+import currencies from './currency_with_country.json';
+import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -391,7 +391,8 @@ export const sidebarResource = {
   resourceDoaRequest: 'Resource Doa Request',
   workOrderPlanning: 'Work Order Planning',
   subcontractAssembly: 'Subcontract Assembly',
-  managedPackages: 'Managed Packages'
+  managedPackages: 'Managed Packages',
+  trainAiModel: 'Train Ai Model'
 };
 
 export const primaryFields = {
@@ -535,6 +536,9 @@ export const RESOURCE_LABEL = {
   serializedAssetStatusChangeRequest: 'Serialized Asset Status Change Request',
   managedPackages: 'Managed Packages',
   integration: 'Integration',
+  equiptAi: 'Equipt Ai',
+  trainAiModel: 'Train Ai Model',
+  workSpace: 'Work Space'
 };
 
 export const CHILD_RESOURCE = {
@@ -837,6 +841,13 @@ export const purchaseOrder = {
   resource: 'purchaseOrder'
 };
 
+export const trainAiModel = {
+  api: '/train-ai-model',
+  route: '/train-ai-model',
+  permission: 'trainAiModel',
+  resource: 'trainAiModel'
+};
+
 export const sublease = {
   api: '/sublease',
   route: '/sublease',
@@ -1117,21 +1128,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1184,6 +1195,8 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'multiFileUpload') {
       schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`).nullable() : array().nullable();
     } else if (input.type === 'counter') {
+      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'groupSignature') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
@@ -3128,7 +3141,9 @@ export const DEAL_STAGE = {
 };
 
 export const cloneResourceData = (fromFields, toFields, data, currency) => {
-  const overlappingFields = fromFields.filter((e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type));
+  const overlappingFields = fromFields.filter(
+    (e) => toFields?.map((e) => e.fieldName).includes(e?.fieldName) && !['lookUpDisplay']?.includes(e?.type)
+  );
   const result: any = {};
   overlappingFields?.forEach((e) => {
     let fieldName = e?.fieldName;
@@ -3382,7 +3397,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) { }
+  } catch (error) {}
 };
 
 export const columnSize = (type) => {
@@ -3408,3 +3423,44 @@ export const normalizeDate = (date) => {
   normalized.setHours(0, 0, 0, 0);
   return normalized;
 };
+
+function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => void) {
+  var textArea = document.createElement('textarea');
+  textArea.value = text;
+
+  // Avoid scrolling to bottom
+  textArea.style.top = '0';
+  textArea.style.left = '0';
+  textArea.style.position = 'fixed';
+
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+
+  try {
+    document.execCommand('copy');
+    callBack(text);
+  } catch (err) {
+    console.error('Fallback: Oops, unable to copy', err);
+  }
+
+  document.body.removeChild(textArea);
+}
+
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
+
+  if (!navigator.clipboard) {
+    fallbackCopyTextToClipboard(text, callBack);
+  }
+  navigator.clipboard.writeText(text).then(
+    function () {
+      callBack(text);
+    },
+    function (err) {
+      console.error('Async: Could not copy text: ', err);
+    }
+  );
+}
+
+export const HIDDEN_FIELD_TYPE = ['description'];

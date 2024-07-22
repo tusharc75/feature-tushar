@@ -40,8 +40,8 @@ const DoaSetup = ({ resource, entity }) => {
   return (
     <>
       <Box mt={2} className="single-form-v1">
-        <Box className="form-head-v1">
-          <Typography className="form-label-style-v1" component={'h3'}>
+        <div className="form-head-v1">
+          <Typography className="form-label-style-v1 pr" component={'h3'}>
             {`${resource} DOA Details`}
           </Typography>
           {permissions.entity?.isUpdate && (
@@ -49,7 +49,7 @@ const DoaSetup = ({ resource, entity }) => {
               {doaData ? `Edit DOA` : `Add DOA`}
             </Button>
           )}
-        </Box>
+        </div>
         <Box className="formdata-v1">
           <Grid container style={{ padding: '8px' }} spacing={1}>
             <Grid item xs={12} sm={12}>

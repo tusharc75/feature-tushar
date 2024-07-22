@@ -309,313 +309,280 @@ const DoaDialog = ({
             )}
 
             <>
-              <Box padding={2} className={classes.contentBox}>
-                <Box padding={1}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6} md={3} sm={6}>
-                      <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
-                        {DOAType.map((k, index) => {
-                          return (
-                            <ToggleButton style={{ width: 80 }} value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    </Grid>
-                    <Grid item xs={6} md={3} sm={6}>
-                      <ToggleButtonGroup size="small" value={selectedDoaApprove} exclusive onChange={handleDOAAproveTypeFilter}>
-                        {DoaApproveType.map((k, index) => {
-                          return (
-                            <ToggleButton style={{ width: 80 }} value={k.key} key={index}>
-                              {k.key}
-                            </ToggleButton>
-                          );
-                        })}
-                      </ToggleButtonGroup>
-                    </Grid>
-                    <Grid item xs={12} md={3} sm={6}>
-                      {selectedType === 2 && (
-                        <>
-                          <TextField
-                            InputProps={{
-                              startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                            }}
-                            variant="outlined"
-                            type="text"
-                            size="small"
-                            fullWidth
-                            name="amount"
-                            placeholder="Enter minimum DOA amount"
-                            label={isMobile && !isTablet ? 'DOA amount' : 'Enter minimum DOA amount'}
-                            value={doaLowerLimit}
-                            onChange={(e) => {
-                              setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')));
-                            }}
-                            required
-                            error={formikRef?.current?.values ? validate(formikRef?.current?.values) : false}
-                            helperText={formikRef?.current?.values ? (validate(formikRef?.current?.values) ? 'should have minimum amount' : '') : ''}
-                          />
-                        </>
-                      )}
-                    </Grid>
-                    <Grid item xs={12} md={3} sm={6}>
-                      {selectedType === 2 && (
-                        <div>
-                          <Autocomplete
-                            fullWidth
-                            className={`max-w-full`}
-                            size="small"
-                            value={
-                              currencyData.filter((data) => data?.currencyCode === currency).length
-                                ? currencyData.filter((data) => data?.currencyCode === currency)[0]
-                                : ''
-                            }
-                            options={currencyData}
-                            getOptionLabel={(option: any) =>
-                              option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ''
-                            }
-                            getOptionSelected={(option: any, val) => option?.currencyCode === val}
-                            onChange={(e, val) => {
-                              setCurrency(val?.currencyCode ? val?.currencyCode : '');
-                              setCurrencySymbol(val?.symbolNative);
-                            }}
-                            renderInput={(params) => <TextField {...params} fullWidth variant="outlined" name={'currency'} label={'Currency'} />}
-                            renderOption={(option) => {
-                              const { currencyCode, currencyName, symbolNative } = option;
-                              return `${currencyCode} - ${currencyName} - (${symbolNative})`;
-                            }}
-                          />
-                        </div>
-                      )}
-                    </Grid>
-                  </Grid>
-                </Box>
-              </Box>
               <div className={classes.doaUsersStyle}>
                 <Formik initialValues={{ users: users }} enableReinitialize={true} innerRef={formikRef} onSubmit={() => {}}>
                   {({ values }) => (
                     <>
-                      <DialogContent className={classes.contentBox}>
-                        <Form>
-                          <Container className="p-0">
-                            <Grid container direction="row" justify="space-evenly" alignItems="center">
-                              <Grid item md={12}>
-                                {values.users && values.users.length > 0 && (
-                                  <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
-                                    <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
-                                      <Grid item xs={1}>
-                                        {' '}
-                                        Index{' '}
-                                      </Grid>
-                                      <Grid item xs={11} sm={5} md={5}>
-                                        {' '}
-                                        {doaApprove == 0 ? 'User' : 'Role'}{' '}
-                                      </Grid>
-                                      {selectedType === 2 && (
-                                        <Grid item md={4}>
-                                          {' '}
-                                          Amount{' '}
-                                        </Grid>
-                                      )}
-                                      <Grid item md={2}></Grid>
-                                    </Grid>
-                                  </Box>
+                      <div style={{ minHeight: fullScreen || isMobile || isTablet ? 'calc(100vh - 110px)' : '' }}>
+                        <Box padding={2} className={`${classes.contentBox} max-[768px]:!mb-4`}>
+                          <Box padding={1}>
+                            <Grid container spacing={2}>
+                              <Grid item xs={6} md={3} sm={6}>
+                                <ToggleButtonGroup size="small" value={filter} exclusive onChange={handleFilter}>
+                                  {DOAType.map((k, index) => {
+                                    return (
+                                      <ToggleButton style={{ width: 80 }} value={k.key} key={index}>
+                                        {k.key}
+                                      </ToggleButton>
+                                    );
+                                  })}
+                                </ToggleButtonGroup>
+                              </Grid>
+                              <Grid item xs={6} md={3} sm={6}>
+                                <ToggleButtonGroup size="small" value={selectedDoaApprove} exclusive onChange={handleDOAAproveTypeFilter}>
+                                  {DoaApproveType.map((k, index) => {
+                                    return (
+                                      <ToggleButton style={{ width: 80 }} value={k.key} key={index}>
+                                        {k.key}
+                                      </ToggleButton>
+                                    );
+                                  })}
+                                </ToggleButtonGroup>
+                              </Grid>
+                              <Grid item xs={12} md={3} sm={6}>
+                                {selectedType === 2 && (
+                                  <>
+                                    <TextField
+                                      InputProps={{
+                                        startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                      }}
+                                      variant="outlined"
+                                      type="text"
+                                      size="small"
+                                      fullWidth
+                                      name="amount"
+                                      placeholder="Enter minimum DOA amount"
+                                      label={isMobile && !isTablet ? 'DOA amount' : 'Enter minimum DOA amount'}
+                                      value={doaLowerLimit}
+                                      onChange={(e) => {
+                                        setDoaLowerLimit(Number(e.target.value.replace(/[^0-9]/g, '')));
+                                      }}
+                                      required
+                                      error={formikRef?.current?.values ? validate(formikRef?.current?.values) : false}
+                                      helperText={
+                                        formikRef?.current?.values ? (validate(formikRef?.current?.values) ? 'should have minimum amount' : '') : ''
+                                      }
+                                    />
+                                  </>
                                 )}
-                                <Box className="p-1">
-                                  <FieldArray
-                                    name="users"
-                                    render={(arrayHelpers) => (
-                                      <div>
-                                        {values.users && values.users.length > 0 ? (
-                                          values.users.map((userVal, index) => (
-                                            <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center" key={index}>
-                                              <Grid item xs={1} md={1}>
-                                                {index + 1}
-                                              </Grid>
-                                              <Grid item xs={11} sm={5} md={5}>
-                                                <Autocomplete
-                                                  id="combo-box-demo"
-                                                  size="small"
-                                                  style={{ minWidth: 200 }}
-                                                  // options={userList}
-                                                  options={
-                                                    doaApprove == 0
-                                                      ? selectedType === 2
-                                                        ? userList?.filter(
-                                                            (element) =>
-                                                              !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                          )
-                                                        : tempUserList?.filter(
-                                                            (element) =>
-                                                              !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
-                                                          )
-                                                      : selectedType === 2
+                              </Grid>
+                              <Grid item xs={12} md={3} sm={6}>
+                                {selectedType === 2 && (
+                                  <div>
+                                    <Autocomplete
+                                      fullWidth
+                                      className={`max-w-full`}
+                                      size="small"
+                                      value={
+                                        currencyData.filter((data) => data?.currencyCode === currency).length
+                                          ? currencyData.filter((data) => data?.currencyCode === currency)[0]
+                                          : ''
+                                      }
+                                      options={currencyData}
+                                      getOptionLabel={(option: any) =>
+                                        option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ''
+                                      }
+                                      getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                                      onChange={(e, val) => {
+                                        setCurrency(val?.currencyCode ? val?.currencyCode : '');
+                                        setCurrencySymbol(val?.symbolNative);
+                                      }}
+                                      renderInput={(params) => (
+                                        <TextField {...params} fullWidth variant="outlined" name={'currency'} label={'Currency'} />
+                                      )}
+                                      renderOption={(option) => {
+                                        const { currencyCode, currencyName, symbolNative } = option;
+                                        return `${currencyCode} - ${currencyName} - (${symbolNative})`;
+                                      }}
+                                    />
+                                  </div>
+                                )}
+                              </Grid>
+                            </Grid>
+                          </Box>
+                        </Box>
+                        <DialogContent className={classes.contentBox}>
+                          <Form>
+                            <Grid item md={12}>
+                              {values.users && values.users.length > 0 && (
+                                <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
+                                  <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center">
+                                    <Grid item xs={1}>
+                                      Index
+                                    </Grid>
+                                    <Grid item xs={11} sm={5} md={5}>
+                                      {doaApprove == 0 ? 'User' : 'Role'}
+                                    </Grid>
+                                    {selectedType === 2 && (
+                                      <Grid item md={4}>
+                                        Amount
+                                      </Grid>
+                                    )}
+                                    <Grid item md={2}></Grid>
+                                  </Grid>
+                                </Box>
+                              )}
+                              <Box className="p-1">
+                                <FieldArray
+                                  name="users"
+                                  render={(arrayHelpers) => (
+                                    <div className="grid gap-5">
+                                      {values.users && values.users.length > 0 ? (
+                                        values.users.map((userVal, index) => (
+                                          <Grid container spacing={2} direction="row" justify="flex-start" alignItems="center" key={index}>
+                                            <Grid item xs={1} md={1}>
+                                              <span className="px-2">{index + 1}.</span>
+                                            </Grid>
+                                            <Grid item xs={11} sm={5} md={5}>
+                                              <Autocomplete
+                                                id="combo-box-demo"
+                                                limitTags={2}
+                                                size="small"
+                                                style={{ minWidth: 200 }}
+                                                // options={userList}
+                                                options={
+                                                  doaApprove == 0
+                                                    ? selectedType === 2
+                                                      ? userList?.filter(
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
+                                                      : tempUserList?.filter(
+                                                          (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
+                                                        )
+                                                    : selectedType === 2
                                                       ? roleList?.filter(
                                                           (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
                                                         )
                                                       : roleList?.filter(
                                                           (element) => !values?.users?.some((e) => e?.user?.split(',').some((d) => d === element.id))
                                                         )
-                                                  }
-                                                  getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
-                                                  onChange={(event, newValue) => {
-                                                    arrayHelpers.replace(index, {
-                                                      ...values.users[index],
-                                                      ['user']: newValue?.map((d) => d.id).toString()
-                                                    });
-                                                  }}
-                                                  multiple
-                                                  value={
-                                                    doaApprove == 0
-                                                      ? userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
-                                                      : roleList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
-                                                  }
-                                                  renderOption={(option) => <React.Fragment>{option?.name}</React.Fragment>}
-                                                  renderInput={(params) => (
-                                                    <TextField
-                                                      {...params}
-                                                      variant="outlined"
-                                                      name="userField"
-                                                      error={userVal?.user?.length <= 0}
-                                                      helperText={
-                                                        userVal?.user?.length <= 0 ? `${doaApprove == 0 ? 'User' : 'Role'}  is Required` : ''
-                                                      }
-                                                      required
-                                                    />
-                                                  )}
-                                                />
-                                              </Grid>
-                                              <Grid item xs={1} sm={1} md={1} className="min-[600px]:hidden"></Grid>
-                                              {selectedType === 2 && (
-                                                <Grid item xs={6} sm={3} md={3}>
-                                                  {/* <Field
-                                                    fullWidth
-                                                    InputProps={{
-                                                      startAdornment: (
-                                                        <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                                                      )
-                                                    }}
-                                                    startAdornment={
-                                                      currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''
-                                                    }
-                                                    variant="outlined"
-                                                    type="text"
-                                                    size="small"
-                                                    component={TextField}
-                                                    name="amount"
-                                                    placeholder="Enter Amount"
-                                                    label="Enter Amount"
-                                                    value={userVal.amount}
-                                                    onChange={(e) => {
-                                                      arrayHelpers.replace(index, {
-                                                        ...values.users[index],
-                                                        ['amount']: e.target.value.replace(/[^0-9]/g, '')
-                                                      });
-                                                    }}
-                                                    error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
-                                                    helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
-                                                    required
-                                                  /> */}
+                                                }
+                                                getOptionLabel={(option: any) => (option?.name ? option?.name : '')}
+                                                onChange={(event, newValue) => {
+                                                  arrayHelpers.replace(index, {
+                                                    ...values.users[index],
+                                                    ['user']: newValue?.map((d) => d.id).toString()
+                                                  });
+                                                }}
+                                                multiple
+                                                value={
+                                                  doaApprove == 0
+                                                    ? userList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
+                                                    : roleList?.filter((element) => userVal?.user?.split(',')?.some((d) => d === element?.id))
+                                                }
+                                                renderOption={(option) => <React.Fragment>{option?.name}</React.Fragment>}
+                                                renderInput={(params) => (
                                                   <TextField
-                                                    fullWidth
-                                                    InputProps={{
-                                                      startAdornment: (
-                                                        <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                                                      )
-                                                    }}
-                                                    // startAdornment={
-                                                    //   currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''
-                                                    // }
+                                                    {...params}
                                                     variant="outlined"
-                                                    type="text"
-                                                    size="small"
-                                                    name="amount"
-                                                    placeholder="Enter Amount"
-                                                    label="Enter Amount"
-                                                    value={userVal.amount}
-                                                    onChange={(e) => {
-                                                      arrayHelpers.replace(index, {
-                                                        ...values.users[index],
-                                                        ['amount']: e.target.value.replace(/[^0-9]/g, '')
-                                                      });
-                                                    }}
-                                                    // error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
-                                                    // helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
+                                                    name="userField"
+                                                    error={userVal?.user?.length <= 0}
+                                                    helperText={userVal?.user?.length <= 0 ? `${doaApprove == 0 ? 'User' : 'Role'}  is Required` : ''}
                                                     required
                                                   />
-                                                  {validate(values) && check && (userVal.id === selectedEntity[0] || userVal.id === 'self') && (
-                                                    <span style={{ color: 'red' }}>{`${userVal.name} should have minimum amount`}</span>
-                                                  )}
-                                                </Grid>
-                                              )}
-                                              <Grid item xs={5} sm={3} md={3}>
-                                                <ButtonGroup size="medium" aria-label="small outlined button group">
-                                                  <IconButton
-                                                    size="small"
-                                                    aria-label="add"
-                                                    disabled={values.users.length === userList.length}
-                                                    onClick={() => {
-                                                      arrayHelpers.insert(index + 1, { user: '', amount: 0, disable: false });
-                                                    }}
-                                                  >
-                                                    <Add />
-                                                  </IconButton>
-                                                  <IconButton
-                                                    size="small"
-                                                    aria-label="delete"
-                                                    style={{ color: '#f44336' }}
-                                                    onClick={() => arrayHelpers.remove(index)}
-                                                  >
-                                                    <Delete />
-                                                  </IconButton>
-                                                  <HtmlTooltip title={userVal.disable ? 'User Disabled' : 'User Enabled'}>
-                                                    <FormControlLabel
-                                                      key={1}
-                                                      control={
-                                                        <Switch
-                                                          color={userVal.disable ? 'primary' : 'secondary'}
-                                                          checked={userVal.disable}
-                                                          name="disable"
-                                                          onChange={(e) => {
-                                                            arrayHelpers.replace(index, {
-                                                              ...values.users[index],
-                                                              ['disable']: !userVal.disable
-                                                            });
-                                                          }}
-                                                        />
-                                                      }
-                                                      label=""
-                                                    />
-                                                  </HtmlTooltip>
-                                                </ButtonGroup>
-                                              </Grid>
+                                                )}
+                                              />
                                             </Grid>
-                                          ))
-                                        ) : (
-                                          <Grid item md={12} className="d-flex  align-items-center justify-content-center">
-                                            <Button
-                                              variant="contained"
-                                              color="primary"
-                                              size="large"
-                                              onClick={() => {
-                                                arrayHelpers.push({ user: '', amount: 0, disable: false });
-                                              }}
-                                            >
-                                              Add Users
-                                            </Button>
+                                            <Grid item xs={1} sm={1} md={1} className="min-[600px]:hidden"></Grid>
+                                            {selectedType === 2 && (
+                                              <Grid item xs={6} sm={3} md={3}>
+                                                <TextField
+                                                  fullWidth
+                                                  InputProps={{
+                                                    startAdornment: (
+                                                      <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                                    )
+                                                  }}
+                                                  // startAdornment={
+                                                  //   currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''
+                                                  // }
+                                                  variant="outlined"
+                                                  type="text"
+                                                  size="small"
+                                                  name="amount"
+                                                  placeholder="Enter Amount"
+                                                  label="Enter Amount"
+                                                  value={userVal.amount}
+                                                  onChange={(e) => {
+                                                    arrayHelpers.replace(index, {
+                                                      ...values.users[index],
+                                                      ['amount']: e.target.value.replace(/[^0-9]/g, '')
+                                                    });
+                                                  }}
+                                                  // error={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined}
+                                                  // helperText={userList.find(v => v.name === userVal.name) === "" || userList.find(v => v.name === userVal.name) === undefined ? " User is Required" : ""}
+                                                  required
+                                                />
+                                                {validate(values) && check && (userVal.id === selectedEntity[0] || userVal.id === 'self') && (
+                                                  <span style={{ color: 'red' }}>{`${userVal.name} should have minimum amount`}</span>
+                                                )}
+                                              </Grid>
+                                            )}
+                                            <Grid item sm={3} md={3} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
+                                              <ButtonGroup size="medium" aria-label="small outlined button group">
+                                                <IconButton
+                                                  size="small"
+                                                  aria-label="add"
+                                                  disabled={values.users.length === userList.length}
+                                                  onClick={() => {
+                                                    arrayHelpers.insert(index + 1, { user: '', amount: 0, disable: false });
+                                                  }}
+                                                >
+                                                  <Add />
+                                                </IconButton>
+                                                <IconButton
+                                                  size="small"
+                                                  aria-label="delete"
+                                                  style={{ color: '#f44336' }}
+                                                  onClick={() => arrayHelpers.remove(index)}
+                                                >
+                                                  <Delete />
+                                                </IconButton>
+                                                <HtmlTooltip title={userVal.disable ? 'User Disabled' : 'User Enabled'}>
+                                                  <FormControlLabel
+                                                    key={1}
+                                                    control={
+                                                      <Switch
+                                                        color={userVal.disable ? 'primary' : 'secondary'}
+                                                        checked={userVal.disable}
+                                                        name="disable"
+                                                        onChange={(e) => {
+                                                          arrayHelpers.replace(index, {
+                                                            ...values.users[index],
+                                                            ['disable']: !userVal.disable
+                                                          });
+                                                        }}
+                                                      />
+                                                    }
+                                                    label=""
+                                                  />
+                                                </HtmlTooltip>
+                                              </ButtonGroup>
+                                            </Grid>
                                           </Grid>
-                                        )}
-                                      </div>
-                                    )}
-                                  />
-                                </Box>
-                              </Grid>
+                                        ))
+                                      ) : (
+                                        <Grid item md={12} className="d-flex  align-items-center justify-content-center">
+                                          <Button
+                                            variant="contained"
+                                            color="primary"
+                                            size="large"
+                                            onClick={() => {
+                                              arrayHelpers.push({ user: '', amount: 0, disable: false });
+                                            }}
+                                          >
+                                            Add Users
+                                          </Button>
+                                        </Grid>
+                                      )}
+                                    </div>
+                                  )}
+                                />
+                              </Box>
                             </Grid>
-                          </Container>
-                        </Form>
-                      </DialogContent>
-
+                          </Form>
+                        </DialogContent>
+                      </div>
                       <CustomDialogFooter>
                         {!isRenderedFromUserSetUp && (
                           <Button variant="outlined" color="primary" size="small" onClick={onClose}>

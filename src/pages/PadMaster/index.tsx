@@ -27,8 +27,8 @@ const PadMaster = () => {
   }: any = useData();
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [padMasterId, setPadMasterId] = useState(null);
-  const [open, setOpen] = useState({ open: false, isClone: false });
+
+  const [open, setOpen] = useState({ open: false, isClone: false, _id: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
@@ -127,7 +127,7 @@ const PadMaster = () => {
               size="small"
               aria-label="Clone"
               onClick={() => {
-                setOpen({ open: true, isClone: true });
+                setOpen({ open: true, isClone: true, _id: row.original._id });
               }}
             >
               <FileCopyIcon fontSize="small" color="primary" />
@@ -242,7 +242,7 @@ const PadMaster = () => {
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={actionMenuItems()}
           addButtonOnclick={() => {
-            setOpen({ open: true, isClone: false });
+            setOpen({ open: true, isClone: false, _id: null });
           }}
           isAddButtonVisible={permissions?.padMaster?.isCreate}
           setQueryString
@@ -281,11 +281,11 @@ const PadMaster = () => {
       )}
       {open?.open && (
         <ManagePadMaster
-          id={padMasterId}
+          id={open._id}
           isClone={open?.isClone}
-          onClose={() => setOpen({ open: false, isClone: false })}
+          onClose={() => setOpen({ open: false, isClone: false, _id: null })}
           onSuccess={() => {
-            setOpen({ open: false, isClone: false });
+            setOpen({ open: false, isClone: false, _id: null });
             fetchPadMasterData();
           }}
         />

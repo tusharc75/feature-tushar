@@ -33,7 +33,20 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     try {
       dispatch({ type: 'loading', loading: true });
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`);
-      dispatch({ type: 'initialize', data: response?.data?.data, count: response?.data?.data?.length });
+      const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalId}/invoice/material-end-date-qty`);
+      let invoiceData = invoiceResponse?.data?.data?.material || [];
+      const maxInvoiceDate = invoiceData?.find((ele)=> ele._id===id)?.endDate;
+      const serviceLogData = response?.data?.data;
+
+      serviceLogData?.forEach((log)=>{
+        if(maxInvoiceDate && log.endDate<=maxInvoiceDate){
+          log.canEdit = false;
+        }else{
+          log.canEdit = true;
+        }
+      })
+      
+      dispatch({ type: 'initialize', data: serviceLogData, count: serviceLogData?.length });
       setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
     } catch (e) {
       toastConfig.setToastConfig(e);
@@ -180,10 +193,11 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       Cell: ({ row }) => {
         return (
           <>
-            <HtmlTooltip title={`Update - Start Date/End Date`}>
+            <HtmlTooltip title={row?.original?.canEdit ?`Update - Start Date/End Date` : 'Invoice already created'}>
               <span>
                 <IconButton
                   size="small"
+                  disabled={!row?.original?.canEdit}
                   onClick={() => {
                     let minStartDate = null, maxEndDate = null;
                     dataRows?.forEach((d: any, index: number) => {
@@ -201,7 +215,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
                     setEditDateDialog({ open: true, loading: false, minStartDate: minStartDate, maxEndDate: maxEndDate, data: row?.original });
                   }}
                 >
-                  <Edit fontSize="small" color={'primary'} />
+                  <Edit fontSize="small" color={row?.original?.canEdit ? 'primary' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>

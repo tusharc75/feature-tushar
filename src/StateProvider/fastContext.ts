@@ -1,4 +1,4 @@
-import { WalkmeData } from 'src/components/CustomIntro';
+import { WalkmeData, StateWalkmeInstance } from 'src/components/CustomIntro';
 import createFastContext from './createFastContext';
 
 export const SEARCH = 'searchQuery';
@@ -10,6 +10,7 @@ export const MOBILE_FILTER_CLEARED = 'mobileFilterCleared';
 export const SIDEBAR_OPEN = 'isSidebarOpen';
 export const SIDEBAR_OPENED_BY_BUTTON = 'isSidebarOpenedByButton';
 export const WALK_ME_STEPS = 'walkMeSteps';
+export const WALK_ME_INSTANCE = 'walkMeInstance';
 
 const initialState: {
   searchQuery: string;
@@ -21,6 +22,7 @@ const initialState: {
   isSidebarOpen: boolean;
   isSidebarOpenedByButton: boolean;
   walkMeSteps: WalkmeData[];
+  walkMeInstance: StateWalkmeInstance | null;
 } = {
   searchQuery: '',
   themeColor: 'light',
@@ -30,7 +32,8 @@ const initialState: {
   mobileFilterCleared: true,
   isSidebarOpen: false,
   isSidebarOpenedByButton: false,
-  walkMeSteps: []
+  walkMeSteps: [],
+  walkMeInstance: null
 };
 
 const { Provider, useStore } = createFastContext(initialState);

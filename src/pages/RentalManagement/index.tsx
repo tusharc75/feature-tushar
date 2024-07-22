@@ -1,18 +1,18 @@
-import { Box, Button, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore, Warning } from '@material-ui/icons';
+import { Box, Button, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { useData } from 'src/StateProvider/Provider';
+import { IOTIcon } from 'src/assets/svg/svgIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import { createAddItemStepdata, useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -20,6 +20,7 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
 import HideWhenOffline from 'src/components/HideWhenOffline';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import {
   CHILD_RESOURCE,
   checkIsAllowedToDelete,
@@ -27,19 +28,17 @@ import {
   gridLoadingTimeout,
   prepareDataForGrid,
   rentalManagement,
-  serializedAsset,
   sidebarResource
 } from 'src/constants/helpers';
-import { clearAll, findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
+import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRentalManagementDialog from './ManageRental';
-import { rentalJobOfflineUpdate, rentalJobClearOffline } from './rentalOfflineHelper';
-import { ListingPageHeader } from 'src/components/PageHeaders';
-import axios, { CancelTokenSource } from 'axios';
-import { IOTIcon } from 'src/assets/svg/svgIcons';
+import { rentalJobClearOffline, rentalJobOfflineUpdate } from './rentalOfflineHelper';
+import { createRentalJobsFlow } from 'src/pages/RentalManagement/walkmeSteps';
 
 const RentalManagement = () => {
+  const { setWalkmeData } = useSetWalkmeData();
   const renderedFrom = camelCase(routes?.rentalManagement.title);
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
@@ -110,6 +109,7 @@ const RentalManagement = () => {
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.rentalManagement}&entity=${selectedEntity}&view=true`);
       data = response?.data?.data;
+      setWalkmeData([createRentalJobsFlow(data)]);
       try {
         insertUpdate(objectStore.resource, sidebarResource.rentalManagement, data);
       } catch (e) {
@@ -268,7 +268,9 @@ const RentalManagement = () => {
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-        finalObject['canDelete'] = permissions?.rentalManagement?.isDelete && u?.material?.length === 0 &&
+        finalObject['canDelete'] =
+          permissions?.rentalManagement?.isDelete &&
+          u?.material?.length === 0 &&
           checkIsAllowedToDelete(user, sidebarResource.rentalManagement, finalObject?.ownerId);
         return finalObject;
       });
@@ -449,7 +451,10 @@ const RentalManagement = () => {
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
           {`Add ${routes.rentalManagement.title} Offline`}
         </MenuItem>
-        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map(e => e._id))}>{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
+        <MenuItem
+          disabled={!selectedRecords.length}
+          onClick={() => handleRemoveoffline(selectedRecords?.map((e) => e._id))}
+        >{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );
@@ -535,8 +540,9 @@ const RentalManagement = () => {
         {singleRentalManagementDelete.show && (
           <ConfirmationDialog
             open={singleRentalManagementDelete.show}
-            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
-              }?`}
+            message={`Are you sure you want to delete this ${routes.rentalManagement.title.toLowerCase()} ${
+              singleRentalManagementDelete ? (singleRentalManagementDelete?.id ? singleRentalManagementDelete?.rentalJobName : '') : ''
+            }?`}
             onClose={() =>
               setSingleRentalManagementDelete({
                 id: null,

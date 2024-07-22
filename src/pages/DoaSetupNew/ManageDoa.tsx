@@ -109,9 +109,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setUserList(
           data.length
             ? data.map((user: any) => ({
-              id: user._id,
-              name: `${user.firstName} ${user.lastName}`
-            }))
+                id: user._id,
+                name: `${user.firstName} ${user.lastName}`
+              }))
             : []
         );
       })
@@ -127,9 +127,9 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
         setRoleList(
           data.length
             ? data.map((role: any) => ({
-              id: role._id,
-              name: role.name
-            }))
+                id: role._id,
+                name: role.name
+              }))
             : []
         );
       });
@@ -181,13 +181,14 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
   const RenderField = ({ data, options, arrayHelpers, approveType, touched, errors, name }) => {
     return data && data?.length > 0 ? (
       data?.map((_data, i) => (
-        <Grid container spacing={2} key={i}>
-          <Grid item md={1} lg={1}>
-            {i + 1}
+        <Grid container spacing={1} key={i} alignItems="center">
+          <Grid item className="!flex-shrink-0">
+            <span className="block min-w-[26px] px-2">{i + 1}.</span>
           </Grid>
-          <Grid item md={5} lg={5}>
+          <Grid item xs={6} md={5} lg={5}>
             <Autocomplete
               fullWidth
+              limitTags={1}
               multiple
               size="small"
               options={options?.filter((user) => !data?.some((e) => e?._id?.some((d) => d === user?.id)))}
@@ -213,7 +214,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
             />
           </Grid>
           {checkType === DOAType.amount && (
-            <Grid item md={4} lg={4}>
+            <Grid item xs={3} md={4} lg={4}>
               <TextField
                 fullWidth
                 InputProps={{
@@ -236,7 +237,7 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
               />
             </Grid>
           )}
-          <Grid item md={2} lg={2}>
+          <Grid item md={2} lg={2} className="max-[768px]:!ml-auto max-[768px]:max-w-fit">
             <Box mt={0.7}>
               <IconButton
                 size="small"
@@ -338,161 +339,163 @@ const ManageDoa = ({ onClose, onSuccess, resource, entity, data }) => {
           showManimizeMaximize={true}
         />
         <>
-          <Box padding={2} className={classes.contentBox}>
-            <Box padding={1}>
-              <Grid container spacing={2}>
-                <Grid item md={5} lg={5} sm={12} xs={12}>
-                  <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
-                    <ToggleButtonGroup size="small" value={checkType} exclusive onChange={handleCheckType}>
-                      {Object.keys(DOAType)?.map((k, index) => {
-                        return (
-                          <ToggleButton style={{ width: 80 }} value={DOAType[k]} key={index}>
-                            {DOAType[k]}
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                    <ToggleButtonGroup size="small" value={approveType} exclusive onChange={handleApproveType}>
-                      {Object.keys(DoaApproveType)?.map((k, index) => {
-                        return (
-                          <ToggleButton style={{ width: 80 }} value={DoaApproveType[k]} key={index}>
-                            {DoaApproveType[k]}
-                          </ToggleButton>
-                        );
-                      })}
-                    </ToggleButtonGroup>
-                  </Box>
-                </Grid>
-                <Grid item md={7} lg={7} sm={12} xs={12}>
-                  {checkType === DOAType.amount && (
-                    <Grid container spacing={2}>
-                      <Grid item md={6} lg={6} sm={6} xs={6}>
-                        <TextField
-                          InputProps={{
-                            startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
-                          }}
-                          variant="outlined"
-                          type="text"
-                          size="small"
-                          fullWidth
-                          name="minAmount"
-                          placeholder="Enter minimum DOA amount"
-                          label={isMobile && !isTablet ? 'DOA amount' : 'Enter minimum DOA amount'}
-                          value={minAmount}
-                          onChange={(e) => {
-                            setMinAmount(Number(e.target.value.replace(/[^0-9]/g, '')));
-                          }}
-                          error={validation()?.minAmount}
-                          helperText={validation()?.minAmount}
-                        />
-                      </Grid>
-                      <Grid item md={6} lg={6} sm={6} xs={6}>
-                        <Autocomplete
-                          fullWidth
-                          className={`max-w-full`}
-                          size="small"
-                          value={
-                            currencyOptions.filter((data) => data?.currencyCode === currency).length
-                              ? currencyOptions.filter((data) => data?.currencyCode === currency)[0]
-                              : ''
-                          }
-                          options={currencyOptions}
-                          getOptionLabel={(option: any) =>
-                            option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ''
-                          }
-                          getOptionSelected={(option: any, val) => option?.currencyCode === val}
-                          onChange={(e, val) => {
-                            setCurrency(val?.currencyCode ? val?.currencyCode : '');
-                            setCurrencySymbol(val?.symbolNative);
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              fullWidth
-                              variant="outlined"
-                              name={'currency'}
-                              label={'Currency'}
-                              error={validation()?.currency}
-                              helperText={validation()?.currency}
-                            />
-                          )}
-                          renderOption={(option) => {
-                            const { currencyCode, currencyName, symbolNative } = option;
-                            return `${currencyCode} - ${currencyName} - (${symbolNative})`;
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                  )}
-                </Grid>
-              </Grid>
-            </Box>
-          </Box>
           <Box>
             <Formik initialValues={initialValues} enableReinitialize={true} innerRef={formikRef} validate={validate} onSubmit={handleSubmit}>
               {({ values, errors, touched, submitForm }) => (
                 <>
-                  <CustomDialogContent className={classes.contentBox}>
-                    <Form>
-                      <Grid container direction="column">
-                        <Grid item md={12} lg={12}>
-                          {values?.data && values?.data?.length > 0 && (
-                            <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
-                              <Grid container spacing={2}>
-                                <Grid item md={1} lg={1}>
-                                  Index
-                                </Grid>
-                                <Grid item md={5} lg={5}>
-                                  {approveType}
-                                </Grid>
-                                {checkType === DOAType.amount && (
-                                  <Grid item md={4} lg={4}>
-                                    Amount
-                                  </Grid>
-                                )}
-                                <Grid item md={2} lg={2}></Grid>
-                              </Grid>
+                  <div style={{ minHeight: fullScreen || isMobile || isTablet ? 'calc(100vh - 110px)' : '' }}>
+                    <Box padding={2} className={classes.contentBox}>
+                      <Box padding={1}>
+                        <Grid container spacing={2}>
+                          <Grid item md={5} lg={5} sm={12} xs={12}>
+                            <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'}>
+                              <ToggleButtonGroup size="small" value={checkType} exclusive onChange={handleCheckType}>
+                                {Object.keys(DOAType)?.map((k, index) => {
+                                  return (
+                                    <ToggleButton style={{ width: 80 }} value={DOAType[k]} key={index}>
+                                      {DOAType[k]}
+                                    </ToggleButton>
+                                  );
+                                })}
+                              </ToggleButtonGroup>
+                              <ToggleButtonGroup size="small" value={approveType} exclusive onChange={handleApproveType}>
+                                {Object.keys(DoaApproveType)?.map((k, index) => {
+                                  return (
+                                    <ToggleButton style={{ width: 80 }} value={DoaApproveType[k]} key={index}>
+                                      {DoaApproveType[k]}
+                                    </ToggleButton>
+                                  );
+                                })}
+                              </ToggleButtonGroup>
                             </Box>
-                          )}
-                        </Grid>
-                        <Grid item md={12} lg={12}>
-                          <Box p={1}>
-                            {approveType === DoaApproveType.user ? (
-                              <FieldArray
-                                name="users"
-                                render={(arrayHelpers) => (
-                                  <RenderField
-                                    data={values?.users}
-                                    options={userList}
-                                    arrayHelpers={arrayHelpers}
-                                    approveType={DoaApproveType.user}
-                                    touched={touched}
-                                    errors={errors}
-                                    name={'users'}
+                          </Grid>
+                          <Grid item md={7} lg={7} sm={12} xs={12}>
+                            {checkType === DOAType.amount && (
+                              <Grid container spacing={2}>
+                                <Grid item md={6} lg={6} sm={6} xs={6}>
+                                  <TextField
+                                    InputProps={{
+                                      startAdornment: <InputAdornment position="start">{currencySymbol ? currencySymbol : ''}</InputAdornment>
+                                    }}
+                                    variant="outlined"
+                                    type="text"
+                                    size="small"
+                                    fullWidth
+                                    name="minAmount"
+                                    placeholder="Enter minimum DOA amount"
+                                    label={isMobile && !isTablet ? 'DOA amount' : 'Enter minimum DOA amount'}
+                                    value={minAmount}
+                                    onChange={(e) => {
+                                      setMinAmount(Number(e.target.value.replace(/[^0-9]/g, '')));
+                                    }}
+                                    error={validation()?.minAmount}
+                                    helperText={validation()?.minAmount}
                                   />
-                                )}
-                              />
-                            ) : (
-                              <FieldArray
-                                name="roles"
-                                render={(arrayHelpers) => (
-                                  <RenderField
-                                    data={values?.roles}
-                                    options={roleList}
-                                    arrayHelpers={arrayHelpers}
-                                    approveType={DoaApproveType.role}
-                                    touched={touched}
-                                    errors={errors}
-                                    name={'roles'}
+                                </Grid>
+                                <Grid item md={6} lg={6} sm={6} xs={6}>
+                                  <Autocomplete
+                                    fullWidth
+                                    className={`max-w-full`}
+                                    size="small"
+                                    value={
+                                      currencyOptions.filter((data) => data?.currencyCode === currency).length
+                                        ? currencyOptions.filter((data) => data?.currencyCode === currency)[0]
+                                        : ''
+                                    }
+                                    options={currencyOptions}
+                                    getOptionLabel={(option: any) =>
+                                      option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : ''
+                                    }
+                                    getOptionSelected={(option: any, val) => option?.currencyCode === val}
+                                    onChange={(e, val) => {
+                                      setCurrency(val?.currencyCode ? val?.currencyCode : '');
+                                      setCurrencySymbol(val?.symbolNative);
+                                    }}
+                                    renderInput={(params) => (
+                                      <TextField
+                                        {...params}
+                                        fullWidth
+                                        variant="outlined"
+                                        name={'currency'}
+                                        label={'Currency'}
+                                        error={validation()?.currency}
+                                        helperText={validation()?.currency}
+                                      />
+                                    )}
+                                    renderOption={(option) => {
+                                      const { currencyCode, currencyName, symbolNative } = option;
+                                      return `${currencyCode} - ${currencyName} - (${symbolNative})`;
+                                    }}
                                   />
-                                )}
-                              />
+                                </Grid>
+                              </Grid>
                             )}
-                          </Box>
+                          </Grid>
                         </Grid>
-                      </Grid>
-                    </Form>
-                  </CustomDialogContent>
+                      </Box>
+                    </Box>
+                    <CustomDialogContent className={classes.contentBox}>
+                      <Form>
+                        <Grid container direction="column">
+                          <Grid item md={12} lg={12}>
+                            {values?.data && values?.data?.length > 0 && (
+                              <Box className={`${classes.doaHeader} max-[600px]:hidden`}>
+                                <Grid container spacing={2}>
+                                  <Grid item md={1} lg={1}>
+                                    Index
+                                  </Grid>
+                                  <Grid item md={5} lg={5}>
+                                    {approveType}
+                                  </Grid>
+                                  {checkType === DOAType.amount && (
+                                    <Grid item md={4} lg={4}>
+                                      Amount
+                                    </Grid>
+                                  )}
+                                  <Grid item md={2} lg={2}></Grid>
+                                </Grid>
+                              </Box>
+                            )}
+                          </Grid>
+                          <Grid item md={12} lg={12}>
+                            <Box p={1}>
+                              {approveType === DoaApproveType.user ? (
+                                <FieldArray
+                                  name="users"
+                                  render={(arrayHelpers) => (
+                                    <RenderField
+                                      data={values?.users}
+                                      options={userList}
+                                      arrayHelpers={arrayHelpers}
+                                      approveType={DoaApproveType.user}
+                                      touched={touched}
+                                      errors={errors}
+                                      name={'users'}
+                                    />
+                                  )}
+                                />
+                              ) : (
+                                <FieldArray
+                                  name="roles"
+                                  render={(arrayHelpers) => (
+                                    <RenderField
+                                      data={values?.roles}
+                                      options={roleList}
+                                      arrayHelpers={arrayHelpers}
+                                      approveType={DoaApproveType.role}
+                                      touched={touched}
+                                      errors={errors}
+                                      name={'roles'}
+                                    />
+                                  )}
+                                />
+                              )}
+                            </Box>
+                          </Grid>
+                        </Grid>
+                      </Form>
+                    </CustomDialogContent>
+                  </div>
                   <CustomDialogFooter>
                     <Button variant="outlined" color="primary" size="small" onClick={onClose}>
                       Cancel

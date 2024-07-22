@@ -46,8 +46,12 @@ import AddSerializedAsset from './AddSerializedAsset';
 import AssignSerialNumbersDialog from 'src/components/AssignRolesDialog/AssignSerialNumbersDialog';
 import AddNonSerializedInventory from './AddNonSerializedInventory';
 import { FiExternalLink } from 'react-icons/fi';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAssignStepAssignSerializedAsset, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
 const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
+  const walkmeInstance = useGetWalkmeInstance();
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = 'rental_management_serialized_asset';
 
@@ -509,8 +513,38 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
 
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });
+      // Adding Step Data
+      addWalkmeData(rows);
     } catch (error) {
       toastConfig.setToastConfig(error);
+    }
+  };
+
+  const addWalkmeData = (rows: any[]) => {
+    if (rows?.length > 0) {
+      const stepDataAdded = {
+        assignSerializedAsset: false
+      };
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (!stepDataAdded.assignSerializedAsset && !disableAssignSerializedAssets([r])) {
+          setWalkmeData([generateAssignStepAssignSerializedAsset(i)]);
+          stepDataAdded.assignSerializedAsset = true;
+          if (walkmeInstance && walkmeInstance.type === 'flow') {
+            const steps = generateAssignStepAssignSerializedAsset(i).steps;
+            steps.push({ ...nextButtonStep, waitForStepInsertion: true });
+            walkmeInstance.instance.push(steps);
+            walkmeInstance.handleNext();
+          }
+        } else if (!stepDataAdded.assignSerializedAsset) {
+          stepDataAdded.assignSerializedAsset = true;
+          if (walkmeInstance && walkmeInstance.type === 'flow') {
+            const steps = [{ ...nextButtonStep, waitForStepInsertion: true }];
+            walkmeInstance.instance.push(steps);
+            walkmeInstance.handleNext();
+          }
+        }
+      }
     }
   };
 
@@ -922,7 +956,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
     setNonSerializedProduct([...nonSerializeAssetProduct]);
   }, [selectedRecords]);
 
-  const disableAssignSerializedAssets = () => {
+  const disableAssignSerializedAssets = (selectedRecords) => {
     if (selectedRecords.length === 0) return true;
     const flatArray = treeToFlatArray(selectedRecords, 'subRows').filter(
       (f) => f.type === 'product' && f.serializedProduct && f.realAssetQty > f.realAssetAssignedQty
@@ -964,7 +998,8 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
               color="primary"
               type="button"
               size="small"
-              disabled={disableAssignSerializedAssets()}
+              id="assign-serialized-asset-button"
+              disabled={disableAssignSerializedAssets(selectedRecords)}
               onClick={() => {
                 if (isOffline) {
                   setAddNonSerializedAssetDialog(true);
@@ -1185,7 +1220,6 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
             dispatch={dispatch}
             setWholeRowsCellColor={(rowData) => {
               if (!rowData.isValid) return 'error';
-
               return '';
             }}
             refreshGrid={fetchData}

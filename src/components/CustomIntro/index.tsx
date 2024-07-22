@@ -5,21 +5,28 @@ import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
 import React, { useEffect } from 'react';
 import { FaArrowLeft, FaArrowRight, FaQuestion } from 'react-icons/fa';
-import { GiFinishLine } from 'react-icons/gi';
 import { useLocation } from 'react-router-dom';
 import { HandleSteps } from 'src/components/CustomIntro/HandleStep';
 import { getCurrentUrl } from 'src/components/CustomIntro/helper';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { useStore, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
+import { useStore, WALK_ME_INSTANCE, WALK_ME_STEPS } from 'src/StateProvider/fastContext';
 export * from 'src/components/CustomIntro/CustomIntroWrapper';
-export * from 'src/components/CustomIntro/useSetWalkmeSteps';
 export * from 'src/components/CustomIntro/helper';
+export * from 'src/components/CustomIntro/useSetWalkmeSteps';
+
+export type StateWalkmeInstance = {
+  name: string;
+  type?: 'flow' | 'normal' | undefined;
+  instance: HandleSteps;
+  handleNext: () => void;
+};
 
 export type WalkmeData = {
   name: string;
+  type?: 'flow' | 'normal' | undefined;
   steps: StepDefination[];
-  urls: string[];
+  url: string;
 };
 
 export type Step = NormalStep | HiddenStep;
@@ -28,32 +35,49 @@ export type StepDefination = {
   title: ReactNode;
   content?: ReactNode;
   target: string;
-  url: string;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
-  nextOnValueChange?: boolean;
+  formFields?: boolean;
+  nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  skipIfValueExist?: boolean;
+  nextButtonName?: string;
+  waitForEnable?: boolean;
+  willOpenDialog?: boolean;
+  waitForStepInsertion?: boolean;
 };
 
 export type NormalStep = {
   title: ReactNode;
   content?: ReactNode;
   target: string;
-  url: string;
   isHiddenStep: false;
+  skipIfValueExist?: boolean;
+  nextButtonName?: string;
+  waitForEnable?: boolean;
+  willOpenDialog?: boolean;
+  waitForStepInsertion?: boolean;
 };
 export type HiddenStep = {
   target: string;
   isHiddenStep: true;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
-  nextOnValueChange?: boolean;
+  nextOnValueChange?: boolean | ((value: string) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  skipIfValueExist?: boolean;
+  nextButtonName?: string;
+  waitForEnable?: boolean;
+  willOpenDialog?: boolean;
+  waitForStepInsertion?: boolean;
 };
+
+let timeout: NodeJS.Timeout;
 
 const CustomIntro = () => {
   const [selectedIntro, setSelectedIntro] = useState<WalkmeData | null>(null);
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [_s, setWalkMeInstance] = useStore((store) => store[WALK_ME_INSTANCE]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [_, setUpdateSignal] = useState<number>(0);
   let handleSteps = useRef<HandleSteps | null>(null);
@@ -64,10 +88,37 @@ const CustomIntro = () => {
   const open = Boolean(anchorEl);
 
   const handleReset = () => {
+    if (isWaiting) return;
     handleSteps?.current?.removeListeners();
     setAnchorEl(null);
     handleSteps.current = null;
     setSelectedIntro(null);
+    setWalkMeInstance({ [WALK_ME_INSTANCE]: null });
+  };
+
+  const handleNext = (checkForStepInsertion = true) => {
+    if (checkForStepInsertion) {
+      currentStepData?.element.click();
+      if (currentStepData?.waitForStepInsertion) {
+        handleSteps.current?.pause();
+        return;
+      }
+    } else {
+      handleSteps.current.resume();
+    }
+
+    clearTimeout(timeout);
+    if (currentStepData?.willOpenDialog) {
+      // check if dialog will open then wait for 500ms to let dialog open properly
+      timeout = setTimeout(() => {
+        handleSteps.current?.next();
+      }, 500);
+    } else {
+      // wait for any layout change
+      timeout = setTimeout(() => {
+        handleSteps.current?.next();
+      }, 100);
+    }
   };
 
   const handleStart = (intro: WalkmeData) => {
@@ -78,6 +129,15 @@ const CustomIntro = () => {
       setUpdateSignal: setUpdateSignal,
       onReset: handleReset
     });
+    setWalkMeInstance({
+      [WALK_ME_INSTANCE]: {
+        name: intro.name,
+        instance: handleSteps.current,
+        type: intro.type,
+        handleNext: () => handleNext(false)
+      }
+    });
+
     handleSteps.current?.start();
   };
 
@@ -88,13 +148,9 @@ const CustomIntro = () => {
   } & NormalStep;
   const isLastStep = handleSteps?.current?.isLastStep();
   const isFirstStep = handleSteps?.current?.isFirstStep();
-  const isFindingElement = handleSteps?.current?.findingElement;
+  const isWaiting = handleSteps?.current?.waiting;
+  const isFindingElement = handleSteps?.current?.findingElement || isWaiting;
   const isHiddenStep = currentStepData?.isHiddenStep;
-
-  const handleNext = () => {
-    currentStepData?.element.click();
-    handleSteps.current?.next();
-  };
 
   if (handleSteps?.current?.error || !handleSteps || isHiddenStep) return null;
 
@@ -110,7 +166,7 @@ const CustomIntro = () => {
             {currentStepData.element && !isFindingElement && (
               <div
                 ref={(ref) => setAnchorEl(ref)}
-                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
+                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten transition-all duration-200"
                 onClick={() => {
                   handleNext();
                 }}
@@ -153,6 +209,7 @@ const CustomIntro = () => {
                 {!isFirstStep ? (
                   <ThemeButton
                     color="secondary"
+                    disabled={isWaiting}
                     iconForMobile={false}
                     onClick={() => handleSteps.current?.previous()}
                     startIcon={<FaArrowLeft size={16} />}
@@ -162,7 +219,7 @@ const CustomIntro = () => {
                 ) : (
                   <span></span>
                 )}
-                {!isLastStep ? (
+                {!isLastStep || isWaiting || currentStepData.waitForStepInsertion ? (
                   <ThemeButton
                     borderColor="none"
                     color="primary"
@@ -170,22 +227,23 @@ const CustomIntro = () => {
                     onClick={() => {
                       handleNext();
                     }}
+                    disabled={isWaiting}
                     endIcon={<FaArrowRight size={16} />}
                   >
-                    Next
+                    {currentStepData.nextButtonName || 'Next'}
                   </ThemeButton>
                 ) : (
                   <ThemeButton
                     borderColor="none"
                     color="primary"
                     iconForMobile={false}
+                    disabled={isWaiting}
                     onClick={() => {
                       handleNext();
                       handleReset();
                     }}
-                    endIcon={<GiFinishLine size={16} />}
                   >
-                    Finish
+                    {currentStepData.nextButtonName || 'Finish'}
                   </ThemeButton>
                 )}
               </div>
@@ -209,7 +267,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
 
   useEffect(() => {
     const url = getCurrentUrl();
-    const stepsForCurrentPage = walkMeSteps?.filter((d) => d?.urls?.some((u) => u === url));
+    const stepsForCurrentPage = walkMeSteps?.filter((d) => url === d?.url);
     setStepsForThisPage(stepsForCurrentPage);
     setFilteredSteps(stepsForCurrentPage);
   }, [walkMeSteps, location]);
@@ -255,9 +313,12 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
         }}
       >
         <div className="p-[24px]">
-          <h6 className=" pb-[10px] text-[17px] font-bold leading-[1.57] text-[#2a3042] [border-bottom:1px_solid_var(--common-border-color)]  dark:text-[white]">
-            Select any topic
-          </h6>
+          <div className="flex justify-between gap-2 pb-[10px] text-[#2a3042] [border-bottom:1px_solid_var(--common-border-color)] dark:text-[white]">
+            <h6 className="  text-[17px] font-bold leading-[1.57] ">Select any topic</h6>
+            <IconButton onClick={() => setOpen(false)} size="small">
+              <Close />
+            </IconButton>
+          </div>
           <div className="pb-2 pt-3">
             <TextField autoFocus label="Search topic..." variant="outlined" size="small" fullWidth onChange={handleSearch} value={search} />
           </div>

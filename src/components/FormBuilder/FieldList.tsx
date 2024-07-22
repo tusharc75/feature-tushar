@@ -167,6 +167,11 @@ const FieldList = {
     type: 'signature',
     icon: 'far fa-calendar-check'
   },
+  GROUPSIGNATURE: {
+    label: 'Group Signature',
+    type: 'groupSignature',
+    icon: 'far fa-calendar-check'
+  },
   LOOKUPDISPLAY: {
     label: 'Look Up Display',
     type: 'lookUpDisplay',

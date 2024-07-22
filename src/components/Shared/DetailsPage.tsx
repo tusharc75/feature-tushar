@@ -1,32 +1,28 @@
-import React, { useState, useEffect, useContext } from 'react';
-import {
-  Grid,
-  makeStyles,
-  Typography,
-  Box,
-  Avatar,
-  IconButton,
-  CircularProgress,
-  Link as MuiLink,
-  ImageList,
-  ImageListItem,
-  GridSize
-} from '@material-ui/core';
-import { Link } from 'react-router-dom';
-import { GetApp, Image, InfoOutlined, InsertDriveFile } from '@material-ui/icons';
-import { kebabCase } from 'lodash';
+import { Avatar, Box, GridSize, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
+import { Image, InfoOutlined } from '@material-ui/icons';
+import { camelCase, kebabCase } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
-import { cn, colSpans, columnSize, formatAmountWithCurrency, getFileIconSrc, getObjKeysWithValues } from '../../constants/helpers';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from '../../StateProvider/Provider';
-import CopyToClipboard from '../Helpers/CopyToClipboard';
-import { displayDate, displayDateTime, getUniqueCurrencies } from '../../constants/helpers';
-import HtmlTooltip from '../CustomTooltipTitle';
-import CarouselDialog from '../CarouselDialog';
-import { camelCase } from 'lodash';
-import AttachmentThumbnail from 'src/components/AttachmentThumbnail';
+import { Link } from 'react-router-dom';
+import routes from 'src/components/Helpers/Routes';
 import { PreviewFile } from 'src/components/PreviewFile';
+import {
+  cn,
+  colSpans,
+  columnSize,
+  displayDate,
+  displayDateTime,
+  formatAmountWithCurrency,
+  getFileIconSrc,
+  getObjKeysWithValues,
+  getUniqueCurrencies,
+  HIDDEN_FIELD_TYPE
+} from '../../constants/helpers';
+import { useData } from '../../StateProvider/Provider';
+import CarouselDialog from '../CarouselDialog';
+import HtmlTooltip from '../CustomTooltipTitle';
+import CopyToClipboard from '../Helpers/CopyToClipboard';
+import { FiExternalLink } from 'react-icons/fi';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -104,7 +100,7 @@ const Details = (props: DetailProps) => {
 
   useEffect(() => {
     sortArray();
-    const fieldData = fields.map((f) => f.fieldData);
+    const fieldData = fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData);
     const vals = getObjKeysWithValues(data, fieldData);
     fieldData?.forEach((e) => {
       if (e.type === 'lookUpDisplay') {
@@ -183,6 +179,8 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
     } else if (input.type === 'counter') {
       text = '-';
+    } else if (input.type === 'groupSignature') {
+      text = '-';
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }
@@ -194,10 +192,11 @@ const Details = (props: DetailProps) => {
    */
   const sortArray = () => {
     const sections = [];
-
-    const allFields = fields.sort((a, b) => {
-      return a.fieldData.order - b.fieldData.order;
-    });
+    const allFields = fields
+      ?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))
+      ?.sort((a, b) => {
+        return a.fieldData.order - b.fieldData.order;
+      });
 
     allFields.forEach((field) => {
       if (!sections.includes(field.fieldData.sectionName)) {
@@ -214,7 +213,7 @@ const Details = (props: DetailProps) => {
     setFormsData(customData);
   };
 
-  const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload'].includes(type);
+  const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload', 'groupSignature'].includes(type);
 
   /**
    * Render Link  or Typography component
@@ -269,7 +268,7 @@ const Details = (props: DetailProps) => {
         const files = Array.isArray(value) ? value : [];
         if (files.length === 0) return '-';
         return (
-          <div className={classes.imageListContainer}>
+          <div className={cn(classes.imageListContainer, 'p-[8.6px_10px] pt-0')}>
             <ImageList className={classes.imageList} cols={2.5}>
               {val[fieldData.fieldName].map((item, i) => (
                 <ImageListItem className={classes.imageListItem} key={item}>
@@ -291,7 +290,7 @@ const Details = (props: DetailProps) => {
         const Icon = getFileIconSrc(value || '');
         if (value === '-' || Array.isArray(value)) return value;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 p-[8.6px_10px] pt-0">
             <Icon />
             <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
               <span className={`text-truncate tooltip-asdfkljashdfkjas text-gray-500 dark:text-gray-400`}>{value}</span>
@@ -304,7 +303,7 @@ const Details = (props: DetailProps) => {
         const files = Array.isArray(value) ? value : [];
         if (files.length > 0) {
           return (
-            <div className="space-y-2">
+            <div className="space-y-2 p-[8.6px_10px] pt-0">
               {files.map((d) => {
                 const Icon = getFileIconSrc(d.fileName || '');
                 return (
@@ -417,17 +416,12 @@ const Details = (props: DetailProps) => {
                       <div
                         className={cn(
                           isTypeFile(field.fieldData.type) && 'flex-wrap',
-                          'flex items-center',
-                          isTypeFile(field.fieldData.type) || '[border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                          'flex items-center [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
                         )}
                       >
                         <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
                           <div className={cn('d-flex align-items-center formdata-title-v1', isTypeFile(field.fieldData.type) && '!border-r-0')}>
-                            <h4
-                              title={field.fieldData.fieldLabel}
-                              style={{ paddingLeft: isTypeFile(field.fieldData.type) && 0 }}
-                              className={`text-truncate `}
-                            >
+                            <h4 title={field.fieldData.fieldLabel} className={`text-truncate `}>
                               {field.fieldData.fieldLabel}
                             </h4>
                             {field.fieldData.isTooltip && (
@@ -440,11 +434,47 @@ const Details = (props: DetailProps) => {
 
                         <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
                           {field.fieldData.type === 'imageUpload' ? (
-                            <Box marginTop={1} marginBottom={4}>
+                            <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
                               <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
                                 <Image style={{ fontSize: 30 }} />
                               </Avatar>
                             </Box>
+                          ) : field.fieldData.type === 'groupSignature' ? (
+                            <div className="grid grid-cols-1 md:grid-cols-2">
+                              {initialVals[field.fieldData.fieldName]?.map((ele, index) => (
+                                <div
+                                  className={cn(
+                                    `flex items-center justify-between p-[0px_10px]`,
+                                    initialVals[field.fieldData.fieldName].length === index - 1
+                                      ? ''
+                                      : '[border-top:1px_solid_var(--common-border-color)]',
+                                    index % 2 === 0 ? 'md:[border-right:1px_solid_var(--common-border-color)]' : ''
+                                  )}
+                                >
+                                  <div className="flex items-center gap-2">
+                                    <p title={ele?.user?.concatedName} className={`text-truncate font-normal`}>
+                                      {ele?.user?.concatedName}
+                                    </p>
+                                    <Link
+                                      title={ele?.user?.concatedName}
+                                      to={`${routes?.userDetail?.path}/${ele?.user?._id}`}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className={'mt-1 max-h-fit flex-shrink-0'}
+                                    >
+                                      <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
+                                    </Link>
+                                  </div>
+                                  <div className="flex h-[48px] items-center">
+                                    {ele?.signature ? (
+                                      <img alt={ele?.user?.concatedName} className="h-12 w-14 object-contain" src={ele.signature} />
+                                    ) : (
+                                      '-'
+                                    )}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
                           ) : (
                             <Box display="flex" alignItems="center" className="formdata-text-v1">
                               {renderData(initialVals, field.fieldData)}

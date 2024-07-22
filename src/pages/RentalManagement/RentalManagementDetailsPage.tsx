@@ -24,6 +24,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import {
   ACTIVITY_RESOURCE,
   DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   QUOTATION_STATUS,
   RENTAL_STATUS,
@@ -49,8 +50,11 @@ import SerializedAsset from './SerializedAsset';
 import Services from './Services';
 import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
 
 const RentalManagementDetailsPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
   const renderedFrom = camelCase(routes?.rentalManagement.title);
@@ -90,6 +94,7 @@ const RentalManagementDetailsPage = () => {
 
   const [allowUpdateStatus, setAllowUpdateStatus] = useState(false);
   const [displayProgressiveBillingTab, setDisplayProgressiveBillingTab] = useState(false);
+  const [hideDeliveryTicketDelivered, setHideDeliveryTicketDelivered] = useState(false);
 
   const [rentalSteps, setRentalSteps] = useState([]);
 
@@ -136,8 +141,14 @@ const RentalManagementDetailsPage = () => {
     }
     if (!isOffline) {
       fetchAssetStatusRights();
+      checkDeliveryTicketFields();
     }
     checkProgressiveBilling();
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(generateAddExistingProduct(true).steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
+    }
   }, [id]);
 
   const checkProgressiveBilling = () => {
@@ -202,7 +213,25 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
+  };
+
+  const checkDeliveryTicketFields = () => {
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.deliveryTicket}&view=true`)
+      .then(({ data: { data } }) => {
+        if (data?.length) {
+          data?.some((o) => {
+            if (o?.fieldData?.fieldName === 'status') {
+              if (o?.fieldData?.option?.find((e) => e.default)?.optionValue === DELIVERY_TICKET_STATUS.delivered) {
+                setHideDeliveryTicketDelivered(true);
+              }
+              return true;
+            }
+          });
+        }
+      })
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -318,15 +347,14 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
-
   const updateProcessStatus = async (processStatus) => {
     if (isOffline) {
       await updateRentalProcessStatus(id, processStatus);
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -441,9 +469,8 @@ const RentalManagementDetailsPage = () => {
                     {isMobile && !isTablet ? <IoMdDownload size={20} /> : isDownloading ? 'Please wait...' : 'Download'}
                   </Button>
                   {['Add Products', 'Add Services', 'Add-on'].includes(rentalSteps[currentStep]?.name) &&
-                    versionNotClonned && (rentalManagementData?.addQuotationStep ||
-                      user?.user?.brandPolicy?.rentalQuotation
-                    ) && (
+                    versionNotClonned &&
+                    (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (
                       <Button
                         className="btn-outline-v1"
                         variant="contained"
@@ -489,8 +516,7 @@ const RentalManagementDetailsPage = () => {
                   )}
                   {permissions?.rentalManagement?.isUpdate &&
                     !isOffline &&
-                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) &&
-                    (
+                    ![RENTAL_STATUS.cancelled, RENTAL_STATUS.closed].includes(rentalManagementData?.status) && (
                       <Fragment>
                         <HtmlTooltip title={!allowedToEdit ? ownerAndColaborator : 'Edit'}>
                           <span>
@@ -573,12 +599,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -597,12 +623,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -648,6 +674,7 @@ const RentalManagementDetailsPage = () => {
                   stepFullScreen={stepFullScreen}
                   checkProgressiveBilling={checkProgressiveBilling}
                   rentalPolicyData={resourceData?.policy}
+                  hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
                 />
               )}
               {['On Field', 'Receiving Ticket']?.includes(rentalSteps[currentStep]?.name) && rentalManagementData && (
@@ -664,6 +691,7 @@ const RentalManagementDetailsPage = () => {
                   allowUpdateStatus={allowUpdateStatus}
                   checkProgressiveBilling={checkProgressiveBilling}
                   rentalPolicyData={resourceData?.policy}
+                  hideDeliveryTicketDelivered={hideDeliveryTicketDelivered}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Final Slip' && rentalManagementData && (
@@ -689,16 +717,10 @@ const RentalManagementDetailsPage = () => {
             />
           </TabPanel>
           <TabPanel value={tabValue} index={3}>
-            <ProgressiveBilling
-              rentalId={id}
-              rentalManagementData={rentalManagementData}
-              allowCreateInvoice={allowedToEdit} />
+            <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={allowedToEdit} />
           </TabPanel>
           <TabPanel value={tabValue} index={4}>
-            <RentalManagementViews
-              rentalName={rentalManagementData?.rentalJobName}
-              rentalId={id}
-              status={rentalManagementData?.status} />
+            <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
           </TabPanel>
         </Box>
         {showConfirmBox && (

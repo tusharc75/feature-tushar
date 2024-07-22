@@ -1,0 +1,369 @@
+import Box from '@material-ui/core/Box/Box';
+import { useState, useEffect, useContext } from 'react';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import routes from '../../../components/Helpers/Routes';
+import Grid from '@material-ui/core/Grid/Grid';
+import axiosInstance from 'src/axios/axiosInstance';
+import {
+  MATERIAL_TYPE,
+  dateFormat,
+  rentalManagement,
+} from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { IconButton, MenuItem } from '@material-ui/core';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { camelCase, isEmpty } from 'lodash';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { FiExternalLink } from 'react-icons/fi';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import moment from 'moment';
+import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
+import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
+import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
+import CustomMessageDialog from 'src/components/MessageDialog';
+import { isMobile, isTablet } from 'react-device-detect';
+import { useData } from '../../../StateProvider/Provider';
+
+const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords }) => {
+
+
+  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services`;
+
+  const toastConfig = useContext(CustomToastContext);
+
+  const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
+
+    const {
+    state: { user }
+  }: any = useData();
+
+  const [columns, setColumns] = useState(null);
+  const [tabValue, setTabValue] = useState(0);
+  const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false, minStartDate: null });
+  const [serviceLogDialog, setServiceLogDialog] = useState({ open: false, data: null });
+  const { state, dispatch } = useTableReducer();
+  const { selectedRecords } = state;
+
+  useEffect(() => {
+    fetchColumns();
+  }, [rentalManagementData]);
+
+  useEffect(() => {
+    fetchData();
+  }, [services]);
+
+  const fetchColumns = () => {
+    const column: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        minWidth: 100,
+        width: 100,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div className="d-flex align-items-center gap-2">
+            <h5 className="text-truncate">{row?.original?.index}</h5>
+            {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
+              <HtmlTooltip title={'View Service Logs'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setServiceLogDialog({ open: true, data: row?.original });
+                    }}
+                  >
+                    <VisibilityIcon fontSize="small" color="primary" />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            ) : null}
+          </div>
+        )
+      },
+      {
+        accessor: 'assetNumber',
+        Header: 'Details',
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        Cell: ({ row }) => (
+          <div className="flex items-center gap-2">
+            <p className="text-truncate">{row?.original?.assetNumber}</p>
+            <IconButton
+              size="small"
+              onClick={() => {
+                window.open(`${routes.serviceMasterDetail.path}/${row?.original?.materialId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
+          </div>
+        )
+      },
+      {
+        accessor: 'parentName',
+        Header: 'Parent',
+        disabled: true,
+        Cell: ({ row }) => (row?.original?.parentName ? <h5 className="text-truncate">{row?.original?.parentName}</h5> : <NoDataCell />)
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        disabled: true,
+        Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        Cell: ({ row }) => (row?.original?.description ? <h5 className="text-truncate">{row?.original?.description}</h5> : <NoDataCell />)
+      },
+      {
+        accessor: 'manualStartDate',
+        Header: 'Start Date',
+        Cell: ({ row }) =>
+          row?.original?.manualStartDate ? (
+            <h5 className="text-truncate" title={`${moment(row?.original?.manualStartDate).format(dateFormat)}`}>
+              {moment(row?.original?.manualStartDate)?.format(dateFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'manualEndDate',
+        Header: 'End Date',
+        Cell: ({ row }) =>
+          row?.original?.manualEndDate ? (
+            <h5 className="text-truncate" title={`${moment(row?.original?.manualEndDate).format(dateFormat)}`}>
+              {moment(row?.original?.manualEndDate)?.format(dateFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'startDate',
+        Header: 'System Start Date',
+        Cell: ({ row }) =>
+          row?.original?.startDate ? (
+            <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
+              {moment(row?.original?.startDate)?.format(dateFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'endDate',
+        Header: 'System End Date',
+        Cell: ({ row }) =>
+          row?.original?.endDate ? (
+            <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
+              {moment(row?.original?.endDate)?.format(dateFormat)}
+            </h5>
+          ) : (
+            <NoDataCell />
+          )
+      },
+    ];
+    setColumns(column);
+  };
+
+  const fetchData = async () => {
+    try {
+      dispatch({ type: 'selection', selectedRecords: [] });
+      dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'initialize', data: services, count: services?.length });
+      dispatch({ type: 'loading', loading: false });
+    } catch (error) {
+      dispatch({ type: 'loading', loading: false });
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const handleSubmitChangeDates = (values, type: string = '') => {
+    let data;
+    setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
+    data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
+    data['type'] = type;
+    // data['date'] = values.date;
+    data['startDate'] = values.startDate;
+    data['endDate'] = values.endDate;
+
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
+      .then((response) => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: response?.data?.message,
+          type: 'success'
+        });
+        setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
+        fetchRecords();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+        setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
+      });
+  };
+
+  return (
+    <Box mt={1}>
+      <CustomTabs value={tabValue} onChange={() => { }} style={{ marginBottom: -1 }}>
+        <CustomTab value={0} label={'Services'} primaryColor={true} />
+      </CustomTabs>
+      <TabPanel value={tabValue} index={0}>
+        <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
+          <DetailsPageHeader
+            isAddButtonVisible={false}
+            isActionButtonVisible={allowedToEdit && user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
+            actionButtonMenuItems={
+              <ActionButtonMenuItems
+                {...{
+                  selectedRecords,
+                  setOpenMessageDialog,
+                  setServiceConfirmationDialog,
+                }}
+              />
+            }
+            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+            hasXpadding
+          />
+          <Grid container spacing={2}>
+            <Grid item xs={12} md={12} sm={12}>
+              {columns ? (
+                <CustomReactTable
+                  height={'300px'}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={`${renderedFrom}_services`}
+                  isClientSideGrid={true}
+                  hideSelection={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
+                  hideAction={true}
+                  refreshGrid={fetchRecords}
+                />
+              ) : (
+                <Box p={2} height={300}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
+              )}
+            </Grid>
+          </Grid>
+        </Box>
+      </TabPanel>
+      {openMessageDialog.open && (
+        <CustomMessageDialog
+          open={openMessageDialog.open}
+          errorMessages={openMessageDialog.errorMessages}
+          onClose={() => {
+            setOpenMessageDialog({ open: false, errorMessages: [] });
+          }}
+        />
+      )}
+      {serviceLogDialog.open && (
+        <ServiceLogDialog
+          rentalId={rentalManagementData?._id}
+          id={serviceLogDialog?.data?.uniqueId}
+          assetNumber={serviceLogDialog?.data?.assetNumber}
+          open={serviceLogDialog?.open}
+          onClose={() => {
+            setServiceLogDialog({ open: false, data: null });
+          }}
+          onSuccess={() => {
+            fetchRecords()
+          }}
+          renderedFrom={renderedFrom}
+        />
+      )}
+      {serviceConfirmationDialog.open && (
+        <StartStopServiceDateDialog
+          data={selectedRecords}
+          type={serviceConfirmationDialog.type}
+          open={serviceConfirmationDialog.open}
+          onClose={() => {
+            setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
+          }}
+          handleSubmit={(val) => {
+            handleSubmitChangeDates(val, serviceConfirmationDialog.type);
+          }}
+          loading={serviceConfirmationDialog.loading}
+          minStartDate={serviceConfirmationDialog.minStartDate}
+        />
+      )}
+    </Box>
+  );
+};
+
+export default ReceivingServices;
+
+const ActionButtonMenuItems = ({
+  selectedRecords,
+  setOpenMessageDialog,
+  setServiceConfirmationDialog,
+}) => {
+
+  // const validateAction = (action) => {
+  //   const errorMessages = [];
+  //   selectedRecords.forEach((e) => {
+  //     if (action === rentalManagementActions.startService) {
+  //       const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+  //       if (!isEmpty(serviceLogEntry)) {
+  //         errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
+  //       }
+  //     }
+  //     else if (action === rentalManagementActions.stopService) {
+  //       const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+  //       if (!serviceLogEntry) {
+  //         errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
+  //       }
+  //     }
+  //   });
+  //   if (errorMessages?.length) {
+  //     setOpenMessageDialog({ open: true, errorMessages: errorMessages });
+  //     return true;
+  //   }
+  //   return false;
+  // };
+
+  return (<>
+    {/* <MenuItem
+      onClick={() => {
+        if (!validateAction(rentalManagementActions.startService)) {
+          setServiceConfirmationDialog({ open: true, type: 'start' });
+        }
+      }}
+    >
+      Start Service(s)
+    </MenuItem>
+    <MenuItem
+      onClick={() => {
+        if (!validateAction(rentalManagementActions.stopService)) {
+          setServiceConfirmationDialog({ open: true, type: 'stop' });
+        }
+      }}
+    >
+      Stop Service(s)
+    </MenuItem> */}
+    <MenuItem onClick={() => {
+      const dates = [];
+      selectedRecords?.forEach((d: any) => {
+        d?.serviceLog?.forEach((l: any) => {
+          dates.push(new Date(l.endDate));
+        })
+      })
+      let date = null;
+      if (dates?.length) {
+        date = new Date(Math.max(...dates));
+        date = new Date().setDate(new Date(date).getDate() + 1)
+      }
+      setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
+    }}>
+      Start/Stop Service(s)
+    </MenuItem>
+  </>
+  );
+};
+

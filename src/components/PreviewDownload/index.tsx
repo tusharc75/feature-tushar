@@ -200,7 +200,7 @@ function PreviewDownload({
           {isExcelDownload && (
             <ThemeButton
               iconForMobile={<ExportIcon />}
-              tooltip="Download"
+              tooltip="Export To Excel"
               startIcon={<ExportIcon />}
               disabled={btnLoading === 'Download'}
               onClick={(e) => {

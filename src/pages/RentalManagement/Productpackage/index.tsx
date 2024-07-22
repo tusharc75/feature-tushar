@@ -6,7 +6,6 @@ import { startCase } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { AssetAvailabilityIcon } from 'src/assets/svg/svgIcons';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import CalculatePriceDialog from 'src/components/RentalManagment/CalculatePriceDialog';
@@ -43,6 +42,16 @@ import RentalJobQtyDialog from './RentalJobQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import AddExistingProductInventory from 'src/pages/RentalManagement/Productpackage/AddExistingProductInventory';
 import { FiExternalLink } from 'react-icons/fi';
+import AssignServiceDialog from 'src/components/AssignRolesDialog/AssignServiceDialog';
+import AddExistingSerializedAssetDialog from 'src/pages/RentalManagement/Productpackage/AddExistingSerializedAssetDialog';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import {
+  generateAddExistingProduct,
+  generateAddChildProduct,
+  generateAddStepEditProduct,
+  generateDeleteAddedProductSteps,
+  nextButtonStep
+} from 'src/pages/RentalManagement/walkmeSteps';
 
 const Productpackage = ({
   rentalManagementData,
@@ -56,6 +65,8 @@ const Productpackage = ({
   fetchRentalManagementData,
   rentalPolicyData
 }) => {
+  const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -64,7 +75,7 @@ const Productpackage = ({
   const [isUpdating, setUpdating] = useState(false);
 
   const [isProductEdit, setIsProductEdit] = useState({ open: false, data: null, showSaveAndNext: false });
-  const [isAddingProducts, setAddingProducts] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [deleteData, setDeleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -74,7 +85,7 @@ const Productpackage = ({
   const [addExistingProductDialog, setAddExistingProductDialog] = useState({ open: false, type: '', parentId: null });
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState(null);
-  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, top: null, bottom: null });
+  const [addchildDialog, setAddchildDialog] = useState({ open: false, parentId: null, type: null, top: null, bottom: null });
   const [showConfirmationDialog, setShowConfirmationDialog] = useState({ open: false, data: null });
   const [priceDataDialog, setPriceDataDialog] = useState({ open: false, material: null });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
@@ -93,6 +104,7 @@ const Productpackage = ({
 
   useEffect(() => {
     fetchFields();
+    setWalkmeData([generateAddExistingProduct()]);
   }, []);
 
   useEffect(() => {
@@ -197,7 +209,17 @@ const Productpackage = ({
                 {!isOffline && allowedToEdit && !quotationApproved && (
                   <HtmlTooltip title="Add">
                     <IconButton
-                      onClick={(event) => setAddchildDialog({ open: true, parentId: row.original?._id, top: event.clientY, bottom: event.clientX })}
+                      id={`add-child-product-button-${row.index || 0}`}
+                      onClick={(event) => {
+                        const { top, left } = event.currentTarget.getBoundingClientRect();
+                        setAddchildDialog({
+                          open: true,
+                          parentId: row.original?._id,
+                          type: row.original?.type,
+                          top: top + 25,
+                          bottom: left
+                        });
+                      }}
                       size="small"
                       color="primary"
                     >
@@ -258,6 +280,7 @@ const Productpackage = ({
                 onClick={() => {
                   openMaterial(row, table.getRowModel().rows);
                 }}
+                id={`edit-product-button-${row.index || 0}`}
               >
                 <EditIcon fontSize="small" color={isOffline || !allowedToEdit || quotationApproved ? 'disabled' : 'primary'} />
               </IconButton>
@@ -423,8 +446,55 @@ const Productpackage = ({
       setNextStep(true);
       setNextStepToolTip(null);
     }
+    addWalkmeData(rows);
+
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+  };
+
+  const addWalkmeData = (rows: any[]) => {
+    // Adding Step Data
+
+    if (rows?.length > 0) {
+      let stepData = [generateAddExistingProduct()];
+      const stepDataAdded = {
+        stepEditProduct: false,
+        addChildProduct: false,
+        deleteAddedProduct: false,
+        addExistingProduct: true
+      };
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (r.type !== MATERIAL_TYPE.manualEntry && !isOffline && allowedToEdit && !quotationApproved) {
+          if (!stepDataAdded.stepEditProduct && !r.isValid) {
+            stepData.push(generateAddStepEditProduct(i));
+            stepDataAdded.stepEditProduct = true;
+            if (walkmeInstance && walkmeInstance.type === 'flow') {
+              const steps = generateAddStepEditProduct(i).steps;
+              steps.push(nextButtonStep, { ...nextButtonStep, waitForStepInsertion: true });
+              walkmeInstance.instance.push(steps);
+              walkmeInstance.handleNext();
+            }
+          } else if (!stepDataAdded.stepEditProduct) {
+            stepDataAdded.stepEditProduct = true;
+            if (walkmeInstance && walkmeInstance.type === 'flow') {
+              const steps = [nextButtonStep, { ...nextButtonStep, waitForStepInsertion: true }];
+              walkmeInstance.instance.push(steps);
+              walkmeInstance.handleNext();
+            }
+          }
+          if (!stepDataAdded.addChildProduct) {
+            stepData.push(generateAddChildProduct(i));
+            stepDataAdded.addChildProduct = true;
+          }
+          if (!stepDataAdded.deleteAddedProduct && r.hideSelection === false) {
+            stepData.push(generateDeleteAddedProductSteps(i));
+            stepDataAdded.deleteAddedProduct = true;
+          }
+        }
+      }
+      setWalkmeData(stepData);
+    }
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts) => {
@@ -485,7 +555,7 @@ const Productpackage = ({
   };
 
   const handleAdd = async (rows) => {
-    setAddingProducts(true);
+    setIsSubmitting(true);
     const material: any = [];
     rows.forEach((d) => {
       const element: any = {};
@@ -516,7 +586,7 @@ const Productpackage = ({
   };
 
   const handleAddAsset = async (rows) => {
-    setAddingProducts(true);
+    setIsSubmitting(true);
     const assetIds = rows?.map((item) => item._id);
     axiosInstance()
       .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
@@ -524,11 +594,11 @@ const Productpackage = ({
       })
       .then(() => {
         setAddExistingAssets(false);
-        setAddingProducts(false);
+        setIsSubmitting(false);
         fetchData();
       })
       .catch((error) => {
-        setAddingProducts(false);
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -564,12 +634,12 @@ const Productpackage = ({
         if ([RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced]?.includes(rentalManagementData?.status)) {
           fetchRentalManagementData();
         }
-        setAddingProducts(false);
+        setIsSubmitting(false);
         setPriceDataDialog({ open: false, material: null });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        setAddingProducts(false);
+        setIsSubmitting(false);
         setPriceDataDialog({ open: false, material: null });
       });
   };
@@ -805,20 +875,23 @@ const Productpackage = ({
     return (
       <>
         <MenuItem
+          id={'add-existing-products-menu-item'}
           onClick={() => {
-            setAddExistingProductDialog({ open: true, type: 'product', parentId: null });
+            setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.product, parentId: null });
           }}
         >
           Add Existing Products
         </MenuItem>
         <MenuItem
+          id={'add-existing-package-menu-item'}
           onClick={() => {
-            setAddExistingProductDialog({ open: true, type: 'package', parentId: null });
+            setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
           }}
         >
           Add Existing Packages
         </MenuItem>
         <MenuItem
+          id={'add-new-products-package-menu-item'}
           onClick={() => {
             setAddExistingProductDialog({ open: true, type: 'newPackage', parentId: null });
           }}
@@ -826,6 +899,7 @@ const Productpackage = ({
           Add New Product Package
         </MenuItem>
         <MenuItem
+          id={'add-existing-serialized-asset-menu-item'}
           onClick={() => {
             setAddExistingAssets(true);
           }}
@@ -834,6 +908,7 @@ const Productpackage = ({
         </MenuItem>
         {costFields?.filter((f) => f?.isRead)?.length > 0 && (
           <MenuItem
+            id={'add-manual-entry-menu-item'}
             onClick={() => {
               setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
             }}
@@ -879,6 +954,7 @@ const Productpackage = ({
           placement="top"
         >
           <MenuItem
+            id={'bulk-edit-menu-item'}
             disabled={selectedRecords.some((e) => e.type === MATERIAL_TYPE.manualEntry)}
             onClick={() => {
               setIsProductEdit({ open: true, data: null, showSaveAndNext: false });
@@ -899,6 +975,7 @@ const Productpackage = ({
           placement="top"
         >
           <MenuItem
+            id={'delete-menu-item'}
             disabled={isDeleting}
             onClick={() => {
               handleDeleteMultiple();
@@ -1000,26 +1077,47 @@ const Productpackage = ({
         />
       )}
       {addExistingAssets && (
-        <AssignSerializedAssetDialog
-          reference={'rentalJob'}
-          referenceData={{ warehouse: rentalManagementData?.warehouse?.optionValue, rentalJob: rentalManagementData._id }}
-          isAssigning={isAddingProducts}
+        <AddExistingSerializedAssetDialog
+          referenceData={{
+            warehouse: rentalManagementData?.warehouse,
+            rentalJob: rentalManagementData._id,
+            wellName: rentalManagementData?.wellName,
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null,
+            afeNumber: rentalManagementData?.afeNumber
+          }}
+          isAssigning={isSubmitting}
           handleClose={() => setAddExistingAssets(false)}
           handleSucess={handleAddAsset}
-          ids={[]}
+          handleSuccessInUseAsset={() => {
+            setAddExistingAssets(false);
+            fetchData();
+          }}
         />
       )}
-      {addExistingProductDialog.open && addExistingProductDialog.type !== 'newPackage' && (
+      {addExistingProductDialog.open && [MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(addExistingProductDialog?.type) && (
         <AddExistingProductInventory
           type={addExistingProductDialog.type}
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
           rentalManagementData={rentalManagementData}
-          isAddingProducts={isAddingProducts}
+          isAddingProducts={isSubmitting}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
           }}
           addMaterial={handleAdd}
           rentalPolicyData={rentalPolicyData}
+        />
+      )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
+        <AssignServiceDialog
+          onSuccess={(services) => {
+            handleAdd(services);
+          }}
+          handleClose={() => {
+            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+          }}
+          isSubmitting={isSubmitting}
         />
       )}
       {addchildDialog.open && (
@@ -1036,35 +1134,41 @@ const Productpackage = ({
           }}
           open={addchildDialog.open}
           onClose={() => {
-            setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+            setAddchildDialog({ open: false, parentId: null, type: null, top: null, bottom: null });
           }}
         >
           <MenuList>
             <MenuItem
               onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'product', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
+                setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.product, parentId: addchildDialog.parentId });
+                setAddchildDialog({ open: false, parentId: null, type: null, top: null, bottom: null });
               }}
+              id={'add-existing-child-product-menu-item'}
             >
               Add Existing Products
             </MenuItem>
-            <MenuItem
-              onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'package', parentId: addchildDialog.parentId });
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null });
-              }}
-            >
-              Add Existing Packages
-            </MenuItem>
-            {/* <MenuItem
-              onClick={() => {
-                setAddExistingProductDialog({ open: true, type: 'service', parentId: addchildDialog.parentId })
-                setAddchildDialog({ open: false, parentId: null, top: null, bottom: null })
-              }
-              }
-            >
-              Services
-            </MenuItem> */}
+            {addchildDialog.type === MATERIAL_TYPE.package && (
+              <MenuItem
+                id={'add-existing-child-package-menu-item'}
+                onClick={() => {
+                  setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.package, parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, type: null, top: null, bottom: null });
+                }}
+              >
+                Add Existing Packages
+              </MenuItem>
+            )}
+            {permissions?.serviceMaster?.isRead && addchildDialog.type === MATERIAL_TYPE.package && (
+              <MenuItem
+                id={'add-existing-child-service-menu-item'}
+                onClick={() => {
+                  setAddExistingProductDialog({ open: true, type: MATERIAL_TYPE.service, parentId: addchildDialog.parentId });
+                  setAddchildDialog({ open: false, parentId: null, type: null, top: null, bottom: null });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>
+            )}
           </MenuList>
         </Popover>
       )}

@@ -14,7 +14,16 @@ import axiosInstance from '../../axios/axiosInstance';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import routes from '../../components/Helpers/Routes';
 import { extractFields, handleAutoCalculation } from '../../constants/formulaUtility';
-import { QUOTE_PROCESS_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierContact } from '../../constants/helpers';
+import {
+  QUOTE_PROCESS_STATUS,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  priceTemplate,
+  productCategory,
+  productTemplate,
+  sidebarResource,
+  supplierContact
+} from '../../constants/helpers';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { AddField } from '../FormBuilder/AddField';
@@ -87,8 +96,6 @@ const ProductBuilder = (props) => {
   const [supplierData, setSupplierData] = useState(null);
   const [inlineBulkEdit, setInlineBulkEdit] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [fields, setFields] = useState([]);
-  const [customImportDialog, setCustomImportDialog] = useState(false);
   const { generateColumns } = useColumns();
 
   const {
@@ -180,7 +187,6 @@ const ProductBuilder = (props) => {
         if (stage && stage === 'product') {
           fields = fields.filter((t) => t.leval === 'product' || t.leval === 'product-custom' || t.leval === 'product-template');
         }
-        setFields(JSON.parse(JSON.stringify(fields)));
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns = sortBy(columns, function (item: any) {
           return levalOrderBy.indexOf(item.leval);
@@ -547,6 +553,18 @@ const ProductBuilder = (props) => {
       });
   };
 
+  const isDisabledInlineEdit = () => {
+    if (selectedRecords?.length === 0) {
+      return true;
+    }
+    const { productCategoryId: _productCategoryId, productTemplateId: _productTemplateId, priceTemplateId: _priceTemplateId } = selectedRecords[0];
+
+    return !selectedRecords?.every(
+      ({ productCategoryId, productTemplateId, priceTemplateId }) =>
+        productCategoryId === _productCategoryId && productTemplateId === _productTemplateId && priceTemplateId === _priceTemplateId
+    );
+  };
+
   const actionButtonMenuItems = () => {
     return (
       <>
@@ -555,8 +573,9 @@ const ProductBuilder = (props) => {
             onClick={() => {
               setInlineBulkEdit(true);
             }}
+            disabled={isDisabledInlineEdit()}
           >
-            {isMobile && !isTablet ? '' : 'Bulk Edit New'}
+            {isMobile && !isTablet ? '' : 'Inline Edit'}
           </MenuItem>
         )}
         {stage === 'cost' && permissions?.isUpdate && (
@@ -608,20 +627,12 @@ const ProductBuilder = (props) => {
                 fetchProduct();
               }}
               small={true}
-            />
-          )}
-          {permissions?.isUpdate && (
-            <Button
-              size="small"
-              variant="outlined"
-              component="span"
-              startIcon={<AiOutlineImport />}
-              onClick={() => {
-                setCustomImportDialog(true);
+              isCustomImport={true}
+              onSuccessCustomImport={() => {
+                fetchProduct();
               }}
-            >
-              Custom Import
-            </Button>
+              currency={currency}
+            />
           )}
 
           {isPriceBuilder && fromQuote && permissions?.isUpdate && user?.role?.selectedEntity?.policy?.isQuoteAskSupplierPrice && (
@@ -697,7 +708,6 @@ const ProductBuilder = (props) => {
             renderedFrom={renderedFrom}
             refreshGrid={fetchProduct}
             onSaveEdit={onCellValueChanged}
-            showOnlyShowFilteredRecordSwitch={true}
             isClientSideGrid={true}
             hideAction={!Editable}
             hideSelection={!Editable}
@@ -705,6 +715,7 @@ const ProductBuilder = (props) => {
               return (row[`totalSalesPrice_${currency?.toLowerCase()}`] || 0) === 0 || (row[`qty`] || 0) === 0 ? 'error' : '';
             }}
             resource={sidebarResource.product}
+            hideExportTable={true}
           />
         ) : (
           <Box p={2} height={500}>
@@ -762,13 +773,23 @@ const ProductBuilder = (props) => {
             setInlineBulkEdit(false);
           }}
           data={selectedRecords}
-          fields={fields}
           extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
           handleSave={(products) => {
             handleSaveProductInlineBulk(products);
           }}
           isSubmitting={isSubmitting}
           referenceId={productBuilderId}
+          restData={dataRows
+            ?.filter((d) => !selectedRecords?.map((r) => r?._id)?.includes(d?._id))
+            ?.map((_d) => {
+              const { productCategoryId, productTemplateId, priceTemplateId, ...rest } = _d;
+              return {
+                ...rest,
+                productCategory: productCategoryId,
+                productTemplate: productTemplateId,
+                priceTemplate: priceTemplateId
+              };
+            })}
         />
       )}
       {openSupplierPriceDialog && (
@@ -848,18 +869,6 @@ const ProductBuilder = (props) => {
           supplierContactData={supplierContactData}
           productBuilderId={productBuilderId}
           productDataList={productData?.product?.filter((data) => selectedRecords.some((rec) => rec._id === data._id))}
-        />
-      )}
-      {customImportDialog && (
-        <CustomImport
-          handleClose={() => {
-            setCustomImportDialog(false);
-          }}
-          onSuccess={() => {
-            setCustomImportDialog(false);
-            fetchProduct();
-          }}
-          refrenceId={productBuilderId}
         />
       )}
     </Box>

@@ -1,4 +1,4 @@
-import { Box, } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
 import Dialog from '@material-ui/core/Dialog';
 import TextField from '@material-ui/core/TextField';
@@ -21,7 +21,7 @@ const ignoreField = ['qty', 'priceTemplate'];
 const renderedFrom = 'productPage';
 const AddExistingProduct = (props) => {
   const toastConfig = useContext(CustomToastContext);
-  const { handleClose, addProductInBuilder } = props;
+  const { handleClose, addProductInBuilder, referenceData = null } = props;
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
@@ -34,6 +34,13 @@ const AddExistingProduct = (props) => {
   const [productTemplate, setProductTemplate] = useState(null);
   const [isProductTemplate, setIsProductTemplate] = useState(true);
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    if (referenceData) {
+      setProductCategory(referenceData?.productCategory);
+      setProductTemplate(referenceData?.productTemplate);
+    }
+  }, [referenceData]);
 
   useEffect(() => {
     axiosInstance()
@@ -76,7 +83,11 @@ const AddExistingProduct = (props) => {
         if (data.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
           setIsProductTemplate(false);
         }
-        const newColumns = generateColumns(routes.product.title, data?.filter(d => !ignoreField?.includes(d?.fieldData?.fieldName)), routes.product.path);
+        const newColumns = generateColumns(
+          routes.product.title,
+          data?.filter((d) => !ignoreField?.includes(d?.fieldData?.fieldName)),
+          routes.product.path
+        );
         newColumns?.forEach((ele) => {
           ele.leval = 'product';
         });
@@ -90,13 +101,13 @@ const AddExistingProduct = (props) => {
     if (showFilteredRecordsOnly) {
       deepFilter = `${deepFilter}&getById=${selectedRecords?.map((m) => m._id)}`;
     }
-    
+
     const { deepFilters } = gridFilterParser(filters);
-    
+
     if (deepFilters?.length) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
     }
-    
+
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
@@ -137,17 +148,17 @@ const AddExistingProduct = (props) => {
           return res;
         });
 
-        const fields: any = []
+        const fields: any = [];
         data.productTemplate?.forEach((ele) => {
           ele.fields.forEach((field) => {
-            fields.push(field)
-          })
+            fields.push(field);
+          });
         });
         const newColumns = generateColumns(renderedFrom, fields, `${routes.productDetail.path}`);
         newColumns?.forEach((ele) => {
           ele.leval = 'product-template';
         });
-        let columns = [...productColoums, ...newColumns]
+        let columns = [...productColoums, ...newColumns];
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
         columns.push({
           accessor: 'inventoryCount',
@@ -158,7 +169,8 @@ const AddExistingProduct = (props) => {
         });
         columns.push({
           accessor: 'warehouses',
-          Header: 'Plants', show: true,
+          Header: 'Plants',
+          show: true,
           Cell: ({ row }) => <p className="text-truncate">{row.original?.warehouses}</p>,
           leval: 'price-builder-custom'
         });
@@ -230,16 +242,17 @@ const AddExistingProduct = (props) => {
       <CustomDialogHeader title={'Add Existing Product'} onClose={handleClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
-          <h6 className="text-gray-400 mt-0 mb-0 text-[0.8rem]" style={{ borderBottom: 'none' }}>
+          <h6 className="mb-0 mt-0 text-[0.8rem] text-gray-400" style={{ borderBottom: 'none' }}>
             * Select checkboxes and then click Add button to add the products
           </h6>
-          <div className="grid grid-cols-1 md:grid-cols-2 my-3 justify-between gap-2">
-            <div className="flex items-center flex-wrap gap-2 ">
+          <div className="my-3 grid grid-cols-1 justify-between gap-2 md:grid-cols-2">
+            <div className="flex flex-wrap items-center gap-2 ">
               <Autocomplete
                 style={{ width: '250px' }}
                 options={productCategoryList}
                 getOptionLabel={(option: any) => (option ? option.name : '')}
                 getOptionSelected={(option: any, val) => option._id === val}
+                disabled={referenceData && referenceData?.productCategory ? true : false}
                 value={
                   productCategoryList.filter((data) => data._id === productCategory).length
                     ? productCategoryList.filter((data) => data._id === productCategory)[0]
@@ -258,6 +271,7 @@ const AddExistingProduct = (props) => {
                   options={productTemplateList}
                   getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                   getOptionSelected={(option: any, val) => option.optionValue === val}
+                  disabled={referenceData && referenceData?.productTemplate ? true : false}
                   value={
                     productTemplateList.filter((data) => data.optionValue === productTemplate).length
                       ? productTemplateList.filter((data) => data.optionValue === productTemplate)[0]
@@ -272,18 +286,10 @@ const AddExistingProduct = (props) => {
                 />
               )}
             </div>
-            <div className="flex flex-wrap justify-end items-start gap-2 ml-auto ">
+            <div className="ml-auto flex flex-wrap items-start justify-end gap-2 ">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              <Button
-                size="small"
-                color="primary"
-                onClick={handleAdd}
-                variant="contained"
-                disabled={selectedRecords.length > 0 ? false : true}
-              >
-                {selectedRecords.length
-                  ? '(' + selectedRecords.length + ')  '
-                  : ''}
+              <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}>
+                {selectedRecords.length ? '(' + selectedRecords.length + ')  ' : ''}
                 Add
               </Button>
             </div>
@@ -293,7 +299,7 @@ const AddExistingProduct = (props) => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
+            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -308,12 +314,9 @@ const AddExistingProduct = (props) => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-
       </div>
     </Dialog>
   );
 };
 
 export default AddExistingProduct;
-
-

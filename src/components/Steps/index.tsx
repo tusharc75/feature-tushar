@@ -113,6 +113,7 @@ const Steps = ({
               disabled={isNextButtonDisabled}
               endIcon={<AiOutlineRight />}
               className="MobileStep-next-back-button ml-1"
+              id="step-next-button"
               onClick={goNext}
             >
               {'Next'}
@@ -123,6 +124,7 @@ const Steps = ({
               size="small"
               variant="text"
               color={'primary'}
+              id="step-previous-button"
               startIcon={<AiOutlineLeft />}
               disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
               className={`MobileStep-next-back-button mr-1 `}
@@ -140,6 +142,7 @@ const Steps = ({
                 <HtmlTooltip title={prevStepToolTip || ''}>
                   <span>
                     <IconButton
+                      id="step-previous-button"
                       style={{ opacity: currentStep === 0 && '0' }}
                       disabled={currentStep === steps.length || currentStep === 0 || isStepEnded || !isPrevStep}
                       onClick={goPrev}
@@ -212,6 +215,7 @@ const Steps = ({
                 <HtmlTooltip title={nextStepToolTip || ''}>
                   <span>
                     <IconButton
+                      id="step-next-button"
                       style={{ opacity: showExtraStep ? currentStep - 1 === steps.length && '0' : currentStep === steps.length - 1 && '0' }}
                       disabled={isNextButtonDisabled}
                       onClick={goNext}

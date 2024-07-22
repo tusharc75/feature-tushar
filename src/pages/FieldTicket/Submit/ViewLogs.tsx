@@ -88,7 +88,7 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
         }
       }
     ];
-    fields = fields?.filter((f) => f?.isRead);
+    fields = fields?.filter((f) => f?.isRead && !['files']?.includes(f?.fieldName));
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const actionColumn = {
       accessor: 'action',
