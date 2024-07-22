@@ -144,6 +144,11 @@ const MapView = (props: MapViewProps) => {
     }
   }, []);
 
+  const handleMarkerClick = (asset: locationType) => {
+    setCenter({ lat: asset.location.latitude, lng: asset.location.longitude });
+    fetchLocationData(asset._id, asset);
+  };
+
   if (!window.google || typeof window.google !== 'object') return <div>Loading...</div>;
 
   if (!data || !Array.isArray(data) || data.length === 0) return <div>No data</div>;
@@ -181,10 +186,7 @@ const MapView = (props: MapViewProps) => {
                           color: 'black',
                           fontSize: '14px'
                         }}
-                        onClick={() => {
-                          // setCenter(new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude));
-                          fetchLocationData(asset._id, asset);
-                        }}
+                        onClick={() => handleMarkerClick(asset)}
                         position={new google.maps.LatLng(asset?.location?.latitude, asset?.location?.longitude)}
                         clusterer={clusterer}
                       />
