@@ -189,7 +189,7 @@ const SubcontractAssemblyDetail = () => {
                 {permissions?.subcontractAssembly?.isUpdate &&
                   allowedToEdit &&
                   [SUBCONTRACT_ASSEMBLY_STATUS.inProgress].includes(subcontractAssemblyData?.status) &&
-                  subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
+                  subcontractAssemblyData?.material?.length>0 && subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
                     <ButtonWithPulse
                       variant={'outlined'}
                       color="default"
