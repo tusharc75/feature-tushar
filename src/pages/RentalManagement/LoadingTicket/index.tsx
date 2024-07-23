@@ -7,7 +7,6 @@ import Edit from '@material-ui/icons/Edit';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
-import VisibilityIcon from '@material-ui/icons/Visibility';
 import { groupBy, isArray, isEmpty, isEqual, isObject, map, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
@@ -1275,7 +1274,8 @@ const LoadingTicket = ({
               setAddSerializedAssetDialog,
               setShowConformationRevertTicket,
               setShowConformationCancleTicket,
-              hideDeliveryTicketDelivered
+              hideDeliveryTicketDelivered,
+              permissions
             }}
           />
         }
@@ -1605,7 +1605,8 @@ const ActionButtonMenuItems = ({
   setAddSerializedAssetDialog,
   setShowConformationRevertTicket,
   setShowConformationCancleTicket,
-  hideDeliveryTicketDelivered
+  hideDeliveryTicketDelivered,
+  permissions
 }) => {
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -1626,43 +1627,49 @@ const ActionButtonMenuItems = ({
 
   return (
     <>
-      <MenuItem
-        onClick={() => {
-          if (!validateAction(rentalManagementActions.createLoadingTicket)) {
-            if (checkMTRValidation && selectedRecords?.some((e) => e.type === 'Asset' && e.mtrAttached !== true)) {
-              setMtrConfirmBox(true);
-            } else {
-              handleDeliveryTicketDialog();
-            }
-          }
-        }}
-        id={'create-loding-ticket-menu-item'}
-        disabled={selectedRecords.length === 0}
-      >
-        Create Loading Ticket
-      </MenuItem>
-      {user?.user?.brandPolicy?.rentalOnFieldStep || hideDeliveryTicketDelivered ? null : (
+      <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? `You don't have permission to perform this action ` : ''}>
         <MenuItem
           onClick={() => {
-            if (!validateAction(rentalManagementActions.deliveredToCustomer)) {
-              if (user?.user?.brandPolicy?.assetDeliveredStatus) {
-                setOpenDateDialog({
-                  open: true,
-                  type: 'changeStatus',
-                  status: ASSET_STATUS.delivered,
-                  prevStatus: ASSET_STATUS.delivered,
-                  assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
-                  loading: false
-                });
+            if (!validateAction(rentalManagementActions.createLoadingTicket)) {
+              if (checkMTRValidation && selectedRecords?.some((e) => e.type === 'Asset' && e.mtrAttached !== true)) {
+                setMtrConfirmBox(true);
               } else {
-                handelProcessTickets();
+                handleDeliveryTicketDialog();
               }
             }
           }}
-          id={'delivered-to-customer-menu-item'}
+          id={'create-loding-ticket-menu-item'}
+          disabled={!permissions?.deliveryTicket?.isCreate || selectedRecords.length === 0}
         >
-          Delivered to Customer
+          Create Loading Ticket
         </MenuItem>
+      </HtmlTooltip>
+
+      {user?.user?.brandPolicy?.rentalOnFieldStep || hideDeliveryTicketDelivered ? null : (
+        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? `You don't have permission to perform this action ` : ''}>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(rentalManagementActions.deliveredToCustomer)) {
+                if (user?.user?.brandPolicy?.assetDeliveredStatus) {
+                  setOpenDateDialog({
+                    open: true,
+                    type: 'changeStatus',
+                    status: ASSET_STATUS.delivered,
+                    prevStatus: ASSET_STATUS.delivered,
+                    assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                    loading: false
+                  });
+                } else {
+                  handelProcessTickets();
+                }
+              }
+            }}
+            id={'delivered-to-customer-menu-item'}
+            disabled={!permissions?.deliveryTicket?.isUpdate}
+          >
+            Delivered to Customer
+          </MenuItem>
+        </HtmlTooltip>
       )}
       {user?.user?.brandPolicy?.assetDeliveredStatus &&
         (user?.user?.brandPolicy?.rentalOnFieldStep ? null : (
@@ -1805,27 +1812,33 @@ const ActionButtonMenuItems = ({
         </MenuItem>
       )}
       {!hideDeliveryTicketDelivered && (
+        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? `You don't have permission to perform this action ` : ''}>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
+                setShowConformationRevertTicket(true);
+              }
+            }}
+            id={'cancel-specific-line-item-menu-item'}
+            disabled={!permissions?.deliveryTicket?.isUpdate}
+          >
+            Cancel Specific Line Items
+          </MenuItem>
+        </HtmlTooltip>
+      )}
+      <HtmlTooltip title={!permissions?.deliveryTicket?.isDelete ? `You don't have permission to perform this action ` : ''}>
         <MenuItem
           onClick={() => {
-            if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
-              setShowConformationRevertTicket(true);
+            if (!validateAction(rentalManagementActions.cancelLoadingTicket)) {
+              setShowConformationCancleTicket({ open: true });
             }
           }}
-          id={'cancel-specific-line-item-menu-item'}
+          id={'cancel-loading-ticket-menu-item'}
+          disabled={!permissions?.deliveryTicket?.isDelete}
         >
-          Cancel Specific Line Items
+          Cancel Loading Ticket(s)
         </MenuItem>
-      )}
-      <MenuItem
-        onClick={() => {
-          if (!validateAction(rentalManagementActions.cancelLoadingTicket)) {
-            setShowConformationCancleTicket({ open: true });
-          }
-        }}
-        id={'cancel-loading-ticket-menu-item'}
-      >
-        Cancel Loading Ticket(s)
-      </MenuItem>
+      </HtmlTooltip>
     </>
   );
 };
