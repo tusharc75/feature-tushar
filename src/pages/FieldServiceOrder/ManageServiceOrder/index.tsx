@@ -44,13 +44,9 @@ const ManageServiceOrderDialog = ({
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [formsData, setFormsData] = useState([]);
-  const {
-    state: { user, permissions, selectedEntity }
-  }: any = useData();
+  const { state: { user, permissions, selectedEntity } }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
   const [serviceDetails, setServiceDetails] = useState(null);
-
   const [cloneHeading, setCloneHeading] = useState('');
 
   useEffect(() => {
@@ -328,6 +324,7 @@ const ManageServiceOrderDialog = ({
                     Cancel
                   </Button>
                   <CustomButton
+                    id="dialog-save-button"
                     loading={loading}
                     variant="contained"
                     color="primary"
