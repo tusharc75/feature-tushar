@@ -10,9 +10,10 @@ import { Send } from '@material-ui/icons';
 type SendMessageProps = {
   channelId: string;
   socket: Socket;
+  messageId?: string | null;
 };
 
-const SendMessage = ({ channelId, socket }: SendMessageProps) => {
+const SendMessage = ({ channelId, socket, messageId= null }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const [isLoading, setIsLoading] = useState(false);
@@ -22,9 +23,9 @@ const SendMessage = ({ channelId, socket }: SendMessageProps) => {
   const postMessage = async () => {
     setIsLoading(true);
     try {
-      await axiosInstance().post('/work-space/channel/message', { channelId, message });
+      await axiosInstance().post('/work-space/channel/message', { channelId, message, ...(messageId && { parentId: messageId }) });
       setMessage('');
-      socket.emit('newMessagePosted', { channelId });
+      socket.emit('newMessagePosted', { channelId, messageId });
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {

@@ -1,65 +1,97 @@
-import { List, ListItem, ListItemText, Typography } from '@material-ui/core';
+import { IconButton } from '@material-ui/core';
+import { Delete, Reply } from '@material-ui/icons';
 import { groupBy } from 'lodash';
 import moment from 'moment';
-import { useCallback, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Socket } from 'socket.io-client';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { dateFormat, dateTimeFormat } from 'src/constants/helpers';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { dateFormat } from 'src/constants/helpers';
 import { Message } from 'src/pages/WorkSpace/types';
+import Thread from './Thread';
 
 type MessagesProps = {
   channelId: string;
   socket: Socket;
+  setIsEditorActive: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const Messages = ({ channelId, socket }: MessagesProps) => {
+export const groupByDate = (messages: Message[]) => {
+  return groupBy(messages, (message) => moment(message.date).format(dateFormat));
+};
+
+const Messages = ({ channelId, socket, setIsEditorActive }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
+  const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
+  const [threadDialog, setThreadDialog] = useState({ open: false, message: null });
+  const { state: { user: { user } } } = useData();
 
-  const groupByDate = (messages: Message[]) => {
-    return groupBy(messages, (message) => moment(message.date).format(dateFormat));
-  };
-
-  const fetchMessages = useCallback(
-    async (after: string = null) => {
-      try {
-        let api = `/work-space/channel/${channelId}/message`;
-        if (after) {
-          api += `?after=${after}`;
-        }
-        const { data } = await axiosInstance().get(api);
-        if (after) {
-          setMessages((prevMessages) => groupByDate([...Object.values(prevMessages), ...(data.data || [])]));
-        } else {
-          setMessages(groupByDate(data?.data || []));
-        }
-        if (data?.data?.length > 0) setLastMessageId(data.data[data.data.length - 1]?._id);
-      } catch (error) {
-        toastConfig.setToastConfig(error);
+  const fetchMessages = async (after: string = null) => {
+    try {
+      let api = `/work-space/channel/message/${channelId}`;
+      if (after) {
+        api += `?after=${after}`;
       }
-    },
-    [channelId, toastConfig]
-  );
+      const { data } = await axiosInstance().get(api);
+
+      setMessages(prevMessages => {
+        let newMessages = data?.data || [];
+        if (after) {
+          return groupByDate([...Object.values(prevMessages).flat().slice(0, -1), ...newMessages]);
+        } else {
+          return groupByDate(newMessages);
+        }
+      });
+      setThreadDialog((prevDialog) => {
+        if (prevDialog.open && (prevDialog.message?._id === after || !after)) {
+          const updatedMessage = data?.data?.find((message) => message._id === prevDialog.message?._id);
+          return { open: true, message: updatedMessage || prevDialog.message };
+        }
+        return prevDialog;
+      });
+      if (data?.data?.length > 0) setLastMessageId(data.data[data.data.length - 1]?._id);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   useEffect(() => {
     if (socket) {
       socket.emit('joinChannel', channelId);
-      socket.on('fetchNewMessage', () => {
-        fetchMessages(lastMessageId);
+      socket.on('fetchNewMessage', (messageId) => {
+        if (messageId) {
+          fetchMessages(messageId)
+        } else {
+          fetchMessages(lastMessageId);
+        }
       });
+      socket.on('fetchMessages', () => { fetchMessages() });
       return () => {
+        socket.off('fetchNewMessage');
+        socket.off('fetchMessages');
         socket.emit('leaveChannel', channelId);
-        socket.off('receiveMessage');
       };
     }
-  }, [socket]);
+  }, [socket, lastMessageId]);
 
   useEffect(() => {
     fetchMessages();
-  }, [fetchMessages]);
+  }, [channelId]);
+
+  const deleteMessage = async (_id) => {
+    try {
+      await axiosInstance().delete(`/work-space/channel/message`, { data: { _id } });
+      socket.emit('messageDeleted', { channelId });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   return (
     <>
@@ -83,6 +115,20 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
                       <span className="text-[12px] font-normal">{moment(message.date).format('hh:mm A')}</span>
                     </div>
                     <p className="message" dangerouslySetInnerHTML={{ __html: message.message }}></p>
+                    {message?.user?.optionValue === user?._id && (
+                      <>
+                        <HtmlTooltip title={'Delete'}>
+                          <IconButton onClick={() => setShowConfirmBox({ open: true, _id: message?._id })} size={'small'}>
+                            <Delete color="error" />
+                          </IconButton>
+                        </HtmlTooltip>
+                      </>
+                    )}
+                    <HtmlTooltip title={'Reply'} >
+                      <IconButton size={'small'} onClick={() => setThreadDialog({ open: true, message: message })}>
+                        <Reply />
+                      </IconButton>
+                    </HtmlTooltip>
                   </li>
                 ))}
               </ul>
@@ -93,6 +139,29 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
         <div className="p-3">
           <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
         </div>
+      )}
+      {showConfirmBox.open && (
+        <ConfirmationDialog
+          open={showConfirmBox.open}
+          message={`Are you sure you want to delete Message?`}
+          onClose={() => {
+            setShowConfirmBox({ open: false, _id: null });
+          }}
+          onOk={() => {
+            deleteMessage(showConfirmBox._id);
+            setShowConfirmBox({ open: false, _id: null });
+          }}
+        />
+      )}
+      {threadDialog.open && (
+        <Thread
+          message={threadDialog.message}
+          onClose={() => setThreadDialog({ open: false, message: null })}
+          socket={socket}
+          channelId={channelId}
+          deleteMessage={deleteMessage}
+          setIsEditorActive={setIsEditorActive}
+        />
       )}
     </>
   );

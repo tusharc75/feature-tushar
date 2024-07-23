@@ -44,6 +44,7 @@ export type Message = {
   parentId?: null | string;
   date: Date;
   user: MessageUser;
+  replies: Message[];
 };
 
 export type MessageUser = {
