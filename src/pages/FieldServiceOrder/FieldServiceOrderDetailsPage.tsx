@@ -39,8 +39,11 @@ import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
 import ServiceOrderViews from './RoadMapViews';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 
 const ServiceOrderDetailsPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
 
@@ -120,6 +123,11 @@ const ServiceOrderDetailsPage = () => {
       getServiceOrderFields();
       fetchServiceOrderData();
       fetchPolicy();
+    }
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(generateAddFieldTicket(true).steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
     }
   }, [id]);
 

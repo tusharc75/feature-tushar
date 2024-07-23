@@ -25,6 +25,8 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from './Services/OfflineHelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createFieldServiceOrderFlow } from './walkmeSteps';
 
 let serviceOrderTimeout;
 
@@ -39,6 +41,8 @@ const ServiceOrder = () => {
       value: 2
     }
   ];
+
+  const { setWalkmeData } = useSetWalkmeData();
 
   const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
 
@@ -73,10 +77,11 @@ const ServiceOrder = () => {
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
       data = response?.data?.data;
+      setWalkmeData([createFieldServiceOrderFlow(data)]);
       try {
         insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);
       } catch (e) {
-        console.error(`Field Service Order : ${e.message}`);
+        toastConfig.setToastConfig(e);
       }
     }
     const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path, true);
