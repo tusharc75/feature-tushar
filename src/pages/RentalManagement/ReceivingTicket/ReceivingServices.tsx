@@ -67,7 +67,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         Cell: ({ row }) => (
           <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.index}</h5>
-            {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
+            {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length && allowedToEdit && user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement ? (
               <HtmlTooltip title={'View Service Logs'}>
                 <span>
                   <IconButton
@@ -276,7 +276,6 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
             fetchRecords()
           }}
           renderedFrom={renderedFrom}
-          allowedToEdit={allowedToEdit}
         />
       )}
       {serviceConfirmationDialog.open && (

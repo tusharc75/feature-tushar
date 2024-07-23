@@ -17,7 +17,7 @@ import { Edit } from '@material-ui/icons';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 
-const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess, allowedToEdit }) => {
+const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess }) => {
 
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
@@ -40,7 +40,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       const serviceLogData = response?.data?.data;
 
       serviceLogData?.forEach((log)=>{
-        if((maxInvoiceDate && log.endDate<=maxInvoiceDate) || !allowedToEdit){
+        if(maxInvoiceDate && log.endDate<=maxInvoiceDate){
           log.canEdit = false;
         }else{
           log.canEdit = true;
