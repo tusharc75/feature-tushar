@@ -15,7 +15,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Edit } from '@material-ui/icons';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
-import { useData } from 'src/StateProvider/Provider';
 
 const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess }) => {
 
