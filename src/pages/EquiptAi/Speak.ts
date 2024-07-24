@@ -27,46 +27,46 @@ export class Speak {
     this.isPlaying = false;
     this.isEnded = false;
     this.voice = voice;
-    this.voices = this.getEnglishVoices();
-    this.utterance.voice = this.getPreferredVoice();
+    // this.voices = this.getEnglishVoices();
+    // this.utterance.voice = this.getPreferredVoice();
     this.utterance.volume = 1;
     this.setSpeakerState = setSpeakerState;
   }
 
-  getEnglishVoices() {
-    if (this.voices?.length > 0) return this.voices;
-    const voices = window.speechSynthesis.getVoices();
-    const englishVoices = voices.filter((voice) => voice.lang.startsWith('en'));
-    if (englishVoices.length > 0) {
-      this.voices = englishVoices;
-      return englishVoices;
-    }
-    this.voices = voices;
-    return voices;
-  }
+  // getEnglishVoices() {
+  //   if (this.voices?.length > 0) return this.voices;
+  //   const voices = window.speechSynthesis.getVoices();
+  //   const englishVoices = voices.filter((voice) => voice.lang.startsWith('en'));
+  //   if (englishVoices.length > 0) {
+  //     this.voices = englishVoices;
+  //     return englishVoices;
+  //   }
+  //   this.voices = voices;
+  //   return voices;
+  // }
 
-  getPreferredVoice() {
-    const voiceName = 'Microsoft AndrewMultilingual Online (Natural) - English (United States)';
-    const isAvailableForWidows = this.voices.find((voice) => voice.name === voiceName);
-    if (isAvailableForWidows) return isAvailableForWidows;
-    const isNaturalAvailable = this.voices.find((voice) => voice.name.toLowerCase().includes('natural'));
-    if (isNaturalAvailable) return isNaturalAvailable;
-    return this.voices[this.voice] || this.voices[0];
-  }
+  // getPreferredVoice() {
+  //   const voiceName = 'Microsoft AndrewMultilingual Online (Natural) - English (United States)';
+  //   const isAvailableForWidows = this.voices.find((voice) => voice.name === voiceName);
+  //   if (isAvailableForWidows) return isAvailableForWidows;
+  //   const isNaturalAvailable = this.voices.find((voice) => voice.name.toLowerCase().includes('natural'));
+  //   if (isNaturalAvailable) return isNaturalAvailable;
+  //   return this.voices[this.voice] || this.voices[0];
+  // }
 
   play(text: string) {
     this.isEnded = false;
     this.setSpeakerState((prev) => ({ ...prev, isFinished: false, isLoading: true, isPlaying: false, isPaused: false }));
     if (this.isPaused) this.isPaused = false;
     if (this.synth.speaking) this.synth.cancel();
-    this.getEnglishVoices();
+    //this.getEnglishVoices();
     this.text = text;
     this.utterance = new SpeechSynthesisUtterance(text);
     this.utterance.lang = 'en-US';
     this.utterance.rate = 1;
-    this.utterance.pitch = 1.2;
-    this.utterance.rate = 1.2;
-    this.utterance.voice = this.getPreferredVoice();
+    this.utterance.pitch = 1;
+    this.utterance.rate = 1;
+    //this.utterance.voice = this.getPreferredVoice();
     this.synth.speak(this.utterance);
     this.utterance.addEventListener('start', () => {
       this.isPlaying = true;
