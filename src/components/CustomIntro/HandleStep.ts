@@ -185,14 +185,6 @@ export class HandleSteps {
     if (this.tempIndex > -1) return;
     for (const observer of invalidObservers) {
       if (observer.actualIndex < this.currentIndex) {
-        console.log({
-          this: this,
-          actualIndex: observer.actualIndex,
-          currentIndex: this.currentIndex,
-          currentStepData: this.currentStepData,
-          tempIndex: this.currentStepData.isHiddenStep ? this.currentIndex - 1 : this.currentIndex,
-          invalidObservers
-        });
         this.tempIndex = this.currentStepData.isHiddenStep ? this.currentIndex - 1 : this.currentIndex;
         this.currentIndex = observer.stepIndex;
         this.next(false);
