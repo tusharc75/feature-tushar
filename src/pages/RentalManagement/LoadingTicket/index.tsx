@@ -518,7 +518,7 @@ const LoadingTicket = ({
         if (walkmeInstance && walkmeInstance.type === 'flow' && !stepGlobalDataAdded.deliverToCustomer) {
           stepGlobalDataAdded.deliverToCustomer = true;
           const steps = generateDeliveredToCustomer(i).steps;
-          steps.push({ ...nextButtonStep, waitForStepInsertion: false });
+          steps.push({ ...nextButtonStep, waitForStepInsertion: true });
           walkmeInstance.instance.push(steps);
           walkmeInstance.handleNext();
         }
