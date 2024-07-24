@@ -157,7 +157,7 @@ export class HandleSteps {
         this.attachedOvservers.push(observer);
       } else {
         // Track Text input via observer
-        let validator = (value: string) => value.length > 0;
+        let validator = (value: string) => value.length > 0 && value !== '0';
         if (typeof this.currentStepData.nextOnValueChange === 'function') {
           validator = this.currentStepData.nextOnValueChange;
         }
