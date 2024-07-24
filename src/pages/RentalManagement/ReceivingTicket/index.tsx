@@ -88,7 +88,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-let globalStepDataAdded = false;
+const globalStepDataAdded = { createReceivingTicket: false, receivedItems: false };
 
 const ReceivingTicket = ({
   currentStep,
@@ -193,22 +193,30 @@ const ReceivingTicket = ({
     const canAddCreateReceivingTicketStep = validateAction(rentalManagementActions.createReceivingTicket, data, true);
     if (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep && canAddCreateReceivingTicketStep) {
       const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
+      let data: WalkmeData;
       if (statusPolicy && data[0].type === 'Asset') {
-        stepData.push(generateCreateReceivingTicket(renderedFrom));
+        data = generateCreateReceivingTicket(renderedFrom);
       } else {
-        stepData.push(generateCreateReceivingTicket(renderedFrom, false));
+        data = generateCreateReceivingTicket(renderedFrom, false);
+      }
+      stepData.push(data);
+      if (walkmeInstance && walkmeInstance.type === 'flow' && !globalStepDataAdded.createReceivingTicket) {
+        globalStepDataAdded.createReceivingTicket = true;
+        walkmeInstance.instance.push([...data.steps, { ...data.steps[data.steps.length - 1], waitForStepInsertion: true }]);
+        walkmeInstance.handleNext();
       }
     }
 
     if (currentStep === RENTAL_STEPS.receiving && !hideDeliveryTicketDelivered && permissions?.deliveryTicket?.isUpdate) {
       const isValid = validateAction(rentalManagementActions.receiveItems, data, true);
       if (isValid) stepData.push(generateReceiveItem(renderedFrom));
+      if (walkmeInstance && walkmeInstance.type === 'flow' && !globalStepDataAdded.receivedItems) {
+        globalStepDataAdded.receivedItems = true;
+        walkmeInstance.instance.push([...generateReceiveItem(renderedFrom).steps, { ...nextButtonStep }]);
+        walkmeInstance.handleNext();
+      }
     }
-    if (walkmeInstance && walkmeInstance.type === 'flow' && !globalStepDataAdded) {
-      globalStepDataAdded = true;
-      walkmeInstance.instance.push([...stepData.map((d) => d.steps).flat(), { ...nextButtonStep, waitForStepInsertion: true }]);
-      walkmeInstance.handleNext();
-    }
+
     setWalkmeData(stepData);
   };
 

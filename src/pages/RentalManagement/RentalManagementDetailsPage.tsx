@@ -588,7 +588,6 @@ const RentalManagementDetailsPage = () => {
               isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
             />
-            {console.log(rentalSteps[currentStep]?.name)}
             <ContentFullScreen title={rentalSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {rentalSteps[currentStep]?.name === 'Add Products' && rentalManagementData && (
                 <Productpackage
