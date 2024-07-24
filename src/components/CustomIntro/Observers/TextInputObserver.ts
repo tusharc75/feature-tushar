@@ -27,7 +27,7 @@ export class TextInputObserver extends Observer {
       if (!this.debouncedTracker) {
         const [debouncedTracker, teardown] = debounce(() => {
           this.handleSteps.next();
-          this.disconnect();
+          this.success = true;
         }, 1500);
         this.debouncedTracker = debouncedTracker;
         this.cancelDebounceTracker = teardown;
@@ -35,6 +35,8 @@ export class TextInputObserver extends Observer {
       }
 
       this.debouncedTracker();
+    } else if (this.target) {
+      this.success = false;
     }
   }
 

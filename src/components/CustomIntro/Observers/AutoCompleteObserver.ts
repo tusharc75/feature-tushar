@@ -6,6 +6,7 @@ export class AutocompleteObserver extends Observer {
   next: () => void;
   observer: MutationObserver;
   valiDator: (value: string) => boolean;
+
   constructor(handleSteps: HandleSteps, element: HTMLElement, valiDator: (value: string) => boolean = (value) => value.length > 0) {
     super(handleSteps, element);
     this.options = {
@@ -23,7 +24,9 @@ export class AutocompleteObserver extends Observer {
     }
     if (!this.attributeTracker['aria-controls'] && this.attributeTracker['value'] && this.valiDator(this.attributeTracker['value'])) {
       this.handleSteps.next();
-      this.disconnect();
+      this.success = true;
+    } else if (this.target) {
+      this.success = false;
     }
   }
 }
