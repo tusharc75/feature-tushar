@@ -21,7 +21,8 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 
-const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords }) => {
+const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
+
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -222,11 +223,11 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         <Grid item xs={12} md={12} sm={12}>
           {columns ? (
             <CustomReactTable
-              height={'300px'}
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
               columns={columns}
               state={state}
               dispatch={dispatch}
-              renderedFrom={`${renderedFrom}_services`}
+              renderedFrom={renderedFrom}
               isClientSideGrid={true}
               hideSelection={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
               hideAction={true}
