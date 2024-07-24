@@ -22,6 +22,8 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageFieldTicket from './ManageFieldTicket';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createFieldTicketFlow } from 'src/pages/FieldTicket/walkmeSteps';
 
 const FieldTicket = () => {
   const types = [
@@ -34,6 +36,8 @@ const FieldTicket = () => {
       value: 2
     }
   ];
+
+  const { setWalkmeData } = useSetWalkmeData();
 
   const renderedFrom = camelCase(routes?.fieldTicket.title);
 
@@ -58,6 +62,7 @@ const FieldTicket = () => {
 
   useEffect(() => {
     fetchGridColumns();
+    setWalkmeData([createFieldTicketFlow()]);
   }, []);
 
   useEffect(() => {

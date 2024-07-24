@@ -31,9 +31,12 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
 import Add from '@material-ui/icons/Add';
 import { FiExternalLink } from 'react-icons/fi';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddExistingService, generateAddManualEntry, generateAddNewService } from 'src/pages/FieldTicket/walkmeSteps';
 
 const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
+  const { setWalkmeData } = useSetWalkmeData();
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -68,6 +71,17 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       fetchMaterial();
     }
   }, [columns]);
+
+  useEffect(() => {
+    let stepData = [];
+    stepData.push(generateAddExistingService(false));
+    stepData.push(generateAddManualEntry(false));
+    stepData.push(generateAddNewService(false));
+    if (dataRows?.length) {
+      // stepData.push(...generateFieldTicketActions(0));
+    }
+    setWalkmeData(stepData);
+  }, [dataRows]);
 
   const fetchFields = async () => {
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
@@ -672,6 +686,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           onClick={() => {
             setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
           }}
+          id={'add-existing-service-menu-item'}
         >
           Add Existing Service
         </MenuItem>
@@ -680,6 +695,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             onClick={() => {
               setMaterialDialog({ open: true, type: 'newService', parentId: null });
             }}
+            id={'add-new-service-menu-item'}
           >
             Add New Service
           </MenuItem>
@@ -689,6 +705,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             onClick={() => {
               setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
+            id={'add-existing-package-menu-item'}
           >
             Add Existing Package
           </MenuItem>
@@ -698,6 +715,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             onClick={() => {
               setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
             }}
+            id={'add-manual-entry-menu-item'}
           >
             Add Manual Entry
           </MenuItem>
