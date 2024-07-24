@@ -19,6 +19,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose, onSuccess, isRedirectToDetailPage = true, referenceData = null }) => {
   const history = useHistory();
@@ -27,12 +28,21 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const ref = useRef(null);
-
+  const walkmeInstance = useGetWalkmeInstance();
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [serviceMasterManage, setServiceMasterManage] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const isStepDataSet = useRef(false);
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
 
   useEffect(() => {
     axiosInstance()
@@ -206,6 +216,7 @@ const ManageServiceMaster = ({ isClone = false, serviceMasterId = null, onClose,
                   Cancel
                 </Button>
                 <CustomButton
+                  id={'dialog-save-button'}
                   loading={loading}
                   variant="contained"
                   color="primary"

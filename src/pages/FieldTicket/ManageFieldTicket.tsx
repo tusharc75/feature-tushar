@@ -61,7 +61,10 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   useEffect(() => {
     if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
       isStepDataSet.current = true;
-      const ignoreField = ['currency', 'owner', 'pdfTemplate', 'fieldServiceOrderNumber'];
+      const ignoreField = ['currency', 'owner', 'pdfTemplate'];
+      if(referenceData) {
+        ignoreField.push('fieldServiceOrderNumber');
+      }
       walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields, ignoreField)]);
       walkmeInstance.handleNext();
     }
