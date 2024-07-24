@@ -34,9 +34,24 @@ export class Speak {
   }
 
   getEnglishVoices() {
-    const voices = window.speechSynthesis.getVoices().filter((voice) => voice.lang === 'en-US');
+    if (this.voices?.length > 0) return this.voices;
+    const voices = window.speechSynthesis.getVoices();
+    const englishVoices = voices.filter((voice) => voice.lang.startsWith('en'));
+    if (englishVoices.length > 0) {
+      this.voices = englishVoices;
+      return englishVoices;
+    }
     this.voices = voices;
     return voices;
+  }
+
+  getPreferredVoice() {
+    const voiceName = 'Microsoft AndrewMultilingual Online (Natural) - English (United States)';
+    const isAvailableForWidows = this.voices.find((voice) => voice.name === voiceName);
+    if (isAvailableForWidows) return isAvailableForWidows;
+    const isNaturalAvailable = this.voices.find((voice) => voice.name.toLowerCase().includes('natural'));
+    if (isNaturalAvailable) return isNaturalAvailable;
+    return this.voices[this.voice] || this.voices[0];
   }
 
   play(text: string) {
@@ -73,14 +88,6 @@ export class Speak {
     this.isEnded = false;
   }
 
-  getPreferredVoice() {
-    const voiceName = 'Microsoft AndrewMultilingual Online (Natural) - English (United States)';
-    const isAvailable = this.voices.find((voice) => voice.name === voiceName);
-    if (isAvailable) {
-      return isAvailable;
-    }
-    return this.voices[this.voice] || this.voices[0];
-  }
   pause() {
     if (!this.isPaused) {
       this.setSpeakerState((prev) => ({ ...prev, isPaused: true, isPlaying: false }));
