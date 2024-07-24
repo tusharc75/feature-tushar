@@ -41,6 +41,7 @@ export class HandleSteps {
   attachedOvservers: Observer[];
   clicked: boolean;
   waiting: boolean;
+  tempIndex: number;
   constructor({
     setUpdateSignal,
     steps,
@@ -68,6 +69,7 @@ export class HandleSteps {
     this.clicked = false;
     this.waiting = false;
     this.message = '';
+    this.tempIndex = -1;
     this.resizeObserver = new ResizeObserver((entries) => {
       window.requestAnimationFrame(() => {
         if (!entries[0]) return;
@@ -78,7 +80,7 @@ export class HandleSteps {
         }
       });
     });
-
+    this.loop();
     this.addEventListeners();
     this.resizeObserver.observe(document?.body);
   }
@@ -87,6 +89,14 @@ export class HandleSteps {
     this.boundMousedown = this.handleNextMouseDown.bind(this);
     window.addEventListener('mousedown', this.boundMousedown);
   }
+
+  private loop() {
+    window.requestAnimationFrame(() => {
+      this.checkPreviousObservers();
+      this.loop();
+    });
+  }
+
   removeListeners() {
     window.removeEventListener('mousedown', this.boundMousedown);
   }
@@ -119,6 +129,8 @@ export class HandleSteps {
   attachObservers() {
     const currStepData = this.currentStepData;
     if (!currStepData) return;
+    const isObserverPresent = this.attachedOvservers.find((o) => o.actualIndex === this.currentIndex);
+    if (isObserverPresent) return;
 
     // All steps
     if (currStepData.waitForEnable) {
@@ -159,11 +171,35 @@ export class HandleSteps {
     }
   }
 
-  removeNextObservers() {
+  removeObservers() {
     this.listenerAttachedElements.map((d) => d.elm.removeEventListener(d.event, d.func));
     this.attachedOvservers.map((d) => d.disconnect());
     this.listenerAttachedElements = [];
     this.attachedOvservers = [];
+  }
+
+  checkPreviousObservers() {
+    if (this.attachedOvservers.length <= 1) return;
+    const invalidObservers = this.attachedOvservers.filter((o) => !o.success);
+    if (invalidObservers.length === 0) return;
+    if (this.tempIndex > -1) return;
+    for (const observer of invalidObservers) {
+      if (observer.actualIndex < this.currentIndex) {
+        console.log({
+          this: this,
+          actualIndex: observer.actualIndex,
+          currentIndex: this.currentIndex,
+          currentStepData: this.currentStepData,
+          tempIndex: this.currentStepData.isHiddenStep ? this.currentIndex - 1 : this.currentIndex,
+          invalidObservers
+        });
+        this.tempIndex = this.currentStepData.isHiddenStep ? this.currentIndex - 1 : this.currentIndex;
+        this.currentIndex = observer.stepIndex;
+        this.next(false);
+        this.tempIndex = -1;
+        break;
+      }
+    }
   }
 
   start() {
@@ -174,25 +210,31 @@ export class HandleSteps {
     this.reset();
   }
   reset() {
+    this.tempIndex = -1;
     this.started = false;
     this.finished = false;
     this.clicked = false;
     this.currentIndex = -1;
     this.handleReset();
+    this.removeListeners();
+    this.removeObservers();
   }
-  next() {
+  next(shouldCheck = true) {
     if (this.currentIndex === this.steps.length - 1) {
       this.reset();
     }
-
     // To debounce click only register first click
-    if (this.clicked || this.waiting) return;
+    if ((this.clicked || this.waiting) && shouldCheck) return;
 
-    this.clicked = true;
-    this.currentIndex++;
-
+    if (shouldCheck) {
+      this.clicked = true;
+      this.currentIndex++;
+      if (this.tempIndex > -1) {
+        this.currentIndex = this.tempIndex;
+        this.tempIndex = -1;
+      }
+    }
     this.getCurrentStep();
-    this.removeNextObservers();
   }
   previous() {
     if (this.currentIndex === 0) {
@@ -206,7 +248,7 @@ export class HandleSteps {
     if (this.steps[this.currentIndex]?.isHiddenStep) {
       this.previous();
     }
-    this.removeNextObservers();
+
     this.getCurrentStep();
   }
 
