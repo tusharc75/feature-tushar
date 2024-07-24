@@ -671,7 +671,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     });
 
     let tempRows = _material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
-    const parentPackages = tempRows?.filter((ele)=> !ele.parentId);
+    const parentPackages = tempRows?.filter((ele)=> !ele.parentId && ele.type===MATERIAL_TYPE.package);
     parentPackages.forEach((parent)=> processPackage(parent, tempRows));
  
     setMaterial(tempRows);
