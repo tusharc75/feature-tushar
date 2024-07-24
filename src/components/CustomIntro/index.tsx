@@ -90,6 +90,7 @@ const CustomIntro = () => {
   const handleReset = () => {
     if (isWaiting) return;
     handleSteps?.current?.removeListeners();
+    handleSteps?.current?.removeObservers();
     setAnchorEl(null);
     handleSteps.current = null;
     setSelectedIntro(null);
