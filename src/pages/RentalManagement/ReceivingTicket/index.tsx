@@ -72,6 +72,7 @@ import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalM
 import TransferToAnotherPackageDialog from 'src/pages/RentalManagement/ReceivingTicket/TransferToAnotherPackageDialog';
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import ReceivingServices from './ReceivingServices';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -143,6 +144,7 @@ const ReceivingTicket = ({
   const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
   const [transferAnotherPackageDialog, setTransferAnotherPackageialog] = useState(false);
   const [serviceData, setServiceData] = useState([]);
+  const [tabValue, setTabValue] = useState(0);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -1736,70 +1738,91 @@ const ReceivingTicket = ({
     );
   };
 
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
+    dispatch({ type: 'selection', selectedRecords: [] });
+  };
+
   return (
     <>
-      <DetailsPageHeader
-        isAddButtonVisible={false}
-        isActionButtonVisible={true}
-        actionButtonMenuItems={
-          <ActionButtonMenuItems
-            {...{
-              selectedRecords,
-              setOpenMessageDialog,
-              handleTicketDialog,
-              setShowRemoveAssetFromReceivingTicketDialog,
-              setShowQtyDialog,
-              handelProcessLoadingTickets,
-              handelProcessTickets,
-              isOffline,
-              setIsExistingRentalJob,
-              setAddSerializedAssetDialog,
-              permissions,
-              setShowRepairJobDialog,
-              setShowRepairOrderDialog,
-              setShowConformationRevertTicket,
-              setShowConformationCancleTicket,
-              setShowConformationConsume,
-              setShowConformationConsumeMultiple,
-              setOpenAssetsDetailsChangeDialog,
-              dataRows,
-              user,
-              setOpenDateDialog,
-              currentStep,
-              columns,
-              rentalManagementData,
-              rentalPolicyData,
-              setTransferAnotherPackageialog,
-              hideDeliveryTicketDelivered,
-              openChangeActualDateDialog,
-              setOpenChangeActualDateDialog
-            }}
-          />
-        }
-        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-        rightSideContents={rightSideContents()}
-        hasXpadding
-      />
+      {serviceData?.length > 0 && (
+        <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0} label={'Assets'} primaryColor={true} />
+          <CustomTab value={1} label={'Services'} primaryColor={true} />
+        </CustomTabs>
+      )}
+      <TabPanel value={tabValue} index={0}>
+        <DetailsPageHeader
+          isAddButtonVisible={false}
+          isActionButtonVisible={true}
+          actionButtonMenuItems={
+            <ActionButtonMenuItems
+              {...{
+                selectedRecords,
+                setOpenMessageDialog,
+                handleTicketDialog,
+                setShowRemoveAssetFromReceivingTicketDialog,
+                setShowQtyDialog,
+                handelProcessLoadingTickets,
+                handelProcessTickets,
+                isOffline,
+                setIsExistingRentalJob,
+                setAddSerializedAssetDialog,
+                permissions,
+                setShowRepairJobDialog,
+                setShowRepairOrderDialog,
+                setShowConformationRevertTicket,
+                setShowConformationCancleTicket,
+                setShowConformationConsume,
+                setShowConformationConsumeMultiple,
+                setOpenAssetsDetailsChangeDialog,
+                dataRows,
+                user,
+                setOpenDateDialog,
+                currentStep,
+                columns,
+                rentalManagementData,
+                rentalPolicyData,
+                setTransferAnotherPackageialog,
+                hideDeliveryTicketDelivered,
+                openChangeActualDateDialog,
+                setOpenChangeActualDateDialog
+              }}
+            />
+          }
+          actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+          rightSideContents={rightSideContents()}
+          hasXpadding
+        />
 
-      <Grid item xs={12} md={12} sm={12}>
-        {columns ? (
-          <CustomReactTable
-            height={serviceData?.length ? '400px' : stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            isClientSideGrid={true}
-            refreshGrid={fetchRecords}
-            hideAction={!(allowedToEdit || isProcessor)}
-            hideSelection={!(allowedToEdit || isProcessor)}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-      </Grid>
+        <Grid item xs={12} md={12} sm={12}>
+          {columns ? (
+            <CustomReactTable
+              height={serviceData?.length ? '400px' : stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              refreshGrid={fetchRecords}
+              hideAction={!(allowedToEdit || isProcessor)}
+              hideSelection={!(allowedToEdit || isProcessor)}
+            />
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </Grid>
+      </TabPanel>
+      <TabPanel value={tabValue} index={1}>
+        <ReceivingServices
+          services={serviceData}
+          rentalManagementData={rentalManagementData}
+          fetchRecords={fetchRecords}
+          allowedToEdit={allowedToEdit}
+        />
+      </TabPanel>
       <Menu
         anchorEl={anchorLinkActionEl}
         keepMounted
@@ -2284,14 +2307,6 @@ const ReceivingTicket = ({
           selectedAssets={selectedRecords}
           rentalManagementData={rentalManagementData}
           assetPolicyData={assetPolicyData}
-        />
-      )}
-      {serviceData?.length > 0 && (
-        <ReceivingServices
-          services={serviceData}
-          rentalManagementData={rentalManagementData}
-          fetchRecords={fetchRecords}
-          allowedToEdit={allowedToEdit}
         />
       )}
     </>
@@ -2922,7 +2937,7 @@ const ActionButtonMenuItems = ({
               >
                 Cancel Specific Line Items
               </MenuItem>
-           </HtmlTooltip>
+            </HtmlTooltip>
           )}
           <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? `You don't have permission to perform this action ` : ''}>
             <MenuItem
