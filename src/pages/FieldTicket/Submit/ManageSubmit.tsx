@@ -67,10 +67,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
         setFormsData(setFieldsInAscendingOrder(initialData.fields));
         if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
             isStepDataSet.current = true;
-            console.log(initialData?.fields);
-            console.log([...generateStepsFormfieldData(initialData?.fields)]);
             walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
-            console.log(walkmeInstance);
             walkmeInstance.handleNext();            
           }
     }, [initialData.fields]);
