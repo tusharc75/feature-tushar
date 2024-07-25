@@ -1087,6 +1087,25 @@ body::-webkit-scrollbar-thumb {
   padding: 0;
 }
 
+.detail-box-new {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-radius: 3px;
+  background-color: var(--new_theme_color);
+}
+
+.detail-box-content-new {
+  display: flex;
+  align-items: center;
+
+  h3 {
+    padding: 0px;
+    padding-top: 1px;
+    color: var(--white);
+  }
+}
 .detail-box-content {
   display: flex;
   align-items: center;
