@@ -344,9 +344,11 @@ export class HandleSteps {
     this.steps.push(...this.initializeStepData(steps));
   }
   insert(steps: StepDefination[], index: number) {
+    if (!steps || steps.length === 0 || !index) return;
     this.steps.splice(index, 0, ...this.initializeStepData(steps));
   }
   insertAtCurrentIndex(steps: StepDefination[]) {
+    if (!steps || steps.length === 0) return;
     this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps));
   }
   pop() {
