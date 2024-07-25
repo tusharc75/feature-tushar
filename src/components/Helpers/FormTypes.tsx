@@ -249,7 +249,11 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
 
 const FormTypes = (props) => {
   const theme = useTheme();
-  const tempProps = { ...props, id: props.id ? props.id : props.label ? `field-${props.label.toLowerCase().split(' ').join('-')}` : 'custom-field' };
+  const tempProps = {
+    ...props,
+    id: props.id ? props.id : props.label ? `field-${props.label.toLowerCase().split(' ').join('-')}` : 'custom-field',
+    dataType: props.type
+  };
   const {
     addAdditionalOption,
     productTemplateId,
