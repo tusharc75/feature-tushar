@@ -287,7 +287,8 @@ export class HandleSteps {
       // Check if value exist then move on to the next step
       if (activeStep.skipIfValueExist) {
         const inputElement = element as HTMLInputElement;
-        if (inputElement.value?.length > 0) {
+        let validator = (value: string) => value.length > 0 && value !== '0';
+        if (validator(inputElement.value)) {
           this.clicked = false;
           this.next();
           return;
