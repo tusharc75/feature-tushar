@@ -19,8 +19,7 @@ import {
   rentalManagement,
   MATERIAL_TYPE,
   ASSET_STATUS,
-  sidebarResource,
-  treeToFlatArray
+  sidebarResource
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -43,12 +42,14 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
   const logs = serviceLog?.filter(s => s.endDate);
   if (!logs?.length) return 0;
   const uniqueDates = new Set<string>();
+  const newStartDate = moment(startDate).startOf('day');
+  const newEndDate = moment(endDate).endOf('day');
   serviceLog.forEach(log => {
-    const logStartDate = new Date(log.startDate);
-    const logEndDate = new Date(log.endDate);
-    for (let date = logStartDate; date <= logEndDate; date.setDate(date.getDate() + 1)) {
-      if (moment(date).isBetween(moment(startDate), moment(endDate), null, '[]')) {
-        uniqueDates.add(date.toISOString().split('T')[0]);
+    const logStartDate = moment(log.startDate).startOf('day');
+    const logEndDate = moment(log.endDate).endOf('day');
+    for (var m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
+      if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
+        uniqueDates.add(m.format('YYYY-MM-DD'));
       }
     }
   });
@@ -85,9 +86,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
       .then(({ data: { data } }) => {
         setResourceData(data);
-        if (data?.policy?.invoiceCurrentDateAutoSelect) {
-          setEndDate(new Date());
-        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -100,7 +98,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   useEffect(() => {
     if (columns) {
-      fetchData(true);
+      fetchData();
     }
   }, [columns, proRata]);
 
@@ -257,7 +255,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     );
   };
 
-  const fetchData = async (onPageLoad = false) => {
+  const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -415,14 +413,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     }
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
-    initializeTable(data?.material, onPageLoad);
+    initializeTable(data?.material);
   };
 
-  const initializeTable = (material, onPageLoad = false, resetSelectedRecord = true) => {
+  const initializeTable = (material) => {
     dispatch({ type: 'loading', loading: true });
-    if (resetSelectedRecord) {
-      dispatch({ type: 'selection', selectedRecords: [] });
-    }
+    dispatch({ type: 'selection', selectedRecords: [] });
+
     const rows = material?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -457,9 +454,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           : true;
       parent.subRows = generateNestedData(material, parent);
     });
-    if (resourceData?.policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && onPageLoad) {
-      handleApplyDate(rows, material);
-    }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -507,9 +501,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     }
   };
 
-  const handleApplyDate = async (allRows = [], rawMaterial = []) => {
-    const records = allRows?.length > 0 ? [...treeToFlatArray(allRows, 'subRows')] : [...selectedRecords];
-    const _material = rawMaterial?.length > 0 ? rawMaterial : material;
+  const handleApplyDate = async () => {
+    const records = [...selectedRecords];
+
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
     let tempValues: any = { actualEndDate: endDate };
@@ -671,10 +665,12 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
-    let tempRows = _material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
+    let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
 
     const parentPackages = tempRows?.filter((ele) => !ele.parentId && ele.type === MATERIAL_TYPE.package);
-    parentPackages.forEach((parent) => processPackage(parent, tempRows));
+    parentPackages.forEach((parent) => {
+      processPackage(parent, tempRows)
+    });
 
     setMaterial(tempRows);
     initializeTable([...tempRows, ...childRows]);
@@ -857,150 +853,134 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       });
   };
 
+  const selectItems = (rows) => {
+    const records = [...rows]
+    records?.forEach((element) => {
+      element.isAppliedBill = true;
+    })
+    let tempRows = orginalMaterial?.map((obj) => records.find((o) => o._id === obj._id) || obj);
+    setMaterial(tempRows);
+    initializeTable(tempRows);
+    setRowsApplied(records);
+  }
+
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader title={`Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
-          <Fragment>
-            <MuiPickersUtilsProvider utils={MomentUtils}>
-              <Grid container className={styles.rental_header_layout}>
-                <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-                <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-                  <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                    <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
-                      <div>
-                        <FormGroup>
-                          <FormControlLabel
-                            control={<Checkbox checked={proRata} />}
-                            key="proRata"
-                            placeholder="Pro Rata"
-                            label="Pro Rata"
-                            style={{ whiteSpace: 'nowrap' }}
-                            onChange={() => {
-                              setProRata(!proRata);
-                            }}
-                          />
-                        </FormGroup>
-                      </div>
-                      {/* <KeyboardDatePicker
-                            autoOk
-                            fullWidth
-                            size="small"
-                            disablePast
-                            variant="inline"
-                            inputVariant="outlined"
-                            minDate={estimateStartDate}
-                            value={startDate}
-                            name="startDate"
-                            label="Start Date"
-                            onChange={(date: any) => {
-                              setStartDate(date ? date : null);
-                            }}
-                            format={dateFormat}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
-                            margin="dense"
-                          /> */}
-                      <KeyboardDatePicker
-                        autoOk
-                        fullWidth
-                        size="small"
-                        variant="inline"
-                        inputVariant="outlined"
-                        // minDate={endDate || new Date()}
-                        value={endDate}
-                        name="endDate"
-                        label="End Date"
-                        onChange={(date: any) => {
-                          setEndDate(date ? date : null);
-                        }}
-                        format={dateFormat}
-                        InputLabelProps={{
-                          shrink: true
-                        }}
-                        margin="dense"
-                      />
-                      <Box style={{ display: 'flex', gap: '5px' }}>
-                        <HtmlTooltip
-                          title={
-                            !Boolean(
-                              selectedRecords &&
-                              selectedRecords?.length &&
-                              (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                            ) ? 'Please select items to apply'
-                              : ''
-                          }
-                        >
-                          <span>
-                            <Button
-                              variant="contained"
-                              color="primary"
-                              disabled={
-                                isApplingDate ||
-                                !Boolean(
-                                  selectedRecords &&
-                                  selectedRecords?.length &&
-                                  (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                                )
-                              }
-                              size="small"
-                              onClick={() => {
-                                handleApplyDate();
+          {!resourceData?.policy?.disableProgressiveBilling &&
+            <Fragment>
+              <MuiPickersUtilsProvider utils={MomentUtils}>
+                <Grid container className={styles.rental_header_layout}>
+                  <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+                  <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
+                    <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                      <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
+                        <div>
+                          <FormGroup>
+                            <FormControlLabel
+                              control={<Checkbox checked={proRata} />}
+                              key="proRata"
+                              placeholder="Pro Rata"
+                              label="Pro Rata"
+                              style={{ whiteSpace: 'nowrap' }}
+                              onChange={() => {
+                                setProRata(!proRata);
                               }}
-                            >
-                              Apply
-                            </Button>
-                          </span>
-                        </HtmlTooltip>
-                      </Box>
-                      {/* <Button
-                        variant="contained"
-                        color="primary"
-                        disabled={
-                          selectedProducts.filter((d) => !['Per Day', 'Per Week', 'Per Month'].includes(d.pricingMethod)).length === 0 ||
-                          selectedProducts.length !== 1
-                        }
-                        size="small"
-                        onClick={() => {
-                          setOpenQtyEdit(true);
-                        }}
-                      >
-                        Edit Qty
-                      </Button> */}
-                    </Grid>
-                  </Box>
+                            />
+                          </FormGroup>
+                        </div>
+                        <KeyboardDatePicker
+                          autoOk
+                          fullWidth
+                          size="small"
+                          variant="inline"
+                          inputVariant="outlined"
+                          // minDate={endDate || new Date()}
+                          value={endDate}
+                          name="endDate"
+                          label="End Date"
+                          onChange={(date: any) => {
+                            setEndDate(date ? date : null);
+                          }}
+                          format={dateFormat}
+                          InputLabelProps={{
+                            shrink: true
+                          }}
+                          margin="dense"
+                        />
+                        <Box style={{ display: 'flex', gap: '5px' }}>
+                          <HtmlTooltip
+                            title={
+                              !Boolean(
+                                selectedRecords &&
+                                selectedRecords?.length &&
+                                (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                              ) ? 'Please select items to apply'
+                                : ''
+                            }
+                          >
+                            <span>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                disabled={
+                                  isApplingDate ||
+                                  !Boolean(
+                                    selectedRecords &&
+                                    selectedRecords?.length &&
+                                    (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                  )
+                                }
+                                size="small"
+                                onClick={() => {
+                                  handleApplyDate();
+                                }}
+                              >
+                                Apply
+                              </Button>
+                            </span>
+                          </HtmlTooltip>
+                        </Box>
+                      </Grid>
+                    </Box>
+                  </Grid>
                 </Grid>
-              </Grid>
-            </MuiPickersUtilsProvider>
-            {columns ? (
-              <Box zIndex={5} p={1}>
-                <CustomReactTable
-                  height={'calc(100vh - 250px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  setWholeRowsCellColor={(rowData) => {
-                    if (rowData?.invalidDate) return 'error';
-                    if (rowData?.isAppliedBill) return 'isAppliedBill';
-                    return '';
-                  }}
-                  refreshGrid={() => {
-                    setRowsApplied([])
-                    fetchData()
-                  }}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  expander={true}
-                />
-              </Box>
-            ) : (
-              <Box p={2} height={500}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
-          </Fragment>
+              </MuiPickersUtilsProvider>
+            </Fragment>
+          }
+          {columns ? (
+            <Box zIndex={5} p={1}>
+              <CustomReactTable
+                height={'calc(100vh - 250px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                setWholeRowsCellColor={(rowData) => {
+                  if (rowData?.invalidDate) return 'error';
+                  if (rowData?.isAppliedBill) return 'isAppliedBill';
+                  return '';
+                }}
+                onSelect={(rows) => {
+                  if (resourceData?.policy?.disableProgressiveBilling) {
+                    selectItems(rows)
+                  }
+                }}
+                refreshGrid={() => {
+                  setRowsApplied([])
+                  fetchData()
+                }}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                expander={true}
+              />
+            </Box>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button
