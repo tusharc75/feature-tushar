@@ -2,6 +2,7 @@ import { NormalStep, Step, StepDefination } from 'src/components/CustomIntro';
 import { Observer } from 'src/components/CustomIntro/Observers';
 import { AutocompleteObserver } from 'src/components/CustomIntro/Observers/AutoCompleteObserver';
 import { DisableObserver } from 'src/components/CustomIntro/Observers/DisableObserver';
+import { MultiSelectAutoCompleteObserver } from 'src/components/CustomIntro/Observers/MultiSelectAutoCompleteObserver';
 import { TextInputObserver } from 'src/components/CustomIntro/Observers/TextInputObserver';
 const RETRY = 20; //in seconds
 
@@ -146,9 +147,20 @@ export class HandleSteps {
       this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
     }
     if (currData.nextOnValueChange) {
+      const parent = this.currentStepData?.element?.parentElement?.parentElement?.parentElement?.getAttribute('datatype');
+      const isMultiInputAutoComplete = parent === 'multiSelect';
       const isAutoComplete = this.currentStepData.element.classList.contains('MuiAutocomplete-input');
-      // Track autocomplete via autocomplete observer
-      if (isAutoComplete) {
+
+      if (isMultiInputAutoComplete) {
+        // Track multiselect autocomplete via MultiSelectAutoComplete observer
+        let validator = (value: string[]) => value.length > 0;
+        if (typeof this.currentStepData.nextOnValueChange === 'function') {
+          validator = this.currentStepData.nextOnValueChange;
+        }
+        const observer = new MultiSelectAutoCompleteObserver(this, this.currentStepData.element, validator);
+        this.attachedOvservers.push(observer);
+      } else if (isAutoComplete) {
+        // Track autocomplete via autocomplete observer
         let validator = (value: string) => value.length > 0;
         if (typeof this.currentStepData.nextOnValueChange === 'function') {
           validator = this.currentStepData.nextOnValueChange;

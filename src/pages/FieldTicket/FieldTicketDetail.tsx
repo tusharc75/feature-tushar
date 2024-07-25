@@ -77,7 +77,7 @@ const FieldTicketDetail = () => {
       fetchPolicy();
     }
     if (walkmeInstance && walkmeInstance.type === 'flow') {
-      walkmeInstance.instance.push(generateAddExistingService(false).steps);
+      walkmeInstance.instance.push(generateAddExistingService(true).steps);
       // immediately start next step
       walkmeInstance.handleNext();
     }

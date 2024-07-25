@@ -1,7 +1,7 @@
 import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -15,6 +15,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { array, object, string } from 'yup';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const submitValidation = object().shape({
     signature: string(),
@@ -39,6 +40,8 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [formsData, setFormsData] = useState([]);
     const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
+    const walkmeInstance = useGetWalkmeInstance();
+    const isStepDataSet = useRef(false);
 
     useEffect(() => {
         fetchFields();
@@ -62,6 +65,11 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
 
     useEffect(() => {
         setFormsData(setFieldsInAscendingOrder(initialData.fields));
+        if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+            isStepDataSet.current = true;
+            walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
+            walkmeInstance.handleNext();            
+          }
     }, [initialData.fields]);
 
     const handleSubmit = async (values) => {
@@ -184,6 +192,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
                                     Cancel
                                 </Button>
                                 <Button
+                                    id={'dialog-save-button'}
                                     disabled={submitting || uploadingImageOrFileProgress > 0}
                                     variant="contained"
                                     color="primary"
