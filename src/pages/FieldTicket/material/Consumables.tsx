@@ -627,6 +627,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       {allowedToEdit && !fieldTicketData?.quotation && serviceOption?.length > 0 && (
         <Box style={{ maxWidth: '400px' }} mb={3}>
           <Autocomplete
+            id={'select-service'}
             size="small"
             style={{ minWidth: '300px' }}
             fullWidth
@@ -648,8 +649,8 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         </Box>
       )}
       <CustomTabs value={tabValue} onChange={handleMainTabChange} style={{ marginBottom: -1 }}>
-        <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} />
-        {!isOffline && <CustomTab value={1} label={'Technicians'} primaryColor={true} />}
+        <CustomTab value={0} label={'Products/Consumables'} primaryColor={true} id={'products-consumables-tab'} />
+        {!isOffline && <CustomTab value={1} label={'Technicians'} primaryColor={true} id={'technicians-tab'} />}
       </CustomTabs>
 
       <TabPanel value={tabValue} index={0}>
@@ -658,7 +659,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
             <>
               <DetailsPageHeader
                 isAddButtonVisible={true}
-                addButtonProps={{ onClick: () => setConsumablesDialog(true) }}
+                addButtonProps={{ onClick: () => setConsumablesDialog(true), id: 'add-product-consumable' }}
                 isActionButtonVisible={!isOffline}
                 actionButtonMenuItems={actionButtonMenuItems()}
                 actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
