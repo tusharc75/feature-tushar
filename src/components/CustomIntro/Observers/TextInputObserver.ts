@@ -22,7 +22,8 @@ export class TextInputObserver extends Observer {
   }
 
   detectValueChange() {
-    if (this.attributeTracker['value'] && this.valiDator(this.attributeTracker['value'])) {
+    const target = this.target as HTMLInputElement | HTMLTextAreaElement;
+    if (target?.value && this.valiDator(target?.value)) {
       // Creating only one instance of debounce
       if (!this.debouncedTracker) {
         const [debouncedTracker, teardown] = debounce(() => {

@@ -33,7 +33,7 @@ import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEqual, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
@@ -70,7 +70,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [columns, setColumns] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [appliedDate, setAppliedDate] = useState(false);
   const [isApplingDate, setIsApplingDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
@@ -101,7 +100,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   useEffect(() => {
     if (columns) {
-      fetchData();
+      fetchData(true);
     }
   }, [columns, proRata]);
 
@@ -258,7 +257,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     );
   };
 
-  const fetchData = async () => {
+  const fetchData = async (onPageLoad = false) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -416,12 +415,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     }
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
-    initializeTable(data?.material);
+    initializeTable(data?.material, onPageLoad);
   };
 
-  const initializeTable = (material, fromRoot = true) => {
+  const initializeTable = (material, onPageLoad = false, resetSelectedRecord = true) => {
     dispatch({ type: 'loading', loading: true });
-    dispatch({ type: 'selection', selectedRecords: [] });
+    if (resetSelectedRecord) {
+      dispatch({ type: 'selection', selectedRecords: [] });
+    }
     const rows = material?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -456,7 +457,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           : true;
       parent.subRows = generateNestedData(material, parent);
     });
-    if (resourceData?.policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
+    if (resourceData?.policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && onPageLoad) {
       handleApplyDate(rows, material);
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -669,16 +670,132 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         rows.push({ ...element, ...calValues });
       }
     });
+
     let tempRows = _material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
+
+    const parentPackages = tempRows?.filter((ele) => !ele.parentId && ele.type === MATERIAL_TYPE.package);
+    parentPackages.forEach((parent) => processPackage(parent, tempRows));
+
     setMaterial(tempRows);
-    initializeTable([...tempRows, ...childRows], false);
+    initializeTable([...tempRows, ...childRows]);
     setRowsApplied((prevState) => {
       let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
       return [...prevRowsApplied, ...rows, ...childRows];
     });
     setIsApplingDate(false);
-    setAppliedDate(true);
   };
+
+  const processPackage = (parent, allMaterial) => {
+
+    const processMaterial = (parent) => {
+      if ([MATERIAL_TYPE.service, MATERIAL_TYPE.product].includes(parent.type)) {
+        return parent;
+      }
+
+      const childMaterial = allMaterial?.filter(m => m.parentId && isEqual(m.parentId, parent._id)) || [];
+      const childData = [];
+      childMaterial?.forEach((child) => {
+        const data = processMaterial(child);
+        childData.push(data);
+      });
+      let updatedParent = parent;
+      if (childData?.length > 0) {
+        updatedParent = sumOnParent(parent, childData, allFields, rentalManagementData.currency);
+        let calValues = autoCalculateSpecificFields({ ['actualEndDate']: updatedParent['actualEndDate'] }, updatedParent, allFields);
+
+        if (calValues['actualJobDuration']) {
+          updatedParent['actualJobDuration'] = calValues['actualJobDuration'];
+        }
+        Object.assign(parent, updatedParent);
+      }
+
+      return updatedParent;
+    };
+
+    processMaterial(parent);
+  }
+
+  const sumOnParent = (parent, child, fields, currency) => {
+    const resetFields = []
+    fields.forEach((element) => {
+
+      if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+        if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+          element.displayUnits.forEach((_unit) => {
+            resetFields.push({ fieldName: element.fieldName + "_" + _unit.toLowerCase(), type: "amount" })
+          })
+        }
+        else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+          element.displayUnits.forEach((_unit) => {
+            element.displayCurrency.forEach((_currency) => {
+              resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), type: "amount" })
+            })
+          })
+        }
+        else if (element.type === "currencyAmount") {
+          element.displayCurrency.forEach((_currency) => {
+            resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase(), type: "amount" })
+          })
+        }
+      }
+      else if (element.type === "percent") {
+        resetFields.push({ fieldName: element.fieldName, type: "percent" })
+      }
+      else if (element.type === "date") {
+        resetFields.push({ fieldName: element.fieldName, type: "date" })
+      }
+
+    })
+    const sumValues: any = {}
+    resetFields.forEach((_field: any) => {
+      sumValues[_field.fieldName] = 0;
+      if (['actualStartDate', 'actualEndDate'].includes(_field.fieldName)) {
+        const { minStartDate, maxEndDate } = child?.reduce(
+          (acc, ele) => {
+            if (ele?.actualStartDate) {
+              const startDate = new Date(ele?.actualStartDate);
+              if (!acc.minStartDate || startDate < acc.minStartDate) {
+                acc.minStartDate = startDate;
+              }
+            }
+            if (ele?.actualEndDate) {
+              const endDate = new Date(ele?.actualEndDate);
+              if (!acc.maxEndDate || endDate > acc.maxEndDate) {
+                acc.maxEndDate = endDate;
+              }
+            }
+            return acc;
+          },
+          { minStartDate: null, maxEndDate: null }
+        );
+
+        sumValues['actualStartDate'] = minStartDate.toISOString();
+        sumValues['actualEndDate'] = maxEndDate.toISOString();
+      } else {
+        child.forEach(element => {
+          sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
+        });
+      }
+    });
+
+    resetFields.forEach((ele) => {
+      if (ele.type === "amount") {
+        parent[ele.fieldName] = sumValues[ele.fieldName];
+      }
+      else {
+        if (ele.fieldName === "discountPercentage") {
+          parent[ele.fieldName] = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));
+        }
+        if (ele.fieldName === "taxPercentage") {
+          parent[ele.fieldName] = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
+        }
+        if (['actualStartDate', 'actualEndDate'].includes(ele.fieldName)) {
+          parent[ele.fieldName] = sumValues[ele.fieldName];
+        }
+      }
+    })
+    return parent;
+  }
 
   const handleSaveData = async (rows: any) => {
     rows[0].isAppliedBill = true;
@@ -696,7 +813,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       return [...prevRowsApplied, ...rows];
     });
     setIsProductEdit({ open: false, rowData: null });
-    setAppliedDate(true);
   };
 
   const handleCreateBill = () => {
@@ -813,8 +929,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                               selectedRecords &&
                               selectedRecords?.length &&
                               (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                            )
-                              ? 'Please select product to apply'
+                            ) ? 'Please select items to apply'
                               : ''
                           }
                         >
@@ -871,7 +986,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                     if (rowData?.isAppliedBill) return 'isAppliedBill';
                     return '';
                   }}
-                  refreshGrid={fetchData}
+                  refreshGrid={() => {
+                    setRowsApplied([])
+                    fetchData()
+                  }}
                   renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                   expander={true}
@@ -897,12 +1015,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             Cancel
           </Button>
           <HtmlTooltip
-            title={
-              !appliedDate
-                ? 'Please select items and apply end date'
-                : rowsApplied?.some((d) => d.invalidDate === true)
-                  ? 'Please select an appropriate date !'
-                  : 'Create Bill'
+            title={rowsApplied?.length === 0 ? 'Please select items and end date then apply '
+              : rowsApplied?.some((d) => d.invalidDate === true) ? 'Please select an appropriate date !'
+                : 'Create Bill'
             }
           >
             <span>
@@ -911,7 +1026,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 variant="contained"
                 color="primary"
                 size="small"
-                disabled={isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true)}
+                disabled={isUpdating || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
                   handleCreateBill();
                 }}

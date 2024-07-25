@@ -1,7 +1,7 @@
 import { Box, Button, IconButton } from '@material-ui/core';
 import HistoryIcon from '@material-ui/icons/History';
 import { camelCase, startCase } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -17,16 +17,20 @@ import ManageSubmit from './ManageSubmit';
 import ViewLogs from './ViewLogs';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateFieldTicketSubmit, generateFieldTicketReopen } from '../walkmeSteps';
 
 const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Submit`;
-
+  const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [submitDialog, setSubmitDialog] = useState(false);
   const [commentDialog, setCommentDialog] = useState(false);
   const [viewLogsDialog, setViewLogsDialog] = useState(false);
   const [fieldTicketSubmitFields, setFieldTicketSubmitFields] = useState(null);
+  const isStepDataSet = useRef(false);
 
   const { state, dispatch } = useTableReducer();
   const { generateColumns } = useColumns();
@@ -35,6 +39,19 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
     fetchFields();
     fetchGridData();
   }, [fieldTicketData]);
+
+  useEffect(() => {
+    if ((fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && fieldTicketSubmitFields?.some(f => f?.isRead)) {
+      setWalkmeData([generateFieldTicketSubmit()]);
+      if (walkmeInstance && walkmeInstance.type === 'flow' &&  !isStepDataSet.current) {
+        isStepDataSet.current = true;
+        walkmeInstance.instance.push(generateFieldTicketSubmit().steps);
+        walkmeInstance.handleNext();
+      }
+    } else if (fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice) {
+      setWalkmeData([generateFieldTicketReopen()]);
+    }
+  }, [fieldTicketData, fieldTicketSubmitFields]);
 
   const fetchFields = async () => {
     setColumns(null);
@@ -205,6 +222,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
           <Fragment>
             {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
               <Button
+                id={'submit-field-ticket'}
                 variant="contained"
                 color="primary"
                 size="small"
@@ -216,7 +234,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
               </Button>
             )}
             {fieldTicketData.status === FIELD_TICKET_STATUS.readyToInvoice && (
-              <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)}>
+              <Button variant="contained" color="primary" size="small" onClick={() => setCommentDialog(true)} id={'reopen-field-ticket'}>
                 Re-Open
               </Button>
             )}

@@ -23,6 +23,7 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -69,6 +70,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchData();
@@ -209,6 +212,14 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     EvaluteproductFields(data);
     setFetchingData(false);
   };
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
 
   useEffect(() => {
     if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
@@ -666,6 +677,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                   </CustomButton>
                 )}
                 <CustomButton
+                  id="dialog-save-button"
                   loading={loading}
                   disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                   variant="contained"

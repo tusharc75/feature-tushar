@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -18,10 +18,11 @@ import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import moment from 'moment';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, handleUpdateCost, showSaveAndNext, loadingEdit }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
+  const walkmeInstance = useGetWalkmeInstance();
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [allFields, setAllFields] = useState([]);
@@ -29,6 +30,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
+  const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchFields();
@@ -46,6 +48,14 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
       toastConfig.setToastConfig(e);
     }
   };
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
 
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
@@ -274,6 +284,7 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
                   </Button>
                 )}
                 <Button
+                  id={'dialog-save-button'}
                   disabled={loadingEdit}
                   variant="contained"
                   color="primary"

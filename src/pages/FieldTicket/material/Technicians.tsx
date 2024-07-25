@@ -249,7 +249,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
           <>
             <DetailsPageHeader
               isAddButtonVisible={true}
-              addButtonProps={{ onClick: () => setTechnicianDialog(true) }}
+              addButtonProps={{ onClick: () => setTechnicianDialog(true), id: 'add-technician' }}
               isActionButtonVisible={true}
               actionButtonMenuItems={actionButtonMenuItems()}
               actionButtonProps={{ disabled: !Boolean(selectedRecords?.length) }}
