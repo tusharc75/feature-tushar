@@ -268,7 +268,6 @@ const AddCostDialog = ({ costData, onClose, fieldTicketData, handleAddCost, hand
                 </Button>
                 {showSaveAndNext && (
                   <Button
-                    id={'dialog-save-button'}
                     disabled={loadingEdit}
                     variant="contained"
                     color="primary"
