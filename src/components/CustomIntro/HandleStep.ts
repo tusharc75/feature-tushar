@@ -287,7 +287,13 @@ export class HandleSteps {
       // Check if value exist then move on to the next step
       if (activeStep.skipIfValueExist) {
         const inputElement = element as HTMLInputElement;
-        let validator = (value: string) => value.length > 0 && value !== '0';
+        let validator = (value: string) => {
+          if (activeStep.fieldType === 'decimal') {
+            return value.length > 0 && value !== '0';
+          }
+          return value.length > 0;
+        };
+
         if (validator(inputElement.value)) {
           this.clicked = false;
           this.next();
@@ -321,7 +327,8 @@ export class HandleSteps {
         isHiddenStep: false,
         nextButtonName: data.nextButtonName,
         willOpenDialog: data.willOpenDialog,
-        waitForStepInsertion: data.waitForStepInsertion
+        waitForStepInsertion: data.waitForStepInsertion,
+        fieldType: data.fieldType
       };
       if (data.skipIfValueExist) {
         normalStep.skipIfValueExist = data.skipIfValueExist;

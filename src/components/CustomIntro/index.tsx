@@ -45,6 +45,7 @@ export type StepDefination = {
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
 };
 
 export type NormalStep = {
@@ -57,6 +58,7 @@ export type NormalStep = {
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
 };
 export type HiddenStep = {
   target: string;
@@ -70,6 +72,7 @@ export type HiddenStep = {
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
 };
 
 let timeout: NodeJS.Timeout;
