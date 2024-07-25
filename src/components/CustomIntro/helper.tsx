@@ -81,7 +81,8 @@ export function generateFormFieldSteps(fields: any[], ignoreField?: string[]) {
         target: `#field-${e?.fieldData?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
         content: '',
         nextOnValueChange: true,
-        skipIfValueExist: true
+        skipIfValueExist: true,
+        fieldType: e?.fieldData?.type
       });
     }
   });
@@ -97,7 +98,8 @@ export function generateStepsFormfieldData(fields: any[], ignoreField?: string[]
         target: `#field-${e?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
         content: '',
         nextOnValueChange: true,
-        skipIfValueExist: true
+        skipIfValueExist: true,
+        fieldType: e?.type
       });
     }
   });
