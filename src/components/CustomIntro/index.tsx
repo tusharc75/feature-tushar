@@ -38,7 +38,7 @@ export type StepDefination = {
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
   formFields?: boolean;
-  nextOnValueChange?: boolean | ((value: string) => boolean);
+  nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
   skipIfValueExist?: boolean;
   nextButtonName?: string;
@@ -63,7 +63,7 @@ export type HiddenStep = {
   isHiddenStep: true;
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
-  nextOnValueChange?: boolean | ((value: string) => boolean);
+  nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
   nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
   skipIfValueExist?: boolean;
   nextButtonName?: string;
