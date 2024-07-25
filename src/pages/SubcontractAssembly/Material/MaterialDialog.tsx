@@ -42,7 +42,6 @@ const MaterialDialog = ({ onClose, subcontractAssemblyData, rowData, material, a
 
     if (walkmeInstance) {
       const steps = generateStepsFormfieldData(data);
-      console.log(steps);
       walkmeInstance.instance.insertAtCurrentIndex(steps);
       walkmeInstance.handleNext();
     }
