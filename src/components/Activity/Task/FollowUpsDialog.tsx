@@ -190,7 +190,6 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
                         }}
                         format={dateFormatForInputControl}
                       />
-                      {Boolean(errors['dueDate']) && <span className="text-[12px] text-red-500">{errors['dueDate']}</span>}
                     </Grid>
                   </Grid>
                 </MuiPickersUtilsProvider>
