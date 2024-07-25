@@ -41,9 +41,12 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
   }, [fieldTicketData]);
 
   useEffect(() => {
-    if ((fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && fieldTicketSubmitFields?.some(f => f?.isRead)) {
+    if (
+      (fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) &&
+      fieldTicketSubmitFields?.some((f) => f?.isRead)
+    ) {
       setWalkmeData([generateFieldTicketSubmit()]);
-      if (walkmeInstance && walkmeInstance.type === 'flow' &&  !isStepDataSet.current) {
+      if (walkmeInstance && walkmeInstance.type === 'flow' && !isStepDataSet.current) {
         isStepDataSet.current = true;
         walkmeInstance.instance.push(generateFieldTicketSubmit().steps);
         walkmeInstance.handleNext();
@@ -132,15 +135,23 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
       _subRow.detail =
-        _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceName
-            : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageName
-              : _subRow.type === MATERIAL_TYPE.manualEntry ? _subRow?.detail || ''
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow?.serviceDetail?.serviceName
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : _subRow.type === MATERIAL_TYPE.manualEntry
+                ? _subRow?.detail || ''
                 : '';
-      _subRow.description = _subRow.type === MATERIAL_TYPE.service ? _subRow?.serviceDetail?.serviceDescription || ''
-        : _subRow.type === MATERIAL_TYPE.product ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package ? _subRow?.packageDetail?.packageDescription || ''
-            : _subRow.description || '';
+      _subRow.description =
+        _subRow.type === MATERIAL_TYPE.service
+          ? _subRow?.serviceDetail?.serviceDescription || ''
+          : _subRow.type === MATERIAL_TYPE.product
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : _subRow.description || '';
       _subRow.competencyType = `${_subRow?.serviceDetail?.competencyType?.optionLabel || ''}`;
       _subRow.qty = _subRow.qty * parent.qty;
       _subRow.isValid = _subRow['finalPrice_' + fieldTicketData?.currency?.toLowerCase()] ? true : false;
@@ -162,8 +173,14 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
 
     materialRows?.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = parent?.productDetail?.productName || parent?.serviceDetail?.serviceName || parent?.serializedAssetDetail?.assetNumber || parent?.packageDetail?.packageName || '';
-      parent.description = parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || parent?.packageDetail?.packageDescription || '';
+      parent.detail =
+        parent?.productDetail?.productName ||
+        parent?.serviceDetail?.serviceName ||
+        parent?.serializedAssetDetail?.assetNumber ||
+        parent?.packageDetail?.packageName ||
+        '';
+      parent.description =
+        parent?.productDetail?.productDescription || parent?.serviceDetail?.serviceDescription || parent?.packageDetail?.packageDescription || '';
       parent.subRows = generateNestedData(material, parent);
     });
     costs?.forEach((ele, i) => {
@@ -218,7 +235,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
   const RightSideContents = () => {
     return (
       <>
-        {allowedToEdit && fieldTicketSubmitFields?.some(f => f?.isRead) && (
+        {allowedToEdit && fieldTicketSubmitFields?.some((f) => f?.isRead) && (
           <Fragment>
             {(fieldTicketData.status === FIELD_TICKET_STATUS.new || fieldTicketData.status === FIELD_TICKET_STATUS.inProgress) && (
               <Button

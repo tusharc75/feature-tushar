@@ -45,6 +45,7 @@ export type StepDefination = {
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
 };
 
 export type NormalStep = {
@@ -57,6 +58,7 @@ export type NormalStep = {
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
 };
 export type HiddenStep = {
   target: string;
@@ -70,6 +72,7 @@ export type HiddenStep = {
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
 };
 
 let timeout: NodeJS.Timeout;
@@ -98,6 +101,7 @@ const CustomIntro = () => {
   };
 
   const handleNext = (checkForStepInsertion = true) => {
+    clearTimeout(timeout);
     if (checkForStepInsertion) {
       currentStepData?.element.click();
       if (currentStepData?.waitForStepInsertion) {
@@ -108,7 +112,6 @@ const CustomIntro = () => {
       handleSteps.current.resume();
     }
 
-    clearTimeout(timeout);
     if (currentStepData?.willOpenDialog) {
       // check if dialog will open then wait for 500ms to let dialog open properly
       timeout = setTimeout(() => {
@@ -116,9 +119,12 @@ const CustomIntro = () => {
       }, 500);
     } else {
       // wait for any layout change
-      timeout = setTimeout(() => {
-        handleSteps.current?.next();
-      }, 100);
+      timeout = setTimeout(
+        () => {
+          handleSteps.current?.next();
+        },
+        checkForStepInsertion ? 100 : 500
+      );
     }
   };
 
@@ -167,7 +173,7 @@ const CustomIntro = () => {
             {currentStepData.element && !isFindingElement && (
               <div
                 ref={(ref) => setAnchorEl(ref)}
-                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten transition-all duration-200"
+                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
                 onClick={() => {
                   handleNext();
                 }}
