@@ -336,9 +336,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           let values: any = {};
           values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           values['manualEndDate'] = element?.actualEndDate;
-          if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            values['actualJobDuration'] = calculateServiceDays(element?.serviceLog, element['actualStartDate'], values['actualEndDate']);
-          }
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
 
@@ -411,6 +408,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         return materialData;
       }).filter((d) => d.qty > 0);
     }
+
+    data.material?.forEach((element) => {
+      if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
+        element.actualJobDuration = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
+      }
+    })
+
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
     initializeTable(data?.material);
@@ -857,6 +861,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     const records = [...rows]
     records?.forEach((element) => {
       element.isAppliedBill = true;
+      if (!element['actualJobDuration']) {
+        element.invalidDate = true;
+      }
     })
     let tempRows = orginalMaterial?.map((obj) => records.find((o) => o._id === obj._id) || obj);
     setMaterial(tempRows);
