@@ -20,7 +20,7 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
 import { packages } from 'src/constants/helpers';
 
-const Products = ({ packageId, packageData }) => {
+const Products = ({ packageId, packageData, allowedToEdit = true, fullHeight = false }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -35,6 +35,7 @@ const Products = ({ packageId, packageData }) => {
 
   const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
   const [isAssetAdding, setIsAssetAdding] = useState(false);
+  const [allowToEdit] = useState((permissions?.packages?.isCreate || permissions?.packages?.isUpdate) && allowedToEdit);
 
   const [isSubmitting, setSubmitting] = useState(false);
   const { state, dispatch } = useTableReducer();
@@ -153,9 +154,13 @@ const Products = ({ packageId, packageData }) => {
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <div>
-            <p className="text-truncate">{row.original.description}</p>
-          </div> : <NoDataCell />;
+          return row.original['description'] ? (
+            <div>
+              <p className="text-truncate">{row.original.description}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -174,21 +179,29 @@ const Products = ({ packageId, packageData }) => {
           return row.original['productCategory'] ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
         }
       },
-      ...(productFields?.find((e) => e.fieldName === 'position') ? [{
-        accessor: 'position',
-        Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['position'] ? <div>
-            <p className="text-truncate">{row.original.position}</p>
-          </div> : <NoDataCell />;
-        }
-      }] : []),
+      ...(productFields?.find((e) => e.fieldName === 'position')
+        ? [
+            {
+              accessor: 'position',
+              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+              width: 200,
+              Cell: ({ row }) => {
+                return row.original['position'] ? (
+                  <div>
+                    <p className="text-truncate">{row.original.position}</p>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                );
+              }
+            }
+          ]
+        : []),
       {
         accessor: 'qty',
         Header: 'Qty',
         width: 150,
-        editable: permissions?.packages?.isCreate || permissions?.packages?.isUpdate,
+        editable: allowToEdit,
         Cell: ({ row }) => {
           return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
         }
@@ -358,7 +371,7 @@ const Products = ({ packageId, packageData }) => {
   const actionButtonMenuItems = () => {
     return (
       <>
-        {permissions?.serializedAsset?.isRead &&
+        {permissions?.serializedAsset?.isRead && (
           <MenuItem
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
@@ -375,7 +388,7 @@ const Products = ({ packageId, packageData }) => {
           >
             {`Assign ${routes.serializedAsset.title}`}
           </MenuItem>
-        }
+        )}
         <MenuItem
           disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
           onClick={() => {
@@ -391,7 +404,7 @@ const Products = ({ packageId, packageData }) => {
   const rightSideContents = () => {
     return (
       <>
-        {permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
+        {allowToEdit && (
           <ImportExportMenu
             permissions={permissions?.packages}
             module="products"
@@ -403,7 +416,7 @@ const Products = ({ packageId, packageData }) => {
             ids={[]}
             additionalParams={`refrenceId=${packageId}`}
           />
-        }
+        )}
       </>
     );
   };
@@ -411,9 +424,9 @@ const Products = ({ packageId, packageData }) => {
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isCreate || permissions?.packages?.isUpdate}
+        isAddButtonVisible={allowToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={permissions?.packages?.isCreate || permissions?.packages?.isUpdate}
+        isActionButtonVisible={allowToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
         rightSideContents={rightSideContents()}
@@ -421,7 +434,7 @@ const Products = ({ packageId, packageData }) => {
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 393px)'}
+          height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -430,8 +443,9 @@ const Products = ({ packageId, packageData }) => {
           isClientSideGrid={true}
           onSaveEdit={onSaveInlineEdit}
           expander={true}
-          hideAction={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
-          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
+          hideAction={allowToEdit ? false : true}
+          hideSelection={allowToEdit ? false : true}
+          hideExportTable={!allowedToEdit}
         />
       ) : (
         <Box p={2} height={500}>
