@@ -159,13 +159,13 @@ const PackageDetails = () => {
               </Box>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              {tabValue === 1 && <Services packageData={packageData} packageId={id} />}
+              {tabValue === 1 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              {tabValue === 2 && <Products packageData={packageData} packageId={id} />}
+              {tabValue === 2 && <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
-              {tabValue === 3 && <Packages packageData={packageData} packageId={id} />}
+              {tabValue === 3 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
           </Grid>
         </Grid>

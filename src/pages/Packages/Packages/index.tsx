@@ -14,7 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const PackagesTable = ({ packageId, packageData, allowedToEdit = true, fullHeight = false }) => {
+const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
 
   const renderedFrom = `${camelCase(routes?.packages.title)}_packages'}`;
 
@@ -73,7 +73,15 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit = true, fullHeigh
     const response = await axiosInstance().get(`/field?resource=Packages`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
-    setColumns([...newColumns, ActionsRenderer]);
+    setColumns([{
+      accessor: 'qty',
+      Header: 'Qty',
+      editable: allowedToEdit,
+      disableFilters: true,
+      disableSortBy: true,
+      disabled: true,
+      Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
+    }, ...newColumns]);
   };
 
   const handleUpdateQuantity = (data, row) => {
@@ -109,19 +117,6 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit = true, fullHeigh
       });
   };
 
-  const ActionsRenderer = {
-    accessor: 'qty',
-    Header: 'Qty',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    editable: permissions?.packages?.isUpdate && allowedToEdit,
-    cellEditor: 'numericCellEditor',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
-  };
 
   const handleAssignPackage = (rows) => {
     setSubmitting(true);
@@ -168,32 +163,30 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit = true, fullHeigh
   };
 
   const rightSideContents = () => {
-    return (
-      (permissions?.packages?.isCreate || permissions?.packages?.isUpdate) &&
-      allowedToEdit && (
-        <>
-          <ImportExportMenu
-            permissions={permissions?.packages}
-            module="packages"
-            api={`${packages.api}/${packageId}/package`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
-          />
-        </>
-      )
+    return (allowedToEdit && (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.packages}
+          module="packages"
+          api={`${packages.api}/${packageId}/package`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`refrenceId=${packageId}`}
+        />
+      </>
+    )
     );
   };
 
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isUpdate && allowedToEdit}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={permissions?.packages?.isUpdate && allowedToEdit}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingProducts }}
         rightSideContents={rightSideContents()}
@@ -209,8 +202,8 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit = true, fullHeigh
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={handleUpdateQuantity}
-          hideSelection={(permissions?.packages?.isCreate || permissions?.packages?.isUpdate) && allowedToEdit ? false : true}
-          hideExportTable={!allowedToEdit}
+          hideSelection={allowedToEdit ? false : true}
+          hideExportTable={true}
         />
       ) : (
         <Box p={2} height={500}>

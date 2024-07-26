@@ -107,140 +107,119 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     }
   }, [dataRows, selectedRecords]);
 
+
+  const extraColumn = [{
+    accessor: 'loadingTicket',
+    Header: 'Loading Ticket',
+    width: 200,
+    Cell: ({ row }) =>
+      row?.original?.loadingTicket ? (
+        <div className="flex items-center gap-2">
+          <p> {row?.original?.loadingTicket}</p>
+          <IconButton
+            size="small"
+            onClick={() => {
+              window.open(`${routes.deliveryTicketDetail.path}/${row.original?.loadingTicketId}`);
+            }}
+          >
+            <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+          </IconButton>
+        </div>
+      ) : (
+        <NoDataCell />
+      )
+  },
+  {
+    accessor: 'loadingTicketStatus',
+    Header: 'Loading Ticket Status',
+    primaryField: true,
+    width: 200,
+    Cell: ({ row }) => <p className="text-truncate">{row?.original?.loadingTicketStatus || <NoDataCell />}</p>
+  },
+  {
+    accessor: 'createDate',
+    Header: 'Shipped Date',
+    width: 200,
+    disableFilters: true,
+    disableSortBy: true,
+    Cell: ({ row }) =>
+      row.original?.createDate ? (
+        <div className="createBy" title={`${moment(row.original?.createDate)?.format(dateTimeFormat)}`}>
+          {moment(row.original?.createDate)?.format(dateTimeFormat)}
+        </div>
+      ) : (
+        <NoDataCell />
+      )
+  },
+  {
+    accessor: 'actualDeliveryDate',
+    Header: 'Delivery Date',
+    width: 200,
+    disableFilters: true,
+    disableSortBy: true,
+    Cell: ({ row }) =>
+      row.original?.actualDeliveryDate ? (
+        <div className="createBy" title={`${moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}`}>
+          {moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}
+        </div>
+      ) : (
+        <NoDataCell />
+      )
+  }]
+
   const fetchFields = () => {
     setColumns(null);
-    axiosInstance()
-      .get(`/field?resource=${serializedAsset.resource}`)
-      .then(({ data: { data } }) => {
-        const newColumns = generateColumns(
-          renderedFrom,
-          data?.filter((d) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(d?.fieldData?.fieldName)),
-          false
-        );
-        newColumns?.forEach((o) => {
-          if (o?.accessor === 'assetNumber') {
-            o.cell = ({ row }) =>
-              row?.original?.assetNumber ? (
-                <div
+    axiosInstance().get(`/field?resource=${serializedAsset.resource}`).then(({ data: { data } }) => {
+      const newColumns = generateColumns(renderedFrom, data, false);
+      newColumns?.forEach((o) => {
+        if (o?.accessor === 'assetNumber') {
+          o.cell = ({ row }) =>
+            row?.original?.assetNumber ? (
+              <div
                 className="flex items-center gap-2"
-                  style={{
-                    backgroundColor: row?.original?.isReplaced
-                      ? COLOUR_MASTER.replaceAssetColor.background
-                      : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
-                        ? COLOUR_MASTER.lostAssets.background
-                        : ''
+                style={{
+                  backgroundColor: row?.original?.isReplaced
+                    ? COLOUR_MASTER.replaceAssetColor.background
+                    : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert].includes(row?.original?.status)
+                      ? COLOUR_MASTER.lostAssets.background
+                      : ''
+                }}
+              >
+                <p> {row.original?.assetNumber}</p>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
                   }}
                 >
-                  <p> {row.original?.assetNumber}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                  {row?.original?.isReplaced && (
-                    <Box>
-                      <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
-                        <InfoIcon fontSize="small" color={'primary'} />
-                      </HtmlTooltip>
-                    </Box>
-                  )}
-                </div>
-              ) : (
-                <NoDataCell />
-              );
-          } else if (o?.accessor === 'product') {
-            o.cell = ({ row }) =>
-              row?.original?.product ? (
-                <div className="flex items-center gap-2">
-                  <p> {row.original?.product}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              );
-          }
-        });
-
-        const column = [
-          {
-            accessor: 'index',
-            Header: 'Index',
-            width: 70,
-            sticky: isMobile ? 'none' : 'left',
-            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
-          },
-          ...newColumns,
-          {
-            accessor: 'loadingTicket',
-            Header: 'Loading Ticket',
-            width: 200,
-            Cell: ({ row }) =>
-              row?.original?.loadingTicket ? (
-                <div className="flex items-center gap-2">
-                  <p> {row?.original?.loadingTicket}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.deliveryTicketDetail.path}/${row.original?.loadingTicketId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          },
-          {
-            accessor: 'loadingTicketStatus',
-            Header: 'Loading Ticket Status',
-            primaryField: true,
-            width: 200,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.loadingTicketStatus || <NoDataCell />}</p>
-          },
-          {
-            accessor: 'createDate',
-            Header: 'Shipped Date',
-            width: 200,
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) =>
-              row.original?.createDate ? (
-                <div className="createBy" title={`${moment(row.original?.createDate)?.format(dateTimeFormat)}`}>
-                  {moment(row.original?.createDate)?.format(dateTimeFormat)}
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          },
-          {
-            accessor: 'actualDeliveryDate',
-            Header: 'Delivery Date',
-            width: 200,
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) =>
-              row.original?.actualDeliveryDate ? (
-                <div className="createBy" title={`${moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}`}>
-                  {moment(row.original?.actualDeliveryDate)?.format(dateTimeFormat)}
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          }
-        ];
-        setColumns(column);
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
+                {row?.original?.isReplaced && (
+                  <Box>
+                    <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
+                      <InfoIcon fontSize="small" color={'primary'} />
+                    </HtmlTooltip>
+                  </Box>
+                )}
+              </div>
+            ) : (
+              <NoDataCell />
+            );
+        }
       });
+      const column = [
+        {
+          accessor: 'index',
+          Header: 'Index',
+          width: 70,
+          sticky: isMobile ? 'none' : 'left',
+          Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+        },
+        ...newColumns,
+        ...extraColumn
+      ];
+      setColumns(column);
+    });
   };
 
   const fetchAssetsData = async () => {
@@ -441,8 +420,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     fileName: `${routes.transferAsset.title}-${transferAssetData?.transferAssetNumber}`,
     resource: sidebarResource.transferAsset,
     referenceId: transferAssetId,
-    columns: columns?.filter((e) => ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']?.includes(e?.accessor)),
-    hideDetailButton: true
+    columns: columns?.filter((e) => !extraColumn?.map((e) => e.accessor)?.includes(e?.accessor)),
+    hideDetailButton: true,
+    defaultColumns: ['assetNumber', 'serialNumber', 'product', 'productDescription', 'status']
   };
 
   const ActionMenuItems = () => {
