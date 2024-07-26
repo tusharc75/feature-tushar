@@ -9,14 +9,14 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit = true, fullHeight = false }) => {
-  const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
+
+  const renderedFrom = `${camelCase(routes?.packages.title)}_packages'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
   const {

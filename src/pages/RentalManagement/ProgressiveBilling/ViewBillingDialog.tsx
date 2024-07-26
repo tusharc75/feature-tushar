@@ -25,7 +25,7 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
 
-const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
+const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess, allowCreateInvoice }) => {
 
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
 
@@ -46,7 +46,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     state: { user, permissions }
   }: any = useData();
 
-  const [allowedToEdit, setAllowedToEdit] = useState(checkIsAllowedToEdit(user, sidebarResource.invoice, invoiceData?.orignalData) && permissions?.invoice?.isUpdate);
+  const [allowedToEdit, setAllowedToEdit] = useState(checkIsAllowedToEdit(user,
+    sidebarResource.invoice, invoiceData?.orignalData) && permissions?.invoice?.isUpdate && allowCreateInvoice);
 
   useEffect(() => {
     fetchFields();
@@ -346,18 +347,20 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 />
               )}
               <Box display="flex" alignItems="center">
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={handleClick}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords?.length && invoiceData?.isLatestInvoice ? false : true}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
+                {allowedToEdit &&
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={handleClick}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords?.length && invoiceData?.isLatestInvoice ? false : true}
+                    endIcon={<ExpandMore />}
+                    className="new-dropdown-v1"
+                  >
+                    Actions
+                  </Button>
+                }
                 <Menu
                   id="action-menu"
                   anchorEl={anchorEl}
