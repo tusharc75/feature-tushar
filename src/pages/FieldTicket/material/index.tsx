@@ -72,12 +72,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   }, [columns]);
 
   useEffect(() => {
-    let stepData = [];
-    stepData.push(generateAddExistingService());
-    stepData.push(generateAddManualEntry());
-    stepData.push(generateAddNewService());
-    stepData.push(generateAddProductConsumable());
-    stepData.push(generateAddTechnician());
+    let stepData = [generateAddExistingService(), generateAddManualEntry(), generateAddNewService(), generateAddProductConsumable(), generateAddTechnician()];
     if (dataRows?.length) {
       const serviceIndex = dataRows.findIndex((d) => d.type === MATERIAL_TYPE.service);
       const manualEntryIndex = dataRows.findIndex((d) => d.type === MATERIAL_TYPE.manualEntry);
@@ -91,9 +86,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         isStepDataSet.current = true;
         let steps = [];
         if (serviceIndex !== -1 && !dataRows[serviceIndex]?.isValid) {
-          steps = generateEditService(true, serviceIndex).steps;
+          steps = generateEditService(false, serviceIndex).steps;
         } else if (manualEntryIndex !== -1 && !dataRows[serviceIndex]?.isValid) {
-          steps = generateEditManualEntry(true, manualEntryIndex).steps;
+          steps = generateEditManualEntry(false, manualEntryIndex).steps;
         }
         steps.push({ ...nextButtonStep, waitForStepInsertion: true });
         walkmeInstance.instance.push(steps);
