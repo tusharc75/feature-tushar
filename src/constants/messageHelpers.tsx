@@ -31,7 +31,8 @@ export const rentalManagementActions = {
     swapInUseAssets: 'Swap In-Use Assets',
     updateStartDateEndDate: 'Update Start Date/End Date',
     startService: 'Start Service',
-    stopService: 'Stop Service'
+    stopService: 'Stop Service',
+    deleteServiceLog: 'Delete Service Log',
 };
 
 export const rentalManagementMessage = {

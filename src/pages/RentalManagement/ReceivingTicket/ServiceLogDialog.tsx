@@ -16,14 +16,17 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete, Edit } from '@material-ui/icons';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, onSuccess, allowedToEdit }) => {
+const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, onSuccess, allowedToEdit, fetchRecords }) => {
 
   const { state: { user } }: any = useData();
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
   const [editDateDialog, setEditDateDialog] = useState({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
   const { dataRows } = state;
+  const [deleteServiceLogConfirmDialog, setDeleteServiceLogConfirmDialog] = useState({ open: false, data: null });
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -49,22 +52,6 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
       })
       dispatch({ type: 'initialize', data: serviceLogData, count: serviceLogData?.length });
       setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
-    } catch (e) {
-      toastConfig.setToastConfig(e);
-      dispatch({ type: 'loading', loading: false });
-    }
-  };
-
-  const handleDelete = async (_id) => {
-    try {
-      dispatch({ type: 'loading', loading: true });
-      const response = await axiosInstance().delete(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`, { data: { serviceLogId: _id } });
-      toastConfig.setToastConfig({
-        open: true,
-        message: response?.data?.message,
-        type: 'success'
-      });
-      fetchData();
     } catch (e) {
       toastConfig.setToastConfig(e);
       dispatch({ type: 'loading', loading: false });
@@ -191,7 +178,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
                 <IconButton
                   size="small"
                   disabled={!row?.original?.canDelete}
-                  onClick={() => { handleDelete(row.original._id) }}
+                  onClick={() => { setDeleteServiceLogConfirmDialog({ open: true, data: [{ _id: id, serviceLogId: row.original._id }] }) }}
                 >
                   <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
@@ -221,6 +208,27 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
         toastConfig.setToastConfig(err);
         setEditDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
       });
+  };
+
+  const handleDeleteServiceLogs = (data: any[]) => {
+    setOkBtnLoading(true);
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance().delete(`${rentalManagement.api}/productpackage/${rentalId}/service-log`, { data }).then((response) => {
+      toastConfig.setToastConfig({
+        open: true,
+        message: response?.data?.message,
+        type: 'success'
+      });
+      setOkBtnLoading(false);
+      setDeleteServiceLogConfirmDialog({ open: false, data: null });
+      fetchData();
+      fetchRecords();
+    }).catch((err) => {
+      setOkBtnLoading(false);
+      setDeleteServiceLogConfirmDialog({ open: false, data: null });
+      toastConfig.setToastConfig(err);
+      dispatch({ type: 'loading', loading: false });
+    })
   };
 
   return (
@@ -261,13 +269,20 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
             data={editDateDialog.data}
             type={null}
             open={editDateDialog.open}
-            onClose={() => {
-              setEditDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
-            }}
+            onClose={() => { setEditDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null }) }}
             handleSubmit={handleSubmitChangeDates}
             loading={editDateDialog.loading}
             minStartDate={editDateDialog.minStartDate}
             maxEndDate={editDateDialog.maxEndDate}
+          />
+        )}
+        {deleteServiceLogConfirmDialog.open && (
+          <ConfirmationDialog
+            open={deleteServiceLogConfirmDialog}
+            message={`Are you sure you want to delete log?`}
+            onClose={() => { setDeleteServiceLogConfirmDialog({ open: false, data: null }) }}
+            onOk={() => { handleDeleteServiceLogs(deleteServiceLogConfirmDialog.data) }}
+            okBtnLoading={okBtnLoading}
           />
         )}
       </CustomDialogContent>
