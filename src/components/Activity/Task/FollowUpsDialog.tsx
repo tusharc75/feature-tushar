@@ -208,7 +208,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
                 onClick={submitForm}
                 endIcon={submitting && <CircularProgress color="inherit" size={18} />}
               >
-                Create
+                Save
               </Button>
             </CustomDialogFooter>
           </>
