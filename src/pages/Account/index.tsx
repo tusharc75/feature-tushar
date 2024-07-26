@@ -17,7 +17,7 @@ import { Link, useHistory } from 'react-router-dom';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { cloneDisable } from 'src/constants/messageHelpers';
+import { cloneDisable, updateDisable } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -65,7 +65,6 @@ export default function Account(props) {
 
   const renderedFrom = camelCase(accountResource);
   const history = useHistory();
-  let { type }: any = queryString.parse(history.location.search);
 
   const [cloneId, setCloneId] = useState('');
   const [menuType, setMenuType] = useState(options[0]);
@@ -217,45 +216,25 @@ export default function Account(props) {
             </IconButton>
           </span>
         </HtmlTooltip>
-        {accountPermissions?.isUpdate && accountPermissions?.approveAccount && row?.original?.approved ? (
-          <HtmlTooltip title="Disapprove">
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Disapprove"
-                onClick={() => {
-                  setSingleApproveDisapproveAccount({
-                    show: true,
-                    approved: false,
-                    id: row?.original?._id,
-                    accountName: row?.original?.accountName
-                  });
-                }}
-              >
-                <CancelIcon style={{ fontSize: '20px' }} color="error" />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        ) : (
-          <HtmlTooltip title={row?.original?.approved ? 'Disapprove' : 'Approve'}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label={row?.original?.approved ? 'Disapprove' : 'Approve'}
-                onClick={() => {
-                  setSingleApproveDisapproveAccount({
-                    show: true,
-                    approved: row?.original?.approved ? false : true,
-                    id: row?.original?._id,
-                    accountName: row?.original?.accountName
-                  });
-                }}
-              >
-                {row?.original?.approved ? <HiBadgeCheck size={20} /> : <FcApproval size={20} />}
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        )}
+        <HtmlTooltip title={accountPermissions?.isUpdate && user?.role?.selectedEntity?.policy?.isApproveAccount ? row?.original?.approved ? 'Disapprove' : 'Approve' : updateDisable}>
+          <span>
+            <IconButton
+              size="small"
+              disabled={accountPermissions?.isUpdate && user?.role?.selectedEntity?.policy?.isApproveAccount ? false : true}
+              aria-label={row?.original?.approved ? 'Disapprove' : 'Approve'}
+              onClick={() => {
+                setSingleApproveDisapproveAccount({
+                  show: true,
+                  approved: row?.original?.approved ? false : true,
+                  id: row?.original?._id,
+                  accountName: row?.original?.accountName
+                });
+              }}
+            >
+              {row?.original?.approved ? <HiBadgeCheck size={20} /> : <FcApproval size={20} />}
+            </IconButton>
+          </span>
+        </HtmlTooltip>
         <GridDeleteIcon
           hasDeletePermission={accountPermissions?.isDelete}
           ownerId={row?.original?.ownerId}
