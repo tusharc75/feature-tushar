@@ -194,7 +194,7 @@ const ReceivingTicket = ({
     if (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep && canAddCreateReceivingTicketStep) {
       const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
       let data: WalkmeData;
-      if (statusPolicy && data[0]?.type === 'Asset') {
+      if (statusPolicy && data?.[0]?.type === 'Asset') {
         data = generateCreateReceivingTicket(renderedFrom);
       } else {
         data = generateCreateReceivingTicket(renderedFrom, false);
