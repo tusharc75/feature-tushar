@@ -35,6 +35,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Warehouse from '../Account/Warehouse';
 import axiosInstance from './../../axios/axiosInstance';
 import {
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   customerAccount,
   customerContact,
@@ -63,6 +64,8 @@ const ContactDetailsPage = (props) => {
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [contactFields, setContactFields] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
+
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -200,7 +203,6 @@ const ContactDetailsPage = (props) => {
         }
         excludeContacts.push(data._id);
         getContacts(excludeContacts, data);
-
         orgChartData.push({
           id: data._id,
           name: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' '),
@@ -210,8 +212,8 @@ const ContactDetailsPage = (props) => {
           phone: data.phone,
           current: true
         });
-       
-        setAllowedToEdit(checkIsAllowedToEdit(user, contactResource, data));
+        setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource[contactResource], data));
+        setAllowedToDelete(checkIsAllowedToDelete(user, sidebarResource[contactResource], data?.owner?.optionValue));
         setOrgChartData(orgChartData);
       })
       .catch((err) => {
@@ -539,20 +541,21 @@ const ContactDetailsPage = (props) => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.eCommercePolicy?.isRead && contactResource === customerContact.contactResource && (
-              <HtmlTooltip title="E-Commerce Access" arrow placement="top">
-                <Button
-                  size="small"
-                  variant={isMobile && !isTablet ? 'text' : 'contained'}
-                  disabled={contactData.relatedUser?.eCommerceAccess}
-                  onClick={handleEcommerceAccess}
-                  className={'btn-outline-v1'}
-                >
-                  {isMobile && !isTablet ? <HiShoppingCart /> : 'E-Commerce Access'}
-                </Button>
-              </HtmlTooltip>
-            )}
-            {contactPermissions?.isUpdate && contactData?.owner?.optionValue === user?.user?._id && (
+            {permissions?.eCommercePolicy?.isRead && contactResource === customerContact.contactResource
+              && contactPermissions?.isUpdate && allowedToEdit && (
+                <HtmlTooltip title="E-Commerce Access" arrow placement="top">
+                  <Button
+                    size="small"
+                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                    disabled={contactData.relatedUser?.eCommerceAccess}
+                    onClick={handleEcommerceAccess}
+                    className={'btn-outline-v1'}
+                  >
+                    {isMobile && !isTablet ? <HiShoppingCart /> : 'E-Commerce Access'}
+                  </Button>
+                </HtmlTooltip>
+              )}
+            {contactPermissions?.isUpdate && allowedToEdit && (
               <HtmlTooltip title="Give Portal Access" arrow placement="top">
                 <Button
                   size="small"
@@ -565,7 +568,7 @@ const ContactDetailsPage = (props) => {
                 </Button>
               </HtmlTooltip>
             )}
-            {contactPermissions?.isUpdate && allowedToEdit ? (
+            {contactPermissions?.isUpdate && allowedToEdit && (
               <HtmlTooltip title="Edit" arrow placement="top">
                 <Button
                   variant={isMobile && !isTablet ? 'text' : 'contained'}
@@ -576,11 +579,12 @@ const ContactDetailsPage = (props) => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               </HtmlTooltip>
-            ) : null}
-
-            {contactPermissions?.isDelete && contactData?.owner?.optionValue && user?.user?._id && contactData.owner.optionValue === user.user._id ? (
-              <DeleteButton text={isMobile ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
-            ) : null}
+            )}
+            {contactPermissions?.isDelete && allowedToDelete && (
+              <DeleteButton
+                text={isMobile ? <MdDelete size={20} /> : 'Delete'}
+                onClick={() => setShowConfirmBox(true)} />
+            )}
             <ActivityButton
               referenceId={contactData?._id}
               resource={contactResource}
