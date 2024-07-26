@@ -206,6 +206,28 @@ export const generateReceiveItem = (renderedFrom: string): WalkmeData => {
   return data;
 };
 
+export const createSendEmailStep = () => {
+  const data: WalkmeData = {
+    name: 'Send Email',
+    url: '/rental-management/detail/:id',
+    steps: [
+      { target: '#details-page-send-email-button', title: 'Select View', willOpenDialog: true },
+      { target: '#show-column-dialog-send-email-button', title: 'Send Email', waitForStepInsertion: true, willOpenDialog: true },
+      { target: '#send-email-dialog-send-button', title: 'Send' }
+    ]
+  };
+  return data;
+};
+
+export const createCloseStep = (renderedFrom: string) => {
+  const data: WalkmeData = {
+    name: 'Close',
+    url: '/rental-management/detail/:id',
+    steps: [{ target: '#rental-management-close-button', title: `Close ${renderedFrom}` }]
+  };
+  return data;
+};
+
 export const createRentalJobsFlow = (fields: any): WalkmeData => {
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
