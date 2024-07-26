@@ -21,7 +21,9 @@ import { flattenArray } from 'src/constants/columns';
 import { packages } from 'src/constants/helpers';
 
 const Products = ({ packageId, packageData, allowedToEdit = true, fullHeight = false }) => {
-  const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
+
+  const renderedFrom = `${camelCase(routes?.packages.title)}_product`;
+
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -181,21 +183,21 @@ const Products = ({ packageId, packageData, allowedToEdit = true, fullHeight = f
       },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-              width: 200,
-              Cell: ({ row }) => {
-                return row.original['position'] ? (
-                  <div>
-                    <p className="text-truncate">{row.original.position}</p>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'position',
+            Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+            width: 200,
+            Cell: ({ row }) => {
+              return row.original['position'] ? (
+                <div>
+                  <p className="text-truncate">{row.original.position}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'qty',
