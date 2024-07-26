@@ -20,7 +20,7 @@ import { DynamicIcon } from 'src/assets/IconGenerator';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
-  link: 'https://docs.equip-t.com/'
+  link: 'https://docs.equip-t.com'
 };
 
 function Dashboard() {
@@ -30,7 +30,6 @@ function Dashboard() {
   const [sections, setSections] = useState([]);
   const [objBySectionName, setObjBySectionName] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
-
   useEffect(() => {
     let allData = [];
 
@@ -73,9 +72,9 @@ function Dashboard() {
             {!isOffline && <Chart />}
           </div>
           <div className={styles.rightContainer}>
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" user={user.user._id}/>
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" user={user.user._id}/>
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" user={user.user._id}/>
           </div>
         </div>
       </div>
@@ -185,9 +184,10 @@ interface sidecardInterface extends React.HTMLAttributes<HTMLDivElement> {
   objBySectionName: any;
   handleRoutes: any;
   mode: 'Collaboration Tools' | 'Setups & Administration' | 'User Manual';
+  user: any;
 }
 
-const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools', ...others }: sidecardInterface) => {
+const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools',user, ...others }: sidecardInterface) => {
   const [modalContent, setModalContent] = useState(null);
   const [colabData, setColabData] = useState(null);
   const style = { '--sideCardBg': '#FFFFFF' } as React.CSSProperties;
@@ -217,7 +217,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           aria-label={`open ${mode}`}
           onClick={() => {
             if (mode === 'User Manual') {
-              window.open(userManual.link);
+              window.open(`${userManual.link}/?token=${encodeURIComponent(user)}`);
             } else {
               setModalContent({ items: colabData, title: mode, icon: <img src={SVGImages(mode)} alt={`${mode} Logo`} /> });
             }
