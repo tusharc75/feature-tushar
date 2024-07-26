@@ -13,20 +13,16 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Edit } from '@material-ui/icons';
+import { Delete, Edit } from '@material-ui/icons';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 
 const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess, allowedToEdit }) => {
-  
-  const {
-    state: { user }
-  }: any = useData();
+
+  const { state: { user } }: any = useData();
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
-
   const [editDateDialog, setEditDateDialog] = useState({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
-
   const { dataRows } = state;
 
   useEffect(() => {
@@ -39,19 +35,38 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`);
       const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalId}/invoice/material-end-date-qty`);
       let invoiceData = invoiceResponse?.data?.data?.material || [];
-      const maxInvoiceDate = invoiceData?.find((ele)=> ele._id===id)?.endDate;
+      const maxInvoiceDate = invoiceData?.find((ele) => ele._id === id)?.endDate;
       const serviceLogData = response?.data?.data;
 
-      serviceLogData?.forEach((log)=>{
-        if(maxInvoiceDate && log.endDate<=maxInvoiceDate){
+      serviceLogData?.forEach((log, index) => {
+        if (index !== 0 && index === serviceLogData.length - 1) {
+          log.canDelete = true;
+        }
+        if (maxInvoiceDate && log.endDate <= maxInvoiceDate) {
           log.canEdit = false;
-        }else{
+        } else {
           log.canEdit = true;
         }
       })
-      
+
       dispatch({ type: 'initialize', data: serviceLogData, count: serviceLogData?.length });
       setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+      dispatch({ type: 'loading', loading: false });
+    }
+  };
+
+  const handleDelete = async (_id) => {
+    try {
+      dispatch({ type: 'loading', loading: true });
+      const response = await axiosInstance().delete(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`, { data: { serviceLogId: _id } });
+      toastConfig.setToastConfig({
+        open: true,
+        message: response?.data?.message,
+        type: 'success'
+      });
+      fetchData();
     } catch (e) {
       toastConfig.setToastConfig(e);
       dispatch({ type: 'loading', loading: false });
@@ -197,7 +212,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       Cell: ({ row }) => {
         return (
           <>
-            <HtmlTooltip title={row?.original?.canEdit ?`Update - Start Date/End Date` : 'Invoice already created'}>
+            <HtmlTooltip title={row?.original?.canEdit ? `Update - Start Date/End Date` : 'Invoice already created'}>
               <span>
                 <IconButton
                   size="small"
@@ -220,6 +235,17 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
                   }}
                 >
                   <Edit fontSize="small" color={row?.original?.canEdit ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : 'Can only delete most recent log'}>
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={!row?.original?.canDelete}
+                  onClick={() => { handleDelete(row.original._id) }}
+                >
+                  <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
