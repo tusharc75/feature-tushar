@@ -42,7 +42,7 @@ export const PreviewDialog = ({
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
 
   useEffect(() => {
-    setDefaultColumns()
+    setDefaultColumns();
   }, [columns]);
 
   useEffect(() => {
@@ -53,7 +53,7 @@ export const PreviewDialog = ({
     const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
     setVisibleColumnsPdf([...temp]);
     setVisibleColumnsExcel([...temp]);
-  }
+  };
 
   const fetchUserViews = () => {
     axiosInstance()
@@ -61,10 +61,10 @@ export const PreviewDialog = ({
       .then(({ data: { data } }) => {
         setViews(data);
         if (!selectedPdfView && data?.length === 1) {
-          handleSelectView(data[0])
+          handleSelectView(data[0]);
         }
         if (selectedPdfView && data?.length && data?.find((e) => e._id === selectedPdfView?._id)) {
-          handleSelectView(data?.find((e) => e._id === selectedPdfView?._id))
+          handleSelectView(data?.find((e) => e._id === selectedPdfView?._id));
         }
       })
       .catch((err) => {
@@ -76,12 +76,22 @@ export const PreviewDialog = ({
     setSelectedPdfView(data);
     if (data && data.columns) {
       const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
-      setVisibleColumnsPdf(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
-      setVisibleColumnsExcel(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
+      setVisibleColumnsPdf(
+        columnsArray
+          ?.map((e) => {
+            return allColumn.find((col) => col.fieldName === e);
+          })
+          .filter((col) => col !== undefined)
+      );
+      setVisibleColumnsExcel(
+        columnsArray
+          ?.map((e) => {
+            return allColumn.find((col) => col.fieldName === e);
+          })
+          .filter((col) => col !== undefined)
+      );
     }
   };
-
-
 
   return (
     <>
@@ -113,7 +123,7 @@ export const PreviewDialog = ({
         <CustomDialogContent>
           <Grid container justify="space-between" alignItems="center">
             <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
-              {type?.includes('PDF') &&
+              {type?.includes('PDF') && (
                 <PreviewFields
                   views={views}
                   selectedView={selectedPdfView}
@@ -123,10 +133,11 @@ export const PreviewDialog = ({
                   fetchUserViews={fetchUserViews}
                   allColumn={allColumn}
                   resource={resource}
-                  type={"PDF"}
+                  type={'PDF'}
                   defaultColumns={defaultColumns}
-                />}
-              {type?.includes('Excel') &&
+                />
+              )}
+              {type?.includes('Excel') && (
                 <Box mt={3}>
                   <PreviewFields
                     views={views}
@@ -137,24 +148,19 @@ export const PreviewDialog = ({
                     fetchUserViews={fetchUserViews}
                     allColumn={allColumn}
                     resource={resource}
-                    type={"Excel"}
+                    type={'Excel'}
                     defaultColumns={defaultColumns}
                   />
                 </Box>
-              }
+              )}
             </Grid>
-            {isAsyncDownload &&
-              <DownloadHistory
-                referenceId={referenceId}
-                resource={resource}
-                loadingType={loadingType}
-              />
-            }
+            {isAsyncDownload && <DownloadHistory referenceId={referenceId} resource={resource} loadingType={loadingType} />}
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
-          {type?.includes('Excel') && type?.includes('PDF') ? null :
+          {type?.includes('Excel') && type?.includes('PDF') ? null : (
             <CustomButton
+              id={'show-column-dialog-save-update-button'}
               onClick={() => {
                 setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
               }}
@@ -162,9 +168,10 @@ export const PreviewDialog = ({
               size="small"
               className="yellow-button"
             >
-              {type === 'Excel' ? selectedExcelView ? 'Update View' : 'Save View' : selectedPdfView ? 'Update View' : 'Save View'}
-            </CustomButton>}
-          {operation === 'Send Email' ?
+              {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
+            </CustomButton>
+          )}
+          {operation === 'Send Email' ? (
             <CustomButton
               variant="contained"
               className="no-shadow"
@@ -175,14 +182,17 @@ export const PreviewDialog = ({
               onClick={(e) => {
                 handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
               }}
+              id={'show-column-dialog-send-email-button'}
             >
               {operation}
-            </CustomButton> :
+            </CustomButton>
+          ) : (
             <>
               <CustomButton
                 variant="contained"
                 className="no-shadow"
                 color="primary"
+                id={'show-column-dialog-export-button'}
                 size="small"
                 loading={loadingType === 'Regular'}
                 disabled={loadingType || visibleColumnsPdf?.length === 0}
@@ -197,6 +207,7 @@ export const PreviewDialog = ({
                   variant="contained"
                   color="primary"
                   className="no-shadow"
+                  id={'show-column-dialog-operation-2-button'}
                   size="small"
                   loading={loadingType === 'Detail'}
                   disabled={loadingType || visibleColumnsPdf?.length === 0}
@@ -206,8 +217,9 @@ export const PreviewDialog = ({
                 >
                   {`${button2Title} ${operation}`}
                 </CustomButton>
-              )}</>
-          }
+              )}
+            </>
+          )}
         </CustomDialogFooter>
       </Dialog>
       {showSaveViewDialog.open && (
