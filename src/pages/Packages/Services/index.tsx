@@ -16,8 +16,10 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
-const ServiceTable = ({ packageId, packageData }) => {
-  const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_${packageData?.packageType || 'product'}`;
+const ServiceTable = ({ packageId, packageData, allowedToEdit = true, fullHeight = false }) => {
+
+  const renderedFrom = `${camelCase(routes?.packages.title)}_service'}`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user }
@@ -92,7 +94,7 @@ const ServiceTable = ({ packageId, packageData }) => {
     minWidth: 100,
     width: 100,
     sticky: 'right',
-    editable: permissions?.packages?.isUpdate,
+    editable: permissions?.packages?.isUpdate && allowedToEdit,
     cellEditor: 'numericCellEditor',
     disableFilters: true,
     disableSortBy: true,
@@ -200,32 +202,36 @@ const ServiceTable = ({ packageId, packageData }) => {
   };
 
   const rightSideContents = () => {
-    return permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
-      <>
-        <ImportExportMenu
-          permissions={permissions?.packages}
-          module="services"
-          api={`${packages.api}/${packageId}/services`}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          ids={[]}
-          additionalParams={`refrenceId=${packageId}`}
-        />
-        <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-          <GrDrag fontSize="small" color="primary" className="mr-1" />
-          Arrange
-        </Button>
-      </>
+    return (
+      permissions?.packages?.isCreate ||
+      (permissions?.packages?.isUpdate && allowedToEdit && (
+        <>
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="services"
+            api={`${packages.api}/${packageId}/services`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            ids={[]}
+            additionalParams={`refrenceId=${packageId}`}
+          />
+          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+            <GrDrag fontSize="small" color="primary" className="mr-1" />
+            Arrange
+          </Button>
+        </>
+      ))
+    );
   };
 
   return (
     <Box>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isUpdate}
+        isAddButtonVisible={permissions?.packages?.isUpdate && allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={permissions?.packages?.isUpdate}
+        isActionButtonVisible={permissions?.packages?.isUpdate && allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingServices }}
         rightSideContents={rightSideContents()}
@@ -233,7 +239,7 @@ const ServiceTable = ({ packageId, packageData }) => {
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 393px)'}
+          height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -241,7 +247,8 @@ const ServiceTable = ({ packageId, packageData }) => {
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={handleUpdateQuantity}
-          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
+          hideSelection={(permissions?.packages?.isCreate || permissions?.packages?.isUpdate) && allowedToEdit ? false : true}
+          hideExportTable={!allowedToEdit}
         />
       ) : (
         <Box p={2} height={500}>
