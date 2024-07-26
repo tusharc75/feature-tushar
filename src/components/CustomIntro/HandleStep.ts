@@ -288,8 +288,8 @@ export class HandleSteps {
       if (activeStep.skipIfValueExist) {
         const inputElement = element as HTMLInputElement;
         let validator = (value: string) => {
-          if (activeStep.fieldType === 'decimal') {
-            return value.length > 0 && value !== '0';
+          if (['decimal', 'currencyAmount'].includes(activeStep.fieldType)) {
+            return value.length > 0 && Number(value) !== 0;
           }
           return value.length > 0;
         };
