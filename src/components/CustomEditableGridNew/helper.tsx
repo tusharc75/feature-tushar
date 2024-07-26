@@ -52,7 +52,7 @@ export const generateColumn = (fields) => {
         _field?.displayUnits.forEach((_unit) => {
           _field?.displayCurrency.forEach((_currency) => {
             const fieldName = _field?.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-            const fieldLabel = _field?.fieldLabel + ' ' + _unit + '/' + _currency;
+            const fieldLabel = _field?.fieldLabel + ' ' + _currency + '/' + _unit;
             newColumns.push({
               accessor: fieldName,
               accessorKey: fieldName,

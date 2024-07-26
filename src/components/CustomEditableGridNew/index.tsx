@@ -20,6 +20,7 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
 const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, handleSave, isSubmitting, referenceId = null, restData = [] }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -54,7 +55,6 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
         _fields = sortBy(_fields, function (item) {
           return levalOrderBy.indexOf(item.leval);
         });
-
         setAllFields(JSON.parse(JSON.stringify(_fields)));
         const { newColumns, constColumns } = generateColumn(_fields);
         setColumns(newColumns);
@@ -192,7 +192,7 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
                   style={{
                     display: 'block',
                     overflow: 'auto',
-                    height: '100%',
+                    height: 'calc(100vh - 200px)',
                     marginTop: '10px'
                   }}
                   className="custom-react-table editable-table-v1 border"

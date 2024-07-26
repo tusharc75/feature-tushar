@@ -16,7 +16,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
-const ServiceTable = ({ packageId, packageData, allowedToEdit = true, fullHeight = false }) => {
+const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
 
   const renderedFrom = `${camelCase(routes?.packages.title)}_service'}`;
 
@@ -77,6 +77,15 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit = true, fullHeight
       filter: false,
       sortable: false,
       Cell: ({ row }) => (row.original?.order ? <div>{row?.original?.order}</div> : <NoDataCell />)
+    },
+    {
+      accessor: 'qty',
+      Header: 'Qty',
+      editable: allowedToEdit,
+      disableFilters: true,
+      disableSortBy: true,
+      disabled: true,
+      Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
     }
   ];
 
@@ -85,21 +94,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit = true, fullHeight
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
-    setColumns([...defaultColumns, ...newColumns, ActionsRenderer]);
-  };
-
-  const ActionsRenderer = {
-    accessor: 'qty',
-    Header: 'Qty',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    editable: permissions?.packages?.isUpdate && allowedToEdit,
-    cellEditor: 'numericCellEditor',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
+    setColumns([...defaultColumns, ...newColumns]);
   };
 
   const handleUpdateQuantity = (data, row) => {
@@ -202,36 +197,34 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit = true, fullHeight
   };
 
   const rightSideContents = () => {
-    return (
-      permissions?.packages?.isCreate ||
-      (permissions?.packages?.isUpdate && allowedToEdit && (
-        <>
-          <ImportExportMenu
-            permissions={permissions?.packages}
-            module="services"
-            api={`${packages.api}/${packageId}/services`}
-            afterImportCompleted={() => {
-              fetchData();
-            }}
-            isExportAllOrSomeFeature={true}
-            ids={[]}
-            additionalParams={`refrenceId=${packageId}`}
-          />
-          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-            <GrDrag fontSize="small" color="primary" className="mr-1" />
-            Arrange
-          </Button>
-        </>
-      ))
+    return (allowedToEdit && (
+      <>
+        <ImportExportMenu
+          permissions={permissions?.packages}
+          module="services"
+          api={`${packages.api}/${packageId}/services`}
+          afterImportCompleted={() => {
+            fetchData();
+          }}
+          isExportAllOrSomeFeature={true}
+          ids={[]}
+          additionalParams={`refrenceId=${packageId}`}
+        />
+        <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+          <GrDrag fontSize="small" color="primary" className="mr-1" />
+          Arrange
+        </Button>
+      </>
+    )
     );
   };
 
   return (
     <Box>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isUpdate && allowedToEdit}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={permissions?.packages?.isUpdate && allowedToEdit}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingServices }}
         rightSideContents={rightSideContents()}
@@ -247,8 +240,8 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit = true, fullHeight
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={handleUpdateQuantity}
-          hideSelection={(permissions?.packages?.isCreate || permissions?.packages?.isUpdate) && allowedToEdit ? false : true}
-          hideExportTable={!allowedToEdit}
+          hideSelection={!allowedToEdit}
+          hideExportTable={true}
         />
       ) : (
         <Box p={2} height={500}>

@@ -21,19 +21,16 @@ import CustomMessageDialog from 'src/components/MessageDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
 
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services`;
-
   const toastConfig = useContext(CustomToastContext);
-
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
-
-  const {
-    state: { user }
-  }: any = useData();
-
+  const [deleteServiceLogConfirmDialog, setDeleteServiceLogConfirmDialog] = useState({ open: false, data: null });
+  const { state: { user } }: any = useData();
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [columns, setColumns] = useState(null);
   const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false, minStartDate: null });
   const [serviceLogDialog, setServiceLogDialog] = useState({ open: false, data: null });
@@ -178,6 +175,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
   };
 
   const handleSubmitChangeDates = (values, type: string = '') => {
+    dispatch({ type: 'loading', loading: true });
     let data;
     setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
     data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
@@ -199,8 +197,29 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        dispatch({ type: 'loading', loading: false });
         setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
       });
+  };
+
+  const handleDeleteServiceLogs = (data: any[]) => {
+    setOkBtnLoading(true);
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance().delete(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/service-log`, { data }).then((response) => {
+      toastConfig.setToastConfig({
+        open: true,
+        message: response?.data?.message,
+        type: 'success'
+      });
+      setOkBtnLoading(false);
+      setDeleteServiceLogConfirmDialog({ open: false, data: null });
+      fetchRecords();
+    }).catch((err) => {
+      setOkBtnLoading(false);
+      setDeleteServiceLogConfirmDialog({ open: false, data: null });
+      toastConfig.setToastConfig(err);
+      dispatch({ type: 'loading', loading: false });
+    })
   };
 
   return (
@@ -213,7 +232,8 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
             {...{
               selectedRecords,
               setOpenMessageDialog,
-              setServiceConfirmationDialog
+              setServiceConfirmationDialog,
+              setDeleteServiceLogConfirmDialog
             }}
           />
         }
@@ -263,6 +283,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           }}
           renderedFrom={renderedFrom}
           allowedToEdit={allowedToEdit}
+          fetchRecords={fetchRecords}
         />
       )}
       {serviceConfirmationDialog.open && (
@@ -280,6 +301,19 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           minStartDate={serviceConfirmationDialog.minStartDate}
         />
       )}
+      {deleteServiceLogConfirmDialog.open && (
+        <ConfirmationDialog
+          open={deleteServiceLogConfirmDialog.open}
+          message={`Are you sure you want to delete log for selected service(s)?`}
+          onClose={() => {
+            setDeleteServiceLogConfirmDialog({ open: false, data: null });
+          }}
+          onOk={() => {
+            handleDeleteServiceLogs(deleteServiceLogConfirmDialog.data);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
     </Box>
   );
 };
@@ -290,6 +324,7 @@ const ActionButtonMenuItems = ({
   selectedRecords,
   setOpenMessageDialog,
   setServiceConfirmationDialog,
+  setDeleteServiceLogConfirmDialog
 }) => {
 
   const validateAction = (action) => {
@@ -304,6 +339,10 @@ const ActionButtonMenuItems = ({
       else if (action === rentalManagementActions.stopService) {
         const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
         if (!serviceLogEntry) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
+        }
+      } else if (action === rentalManagementActions.deleteServiceLog) {
+        if (!e?.serviceLog?.length) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
         }
       }
@@ -371,6 +410,20 @@ const ActionButtonMenuItems = ({
       }
     }}>
       Start/Stop Service(s)
+    </MenuItem>
+    <MenuItem onClick={() => {
+      if (!validateAction(rentalManagementActions.deleteServiceLog)) {
+        const data = [];
+        selectedRecords?.forEach((d: any) => {
+          data.push({
+            _id: d?.uniqueId,
+            serviceLogId: d?.serviceLog[d?.serviceLog?.length - 1]?._id
+          });
+        })
+        setDeleteServiceLogConfirmDialog({ open: true, data });
+      }
+    }}>
+      Delete Service Log(s)
     </MenuItem>
   </>
   );
