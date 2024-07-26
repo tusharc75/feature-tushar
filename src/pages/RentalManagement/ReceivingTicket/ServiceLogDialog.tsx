@@ -17,7 +17,7 @@ import { Delete, Edit } from '@material-ui/icons';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 
-const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess, allowedToEdit }) => {
+const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, onSuccess, allowedToEdit }) => {
 
   const { state: { user } }: any = useData();
   const { state, dispatch } = useTableReducer();
@@ -37,9 +37,8 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       let invoiceData = invoiceResponse?.data?.data?.material || [];
       const maxInvoiceDate = invoiceData?.find((ele) => ele._id === id)?.endDate;
       const serviceLogData = response?.data?.data;
-
       serviceLogData?.forEach((log, index) => {
-        if (index === 0 && serviceLogData.length !== 1) {
+        if (index === serviceLogData.length - 1) {
           log.canDelete = true;
         }
         if (maxInvoiceDate && log.endDate <= maxInvoiceDate) {
@@ -48,7 +47,6 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
           log.canEdit = true;
         }
       })
-
       dispatch({ type: 'initialize', data: serviceLogData, count: serviceLogData?.length });
       setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
     } catch (e) {
@@ -71,56 +69,6 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       toastConfig.setToastConfig(e);
       dispatch({ type: 'loading', loading: false });
     }
-  };
-
-  const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (inputField.hasOwnProperty('startDate')) {
-      for (const [index, d] of dataRows.entries()) {
-        if (d._id === updatedData._id) {
-          if (updatedData['endDate'] && new Date(updatedData['endDate']) < new Date(inputField['startDate'])) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't exceed End Date` });
-            return;
-          } else if (index !== dataRows?.length - 1 && new Date(dataRows[index + 1].endDate) > new Date(inputField['startDate'])) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't be less than previous log End Date` });
-            return;
-          }
-        }
-      }
-    } else if (inputField.hasOwnProperty('endDate')) {
-      for (const [index, d] of dataRows.entries()) {
-        if (d._id === updatedData._id) {
-          if (!d.endDate) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `Service not stopped yet` });
-            return;
-          }
-          if (new Date(updatedData['startDate']) > new Date(inputField['endDate'])) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't exceed End Date` });
-            return;
-          } else if (index !== 0 && new Date(dataRows[index - 1].startDate) < new Date(inputField['endDate'])) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `End Date can't be greater than next log Start Date` });
-            return;
-          }
-        }
-      }
-    }
-    dispatch({ type: 'loading', loading: true });
-    const values: any = { _id: updatedData?._id };
-    Object.keys(inputField)?.map((_key) => {
-      values[_key] = updatedData[_key] ? updatedData[_key] : '';
-    });
-    let data = { ids: [id], type: 'update', ...values };
-    axiosInstance().put(`${rentalManagement.api}/${rentalId}/start-end-date`, data).then(({ data }) => {
-      fetchData();
-      onSuccess();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      dispatch({ type: 'loading', loading: false });
-    });
   };
 
   const columns: any = [
@@ -277,7 +225,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
 
   return (
     <Dialog
-      open={open}
+      open={true}
       TransitionComponent={CustomDialogTransition}
       fullScreen={true}
       onClose={(e, reason) => {
@@ -288,7 +236,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       maxWidth="sm"
       fullWidth
     >
-      <CustomDialogHeader title={`${assetNumber || ''} Service Logs`} onClose={onClose} showRequiredLabel={false} />
+      <CustomDialogHeader title={`${serviceName || ''} - Logs`} onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent>
         {columns ? (
           <CustomReactTable
@@ -301,7 +249,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
             hideSelection={true}
             hideAction={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
             hideExportTable={true}
-          // onSaveEdit={onSaveInlineEdit}
+            refreshGrid={fetchData}
           />
         ) : (
           <Box p={2} height={500}>

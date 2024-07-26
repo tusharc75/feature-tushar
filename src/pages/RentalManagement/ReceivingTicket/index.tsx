@@ -964,23 +964,21 @@ const ReceivingTicket = ({
 
       const services: any = [];
       if (rentalPolicyData?.showServiceOnFieldStep) {
-        material
-          ?.filter((m) => m.type === MATERIAL_TYPE.service)
-          ?.forEach((s: any, index: any) => {
-            s.index = index + 1;
-            s.uniqueId = s._id;
-            s.materialId = s?.materialId;
-            s.description = s?.serviceDetail?.serviceDescription || '';
-            s.displayType = startCase(MATERIAL_TYPE.service);
-            s.assetNumber = s?.serviceDetail?.serviceName;
-            s.startDate = s?.actualStartDate;
-            s.endDate = s?.actualEndDate;
-            const parent = material?.find((e) => e._id === s?.parentId);
-            if (parent) {
-              s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
-            }
-            services.push(s);
-          });
+        material?.filter((m) => m.type === MATERIAL_TYPE.service)?.forEach((s: any, index: any) => {
+          s.index = index + 1;
+          s.uniqueId = s._id;
+          s.materialId = s?.materialId;
+          s.description = s?.serviceDetail?.serviceDescription || '';
+          s.displayType = startCase(MATERIAL_TYPE.service);
+          s.serviceName = s?.serviceDetail?.serviceName;
+          s.startDate = s?.actualStartDate;
+          s.endDate = s?.actualEndDate;
+          const parent = material?.find((e) => e._id === s?.parentId);
+          if (parent) {
+            s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+          }
+          services.push(s);
+        });
       }
       setServiceData(services);
 
