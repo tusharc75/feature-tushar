@@ -85,6 +85,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                       >
                         {column.render('Header')}
                       </span>
+                      {column?.required && <span style={{ color: '#dc3545', fontSize: '20px' }}>*</span>}
                     </div>
                   </div>
                   <div {...column.getResizerProps()} className="resizer" />
