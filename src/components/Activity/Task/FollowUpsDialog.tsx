@@ -3,7 +3,6 @@ import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import DateUtils from '@date-io/date-fns';
 import { Form, Formik } from 'formik';
-import { useParams } from 'react-router-dom';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -14,11 +13,9 @@ import { UserDropdown } from 'src/components/Activity/Helpers/userDropdown';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { camelCase } from 'lodash';
 
-const FollowUpsDialog = ({ onClose, section }) => {
-  const { route, id } = useParams();
-  const resource = route?.replace(/-/g, ' ');
-
+const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -38,7 +35,7 @@ const FollowUpsDialog = ({ onClose, section }) => {
     }
     setInitialValues({
       startDate: new Date(),
-      dueDate: new Date(),
+      dueDate: null,
       assignee: [],
       name: '',
       description: '',
@@ -47,8 +44,8 @@ const FollowUpsDialog = ({ onClose, section }) => {
       parentId: null,
       relatedTo: [
         {
-          type: resource,
-          referenceId: id,
+          type: camelCase(resource),
+          referenceId: referenceId,
           access: true
         }
       ],
@@ -73,6 +70,17 @@ const FollowUpsDialog = ({ onClose, section }) => {
       });
   };
 
+  const validate = (values) => {
+    const errors = {};
+    if (!values?.assignee?.length) {
+      errors['assignee'] = 'This field is required';
+    }
+    if (!values?.name) {
+      errors['name'] = 'This field is required';
+    }
+    return errors;
+  };
+
   return (
     <Dialog
       maxWidth="sm"
@@ -86,7 +94,7 @@ const FollowUpsDialog = ({ onClose, section }) => {
         }
       }}
     >
-      <Formik initialValues={initialValues} enableReinitialize={true} validate={() => {}} onSubmit={handleSubmit}>
+      <Formik initialValues={initialValues} enableReinitialize={true} validate={validate} onSubmit={handleSubmit}>
         {({ values, setFieldValue, submitForm, touched, errors }) => (
           <>
             <CustomDialogHeader
@@ -117,7 +125,7 @@ const FollowUpsDialog = ({ onClose, section }) => {
                         renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Field" name="field" />}
                       />
                     </Grid>
-                    <Grid item md={6} lg={6} xs={6} sm={12}>
+                    <Grid item md={12} lg={12} xs={12} sm={12}>
                       <UserDropdown
                         name="assignee"
                         label="Assignee"
@@ -130,6 +138,40 @@ const FollowUpsDialog = ({ onClose, section }) => {
                         multiple={true}
                         value={values['assignee']}
                         email={[]}
+                      />
+                    </Grid>
+
+                    <Grid item md={12} lg={12} xs={12} sm={12}>
+                      <TextField
+                        fullWidth
+                        label="Title"
+                        variant="outlined"
+                        type="text"
+                        size="small"
+                        name="name"
+                        value={values?.name}
+                        required
+                        onChange={(e) => {
+                          setFieldValue('name', e?.target?.value);
+                        }}
+                        error={touched['name'] && Boolean(errors['name'])}
+                        helperText={touched['name'] && errors['name']}
+                      />
+                    </Grid>
+                    <Grid item md={12} lg={12} xs={12} sm={12}>
+                      <TextField
+                        fullWidth
+                        label="Description"
+                        variant="outlined"
+                        type="text"
+                        size="small"
+                        name="description"
+                        multiline
+                        rows={4}
+                        value={values?.description}
+                        onChange={(e) => {
+                          setFieldValue('description', e?.target?.value);
+                        }}
                       />
                     </Grid>
                     <Grid item xs={6} sm={12} md={6} lg={6}>
@@ -147,37 +189,6 @@ const FollowUpsDialog = ({ onClose, section }) => {
                           setFieldValue('dueDate', value);
                         }}
                         format={dateFormatForInputControl}
-                      />
-                      {Boolean(errors['dueDate']) && <span className="text-[12px] text-red-500">{errors['dueDate']}</span>}
-                    </Grid>
-                    <Grid item md={12} lg={12} xs={12} sm={12}>
-                      <TextField
-                        fullWidth
-                        label="Title"
-                        variant="outlined"
-                        type="text"
-                        size="small"
-                        name="name"
-                        value={values?.name}
-                        onChange={(e) => {
-                          setFieldValue('name', e?.target?.value);
-                        }}
-                      />
-                    </Grid>
-                    <Grid item md={12} lg={12} xs={12} sm={12}>
-                      <TextField
-                        fullWidth
-                        label="Description"
-                        variant="outlined"
-                        type="text"
-                        size="small"
-                        name="description"
-                        multiline
-                        rows={4}
-                        value={values?.description}
-                        onChange={(e) => {
-                          setFieldValue('description', e?.target?.value);
-                        }}
                       />
                     </Grid>
                   </Grid>

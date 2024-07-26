@@ -7,7 +7,7 @@ import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 
 const InputField = (props) => {
-  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
+  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, resource = null, referenceId = null, ...rest } = props;
 
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
@@ -27,20 +27,22 @@ const InputField = (props) => {
                 <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                 <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
               </div>
-              <div>
-                <IconButton
-                  style={{ padding: '0px' }}
-                  title="Follow-Ups"
-                  size="small"
-                  color="primary"
-                  aria-label="delete"
-                  onClick={() => {
-                    setOpen({ open: true, section: form });
-                  }}
-                >
-                  <MoreHorizIcon fontSize="small" />
-                </IconButton>
-              </div>
+              {resource && referenceId && (
+                <div>
+                  <IconButton
+                    style={{ padding: '0px' }}
+                    title="Follow-Ups"
+                    size="small"
+                    color="primary"
+                    aria-label="delete"
+                    onClick={() => {
+                      setOpen({ open: true, section: form });
+                    }}
+                  >
+                    <MoreHorizIcon fontSize="small" style={{ color: '#ffffff' }} />
+                  </IconButton>
+                </div>
+              )}
             </div>
             <Box marginY={2}>
               <Grid spacing={3} container>
@@ -170,6 +172,8 @@ const InputField = (props) => {
             setOpen({ open: false, section: null });
           }}
           section={open?.section}
+          resource={resource}
+          referenceId={referenceId}
         />
       )}
     </React.Fragment>
