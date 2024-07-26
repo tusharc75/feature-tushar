@@ -15,7 +15,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
     if (type) {
       setInitialValues({
         startDate: minStartDate ? new Date(minStartDate) : new Date(),
-        endDate: minStartDate ? new Date(minStartDate) : new Date()
+        ...(type !== 'start' ? { endDate: minStartDate ? new Date(minStartDate) : new Date() } : {})
       })
     } else {
       setInitialValues({
@@ -65,25 +65,27 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12}>
-                    <FormTypes
-                      size="small"
-                      fullWidth
-                      required={true}
-                      values={values}
-                      errors={errors}
-                      touched={touched}
-                      type="date"
-                      label={`Start Date`}
-                      name="startDate"
-                      onChange={(date) => {
-                        setFieldValue('startDate', date);
-                      }}
-                      {...(minStartDate ? { minDate: minStartDate } : {})}
-                      {...(values.endDate ? { maxDate: values.endDate } : {})}
-                    />
-                  </Grid>
-                  {(data?.endDate || type) &&
+                  {type !== 'stop' && (
+                    <Grid item xs={12} sm={12}>
+                      <FormTypes
+                        size="small"
+                        fullWidth
+                        required={true}
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        type="date"
+                        label={`Start Date`}
+                        name="startDate"
+                        onChange={(date) => {
+                          setFieldValue('startDate', date);
+                        }}
+                        {...(minStartDate ? { minDate: minStartDate } : {})}
+                        {...(values.endDate ? { maxDate: values.endDate } : {})}
+                      />
+                    </Grid>
+                  )}
+                  {(data?.endDate || type === 'startStop' || type === 'stop') &&
                     (
                       <Grid item xs={12} sm={12}>
                         <FormTypes
