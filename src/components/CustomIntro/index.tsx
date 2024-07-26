@@ -39,7 +39,7 @@ export type StepDefination = {
   nextOnFocusOut?: boolean;
   formFields?: boolean;
   nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
-  nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  nextOnKeyPress?: (e: KeyboardEvent) => boolean;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
   waitForEnable?: boolean;
@@ -66,7 +66,7 @@ export type HiddenStep = {
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
   nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
-  nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  nextOnKeyPress?: (e: KeyboardEvent) => boolean;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
   waitForEnable?: boolean;
@@ -103,7 +103,13 @@ const CustomIntro = () => {
   const handleNext = (checkForStepInsertion = true) => {
     clearTimeout(timeout);
     if (checkForStepInsertion) {
-      currentStepData?.element.click();
+      if (currentStepData?.element.tagName === 'IFRAME') {
+        const frame = currentStepData?.element as HTMLIFrameElement;
+        frame.contentDocument.body.focus();
+        frame.contentDocument.body.click();
+      } else {
+        currentStepData?.element.click();
+      }
       if (currentStepData?.waitForStepInsertion) {
         handleSteps.current?.pause();
         return;

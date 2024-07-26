@@ -165,6 +165,7 @@ function PreviewDownload({
           {
             <ThemeButton
               size="small"
+              id={'details-page-preview-button'}
               tooltip="Preview"
               iconForMobile={<VisibilityIcon />}
               startIcon={<VisibilityIcon />}
@@ -183,6 +184,7 @@ function PreviewDownload({
 
           <ThemeButton
             iconForMobile={<DownloadIcon />}
+            id={'details-page-download-button'}
             tooltip="Download"
             startIcon={<DownloadIcon />}
             disabled={btnLoading === 'Download'}
@@ -199,6 +201,7 @@ function PreviewDownload({
 
           {isExcelDownload && (
             <ThemeButton
+              id={'details-page-export-to-excel-button'}
               iconForMobile={<ExportIcon />}
               tooltip="Export To Excel"
               startIcon={<ExportIcon />}
@@ -213,6 +216,7 @@ function PreviewDownload({
           {isSendEmail && (
             <ThemeButton
               iconForMobile={<MdEmail />}
+              id={'details-page-send-email-button'}
               disabled={btnLoading === 'Send Email'}
               startIcon={<MdEmail />}
               tooltip="Send Email"

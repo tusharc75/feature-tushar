@@ -445,6 +445,7 @@ const RentalManagementDetailsPage = () => {
                   {permissions?.iotChart?.isRead && (
                     <Button
                       className="btn-outline-v1"
+                      id={'rental-management-view-iot-chart-button'}
                       variant="outlined"
                       color="primary"
                       size="small"
@@ -458,6 +459,7 @@ const RentalManagementDetailsPage = () => {
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
                     className="btn-outline-v1"
+                    id={'rental-management-download-button'}
                     type="button"
                     size="small"
                     disabled={isDownloading ? true : false}
@@ -473,6 +475,7 @@ const RentalManagementDetailsPage = () => {
                     (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (
                       <Button
                         className="btn-outline-v1"
+                        id={'rental-management-create-new-version-button'}
                         variant="contained"
                         size="small"
                         onClick={() => {
@@ -489,6 +492,7 @@ const RentalManagementDetailsPage = () => {
                     allowedToEdit && (
                       <Fragment>
                         <ButtonWithPulse
+                          id={'rental-management-close-button'}
                           variant={'outlined'}
                           color="default"
                           size="small"
@@ -502,6 +506,7 @@ const RentalManagementDetailsPage = () => {
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
                     <Button
                       className="buttonStyleBigScreen"
+                      id={'rental-management-re-open-button'}
                       variant="contained"
                       color="primary"
                       size="small"
@@ -525,6 +530,7 @@ const RentalManagementDetailsPage = () => {
                               variant={isMobile && !isTablet ? 'text' : 'contained'}
                               className={'btn-outline-v1'}
                               onClick={handleOpenUpdateDialog}
+                              id={'rental-management-edit-button'}
                             >
                               {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                             </Button>
@@ -637,7 +643,6 @@ const RentalManagementDetailsPage = () => {
                   rentalPolicyData={resourceData?.policy}
                 />
               )}
-
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
                 <Quotation
                   rentalManagementData={rentalManagementData}

@@ -92,6 +92,11 @@ export class HandleSteps {
   }
 
   private loop() {
+    if (this.error) {
+      console.error(this.message);
+      this.error = false;
+      this.message = '';
+    }
     window.requestAnimationFrame(() => {
       this.checkPreviousObservers();
       this.loop();
@@ -122,7 +127,7 @@ export class HandleSteps {
     }
   }
   handleNextOnKeyDown(e: KeyboardEvent) {
-    if (this.currentStepData.isHiddenStep && e.key === this.currentStepData.nextOnKeyPress) {
+    if (this.currentStepData.isHiddenStep && this.currentStepData.nextOnKeyPress(e)) {
       this.next();
     }
   }
@@ -143,12 +148,19 @@ export class HandleSteps {
     if (!this.currentStepData.isHiddenStep) return;
     const currData = this.currentStepData;
     if (currData.nextOnFocusOut) {
-      currData.element.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
-      this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
+      if (currData.element.tagName === 'IFRAME') {
+        const element = currData.element as HTMLIFrameElement;
+        element.contentDocument.body.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
+        this.listenerAttachedElements.push({ elm: element.contentDocument.body, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
+      } else {
+        currData.element.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
+        this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
+      }
     }
     if (currData.nextOnValueChange) {
       const parent = this.currentStepData?.element?.parentElement?.parentElement?.parentElement?.getAttribute('datatype');
       const isMultiInputAutoComplete = parent === 'multiSelect';
+
       const isAutoComplete = this.currentStepData.element.classList.contains('MuiAutocomplete-input');
 
       if (isMultiInputAutoComplete) {
@@ -268,7 +280,7 @@ export class HandleSteps {
       this.retry++;
       if (this.retry >= RETRY) {
         clearInterval(this.interval);
-        this.message = 'Element not found';
+        this.message = `Element not found with selector: ${activeStep.target}`;
         this.error = true;
 
         this.reset();
