@@ -575,12 +575,14 @@ const ProductBuilder = (props) => {
             }}
             disabled={isDisabledInlineEdit()}
           >
-            {isMobile && !isTablet ? '' : 'Inline Edit'}
+            {'Inline Edit'}
           </MenuItem>
         )}
         {stage === 'cost' && permissions?.isUpdate && (
-          <MenuItem onClick={handelOpenBulkEdit} disabled={checkUniqTemplate()}>
-            {isMobile && !isTablet ? '' : 'Bulk Edit'}
+          <MenuItem
+            onClick={handelOpenBulkEdit}
+            disabled={checkUniqTemplate()}>
+            {'Bulk Edit'}
           </MenuItem>
         )}
         <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>

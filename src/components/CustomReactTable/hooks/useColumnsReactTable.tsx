@@ -226,7 +226,7 @@ export default function useColumns() {
           field.displayUnits.forEach((_unit) => {
             field.displayCurrency.forEach((_currency) => {
               let fieldName = field.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = field.fieldLabel + ' ' + _unit + '/' + _currency;
+              let fieldLabel = field.fieldLabel + ' ' + _currency + '/' + _unit;
               column.push({
                 ...commonFieldData,
                 id: fieldName,
