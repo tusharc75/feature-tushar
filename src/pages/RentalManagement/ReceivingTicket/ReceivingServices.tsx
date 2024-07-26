@@ -20,6 +20,7 @@ import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTick
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
+import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
 
@@ -292,31 +293,31 @@ const ActionButtonMenuItems = ({
   setServiceConfirmationDialog,
 }) => {
 
-  // const validateAction = (action) => {
-  //   const errorMessages = [];
-  //   selectedRecords.forEach((e) => {
-  //     if (action === rentalManagementActions.startService) {
-  //       const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-  //       if (!isEmpty(serviceLogEntry)) {
-  //         errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
-  //       }
-  //     }
-  //     else if (action === rentalManagementActions.stopService) {
-  //       const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-  //       if (!serviceLogEntry) {
-  //         errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
-  //       }
-  //     }
-  //   });
-  //   if (errorMessages?.length) {
-  //     setOpenMessageDialog({ open: true, errorMessages: errorMessages });
-  //     return true;
-  //   }
-  //   return false;
-  // };
+  const validateAction = (action) => {
+    const errorMessages = [];
+    selectedRecords.forEach((e) => {
+      if (action === rentalManagementActions.startService) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!isEmpty(serviceLogEntry)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
+        }
+      }
+      else if (action === rentalManagementActions.stopService) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!serviceLogEntry) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
+        }
+      }
+    });
+    if (errorMessages?.length) {
+      setOpenMessageDialog({ open: true, errorMessages: errorMessages });
+      return true;
+    }
+    return false;
+  };
 
   return (<>
-    {/* <MenuItem
+    <MenuItem
       onClick={() => {
         if (!validateAction(rentalManagementActions.startService)) {
           setServiceConfirmationDialog({ open: true, type: 'start' });
@@ -333,20 +334,22 @@ const ActionButtonMenuItems = ({
       }}
     >
       Stop Service(s)
-    </MenuItem> */}
+    </MenuItem>
     <MenuItem onClick={() => {
-      const dates = [];
-      selectedRecords?.forEach((d: any) => {
-        d?.serviceLog?.forEach((l: any) => {
-          dates.push(new Date(l.endDate));
+      if (!validateAction(rentalManagementActions.startService)) {
+        const dates = [];
+        selectedRecords?.forEach((d: any) => {
+          d?.serviceLog?.forEach((l: any) => {
+            dates.push(new Date(l.endDate));
+          })
         })
-      })
-      let date = null;
-      if (dates?.length) {
-        date = new Date(Math.max(...dates));
-        date = new Date().setDate(new Date(date).getDate() + 1)
+        let date = null;
+        if (dates?.length) {
+          date = new Date(Math.max(...dates));
+          date = new Date().setDate(new Date(date).getDate() + 1)
+        }
+        setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
       }
-      setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
     }}>
       Start/Stop Service(s)
     </MenuItem>
