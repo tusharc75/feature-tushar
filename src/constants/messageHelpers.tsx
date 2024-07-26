@@ -9,6 +9,8 @@ export const actionSelection = 'Select at least one line item to enable this but
 export const cloneDisable = 'You do not have permission to Clone/Create';
 export const deleteDisable = 'You do not have permission to Delete';
 export const editDisable = 'You do not have permission to Edit';
+export const addDisable = 'You do not have permission to Add';
+export const updateDisable = 'You do not have permission to Update';
 export const childDisable = 'You do not have permission to View Child';
 
 export const rentalManagementActions = {
