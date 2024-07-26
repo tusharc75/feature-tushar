@@ -55,7 +55,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
   const addWalkmeData = () => {
     const sendEmailSteps = createSendEmailStep();
-    const closeSteps = createCloseStep(renderedFrom);
+    const closeSteps = createCloseStep(routes.rentalManagement.title);
     const stepData = [sendEmailSteps];
 
     if (
