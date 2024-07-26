@@ -320,7 +320,18 @@ const ActionButtonMenuItems = ({
     <MenuItem
       onClick={() => {
         if (!validateAction(rentalManagementActions.startService)) {
-          setServiceConfirmationDialog({ open: true, type: 'start' });
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            d?.serviceLog?.forEach((l: any) => {
+              if (l?.endDate) dates.push(new Date(l.endDate));
+            })
+          })
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+            date = new Date().setDate(new Date(date).getDate() + 1)
+          }
+          setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
         }
       }}
     >
@@ -329,7 +340,16 @@ const ActionButtonMenuItems = ({
     <MenuItem
       onClick={() => {
         if (!validateAction(rentalManagementActions.stopService)) {
-          setServiceConfirmationDialog({ open: true, type: 'stop' });
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            const serviceLogEntry = d?.serviceLog?.find((log: any) => !log.endDate);
+            dates.push(new Date(serviceLogEntry?.startDate));
+          })
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+          }
+          setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
         }
       }}
     >

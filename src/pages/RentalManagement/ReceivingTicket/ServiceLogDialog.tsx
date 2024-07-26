@@ -39,7 +39,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       const serviceLogData = response?.data?.data;
 
       serviceLogData?.forEach((log, index) => {
-        if (index !== 0 && index === serviceLogData.length - 1) {
+        if (index === 0 && serviceLogData.length !== 1) {
           log.canDelete = true;
         }
         if (maxInvoiceDate && log.endDate <= maxInvoiceDate) {
