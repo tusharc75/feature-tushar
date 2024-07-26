@@ -190,7 +190,6 @@ const ReceivingTicket = ({
   };
 
   const addWalkmeData = (data: any[]) => {
-    console.log(data);
     if (data?.length === 0) return;
     const stepData: WalkmeData[] = [];
     const canAddCreateReceivingTicketStep = validateAction(rentalManagementActions.createReceivingTicket, data, true);
