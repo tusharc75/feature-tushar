@@ -181,7 +181,6 @@ const ReceivingTicket = ({
 
   useEffect(() => {
     if (dataRows.length) {
-      console.log({ dataRows });
       addWalkmeData(dataRows);
     }
   }, [assetPolicyData, dataRows]);
