@@ -115,14 +115,14 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
                 <p className="text-truncate">{row.original?.productName}</p>
               )}
               {row.original.type === MATERIAL_TYPE.product &&
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`/product/detail/${row.original.product}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    window.open(`/product/detail/${row.original.product}`);
+                  }}
+                >
+                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                </IconButton>
               }
             </div>
           )
@@ -149,7 +149,6 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
       Header: 'Quantity',
       disabled: false,
       Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />),
-      cellEditor: 'numericCellEditor',
       filter: false,
       sortable: false,
       editable: permissions?.transferInventory?.isUpdate
@@ -239,7 +238,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
             qty: 1
           })
         })
-        if(finalObject?.subRows?.length) finalObject.canDelete = false;
+        if (finalObject?.subRows?.length) finalObject.canDelete = false;
         return {
           ...finalObject
         };
