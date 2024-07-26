@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset, getObjKeys } from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset, getObjKeys, DELIVERY_TICKET_TYPE } from '../../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -25,7 +25,8 @@ export default function AssetDetailsChangeDialog({
   ids,
   setAssetsData,
   staticLookUpFilters = {},
-  productsDefaultData = []
+  productsDefaultData = [],
+  ticketType = null,
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -71,7 +72,9 @@ export default function AssetDetailsChangeDialog({
             initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
             initialValues[e.fieldName] = 0;
           } else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
-            initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
+            if (!ticketType || ticketType && ticketType !== DELIVERY_TICKET_TYPE.return) {
+              initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
+            }
           }
         });
       }

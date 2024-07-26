@@ -14,7 +14,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { Link } from 'react-router-dom';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Services from 'src/pages/Packages/Services';
 import Products from 'src/pages/Packages/Products';
@@ -91,19 +91,16 @@ const AssignPackageDialog = ({
                   >
                     {row?.original?.packageName}
                   </Link>
-
-                  <Box ml={1}>
-                    <HtmlTooltip title={`Info`}>
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          setOpen({ open: true, data: row?.original });
-                        }}
-                      >
-                        <InfoOutlinedIcon fontSize="small" color="primary" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </Box>
+                  <HtmlTooltip title={`View`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setOpen({ open: true, data: row?.original });
+                      }}
+                    >
+                      <VisibilityIcon fontSize="small" color="primary" />
+                    </IconButton>
+                  </HtmlTooltip>
                 </span>
               );
             };

@@ -907,7 +907,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                           // minDate={endDate || new Date()}
                           value={endDate}
                           name="endDate"
-                          label="End Date"
+                          label="Invoice Closing Date"
                           onChange={(date: any) => {
                             setEndDate(date ? date : null);
                           }}
@@ -1002,7 +1002,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             Cancel
           </Button>
           <HtmlTooltip
-            title={rowsApplied?.length === 0 ? 'Please select items and end date then apply '
+            title={rowsApplied?.length === 0 ? 'Please select items and invoice closing date then apply '
               : rowsApplied?.some((d) => d.invalidDate === true) ? 'Please select an appropriate date !'
                 : 'Create Bill'
             }

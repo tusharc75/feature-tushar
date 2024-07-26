@@ -17,7 +17,9 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit = true, fullHeight = false }) => {
-  const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_${packageData?.packageType || 'product'}`;
+
+  const renderedFrom = `${camelCase(routes?.packages.title)}_service'}`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user }
