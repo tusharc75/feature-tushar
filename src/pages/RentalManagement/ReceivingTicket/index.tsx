@@ -180,7 +180,10 @@ const ReceivingTicket = ({
   }, [currentStep, rentalPolicyData]);
 
   useEffect(() => {
-    addWalkmeData(dataRows);
+    if (dataRows.length) {
+      console.log({ dataRows });
+      addWalkmeData(dataRows);
+    }
   }, [assetPolicyData, dataRows]);
 
   const OpenInNewWindow = (url) => {
@@ -188,21 +191,22 @@ const ReceivingTicket = ({
   };
 
   const addWalkmeData = (data: any[]) => {
+    console.log(data);
     if (data?.length === 0) return;
     const stepData: WalkmeData[] = [];
     const canAddCreateReceivingTicketStep = validateAction(rentalManagementActions.createReceivingTicket, data, true);
     if (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep && canAddCreateReceivingTicketStep) {
       const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
-      let data: WalkmeData;
+      let walkmeData: WalkmeData;
       if (statusPolicy && data?.[0]?.type === 'Asset') {
-        data = generateCreateReceivingTicket(renderedFrom);
+        walkmeData = generateCreateReceivingTicket(renderedFrom);
       } else {
-        data = generateCreateReceivingTicket(renderedFrom, false);
+        walkmeData = generateCreateReceivingTicket(renderedFrom, false);
       }
-      stepData.push(data);
+      stepData.push(walkmeData);
       if (walkmeInstance && walkmeInstance.type === 'flow' && !globalStepDataAdded.createReceivingTicket) {
         globalStepDataAdded.createReceivingTicket = true;
-        walkmeInstance.instance.push([...data.steps, { ...data.steps[data.steps.length - 1], waitForStepInsertion: true }]);
+        walkmeInstance.instance.push([...walkmeData.steps, { ...walkmeData.steps[walkmeData.steps.length - 1], waitForStepInsertion: true }]);
         walkmeInstance.handleNext();
       }
     }
