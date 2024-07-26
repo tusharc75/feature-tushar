@@ -52,6 +52,7 @@ import {
   generateDeleteAddedProductSteps,
   nextButtonStep
 } from 'src/pages/RentalManagement/walkmeSteps';
+import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 
 const Productpackage = ({
   rentalManagementData,
@@ -1103,7 +1104,7 @@ const Productpackage = ({
           }}
         />
       )}
-      {addExistingProductDialog.open && [MATERIAL_TYPE.product, MATERIAL_TYPE.package]?.includes(addExistingProductDialog?.type) && (
+      {addExistingProductDialog.open && [MATERIAL_TYPE.product]?.includes(addExistingProductDialog?.type) && (
         <AddExistingProductInventory
           type={addExistingProductDialog.type}
           renderedFrom={addExistingProductDialog?.type === 'product' ? `${renderedFrom}-product` : `${renderedFrom}-package`}
@@ -1116,6 +1117,18 @@ const Productpackage = ({
           rentalPolicyData={rentalPolicyData}
         />
       )}
+      {addExistingProductDialog.open && addExistingProductDialog.type === MATERIAL_TYPE.package && (
+        <AssignPackageDialog
+          onSuccess={handleAdd}
+          handleClose={() => {
+            setAddExistingProductDialog({ open: false, type: '', parentId: null });
+          }}
+          packageType={MATERIAL_TYPE.product}
+          customerAccount={rentalPolicyData?.customerAccountWisePackages ? rentalManagementData?.customerAccount?.optionValue : null}
+          isSubmitting={isSubmitting}
+        />
+      )}
+
       {addExistingProductDialog.open && addExistingProductDialog.type === 'service' && (
         <AssignServiceDialog
           onSuccess={(services) => {

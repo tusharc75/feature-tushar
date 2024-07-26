@@ -15,7 +15,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const PackagesTable = ({ packageId, packageData }) => {
+const PackagesTable = ({ packageId, packageData, allowedToEdit = true, fullHeight = false }) => {
   const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -115,7 +115,7 @@ const PackagesTable = ({ packageId, packageData }) => {
     minWidth: 100,
     width: 100,
     sticky: 'right',
-    editable: permissions?.packages?.isUpdate,
+    editable: permissions?.packages?.isUpdate && allowedToEdit,
     cellEditor: 'numericCellEditor',
     disableFilters: true,
     disableSortBy: true,
@@ -169,29 +169,31 @@ const PackagesTable = ({ packageId, packageData }) => {
 
   const rightSideContents = () => {
     return (
-      permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
-      <>
-        <ImportExportMenu
-          permissions={permissions?.packages}
-          module="packages"
-          api={`${packages.api}/${packageId}/package`}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          ids={[]}
-          additionalParams={`refrenceId=${packageId}`}
-        />
-      </>
+      (permissions?.packages?.isCreate || permissions?.packages?.isUpdate) &&
+      allowedToEdit && (
+        <>
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="packages"
+            api={`${packages.api}/${packageId}/package`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            ids={[]}
+            additionalParams={`refrenceId=${packageId}`}
+          />
+        </>
+      )
     );
   };
 
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isUpdate}
+        isAddButtonVisible={permissions?.packages?.isUpdate && allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={permissions?.packages?.isUpdate}
+        isActionButtonVisible={permissions?.packages?.isUpdate && allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingProducts }}
         rightSideContents={rightSideContents()}
@@ -199,7 +201,7 @@ const PackagesTable = ({ packageId, packageData }) => {
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 393px)'}
+          height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -207,7 +209,8 @@ const PackagesTable = ({ packageId, packageData }) => {
           isClientSideGrid={true}
           refreshGrid={fetchData}
           onSaveEdit={handleUpdateQuantity}
-          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
+          hideSelection={(permissions?.packages?.isCreate || permissions?.packages?.isUpdate) && allowedToEdit ? false : true}
+          hideExportTable={!allowedToEdit}
         />
       ) : (
         <Box p={2} height={500}>
