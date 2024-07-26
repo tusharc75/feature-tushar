@@ -81,30 +81,28 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                           setFieldValue('startDate', date);
                         }}
                         {...(minStartDate ? { minDate: minStartDate } : {})}
-                        {...(values.endDate ? { maxDate: values.endDate } : {})}
                       />
                     </Grid>
                   )}
                   {(data?.endDate || type === 'startStop' || type === 'stop') &&
-                    (
-                      <Grid item xs={12} sm={12}>
-                        <FormTypes
-                          size="small"
-                          fullWidth
-                          required={true}
-                          values={values}
-                          errors={errors}
-                          touched={touched}
-                          type="date"
-                          label={`End Date`}
-                          name="endDate"
-                          onChange={(date) => {
-                            setFieldValue('endDate', date);
-                          }}
-                          minDate={values.startDate}
-                          {...(maxEndDate ? { maxDate: maxEndDate } : {})}
-                        />
-                      </Grid>
+                    (<Grid item xs={12} sm={12}>
+                      <FormTypes
+                        size="small"
+                        fullWidth
+                        required={true}
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        type="date"
+                        label={`End Date`}
+                        name="endDate"
+                        onChange={(date) => {
+                          setFieldValue('endDate', date);
+                        }}
+                        minDate={values.startDate}
+                        {...(maxEndDate ? { maxDate: maxEndDate } : {})}
+                      />
+                    </Grid>
                     )}
                 </Grid>
               </Box>

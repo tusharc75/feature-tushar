@@ -82,9 +82,8 @@ export const rentalManagementMessage = {
     onlySwapAssets: 'Only Assets can be swapped',
     onlySwapInUseAssets: 'Only In-Use assets can be swapped',
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
-    serviceAlreadyStarted: 'Service already in progress',
+    serviceAlreadyStarted: 'Service already started',
     serviceNotstarted: 'Service not started yet',
-    serviceCannotbeSelect: `Service cannot be select for this action`,
     canNotChangeStartDateEndDate: `Can not change Start Date/End Date`,
     canNotChangeStartDate: `Can not change Start Date`,
     canNotChangeEndDate: `Can not change End Date`

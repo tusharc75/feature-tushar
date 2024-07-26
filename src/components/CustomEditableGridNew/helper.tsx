@@ -2,8 +2,14 @@ export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
   const schema = {};
   values.forEach((element) => {
     fields.forEach((input) => {
-      if (input.required && !Boolean(element[`${input.fieldName}`])) {
-        schema[`${element._id}_${input.fieldName}`] = `${input.fieldLabel} is required`;
+      if (input.type === 'multiSelect') {
+        if (input.required && !Boolean(element[`${input.fieldName}`]?.length)) {
+          schema[`${element._id}_${input.fieldName}`] = `${input.fieldLabel} is required`;
+        }
+      } else {
+        if (input.required && !Boolean(element[`${input.fieldName}`])) {
+          schema[`${element._id}_${input.fieldName}`] = `${input.fieldLabel} is required`;
+        }
       }
     });
   });
@@ -34,6 +40,7 @@ export const generateColumn = (fields) => {
             accessorKey: fieldName,
             Header: fieldLabel,
             id: fieldName,
+            required: _field?.required,
             unit: _unit,
             minWidth: 180,
             width: 200
@@ -51,6 +58,7 @@ export const generateColumn = (fields) => {
               accessorKey: fieldName,
               Header: fieldLabel,
               id: fieldName,
+              required: _field?.required,
               currency: _currency,
               unit: _unit,
               minWidth: 180,
@@ -68,6 +76,7 @@ export const generateColumn = (fields) => {
             accessorKey: fieldName,
             Header: fieldLabel,
             id: fieldName,
+            required: _field?.required,
             currency: _currency,
             minWidth: 180,
             width: 200
@@ -81,6 +90,7 @@ export const generateColumn = (fields) => {
         accessorKey: _field?.fieldName,
         Header: _field?.fieldLabel,
         id: _field?.fieldName,
+        required: _field?.required,
         minWidth: 260,
         width: 280
       });

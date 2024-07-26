@@ -61,7 +61,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.index}</h5>
             {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
-              <HtmlTooltip title={'View Service Logs'}>
+              <HtmlTooltip title={'View Logs'}>
                 <span>
                   <IconButton
                     size="small"
@@ -78,13 +78,13 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         )
       },
       {
-        accessor: 'assetNumber',
+        accessor: 'serviceName',
         Header: 'Details',
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <p className="text-truncate">{row?.original?.assetNumber}</p>
+            <p className="text-truncate">{row?.original?.serviceName}</p>
             <IconButton
               size="small"
               onClick={() => {
@@ -254,8 +254,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         <ServiceLogDialog
           rentalId={rentalManagementData?._id}
           id={serviceLogDialog?.data?.uniqueId}
-          assetNumber={serviceLogDialog?.data?.assetNumber}
-          open={serviceLogDialog?.open}
+          serviceName={serviceLogDialog?.data?.serviceName}
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
           }}
@@ -320,7 +319,18 @@ const ActionButtonMenuItems = ({
     <MenuItem
       onClick={() => {
         if (!validateAction(rentalManagementActions.startService)) {
-          setServiceConfirmationDialog({ open: true, type: 'start' });
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            d?.serviceLog?.forEach((l: any) => {
+              if (l?.endDate) dates.push(new Date(l.endDate));
+            })
+          })
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+            date = new Date().setDate(new Date(date).getDate() + 1)
+          }
+          setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
         }
       }}
     >
@@ -329,7 +339,16 @@ const ActionButtonMenuItems = ({
     <MenuItem
       onClick={() => {
         if (!validateAction(rentalManagementActions.stopService)) {
-          setServiceConfirmationDialog({ open: true, type: 'stop' });
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            const serviceLogEntry = d?.serviceLog?.find((log: any) => !log.endDate);
+            dates.push(new Date(serviceLogEntry?.startDate));
+          })
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+          }
+          setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
         }
       }}
     >
