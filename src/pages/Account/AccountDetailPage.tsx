@@ -29,7 +29,7 @@ import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAcc
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { customerAccount, getObjKeysWithValues, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
+import { checkIsAllowedToDelete, checkIsAllowedToEdit, customerAccount, getObjKeysWithValues, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
 import { accountPage } from '../../routes/Accounts';
 import ManageContactDialog from '../Contact/ManageContact';
 import Step from '../DynamicForm/Step';
@@ -84,7 +84,6 @@ export default function AccountDetailPage(props) {
 
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const parsed = queryString.parse(history.location.search);
   const {
     account: { accountApi, accountResource, accountRoute },
     accountBreadcrumb,
@@ -114,7 +113,10 @@ export default function AccountDetailPage(props) {
   const [isProcessing, setIsProcessing] = useState(false);
   const [showCreateOpportunityDialog, setShowCreateOpportunityDialog] = useState(false);
   const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
-  const [canEdit, setCanEdit] = useState(false);
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
+
+
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
   const [editAccountData, setEditAccountData] = useState<any>({});
@@ -267,103 +269,44 @@ export default function AccountDetailPage(props) {
 
   const fetchAccountData = async () => {
     setLoading(true);
-
     let data;
-
     const response: any = await axiosInstance().get(`/${accountApi}/${id}`);
     data = response?.data?.data;
-
     setCustomizedRoutes([accountBreadcrumb, { title: data.accountName }]);
     handleMainPonts(data);
     setAccountData(data);
-    setCanEdit([...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id));
+    setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource[accountResource], data));
+    setAllowedToDelete(checkIsAllowedToDelete(user, sidebarResource[accountResource], data?.owner?.optionValue));
 
-    let parentHierarchyData = [];
-    if (data.parentHierarchy && data.parentHierarchy.length > 0) {
-      data.parentHierarchy.map((o) => {
-        if (Object.keys(o).length) {
-          if (typeof o.owner === 'string') {
-            o.owner = {
-              optionValue: o.owner,
-              optionLabel: o.owner
-            };
-          }
-          o.canEdit = [...(data?.collaborator ?? []), o.owner].some((obj) => obj.optionValue === user.user._id);
-          parentHierarchyData.push(o);
-        }
-      });
-    }
-    if (parentHierarchyData && parentHierarchyData.length > 0) {
+    if (data?.parentHierarchy?.length) {
       let accounts = [
         ...data.parentHierarchy,
         {
-          // _id: data._id,
-          // accountName: data.accountName,
-          // typeOfAccount: data.typeOfAccount,
-          // industry: data.industry,
-          // typeOfBusiness: data.typeOfBusiness,
-          // phone: data.phone,
           ...data,
           type: 'child',
           current: true,
-          // parentAccount: data.parentAccount
-          //   ? {
-          //       _id: data.parentAccount.optionValue,
-          //       accountName: data.parentAccount.optionLabel
-          //     }
-          //   : null,
-          canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
         }
       ];
       let newData = [];
       accounts.forEach((account) => {
         if (isObjectEmpty(account)) return true;
-
         const updatedAccount = {
-          // _id: account._id,
-          // accountName: account.accountName,
-          // typeOfAccount: account.typeOfAccount,
-          // industry: account.industry,
-          // parentId: null,
-          // typeOfBusiness: account.typeOfBusiness,
-          // phone: account.phone,
           ...account,
           type: 'child',
-          // current: account.current,
-          canEdit: account?.canEdit ?? [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
+          canEdit: checkIsAllowedToEdit(user, sidebarResource[accountResource], account)
         };
-
-        // if (account.parentAccount) {
-        //   updatedAccount['parentAccountText'] = account.parentAccount.accountName;
-        //   updatedAccount['parentId'] = account.parentAccount._id;
-        // } else {
-        //   updatedAccount['type'] = 'parent';
-        // }
         newData.push(updatedAccount);
       });
-
       setAccountHierarchyData([...newData]);
     } else {
       setAccountHierarchyData([
         {
-          // _id: data._id,
-          // accountName: data.accountName,
-          // typeOfAccount: data.typeOfAccount,
-          // industry: data.industry,
-          // typeOfBusiness: data.typeOfBusiness,
-          // phone: data.phone,
           ...data,
           current: true,
-          canEdit: [...(data?.collaborator ?? []), data?.owner].some((obj) => obj.optionValue === user.user._id)
+          canEdit: checkIsAllowedToEdit(user, sidebarResource[accountResource], data)
         }
       ]);
     }
-
-    // if (accountFields.length === 0) {
-    //   getAccountFields();
-    // } else {
-    //   setLoading(false);
-    // }
     getAccountFields(data);
     setLoading(false);
     initializeGraphData();
@@ -442,7 +385,6 @@ export default function AccountDetailPage(props) {
         setShowAccountHierarchyInFullScreenDialog(true);
       },
       icon: <AccountHierarchyIcon width={42} height={42} />,
-      // icon: <TiFlowChildren />,
       show: true,
       class: 'account'
     },
@@ -718,8 +660,8 @@ export default function AccountDetailPage(props) {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions && permissions[accountResource] && permissions[accountResource].approveAccount && (
-              <>
+            {permissions && permissions[accountResource] && permissions[accountResource].approveAccount && allowedToEdit
+              && (
                 <Button
                   id="detailApproveButton"
                   variant={isMobile ? 'text' : 'contained'}
@@ -750,30 +692,26 @@ export default function AccountDetailPage(props) {
                     'Approve'
                   )}
                 </Button>
-              </>
+              )}
+            {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit && (
+              <Button
+                variant={isMobile ? 'text' : 'contained'}
+                size="small"
+                onClick={handleOpneUpdateDialog}
+                className={'btn-outline-v1'}>
+                {isMobile ? <Edit /> : 'Edit'}
+              </Button>
             )}
-            {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit && (
-              <>
-                <Button variant={isMobile ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
-                  {isMobile ? <Edit /> : 'Edit'}
-                </Button>
-              </>
-            )}
-            {permissions &&
-              permissions[accountResource] &&
-              permissions[accountResource].isDelete &&
-              accountData?.owner?.optionValue &&
-              user?.user?._id &&
-              accountData.owner.optionValue === user.user._id ? (
+            {permissions && permissions[accountResource] && permissions[accountResource].isDelete && allowedToDelete && (
               <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-            ) : null}
+            )}
             <ActivityButton referenceId={accountData?._id} resource={accountResource} resourceLabel={accountData?.accountName} />
           </Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
         <ProcessFlow
-          disableBackNext={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit ? false : true}
+          disableBackNext={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit ? false : true}
           steps={steps}
           activeStep={activeStep}
           handleMarkAsCompleted={handleMarkAsCompleted}
@@ -822,7 +760,7 @@ export default function AccountDetailPage(props) {
                         recordsPerLine={3}
                         resource={accountResource}
                         isRedirect={false}
-                        isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
+                        isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
                       />
                     </Box>
                   )}
@@ -835,7 +773,7 @@ export default function AccountDetailPage(props) {
                         fetchData={fetchRelatedData}
                         permissions={permissions}
                         isAddProjectSale={true}
-                        isAllowedToEdit={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
+                        isAllowedToEdit={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
                         accountId={accountData._id}
                         accountName={accountData.accountName}
                         resource={accountResource}
@@ -853,7 +791,7 @@ export default function AccountDetailPage(props) {
                         accountName={accountData.accountName}
                         accountResource={accountResource}
                         isRenderedFromCustomerAccount={true}
-                        isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && canEdit}
+                        isAllowedToUpdate={permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit}
                       />
                     </Box>
                   )}
