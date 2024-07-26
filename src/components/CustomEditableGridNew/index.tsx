@@ -30,6 +30,7 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [isAddField, setIsAddField] = useState(false);
   const [addedField, setAddedField] = useState([]);
+  const [scrollToHeader, setScrollToHeader] = useState('');
 
   useEffect(() => {
     if (referenceId) {
@@ -205,6 +206,7 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
                     extraDisabledFields={extraDisabledFields}
                     error={error}
                     updateData={updateData}
+                    scrollToHeader={scrollToHeader}
                   />
                 </div>
               </Box>
@@ -222,6 +224,11 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
                 onClick={() => {
                   if (isEmpty(error)) {
                     handleSave([...flatRows?.map((f) => ({ ...f, fields: [...(f?.fields || []), ...addedField] })), ...restData]);
+                  } else {
+                    const err = Object.keys(error);
+                    if (err?.length) {
+                      setScrollToHeader(err[0]);
+                    }
                   }
                 }}
               >
