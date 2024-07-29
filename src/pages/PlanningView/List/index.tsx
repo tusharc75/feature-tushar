@@ -101,7 +101,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
 
   return (
     <>
-      <div className="pr-[66px] flex">
+      <div className="flex max-[560px]:pt-[40px] min-[561px]:pr-[100px]">
         <Autocomplete
           options={resourceList}
           getOptionLabel={(option) => (option && option?.title) || ''}
@@ -131,7 +131,11 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
         <Box height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      ) : <Box mt={2}><span>Please Select Resource</span></Box>}
+      ) : (
+        <Box mt={2}>
+          <span>Please Select Resource</span>
+        </Box>
+      )}
     </>
   );
 }
