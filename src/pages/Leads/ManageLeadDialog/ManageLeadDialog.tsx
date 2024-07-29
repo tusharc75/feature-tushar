@@ -1,19 +1,13 @@
 import { useEffect, useState, useContext, Fragment } from 'react';
-import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import { useHistory } from 'react-router-dom';
 import Dialog from '@material-ui/core/Dialog';
 import axiosInstance from '../../../axios/axiosInstance';
-import {
-  getObjKeys,
-  yupSchema,
-  getObjKeysWithValues,
-  setFieldsInAscendingOrder,
-} from '../../../constants/helpers';
+import { getObjKeys, yupSchema, getObjKeysWithValues } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -21,9 +15,9 @@ import { useData } from '../../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
+import InputField from 'src/components/Helpers/InputField';
 
 export default function ManageLeadDialog({
   open,
@@ -33,17 +27,18 @@ export default function ManageLeadDialog({
   dataToUpdate,
   isRedirectToDetailPage = true,
   isClone = false,
-  leadId = null
+  leadId = null,
+  resource = null
 }) {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
-  const { state: { user, selectedEntity, permissions } }: any = useData();
+  const {
+    state: { user, selectedEntity, permissions }
+  }: any = useData();
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -52,10 +47,6 @@ export default function ManageLeadDialog({
   useEffect(() => {
     getLeadFields();
   }, []);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   const getLeadFields = async () => {
     const response = await axiosInstance().get(`/field?resource=Lead`);
@@ -73,7 +64,7 @@ export default function ManageLeadDialog({
             setCloneHeading(`${firstName || ''} ${middleName || ''} ${lastName || ''}`);
             let tempData = { ...rest };
             if (fieldsDataForCreate?.find((e) => e?.fieldName === 'process')) {
-              tempData.process = fieldsDataForCreate?.find((e) => e?.fieldName === 'process')?.defaultValue
+              tempData.process = fieldsDataForCreate?.find((e) => e?.fieldName === 'process')?.defaultValue;
             }
             setInitialData({
               fields: fieldsDataForCreate,
@@ -95,6 +86,7 @@ export default function ManageLeadDialog({
   };
 
   const handleSubmit = async (values) => {
+    setLoading(true);
     if (isNew) {
       axiosInstance()
         .post(`${routes.lead.path}?entity=${selectedEntity}`, values)
@@ -132,7 +124,6 @@ export default function ManageLeadDialog({
           toastConfig.setToastConfig(error);
           setLoading(false);
         });
-
     }
   };
 
@@ -166,7 +157,7 @@ export default function ManageLeadDialog({
       >
         {initialData?.fields?.length ? (
           <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
-            {({ values, errors, setFieldValue, setFieldTouched, setErrors, setValues, touched, submitForm }) => (
+            {({ values, setFieldValue, errors, touched, submitForm }) => (
               <Fragment>
                 <CustomDialogHeader
                   title={
@@ -188,55 +179,22 @@ export default function ManageLeadDialog({
                 />
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {formsData && formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <FormTypes
-                                      isNew={isNew}
-                                      {...field}
-                                      disabled={!isNew && field.disableOnEdit}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      fieldData={field}
-                                      fields={initialData.fields}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={
-                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                          ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
-                                          : null
-                                      }
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                    <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                      }}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                      onImageUploadCompletePercentage={(completePercentage) => {
+                        setUploadingImageOrFileProgress(completePercentage);
+                      }}
+                      resource={resource}
+                      referenceId={leadId}
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
