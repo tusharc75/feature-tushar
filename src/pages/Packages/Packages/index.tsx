@@ -13,6 +13,7 @@ import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageD
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { isMobile } from 'react-device-detect';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
 
@@ -45,18 +46,11 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     axiosInstance()
       .get(`${packages.api}/${packageId}/package`)
       .then(({ data: { data } }) => {
-        let rows = data.map((u) => {
-          let res = {
+        let rows = data.map((u, index) => {
+          let res: any = {
             ...prepareDataForGrid(u, user),
-            inventoryCount: u?.qty,
-            warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
-            productCategoryChipColor: u.productCategory?.chipColour
           };
-          for (let col in res) {
-            if (res[col] && res[col].optionLabel) {
-              res[col] = res[col].optionLabel;
-            }
-          }
+          res.index = index + 1;
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: data.length });
@@ -73,18 +67,26 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
     const response = await axiosInstance().get(`/field?resource=Packages`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
-    setColumns([{
-      accessor: 'qty',
-      Header: 'Qty',
-      editable: allowedToEdit,
-      disableFilters: true,
-      disableSortBy: true,
-      disabled: true,
-      Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
-    }, ...newColumns]);
+    setColumns([
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        editable: allowedToEdit,
+        disableFilters: true,
+        disableSortBy: true,
+        disabled: true,
+        Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
+      }, ...newColumns]);
   };
 
-  const handleUpdateQuantity = (data, row) => {
+  const onSaveInlineEdit = (data, row) => {
     if (Number(row?.qty) > 0) {
       axiosInstance()
         .put(`${packages.api}/${packageId}/package`, {
@@ -117,7 +119,6 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       });
   };
 
-
   const handleAssignPackage = (rows) => {
     setSubmitting(true);
     axiosInstance()
@@ -140,9 +141,9 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Product Packages</MenuItem>
+        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Existing Product Packages</MenuItem>
         <Box ml={1} />
-        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Service Packages</MenuItem>
+        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Existing Service Packages</MenuItem>
       </>
     );
   };
@@ -201,7 +202,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchData}
-          onSaveEdit={handleUpdateQuantity}
+          onSaveEdit={onSaveInlineEdit}
           hideSelection={allowedToEdit ? false : true}
           hideExportTable={true}
         />
