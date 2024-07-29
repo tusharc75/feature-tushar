@@ -23,7 +23,6 @@ import { getDefaultMyRecordType, gridLoadingTimeout, lead, prepareDataForGrid, p
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
-import './style.scss';
 import axios, { CancelTokenSource } from 'axios';
 
 const Leads = () => {
@@ -347,7 +346,7 @@ const Leads = () => {
   const convertLeadToOpportunity = () => {
     const ids = convertLeadToOpportunityConfirmationDialog.id ? [convertLeadToOpportunityConfirmationDialog.id] : selectedRecords.map((m) => m._id);
     axiosInstance()
-      .post(`${lead.leadApi}/to-opportunity`, { ids: ids })
+      .post(`${lead.leadApi}/convert`, { ids: ids })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -437,7 +436,6 @@ const Leads = () => {
     );
   };
 
-
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
@@ -465,14 +463,11 @@ const Leads = () => {
           onToggle={handleFilter}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => {
             setIsOpen({ open: true, isClone: false, idToClone: null });
           }}
@@ -517,8 +512,9 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
-              }?`}
+            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${
+              deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
