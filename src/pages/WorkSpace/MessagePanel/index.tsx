@@ -21,7 +21,6 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
-  const [isEditorActive, setIsEditorActive] = useState(true);
   const [socket, setSocket] = useState<Socket>(null);
 
   const token = localStorage.getItem('token');
@@ -98,15 +97,13 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
               <p className="text-sm text-gray-500">{selectedChannel.description}</p>
             </div>
             <div className="body max-h-[calc(100vh-320px)] overflow-y-auto">
-              <Messages channelId={selectedChannel?._id} socket={socket} setIsEditorActive={setIsEditorActive} />
+              <Messages channelId={selectedChannel?._id} socket={socket} />
             </div>
           </>
         )}
-        {isEditorActive && (
-          <div className="footer">
-            <SendMessage channelId={selectedChannel?._id} socket={socket} />
-          </div>
-        )}
+        <div className="footer">
+          <SendMessage channelId={selectedChannel?._id} socket={socket} />
+        </div>
       </div>
       {isMemberDialogOpen && (
         <ViewMembers
