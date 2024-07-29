@@ -116,8 +116,9 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
                         multiple
                         disableCloseOnSelect
                         options={fieldOptions}
+                        limitTags={4}
                         getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                        getOptionSelected={(option: any, val) => option?.fieldName === val}
+                        getOptionSelected={(option: any, val) => option?.fieldName === val?.fieldName}
                         value={values?.formRelatedTo?.fields}
                         onChange={(e, val) => {
                           setFieldValue('formRelatedTo', { section: values?.formRelatedTo?.section, fields: val ? val : [] });
