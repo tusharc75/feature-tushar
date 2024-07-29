@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Popper, TextField } from '@material-ui/core';
+import { Dialog, IconButton, Popper, TextField, useMediaQuery } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { KeyboardEvent, ReactNode, useRef, useState } from 'react';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
@@ -271,6 +271,7 @@ const CustomIntro = () => {
 export default CustomIntro;
 
 const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void }) => {
+  const isMobile = useMediaQuery('(max-width:768px)');
   const location = useLocation();
   const [walkMeSteps] = useStore((store) => store[WALK_ME_STEPS]);
   const [stepsForThisPage, setStepsForThisPage] = useState<WalkmeData[]>([]);
@@ -295,7 +296,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
     }
   };
 
-  if (stepsForThisPage.length === 0) return null;
+  if (stepsForThisPage.length === 0 || isMobile) return null;
 
   return (
     <>

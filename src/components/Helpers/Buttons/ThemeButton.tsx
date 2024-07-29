@@ -7,6 +7,7 @@ type SimpleButton = {
   borderColor?: 'none';
   iconForMobile: ReactNode | boolean;
   tooltip?: string;
+  mobileTooltip?: string;
   isLoading?: boolean;
   isVisible?: boolean;
 } & Omit<ButtonProps, 'variant'>;
@@ -15,6 +16,7 @@ type OutlinedButtonProps = {
   borderColor?: 'default';
   iconForMobile: ReactNode | boolean;
   hasMobileBorder?: boolean;
+  mobileTooltip?: string;
   tooltip?: string;
   isLoading?: boolean;
   isVisible?: boolean;
@@ -26,6 +28,7 @@ type RedOutlineProps = {
   hasMobileBorder?: boolean;
   mode?: 'dark' | 'light';
   tooltip?: string;
+  mobileTooltip?: string;
   isLoading?: boolean;
   isVisible?: boolean;
 } & ButtonProps;
@@ -43,6 +46,7 @@ const ThemeButton = ({
   startIcon,
   endIcon,
   isVisible = true,
+  mobileTooltip,
   ...rest
 }: ButtonType) => {
   const isMobile = useMediaQuery('(max-width:600px)');
@@ -82,7 +86,7 @@ const ThemeButton = ({
   if (!isVisible) return <></>;
 
   return (
-    <HtmlTooltip title={tooltip} placement="top" arrow enterTouchDelay={0}>
+    <HtmlTooltip title={tooltip ? tooltip : mobileTooltip && isMobile ? mobileTooltip : ''} placement="top" arrow enterTouchDelay={0}>
       <span>
         <Button size="small" disabled={disabled || isLoading} {...rest} {...getButtonProps}>
           {isMobile ? (

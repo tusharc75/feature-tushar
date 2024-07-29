@@ -13,20 +13,14 @@ import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 
-const Thread = ({ message, onClose, socket, channelId, deleteMessage, setIsEditorActive }) => {
+const Thread = ({ message, onClose, socket, channelId, deleteMessage }) => {
   const [messages, setMessages] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
 
   const { state: { user: { user } } } = useData();
 
   useEffect(() => {
-    setIsEditorActive(false); // Deactivating main editor as thread is opened
     setMessages(groupByDate(message?.replies || []));
-
-    return () => {
-      setIsEditorActive(true); // Activating main editor as thread is closed
-    }
-
   }, [message?.replies]);
 
   return (
@@ -75,7 +69,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, setIsEdito
             </div>
           )}
           <div className="footer">
-            <SendMessage channelId={channelId} socket={socket} messageId={message?._id} />
+            <SendMessage channelId={channelId} socket={socket} messageId={message?._id} editorId={'from-thread'} />
           </div>
         </CustomDialogContent>
       </Dialog>
