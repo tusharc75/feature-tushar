@@ -1,5 +1,5 @@
-import { IconButton } from '@material-ui/core';
-import { Delete, Reply } from '@material-ui/icons';
+import { IconButton, Menu, MenuItem } from '@material-ui/core';
+import { MoreVert } from '@material-ui/icons';
 import { groupBy } from 'lodash';
 import moment from 'moment';
 import { useContext, useEffect, useState } from 'react';
@@ -13,24 +13,27 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { dateFormat } from 'src/constants/helpers';
 import { Message } from 'src/pages/WorkSpace/types';
 import Thread from './Thread';
+import SendMessage from './SendMessage';
 
 type MessagesProps = {
   channelId: string;
   socket: Socket;
-  setIsEditorActive: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => moment(message.date).format(dateFormat));
 };
 
-const Messages = ({ channelId, socket, setIsEditorActive }: MessagesProps) => {
+const Messages = ({ channelId, socket }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [threadDialog, setThreadDialog] = useState({ open: false, message: null });
   const { state: { user: { user } } } = useData();
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const [editingMessage, setEditingMessage] = useState(null);
 
   const fetchMessages = async (after: string = null) => {
     try {
@@ -93,6 +96,25 @@ const Messages = ({ channelId, socket, setIsEditorActive }: MessagesProps) => {
     }
   };
 
+  const handleMenuClick = (event, message) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedMessage(message);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedMessage(null);
+  };
+
+  const handleEdit = () => {
+    setEditingMessage(selectedMessage);
+    handleMenuClose();
+  };
+
+  const handleEditComplete = () => {
+    setEditingMessage(null);
+  };
+
   return (
     <>
       {messages !== null ? (
@@ -114,21 +136,24 @@ const Messages = ({ channelId, socket, setIsEditorActive }: MessagesProps) => {
                       <p className="user text-[15px] font-bold">{message.user?.optionLabel}</p>
                       <span className="text-[12px] font-normal">{moment(message.date).format('hh:mm A')}</span>
                     </div>
-                    <p className="message" dangerouslySetInnerHTML={{ __html: message.message }}></p>
-                    {message?.user?.optionValue === user?._id && (
+                    {editingMessage?._id === message._id ? (
+                      <SendMessage
+                        channelId={channelId}
+                        socket={socket}
+                        messageId={message._id}
+                        initialMessage={message.message}
+                        onEditComplete={handleEditComplete}
+                        editorId={`sone`}
+                      />
+                    ) : (
                       <>
-                        <HtmlTooltip title={'Delete'}>
-                          <IconButton onClick={() => setShowConfirmBox({ open: true, _id: message?._id })} size={'small'}>
-                            <Delete color="error" />
-                          </IconButton>
-                        </HtmlTooltip>
+                        <p className="message" dangerouslySetInnerHTML={{ __html: message.message }}></p>
+                        {message?.lastModified ? '(edited)' : null}
+                        <IconButton onClick={(event) => handleMenuClick(event, message)} size="small">
+                          <MoreVert />
+                        </IconButton>
                       </>
                     )}
-                    <HtmlTooltip title={'Reply'} >
-                      <IconButton size={'small'} onClick={() => setThreadDialog({ open: true, message: message })}>
-                        <Reply />
-                      </IconButton>
-                    </HtmlTooltip>
                   </li>
                 ))}
               </ul>
@@ -140,6 +165,25 @@ const Messages = ({ channelId, socket, setIsEditorActive }: MessagesProps) => {
           <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
         </div>
       )}
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+      >
+        <MenuItem onClick={() => setThreadDialog({ open: true, message: selectedMessage })}>
+          Reply
+        </MenuItem>
+        {selectedMessage?.user?.optionValue === user?._id && (
+          <MenuItem onClick={handleEdit}>
+            Edit
+          </MenuItem>
+        )}
+        {selectedMessage?.user?.optionValue === user?._id && (
+          <MenuItem onClick={() => setShowConfirmBox({ open: true, _id: selectedMessage?._id })}>
+            Delete
+          </MenuItem>
+        )}
+      </Menu>
       {showConfirmBox.open && (
         <ConfirmationDialog
           open={showConfirmBox.open}
@@ -160,7 +204,6 @@ const Messages = ({ channelId, socket, setIsEditorActive }: MessagesProps) => {
           socket={socket}
           channelId={channelId}
           deleteMessage={deleteMessage}
-          setIsEditorActive={setIsEditorActive}
         />
       )}
     </>
