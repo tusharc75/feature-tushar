@@ -101,7 +101,7 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
 
   return (
     <>
-      <div className="flex max-[560px]:pt-[40px]">
+      <div className="flex max-[560px]:pt-[40px] min-[561px]:pr-[100px]">
         <Autocomplete
           options={resourceList}
           getOptionLabel={(option) => (option && option?.title) || ''}
