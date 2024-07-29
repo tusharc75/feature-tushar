@@ -49,15 +49,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
         let rows = data.map((u) => {
           let res = {
             ...prepareDataForGrid(u, user),
-            inventoryCount: u?.qty,
-            warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
-            productCategoryChipColor: u.productCategory?.chipColour
           };
-          for (let col in res) {
-            if (res[col] && res[col].optionLabel) {
-              res[col] = res[col].optionLabel;
-            }
-          }
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: data.length });
@@ -97,7 +89,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
     setColumns([...defaultColumns, ...newColumns]);
   };
 
-  const handleUpdateQuantity = (data, row) => {
+  const onSaveInlineEdit = (data, row) => {
     axiosInstance()
       .put(`${packages.api}/${packageId}/services`, {
         ids: [row?._id],
@@ -176,7 +168,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Services</MenuItem>
+        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Existing Services</MenuItem>
       </>
     );
   };
@@ -239,7 +231,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchData}
-          onSaveEdit={handleUpdateQuantity}
+          onSaveEdit={onSaveInlineEdit}
           hideSelection={!allowedToEdit}
           hideExportTable={true}
         />
