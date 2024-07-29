@@ -36,44 +36,66 @@ const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
-
   const {
     state: { permissions }
   }: any = useData();
 
   const FILTERS = [
-    ...(permissions?.warehouse?.isRead ? [{
-      label: routes.warehouse.title,
-      value: 'Warehouse',
-      key: 'warehouse'
-    }] : []),
-    ...(permissions?.product?.isRead ? [{
-      label: routes.product.title,
-      value: 'Product',
-      key: 'product'
-    }] : []),
-    ...(permissions?.serializedAsset?.isRead ? [{
-      label: routes.serializedAsset.title,
-      value: 'Serialized Asset',
-      key: 'asset'
-    }] : []),
-    ...(permissions?.serviceMaster?.isRead ? [{
-      label: routes.serviceMaster.title,
-      value: 'Service Master',
-      key: 'service'
-    }] : []),
-    ...(permissions?.customerAccount?.isRead ? [{
-      label: routes.customerAccount.title,
-      value: 'Customer Account',
-      key: 'customerAccount'
-    }] : []),
-    ...(permissions?.competencies?.isRead ? [{
-      label: routes.competencies.title,
-      value: 'Competencies',
-      key: 'competencies'
-    }] : []),
+    ...(permissions?.warehouse?.isRead
+      ? [
+          {
+            label: routes.warehouse.title,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
+      : []),
+    ...(permissions?.product?.isRead
+      ? [
+          {
+            label: routes.product.title,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
+      : []),
+    ...(permissions?.serializedAsset?.isRead
+      ? [
+          {
+            label: routes.serializedAsset.title,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
+      : []),
+    ...(permissions?.serviceMaster?.isRead
+      ? [
+          {
+            label: routes.serviceMaster.title,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
+      : []),
+    ...(permissions?.customerAccount?.isRead
+      ? [
+          {
+            label: routes.customerAccount.title,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
+      : []),
+    ...(permissions?.competencies?.isRead
+      ? [
+          {
+            label: routes.competencies.title,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
+      : [])
   ];
 
   const ASSET_FILTERS = [
@@ -345,7 +367,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -605,7 +627,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     <>
       <div>
         <Box display="flex" flexDirection="column">
-          <div className="flex flex-wrap gap-2 pr-[66px]">
+          <div className="flex flex-wrap gap-2 max-[560px]:pt-[40px] min-[561px]:pr-[100px]">
             <Autocomplete
               options={resourceList}
               getOptionLabel={(option) => (option && option?.title) || ''}
