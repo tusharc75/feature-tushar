@@ -45,6 +45,7 @@ export type Message = {
   date: Date;
   user: MessageUser;
   replies: Message[];
+  lastModified?: Date;
 };
 
 export type MessageUser = {
