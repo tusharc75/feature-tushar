@@ -19,7 +19,15 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { getDefaultMyRecordType, gridLoadingTimeout, lead, prepareDataForGrid, processFieldName, sidebarResource } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  lead,
+  prepareDataForGrid,
+  processFieldName,
+  sidebarResource
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
@@ -199,12 +207,11 @@ const Leads = () => {
         data = response?.data?.data;
         count = response?.data?.count;
         let rows = data.map((u) => {
-          let finalObject = prepareDataForGrid(u);
-          finalObject['canDelete'] = u.owner?.optionValue === user?.user._id && permissions?.lead?.isDelete;
+          let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
           let res = {
             ...finalObject,
-            isAllowedToUpdate: [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id),
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
             relatedOpportunity: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?.opportunityName,
             relatedOpportunityId: u.staticData && u.staticData.convertedToOpportunity && u.staticData.opportunity?._id
