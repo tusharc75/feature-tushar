@@ -71,22 +71,17 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
   const handleSelectFilter = (name, value) => {
     const isArray = Array.isArray(value);
     const isString = typeof value === 'string';
+    const isNumber = typeof value === 'number';
     const isObject = typeof value === 'object';
 
-    if (isArray && value.length) {
-      setFormValues((prevState) => ({ ...prevState, [name]: value }));
-    } else if (isString && value) {
-      setFormValues((prevState) => ({ ...prevState, [name]: value }));
-    } else if (isObject && !isArray && value) {
-      setFormValues((prevState) => ({ ...prevState, [name]: value }));
-    } else if (value && !isNaN(value)) {
-      setFormValues((prevState) => ({ ...prevState, [name]: value }));
-    } else {
+    if ((isArray && value.length === 0) || (isString && !value) || (isObject && !isArray && !value) || (isNumber && (isNaN(value) || !value))) {
       setFormValues((prevState) => {
         const newState = { ...prevState };
         delete newState[name];
         return newState;
       });
+    } else {
+      setFormValues((prevState) => ({ ...prevState, [name]: value }));
     }
   };
 
