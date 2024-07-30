@@ -288,6 +288,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     formData.append('productCategory', values?.productCategory);
     formData.append('productTemplate', values?.productTemplate);
     formData.append('priceTemplate', values?.priceTemplate);
+    formData.append('customImport', 1);
     if (addedField?.length > 0) {
       formData.append('fields', JSON.stringify(addedField));
     }
@@ -462,35 +463,37 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   </TableHead>
                   <TableBody>
                     {templateImportHeader?.map((_key) => {
-                      const selectedCustomInputHeader = keyValue.find(kv => kv.templateImportHeader === _key?.value)?.customImportHeader;
+                      const selectedCustomInputHeader = keyValue.find((kv) => kv.templateImportHeader === _key?.value)?.customImportHeader;
                       return (
-                      <TableRow key={_key?.value}>
-                        <TableCell component="th" scope="row">
-                          {' '}
-                          {_key?.label}{' '}
-                        </TableCell>
-                        <TableCell align="right">
-                          <Autocomplete
-                            size="small"
-                            id={_key?.value}
-                            options={customImportHeader?.filter((ele)=> !keyValue.some((e)=> e.customImportHeader===ele.value) || ele?.value === selectedCustomInputHeader)}
-                            getOptionLabel={(option) => option?.label || ''}
-                            value={customImportHeader.find((_value) => {
-                              if (_value?.value === selectedCustomInputHeader) {
-                                return true;
-                              }
-                              return null;
-                            })}
-                            onChange={(event, newValue) => {
-                              const tempKeyValues = keyValue?.filter((e)=>e.templateImportHeader!==_key?.value);
-                              setKeyValue([...tempKeyValues, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
-                            }}
-                            style={{ maxWidth: '500px' }}
-                            renderInput={(params) => <TextField {...params} label="" variant="outlined" />}
-                          />
-                        </TableCell>
-                      </TableRow>
-                      )
+                        <TableRow key={_key?.value}>
+                          <TableCell component="th" scope="row">
+                            {' '}
+                            {_key?.label}{' '}
+                          </TableCell>
+                          <TableCell align="right">
+                            <Autocomplete
+                              size="small"
+                              id={_key?.value}
+                              options={customImportHeader?.filter(
+                                (ele) => !keyValue.some((e) => e.customImportHeader === ele.value) || ele?.value === selectedCustomInputHeader
+                              )}
+                              getOptionLabel={(option) => option?.label || ''}
+                              value={customImportHeader.find((_value) => {
+                                if (_value?.value === selectedCustomInputHeader) {
+                                  return true;
+                                }
+                                return null;
+                              })}
+                              onChange={(event, newValue) => {
+                                const tempKeyValues = keyValue?.filter((e) => e.templateImportHeader !== _key?.value);
+                                setKeyValue([...tempKeyValues, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
+                              }}
+                              style={{ maxWidth: '500px' }}
+                              renderInput={(params) => <TextField {...params} label="" variant="outlined" />}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
                     })}
                   </TableBody>
                 </Table>
