@@ -86,7 +86,7 @@ const AddExistingProduct = (props) => {
         const newColumns = generateColumns(
           routes.product.title,
           data?.filter((d) => !ignoreField?.includes(d?.fieldData?.fieldName)),
-          routes.product.path
+          routes.productDetail.path
         );
         newColumns?.forEach((ele) => {
           ele.leval = 'product';
@@ -136,7 +136,6 @@ const AddExistingProduct = (props) => {
 
   const fetchProduct = () => {
     dispatch({ type: 'loading', loading: true });
-
     const queryString = getQueryString();
     axiosInstance()
       .get(`${product.api}${queryString}`)
@@ -147,7 +146,6 @@ const AddExistingProduct = (props) => {
           };
           return res;
         });
-
         const fields: any = [];
         data.productTemplate?.forEach((ele) => {
           ele.fields.forEach((field) => {
@@ -160,24 +158,9 @@ const AddExistingProduct = (props) => {
         });
         let columns = [...productColoums, ...newColumns];
         columns = columns.filter((column, index, self) => self.findIndex((col) => col.accessor === column.accessor) === index);
-        columns.push({
-          accessor: 'inventoryCount',
-          Header: 'Inventory Count',
-          show: true,
-          Cell: ({ row }) => <p className="text-truncate">{row.original?.inventoryCount}</p>,
-          leval: 'price-builder-custom'
-        });
-        columns.push({
-          accessor: 'warehouses',
-          Header: 'Plants',
-          show: true,
-          Cell: ({ row }) => <p className="text-truncate">{row.original?.warehouses}</p>,
-          leval: 'price-builder-custom'
-        });
         columns = sortBy(columns, function (item: any) {
           return levalOrderBy.indexOf(item.leval);
         });
-
         columns = [...columns, ...getStaticFields()];
         setColumns([...columns]);
         dispatch({ type: 'initialize', data: rows, count: data.count });
@@ -239,7 +222,7 @@ const AddExistingProduct = (props) => {
 
   return (
     <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
-      <CustomDialogHeader title={'Add Existing Product'} onClose={handleClose}></CustomDialogHeader>
+      <CustomDialogHeader title={'Add Existing Products'} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
       <div className="listing-grid p-3">
         <Box mb={2}>
           <h6 className="mb-0 mt-0 text-[0.8rem] text-gray-400" style={{ borderBottom: 'none' }}>
@@ -288,7 +271,12 @@ const AddExistingProduct = (props) => {
             </div>
             <div className="ml-auto flex flex-wrap items-start justify-end gap-2 ">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}>
+              <Button
+                size="small"
+                color="primary"
+                onClick={handleAdd}
+                variant="contained"
+                disabled={selectedRecords.length > 0 ? false : true}>
                 {selectedRecords.length ? '(' + selectedRecords.length + ')  ' : ''}
                 Add
               </Button>
@@ -299,13 +287,11 @@ const AddExistingProduct = (props) => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchProduct}
             showOnlyShowFilteredRecordSwitch={true}
-            isClientSideGrid={false}
             hideAction={true}
             resource={sidebarResource.product}
           />

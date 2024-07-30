@@ -107,13 +107,13 @@ const CustomEditableGrid = ({
   const addButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title="Add Existing Product">
+        <HtmlTooltip title="Add Existing Products">
           <MenuItem
             onClick={() => {
               setIsAddExistingProduct(true);
             }}
           >
-            Add Existing Product
+            Add Existing Products
           </MenuItem>
         </HtmlTooltip>
       </>
