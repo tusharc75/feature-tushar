@@ -106,7 +106,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
               </IconButton>
             </>
           ) : (
-            <>
+            <div className="ml-auto flex justify-end gap-2 p-1">
               <Button size="small" color="primary" onClick={onEditComplete}>
                 Cancel
               </Button>
@@ -121,7 +121,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
                 {' '}
                 Save
               </CustomButton>
-            </>
+            </div>
           )}
         </div>
       </div>
