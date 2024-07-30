@@ -1,16 +1,15 @@
-import { useState, useEffect } from 'react';
-import { Dialog, IconButton } from '@material-ui/core';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import { groupByDate } from './Messages';
-import SendMessage from 'src/pages/WorkSpace/MessagePanel/SendMessage';
+import { IconButton } from '@material-ui/core';
+import { Close, Delete } from '@material-ui/icons';
 import moment from 'moment';
-import { cn, dateFormat } from 'src/constants/helpers';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Delete } from '@material-ui/icons';
+import { useEffect, useState } from 'react';
 import { useData } from 'src/StateProvider/Provider';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { cn, dateFormat } from 'src/constants/helpers';
+import SendMessage from 'src/pages/WorkSpace/MessagePanel/SendMessage';
+import { groupByDate } from './Messages';
+import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 
 const Thread = ({ message, onClose, socket, channelId, deleteMessage, open }) => {
   const [messages, setMessages] = useState(null);
@@ -29,14 +28,19 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open }) =>
   return (
     <div
       className={cn(
-        'thread absolute bottom-0 right-0 top-0 z-10 h-[calc(100vh-390px)] min-w-[360px] flex-grow bg-[var(--dark-primary,white)] shadow-md transition-all duration-300 [transform:translateX(100%)] dark:[border:1px_solid_var(--common-border-color)] md:w-[40%]',
+        'thread absolute bottom-0 right-0 top-0 z-10 flex min-w-[360px] max-w-[500px] flex-grow flex-col rounded-md bg-[var(--dark-primary,white)] shadow-md transition-all duration-300 [border:1px_solid_var(--common-border-color)] [transform:translateX(100%)] dark:[border:1px_solid_var(--common-border-color)] md:w-[40%]',
         open && '[transform:translateX(0)]'
       )}
     >
-      <CustomDialogHeader title={`Thread`} onClose={onClose} showRequiredLabel={false} />
-      <div>
+      <div className="flex items-center justify-between p-[10px_12px_10px_16px] [border-bottom:1px_solid_var(--common-border-color)]">
+        <h3>Thread</h3>
+        <IconButton size="small" onClick={onClose}>
+          <Close />
+        </IconButton>
+      </div>
+      <div className="flex-grow overflow-auto">
         {messages !== null ? (
-          <ul className="mt-8 list-none">
+          <ul className=" list-none">
             {Object.keys(messages).map((date) => (
               <li key={date} className="mb- list-none">
                 <div className="relative my-[20px] h-[1px] bg-[var(--common-border-color)]">
@@ -44,7 +48,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open }) =>
                     className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center 
                     text-gray-400 [border:1px_solid_var(--common-border-color)] [left:50%] [top:50%] [transform:translate(-50%,_-50%)]`}
                   >
-                    {moment(date, dateFormat).format('MMMM Do YYYY')}
+                    {formatDateWithTodayYestarday(date, { onlyMonths: true, dateFormat })}
                   </p>
                 </div>
                 <ul className="list-none space-y-5 px-3">
@@ -75,9 +79,9 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open }) =>
             <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
           </div>
         )}
-        <div className="footer">
-          <SendMessage channelId={channelId} socket={socket} messageId={message?._id} editorId={'from-thread'} />
-        </div>
+      </div>
+      <div className="footer">
+        <SendMessage channelId={channelId} socket={socket} messageId={message?._id} editorId={'from-thread'} />
       </div>
       {showConfirmBox.open && (
         <ConfirmationDialog
