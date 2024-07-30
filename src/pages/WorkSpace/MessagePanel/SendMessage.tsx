@@ -17,7 +17,7 @@ type SendMessageProps = {
   editorId?: string;
 };
 
-const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => { }, editorId = '' }: SendMessageProps) => {
+const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => {}, editorId = '' }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +46,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
     <div className={!initialMessage ? `send-message absolute bottom-0 left-0 right-0 bg-[var(--dark-primary,white)] p-3` : ``}>
       <div className="editor overflow-hidden rounded-lg [border:1px_solid_var(--common-border-color)]">
         <Editor
+          key={themeColor}
           id={editorId ? editorId : 'default'}
           onEditorChange={(d) => {
             if (editorRef.current.isDirty()) {
@@ -106,7 +107,9 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
             </>
           ) : (
             <>
-              <Button size="small" color="primary" onClick={onEditComplete}>Cancel</Button>
+              <Button size="small" color="primary" onClick={onEditComplete}>
+                Cancel
+              </Button>
               <CustomButton
                 loading={isLoading}
                 disabled={!message || message === initialMessage || isLoading}
@@ -114,7 +117,9 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
                 color="primary"
                 type="submit"
                 onClick={postMessage}
-              > Save
+              >
+                {' '}
+                Save
               </CustomButton>
             </>
           )}
