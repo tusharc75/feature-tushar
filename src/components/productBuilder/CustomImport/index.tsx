@@ -295,6 +295,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     formData.append('productCategory', values?.productCategory);
     formData.append('productTemplate', values?.productTemplate);
     formData.append('priceTemplate', values?.priceTemplate);
+    formData.append('customImport', 1);
     if (addedField?.length > 0) {
       formData.append('fields', JSON.stringify(addedField));
     }
