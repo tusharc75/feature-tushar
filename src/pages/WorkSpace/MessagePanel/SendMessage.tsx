@@ -43,7 +43,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
   };
 
   return (
-    <div className={!initialMessage ? `send-message absolute bottom-0 left-0 right-0 bg-[var(--dark-primary,white)] p-3` : ``}>
+    <div className={!initialMessage ? `send-message bg-[var(--dark-primary,white)] p-3` : ``}>
       <div className="editor overflow-hidden rounded-lg [border:1px_solid_var(--common-border-color)]">
         <Editor
           key={themeColor}
