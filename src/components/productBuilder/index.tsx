@@ -579,9 +579,7 @@ const ProductBuilder = (props) => {
           </MenuItem>
         )}
         {stage === 'cost' && permissions?.isUpdate && (
-          <MenuItem
-            onClick={handelOpenBulkEdit}
-            disabled={checkUniqTemplate()}>
+          <MenuItem onClick={handelOpenBulkEdit} disabled={checkUniqTemplate()}>
             {'Bulk Edit'}
           </MenuItem>
         )}
@@ -774,6 +772,7 @@ const ProductBuilder = (props) => {
           onClose={() => {
             setInlineBulkEdit(false);
           }}
+          renderedFrom={renderedFrom}
           data={selectedRecords}
           extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
           handleSave={(products) => {
