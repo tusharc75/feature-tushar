@@ -141,21 +141,21 @@ const Assign = ({ managedPackagesData }) => {
       },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-              width: 200,
-              Cell: ({ row }) => {
-                return row.original['position'] ? (
-                  <div>
-                    <p className="text-truncate">{row.original.position}</p>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'position',
+            Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+            width: 200,
+            Cell: ({ row }) => {
+              return row.original['position'] ? (
+                <div>
+                  <p className="text-truncate">{row.original.position}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'qty',
@@ -249,8 +249,6 @@ const Assign = ({ managedPackagesData }) => {
             index++;
           }
         });
-
-        console.log('rowsrows', rows);
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
