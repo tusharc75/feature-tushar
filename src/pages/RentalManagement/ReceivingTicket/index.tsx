@@ -2904,7 +2904,7 @@ const ActionButtonMenuItems = ({
               setTransferAnotherPackageialog(true);
             }}
           >
-            {`Transfer to Another ${routes.packages.title}`}
+            {`Transfer to Another Package`}
           </MenuItem>
         )}
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (

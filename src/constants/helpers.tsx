@@ -456,7 +456,7 @@ export const RESOURCE_LABEL = {
   salesOrder: 'Sales Order',
   invoice: 'Invoice',
   eCommercePolicy: 'e-Commerce Policy',
-  packages: 'Package',
+  packages: 'Packages',
   purchaseOrder: 'Purchase Orders',
   transferAsset: 'Transfer Assets',
   address: 'Addresses',
