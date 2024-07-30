@@ -34,7 +34,7 @@ const Assign = ({ managedPackagesData }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
 
   useEffect(() => {
     fetchColumns();
@@ -141,21 +141,21 @@ const Assign = ({ managedPackagesData }) => {
       },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-              width: 200,
-              Cell: ({ row }) => {
-                return row.original['position'] ? (
-                  <div>
-                    <p className="text-truncate">{row.original.position}</p>
-                  </div>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'position',
+            Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+            width: 200,
+            Cell: ({ row }) => {
+              return row.original['position'] ? (
+                <div>
+                  <p className="text-truncate">{row.original.position}</p>
+                </div>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'qty',
@@ -249,8 +249,6 @@ const Assign = ({ managedPackagesData }) => {
             index++;
           }
         });
-
-        console.log('rowsrows', rows);
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
       })
@@ -312,7 +310,7 @@ const Assign = ({ managedPackagesData }) => {
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = selectedRecords?.map((d) => d._id);
+      ids = selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d._id);
     }
     axiosInstance()
       .put(`/managed-packages/${managedPackagesData?._id}/assets`, { ids: ids })
@@ -389,7 +387,7 @@ const Assign = ({ managedPackagesData }) => {
         )}
         {permissions?.managedPackages?.isUpdate && (
           <MenuItem
-            disabled={selectedRecords?.some((e) => e.type !== MATERIAL_TYPE.serializedAsset)}
+            disabled={!selectedRecords?.some((e) => e.type === MATERIAL_TYPE.serializedAsset)}
             onClick={() => {
               setShowDeleteConfirmBox(true);
             }}
@@ -429,9 +427,6 @@ const Assign = ({ managedPackagesData }) => {
       {assignAssetDialog.open && (
         <AssignSerializedAssetDialog
           reference={'managedPackages'}
-          // ids={flattenArray(dataRows)
-          //   ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
-          //   ?.map((e) => e._id)}
           ids={[]}
           handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
           handleSucess={handleAssignAssets}

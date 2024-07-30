@@ -43,10 +43,10 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
   if (!logs?.length) return 0;
   const uniqueDates = new Set<string>();
   const newStartDate = moment(startDate).startOf('day');
-  const newEndDate = moment(endDate).endOf('day');
+  const newEndDate = moment(endDate).startOf('day');
   serviceLog.forEach(log => {
     const logStartDate = moment(log.startDate).startOf('day');
-    const logEndDate = moment(log.endDate).endOf('day');
+    const logEndDate = moment(log.endDate).startOf('day');
     for (var m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
       if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
         uniqueDates.add(m.format('YYYY-MM-DD'));

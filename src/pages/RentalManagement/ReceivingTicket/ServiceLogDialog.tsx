@@ -162,8 +162,14 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
                         }
                       }
                     })
-                    minStartDate = minStartDate ? new Date(minStartDate) : null;
-                    maxEndDate = maxEndDate ? new Date(maxEndDate) : null;
+                    if(minStartDate) {
+                      minStartDate = new Date(minStartDate);
+                      minStartDate.setDate(minStartDate.getDate() + 1);
+                    }
+                    if(maxEndDate) {
+                      maxEndDate = new Date(maxEndDate);
+                      maxEndDate.setDate(maxEndDate.getDate() - 1);
+                    }
                     setEditDateDialog({ open: true, loading: false, minStartDate: minStartDate, maxEndDate: maxEndDate, data: row?.original });
                   }}
                 >
