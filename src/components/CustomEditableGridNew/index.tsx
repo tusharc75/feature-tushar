@@ -48,7 +48,6 @@ const CustomEditableGrid = ({
     } else {
       setAllFields(JSON.parse(JSON.stringify(fields)));
       const { newColumns, constColumns } = generateColumn(fields, renderedFrom);
-      console.log('newColumns', newColumns);
       setColumns(newColumns);
       setConstColummns(constColumns);
     }
@@ -67,7 +66,6 @@ const CustomEditableGrid = ({
         });
         setAllFields(JSON.parse(JSON.stringify(_fields)));
         const { newColumns, constColumns } = generateColumn(_fields, renderedFrom);
-        console.log('newColumns', newColumns);
         setColumns(newColumns);
         setConstColummns(constColumns);
       })
