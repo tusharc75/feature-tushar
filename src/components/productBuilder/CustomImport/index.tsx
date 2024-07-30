@@ -458,6 +458,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     <MenuItem
                       button
                       onClick={(e) => {
+                        setAddAnchorEl(null);
                         setAddSystemColumn(true);
                       }}
                     >
@@ -466,6 +467,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     <MenuItem
                       button
                       onClick={(e) => {
+                        setAddAnchorEl(null);
                         setAddImportedColumn(true);
                       }}
                     >
