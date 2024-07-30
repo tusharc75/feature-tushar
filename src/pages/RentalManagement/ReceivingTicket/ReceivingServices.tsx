@@ -284,6 +284,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           renderedFrom={renderedFrom}
           allowedToEdit={allowedToEdit}
           fetchRecords={fetchRecords}
+          maxInvoiceDate={serviceLogDialog?.data?.maxInvoiceDate}
         />
       )}
       {serviceConfirmationDialog.open && (
@@ -344,6 +345,8 @@ const ActionButtonMenuItems = ({
       } else if (action === rentalManagementActions.deleteServiceLog) {
         if (!e?.serviceLog?.length) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
+        } else if (e?.maxInvoiceDate && e?.serviceLog[e?.serviceLog?.length - 1]?.endDate <= e?.maxInvoiceDate) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.invoiceCreated });
         }
       }
     });
@@ -367,7 +370,7 @@ const ActionButtonMenuItems = ({
           let date = null;
           if (dates?.length) {
             date = new Date(Math.max(...dates));
-            date = new Date().setDate(new Date(date).getDate() + 1)
+            date.setDate(date.getDate() + 1);
           }
           setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
         }
@@ -404,7 +407,7 @@ const ActionButtonMenuItems = ({
         let date = null;
         if (dates?.length) {
           date = new Date(Math.max(...dates));
-          date = new Date().setDate(new Date(date).getDate() + 1)
+          date.setDate(date.getDate() + 1);
         }
         setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
       }

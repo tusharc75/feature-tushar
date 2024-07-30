@@ -87,8 +87,8 @@ export const rentalManagementMessage = {
     serviceNotstarted: 'Service not started yet',
     canNotChangeStartDateEndDate: `Can not change Start Date/End Date`,
     canNotChangeStartDate: `Can not change Start Date`,
-    canNotChangeEndDate: `Can not change End Date`
-
+    canNotChangeEndDate: `Can not change End Date`,
+    invoiceCreated :  `Invoice already created`
 };
 
 export const subleaseActions = {
