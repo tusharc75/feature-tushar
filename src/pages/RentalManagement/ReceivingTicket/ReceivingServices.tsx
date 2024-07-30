@@ -22,6 +22,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
 import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { Delete } from '@material-ui/icons';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
 
@@ -157,6 +158,35 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           ) : (
             <NoDataCell />
           )
+      },
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 100,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => {
+          const serviceLogCount = row?.original?.serviceLog?.length;
+          const cannotDelete = !serviceLogCount || (row?.original?.serviceLog[serviceLogCount - 1]?.endDate && row?.original?.serviceLog[serviceLogCount - 1]?.endDate <= row?.original?.maxInvoiceDate);
+          return (
+            <>
+              <HtmlTooltip title={'Delete recent log'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={cannotDelete}
+                    onClick={() => { setDeleteServiceLogConfirmDialog({ open: true, data: [{ _id: row.original._id, serviceLogId: row?.original?.serviceLog[serviceLogCount - 1]._id }] }) }}
+                  >
+                    <Delete fontSize="small" color={cannotDelete ? 'disabled' : 'error'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            </>
+          )
+        }
       }
     ];
     setColumns(column);
@@ -250,8 +280,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
               dispatch={dispatch}
               renderedFrom={renderedFrom}
               isClientSideGrid={true}
-              hideSelection={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
-              hideAction={true}
+              hideSelection={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}  
               refreshGrid={fetchRecords}
             />
           ) : (
@@ -305,7 +334,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       {deleteServiceLogConfirmDialog.open && (
         <ConfirmationDialog
           open={deleteServiceLogConfirmDialog.open}
-          message={`Are you sure you want to delete log for selected service(s)?`}
+          message={`Are you sure you want to delete recent log for selected service(s)?`}
           onClose={() => {
             setDeleteServiceLogConfirmDialog({ open: false, data: null });
           }}
