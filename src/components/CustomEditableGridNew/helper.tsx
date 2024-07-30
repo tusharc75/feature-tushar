@@ -16,7 +16,9 @@ export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
   return schema;
 };
 
-export const generateColumn = (fields) => {
+export const generateColumn = (fields, renderedFrom = '') => {
+  const hiddenColumns = JSON.parse(localStorage.getItem('gridMetaData'))[renderedFrom]?.hide || [];
+
   const newColumns: any = [
     {
       accessor: 'index',
@@ -108,7 +110,7 @@ export const generateColumn = (fields) => {
     width: 120
   });
 
-  return { newColumns, constColumns };
+  return { newColumns: newColumns.filter((d) => !hiddenColumns.includes(d.accessor)), constColumns };
 };
 
 export const generateRows = (data, fields) => {

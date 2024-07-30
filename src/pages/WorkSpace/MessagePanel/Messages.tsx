@@ -24,13 +24,19 @@ export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => moment(message.date).format(dateFormat));
 };
 
+const spanClassName = 'text-[13px] text-gray-400';
+
 const Messages = ({ channelId, socket }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [threadDialog, setThreadDialog] = useState({ open: false, message: null });
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const [editingMessage, setEditingMessage] = useState(null);
@@ -43,7 +49,7 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
       }
       const { data } = await axiosInstance().get(api);
 
-      setMessages(prevMessages => {
+      setMessages((prevMessages) => {
         let newMessages = data?.data || [];
         if (after) {
           return groupByDate([...Object.values(prevMessages).flat().slice(0, -1), ...newMessages]);
@@ -69,12 +75,14 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
       socket.emit('joinChannel', channelId);
       socket.on('fetchNewMessage', (messageId) => {
         if (messageId) {
-          fetchMessages(messageId)
+          fetchMessages(messageId);
         } else {
           fetchMessages(lastMessageId);
         }
       });
-      socket.on('fetchMessages', () => { fetchMessages() });
+      socket.on('fetchMessages', () => {
+        fetchMessages();
+      });
       return () => {
         socket.off('fetchNewMessage');
         socket.off('fetchMessages');
@@ -147,8 +155,15 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
                       />
                     ) : (
                       <>
-                        <p className="message" dangerouslySetInnerHTML={{ __html: message.message }}></p>
-                        {message?.lastModified ? '(edited)' : null}
+                        <div className="flex items-end gap-1">
+                          <span
+                            className="message [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] [&_span:last-child]:text-gray-400"
+                            dangerouslySetInnerHTML={{
+                              __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
+                            }}
+                          ></span>
+                        </div>
+
                         <IconButton onClick={(event) => handleMenuClick(event, message)} size="small">
                           <MoreVert />
                         </IconButton>
@@ -169,19 +184,20 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
         anchorEl={anchorEl}
         open={Boolean(anchorEl)}
         onClose={handleMenuClose}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
       >
-        <MenuItem onClick={() => setThreadDialog({ open: true, message: selectedMessage })}>
-          Reply
-        </MenuItem>
+        <MenuItem onClick={() => setThreadDialog({ open: true, message: selectedMessage })}>Reply</MenuItem>
+        {selectedMessage?.user?.optionValue === user?._id && <MenuItem onClick={handleEdit}>Edit</MenuItem>}
         {selectedMessage?.user?.optionValue === user?._id && (
-          <MenuItem onClick={handleEdit}>
-            Edit
-          </MenuItem>
-        )}
-        {selectedMessage?.user?.optionValue === user?._id && (
-          <MenuItem onClick={() => setShowConfirmBox({ open: true, _id: selectedMessage?._id })}>
-            Delete
-          </MenuItem>
+          <MenuItem onClick={() => setShowConfirmBox({ open: true, _id: selectedMessage?._id })}>Delete</MenuItem>
         )}
       </Menu>
       {showConfirmBox.open && (
