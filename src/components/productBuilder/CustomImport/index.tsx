@@ -12,7 +12,10 @@ import {
   Table,
   Box,
   Paper,
-  IconButton
+  IconButton,
+  useMediaQuery,
+  Menu,
+  MenuItem
 } from '@material-ui/core';
 import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
@@ -30,10 +33,13 @@ import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddColumnDialog';
+import { Add } from '@material-ui/icons';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
-
+  const isMobile = useMediaQuery('(max-width:600px)');
   const [fields, setFields] = useState(null);
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState({ productCategory: '', productTemplate: '', priceTemplate: '' });
@@ -49,6 +55,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [addImportedColumn, setAddImportedColumn] = useState(false);
   const [addedField, setAddedField] = useState([]);
   const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
+  const [addAnchorEl, setAddAnchorEl] = useState(null);
 
   useEffect(() => {
     axiosInstance()
@@ -329,96 +336,145 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
         <>
           <CustomDialogHeader title="Custom File Import" onClose={handleClose} />
           <CustomDialogContent>
-            <Grid container xs={12} lg={12} md={12} spacing={2}>
-              <Grid item lg={2} md={2}>
-                <Box display={'flex'} alignItems={'center'} mt={1}>
-                  <Box>
-                    <input
-                      id={`customImportFile`}
-                      name={`customImportFile`}
-                      onChange={handleFileImport}
-                      style={{ display: 'none' }}
-                      onClick={(e: any) => (e.target.value = null)}
-                      type="file"
-                      accept=".xlsx,.csv"
-                      disabled={_.some(_.values(values), (v) => v === '')}
-                    />
-                    <label htmlFor={`customImportFile`}>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <Autocomplete
+                  id="product-category"
+                  style={{ minWidth: '250px', flexGrow: 1 }}
+                  options={productCategory}
+                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    productCategory?.filter((p) => p?.optionValue === values['productCategory'])?.length > 0
+                      ? productCategory?.filter((p) => p?.optionValue === values['productCategory'])[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setValues({ productCategory: val && val.optionValue ? val.optionValue : '', productTemplate: '', priceTemplate: '' });
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} margin="dense" variant="outlined" label="Product Category" placeholder="Product Category" />
+                  )}
+                />
+                <Autocomplete
+                  id="product-template"
+                  style={{ minWidth: '250px', flexGrow: 1 }}
+                  options={productTemplate}
+                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])?.length > 0
+                      ? productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '' });
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} margin="dense" variant="outlined" label="Product Template" placeholder="Product Template" />
+                  )}
+                />
+                <Autocomplete
+                  id="price-template"
+                  style={{ minWidth: '250px', flexGrow: 1 }}
+                  options={priceTemplate}
+                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  value={
+                    priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])?.length > 0
+                      ? priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])[0]
+                      : ''
+                  }
+                  onChange={(e, val) => {
+                    setValues({ ...values, priceTemplate: val && val.optionValue ? val.optionValue : '' });
+                  }}
+                  renderInput={(params) => (
+                    <TextField {...params} margin="dense" variant="outlined" label="Price Template" placeholder="Price Template" />
+                  )}
+                />
+              </div>
+              <div className="ml-auto flex flex-wrap items-center gap-2">
+                <input
+                  id={`customImportFile`}
+                  name={`customImportFile`}
+                  onChange={handleFileImport}
+                  style={{ display: 'none' }}
+                  onClick={(e: any) => (e.target.value = null)}
+                  type="file"
+                  accept=".xlsx,.csv"
+                  disabled={_.some(_.values(values), (v) => v === '')}
+                />
+                <label htmlFor={`customImportFile`}>
+                  <HtmlTooltip title={'Import File'}>
+                    <span>
                       <Button
-                        size="medium"
-                        variant="outlined"
+                        variant={isMobile ? 'text' : 'outlined'}
+                        color="primary"
+                        size="small"
+                        className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
                         component="span"
                         disabled={_.some(_.values(values), (v) => v === '')}
-                        startIcon={<AiOutlineImport />}
+                        startIcon={isMobile ? null : <AiOutlineImport />}
                       >
-                        Import File
+                        {isMobile ? <AiOutlineImport /> : 'Import File'}
                       </Button>
-                    </label>
-                  </Box>
-                </Box>
-              </Grid>
-              <Grid item lg={10} md={10}>
-                <Grid container spacing={2}>
-                  <Grid item md={3} lg={3}>
-                    <Autocomplete
-                      id="product-category"
-                      options={productCategory}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
-                      value={
-                        productCategory?.filter((p) => p?.optionValue === values['productCategory'])?.length > 0
-                          ? productCategory?.filter((p) => p?.optionValue === values['productCategory'])[0]
-                          : ''
-                      }
-                      onChange={(e, val) => {
-                        setValues({ productCategory: val && val.optionValue ? val.optionValue : '', productTemplate: '', priceTemplate: '' });
+                    </span>
+                  </HtmlTooltip>
+                </label>
+
+                <>
+                  <HtmlTooltip title={'Add'}>
+                    <span>
+                      <Button
+                        id={'custom-import-dialog-add-menu-button'}
+                        variant={isMobile ? 'text' : 'outlined'}
+                        color="primary"
+                        size="small"
+                        disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
+                        className={`${isMobile ? 'btn-outline-v1  with-border max-[600px]:[max-width:36px_!important]' : ''}`}
+                        startIcon={isMobile ? null : <Add />}
+                        onClick={(e) => {
+                          setAddAnchorEl(e.currentTarget);
+                        }}
+                        aria-controls="add-menu"
+                      >
+                        {isMobile ? <Add /> : 'Add'}
+                      </Button>
+                    </span>
+                  </HtmlTooltip>
+                  <Menu
+                    anchorEl={addAnchorEl}
+                    keepMounted
+                    getContentAnchorEl={null}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    id="add-menu"
+                    open={Boolean(addAnchorEl)}
+                    onClose={() => setAddAnchorEl(null)}
+                    TransitionProps={{ unmountOnExit: true, timeout: walkmeInstance ? 0 : 200 }}
+                  >
+                    <MenuItem
+                      button
+                      onClick={(e) => {
+                        setAddSystemColumn(true);
                       }}
-                      renderInput={(params) => (
-                        <TextField {...params} margin="dense" variant="outlined" label="Product Category" placeholder="Product Category" />
-                      )}
-                    />
-                  </Grid>
-                  <Grid item md={3} lg={3}>
-                    <Autocomplete
-                      id="product-template"
-                      options={productTemplate}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
-                      value={
-                        productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])?.length > 0
-                          ? productTemplate?.filter((p) => p?.optionValue === values['productTemplate'])[0]
-                          : ''
-                      }
-                      onChange={(e, val) => {
-                        setValues({ ...values, productTemplate: val && val.optionValue ? val.optionValue : '' });
+                    >
+                      Add System Column
+                    </MenuItem>
+                    <MenuItem
+                      button
+                      onClick={(e) => {
+                        setAddImportedColumn(true);
                       }}
-                      renderInput={(params) => (
-                        <TextField {...params} margin="dense" variant="outlined" label="Product Template" placeholder="Product Template" />
-                      )}
-                    />
-                  </Grid>
-                  <Grid item md={3} lg={3}>
-                    <Autocomplete
-                      id="price-template"
-                      options={priceTemplate}
-                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                      getOptionSelected={(option: any, val) => option.optionValue === val}
-                      value={
-                        priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])?.length > 0
-                          ? priceTemplate?.filter((p) => p?.optionValue === values['priceTemplate'])[0]
-                          : ''
-                      }
-                      onChange={(e, val) => {
-                        setValues({ ...values, priceTemplate: val && val.optionValue ? val.optionValue : '' });
-                      }}
-                      renderInput={(params) => (
-                        <TextField {...params} margin="dense" variant="outlined" label="Price Template" placeholder="Price Template" />
-                      )}
-                    />
-                  </Grid>
-                </Grid>
-              </Grid>
-            </Grid>
+                    >
+                      Add From Imported Excel Column
+                    </MenuItem>
+                  </Menu>
+                </>
+              </div>
+            </div>
             {isUploading ? (
               <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
@@ -431,30 +487,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                       <TableCell style={{ width: '50%' }}>
                         <div>
                           <span>System Columns</span>
-                          <span style={{ marginLeft: '10px' }}>
-                            <HtmlTooltip enterTouchDelay={0} title={'Add System Column'}>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  setAddSystemColumn(true);
-                                }}
-                              >
-                                <ControlPointIcon fontSize="small" color="primary" />
-                              </IconButton>
-                            </HtmlTooltip>
-                          </span>
-                          <span style={{ marginLeft: '10px' }}>
-                            <HtmlTooltip enterTouchDelay={0} title={'Add From Imported Excel Column'}>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => {
-                                  setAddImportedColumn(true);
-                                }}
-                              >
-                                <ControlPointIcon fontSize="small" color="primary" />
-                              </IconButton>
-                            </HtmlTooltip>
-                          </span>
                         </div>
                       </TableCell>
                       <TableCell style={{ width: '50%' }}>Imported Excel Columns</TableCell>
@@ -462,35 +494,37 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   </TableHead>
                   <TableBody>
                     {templateImportHeader?.map((_key) => {
-                      const selectedCustomInputHeader = keyValue.find(kv => kv.templateImportHeader === _key?.value)?.customImportHeader;
+                      const selectedCustomInputHeader = keyValue.find((kv) => kv.templateImportHeader === _key?.value)?.customImportHeader;
                       return (
-                      <TableRow key={_key?.value}>
-                        <TableCell component="th" scope="row">
-                          {' '}
-                          {_key?.label}{' '}
-                        </TableCell>
-                        <TableCell align="right">
-                          <Autocomplete
-                            size="small"
-                            id={_key?.value}
-                            options={customImportHeader?.filter((ele)=> !keyValue.some((e)=> e.customImportHeader===ele.value) || ele?.value === selectedCustomInputHeader)}
-                            getOptionLabel={(option) => option?.label || ''}
-                            value={customImportHeader.find((_value) => {
-                              if (_value?.value === selectedCustomInputHeader) {
-                                return true;
-                              }
-                              return null;
-                            })}
-                            onChange={(event, newValue) => {
-                              const tempKeyValues = keyValue?.filter((e)=>e.templateImportHeader!==_key?.value);
-                              setKeyValue([...tempKeyValues, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
-                            }}
-                            style={{ maxWidth: '500px' }}
-                            renderInput={(params) => <TextField {...params} label="" variant="outlined" />}
-                          />
-                        </TableCell>
-                      </TableRow>
-                      )
+                        <TableRow key={_key?.value}>
+                          <TableCell component="th" scope="row">
+                            {' '}
+                            {_key?.label}{' '}
+                          </TableCell>
+                          <TableCell align="right">
+                            <Autocomplete
+                              size="small"
+                              id={_key?.value}
+                              options={customImportHeader?.filter(
+                                (ele) => !keyValue.some((e) => e.customImportHeader === ele.value) || ele?.value === selectedCustomInputHeader
+                              )}
+                              getOptionLabel={(option) => option?.label || ''}
+                              value={customImportHeader.find((_value) => {
+                                if (_value?.value === selectedCustomInputHeader) {
+                                  return true;
+                                }
+                                return null;
+                              })}
+                              onChange={(event, newValue) => {
+                                const tempKeyValues = keyValue?.filter((e) => e.templateImportHeader !== _key?.value);
+                                setKeyValue([...tempKeyValues, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
+                              }}
+                              style={{ maxWidth: '500px' }}
+                              renderInput={(params) => <TextField {...params} label="" variant="outlined" />}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      );
                     })}
                   </TableBody>
                 </Table>
