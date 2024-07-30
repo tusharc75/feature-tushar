@@ -103,6 +103,8 @@ const LeadDetailsPage = () => {
 
   useEffect(() => {
     fetchData();
+    fetchFields();
+    fetchPolicy();
   }, [id, selectedEntity]);
 
   const fetchData = async () => {
@@ -144,8 +146,6 @@ const LeadDetailsPage = () => {
         setAllowedToEdit(isAllowedToUpdate);
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
-        fetchFields();
-        fetchPolicy();
         setCustomizedRoutes([routes.lead, { title: name }]);
       })
       .catch((err) => {
@@ -414,14 +414,10 @@ const LeadDetailsPage = () => {
               />
             </Box>
             <div className="bg-white dark:bg-[var(--dark-primary)_!important]">
-              {loading ? (
+              {loading || !fields?.length ? (
                 <Grid container spacing={2} style={{ padding: '8px' }}>
                   <CommonSkeleton lenArray={[...Array(7).keys()]} />
                 </Grid>
-              ) : !fields?.length ? (
-                <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-                  <img src={SVG('Contacts Placeholder')} alt="No Data" />
-                </Box>
               ) : showAtLast ? (
                 <DetailsPage data={leadData} fields={fields} />
               ) : (
