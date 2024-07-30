@@ -323,7 +323,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchData();
-        onSuccess();
         setViewBillDialogConfirm({ open: false, rows: [] });
       })
       .catch((error) => {
