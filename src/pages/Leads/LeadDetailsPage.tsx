@@ -18,11 +18,22 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import ProcessFlow from '../../components/ProcessFlow';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, checkIsAllowedToEdit, getObjKeysWithValues, lead, processFieldName, sidebarResource } from '../../constants/helpers';
+import {
+  ACTIVITY_RESOURCE,
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
+  getObjKeysWithValues,
+  lead,
+  processFieldName,
+  sidebarResource
+} from '../../constants/helpers';
 import { leadPage } from '../../routes/Lead';
 import axiosInstance from './../../axios/axiosInstance';
 import AccordionOfOpportunity from './AccordionOfOpportunity';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import Step from 'src/pages/DynamicForm/Step';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -31,12 +42,10 @@ const LeadDetailsPage = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
   const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [leadFields, setLeadFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
+  const [fields, setFields] = useState([]);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
@@ -64,6 +73,9 @@ const LeadDetailsPage = () => {
 
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
+  const [tabValue, setTabValue] = useState<any>(0);
+  const [resourceData, setResourceData] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const { leadResource, leadApi } = lead;
   let { id } = useParams();
@@ -76,7 +88,7 @@ const LeadDetailsPage = () => {
 
   useEffect(() => {
     if (steps.length > 0) {
-      const processSteps = leadFields.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLocaleLowerCase());
+      const processSteps = fields?.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLocaleLowerCase());
       if (processSteps && processSteps.isRead && leadData) {
         const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === leadData[processFieldName]);
         setActiveStep(currentStepToShow);
@@ -90,78 +102,62 @@ const LeadDetailsPage = () => {
   }, [steps]);
 
   useEffect(() => {
-    fetchLeadData();
-  }, [user, selectedEntity]);
+    fetchData();
+    fetchFields();
+    fetchPolicy();
+  }, [id, selectedEntity]);
 
-  const fetchLeadData = async () => {
-    if (selectedEntity) {
-      setLoading(true);
-      axiosInstance()
-        .get(`${leadApi}/${id}?entity=${selectedEntity}`)
-        .then(({ data: { data } }) => {
-          const userId = user?.user?._id;
-          handleMainPoints(data);
-          let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
+  const fetchData = async () => {
+    setLoading(true);
+    axiosInstance()
+      .get(`${leadApi}/${id}?entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
 
-          setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.lead, data));
-          let dontHavePermissions = [];
+        let dontHavePermissions = [];
 
-          if (!permissions['customerAccount'].isCreate) {
-            dontHavePermissions.push('Customer Account');
-          }
-          if (!permissions['customerContact'].isCreate) {
-            dontHavePermissions.push('Customer Contact');
-          }
-          if (!permissions['opportunity'].isCreate) {
-            dontHavePermissions.push('Opportunity');
-          }
+        if (!permissions['customerAccount'].isCreate) {
+          dontHavePermissions.push('Customer Account');
+        }
+        if (!permissions['customerContact'].isCreate) {
+          dontHavePermissions.push('Customer Contact');
+        }
+        if (!permissions['opportunity'].isCreate) {
+          dontHavePermissions.push('Opportunity');
+        }
 
-          const isAllowedToUpdate = [...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === userId);
+        const isAllowedToUpdate = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data);
 
-          setHasPermissionToConvertToOpportunity(
-            dontHavePermissions.length === 0 &&
+        setHasPermissionToConvertToOpportunity(
+          dontHavePermissions.length === 0 &&
             user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
             isAllowedToUpdate &&
             data[processFieldName] &&
             data[processFieldName].toLowerCase() === 'qualified'
-          );
-          setIsLeadAlreadyConvertedToOpportunity(
-            data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
-          );
+        );
+        setIsLeadAlreadyConvertedToOpportunity(
+          data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
+        );
 
-          if (data?.salutation?.optionLabel) {
-            name = data.salutation.optionLabel + name;
-          }
-          setHeadingLbl(name);
+        if (data?.salutation?.optionLabel) {
+          name = data.salutation.optionLabel + name;
+        }
 
-          setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === userId));
-          setAllowedToDelete([data.owner].some((d) => d?.optionValue === userId));
-          setLeadData(data);
-          getLeadFields();
-          setCustomizedRoutes([routes.lead, { title: name }]);
-        })
-        .catch((err) => {
-          setLoading(false);
-          toastConfig.setToastConfig(err);
-        });
-    }
+        setAllowedToEdit(isAllowedToUpdate);
+        setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
+        setLeadData(data);
+        setCustomizedRoutes([routes.lead, { title: name }]);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
   };
 
-  const handleMainPoints = (data) => {
-    let tempMp = {
-      company: data.company || '',
-      title: data.title || '',
-      phone: data.phone || '',
-      email: data.email || ''
-    };
-    setMainPoints(tempMp);
-  };
-
-  const getLeadFields = () => {
+  const fetchFields = () => {
     axiosInstance()
       .get(`/field?resource=Lead&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        setLeadFields(data);
+        setFields(data);
 
         const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
         if (processSteps && processSteps.isRead) {
@@ -183,7 +179,6 @@ const LeadDetailsPage = () => {
             setAdditionalFieldName(d.fieldData.sectionName);
           }
         });
-
         setLoading(false);
       })
       .catch((err) => {
@@ -192,8 +187,22 @@ const LeadDetailsPage = () => {
       });
   };
 
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.lead}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const handleDeleteLead = () => {
     if (leadData?._id) {
+      setIsDeleting(true);
       axiosInstance()
         .put(`${leadApi}/remove?entity=${selectedEntity}`, {
           ids: [leadData._id]
@@ -205,16 +214,19 @@ const LeadDetailsPage = () => {
             message: data.message
           });
           goBackToListing();
+          setIsDeleting(false);
           setShowConfirmBox(false);
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
+          setIsDeleting(false);
           setShowConfirmBox(false);
         });
     } else {
       setShowConfirmBox(false);
     }
   };
+
   const goBackToListing = () => {
     history.push({
       pathname: leadPage.path
@@ -222,7 +234,7 @@ const LeadDetailsPage = () => {
   };
 
   const handleUpdateLead = (values) => {
-    fetchLeadData();
+    fetchData();
     setOpenUpdateDialog(false);
   };
 
@@ -235,7 +247,7 @@ const LeadDetailsPage = () => {
 
   const convertLeadToOpportunity = () => {
     axiosInstance()
-      .post(`${leadApi}/to-opportunity`, { ids: [leadData._id] })
+      .post(`${leadApi}/convert`, { ids: [leadData._id] })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -261,7 +273,7 @@ const LeadDetailsPage = () => {
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
 
     let processFieldName = '';
-    const leadFieldData = leadFields.map((f) => {
+    const leadFieldData = fields?.map((f) => {
       if (f.fieldData.type == 'process') {
         processFieldName = f.fieldData.fieldName;
       }
@@ -282,7 +294,7 @@ const LeadDetailsPage = () => {
     axiosInstance()
       .put(`/lead?entity=${selectedEntity}`, updatedData)
       .then(() => {
-        fetchLeadData();
+        fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -296,7 +308,7 @@ const LeadDetailsPage = () => {
       setOpenAdditionalDialog(true);
     } else {
       let processFieldName = '';
-      const leadFieldData = leadFields.map((f) => {
+      const leadFieldData = fields?.map((f) => {
         if (f.fieldData.type == 'process') {
           processFieldName = f.fieldData.fieldName;
         }
@@ -315,7 +327,7 @@ const LeadDetailsPage = () => {
           // setActiveStep(data && data?.isSetBackStep ? tempActiveStep : tempActiveStep + 1)
           // if (steps[tempActiveStep].text.toLowerCase() === "qualified") {
           // }
-          fetchLeadData();
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -323,7 +335,7 @@ const LeadDetailsPage = () => {
     }
   };
 
-  let filteredLeadFields = leadFields.filter((item) => item.fieldData.sectionName != additionalFieldName);
+  let filteredLeadFields = fields?.filter((item) => item.fieldData.sectionName != additionalFieldName);
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -365,7 +377,11 @@ const LeadDetailsPage = () => {
               </Button>
             )}
             {leadsPermissions.isDelete && allowedToDelete && !leadData?.staticData?.convertedToOpportunity && (
-              <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
+              <DeleteButton
+                text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
+                disabled={isDeleting}
+                onClick={() => setShowConfirmBox(true)}
+              />
             )}
             <ActivityButton
               referenceId={leadData?._id}
@@ -376,40 +392,52 @@ const LeadDetailsPage = () => {
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
-        <Box pb={2}>
-          <ProcessFlow
-            disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
-            steps={steps}
-            activeStep={activeStep}
-            handleMarkAsCompleted={handleMarkAsCompleted}
-            hideBackButton={isLeadAlreadyConvertedToOpportunity}
-            className="stepper-box-layout"
-          />
-        </Box>
-        <div className="bg-white dark:bg-[var(--dark-primary)_!important]">
-          {loading ? (
-            <Grid container spacing={2}>
-              {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
-                <Grid key={index} item sm={6} md={6}>
-                  <Skeleton variant="text" width="100px" height="16px" />
-                  <Box marginY={1} />
-                  <Skeleton width="100%" height="50px" />
-                </Grid>
-              ))}
-            </Grid>
-          ) : !leadFields.length ? (
-            <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-              <img src={SVG('Contacts Placeholder')} alt="No Data" />
+        <CustomTabs
+          value={tabValue}
+          onChange={(index, newValue) => {
+            setTabValue(newValue);
+          }}
+        >
+          <CustomTab value={0}>Header</CustomTab>
+          {resourceData && resourceData?.steps?.length && <CustomTab value={1}>Associations</CustomTab>}
+        </CustomTabs>
+        <TabPanel value={tabValue} index={0}>
+          <>
+            <Box pb={2}>
+              <ProcessFlow
+                disableBackNext={leadsPermissions.isUpdate && allowedToEdit ? false : true}
+                steps={steps}
+                activeStep={activeStep}
+                handleMarkAsCompleted={handleMarkAsCompleted}
+                hideBackButton={isLeadAlreadyConvertedToOpportunity}
+                className="stepper-box-layout"
+              />
             </Box>
-          ) : showAtLast ? (
-            <DetailsPage data={leadData} fields={leadFields} />
-          ) : (
-            <DetailsPage data={leadData} fields={filteredLeadFields} />
-          )}
-        </div>
-        <Box pt={3}>
-          <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
-        </Box>
+            <div className="bg-white dark:bg-[var(--dark-primary)_!important]">
+              {loading || !fields?.length ? (
+                <Grid container spacing={2} style={{ padding: '8px' }}>
+                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
+                </Grid>
+              ) : showAtLast ? (
+                <DetailsPage data={leadData} fields={fields} />
+              ) : (
+                <DetailsPage data={leadData} fields={filteredLeadFields} />
+              )}
+            </div>
+            <Box pt={3}>
+              <AccordionOfOpportunity recordsPerLine={3} opportunity={leadData?.staticData?.opportunity} />
+            </Box>
+          </>
+        </TabPanel>
+        <TabPanel value={tabValue} index={1}>
+          <Step
+            resourceData={resourceData}
+            resourceId={id}
+            resource={sidebarResource.lead}
+            data={leadData}
+            allowedToEdit={permissions?.lead?.isUpdate}
+          />
+        </TabPanel>
       </Box>
       {convertLeadToOpportunityConfirmationDialog.open && (
         <ConfirmationDialog
@@ -444,6 +472,8 @@ const LeadDetailsPage = () => {
           }}
           isNew={false}
           dataToUpdate={leadData}
+          resource={sidebarResource.lead}
+          leadId={id}
         />
       )}
       {showConfirmBox && (
@@ -452,6 +482,7 @@ const LeadDetailsPage = () => {
           message={`Are you sure you want to delete this Lead`}
           onClose={() => setShowConfirmBox(false)}
           onOk={handleDeleteLead}
+          okBtnLoading={isDeleting}
         />
       )}
     </Box>

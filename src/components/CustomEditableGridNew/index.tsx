@@ -19,8 +19,17 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
-const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, handleSave, isSubmitting, referenceId = null, restData = [] }) => {
-
+const CustomEditableGrid = ({
+  onClose,
+  fields = [],
+  data,
+  extraDisabledFields,
+  handleSave,
+  isSubmitting,
+  referenceId = null,
+  restData = [],
+  renderedFrom = ''
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -38,7 +47,7 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
       fetchColumns();
     } else {
       setAllFields(JSON.parse(JSON.stringify(fields)));
-      const { newColumns, constColumns } = generateColumn(fields);
+      const { newColumns, constColumns } = generateColumn(fields, renderedFrom);
       setColumns(newColumns);
       setConstColummns(constColumns);
     }
@@ -56,7 +65,7 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
           return levalOrderBy.indexOf(item.leval);
         });
         setAllFields(JSON.parse(JSON.stringify(_fields)));
-        const { newColumns, constColumns } = generateColumn(_fields);
+        const { newColumns, constColumns } = generateColumn(_fields, renderedFrom);
         setColumns(newColumns);
         setConstColummns(constColumns);
       })
@@ -98,13 +107,13 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
   const addButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title="Add Existing Product">
+        <HtmlTooltip title="Add Existing Products">
           <MenuItem
             onClick={() => {
               setIsAddExistingProduct(true);
             }}
           >
-            Add Existing Product
+            Add Existing Products
           </MenuItem>
         </HtmlTooltip>
       </>

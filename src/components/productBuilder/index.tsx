@@ -128,16 +128,26 @@ const ProductBuilder = (props) => {
             width: 150,
             show: true,
             disabled: true,
-            cellRenderer: 'productNameRenderer',
-            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+            Cell: ({ row }) => {
+              return <div>{!Editable ? (
+                <p className="text-truncate">{row.original.index}</p>
+              ) : (
+                <p
+                  onClick={() => {
+                    openProductModel(row.original?._id);
+                  }}
+                  className="link text-truncate"
+                >
+                  {row.original.index}
+                </p>
+              )}</div>
+            }
           }
         ];
         let fields = data.productFields || [];
-
         data?.productTemplate?.forEach((ele) => {
           fields = [...fields, ...ele.fields];
         });
-
         data?.priceTemplate?.forEach((ele) => {
           ele?.fields?.forEach((item) => {
             if (item.type === 'converter' || item.type === 'currencyAmount' || item.isConverter === true) {
@@ -158,30 +168,7 @@ const ProductBuilder = (props) => {
           });
           fields = [...fields, ...ele.fields];
         });
-        let newColumns = generateColumns(routes.product.title, fields, null, false, currency);
-        newColumns.forEach((column) => {
-          if (column?.accessor === 'productName') {
-            column.cell = ({ row }) => (
-              <span>
-                {row?.original?.['productName'] ? (
-                  <>
-                    <Link
-                      className="link text-truncate"
-                      title={row?.original?.['productName']}
-                      to={`${routes.productDetail.path}/${row?.original?.productId}`}
-                      target={'_blank'}
-                      rel="noopener noreferrer"
-                    >
-                      {row?.original?.['productName']}
-                    </Link>
-                  </>
-                ) : (
-                  <NoDataCell />
-                )}
-              </span>
-            );
-          }
-        });
+        let newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path, false, currency);
         columns = [...columns, ...newColumns];
 
         if (stage && stage === 'product') {
@@ -579,9 +566,7 @@ const ProductBuilder = (props) => {
           </MenuItem>
         )}
         {stage === 'cost' && permissions?.isUpdate && (
-          <MenuItem
-            onClick={handelOpenBulkEdit}
-            disabled={checkUniqTemplate()}>
+          <MenuItem onClick={handelOpenBulkEdit} disabled={checkUniqTemplate()}>
             {'Bulk Edit'}
           </MenuItem>
         )}
@@ -774,6 +759,7 @@ const ProductBuilder = (props) => {
           onClose={() => {
             setInlineBulkEdit(false);
           }}
+          renderedFrom={renderedFrom}
           data={selectedRecords}
           extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
           handleSave={(products) => {

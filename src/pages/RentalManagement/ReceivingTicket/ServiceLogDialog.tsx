@@ -18,7 +18,7 @@ import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, onSuccess, allowedToEdit, fetchRecords }) => {
+const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, onSuccess, allowedToEdit, fetchRecords, maxInvoiceDate= null }) => {
 
   const { state: { user } }: any = useData();
   const { state, dispatch } = useTableReducer();
@@ -36,9 +36,6 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
     try {
       dispatch({ type: 'loading', loading: true });
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`);
-      const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalId}/invoice/material-end-date-qty`);
-      let invoiceData = invoiceResponse?.data?.data?.material || [];
-      const maxInvoiceDate = invoiceData?.find((ele) => ele._id === id)?.endDate;
       const serviceLogData = response?.data?.data;
       serviceLogData?.forEach((log, index) => {
         if (index === 0) {
@@ -46,6 +43,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
         }
         if (maxInvoiceDate && log.endDate <= maxInvoiceDate) {
           log.canEdit = false;
+          log.canDelete = false;
         } else {
           log.canEdit = true;
         }
@@ -164,8 +162,14 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
                         }
                       }
                     })
-                    minStartDate = minStartDate ? new Date(minStartDate) : null;
-                    maxEndDate = maxEndDate ? new Date(maxEndDate) : null;
+                    if(minStartDate) {
+                      minStartDate = new Date(minStartDate);
+                      minStartDate.setDate(minStartDate.getDate() + 1);
+                    }
+                    if(maxEndDate) {
+                      maxEndDate = new Date(maxEndDate);
+                      maxEndDate.setDate(maxEndDate.getDate() - 1);
+                    }
                     setEditDateDialog({ open: true, loading: false, minStartDate: minStartDate, maxEndDate: maxEndDate, data: row?.original });
                   }}
                 >
@@ -173,7 +177,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
                 </IconButton>
               </span>
             </HtmlTooltip>
-            <HtmlTooltip title={row?.original?.canDelete ? 'Delete' : 'Can only delete most recent log'}>
+            <HtmlTooltip title={!row?.original?.canEdit ? `Invoice already created` : row?.original?.canDelete ? 'Delete' : 'Can only delete most recent log'}>
               <span>
                 <IconButton
                   size="small"

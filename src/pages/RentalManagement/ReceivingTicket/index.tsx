@@ -973,6 +973,7 @@ const ReceivingTicket = ({
           s.serviceName = s?.serviceDetail?.serviceName;
           s.startDate = s?.actualStartDate;
           s.endDate = s?.actualEndDate;
+          s.maxInvoiceDate = invoiceData?.find((ele) => ele._id === s.uniqueId)?.endDate;
           const parent = material?.find((e) => e._id === s?.parentId);
           if (parent) {
             s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
@@ -2903,7 +2904,7 @@ const ActionButtonMenuItems = ({
               setTransferAnotherPackageialog(true);
             }}
           >
-            {`Transfer to another ${routes.packages.title}`}
+            {`Transfer to Another Package`}
           </MenuItem>
         )}
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (

@@ -1,28 +1,14 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Typography from '@material-ui/core/Typography';
 import Box from '@material-ui/core/Box';
-import {
-  Card,
-  IconButton,
-  CardContent,
-  Grid,
-  List,
-  ListItem,
-  ListItemAvatar,
-  ListItemText,
-  withStyles,
-  Menu,
-  MenuItem,
-  ListItemIcon
-} from '@material-ui/core';
+import { Card, IconButton, CardContent, Grid, Menu, MenuItem } from '@material-ui/core';
 import { Link } from 'react-router-dom';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import ExpandLessIcon from '@material-ui/icons/ExpandLess';
 import { AiOutlineMail, AiOutlineUser } from 'react-icons/ai';
-import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
 import { BiPhone } from 'react-icons/bi';
 import { FaArrowAltCircleDown } from 'react-icons/fa';
-import { customerAccount, customerContact, supplierAccount, supplierContact } from '../../constants/helpers';
+import { customerContact, supplierAccount, supplierContact } from '../../constants/helpers';
 import { MoreVert } from '@material-ui/icons';
 import ManageContactDialog from '../Contact/ManageContact';
 import { Accordion, AccordionSummary, AccordionDetails } from 'src/components/CustomAccordion';
