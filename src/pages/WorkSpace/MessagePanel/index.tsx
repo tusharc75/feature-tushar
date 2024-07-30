@@ -96,14 +96,11 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
               </div>
               <p className="text-sm text-gray-500">{selectedChannel.description}</p>
             </div>
-            <div className="body my-2 max-h-[calc(100vh-430px)] overflow-y-auto">
+            <div className="body ">
               <Messages channelId={selectedChannel?._id} socket={socket} />
             </div>
           </>
         )}
-        <div className="footer">
-          <SendMessage channelId={selectedChannel?._id} socket={socket} />
-        </div>
       </div>
       {isMemberDialogOpen && (
         <ViewMembers
