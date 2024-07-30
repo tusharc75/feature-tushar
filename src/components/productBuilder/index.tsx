@@ -698,7 +698,6 @@ const ProductBuilder = (props) => {
         hasXpadding
       />
 
-      {console.log(renderedFrom)}
       <Box mt={1}>
         {columns ? (
           <CustomReactTable
