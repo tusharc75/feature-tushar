@@ -1,4 +1,4 @@
-import { IconButton, Menu, MenuItem } from '@material-ui/core';
+import { IconButton, Menu, MenuItem, Popper } from '@material-ui/core';
 import { MoreVert } from '@material-ui/icons';
 import { groupBy } from 'lodash';
 import moment from 'moment';
@@ -26,8 +26,6 @@ export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => moment(message.date).format(dateFormat));
 };
 
-const spanClassName = 'text-[13px] text-gray-400';
-
 const Messages = ({ channelId, socket }: MessagesProps) => {
   const [theme] = useAppTheme();
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
@@ -35,7 +33,7 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
   const [threadDialog, setThreadDialog] = useState({ open: false, message: null });
-  const [emojiPanelOpen, setEmojiPanleOpen] = useState<Message>(null);
+  const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<{ selected: Message; anchor: null | HTMLElement }>(null);
   const {
     state: {
       user: { user }
@@ -127,6 +125,13 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
     setEditingMessage(null);
   };
 
+  const openEmojiPanel = (e: React.MouseEvent<HTMLButtonElement>, message: Message) => {
+    setEmojiPanelAnchor((prev) => (!prev || prev?.selected?._id !== message._id ? { anchor: e.currentTarget, selected: message } : null));
+  };
+  const closeEmojiPanel = () => {
+    setEmojiPanelAnchor(null);
+  };
+
   return (
     <div className={cn('message-panel relative flex transition-all duration-300', threadDialog?.open && 'lg:pr-[max(360px,_40%)]')}>
       <div className="flex w-full flex-col">
@@ -151,7 +156,7 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
                           'group relative list-none px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800',
                           selectedMessage?._id === message._id && 'bg-gray-100 dark:bg-gray-800'
                         )}
-                        onMouseLeave={() => setEmojiPanleOpen(null)}
+                        onMouseLeave={closeEmojiPanel}
                       >
                         <div className="flex items-end gap-2">
                           <p className="user text-[15px] font-bold">{message.user?.optionLabel}</p>
@@ -183,7 +188,7 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
                                 selectedMessage?._id === message._id && 'opacity-100'
                               )}
                             >
-                              <IconButton size="small" onClick={() => setEmojiPanleOpen((prev) => (!prev ? message : null))}>
+                              <IconButton size="small" onClick={(e) => openEmojiPanel(e, message)}>
                                 <span className="flex h-6 w-6 items-center justify-center">
                                   <BsEmojiGrin />
                                 </span>
@@ -196,18 +201,36 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
                               >
                                 <MoreVert />
                               </IconButton>
-                              <div className="absolute right-0 top-10 z-[10]">
+                              {console.log(emojiPanleAnchor?.selected?._id === message._id, emojiPanleAnchor)}
+                              <Popper
+                                placement="bottom-end"
+                                open={emojiPanleAnchor?.selected?._id === message._id}
+                                anchorEl={emojiPanleAnchor?.anchor}
+                                disablePortal={true}
+                                modifiers={{
+                                  flip: {
+                                    enabled: true
+                                  },
+                                  preventOverflow: {
+                                    enabled: true,
+                                    boundariesElement: 'scrollParent'
+                                  },
+                                  arrow: {
+                                    enabled: true
+                                  }
+                                }}
+                              >
                                 <EmojiPicker
                                   theme={theme}
-                                  open={emojiPanelOpen?._id === message._id}
+                                  open={emojiPanleAnchor?.selected?._id === message._id}
                                   lazyLoadEmojis
                                   className=" z-[10]"
                                   width={400}
-                                  height={500}
+                                  height={400}
                                   reactions={[]}
                                   onReactionClick={(d) => console.log(d)}
                                 />
-                              </div>
+                              </Popper>
                             </div>
                           </>
                         )}

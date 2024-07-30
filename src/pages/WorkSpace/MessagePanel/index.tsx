@@ -1,15 +1,14 @@
 import { IconButton } from '@material-ui/core';
 import { ArrowBack, Visibility } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import io, { Socket } from 'socket.io-client';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { backendApi } from 'src/config';
+import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import io, { Socket } from 'socket.io-client';
-import { backendApi } from 'src/config';
-import SendMessage from 'src/pages/WorkSpace/MessagePanel/SendMessage';
-import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
 
 type MessagePanelProps = {
   selectedChannel: TChannel | null;
@@ -60,13 +59,13 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
           <>
             <div className="head p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex min-h-[32px] items-center gap-2">
                   {mobScreen && (
                     <IconButton size={'small'} onClick={() => setSelectedChannel(null)}>
                       <ArrowBack />
                     </IconButton>
                   )}
-                  <h5 className="text-[18px] font-bold">{selectedChannel.title}</h5>
+                  <h5 className="line-clamp-1 text-[18px] font-bold">{selectedChannel.title}</h5>
                 </div>
                 <HtmlTooltip
                   title={
@@ -94,7 +93,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
                   </IconButton>
                 </HtmlTooltip>
               </div>
-              <p className="text-sm text-gray-500">{selectedChannel.description}</p>
+              <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel.description}</p>
             </div>
             <div className="body ">
               <Messages channelId={selectedChannel?._id} socket={socket} />
