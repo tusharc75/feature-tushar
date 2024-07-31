@@ -314,6 +314,14 @@ function Dropdown({
   //   }
   // };
 
+  const fieldDependentOn = fieldData?.lookupDependentOn ? fields?.find((d) => d.fieldName === fieldData?.lookupDependentOn) : null;
+  const isDisabled =
+    fieldData?.required &&
+    fieldData?.lookupDependentOn &&
+    fieldData?.lookupDependentOn !== '' &&
+    fieldDependentOn &&
+    !!!values[fieldDependentOn.fieldName];
+
   return (
     <Box key={fieldData?.lookupResource}>
       <Grid container spacing={1} style={{ alignItems: 'center', flexWrap: 'nowrap' }}>
@@ -520,61 +528,68 @@ function Dropdown({
                 )}
               />
             ) : (
-              <Autocomplete
-                {...rest}
-                limitTags={2}
-                disabled={fieldData?.isUneditable || rest?.disabled}
-                options={dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || []}
-                getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                getOptionSelected={(option: any, val) => option.optionValue === val}
-                ListboxComponent={ListboxComponent as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
-                value={
-                  [...dropdownOptions(option, values, fields, fieldData, newAddressOptionList)].find(
-                    (data: any) => data.optionValue === values[name]
-                  ) || ''
-                }
-                onChange={
-                  onChange
-                    ? onChange
-                    : (e, val) => {
-                        if (setFieldValue) {
-                          handleChange(name, val && val.optionValue ? val.optionValue : '');
-                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                          fieldChange?.forEach((val: any) => {
-                            setFieldValue(val.fieldName, val.value);
-                          });
-                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                          if (filterFields?.length) {
-                            filterFields?.forEach((ele: any) => {
-                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                                } else {
-                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                                }
-                              }
+              <>
+                <Autocomplete
+                  {...rest}
+                  limitTags={2}
+                  disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
+                  options={dropdownOptions(option, values, fields, fieldData, newAddressOptionList) || []}
+                  getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                  getOptionSelected={(option: any, val) => option.optionValue === val}
+                  ListboxComponent={ListboxComponent as React.ComponentType<React.HTMLAttributes<HTMLElement>>}
+                  value={
+                    [...dropdownOptions(option, values, fields, fieldData, newAddressOptionList)].find(
+                      (data: any) => data.optionValue === values[name]
+                    ) || ''
+                  }
+                  onChange={
+                    onChange
+                      ? onChange
+                      : (e, val) => {
+                          if (setFieldValue) {
+                            handleChange(name, val && val.optionValue ? val.optionValue : '');
+                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                            fieldChange?.forEach((val: any) => {
+                              setFieldValue(val.fieldName, val.value);
                             });
+                            const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                            if (filterFields?.length) {
+                              filterFields?.forEach((ele: any) => {
+                                if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                                  if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                    setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                                  } else {
+                                    setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                  }
+                                }
+                              });
+                            }
                           }
                         }
-                      }
-                }
-                selectOnFocus
-                clearOnBlur
-                handleHomeEndKeys
-                forcePopupIcon={true}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    name={name}
-                    label={getLabel(label)}
-                    variant="outlined"
-                    style={{ outline: '1px solid white' }}
-                    error={touched[name] && Boolean(errors[name])}
-                    helperText={touched[name] && errors[name]}
-                    required={required}
-                  />
+                  }
+                  selectOnFocus
+                  clearOnBlur
+                  handleHomeEndKeys
+                  forcePopupIcon={true}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      name={name}
+                      label={getLabel(label)}
+                      variant="outlined"
+                      style={{ outline: '1px solid white' }}
+                      error={touched[name] && Boolean(errors[name])}
+                      helperText={touched[name] && errors[name]}
+                      required={required}
+                    />
+                  )}
+                />
+                {isDisabled && (
+                  <span className="requiredStar px-1 text-[12px] text-green-500">
+                    *Please Select {fields?.find((d) => d.fieldName === fieldData?.lookupDependentOn)?.fieldLabel} first
+                  </span>
                 )}
-              />
+              </>
             )}
           </InfoLabel>
         </Grid>
