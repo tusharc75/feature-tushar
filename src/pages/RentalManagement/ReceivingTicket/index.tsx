@@ -1005,7 +1005,7 @@ const ReceivingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber', 'position', 'wellNumber', 'warehouse']
+          fieldNames: ['serialNumber', 'position', 'wellNumber', 'warehouse', 'jobCount']
         }
       ]
     });
@@ -1166,6 +1166,15 @@ const ReceivingTicket = ({
             accessor: 'position',
             Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
             Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+          }
+        ]
+        : []),
+        ...(assetFields?.find((f) => f.fieldName === 'jobCount')
+        ? [
+          {
+            accessor: 'jobCount',
+            Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
+            Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
           }
         ]
         : []),
