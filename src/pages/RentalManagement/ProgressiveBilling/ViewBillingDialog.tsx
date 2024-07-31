@@ -24,9 +24,8 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
 
-const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess, allowCreateInvoice, handleDeleteInvoice, fetchData: fetchInvoiceData }) => {
+const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess, allowCreateInvoice }) => {
 
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
 
@@ -42,7 +41,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [allFields, setAllFields] = useState([]);
-  const [showConfirmBox, setShowConfirmBox] = useState(false);
 
   const {
     state: { user, permissions }
@@ -322,7 +320,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchData();
-        fetchInvoiceData(invoiceData?._id);
         setViewBillDialogConfirm({ open: false, rows: [] });
       })
       .catch((error) => {
@@ -347,8 +344,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 />
               )}
               <Box display="flex" alignItems="center">
-                {invoiceData?.canDelete && permissions?.invoice?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
-                <Box ml={1} />
                 {allowedToEdit &&
                   <Button
                     variant="outlined"
@@ -457,20 +452,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           okBtnLoading={null}
           onOk={() => {
             handleDeleteData(viewBillDialogConfirm.rows);
-          }}
-        />
-      ) : null}
-      {showConfirmBox ? (
-        <ConfirmationDialog
-          open={showConfirmBox}
-          message={`Are you sure you want to delete ${routes?.invoice?.title?.toLowerCase()} ${invoiceData?.invoiceNumber || ''} ?`}
-          onClose={() => {
-            setShowConfirmBox(false);
-          }}
-          okBtnLoading={null}
-          onOk={() => {
-            handleDeleteInvoice(invoiceData?._id);
-            onClose();
           }}
         />
       ) : null}
