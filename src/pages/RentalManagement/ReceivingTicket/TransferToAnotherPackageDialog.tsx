@@ -75,7 +75,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 			for (let i = 0; i < ele.qty; i++) {
 				const asset = tempAssets?.find((e) => e.productId === ele.materialId && !e.isCount)
 				if (asset) {
-					const obj: any = { asset: asset?._id, fromId: asset._id, toId: ele._id }
+					const obj: any = { asset: asset?._id, fromId: asset.uniqueId, toId: ele._id }
 					const matchedAsset = rows?.find((e) => e._id === asset?._id);
 					if (matchedAsset) {
 						const { _id, ...assetData } = matchedAsset;
