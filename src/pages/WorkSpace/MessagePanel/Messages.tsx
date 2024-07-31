@@ -35,12 +35,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
-
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState<Message>(null);
   const [editingMessage, setEditingMessage] = useState(null);
