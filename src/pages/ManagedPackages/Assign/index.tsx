@@ -12,7 +12,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { flattenArray } from 'src/constants/columns';
 import { MATERIAL_TYPE } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
@@ -141,21 +140,21 @@ const Assign = ({ managedPackagesData }) => {
       },
       ...(productFields?.find((e) => e.fieldName === 'position')
         ? [
-          {
-            accessor: 'position',
-            Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-            width: 200,
-            Cell: ({ row }) => {
-              return row.original['position'] ? (
-                <div>
-                  <p className="text-truncate">{row.original.position}</p>
-                </div>
-              ) : (
-                <NoDataCell />
-              );
+            {
+              accessor: 'position',
+              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+              width: 200,
+              Cell: ({ row }) => {
+                return row.original['position'] ? (
+                  <div>
+                    <p className="text-truncate">{row.original.position}</p>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'qty',
@@ -432,6 +431,7 @@ const Assign = ({ managedPackagesData }) => {
           handleSucess={handleAssignAssets}
           isAssigning={isAssetAdding}
           selectedProducts={assignAssetDialog.products}
+          referenceData={{ warehouse: managedPackagesData?.warehouse?.optionValue }}
         />
       )}
       {showDeleteConfirmBox && (
