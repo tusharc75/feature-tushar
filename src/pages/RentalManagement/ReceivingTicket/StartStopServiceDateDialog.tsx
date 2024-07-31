@@ -36,13 +36,13 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
   const validate = (values) => {
     const errors = {};
     if (values?.endDate && normalizeDate(values?.startDate) > normalizeDate(values.endDate)) {
-      errors['endDate'] = `End Date can't be less than Start Date`;
+      errors['endDate'] = `Actual End Date can't be less than Actual Start Date`;
     }
     if (minStartDate && normalizeDate(values?.startDate) < normalizeDate(minStartDate)) {
-      errors['startDate'] = `Start Date can't be less than ${displayDate(minStartDate)}`;
+      errors['startDate'] = `Actual Start Date can't be less than ${displayDate(minStartDate)}`;
     }
     if (maxEndDate && normalizeDate(values?.endDate) > normalizeDate(maxEndDate)) {
-      errors['endDate'] = `End Date can't be greater than ${displayDate(maxEndDate)}`;
+      errors['endDate'] = `Actual End Date can't be greater than ${displayDate(maxEndDate)}`;
     }
     return errors;
   };
@@ -61,7 +61,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       <Formik initialValues={initialValues} onSubmit={(val) => { onSubmit(val) }} enableReinitialize={true} validate={validate}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form >
-            <CustomDialogHeader title={`Set Start/End Date`} onClose={onClose} />
+            <CustomDialogHeader title={`Set Actual Start/End Date`} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
@@ -75,7 +75,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         errors={errors}
                         touched={touched}
                         type="date"
-                        label={`Start Date`}
+                        label={`Actual Start Date`}
                         name="startDate"
                         onChange={(date) => {
                           setFieldValue('startDate', date);
@@ -94,7 +94,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                         errors={errors}
                         touched={touched}
                         type="date"
-                        label={`End Date`}
+                        label={`Actual End Date`}
                         name="endDate"
                         onChange={(date) => {
                           setFieldValue('endDate', date);

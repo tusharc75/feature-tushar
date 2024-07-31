@@ -42,7 +42,6 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
   const uniqueDates = new Set<string>();
   const newStartDate = moment(startDate).startOf('day');
   const newEndDate = moment(endDate).startOf('day');
-  console.log(endDate)
   serviceLog?.forEach(log => {
     const logStartDate = moment(log.startDate).startOf('day');
     const logEndDate = moment(log.endDate || endDate).startOf('day');

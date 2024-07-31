@@ -53,6 +53,7 @@ import {
   nextButtonStep
 } from 'src/pages/RentalManagement/walkmeSteps';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
+import AssignManagedPackagesDialog from 'src/components/AssignRolesDialog/AssignManagedPackagesDialog';
 
 const Productpackage = ({
   rentalManagementData,
@@ -99,6 +100,7 @@ const Productpackage = ({
 
   const { generateColumns } = useColumns();
   const [addExistingAssets, setAddExistingAssets] = useState(false);
+  const [addExistingManagedPackages, setAddExistingManagedPackages] = useState(false);
 
   const { isOffline } = useContext(CustomOfflineContext);
   const [isRateRequired, setIsRateRequired] = useState(false);
@@ -373,8 +375,8 @@ const Productpackage = ({
         }
       });
     }
-
     let rows = data.material.filter((e) => e.parentId === null).filter((e) => e.type !== MATERIAL_TYPE.service);
+
     let products = rows.filter((e) => e.type === MATERIAL_TYPE.product && !e?.isConsumbale);
     let packages = rows.filter((e) => e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service');
 
@@ -591,6 +593,24 @@ const Productpackage = ({
     } else {
       setPriceDataDialog({ open: true, material: material });
     }
+  };
+
+  const handleAddManagedPackages = async (rows) => {
+    setIsSubmitting(true);
+    const packageIds = rows?.map((item) => item._id);
+    axiosInstance()
+      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/managedPackages`, {
+        ids: packageIds
+      })
+      .then(() => {
+        setAddExistingManagedPackages(false);
+        setIsSubmitting(false);
+        fetchData();
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleAddAsset = async (rows) => {
@@ -898,6 +918,16 @@ const Productpackage = ({
         >
           Add Existing Packages
         </MenuItem>
+        {permissions?.managedPackages?.isRead && (
+          <MenuItem
+            id={'add-existing-managed-package-menu-item'}
+            onClick={() => {
+              setAddExistingManagedPackages(true);
+            }}
+          >
+            Add Existing {routes.managedPackages.title}
+          </MenuItem>
+        )}
         <MenuItem
           id={'add-new-products-package-menu-item'}
           onClick={() => {
@@ -1132,6 +1162,15 @@ const Productpackage = ({
           }}
           handleClose={() => {
             setAddExistingProductDialog({ open: false, type: '', parentId: null });
+          }}
+          isSubmitting={isSubmitting}
+        />
+      )}
+      {addExistingManagedPackages && (
+        <AssignManagedPackagesDialog
+          onSuccess={handleAddManagedPackages}
+          handleClose={() => {
+            setAddExistingManagedPackages(false);
           }}
           isSubmitting={isSubmitting}
         />

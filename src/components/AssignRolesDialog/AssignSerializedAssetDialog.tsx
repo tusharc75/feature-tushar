@@ -142,6 +142,9 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
 
     if (reference === 'managedPackages') {
       deepFilter = `${deepFilter}&managedPackages=1`;
+      if (referenceData?.warehouse) {
+        deepFilter = `${deepFilter}&plant=${referenceData?.warehouse}`;
+      }
     }
 
     if (showFilteredRecordsOnly) {
@@ -200,7 +203,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
                 data.push({ product: ele.product, package: ele?.packages[0], asset: result[0]._id });
                 ele.packages.shift();
               } else {
-                data.push({ product: ele.product, asset: result[0]._id });
+                data.push({ product: ele.product, package: ele?.packages[0], asset: result[0]._id });
               }
             } else {
               data.push({ ...ele, asset: result[0]._id });
