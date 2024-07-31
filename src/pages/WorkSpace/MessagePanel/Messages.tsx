@@ -1,5 +1,5 @@
 import { Avatar, IconButton, Menu, MenuItem, Popper } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
+import { MoreVert, Delete, GetApp, } from '@material-ui/icons';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
 import moment from 'moment';
@@ -13,7 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, dateFormat } from 'src/constants/helpers';
+import { cn, dateFormat, getFileIconSrc } from 'src/constants/helpers';
 import { Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
@@ -215,21 +215,49 @@ export const DisplaySingleMessage = ({
   handleEditComplete,
   setThreadDialogOpen,
   handleMenuClick,
-  messageTimeFormatter = (date) => moment(date).format('hh:mm A')
+  messageTimeFormatter = (date) => moment(date).format('hh:mm A'),
 }: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
+  const [attachmentConfirmBox, setAttachmentConfirmBox] = useState({ open: false, messageId: null, attachmentId: null });
   const openEmojiPanel = (e: React.MouseEvent<HTMLButtonElement>, message: Message) => {
     setEmojiPanelAnchor((prev) => (!prev ? e.currentTarget : null));
   };
   const closeEmojiPanel = () => {
     setEmojiPanelAnchor(null);
   };
+  const toastConfig = useContext(CustomToastContext);
+  const { state: { user: { user } } } = useData();
 
   if (!message) return null;
 
   const replies = message.replies || [];
   const uniqueReplies = setThreadDialogOpen ? uniqBy(replies, (d) => d.user.optionLabel) : [];
+
+  const downloadFile = (attachment) => {
+    axiosInstance()
+      .get(`user/download?fileName=${attachment}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', attachment);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const deleteAttachment = async (messageId, attachmentId) => {
+    try {
+      await axiosInstance().put(`/work-space/channel/message/remove-attachment`, { messageId, attachmentId });
+      socket.emit('messageDeleted', { channelId });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   return (
     <>
@@ -273,7 +301,52 @@ export const DisplaySingleMessage = ({
                       __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
                     }}
                   ></span>
-
+                  {message?.attachments?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 py-3">
+                      {message?.attachments?.map((attachment) => {
+                        const Icon = getFileIconSrc(attachment?.url);
+                        return (
+                          <>
+                            <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
+                              <div className="front  group-hover:hidden">
+                                <div className="mx-auto mb-[11px] h-[79px] text-center">
+                                  <Icon size={50} className="mx-auto" />
+                                </div>
+                                <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">{attachment?.fileName}</p>
+                              </div>
+                              <div className="back absolute inset-0 flex flex-col justify-between p-[var(--gutter)] opacity-0 group-hover:opacity-100">
+                                <p className=" line-clamp-4 text-[14px] text-[var(--text-primary)]" title={attachment?.fileName}>
+                                  {attachment?.fileName}
+                                </p>
+                                <div className="flex justify-between">
+                                  <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
+                                    <IconButton
+                                      size={'small'}
+                                      onClick={() => downloadFile(attachment.url)}
+                                      style={{ paddingBottom: 3, width: 30, height: 30 }}
+                                    >
+                                      {<GetApp />}
+                                    </IconButton>
+                                  </HtmlTooltip>
+                                  {message?.user?.optionValue === user?._id && (
+                                    <HtmlTooltip title="Delete Attachment" placement="top" enterTouchDelay={0}>
+                                      <IconButton
+                                        size={'small'}
+                                        onClick={() => { setAttachmentConfirmBox({ open: true, messageId: message?._id, attachmentId: attachment?._id }) }}
+                                        style={{ paddingBottom: 3, width: 30, height: 30 }}
+                                      >
+                                        {<Delete color="error" />}
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )
+                      })}
+                    </div>
+                  )}
                   {replies.length > 0 && setThreadDialogOpen && (
                     <div
                       onClick={() => setThreadDialogOpen({ open: true, message })}
@@ -375,6 +448,19 @@ export const DisplaySingleMessage = ({
           </div>
         </div>
       </li>
+      {attachmentConfirmBox.open && (
+        <ConfirmationDialog
+          open={attachmentConfirmBox.open}
+          message={`Are you sure you want to delete attachment?`}
+          onClose={() => {
+            setAttachmentConfirmBox({ open: false, messageId: null, attachmentId: null });
+          }}
+          onOk={() => {
+            deleteAttachment(attachmentConfirmBox.messageId, attachmentConfirmBox.attachmentId);
+            setAttachmentConfirmBox({ open: false, messageId: null, attachmentId: null });
+          }}
+        />
+      )}
     </>
   );
 };

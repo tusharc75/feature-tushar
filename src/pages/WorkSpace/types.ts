@@ -47,6 +47,7 @@ export type Message = {
   replies: Message[];
   lastModified?: Date;
   avatar?: string;
+  attachments?: any[];
 };
 
 export type MessageUser = {
