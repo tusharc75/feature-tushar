@@ -2587,7 +2587,7 @@ const ReceivingTicket = ({
             fetchRecords();
             setTransferAnotherPackageialog(false);
           }}
-          selectedAssets={selectedRecords}
+          assets={selectedRecords}
           rentalManagementData={rentalManagementData}
           assetPolicyData={assetPolicyData}
         />
