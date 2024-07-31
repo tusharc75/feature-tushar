@@ -19,7 +19,7 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [fullScreen, setFullScreen] = useState(true);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -60,8 +60,8 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
   return (
     <Dialog
       fullWidth
-      maxWidth="md"
-      fullScreen={fullScreen || isMobile || isTablet}
+      maxWidth="sm"
+      fullScreen={fullScreen}
       open={true}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
@@ -72,7 +72,7 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
       {initialData?.fields?.length ? (
         <>
           <CustomDialogHeader
-            title={`Edit Frequency/Condition`}
+            title={`Edit Frequency`}
             isMinimized={!fullScreen}
             onMinimizeMaximize={() => {
               setFullScreen((prevState) => !prevState);
