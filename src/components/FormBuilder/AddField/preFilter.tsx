@@ -1,10 +1,11 @@
-import { CircularProgress, TextField } from '@material-ui/core';
+import { CircularProgress, TextField, Typography } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { useCallback, useEffect, useState } from 'react';
-import { getLookupOption } from '../helper';
+import { getLookupOption, getResourceField } from '../helper';
 import { debounce, uniqBy } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
+import AsyncDropDown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 
 const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null, values, setFieldValue }) => {
   const [options, setOptions] = useState([]);
@@ -13,11 +14,28 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
   const [currentPage, setCurrentPage] = useState(0);
   const [inputValues, setInputValues] = useState('');
   const [selectedOption, setSelectedOption] = useState(null);
+  const [prefilterFields, setPrefilterFields] = useState(null);
 
   const fetchLookupOptions = async () => {
     const options = await getLookupOption(null, lookupResource);
     setOptions(options);
   };
+
+  const fetchLookupFieldOptions = async ()=>{
+    try {
+      const { data: { data } } = await axiosInstance().get(`/field?resource=${lookupResource}&view=true`);
+      const lookupOptions = data?.filter((ele)=> ele.fieldData?.lookup)?.map((e)=> {
+        return {
+          optionValue: e?.fieldData?.fieldName,
+          optionLabel: e?.fieldData?.fieldLabel,
+          lookupResource: e?.fieldData?.lookupResource
+        }
+      })
+      setPrefilterFields(lookupOptions);
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   const fetchOptions = useCallback(
     debounce(async (searchKey: string = '', page: number = 0) => {
@@ -49,7 +67,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
       }
     }, 1000),
     []
-  );
+  ); 
 
   const handleInputChangeMulti = (event, value, reason) => {
     if (reason === 'input') {
@@ -68,6 +86,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
   useEffect(() => {
     if (lookupResource) {
       fetchLookupOptions();
+      fetchLookupFieldOptions();
     }
   }, [lookupResource]);
 
@@ -89,6 +108,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
     const response = await axiosInstance().get(`/sa-formbuilder/resource/fieldLabel?data=${JSON.stringify(query)}`);
     setDefaultOptions(response?.data?.data['dataListField']);
   };
+
 
   return dataList ? (
     <Autocomplete
@@ -148,6 +168,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
       }}
     />
   ) : (
+    <>
     <Autocomplete
       fullWidth
       disableCloseOnSelect={true}
@@ -178,6 +199,69 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
         />
       )}
     />
+    <Autocomplete
+      fullWidth
+      disableCloseOnSelect={true}
+      id="lookupPreFilterFields"
+      options={prefilterFields ?? []}
+      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+      onChange={(e, val) => {
+        const updatedValues = val?.map((v)=> {
+          return {
+            fieldName: v.optionValue,
+            value: values?.lookupPreFiltersFields?.find((ele)=> ele.fieldName===v.optionValue)?.value ?? []
+          }
+        })
+        setFieldValue('lookupPreFilterFields', updatedValues);
+      }}
+      multiple
+      size={'small'}
+      value={
+        prefilterFields?.filter((o) => values['lookupPreFilterFields']?.map((ele)=> ele.fieldName)?.includes(o?.optionValue))?.length > 0
+          ? prefilterFields?.filter((o) => values['lookupPreFilterFields']?.map((ele)=> ele.fieldName)?.includes(o?.optionValue))
+          : []
+      }
+      filterSelectedOptions={true}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          margin="dense"
+          size={'small'}
+          name="lookupPreFilterFields"
+          label="Lookup Pre Filter Fields"
+          placeholder="Lookup Pre Filter Fields"
+          variant="outlined"
+          fullWidth
+        />
+      )}
+    />
+    <div className="flex flex-col gap-4 mt-2">
+    {values['lookupPreFilterFields']?.length>0 ? values['lookupPreFilterFields']?.map((field)=> {
+      const preFilterField = prefilterFields?.find((e)=>e.optionValue===field.fieldName);
+      return (
+                 <AsyncDropDown
+                  resource={preFilterField?.lookupResource}
+                  multiple={true}
+                  errors={false}
+                  touched={false}
+                  value={field?.value ?? []}
+                  fieldLabel={preFilterField?.optionLabel}
+                  onChange={(e, val) => {
+                    const updatedValues = values['lookupPreFilterFields']?.map((ele)=>{
+                      if(ele.fieldName===field.fieldName){
+                        ele.value = val?.map((e)=> e?.optionValue);
+                      }
+                      return ele;
+                    })
+                    setFieldValue('lookupPreFilterFields', updatedValues);
+                  }}
+                  fieldName={''}
+                  required={false}
+                />
+      )
+    }): null}
+    </div>
+    </>
   );
 };
 
