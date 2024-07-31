@@ -5,9 +5,10 @@ import io, { Socket } from 'socket.io-client';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { backendApi } from 'src/config';
+import { cn } from 'src/constants/helpers';
 import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
-import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
+import { ChannelData, Message, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 type MessagePanelProps = {
@@ -21,6 +22,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [socket, setSocket] = useState<Socket>(null);
+  const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
 
   const token = localStorage.getItem('token');
 
@@ -54,10 +56,15 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
 
   return (
     <>
-      <div className="relative flex-grow">
+      <div
+        className={cn(
+          'relative flex-grow transition-all duration-300 [--thread-bar-width:360px] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]',
+          threadDialogOpen?.open && 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]'
+        )}
+      >
         {selectedChannel && channelData && (
           <>
-            <div className="head p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]">
+            <div className={cn('head p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
                 <div className="flex min-h-[32px] items-center gap-2">
                   {mobScreen && (
@@ -96,7 +103,12 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
               <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel.description}</p>
             </div>
             <div className="body ">
-              <Messages channelId={selectedChannel?._id} socket={socket} />
+              <Messages
+                channelId={selectedChannel?._id}
+                socket={socket}
+                threadDialogOpen={threadDialogOpen}
+                setThreadDialogOpen={setThreadDialogOpen}
+              />
             </div>
           </>
         )}

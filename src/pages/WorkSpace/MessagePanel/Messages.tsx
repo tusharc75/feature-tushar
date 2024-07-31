@@ -22,20 +22,20 @@ import Thread from './Thread';
 type MessagesProps = {
   channelId: string;
   socket: Socket;
+  threadDialogOpen: { open: boolean; message: Message };
+  setThreadDialogOpen: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
 };
 
 export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => moment(message.date).format(dateFormat));
 };
 
-const Messages = ({ channelId, socket }: MessagesProps) => {
-  const [theme] = useAppTheme();
+const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
-  const [threadDialog, setThreadDialog] = useState({ open: false, message: null });
-  const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<{ selected: Message; anchor: null | HTMLElement }>(null);
+
   const {
     state: {
       user: { user }
@@ -61,7 +61,7 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
           return groupByDate(newMessages);
         }
       });
-      setThreadDialog((prevDialog) => {
+      setThreadDialogOpen((prevDialog) => {
         if (prevDialog.open && (prevDialog.message?._id === after || !after)) {
           const updatedMessage = data?.data?.find((message) => message._id === prevDialog.message?._id);
           return { open: true, message: updatedMessage || prevDialog.message };
@@ -127,15 +127,8 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
     setEditingMessage(null);
   };
 
-  const openEmojiPanel = (e: React.MouseEvent<HTMLButtonElement>, message: Message) => {
-    setEmojiPanelAnchor((prev) => (!prev || prev?.selected?._id !== message._id ? { anchor: e.currentTarget, selected: message } : null));
-  };
-  const closeEmojiPanel = () => {
-    setEmojiPanelAnchor(null);
-  };
-
   return (
-    <div className={cn('message-panel relative flex transition-all duration-300', threadDialog?.open && 'mr-2 lg:pr-[min(500px,_max(360px,_40%))]')}>
+    <div className={cn('message-panel flex ')}>
       <div className="flex w-full flex-col">
         <div className={cn('messages-container my-2 max-h-[max(500px,_calc(100vh-430px))] min-h-[500px] flex-grow overflow-y-auto')}>
           {messages !== null ? (
@@ -152,157 +145,22 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
                   </div>
                   <ul className="list-none space-y-5">
                     {messages[date].map((message) => {
-                      const replies = message.replies;
-                      const uniqueReplies = uniqBy(replies, (d) => d.user.optionLabel);
-                      const lastReply = [...replies].sort(function compare(a, b) {
-                        const dateA = new Date(a.date).getTime();
-                        const dateB = new Date(b.date).getTime();
-                        return dateB - dateA;
-                      });
-
                       return (
-                        <li
-                          key={message._id}
-                          className={cn(
-                            'group relative list-none px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800',
-                            selectedMessage?._id === message._id && 'bg-gray-100 dark:bg-gray-800'
-                          )}
-                          onMouseLeave={closeEmojiPanel}
-                        >
-                          <div className="flex gap-2">
-                            <Avatar
-                              style={{ width: 36, height: 36, borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)' }}
-                              variant="rounded"
-                              className="mt-[3px]"
-                              src={message.avatar}
-                            >
-                              {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
-                            </Avatar>
-                            <div>
-                              <div className="flex items-end gap-2">
-                                <p className="user text-[15px] font-bold">{message.user?.optionLabel}</p>
-                                <span className="text-[12px] font-normal">{moment(message.date).format('hh:mm A')}</span>
-                              </div>
-                              {editingMessage?._id === message._id ? (
-                                <SendMessage
-                                  channelId={channelId}
-                                  socket={socket}
-                                  messageId={message._id}
-                                  initialMessage={message.message}
-                                  onEditComplete={handleEditComplete}
-                                  editorId={`sone`}
-                                />
-                              ) : (
-                                <>
-                                  <div>
-                                    <span
-                                      className="message [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] [&_span:last-child]:text-gray-400"
-                                      dangerouslySetInnerHTML={{
-                                        __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
-                                      }}
-                                    ></span>
-
-                                    {replies.length > 0 && (
-                                      <div
-                                        onClick={() => setThreadDialog({ open: true, message })}
-                                        className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1"
-                                      >
-                                        {uniqueReplies.map((reply, index) => {
-                                          if (index > 3) return null;
-                                          return (
-                                            <Avatar
-                                              style={{
-                                                width: 24,
-                                                height: 24,
-                                                fontSize: '0.8rem',
-                                                borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)'
-                                              }}
-                                              variant="rounded"
-                                              className="mt-[3px]"
-                                              src={reply.avatar}
-                                            >
-                                              {reply.user?.optionLabel.match(/(\b\S)?/g).join('')}
-                                            </Avatar>
-                                          );
-                                        })}
-                                        <span className="link ml-1 line-clamp-1">{message.replies.length} replies</span>
-                                        <div className="relative ml-1 text-[13px] font-normal">
-                                          <span className="absolute line-clamp-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-                                            View Thread
-                                          </span>
-                                          <span className="line-clamp-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0">
-                                            Last reply {formatDateWithTodayYestarday(lastReply[0].date)}
-                                          </span>
-                                        </div>
-                                      </div>
-                                    )}
-                                  </div>
-
-                                  <div
-                                    className={cn(
-                                      'floating-controls absolute -top-[10px] right-2 z-[10] flex items-center gap-[2px] rounded-md bg-[var(--dark-primary,_white)] p-1 opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100',
-                                      selectedMessage?._id === message._id && 'opacity-100'
-                                    )}
-                                  >
-                                    <HtmlTooltip title="Find reaction">
-                                      <IconButton size="small" onClick={(e) => openEmojiPanel(e, message)}>
-                                        <span className="flex h-6 w-6 items-center justify-center">
-                                          <BsEmojiGrin />
-                                        </span>
-                                      </IconButton>
-                                    </HtmlTooltip>
-                                    <HtmlTooltip title="Reply in thread">
-                                      <IconButton size="small" onClick={() => setThreadDialog({ open: true, message })}>
-                                        <span className="flex h-6 w-6 items-center justify-center">
-                                          <BsReply size={24} />
-                                        </span>
-                                      </IconButton>
-                                    </HtmlTooltip>
-                                    <HtmlTooltip title="More actions">
-                                      <IconButton
-                                        onClick={(event) => {
-                                          handleMenuClick(event, message);
-                                        }}
-                                        size="small"
-                                      >
-                                        <MoreVert />
-                                      </IconButton>
-                                    </HtmlTooltip>
-                                    <Popper
-                                      placement="bottom-end"
-                                      open={emojiPanleAnchor?.selected?._id === message._id}
-                                      anchorEl={emojiPanleAnchor?.anchor}
-                                      disablePortal={true}
-                                      modifiers={{
-                                        flip: {
-                                          enabled: true
-                                        },
-                                        preventOverflow: {
-                                          enabled: true,
-                                          boundariesElement: 'scrollParent'
-                                        },
-                                        arrow: {
-                                          enabled: true
-                                        }
-                                      }}
-                                    >
-                                      <EmojiPicker
-                                        theme={theme}
-                                        open={emojiPanleAnchor?.selected?._id === message._id}
-                                        lazyLoadEmojis
-                                        className=" z-[10]"
-                                        width={400}
-                                        height={400}
-                                        reactions={[]}
-                                        onReactionClick={(d) => console.log(d)}
-                                      />
-                                    </Popper>
-                                  </div>
-                                </>
-                              )}
-                            </div>
-                          </div>
-                        </li>
+                        <>
+                          <DisplaySingleMessage
+                            key={message._id}
+                            {...{
+                              message,
+                              selectedMessage,
+                              editingMessage,
+                              channelId,
+                              socket,
+                              handleEditComplete,
+                              setThreadDialogOpen,
+                              handleMenuClick
+                            }}
+                          />
+                        </>
                       );
                     })}
                   </ul>
@@ -336,7 +194,7 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
           button
           onClick={() => {
             handleMenuClose();
-            setThreadDialog({ open: true, message: selectedMessage });
+            setThreadDialogOpen({ open: true, message: selectedMessage });
           }}
         >
           Reply
@@ -366,9 +224,9 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
         />
       )}
       <Thread
-        message={threadDialog.message}
-        open={threadDialog.open}
-        onClose={() => setThreadDialog({ open: false, message: null })}
+        message={threadDialogOpen.message}
+        open={threadDialogOpen.open}
+        onClose={() => setThreadDialogOpen({ open: false, message: null })}
         socket={socket}
         channelId={channelId}
         deleteMessage={deleteMessage}
@@ -378,3 +236,172 @@ const Messages = ({ channelId, socket }: MessagesProps) => {
 };
 
 export default Messages;
+
+export const DisplaySingleMessage = ({
+  message,
+  selectedMessage,
+  editingMessage,
+  channelId,
+  socket,
+  handleEditComplete,
+  setThreadDialogOpen,
+  handleMenuClick,
+  showThreadReplySection = true
+}) => {
+  const [theme] = useAppTheme();
+  const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
+  const openEmojiPanel = (e: React.MouseEvent<HTMLButtonElement>, message: Message) => {
+    setEmojiPanelAnchor((prev) => (!prev ? e.currentTarget : null));
+  };
+  const closeEmojiPanel = () => {
+    setEmojiPanelAnchor(null);
+  };
+
+  const replies = message.replies || [];
+  const uniqueReplies = showThreadReplySection ? uniqBy(replies, (d) => d.user.optionLabel) : [];
+
+  return (
+    <>
+      <li
+        key={message._id}
+        className={cn(
+          'group relative list-none px-3 py-2 hover:bg-gray-100 dark:hover:bg-gray-800',
+          selectedMessage?._id === message._id && 'bg-gray-100 dark:bg-gray-800'
+        )}
+        onMouseLeave={closeEmojiPanel}
+      >
+        <div className="flex gap-2">
+          <Avatar
+            style={{ width: 36, height: 36, borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)' }}
+            variant="rounded"
+            className="mt-[3px]"
+            src={message.avatar}
+          >
+            {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
+          </Avatar>
+          <div>
+            <div className="flex items-end gap-2">
+              <p className="user text-[15px] font-bold">{message.user?.optionLabel}</p>
+              <span className="text-[12px] font-normal">{moment(message.date).format('hh:mm A')}</span>
+            </div>
+            {editingMessage?._id === message._id ? (
+              <SendMessage
+                channelId={channelId}
+                socket={socket}
+                messageId={message._id}
+                initialMessage={message.message}
+                onEditComplete={handleEditComplete}
+                editorId={`sone`}
+              />
+            ) : (
+              <>
+                <div>
+                  <span
+                    className="message [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] [&_span:last-child]:text-gray-400"
+                    dangerouslySetInnerHTML={{
+                      __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
+                    }}
+                  ></span>
+
+                  {replies.length > 0 && showThreadReplySection && (
+                    <div
+                      onClick={() => setThreadDialogOpen({ open: true, message })}
+                      className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1"
+                    >
+                      {uniqueReplies.map((reply, index) => {
+                        if (index > 3) return null;
+                        return (
+                          <Avatar
+                            style={{
+                              width: 24,
+                              height: 24,
+                              fontSize: '0.8rem',
+                              borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)'
+                            }}
+                            variant="rounded"
+                            className="mt-[3px]"
+                            src={reply.avatar}
+                          >
+                            {reply.user?.optionLabel.match(/(\b\S)?/g).join('')}
+                          </Avatar>
+                        );
+                      })}
+                      <span className="link ml-1 line-clamp-1">{message.replies.length} replies</span>
+                      <div className="relative ml-1 text-[13px] font-normal">
+                        <span className="absolute line-clamp-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">View Thread</span>
+                        <span className="line-clamp-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0">
+                          Last reply {formatDateWithTodayYestarday(replies[replies.length - 1].date)}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div
+                  className={cn(
+                    'floating-controls absolute -top-[10px] right-2 z-[10] flex items-center gap-[2px] rounded-md bg-[var(--dark-primary,_white)] p-1 opacity-0 [border:1px_solid_var(--common-border-color)] group-hover:opacity-100',
+                    selectedMessage?._id === message._id && 'opacity-100'
+                  )}
+                >
+                  <HtmlTooltip title="Find reaction">
+                    <IconButton size="small" onClick={(e) => openEmojiPanel(e, message)}>
+                      <span className="flex h-6 w-6 items-center justify-center">
+                        <BsEmojiGrin />
+                      </span>
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title="Reply in thread">
+                    <IconButton size="small" onClick={() => setThreadDialogOpen({ open: true, message })}>
+                      <span className="flex h-6 w-6 items-center justify-center">
+                        <BsReply size={24} />
+                      </span>
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title="More actions">
+                    <IconButton
+                      onClick={(event) => {
+                        handleMenuClick(event, message);
+                      }}
+                      size="small"
+                    >
+                      <MoreVert />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <Popper
+                    placement="bottom-end"
+                    open={Boolean(emojiPanleAnchor)}
+                    anchorEl={emojiPanleAnchor}
+                    disablePortal={true}
+                    modifiers={{
+                      flip: {
+                        enabled: true
+                      },
+                      preventOverflow: {
+                        enabled: true,
+                        boundariesElement: 'scrollParent'
+                      },
+                      arrow: {
+                        enabled: true
+                      }
+                    }}
+                  >
+                    <EmojiPicker
+                      theme={theme}
+                      open={Boolean(emojiPanleAnchor)}
+                      lazyLoadEmojis
+                      className=" z-[10]"
+                      width={400}
+                      height={400}
+                      reactions={[]}
+                      onReactionClick={(d) => console.log(d)}
+                    />
+                  </Popper>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </li>
+    </>
+  );
+};
