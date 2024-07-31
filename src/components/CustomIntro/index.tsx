@@ -176,7 +176,7 @@ const CustomIntro = () => {
             className="backdrop absolute inset-0 z-[1301] bg-black/50 mix-blend-hard-light"
             style={{ height: handleSteps.current?.documentHeight }}
           >
-            {currentStepData.element && !isFindingElement && (
+            {currentStepData?.element && !isFindingElement && (
               <div
                 ref={(ref) => setAnchorEl(ref)}
                 className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
