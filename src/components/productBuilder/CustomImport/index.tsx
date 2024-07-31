@@ -148,18 +148,14 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     setCustomImportHeaader([]);
     setIsUploading(true);
     let files = e.target.files[0];
-    console.log('fffffffff', files)
     setFile(files);
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
-      console.log('datadata', data)
-
       let readedData = read(data, { type: 'array' });
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
       const jsonData = utils.sheet_to_json(ws, { header: 1 });
-      console.log('jsonData', jsonData)
 
       let headers: any = jsonData[0];
       setFieldLabelOptions(
