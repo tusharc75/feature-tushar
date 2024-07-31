@@ -413,7 +413,7 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const handleChangeStatusInUse = (status, prevStatus, date) => {
-    const assets = dataRows?.map((e) => e._id);
+    const assets = dataRows?.map((e) => { return { asset: e._id, uniqueId: e.uniqueId } });
     if (assets?.length) {
       axiosInstance()
         .put(`${rentalManagement.api}/${deliveryTicketData?.rentalJob?.optionValue}/assets-inuse-standby`, {
