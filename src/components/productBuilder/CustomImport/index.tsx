@@ -29,11 +29,10 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import _, { isEmpty, uniqBy } from 'lodash';
 import { read, utils, write } from 'xlsx';
-import ControlPointIcon from '@material-ui/icons/ControlPoint';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddColumnDialog';
-import { Add } from '@material-ui/icons';
+import { Add, Delete } from '@material-ui/icons';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
@@ -149,15 +148,18 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     setCustomImportHeaader([]);
     setIsUploading(true);
     let files = e.target.files[0];
+    console.log('fffffffff', files)
     setFile(files);
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
+      console.log('datadata', data)
 
       let readedData = read(data, { type: 'array' });
       const wsname = readedData.SheetNames[0];
       const ws = readedData.Sheets[wsname];
       const jsonData = utils.sheet_to_json(ws, { header: 1 });
+      console.log('jsonData', jsonData)
 
       let headers: any = jsonData[0];
       setFieldLabelOptions(
@@ -299,7 +301,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     if (addedField?.length > 0) {
       formData.append('fields', JSON.stringify(addedField));
     }
-
     axiosInstance()
       .post(`/productbuilder/import`, formData, {
         responseType: 'blob',
@@ -330,6 +331,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
         toastConfig.setToastConfig(error);
       });
   };
+
+  const handleDeleteCustomColumns = (obj) => {
+    setAddedField([...addedField?.filter(f => f?.fieldLabel?.toUpperCase() != obj?.label)])
+    setTemplateImportHeaader([...templateImportHeader?.filter(t => t?.value != obj?.value)]);
+  }
 
   return (
     <>
@@ -503,6 +509,16 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                           <TableCell component="th" scope="row">
                             {' '}
                             {_key?.label}{' '}
+                            {addedField?.map(f => f?.fieldLabel?.toUpperCase())?.includes(_key?.label) && (
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  handleDeleteCustomColumns(_key)
+                                }}
+                              >
+                                <Delete fontSize="small" color="error" />
+                              </IconButton>
+                            )}
                           </TableCell>
                           <TableCell align="right">
                             <Autocomplete
