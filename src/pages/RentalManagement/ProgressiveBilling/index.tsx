@@ -134,7 +134,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
     return deepFilter;
   };
 
-  const fetchData = async () => {
+  const fetchData = async (viewBillDialogId= null) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
     const queryString = getQueryString();
@@ -149,7 +149,10 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
           finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
           return finalObject;
         });
-
+        if(viewBillDialogId) {
+          const invoiceData = rows.find((o) => o._id === viewBillDialog.invoiceData._id);
+          setViewBillDialog({ open: true, invoiceData: invoiceData });
+        }
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -161,15 +164,18 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
       });
   };
 
-  const handleDeleteInvoice = async () => {
+  const handleDeleteInvoice = async (invoiceId= null) => {
     setDeleteLoading(true);
     let recordsToDelete = [];
-    if (deleteRecord?._id) {
+    if (invoiceId) {
+      recordsToDelete.push(invoiceId);
+    } else if (deleteRecord?._id) {
       recordsToDelete.push(deleteRecord?._id);
     } else {
       recordsToDelete = selectedRecords.map((o) => o._id);
     }
     if (recordsToDelete.length > 0) {
+      dispatch({ type: 'loading', loading: true });
       axiosInstance()
         .put(`${invoice.api}/remove`, {
           ids: recordsToDelete
@@ -247,6 +253,8 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
             fetchData();
           }}
           allowCreateInvoice={allowCreateInvoice}
+          handleDeleteInvoice={handleDeleteInvoice}
+          fetchData={fetchData}
         />
       )}
       {isConfirmDialogVisible ? (
@@ -258,7 +266,9 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
             setIsConformDialogVisible(false);
           }}
           okBtnLoading={deleteLoading}
-          onOk={handleDeleteInvoice}
+          onOk={() => {
+            handleDeleteInvoice();
+          }}
         />
       ) : null}
     </>
