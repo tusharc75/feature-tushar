@@ -1,28 +1,37 @@
 import { Box, Button, Dialog } from "@material-ui/core";
-import _ from "lodash";
+import _, { camelCase } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
 import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 import CustomReactTable, { useTableReducer } from "src/components/CustomReactTable";
+import CustomButton from "src/components/Helpers/CustomButton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
+import routes from "src/components/Helpers/Routes";
 import { ASSET_STATUS, CustomDialogTransition, rentalManagement } from "src/constants/helpers";
 import AssetDetailsChangeDialog from "src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog";
 
-const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementData, selectedAssets, assetPolicyData }) => {
+const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementData, assets, assetPolicyData }) => {
+
 	const toastConfig = useContext(CustomToastContext);
+	const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_TransferToAnotherPackage`;
 
 	const { state, dispatch } = useTableReducer();
-	const { dataRows } = state;
-	const [isAdding, setIsAdding] = useState(false)
+	const { dataRows, selectedRecords } = state;
+	const [isSubmitting, setIsSubmitting] = useState(false)
 	const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
+
+	useEffect(() => {
+		fetchData()
+	}, [])
 
 	const column = [
 		{
 			accessor: 'productName',
 			Header: 'Product',
 			width: 200,
+			disabled: true,
 			Cell: ({ row }) => {
 				return row.original['productName'] ? <p className="text-truncate">{row.original.productName}</p> : <NoDataCell />;
 			}
@@ -31,6 +40,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 			accessor: 'packageName',
 			Header: 'Package',
 			width: 200,
+			disabled: true,
 			Cell: ({ row }) => {
 				return row.original['packageName'] ? <p className="text-truncate">{row.original.packageName}</p> : <NoDataCell />;
 			}
@@ -39,74 +49,55 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 			accessor: 'qty',
 			Header: 'Qty',
 			width: 200,
+			disabled: true,
 			Cell: ({ row }) => {
 				return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
 			}
 		},
 	]
 
-	useEffect(() => {
-		fetchData()
-	}, [rentalManagementData, selectedAssets])
-
 	const fetchData = async () => {
+		const data = assets?.map(e => ({ asset: e?._id, _id: e?.uniqueId }));
 		dispatch({ type: 'loading', loading: true });
-		axiosInstance()
-			.patch(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/package-similar-product`, selectedAssets?.map(r => ({ asset: r?._id, _id: r?.uniqueId })))
-			.then(({ data: { data } }) => {
-				const rows: any = []
-				data?.forEach(d => {
-					rows.push(...d?.products?.map(p => ({
-						_id: p?.uniqueId,
-						productName: p?.productName,
-						productId: p?._id,
-						packageName: d?.package?.packageName,
-						packageId: d?.package?._id,
-						packageUniqueId: d?.package?.uniqueId,
-						wellNumber: d?.package?.wellNumber,
-						uniqueId: p?.uniqueId,
-						qty: p?.qty
-					})))
-				});
-				dispatch({ type: 'initialize', data: rows, count: rows?.length });
-				dispatch({ type: 'loading', loading: false });
-			}).catch((error) => {
-				toastConfig.setToastConfig(error);
-			})
+		axiosInstance().patch(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/package-similar-product`, data).then(({ data: { data } }) => {
+			dispatch({ type: 'initialize', data: data, count: data?.length });
+			dispatch({ type: 'loading', loading: false });
+		}).catch((error) => {
+			toastConfig.setToastConfig(error);
+		})
 	}
 
-	const handleAdd = (assetsData) => {
-		setIsAdding(true)
-		axiosInstance()
-			.post(
-				`${rentalManagement.api}/productpackage/${rentalManagementData._id}/move-asset-inter-package-product`,
-				dataRows?.map(_d => {
-					const assets: any = [];
-					for (let i = 0; i < _d.qty; i++) {
-						if (selectedAssets[i]) {
-							const obj: any = { _id: selectedAssets[i]?._id }
-							const matchedAsset = assetsData?.find((asset) => asset._id === selectedAssets[i]?._id);
-							if (matchedAsset) {
-								const { _id, ...assetData } = matchedAsset;
-								obj.assetData = assetData;
-							}
-							assets.push(obj)
-						}
+	const handleAdd = (rows) => {
+		setIsSubmitting(true)
+		const tempAssets = [...assets]
+		const data = [];
+		selectedRecords?.forEach((ele) => {
+			for (let i = 0; i < ele.qty; i++) {
+				const asset = tempAssets?.find((e) => e.productId === ele.materialId && !e.isCount)
+				if (asset) {
+					const obj: any = { asset: asset?._id, fromId: asset.uniqueId, toId: ele._id }
+					const matchedAsset = rows?.find((e) => e._id === asset?._id);
+					if (matchedAsset) {
+						const { _id, ...assetData } = matchedAsset;
+						obj.assetData = assetData;
 					}
-					return ({
-						assets: assets,
-						fromId: selectedAssets[0]?.uniqueId,
-						toId: _d?.uniqueId
-					})
-				})
-			)
-			.then((res) => {
-				setIsAdding(false)
-				onSuccess()
-			}).catch((error) => {
-				setIsAdding(false)
-				toastConfig.setToastConfig(error);
-			})
+					asset.isCount = true;
+					data.push(obj)
+				}
+			}
+		})
+		axiosInstance().post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/move-asset-inter-package-product`, data).then(({ data }) => {
+			toastConfig.setToastConfig({
+				open: true,
+				type: 'success',
+				message: data.message
+			});
+			setIsSubmitting(false)
+			onSuccess()
+		}).catch((error) => {
+			setIsSubmitting(false)
+			toastConfig.setToastConfig(error);
+		})
 	}
 
 	return (
@@ -126,32 +117,33 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 				<Box>
 					<CustomDialogHeader
 						onClose={onClose}
-						title={"Transfer Assets To Another Package"}
+						title={"Transfer to Another Package"}
 						showManimizeMaximize={false}
 						showRequiredLabel={false}
-
 					/>
 					<CustomDialogContent>
 						<Box>
 							<Box display={'flex'} justifyContent={'end'} alignItems={'center'}>
-								<Button
+								<CustomButton
+									loading={isSubmitting}
+									disabled={isSubmitting || selectedRecords?.length === 0 ||
+										assets?.reduce((sum, cur) => sum + cur?.qty, 0) != selectedRecords?.reduce((sum, cur) => sum + cur?.qty, 0)
+									}
 									variant="contained"
 									color="primary"
-									size="small"
-									disabled={
-										state?.loading ||
-										isAdding ||
-										selectedAssets?.reduce((sum, cur) => sum + cur?.qty, 0) != dataRows?.reduce((sum, cur) => sum + cur?.qty, 0)
-									}
+									type="submit"
 									onClick={() => {
 										const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved);
 										if (statusPolicy) {
 											setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy });
 										}
+										else {
+											handleAdd([])
+										}
 									}}
 								>
 									Add
-								</Button>
+								</CustomButton>
 							</Box>
 							<Box>
 								<CustomReactTable
@@ -160,8 +152,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 									state={state}
 									dispatch={dispatch}
 									refreshGrid={fetchData}
-									hideAction={true}
-									renderedFrom={'ReceivingTicket_TransferAnotherPackage'}
+									renderedFrom={renderedFrom}
 									isClientSideGrid={true}
 								/>
 							</Box>
@@ -171,7 +162,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 			</Dialog>
 			{openAssetDataDialog.open && (
 				<AssetDetailsChangeDialog
-					ids={selectedAssets?.map((e) => e._id)}
+					ids={assets?.map((e) => e._id)}
 					statusPolicy={openAssetDataDialog.statusPolicy}
 					setAssetsData={() => { }}
 					onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
@@ -184,7 +175,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 							? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
 							: null,
 					}}
-					productsDefaultData={dataRows?.map(d => ({ materialId: d?.productId, assetDefaultData: [{ wellNumber: d?.wellNumber, qty: d?.qty, package: d?.packageId }] }))}
+					productsDefaultData={selectedRecords?.map(d => ({ materialId: d?.materialId, assetDefaultData: [{ wellNumber: d?.wellNumber, qty: d?.qty, package: d?.packageId }] }))}
 				/>
 			)}
 		</>

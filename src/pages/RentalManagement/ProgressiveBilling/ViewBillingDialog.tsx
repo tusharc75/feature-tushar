@@ -172,23 +172,20 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 <Box ml={1} />
               </>
             )}
-            {
-              row.original['type'] !== MATERIAL_TYPE.other && (
-                <IconButton
-                  disabled={!invoiceData?.isLatestInvoice}
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    getNestedSubRows(obj, row.original);
-                    setViewBillDialogConfirm({ open: true, rows: obj });
-                  }}
-                >
-                  <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
-                </IconButton>
-              )
-            }
-
+            {row.original['type'] !== MATERIAL_TYPE.other && (
+              <IconButton
+                disabled={!invoiceData?.isLatestInvoice}
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  getNestedSubRows(obj, row.original);
+                  setViewBillDialogConfirm({ open: true, rows: obj });
+                }}
+              >
+                <Delete fontSize='small' color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
+              </IconButton>
+            )}
           </Grid>
         )
       });

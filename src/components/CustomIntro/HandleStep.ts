@@ -211,8 +211,9 @@ export class HandleSteps {
       if (observer.actualIndex < this.currentIndex) {
         this.tempIndex = this.currentStepData.isHiddenStep ? this.currentIndex - 1 : this.currentIndex;
         this.currentIndex = observer.stepIndex;
-        this.next(false);
         this.tempIndex = -1;
+        this.clicked = false;
+        this.next(false);
         break;
       }
     }
@@ -239,8 +240,9 @@ export class HandleSteps {
     if (this.currentIndex === this.steps.length - 1) {
       this.reset();
     }
-    // To debounce click only register first click
-    if ((this.clicked || this.waiting) && shouldCheck) return;
+    // // To debounce click only register first click
+    // if ((this.clicked || this.waiting) && shouldCheck) return;
+    // this.clicked = !shouldCheck;
 
     if (shouldCheck) {
       this.clicked = true;
@@ -274,8 +276,9 @@ export class HandleSteps {
     this.findingElement = true;
     const activeStep = this.steps[index];
     clearInterval(this.interval);
-    let element = document.querySelector(activeStep.target) as HTMLElement;
     this.sendUpdateSignal();
+    let element = document.querySelector(activeStep.target) as HTMLElement;
+
     if (!element) {
       this.retry++;
       if (this.retry >= RETRY) {
@@ -292,6 +295,8 @@ export class HandleSteps {
     } else {
       this.retry = 0;
       this.findingElement = false;
+      this.clicked = false;
+      this.sendUpdateSignal();
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
       const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
       // this.scrollToCurrentStep(element);
@@ -313,19 +318,17 @@ export class HandleSteps {
         }
       }
 
-      this.clicked = false;
       this.currentStepData = {
         ...activeStep,
         positionData,
         index: index,
         element
       };
-
       // Settimeout with 0 sec delay will move these function calls to js task queue and will execute later
-      setTimeout(() => {
-        this.attachObservers();
-        this.sendUpdateSignal();
-      }, 0);
+      // setTimeout(() => {
+      this.attachObservers();
+      this.sendUpdateSignal();
+      // }, 0);
     }
   }
 

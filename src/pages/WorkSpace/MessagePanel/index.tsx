@@ -1,4 +1,4 @@
-import { IconButton } from '@material-ui/core';
+import { Avatar, IconButton } from '@material-ui/core';
 import { ArrowBack, Visibility } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
@@ -94,9 +94,29 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
                     style={{ border: '1px solid var(--common-border-color)', borderRadius: 8, padding: '2px 5px' }}
                     onClick={() => setIsMemberDialogOpen(true)}
                   >
-                    <span className="flex items-center gap-2">
-                      <Visibility fontSize="small" color="primary" /> {channelData?.members.length}
+                    <span className="flex flex-row-reverse">
+                      {channelData?.members.map((d, i) => {
+                        if (i > 3) return null;
+                        return (
+                          <Avatar
+                            style={{
+                              width: 22,
+                              height: 22,
+                              borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)',
+                              fontSize: 12,
+                              marginRight: i !== 0 ? '-6px' : '5px',
+                              outline: '2px solid var(--dark-primary,white)'
+                            }}
+                            variant="rounded"
+                            className="my-[2px]"
+                            src={d.avatar}
+                          >
+                            {d?.optionLabel.match(/(\b\S)?/g).join('')}
+                          </Avatar>
+                        );
+                      })}
                     </span>
+                    <span className="text-[13px] font-bold leading-[20px]">{channelData?.members.length}</span>
                   </IconButton>
                 </HtmlTooltip>
               </div>
