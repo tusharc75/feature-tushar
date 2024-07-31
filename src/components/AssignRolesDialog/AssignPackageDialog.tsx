@@ -60,6 +60,7 @@ const AssignPackageDialog = ({
       editable: true,
       disableFilters: true,
       disableSortBy: true,
+      disabled:true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
     }
   ];
