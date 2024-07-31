@@ -10,7 +10,7 @@ import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FieldArray, Form, Formik } from 'formik';
-import { camelCase, isEqual, uniqBy } from 'lodash';
+import { camelCase, isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import { Autocomplete } from '@material-ui/lab';
 import AddIcon from '@material-ui/icons/Add';
@@ -287,7 +287,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                         label="Description"
                         required={true}
                         name="description"
-                        rows={3}
+                        size="small"
                         fullWidth
                         value={values['description']}
                         error={touched['description'] && Boolean(errors['description'])}
@@ -429,7 +429,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                       Cancel
                     </Button>
                     <CustomButton
-                      disabled={isEqual(initialData?.values, values)}
+                      disabled={values?.condition?.length===0 || dataRows?.length===0 || isEqual(initialData, {...values, services: dataRows?.map((e)=> e._id)})}
                       loading={loading}
                       variant="contained"
                       color="primary"
