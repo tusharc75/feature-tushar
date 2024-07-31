@@ -34,7 +34,7 @@ const PdfTemplateSchema = object().shape({
   name: string().min(3, 'Too Short!').max(50, 'Too Long').required('PDF template Name  is required'),
   owner: string().required('Owner is required'),
   type: string().required('Type is required'),
-  showPageNumberInFooter: boolean()
+  pageNumberInFooter: boolean()
 });
 
 const useStyles = makeStyles((theme) => ({
@@ -210,7 +210,7 @@ export default function NewCreateQuotePdfTemplate() {
             landscape: tempPdfTemplate.landscape,
             productColumns: tempPdfTemplate.productColumns,
             name: tempPdfTemplate.name,
-            showPageNumberInFooter: tempPdfTemplate.pageNumberInFooter,
+            pageNumberInFooter: tempPdfTemplate.pageNumberInFooter,
             header: tempPdfTemplate.header,
             footer: tempPdfTemplate.footer,
             aboveTable: tempPdfTemplate.aboveTable,
@@ -237,7 +237,7 @@ export default function NewCreateQuotePdfTemplate() {
               landscape: data?.landscape,
               productColumns: data?.productColumns,
               name: !isClone ? data?.name : '',
-              showPageNumberInFooter: data?.pageNumberInFooter,
+              pageNumberInFooter: data?.pageNumberInFooter,
               header: data?.header,
               footer: data?.footer,
               aboveTable: data?.aboveTable,
@@ -287,7 +287,7 @@ export default function NewCreateQuotePdfTemplate() {
         landscape: false,
         productColumns: defaultProductColumns,
         name: '',
-        showPageNumberInFooter: false,
+        pageNumberInFooter: false,
         header: '',
         footer: '',
         aboveTable: '',
@@ -356,7 +356,7 @@ export default function NewCreateQuotePdfTemplate() {
         .post('/quote-pdf-template', {
           ...details,
           name: values.name,
-          pageNumberInFooter: values.showPageNumberInFooter,
+          pageNumberInFooter: values.pageNumberInFooter,
           entity: values?.entity,
           type: values?.type,
           owner: values?.owner,
@@ -401,7 +401,7 @@ export default function NewCreateQuotePdfTemplate() {
           _id: id,
           ...details,
           name: values.name,
-          pageNumberInFooter: values.showPageNumberInFooter,
+          pageNumberInFooter: values.pageNumberInFooter,
           entity: values?.entity,
           type: values?.type,
           owner: values?.owner,
@@ -727,13 +727,13 @@ export default function NewCreateQuotePdfTemplate() {
                   <div className="flex gap-2">
                     <FormControlLabel
                       disabled={!isClone && !hasPermissionToUpdate}
-                      value={values['showPageNumberInFooter']}
+                      value={values['pageNumberInFooter']}
                       control={
                         <Checkbox
-                          name="showPageNumberInFooter"
-                          checked={values['showPageNumberInFooter']}
+                          name="pageNumberInFooter"
+                          checked={values['pageNumberInFooter']}
                           onChange={(e) => {
-                            setFieldValue('showPageNumberInFooter', e.target.checked);
+                            setFieldValue('pageNumberInFooter', e.target.checked);
                           }}
                           color="primary"
                         />

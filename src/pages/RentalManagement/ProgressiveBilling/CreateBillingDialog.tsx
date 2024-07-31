@@ -39,14 +39,13 @@ import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
-  const logs = serviceLog?.filter(s => s.endDate);
-  if (!logs?.length) return 0;
   const uniqueDates = new Set<string>();
   const newStartDate = moment(startDate).startOf('day');
   const newEndDate = moment(endDate).startOf('day');
-  serviceLog.forEach(log => {
+  console.log(endDate)
+  serviceLog?.forEach(log => {
     const logStartDate = moment(log.startDate).startOf('day');
-    const logEndDate = moment(log.endDate).startOf('day');
+    const logEndDate = moment(log.endDate || endDate).startOf('day');
     for (var m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
       if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
         uniqueDates.add(m.format('YYYY-MM-DD'));
@@ -294,9 +293,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
-      if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
-        d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
-      } else if (d?.type === MATERIAL_TYPE.package && !d?.actualStartDate) {
+      // if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
+      //   d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
+      // } else
+      if (d?.type === MATERIAL_TYPE.package && !d?.actualStartDate) {
         d['actualStartDate'] = d?.estimateStartDate;
       }
       if (returnTicketProducts[d?.materialId] > 0) {
@@ -334,7 +334,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (element?.parentId === null && element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
         } else {
           let values: any = {};
-          values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+          if (element.type !== MATERIAL_TYPE.service) {
+            values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
+          }
           values['manualEndDate'] = element?.actualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
@@ -589,9 +591,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }
         }
 
-        if (element?.type === MATERIAL_TYPE.service && element?.serviceLog?.length && element?.actualEndDate) {
-          tempValues.actualEndDate = element?.actualEndDate;
-        }
+        // if (element?.type === MATERIAL_TYPE.service && element?.serviceLog?.length && element?.actualEndDate) {
+        //   tempValues.actualEndDate = element?.actualEndDate;
+        // }
 
         let priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
 
@@ -657,7 +659,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           );
         } else {
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            values['actualJobDuration'] = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
+            values['actualJobDuration'] = calculateServiceDays(element?.serviceLog, element['actualStartDate'], values['actualEndDate']);
             if (!values['actualJobDuration']) {
               element.invalidDate = true;
             }
