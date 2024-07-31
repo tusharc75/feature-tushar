@@ -204,9 +204,6 @@ type DisplaySingleMessageProps = {
   setThreadDialogOpen?: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
   handleMenuClick: (event: React.MouseEvent<HTMLButtonElement>, message: Message) => void;
   messageTimeFormatter?: (string) => string;
-  downloadFile: (attachment: string) => void;
-  deleteAttachment: (messageId: string, attachmentId: string) => void;
-  setAttachmentConfirmBox?: React.Dispatch<React.SetStateAction<{ open: boolean; messageId: string | null, attachmentId: string | null }>>;
 };
 
 export const DisplaySingleMessage = ({
