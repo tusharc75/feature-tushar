@@ -28,7 +28,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open }) =>
   return (
     <div
       className={cn(
-        'thread absolute bottom-0 right-0 top-0 z-10 flex min-w-[360px] max-w-[500px] flex-grow flex-col rounded-md bg-[var(--dark-primary,white)] shadow-md transition-all duration-300 [border:1px_solid_var(--common-border-color)] [transform:translateX(100%)] dark:[border:1px_solid_var(--common-border-color)] md:w-[40%]',
+        'thread absolute bottom-0 right-0 top-0 z-10 flex min-w-[var(--thread-bar-width)] max-w-[var(--thread-bar-width)] flex-grow flex-col rounded-md bg-[var(--dark-primary,white)] shadow-lg transition-all duration-300 [border:1px_solid_var(--common-border-color)] [transform:translateX(100%)] dark:[border:1px_solid_var(--common-border-color)] md:w-[40%]',
         open && '[transform:translateX(0)]'
       )}
     >
