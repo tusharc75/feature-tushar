@@ -5,7 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { CustomDialogTransition, dateFormat, gridLoadingTimeout, rentalManagement } from 'src/constants/helpers';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -18,7 +18,10 @@ import StartStopServiceDateDialog from './StartStopServiceDateDialog';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, onSuccess, allowedToEdit, fetchRecords, maxInvoiceDate= null }) => {
+const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allowedToEdit, fetchRecords, maxInvoiceDate = null }) => {
+
+
+  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services_logs`;
 
   const { state: { user } }: any = useData();
   const { state, dispatch } = useTableReducer();
@@ -59,7 +62,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
   const columns: any = [
     {
       accessor: 'startDate',
-      Header: 'Start Date',
+      Header: 'Actual Start Date',
       disabled: true,
       disableFilters: true,
       disableSortBy: true,
@@ -82,7 +85,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
     },
     {
       accessor: 'endDate',
-      Header: 'End Date',
+      Header: 'Actual End Date',
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
@@ -145,7 +148,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
       Cell: ({ row }) => {
         return (
           <>
-            <HtmlTooltip title={row?.original?.canEdit ? `Update - Start Date/End Date` : 'Invoice already created'}>
+            <HtmlTooltip title={row?.original?.canEdit ? `Update -Actual Start Date/Actual End Date` : 'Invoice already created'}>
               <span>
                 <IconButton
                   size="small"
@@ -162,11 +165,11 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, renderedFrom, on
                         }
                       }
                     })
-                    if(minStartDate) {
+                    if (minStartDate) {
                       minStartDate = new Date(minStartDate);
                       minStartDate.setDate(minStartDate.getDate() + 1);
                     }
-                    if(maxEndDate) {
+                    if (maxEndDate) {
                       maxEndDate = new Date(maxEndDate);
                       maxEndDate.setDate(maxEndDate.getDate() - 1);
                     }
