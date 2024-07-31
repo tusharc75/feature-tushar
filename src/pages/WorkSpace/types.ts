@@ -34,6 +34,7 @@ export type User = {
 export type Member = {
   optionValue: string;
   optionLabel: string;
+  avatar: string;
 };
 
 export type Message = {

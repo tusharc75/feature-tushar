@@ -40,18 +40,32 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
+  const logs = []
   const newStartDate = moment(startDate).startOf('day');
   const newEndDate = moment(endDate).startOf('day');
   serviceLog?.forEach(log => {
     const logStartDate = moment(log.startDate).startOf('day');
     const logEndDate = moment(log.endDate || endDate).startOf('day');
-    for (var m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
+    let index = 0;
+    let tempStartDate
+    let tempEndDate
+    let count = 0;
+    for (const m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
       if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
         uniqueDates.add(m.format('YYYY-MM-DD'));
+        if (index === 0) {
+          tempStartDate = new Date(m.format('YYYY-MM-DD'));
+        }
+        tempEndDate = new Date(m.format('YYYY-MM-DD'));;
+        count++;
+        index++;
       }
     }
+    if (count) {
+      logs.push({ startDate: new Date(tempStartDate), endDate: new Date(tempEndDate), actualJobDuration: count })
+    }
   });
-  return uniqueDates.size;
+  return { actualJobDuration: uniqueDates.size, logs };
 }
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
@@ -412,7 +426,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     data.material?.forEach((element) => {
       if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-        element.actualJobDuration = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
+        const { actualJobDuration } = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
+        element.actualJobDuration = actualJobDuration;
       }
     })
 
@@ -557,6 +572,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     }
 
     let rows: any = [];
+
     records?.forEach((element) => {
       if (element.type === MATERIAL_TYPE.manualEntry) {
         element.isAppliedBill = true;
@@ -590,14 +606,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           }
         }
 
-        // if (element?.type === MATERIAL_TYPE.service && element?.serviceLog?.length && element?.actualEndDate) {
-        //   tempValues.actualEndDate = element?.actualEndDate;
-        // }
-
         let priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
 
+        const extraRows: any = []
         const priceField = allFields?.find((e) => e.fieldName === 'price');
-
         let calValues: any;
         let values = JSON.parse(JSON.stringify(tempValues));
 
@@ -609,7 +621,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             values['standByDaysNotChargeable'] = daysFound[ASSET_STATUS.standByNotChargeable] || 0;
           }
         }
-
         if (element.pricingMethod === 'Per Week') {
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
@@ -658,19 +669,51 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           );
         } else {
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            values['actualJobDuration'] = calculateServiceDays(element?.serviceLog, element['actualStartDate'], values['actualEndDate']);
-            if (!values['actualJobDuration']) {
-              element.invalidDate = true;
+            const { actualJobDuration, logs } = calculateServiceDays(element?.serviceLog, element['actualStartDate'], values['actualEndDate']);
+            if (logs?.length > 1) {
+              values['actualStartDate'] = logs[0]?.startDate
+              values['actualEndDate'] = logs[0]?.endDate
+              values['actualJobDuration'] = logs[0]?.actualJobDuration;
+              element.hideSelection = true;
+              logs?.forEach((e, index) => {
+                if (index !== 0) {
+                  const row = { ...element };
+                  const tempValue = {};
+                  tempValue['actualStartDate'] = e?.startDate
+                  tempValue['actualEndDate'] = e?.endDate
+                  tempValue['actualJobDuration'] = e?.actualJobDuration;
+                  const tempCalValues = autoCalculateSpecificFields(tempValue, { ...row, ...tempValue }, allFields);
+                  row.isAppliedBill = true;
+                  row.hideSelection = true;
+                  extraRows.push({ ...row, ...tempCalValues });
+                }
+              })
+            }
+            else {
+              values['actualJobDuration'] = actualJobDuration;
+              if (!actualJobDuration) {
+                element.invalidDate = true;
+              }
             }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }
         element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
+        if (extraRows?.length) {
+          rows = [...rows, ...extraRows]
+        }
       }
     });
-
-    let tempRows = material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
+    let tempRows: any = [];
+    material?.forEach((obj) => {
+      if (rows.filter((o) => o._id === obj._id)?.length) {
+        tempRows = [...tempRows, ...rows.filter((o) => o._id === obj._id)]
+      }
+      else {
+        tempRows.push(obj)
+      }
+    })
 
     const parentPackages = tempRows?.filter((ele) => !ele.parentId && ele.type === MATERIAL_TYPE.package);
     parentPackages.forEach((parent) => {
