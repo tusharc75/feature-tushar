@@ -315,12 +315,7 @@ function Dropdown({
   // };
 
   const fieldDependentOn = fieldData?.lookupDependentOn ? fields?.find((d) => d.fieldName === fieldData?.lookupDependentOn) : null;
-  const isDisabled =
-    fieldData?.required &&
-    fieldData?.lookupDependentOn &&
-    fieldData?.lookupDependentOn !== '' &&
-    fieldDependentOn &&
-    !!!values[fieldDependentOn.fieldName];
+  const isDisabled = fieldData?.lookupDependentOn && fieldData?.lookupDependentOn !== '' && fieldDependentOn && !!!values[fieldDependentOn.fieldName];
 
   return (
     <Box key={fieldData?.lookupResource}>
@@ -486,32 +481,32 @@ function Dropdown({
                 onChange={
                   onChange
                     ? (e, value: any, reason) => {
-                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
-                        if (isSelectedAll) {
-                          onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
-                        } else {
-                          onChange(e, value, reason);
-                        }
+                      const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (isSelectedAll) {
+                        onChange(e, dropdownOptions(option, values, fields, fieldData), reason);
+                      } else {
+                        onChange(e, value, reason);
                       }
+                    }
                     : (e, value: any, reason) => {
-                        if (setFieldValue) {
-                          const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
+                      if (setFieldValue) {
+                        const isSelectedAll = value.some((val) => val.optionValue === 'selectAll');
 
-                          if (isSelectedAll) {
-                            // If "Select All" is selected, set all other options as values
-                            setFieldValue(
-                              name,
-                              dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
-                            );
-                          } else {
-                            // Remove "Select All" if it was selected and set the values accordingly
-                            setFieldValue(
-                              name,
-                              value.map((val) => val.optionValue)
-                            );
-                          }
+                        if (isSelectedAll) {
+                          // If "Select All" is selected, set all other options as values
+                          setFieldValue(
+                            name,
+                            dropdownOptions(option, values, fields, fieldData).map((item) => item.optionValue)
+                          );
+                        } else {
+                          // Remove "Select All" if it was selected and set the values accordingly
+                          setFieldValue(
+                            name,
+                            value.map((val) => val.optionValue)
+                          );
                         }
                       }
+                    }
                 }
                 forcePopupIcon={true}
                 renderInput={(params) => (
@@ -546,26 +541,26 @@ function Dropdown({
                     onChange
                       ? onChange
                       : (e, val) => {
-                          if (setFieldValue) {
-                            handleChange(name, val && val.optionValue ? val.optionValue : '');
-                            const fieldChange: any = getNestedlookupDependentOn(fields, name);
-                            fieldChange?.forEach((val: any) => {
-                              setFieldValue(val.fieldName, val.value);
-                            });
-                            const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                            if (filterFields?.length) {
-                              filterFields?.forEach((ele: any) => {
-                                if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
-                                  if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
-                                    setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                                  } else {
-                                    setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                                  }
+                        if (setFieldValue) {
+                          handleChange(name, val && val.optionValue ? val.optionValue : '');
+                          const fieldChange: any = getNestedlookupDependentOn(fields, name);
+                          fieldChange?.forEach((val: any) => {
+                            setFieldValue(val.fieldName, val.value);
+                          });
+                          const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+                          if (filterFields?.length) {
+                            filterFields?.forEach((ele: any) => {
+                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                                if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+                                } else {
+                                  setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
                                 }
-                              });
-                            }
+                              }
+                            });
                           }
                         }
+                      }
                   }
                   selectOnFocus
                   clearOnBlur
@@ -585,7 +580,8 @@ function Dropdown({
                   )}
                 />
                 {isDisabled && (
-                  <span className="requiredStar px-1 text-[12px] text-green-500">*Please Select "{fieldDependentOn?.fieldLabel}" first</span>
+                  <span className="requiredStar px-1 text-[12px] text-green-500">
+                    {`Please select ${fieldDependentOn?.fieldLabel} first`}</span>
                 )}
               </>
             )}
@@ -595,7 +591,7 @@ function Dropdown({
           <>
             <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
               <IconButton
-                disabled={fieldData?.isUneditable || rest?.disabled}
+                disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                 onClick={() => setLookupDialog(true)}
                 size="small"
                 color="primary"
@@ -641,7 +637,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -693,7 +689,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -748,7 +744,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -822,7 +818,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -867,7 +863,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -906,7 +902,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -943,7 +939,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -991,7 +987,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -1039,7 +1035,7 @@ function Dropdown({
               <>
                 <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                   <IconButton
-                    disabled={fieldData?.isUneditable || rest?.disabled}
+                    disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                     onClick={() => setLookupDialog(true)}
                     size="small"
                     color="primary"
@@ -1087,7 +1083,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -1137,7 +1133,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -1188,7 +1184,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -1235,7 +1231,7 @@ function Dropdown({
                 <>
                   <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                     <IconButton
-                      disabled={fieldData?.isUneditable || rest?.disabled}
+                      disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                       onClick={() => setLookupDialog(true)}
                       size="small"
                       color="primary"
@@ -1283,7 +1279,7 @@ function Dropdown({
                   <>
                     <HtmlTooltip title={`Add ${fieldData.fieldLabel}`} className="formActionButton">
                       <IconButton
-                        disabled={fieldData?.isUneditable || rest?.disabled}
+                        disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                         onClick={() => setLookupDialog(true)}
                         size="small"
                         color="primary"
