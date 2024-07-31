@@ -2,7 +2,7 @@ import { IconButton } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { useEffect, useState } from 'react';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { cn, dateFormat } from 'src/constants/helpers';
+import { cn } from 'src/constants/helpers';
 import SendMessage from 'src/pages/WorkSpace/MessagePanel/SendMessage';
 import { Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
