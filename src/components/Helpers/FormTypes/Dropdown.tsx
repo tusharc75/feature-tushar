@@ -585,9 +585,7 @@ function Dropdown({
                   )}
                 />
                 {isDisabled && (
-                  <span className="requiredStar px-1 text-[12px] text-green-500">
-                    *Please Select "{fields?.find((d) => d.fieldName === fieldData?.lookupDependentOn)?.fieldLabel}" first
-                  </span>
+                  <span className="requiredStar px-1 text-[12px] text-green-500">*Please Select "{fieldDependentOn?.fieldLabel}" first</span>
                 )}
               </>
             )}
