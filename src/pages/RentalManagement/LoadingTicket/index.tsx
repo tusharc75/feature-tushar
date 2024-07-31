@@ -538,7 +538,7 @@ const LoadingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached', 'warehouse']
+          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached', 'warehouse', 'jobCount']
         }
       ]
     });
@@ -699,6 +699,15 @@ const LoadingTicket = ({
             accessor: 'position',
             Header: findHeader(columnHeader?.assetFields, 'position'),
             Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+          }
+        ]
+      : []),
+      ...(findHeader(columnHeader?.assetFields, 'jobCount')
+      ? [
+          {
+            accessor: 'jobCount',
+            Header: findHeader(columnHeader?.assetFields, 'jobCount'),
+            Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
           }
         ]
       : []),

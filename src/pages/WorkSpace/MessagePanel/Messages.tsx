@@ -1,5 +1,5 @@
 import { Avatar, IconButton, Menu, MenuItem, Popper } from '@material-ui/core';
-import { MoreVert } from '@material-ui/icons';
+import { MoreVert, Delete, GetApp, } from '@material-ui/icons';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
 import moment from 'moment';
@@ -13,7 +13,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { cn, dateFormat } from 'src/constants/helpers';
+import { cn, dateFormat, getFileIconSrc } from 'src/constants/helpers';
 import { Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
@@ -120,7 +120,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
 
   const handleEdit = () => {
     setEditingMessage(selectedMessage);
-    handleMenuClose();
   };
 
   const handleEditComplete = () => {
@@ -146,21 +145,17 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
                   <ul className="list-none space-y-5">
                     {messages[date].map((message) => {
                       return (
-                        <>
-                          <DisplaySingleMessage
-                            key={message._id}
-                            {...{
-                              message,
-                              selectedMessage,
-                              editingMessage,
-                              channelId,
-                              socket,
-                              handleEditComplete,
-                              setThreadDialogOpen,
-                              handleMenuClick
-                            }}
-                          />
-                        </>
+                        <DisplaySingleMessage
+                          key={message._id}
+                          message={message}
+                          selectedMessage={selectedMessage}
+                          editingMessage={editingMessage}
+                          channelId={channelId}
+                          socket={socket}
+                          handleEditComplete={handleEditComplete}
+                          setThreadDialogOpen={setThreadDialogOpen}
+                          handleMenuClick={handleMenuClick}
+                        />
                       );
                     })}
                   </ul>
@@ -175,54 +170,16 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
         </div>
         <SendMessage channelId={channelId} socket={socket} />
       </div>
-      <Menu
+      <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        getContentAnchorEl={null}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'left'
-        }}
-        transformOrigin={{
-          vertical: 'top',
-          horizontal: 'left'
-        }}
-      >
-        <MenuItem button>Mark unread</MenuItem>
-        <MenuItem
-          button
-          onClick={() => {
-            handleMenuClose();
-            setThreadDialogOpen({ open: true, message: selectedMessage });
-          }}
-        >
-          Reply
-        </MenuItem>
-        {selectedMessage?.user?.optionValue === user?._id && (
-          <MenuItem button onClick={handleEdit}>
-            Edit
-          </MenuItem>
-        )}
-        {selectedMessage?.user?.optionValue === user?._id && (
-          <MenuItem button onClick={() => setShowConfirmBox({ open: true, _id: selectedMessage?._id })}>
-            Delete
-          </MenuItem>
-        )}
-      </Menu>
-      {showConfirmBox.open && (
-        <ConfirmationDialog
-          open={showConfirmBox.open}
-          message={`Are you sure you want to delete Message?`}
-          onClose={() => {
-            setShowConfirmBox({ open: false, _id: null });
-          }}
-          onOk={() => {
-            deleteMessage(showConfirmBox._id);
-            setShowConfirmBox({ open: false, _id: null });
-          }}
-        />
-      )}
+        handleMenuClose={handleMenuClose}
+        setThreadDialogOpen={setThreadDialogOpen}
+        selectedMessage={selectedMessage}
+        handleEdit={handleEdit}
+        setShowConfirmBox={setShowConfirmBox}
+        showConfirmBox={showConfirmBox}
+        deleteMessage={deleteMessage}
+      />
       <Thread
         message={threadDialogOpen.message}
         open={threadDialogOpen.open}
@@ -237,6 +194,18 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
 
 export default Messages;
 
+type DisplaySingleMessageProps = {
+  message: Message;
+  selectedMessage: Message;
+  editingMessage: Message;
+  channelId: string;
+  socket: Socket;
+  handleEditComplete: () => void;
+  setThreadDialogOpen?: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
+  handleMenuClick: (event: React.MouseEvent<HTMLButtonElement>, message: Message) => void;
+  messageTimeFormatter?: (string) => string;
+};
+
 export const DisplaySingleMessage = ({
   message,
   selectedMessage,
@@ -246,19 +215,49 @@ export const DisplaySingleMessage = ({
   handleEditComplete,
   setThreadDialogOpen,
   handleMenuClick,
-  showThreadReplySection = true
-}) => {
+  messageTimeFormatter = (date) => moment(date).format('hh:mm A'),
+}: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
+  const [attachmentConfirmBox, setAttachmentConfirmBox] = useState({ open: false, messageId: null, attachmentId: null });
   const openEmojiPanel = (e: React.MouseEvent<HTMLButtonElement>, message: Message) => {
     setEmojiPanelAnchor((prev) => (!prev ? e.currentTarget : null));
   };
   const closeEmojiPanel = () => {
     setEmojiPanelAnchor(null);
   };
+  const toastConfig = useContext(CustomToastContext);
+  const { state: { user: { user } } } = useData();
+
+  if (!message) return null;
 
   const replies = message.replies || [];
-  const uniqueReplies = showThreadReplySection ? uniqBy(replies, (d) => d.user.optionLabel) : [];
+  const uniqueReplies = setThreadDialogOpen ? uniqBy(replies, (d) => d.user.optionLabel) : [];
+
+  const downloadFile = (attachment) => {
+    axiosInstance()
+      .get(`user/download?fileName=${attachment}`, { responseType: 'blob' })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', attachment);
+        document.body.appendChild(link);
+        link.click();
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const deleteAttachment = async (messageId, attachmentId) => {
+    try {
+      await axiosInstance().put(`/work-space/channel/message/remove-attachment`, { messageId, attachmentId });
+      socket.emit('messageDeleted', { channelId });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   return (
     <>
@@ -279,10 +278,10 @@ export const DisplaySingleMessage = ({
           >
             {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
           </Avatar>
-          <div>
+          <div className="flex-grow">
             <div className="flex items-end gap-2">
               <p className="user text-[15px] font-bold">{message.user?.optionLabel}</p>
-              <span className="text-[12px] font-normal">{moment(message.date).format('hh:mm A')}</span>
+              <span className="text-[12px] font-normal ">{messageTimeFormatter(message.date)}</span>
             </div>
             {editingMessage?._id === message._id ? (
               <SendMessage
@@ -302,8 +301,53 @@ export const DisplaySingleMessage = ({
                       __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
                     }}
                   ></span>
-
-                  {replies.length > 0 && showThreadReplySection && (
+                  {message?.attachments?.length > 0 && (
+                    <div className="flex flex-wrap gap-2 py-3">
+                      {message?.attachments?.map((attachment) => {
+                        const Icon = getFileIconSrc(attachment?.url);
+                        return (
+                          <>
+                            <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
+                              <div className="front  group-hover:hidden">
+                                <div className="mx-auto mb-[11px] h-[79px] text-center">
+                                  <Icon size={50} className="mx-auto" />
+                                </div>
+                                <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">{attachment?.fileName}</p>
+                              </div>
+                              <div className="back absolute inset-0 flex flex-col justify-between p-[var(--gutter)] opacity-0 group-hover:opacity-100">
+                                <p className=" line-clamp-4 text-[14px] text-[var(--text-primary)]" title={attachment?.fileName}>
+                                  {attachment?.fileName}
+                                </p>
+                                <div className="flex justify-between">
+                                  <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
+                                    <IconButton
+                                      size={'small'}
+                                      onClick={() => downloadFile(attachment.url)}
+                                      style={{ paddingBottom: 3, width: 30, height: 30 }}
+                                    >
+                                      {<GetApp />}
+                                    </IconButton>
+                                  </HtmlTooltip>
+                                  {message?.user?.optionValue === user?._id && (
+                                    <HtmlTooltip title="Delete Attachment" placement="top" enterTouchDelay={0}>
+                                      <IconButton
+                                        size={'small'}
+                                        onClick={() => { setAttachmentConfirmBox({ open: true, messageId: message?._id, attachmentId: attachment?._id }) }}
+                                        style={{ paddingBottom: 3, width: 30, height: 30 }}
+                                      >
+                                        {<Delete color="error" />}
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </>
+                        )
+                      })}
+                    </div>
+                  )}
+                  {replies.length > 0 && setThreadDialogOpen && (
                     <div
                       onClick={() => setThreadDialogOpen({ open: true, message })}
                       className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1"
@@ -350,13 +394,15 @@ export const DisplaySingleMessage = ({
                       </span>
                     </IconButton>
                   </HtmlTooltip>
-                  <HtmlTooltip title="Reply in thread">
-                    <IconButton size="small" onClick={() => setThreadDialogOpen({ open: true, message })}>
-                      <span className="flex h-6 w-6 items-center justify-center">
-                        <BsReply size={24} />
-                      </span>
-                    </IconButton>
-                  </HtmlTooltip>
+                  {setThreadDialogOpen && (
+                    <HtmlTooltip title="Reply in thread">
+                      <IconButton size="small" onClick={() => setThreadDialogOpen({ open: true, message })}>
+                        <span className="flex h-6 w-6 items-center justify-center">
+                          <BsReply size={24} />
+                        </span>
+                      </IconButton>
+                    </HtmlTooltip>
+                  )}
                   <HtmlTooltip title="More actions">
                     <IconButton
                       onClick={(event) => {
@@ -402,6 +448,104 @@ export const DisplaySingleMessage = ({
           </div>
         </div>
       </li>
+      {attachmentConfirmBox.open && (
+        <ConfirmationDialog
+          open={attachmentConfirmBox.open}
+          message={`Are you sure you want to delete attachment?`}
+          onClose={() => {
+            setAttachmentConfirmBox({ open: false, messageId: null, attachmentId: null });
+          }}
+          onOk={() => {
+            deleteAttachment(attachmentConfirmBox.messageId, attachmentConfirmBox.attachmentId);
+            setAttachmentConfirmBox({ open: false, messageId: null, attachmentId: null });
+          }}
+        />
+      )}
+    </>
+  );
+};
+
+type MoreMenuAndDeleteConfirmDialogProps = {
+  anchorEl: HTMLElement;
+  handleMenuClose: () => void;
+  setThreadDialogOpen?: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
+  selectedMessage: Message;
+  handleEdit: () => void;
+  setShowConfirmBox: React.Dispatch<React.SetStateAction<{ open: boolean; _id: string }>>;
+  showConfirmBox: { open: boolean; _id: string };
+  deleteMessage: (id: string) => void;
+};
+
+export const MoreMenuAndDeleteConfirmDialog = ({
+  anchorEl,
+  handleMenuClose,
+  setThreadDialogOpen,
+  selectedMessage,
+  handleEdit,
+  setShowConfirmBox,
+  showConfirmBox,
+  deleteMessage
+}: MoreMenuAndDeleteConfirmDialogProps) => {
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
+
+  return (
+    <>
+      <Menu
+        anchorEl={anchorEl}
+        open={Boolean(anchorEl)}
+        onClose={handleMenuClose}
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'left'
+        }}
+      >
+        <span onClick={handleMenuClose}>
+          <MenuItem button>Mark unread</MenuItem>
+          {setThreadDialogOpen && (
+            <MenuItem
+              button
+              onClick={() => {
+                handleMenuClose();
+                setThreadDialogOpen({ open: true, message: selectedMessage });
+              }}
+            >
+              Reply
+            </MenuItem>
+          )}
+          {selectedMessage?.user?.optionValue === user?._id && (
+            <MenuItem button onClick={() => handleEdit()}>
+              Edit
+            </MenuItem>
+          )}
+          {selectedMessage?.user?.optionValue === user?._id && (
+            <MenuItem button onClick={() => setShowConfirmBox({ open: true, _id: selectedMessage?._id })}>
+              Delete
+            </MenuItem>
+          )}
+        </span>
+      </Menu>
+      {showConfirmBox.open && (
+        <ConfirmationDialog
+          open={showConfirmBox.open}
+          message={`Are you sure you want to delete Message?`}
+          onClose={() => {
+            setShowConfirmBox({ open: false, _id: null });
+          }}
+          onOk={() => {
+            deleteMessage(showConfirmBox._id);
+            setShowConfirmBox({ open: false, _id: null });
+          }}
+        />
+      )}
     </>
   );
 };
