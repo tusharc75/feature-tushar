@@ -26,7 +26,7 @@ import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 
-const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess, allowCreateInvoice, handleDeleteInvoice }) => {
+const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess, allowCreateInvoice, handleDeleteInvoice, fetchData: fetchInvoiceData }) => {
 
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
 
@@ -42,7 +42,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [allFields, setAllFields] = useState([]);
-  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
 
   const {
@@ -247,8 +246,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
       });
     }
 
-    if (rows?.length === 0) setAllowedToDelete(true);
-
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -325,6 +322,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchData();
+        fetchInvoiceData(invoiceData?._id);
         setViewBillDialogConfirm({ open: false, rows: [] });
       })
       .catch((error) => {
@@ -349,7 +347,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 />
               )}
               <Box display="flex" alignItems="center">
-                {allowedToDelete && permissions?.invoice?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
+                {invoiceData?.canDelete && permissions?.invoice?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
                 <Box ml={1} />
                 {allowedToEdit &&
                   <Button
