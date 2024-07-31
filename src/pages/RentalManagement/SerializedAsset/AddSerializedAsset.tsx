@@ -470,9 +470,9 @@ const AddSerializedAsset = ({
         <CustomDialogContent isFooterPresent={false}>
           <Box pt={1} pb={1} className="main-container-v1">
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-grow flex-wrap items-center gap-2">
                 {serializedProducts.length > 0
-                  ? [...serializedProducts, ...serializedProducts].map((d, i) => (
+                  ? serializedProducts.map((d, i) => (
                       <Box
                         border={1}
                         className={`cursor-pointer p-2 text-[13px] ${
@@ -504,10 +504,10 @@ const AddSerializedAsset = ({
                   ''
                 )}
               </div>
-              <div className="lg:ml-3">
+              <div>
                 {referenceType === 'Rental Job' && (
                   <Autocomplete
-                    style={{ minWidth: '250px' }}
+                    style={{ minWidth: '230px' }}
                     fullWidth
                     options={warehouseOption}
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
@@ -535,7 +535,7 @@ const AddSerializedAsset = ({
                   />
                 )}
               </div>
-              <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+              <div className="ml-auto flex flex-grow flex-wrap items-center justify-end gap-2">
                 <SearchBox
                   onChange={handleSearch}
                   className="small-searchbar ml-auto"
