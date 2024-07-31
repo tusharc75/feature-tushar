@@ -556,8 +556,8 @@ const ProductBuilder = (props) => {
 
   const handleOpenInlineBulkEdit = () => {
     const gridMetaData = JSON.parse(localStorage.getItem('gridMetaData'));
-    if (gridMetaData?.hasOwnProperty('quotesProduct')) {
-      delete gridMetaData['quotesProduct']
+    if (gridMetaData?.hasOwnProperty(renderedFrom)) {
+      delete gridMetaData[renderedFrom]
     }
     localStorage.setItem('gridMetaData', JSON.stringify(gridMetaData))
     dispatchUseData?.dispatch({ type: SET_GRID_METADATA, payload: gridMetaData })
