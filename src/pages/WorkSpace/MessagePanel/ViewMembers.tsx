@@ -1,11 +1,10 @@
-import { Button, Dialog, IconButton, TextField } from '@material-ui/core';
-import { Add, Delete, Remove } from '@material-ui/icons';
+import { IconButton, TextField } from '@material-ui/core';
+import { Add, Remove } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DashboardModal from 'src/components/DashboardModal';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
 import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -69,7 +68,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
             size="small"
             id="search-member"
             type="search"
-            label="Outlined"
+            label="Search.."
             variant="outlined"
             value={searchTerm}
             onChange={handleSearch}
