@@ -213,7 +213,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const checkDeliveryTicketFields = () => {
@@ -231,7 +231,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -353,8 +353,8 @@ const RentalManagementDetailsPage = () => {
     } else {
       axiosInstance()
         .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => { })
-        .catch((error) => { });
+        .then(({ data }) => {})
+        .catch((error) => {});
     }
   };
 
@@ -458,11 +458,11 @@ const RentalManagementDetailsPage = () => {
                   )}
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    className="btn-outline-v1"
+                    className={`btn-outline-v1 ${(isMobile || isTablet) && 'no-hover'}`}
                     id={'rental-management-download-button'}
                     type="button"
                     size="small"
-                    disabled={isDownloading ? true : false}
+                    // disabled={isDownloading ? true : false}
                     startIcon={isMobile ? '' : <IoMdDownload />}
                     onClick={(e) => {
                       handleDownload();
@@ -605,12 +605,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -629,12 +629,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -726,7 +726,10 @@ const RentalManagementDetailsPage = () => {
             <ProgressiveBilling
               rentalId={id}
               rentalManagementData={rentalManagementData}
-              allowCreateInvoice={allowedToEdit && ![RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status) ? true : false} />
+              allowCreateInvoice={
+                allowedToEdit && ![RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status) ? true : false
+              }
+            />
           </TabPanel>
           <TabPanel value={tabValue} index={4}>
             <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />

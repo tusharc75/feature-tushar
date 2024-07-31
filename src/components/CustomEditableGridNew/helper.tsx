@@ -18,6 +18,7 @@ export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
 
 export const generateColumn = (fields, renderedFrom = '') => {
   const hiddenColumns = JSON.parse(localStorage.getItem('gridMetaData'))[renderedFrom]?.hide || [];
+  const columnOrder = JSON.parse(localStorage.getItem('gridMetaData'))[renderedFrom]?.order || [];
 
   const newColumns: any = [
     {
@@ -100,7 +101,12 @@ export const generateColumn = (fields, renderedFrom = '') => {
     }
   });
 
-  newColumns.push({
+  let updatedColumns = newColumns.filter((d) => !hiddenColumns.includes(d.accessor));
+  if (columnOrder.length > 0) {
+    updatedColumns = [...updatedColumns].sort((a, b) => columnOrder.indexOf(a.accessor) - columnOrder.indexOf(b.accessor));
+  }
+
+  updatedColumns.push({
     accessor: 'action',
     accessorKey: 'action',
     Header: 'Action',
@@ -109,8 +115,7 @@ export const generateColumn = (fields, renderedFrom = '') => {
     minWidth: 120,
     width: 120
   });
-
-  return { newColumns: newColumns.filter((d) => !hiddenColumns.includes(d.accessor)), constColumns };
+  return { newColumns: updatedColumns, constColumns };
 };
 
 export const generateRows = (data, fields) => {

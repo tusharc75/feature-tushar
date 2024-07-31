@@ -1169,7 +1169,7 @@ const ReceivingTicket = ({
           }
         ]
         : []),
-        ...(assetFields?.find((f) => f.fieldName === 'jobCount')
+      ...(assetFields?.find((f) => f.fieldName === 'jobCount')
         ? [
           {
             accessor: 'jobCount',
@@ -2905,9 +2905,10 @@ const ActionButtonMenuItems = ({
             {`Transfer to another ${routes.rentalManagement.title}`}
           </MenuItem>
         )}
-      {checkUniqStatus() &&
-        selectedRecords?.every((r) => r?.loadingTicketId) &&
-        !selectedRecords?.some((r) => r?.receivingTicketId || r?.returnTicketId) &&
+      {selectedRecords?.length &&
+        selectedRecords?.every((e) => e?.status === ASSET_STATUS.inUse) &&
+        selectedRecords?.every((e) => e?.loadingTicketId) &&
+        !selectedRecords?.some((e) => e?.receivingTicketId || e?.returnTicketId) &&
         selectedRecords?.map((r) => getParentPackageId(r?.uniqueId))?.every((_id) => _id === getParentPackageId(selectedRecords[0]?.uniqueId)) && (
           <MenuItem
             id={'transfer-to-another-package-menu-item'}
