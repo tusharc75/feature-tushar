@@ -5,9 +5,10 @@ import { Editor } from '@tinymce/tinymce-react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { Button, IconButton } from '@material-ui/core';
-import { AttachFile, Send } from '@material-ui/icons';
+import { AttachFile, Close, Send } from '@material-ui/icons';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { getFileIconSrc } from 'src/constants/helpers';
+import { isImageFile } from 'src/pages/WorkSpace/utils';
 
 type SendMessageProps = {
   channelId: string;
@@ -18,7 +19,7 @@ type SendMessageProps = {
   editorId?: string;
 };
 
-const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => { }, editorId = '' }: SendMessageProps) => {
+const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => {}, editorId = '' }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const [isLoading, setIsLoading] = useState(false);
@@ -34,6 +35,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
       files.forEach((file) => {
         formData.append('files', file);
       });
+      console.log(formData);
       if (initialMessage) {
         formData.append('messageId', messageId);
         await axiosInstance().put(`/work-space/channel/message`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -56,11 +58,43 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
   const handleFileChange = (event) => {
     const newFiles = Array.from(event.target.files);
     setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    event.target.value = '';
   };
+
+  const removeFile = (index) => {
+    setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  console.log(files);
 
   return (
     <div className={`send-message bg-[var(--dark-primary,white)] p-3`}>
       <div className="editor overflow-hidden rounded-lg [border:1px_solid_var(--common-border-color)]">
+        {files.length > 0 && (
+          <div className="flex flex-wrap p-1">
+            {files?.map((file, index) => {
+              const Icon = getFileIconSrc(file.name);
+              return (
+                <>
+                  <div className="group relative min-h-[100px] w-[100px] max-w-[100px] flex-grow rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:8px]">
+                    <>
+                      <div className="mx-auto mb-[11px] h-[30px] text-center">
+                        <Icon size={30} className="mx-auto" />
+                      </div>
+                    </>
+                    <span className="absolute right-0 top-0 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+                      <IconButton size="small" onClick={() => removeFile(index)}>
+                        <Close fontSize="small" />
+                      </IconButton>
+                    </span>
+                    <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">{file.name}</p>
+                  </div>
+                </>
+              );
+            })}
+          </div>
+        )}
+
         <Editor
           key={themeColor}
           id={editorId ? editorId : 'default'}
@@ -84,12 +118,45 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
             height: 100,
             menubar: false,
             paste_as_text: true,
-            plugins: ['advlist', 'paste', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview', 'anchor', 'searchreplace', 'visualblocks', 'fullscreen', 'insertdatetime', 'media', 'table', 'code', 'wordcount'],
+            plugins: [
+              'advlist',
+              'paste',
+              'autolink',
+              'lists',
+              'link',
+              'image',
+              'charmap',
+              'preview',
+              'anchor',
+              'searchreplace',
+              'visualblocks',
+              'fullscreen',
+              'insertdatetime',
+              'media',
+              'table',
+              'code',
+              'wordcount'
+            ],
             toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
             content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
           }}
         />
-        <div className="footer [border-top:1px_solid_var(--common-border-color)]">
+        <div className="footer flex justify-between gap-2 [border-top:1px_solid_var(--common-border-color)]">
+          <div>
+            <input
+              accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+              style={{ display: 'none' }}
+              id="file-upload"
+              multiple
+              type="file"
+              onChange={handleFileChange}
+            />
+            <label htmlFor="file-upload">
+              <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }}>
+                <AttachFile />
+              </IconButton>
+            </label>
+          </div>
           {!initialMessage ? (
             <>
               <IconButton
@@ -103,7 +170,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
               </IconButton>
             </>
           ) : (
-            <div className="ml-auto flex justify-end gap-2 p-1">
+            <>
               <Button size="small" color="primary" onClick={onEditComplete}>
                 Cancel
               </Button>
@@ -115,43 +182,10 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
                 type="submit"
                 onClick={postMessage}
               >
-                {' '}
                 Save
               </CustomButton>
-            </div>
+            </>
           )}
-          <div>
-            <input
-              accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              style={{ display: 'none' }}
-              id="file-upload"
-              multiple
-              type="file"
-              onChange={handleFileChange}
-            />
-            <label htmlFor="file-upload">
-              <IconButton color="primary" aria-label="upload" component="span">
-                <AttachFile />
-              </IconButton>
-            </label>
-            <div className="flex flex-wrap">
-              {
-                files?.map((file, index) => {
-                  const Icon = getFileIconSrc(file.name);
-                  return (
-                    <>
-                      <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
-                        <div className="mx-auto mb-[11px] h-[79px] text-center">
-                          <Icon size={50} className="mx-auto" />
-                        </div>
-                        <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">{file.name}</p>
-                      </div>
-                    </>
-                  )
-                })
-              }
-            </div>
-          </div>
         </div>
       </div>
     </div>

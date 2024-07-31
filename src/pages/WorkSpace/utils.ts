@@ -23,3 +23,22 @@ export function formatDateWithTodayYestarday(date: Date | string, options?: { on
     return inputDate.format('MMM Do [at] h:mm A');
   }
 }
+
+export const isImageFile = (file: File) => {
+  const imageExtentions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
+  const fileExtention = file.name.split('.').pop();
+  console.log(fileExtention, imageExtentions.includes(fileExtention));
+  return imageExtentions.includes(fileExtention);
+};
+
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => {
+      const base64String = String(reader.result).split(',')[1];
+      resolve(base64String);
+    };
+    reader.onerror = (error) => reject(error);
+  });
+}
