@@ -1312,7 +1312,7 @@ const ReceivingTicket = ({
         : []),
       {
         accessor: 'manualStartDate',
-        Header: 'Start Date',
+        Header: 'Actual Start Date',
         Cell: ({ row }) =>
           row?.original?.manualStartDate ? (
             <h5 className="text-truncate" title={`${moment(row?.original?.manualStartDate).format(dateFormat)}`}>
@@ -1324,7 +1324,7 @@ const ReceivingTicket = ({
       },
       {
         accessor: 'manualEndDate',
-        Header: 'End Date',
+        Header: 'Actual End Date',
         Cell: ({ row }) =>
           row?.original?.manualEndDate ? (
             <h5 className="text-truncate" title={`${moment(row?.original?.manualEndDate).format(dateFormat)}`}>
@@ -1337,6 +1337,7 @@ const ReceivingTicket = ({
       {
         accessor: 'startDate',
         Header: 'System Start Date',
+        show: false,
         Cell: ({ row }) =>
           row?.original?.startDate ? (
             <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
@@ -1349,6 +1350,7 @@ const ReceivingTicket = ({
       {
         accessor: 'endDate',
         Header: 'System End Date',
+        show: false,
         Cell: ({ row }) =>
           row?.original?.endDate ? (
             <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
