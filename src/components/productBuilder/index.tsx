@@ -44,6 +44,7 @@ import { Link } from 'react-router-dom';
 import CustomEditableGrid from 'src/components/CustomEditableGridNew';
 import { AiOutlineImport } from 'react-icons/ai';
 import { CustomImport } from 'src/components/productBuilder/CustomImport';
+import { SET_GRID_METADATA } from 'src/StateProvider/actionTypes';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -101,6 +102,7 @@ const ProductBuilder = (props) => {
   const {
     state: { user }
   }: any = useData();
+  const dispatchUseData: any = useData();
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -552,14 +554,23 @@ const ProductBuilder = (props) => {
     );
   };
 
+  const handleOpenInlineBulkEdit = () => {
+    const gridMetaData = JSON.parse(localStorage.getItem('gridMetaData'));
+    if (gridMetaData?.hasOwnProperty('quotesProduct')) {
+      delete gridMetaData['quotesProduct']
+    }
+    localStorage.setItem('gridMetaData', JSON.stringify(gridMetaData))
+    dispatchUseData?.dispatch({ type: SET_GRID_METADATA, payload: gridMetaData })
+
+    setInlineBulkEdit(true);
+  }
+
   const actionButtonMenuItems = () => {
     return (
       <>
         {stage === 'cost' && permissions?.isUpdate && fromQuote && (
           <MenuItem
-            onClick={() => {
-              setInlineBulkEdit(true);
-            }}
+            onClick={handleOpenInlineBulkEdit}
             disabled={isDisabledInlineEdit()}
           >
             {'Inline Edit'}
