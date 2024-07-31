@@ -469,193 +469,181 @@ const AddSerializedAsset = ({
         ></CustomDialogHeader>
         <CustomDialogContent isFooterPresent={false}>
           <Box pt={1} pb={1} className="main-container-v1">
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
-                <Box display="flex">
-                  <Box style={{ display: 'inline' }}>
-                    {serializedProducts.length > 0
-                      ? serializedProducts.map((d, i) => (
-                          <Box
-                            m={0.5}
-                            p={1}
-                            border={1}
-                            className={`cursor-pointer ${
-                              selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
-                            }`}
-                            borderColor="var(--common-border-color)"
-                            id={`serialized-products-${i}`}
-                            onClick={() => {
-                              if (selectedProduct === d.id) {
-                                setSelectedProduct(null);
-                              } else {
-                                setSelectedProduct(d.id);
-                              }
-                            }}
-                            style={{ display: 'inline-block' }}
-                          >
-                            {d?.qty < 0 ? (
-                              <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                            ) : d?.qty === 0 ? (
-                              <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                            ) : (
-                              <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                            )}
-                          </Box>
-                        ))
-                      : null}
-                  </Box>
-                </Box>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                {serializedProducts.length > 0
+                  ? [...serializedProducts, ...serializedProducts].map((d, i) => (
+                      <Box
+                        border={1}
+                        className={`cursor-pointer p-2 text-[13px] ${
+                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                        }`}
+                        borderColor="var(--common-border-color)"
+                        id={`serialized-products-${i}`}
+                        onClick={() => {
+                          if (selectedProduct === d.id) {
+                            setSelectedProduct(null);
+                          } else {
+                            setSelectedProduct(d.id);
+                          }
+                        }}
+                      >
+                        {d?.qty < 0 ? (
+                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                        ) : d?.qty === 0 ? (
+                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                        ) : (
+                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                        )}
+                      </Box>
+                    ))
+                  : null}
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
                   <div className="text-error font-weight-bold">You have selected more assets than required</div>
                 ) : (
                   ''
                 )}
-              </Grid>
-              <Grid item xs={12} md={3}>
+              </div>
+              <div className="lg:ml-3">
                 {referenceType === 'Rental Job' && (
-                  <Grid container>
-                    <Grid item xs={12} justifyContent={'flex-end'}>
-                      <Autocomplete
+                  <Autocomplete
+                    style={{ minWidth: '250px' }}
+                    fullWidth
+                    options={warehouseOption}
+                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                    getOptionSelected={(option: any, val) => option.optionValue === val}
+                    value={
+                      warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
+                        ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
+                        : ''
+                    }
+                    onChange={(e, val) => {
+                      setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        margin="dense"
+                        name="plant"
+                        placeholder={routes.warehouse.title}
+                        label={routes.warehouse.title}
+                        variant="outlined"
                         fullWidth
-                        options={warehouseOption}
-                        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                        getOptionSelected={(option: any, val) => option.optionValue === val}
-                        value={
-                          warehouseOption.filter((data) => data.optionValue === selectedWarehouse).length
-                            ? warehouseOption.filter((data) => data.optionValue === selectedWarehouse)[0]
-                            : ''
-                        }
-                        onChange={(e, val) => {
-                          setSelectedWarehouse(val && val.optionValue ? val.optionValue : null);
-                        }}
-                        renderInput={(params) => (
-                          <TextField
-                            {...params}
-                            margin="dense"
-                            name="plant"
-                            placeholder={routes.warehouse.title}
-                            label={routes.warehouse.title}
-                            variant="outlined"
-                            fullWidth
-                            className="m-0"
-                          />
-                        )}
+                        className="m-0"
                       />
-                    </Grid>
-                  </Grid>
-                )}
-              </Grid>
-              <Grid item xs={12} md={5}>
-                <Box className="flex flex-wrap items-center justify-end gap-2">
-                  <SearchBox
-                    onChange={handleSearch}
-                    className="small-searchbar ml-auto"
-                    value={search}
-                    width={isMobile && !isTablet ? '75%' : '100%'}
+                    )}
                   />
-                  {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
-                    <Fragment>
-                      {permissions?.transferAsset?.isCreate && selectedRecords?.length !== 0 && !checkUniqWarehouse() && (
-                        <Button
-                          style={{ minWidth: 'max-content' }}
-                          size="small"
-                          color="primary"
-                          onClick={() => {
-                            setShowTransferAssetDialog(true);
-                          }}
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                          className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                          endIcon={isAdding && <CircularProgress size={20} />}
-                        >
-                          {`Transfer to ${filterByPlant?.optionLabel}`}
-                          {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                        </Button>
-                      )}
-                      <HtmlTooltip
-                        title={
-                          selectedRecords?.length !== 0 && !checkUniqWarehouse()
-                            ? 'Direct transfer to customer location'
-                            : referenceType === 'Rental Job'
-                              ? 'Add to Job'
-                              : replaceAssets
-                                ? 'Replace'
-                                : 'Add'
-                        }
+                )}
+              </div>
+              <div className="ml-auto flex flex-wrap items-center justify-end gap-2">
+                <SearchBox
+                  onChange={handleSearch}
+                  className="small-searchbar ml-auto"
+                  value={search}
+                  width={isMobile && !isTablet ? '75%' : '100%'}
+                />
+                {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
+                  <Fragment>
+                    {permissions?.transferAsset?.isCreate && selectedRecords?.length !== 0 && !checkUniqWarehouse() && (
+                      <Button
+                        style={{ minWidth: 'max-content' }}
+                        size="small"
+                        color="primary"
+                        onClick={() => {
+                          setShowTransferAssetDialog(true);
+                        }}
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                        endIcon={isAdding && <CircularProgress size={20} />}
                       >
-                        <Button
-                          color="primary"
-                          size="small"
-                          id={'add-to-job-button'}
-                          style={{ minWidth: 'max-content' }}
-                          onClick={() => {
-                            if (referenceType === 'Rental Job') {
-                              if (
-                                user?.user?.brandPolicy?.serializedAssetCertification &&
-                                selectedRecords?.some(
-                                  (e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime()
-                                )
-                              ) {
-                                setCertificateExpireAlert({
-                                  open: true,
-                                  asset: selectedRecords
-                                    ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
-                                    ?.map((e) => e.assetNumber)
-                                    ?.toString()
-                                });
-                              } else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
-                                setOpenAssetDataDialog({
-                                  open: true,
-                                  statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
-                                });
-                              } else if (checkMTRValidation) {
-                                if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
-                                  setMtrConfirmBox(true);
-                                } else {
-                                  addSerializedAsset(selectedRecords);
-                                }
+                        {`Transfer to ${filterByPlant?.optionLabel}`}
+                        {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+                      </Button>
+                    )}
+                    <HtmlTooltip
+                      title={
+                        selectedRecords?.length !== 0 && !checkUniqWarehouse()
+                          ? 'Direct transfer to customer location'
+                          : referenceType === 'Rental Job'
+                            ? 'Add to Job'
+                            : replaceAssets
+                              ? 'Replace'
+                              : 'Add'
+                      }
+                    >
+                      <Button
+                        color="primary"
+                        size="small"
+                        id={'add-to-job-button'}
+                        style={{ minWidth: 'max-content' }}
+                        onClick={() => {
+                          if (referenceType === 'Rental Job') {
+                            if (
+                              user?.user?.brandPolicy?.serializedAssetCertification &&
+                              selectedRecords?.some(
+                                (e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime()
+                              )
+                            ) {
+                              setCertificateExpireAlert({
+                                open: true,
+                                asset: selectedRecords
+                                  ?.filter((e) => e.certificateExpiryDate && new Date(e.certificateExpiryDate)?.getTime() <= new Date()?.getTime())
+                                  ?.map((e) => e.assetNumber)
+                                  ?.toString()
+                              });
+                            } else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                              setOpenAssetDataDialog({
+                                open: true,
+                                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
+                              });
+                            } else if (checkMTRValidation) {
+                              if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
+                                setMtrConfirmBox(true);
                               } else {
                                 addSerializedAsset(selectedRecords);
                               }
                             } else {
                               addSerializedAsset(selectedRecords);
                             }
-                          }}
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          disabled={selectedRecords?.length === 0 || isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                          className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                          endIcon={isAdding && <CircularProgress size={20} />}
-                        >
-                          {referenceType === 'Rental Job' ? 'Add to Job' : replaceAssets ? 'Replace' : 'Add'}
-                          {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                        </Button>
-                      </HtmlTooltip>
-                    </Fragment>
-                  )}
-                  {Number(tabValue) === 2 && (
-                    <Box ml={2}>
-                      <HtmlTooltip title={'Add to Job'}>
-                        <Button
-                          color="primary"
-                          size="small"
-                          style={{ minWidth: 'max-content' }}
-                          onClick={() => {
-                            setInuseAssetConfirmBox(true);
-                          }}
-                          variant={isMobile && !isTablet ? 'text' : 'contained'}
-                          disabled={isSubmitting || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
-                          className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                          endIcon={isSubmitting && <CircularProgress size={20} />}
-                        >
-                          {`Add to Job`}
-                          {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                        </Button>
-                      </HtmlTooltip>
-                    </Box>
-                  )}
-                </Box>
-              </Grid>
-            </Grid>
+                          } else {
+                            addSerializedAsset(selectedRecords);
+                          }
+                        }}
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        disabled={selectedRecords?.length === 0 || isAdding || serializedProducts.some((d) => d?.qty < 0)}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                        endIcon={isAdding && <CircularProgress size={20} />}
+                      >
+                        {referenceType === 'Rental Job' ? 'Add to Job' : replaceAssets ? 'Replace' : 'Add'}
+                        {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+                      </Button>
+                    </HtmlTooltip>
+                  </Fragment>
+                )}
+                {Number(tabValue) === 2 && (
+                  <Box ml={2}>
+                    <HtmlTooltip title={'Add to Job'}>
+                      <Button
+                        color="primary"
+                        size="small"
+                        style={{ minWidth: 'max-content' }}
+                        onClick={() => {
+                          setInuseAssetConfirmBox(true);
+                        }}
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        disabled={isSubmitting || checkUniqRentalJob() || serializedProducts.some((d) => d?.qty < 0)}
+                        className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                        endIcon={isSubmitting && <CircularProgress size={20} />}
+                      >
+                        {`Add to Job`}
+                        {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+                      </Button>
+                    </HtmlTooltip>
+                  </Box>
+                )}
+              </div>
+            </div>
             {['Rental Job'].includes(referenceType) && (
               <Box pt={1}>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>

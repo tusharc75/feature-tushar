@@ -35,12 +35,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
-
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState<Message>(null);
   const [editingMessage, setEditingMessage] = useState(null);
@@ -350,7 +344,7 @@ export const DisplaySingleMessage = ({
                   {replies.length > 0 && setThreadDialogOpen && (
                     <div
                       onClick={() => setThreadDialogOpen({ open: true, message })}
-                      className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1"
+                      className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1 transition-all duration-200 [outline:1px_solid_transparent] hover:shadow-md hover:[outline:1px_solid_var(--common-border-color)]"
                     >
                       {uniqueReplies.map((reply, index) => {
                         if (index > 3) return null;
@@ -363,7 +357,6 @@ export const DisplaySingleMessage = ({
                               borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)'
                             }}
                             variant="rounded"
-                            className="mt-[3px]"
                             src={reply.avatar}
                           >
                             {reply.user?.optionLabel.match(/(\b\S)?/g).join('')}

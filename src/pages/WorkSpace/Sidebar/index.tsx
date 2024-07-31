@@ -1,10 +1,12 @@
 import { Button, Collapse, IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@material-ui/core';
-import { ArrowDropDown, ArrowDropUp, Delete, ExpandMore, MoreHoriz } from '@material-ui/icons';
+import { Add, ArrowDropDown, ArrowDropUp, Delete, ExpandMore, MoreHoriz } from '@material-ui/icons';
 import React, { useState } from 'react';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cn } from 'src/constants/helpers';
 import { TChannel } from 'src/pages/WorkSpace/types';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type SidebarProps = {
   channels: TChannel[];
@@ -150,12 +152,17 @@ const SidebarButton = ({ setCreateChannelDialog }: SidebarButtonProps) => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   return (
     <>
       <Button size={'small'} className="group" onClick={handleClick}>
         <span className="text-[15px]">Channels</span>
-        <ExpandMore className="opacity-0 transition-all duration-300 group-hover:opacity-100" fontSize="small" />
       </Button>
+      <HtmlTooltip title="Create Channel" className="ml-auto">
+        <IconButton size={'small'} onClick={() => setCreateChannelDialog(true)}>
+          <Add fontSize="small" />
+        </IconButton>
+      </HtmlTooltip>
       <Menu
         id="simple-menu"
         anchorEl={anchorEl}
