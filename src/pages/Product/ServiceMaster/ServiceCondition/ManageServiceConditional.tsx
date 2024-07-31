@@ -429,7 +429,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                       Cancel
                     </Button>
                     <CustomButton
-                      disabled={values?.conditions?.length===0 || dataRows?.length===0 || isEqual(initialData, {...values, services: dataRows?.map((e)=> e._id)})}
+                      disabled={values?.condition?.length===0 || dataRows?.length===0 || isEqual(initialData, {...values, services: dataRows?.map((e)=> e._id)})}
                       loading={loading}
                       variant="contained"
                       color="primary"
