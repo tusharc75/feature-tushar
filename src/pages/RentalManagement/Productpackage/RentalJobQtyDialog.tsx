@@ -87,12 +87,13 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const fetchTaxRate = async (billingAddress: any) => {
     const zipCode = billingAddress?.zipCode;
     const state = billingAddress?.state;
+    const county = billingAddress?.county;
     let materialType;
     if (isBulkedit) materialType = rowData[0]?.type;
     else materialType = rowData?.type;
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}`
       );
       return response?.data?.data || [];
     } catch (e) {
@@ -215,9 +216,8 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    if (
-      rentalManagementData?.customerAccount?.taxApplicable &&
-      (rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state)
+    if (rentalManagementData?.customerAccount?.taxApplicable &&
+      (rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state || rentalManagementData?.billingAddress?.county)
     ) {
       const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress);
       fields?.forEach((e: any) => {
