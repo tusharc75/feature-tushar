@@ -18,7 +18,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import ReplaceAssetReason from 'src/components/RentalManagment/ReplaceAssetReason';
-import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ManageRepairOrder from 'src/pages/RepairOrder/ManageRepairOrder';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
@@ -2684,27 +2684,30 @@ const ActionButtonMenuItems = ({
   return (
     <>
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && !hideDeliveryTicketDelivered && (
-        <MenuItem
-          id={'received-on-field-menu-item'}
-          onClick={() => {
-            if (validateAction(rentalManagementActions.deliveredToCustomer)) {
-              if (user?.user?.brandPolicy?.assetDeliveredStatus) {
-                setOpenDateDialog({
-                  open: true,
-                  type: 'changeStatus',
-                  status: ASSET_STATUS.delivered,
-                  prevStatus: ASSET_STATUS.delivered,
-                  assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
-                  loading: false
-                });
-              } else {
-                handelProcessLoadingTickets();
+        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
+          <MenuItem
+            id={'received-on-field-menu-item'}
+            onClick={() => {
+              if (validateAction(rentalManagementActions.deliveredToCustomer)) {
+                if (user?.user?.brandPolicy?.assetDeliveredStatus) {
+                  setOpenDateDialog({
+                    open: true,
+                    type: 'changeStatus',
+                    status: ASSET_STATUS.delivered,
+                    prevStatus: ASSET_STATUS.delivered,
+                    assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                    loading: false
+                  });
+                } else {
+                  handelProcessLoadingTickets();
+                }
               }
-            }
-          }}
-        >
-          Received on Field
-        </MenuItem>
+            }}
+            disabled={!permissions?.deliveryTicket?.isUpdate}
+          >
+            Received on Field
+          </MenuItem>
+        </HtmlTooltip>
       )}
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.assetDeliveredStatus && user?.user?.brandPolicy?.rentalOnFieldStep && (
         <Box>
@@ -2822,16 +2825,19 @@ const ActionButtonMenuItems = ({
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <>
-            <MenuItem
-              id={'create-receiving-ticket-chargaeble-menu-item'}
-              onClick={() => {
-                if (validateAction(rentalManagementActions.createReceivingTicket)) {
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
-                }
-              }}
-            >
-              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
-            </MenuItem>
+            <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
+              <MenuItem
+                id={'create-receiving-ticket-chargaeble-menu-item'}
+                onClick={() => {
+                  if (validateAction(rentalManagementActions.createReceivingTicket)) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
+                  }
+                }}
+                disabled={!permissions?.deliveryTicket?.isCreate}
+              >
+                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
+              </MenuItem>
+            </HtmlTooltip>
             {selectedRecords.length &&
               selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
               selectedRecords?.length ? (
@@ -2844,23 +2850,26 @@ const ActionButtonMenuItems = ({
                 Remove Receiving Ticket
               </MenuItem>
             ) : null}
-            <MenuItem
-              id={'create-return-ticket-non-chargeble-menu-item'}
-              onClick={() => {
-                if (validateAction(rentalManagementActions.createReturnTicket)) {
-                  if (selectedRecords?.every((e) => e.type === 'Asset')) {
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
-                  } else {
-                    setShowQtyDialog({ open: true, data: null });
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+            <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
+              <MenuItem
+                id={'create-return-ticket-non-chargeble-menu-item'}
+                onClick={() => {
+                  if (validateAction(rentalManagementActions.createReturnTicket)) {
+                    if (selectedRecords?.every((e) => e.type === 'Asset')) {
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                    } else {
+                      setShowQtyDialog({ open: true, data: null });
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+                    }
                   }
-                }
-              }}
-            >
-              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
-            </MenuItem>
+                }}
+                disabled={!permissions?.deliveryTicket?.isCreate}
+              >
+                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
+              </MenuItem>
+            </HtmlTooltip>
             {permissions?.sublease?.isRead && (
-              <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? `You don't have permission to perform this action ` : ''}>
+              <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
                 <MenuItem
                   id={'create-delivery-ticket-supplier-menu-item'}
                   onClick={() => {
@@ -2877,7 +2886,7 @@ const ActionButtonMenuItems = ({
           </>
         )}
       {currentStep === RENTAL_STEPS.receiving && !hideDeliveryTicketDelivered && (
-        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? `You don't have permission to perform this action ` : ''}>
+        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
           <MenuItem
             id={'received-items-menu-item'}
             onClick={() => {
@@ -3001,7 +3010,7 @@ const ActionButtonMenuItems = ({
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
           <>
             {!hideDeliveryTicketDelivered && (
-              <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? `You don't have permission to perform this action ` : ''}>
+              <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
                 <MenuItem
                   id={'cancel-specific-line-item-menu-item'}
                   onClick={() => {
@@ -3015,7 +3024,7 @@ const ActionButtonMenuItems = ({
                 </MenuItem>
               </HtmlTooltip>
             )}
-            <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? `You don't have permission to perform this action ` : ''}>
+            <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
               <MenuItem
                 id={'cancel-receiving-return-ticket-menu-item'}
                 onClick={() => {
