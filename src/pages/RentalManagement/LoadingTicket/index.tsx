@@ -14,7 +14,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -1636,7 +1636,7 @@ const ActionButtonMenuItems = ({
 
   return (
     <>
-      <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? `You don't have permission to perform this action ` : ''}>
+      <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
         <MenuItem
           onClick={() => {
             if (!validateAction(rentalManagementActions.createLoadingTicket)) {
@@ -1655,7 +1655,7 @@ const ActionButtonMenuItems = ({
       </HtmlTooltip>
 
       {user?.user?.brandPolicy?.rentalOnFieldStep || hideDeliveryTicketDelivered ? null : (
-        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? `You don't have permission to perform this action ` : ''}>
+        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
           <MenuItem
             onClick={() => {
               if (!validateAction(rentalManagementActions.deliveredToCustomer)) {
@@ -1821,7 +1821,7 @@ const ActionButtonMenuItems = ({
         </MenuItem>
       )}
       {!hideDeliveryTicketDelivered && (
-        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? `You don't have permission to perform this action ` : ''}>
+        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
           <MenuItem
             onClick={() => {
               if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
@@ -1835,7 +1835,7 @@ const ActionButtonMenuItems = ({
           </MenuItem>
         </HtmlTooltip>
       )}
-      <HtmlTooltip title={!permissions?.deliveryTicket?.isDelete ? `You don't have permission to perform this action ` : ''}>
+      <HtmlTooltip title={!permissions?.deliveryTicket?.isDelete ? actionDisable : ''}>
         <MenuItem
           onClick={() => {
             if (!validateAction(rentalManagementActions.cancelLoadingTicket)) {
