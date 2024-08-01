@@ -143,13 +143,11 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
       .then(({ data: { data, count } }) => {
         let rows = data.map((u, idx) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject.orignalData = u;
           finalObject['isLatestInvoice'] = idx === 0 ? true : false;
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
+          finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete && allowCreateInvoice;
           return finalObject;
         });
-
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -237,7 +235,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
       {viewBillDialog.open && (
         <ViewBillingDialog
           rentalManagementData={rentalManagementData}
-          invoiceData={viewBillDialog?.invoiceData}
+          invoiceId={viewBillDialog?.invoiceData?._id}
           onClose={() => {
             setViewBillDialog({ open: false, invoiceData: null });
             fetchData();
@@ -247,6 +245,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
             fetchData();
           }}
           allowCreateInvoice={allowCreateInvoice}
+          isLatestInvoice={viewBillDialog?.invoiceData?.isLatestInvoice}
         />
       )}
       {isConfirmDialogVisible ? (
