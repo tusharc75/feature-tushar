@@ -57,7 +57,7 @@ const AddSerializedAsset = ({
   chartOfAccount = null,
   replaceAssets = false,
   assetPolicyData = null,
-  selectedRecordsOfMain = [],
+  selectedRecordsOfMain = []
 }) => {
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
   const toastConfig = useContext(CustomToastContext);
@@ -411,29 +411,30 @@ const AddSerializedAsset = ({
               <div className="flex flex-grow flex-wrap items-center gap-2">
                 {serializedProducts.length > 0
                   ? serializedProducts.map((d, i) => (
-                    <Box
-                      border={1}
-                      className={`cursor-pointer p-2 text-[13px] ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                      <Box
+                        border={1}
+                        className={`cursor-pointer p-2 text-[13px] ${
+                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                      borderColor="var(--common-border-color)"
-                      id={`serialized-products-${i}`}
-                      onClick={() => {
-                        if (selectedProduct === d.id) {
-                          setSelectedProduct(null);
-                        } else {
-                          setSelectedProduct(d.id);
-                        }
-                      }}
-                    >
-                      {d?.qty < 0 ? (
-                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                      ) : d?.qty === 0 ? (
-                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                      ) : (
-                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                      )}
-                    </Box>
-                  ))
+                        borderColor="var(--common-border-color)"
+                        id={`serialized-products-${i}`}
+                        onClick={() => {
+                          if (selectedProduct === d.id) {
+                            setSelectedProduct(null);
+                          } else {
+                            setSelectedProduct(d.id);
+                          }
+                        }}
+                      >
+                        {d?.qty < 0 ? (
+                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                        ) : d?.qty === 0 ? (
+                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                        ) : (
+                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                        )}
+                      </Box>
+                    ))
                   : null}
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
                   <div className="text-error font-weight-bold">You have selected more assets than required</div>
@@ -473,12 +474,7 @@ const AddSerializedAsset = ({
                 )}
               </div>
               <div className="ml-auto flex flex-grow flex-wrap items-center justify-end gap-2">
-                <SearchBox
-                  onChange={handleSearch}
-                  className="small-searchbar ml-auto"
-                  value={search}
-                  width={isMobile && !isTablet ? '75%' : '100%'}
-                />
+                <SearchBox onChange={handleSearch} value={search} />
                 {(Number(tabValue) === 0 || Number(tabValue) === 1) && (
                   <Fragment>
                     {permissions?.transferAsset?.isCreate && selectedRecords?.length !== 0 && !checkUniqWarehouse() && (
@@ -581,6 +577,7 @@ const AddSerializedAsset = ({
                 )}
               </div>
             </div>
+
             {['Rental Job'].includes(referenceType) && (
               <Box pt={1}>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
@@ -690,7 +687,7 @@ const AddSerializedAsset = ({
         <AssetDetailsChangeDialog
           ids={selectedRecords?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
