@@ -80,6 +80,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
     const zipCode = billingAddress?.zipCode;
     const state = billingAddress?.state;
+    const county = billingAddress?.county;
+
     let materialType;
     if (isBulkedit) {
       materialType = rowData[0]?.type;
@@ -88,7 +90,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     }
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
       );
       return response?.data?.data || [];
     } catch (e) {
@@ -248,7 +250,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) && !isOffline) {
+    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress &&
+      (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) && !isOffline) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
