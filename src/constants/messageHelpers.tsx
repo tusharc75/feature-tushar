@@ -4,6 +4,9 @@ export const ownerAndColaborator = 'You have to be either owner or collaborator 
 
 export const entityDisable = 'You do not have permission to update entity';
 
+export const actionDisable = "You don't have permission to perform this action";
+
+
 export const actionSelection = 'Select at least one line item to enable this button';
 
 export const cloneDisable = 'You do not have permission to Clone/Create';
@@ -88,7 +91,7 @@ export const rentalManagementMessage = {
     canNotChangeStartDateEndDate: `Can not change Start Date/End Date`,
     canNotChangeStartDate: `Can not change Start Date`,
     canNotChangeEndDate: `Can not change End Date`,
-    invoiceCreated :  `Invoice already created`
+    invoiceCreated: `Invoice already created`
 };
 
 export const subleaseActions = {
