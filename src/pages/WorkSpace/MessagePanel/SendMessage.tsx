@@ -27,7 +27,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
   const [message, setMessage] = useState(initialMessage);
   const editorRef = useRef(null);
   const [files, setFiles] = useState([]);
-  const [imageViewerUrl, setImageViewerUrl] = useState('');
+  const [filesWithUrl, setFilesWithUrl] = useState([]);
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -69,12 +69,14 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
         data.push(d);
       }
     }
-    setFiles(data);
+    setFilesWithUrl(data);
+    setFiles(newFiles);
     event.target.value = '';
   };
 
   const removeFile = (index) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setFilesWithUrl((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
   return (
@@ -82,7 +84,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
       <div className="editor overflow-hidden rounded-lg [border:1px_solid_var(--common-border-color)]">
         {files.length > 0 && (
           <div className="flex flex-wrap p-1">
-            {files?.map((file, index) => {
+            {filesWithUrl?.map((file, index) => {
               const Icon = getFileIconSrc(file.name);
               return (
                 <>
