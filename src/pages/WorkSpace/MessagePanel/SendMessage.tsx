@@ -132,6 +132,12 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
               setMessage(d);
             }
           }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.ctrlKey) {
+              e.preventDefault();
+              postMessage();
+            }
+          }}
           value={message}
           onInit={(_evt, editor) => {
             editorRef.current = editor;
