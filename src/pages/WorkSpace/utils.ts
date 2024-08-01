@@ -27,7 +27,6 @@ export function formatDateWithTodayYestarday(date: Date | string, options?: { on
 export const isImageFile = (file: File) => {
   const imageExtentions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
   const fileExtention = file.name.split('.').pop();
-  console.log(fileExtention, imageExtentions.includes(fileExtention));
   return imageExtentions.includes(fileExtention);
 };
 
