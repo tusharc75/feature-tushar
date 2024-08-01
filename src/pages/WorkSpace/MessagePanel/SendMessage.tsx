@@ -1,14 +1,15 @@
-import React, { useContext, useRef, useState } from 'react';
-import { Socket } from 'socket.io-client';
-import axiosInstance from 'src/axios/axiosInstance';
-import { Editor } from '@tinymce/tinymce-react';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useAppTheme } from 'src/constants/AppConfig';
 import { Button, IconButton } from '@material-ui/core';
-import { AttachFile, Close, Send } from '@material-ui/icons';
+import { AttachFile, Close, FindInPageRounded, Send } from '@material-ui/icons';
+import { Editor } from '@tinymce/tinymce-react';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
+import { Socket } from 'socket.io-client';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from 'src/axios/axiosInstance';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { getFileIconSrc } from 'src/constants/helpers';
-import { isImageFile } from 'src/pages/WorkSpace/utils';
+import { useAppTheme } from 'src/constants/AppConfig';
+import { cn, getFileIconSrc } from 'src/constants/helpers';
+import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
 
 type SendMessageProps = {
   channelId: string;
@@ -19,13 +20,14 @@ type SendMessageProps = {
   editorId?: string;
 };
 
-const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => { }, editorId = '' }: SendMessageProps) => {
+const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => {}, editorId = '' }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(initialMessage);
   const editorRef = useRef(null);
   const [files, setFiles] = useState([]);
+  const [filesWithUrl, setFilesWithUrl] = useState([]);
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -54,38 +56,67 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
     }
   };
 
-  const handleFileChange = (event) => {
-    const newFiles = Array.from(event.target.files);
-    setFiles((prevFiles) => [...prevFiles, ...newFiles]);
+  const handleFileChange = async (event) => {
+    const newFiles = [...files, ...Array.from(event.target.files)];
+    const data = [];
+    for (const d of newFiles) {
+      if (isImageFile(d)) {
+        const url = await fileToBase64(d);
+        d.url = url;
+        data.push(d);
+      } else {
+        data.push(d);
+      }
+    }
+    setFilesWithUrl(data);
+    setFiles(newFiles);
     event.target.value = '';
   };
 
   const removeFile = (index) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    setFilesWithUrl((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
-
 
   return (
     <div className={`send-message bg-[var(--dark-primary,white)] p-3`}>
       <div className="editor overflow-hidden rounded-lg [border:1px_solid_var(--common-border-color)]">
         {files.length > 0 && (
           <div className="flex flex-wrap p-1">
-            {files?.map((file, index) => {
+            {filesWithUrl?.map((file, index) => {
               const Icon = getFileIconSrc(file.name);
               return (
                 <>
                   <div className="group relative min-h-[100px] w-[100px] max-w-[100px] flex-grow rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:8px]">
-                    <>
+                    {file.url ? (
+                      <>
+                        <div style={{ backgroundImage: `url(${file.url})` }} className="absolute inset-0 bg-cover bg-center bg-no-repeat"></div>
+                        <div className="absolute inset-0 bg-black/30 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                      </>
+                    ) : (
                       <div className="mx-auto mb-[11px] h-[30px] text-center">
                         <Icon size={30} className="mx-auto" />
                       </div>
-                    </>
-                    <span className="absolute right-0 top-0 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+                    )}
+
+                    <span
+                      className={cn(
+                        'absolute right-0 top-0 z-10 transition-opacity group-hover:opacity-100 lg:opacity-0',
+                        file.url ? 'bg-[var(--dark-primary,white)]' : ''
+                      )}
+                    >
                       <IconButton size="small" onClick={() => removeFile(index)}>
                         <Close fontSize="small" />
                       </IconButton>
                     </span>
-                    <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">{file.name}</p>
+                    <p
+                      className={cn(
+                        'absolute bottom-1 left-1 right-1 line-clamp-2 text-[14px] text-[var(--text-primary)]',
+                        file.url ? 'text-white opacity-0 transition-opacity group-hover:opacity-100' : ''
+                      )}
+                    >
+                      {file.name}
+                    </p>
                   </div>
                 </>
               );
@@ -99,6 +130,12 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
           onEditorChange={(d) => {
             if (editorRef.current.isDirty()) {
               setMessage(d);
+            }
+          }}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.ctrlKey) {
+              e.preventDefault();
+              postMessage();
             }
           }}
           value={message}
@@ -191,3 +228,69 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
 };
 
 export default SendMessage;
+
+const ImageViewer = ({ src, open, onClose }: { src: string | string[]; open: boolean; onClose: () => void }) => {
+  const [currentSrc, setCurrentSrc] = useState(Array.isArray(src) ? src[0] : src);
+  const imageRef = useRef<HTMLImageElement>(null);
+  const [size, setSize] = useState([imageRef.current?.width, imageRef.current?.height]);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCurrentSrc(Array.isArray(src) ? src[0] : src);
+    return () => setSize([0, 0]);
+  }, [src]);
+
+  const portalContainer = document.getElementById('portal-container');
+  const isList = Array.isArray(src);
+
+  function ZoomIn() {
+    const image = imageRef.current;
+    let width = image.clientWidth;
+    let height = image.clientHeight;
+
+    setSize((prev) => [width + 50, height + 50]);
+  }
+  function ZoomOut() {
+    const image = imageRef.current;
+    let width = image.clientWidth;
+    let height = image.clientHeight;
+
+    setSize((prev) => [width - 50, height - 50]);
+  }
+
+  if (!open) return null;
+  return createPortal(
+    <div className="image-viewer fixed inset-0 z-[1499]  bg-black/50">
+      <span className="absolute right-5 top-5 overflow-hidden rounded-md">
+        <IconButton onClick={onClose}>
+          <Close className="text-white" />
+        </IconButton>
+      </span>
+      <span className="absolute right-20 top-5 overflow-hidden rounded-md">
+        <IconButton onClick={ZoomIn}>
+          <FindInPageRounded className="text-white" />
+        </IconButton>
+      </span>
+      <div className="flex h-full w-full items-center justify-center">
+        <div ref={containerRef} className="relative h-[calc(100%_-_20px)] w-[calc(100%_-_20px)] overflow-hidden md:h-[80%] md:w-[80%]">
+          <img
+            key={currentSrc}
+            onLoad={(e) => {
+              const target = e.currentTarget || (e.target as HTMLImageElement);
+              console.log(target.clientWidth, target.clientHeight);
+              if (target) setSize([target.width, target.height]);
+            }}
+            width={size[0] > 0 ? size[0] : undefined}
+            height={size[1] > 0 ? size[1] : undefined}
+            ref={imageRef}
+            src={currentSrc}
+            alt=""
+            loading="lazy"
+            className="absolute inset-0 h-auto object-cover"
+          />
+        </div>
+      </div>
+    </div>,
+    portalContainer
+  );
+};
