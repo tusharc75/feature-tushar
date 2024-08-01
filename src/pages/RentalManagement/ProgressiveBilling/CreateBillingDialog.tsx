@@ -52,17 +52,17 @@ const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) =
     let count = 0;
     for (const m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
       if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
-        uniqueDates.add(m.format('YYYY-MM-DD'));
+        uniqueDates.add(m.format('MM/DD/YYYY'));
         if (index === 0) {
-          tempStartDate = new Date(m.format('YYYY-MM-DD'));
+          tempStartDate = new Date(m.format('MM/DD/YYYY'));
         }
-        tempEndDate = new Date(m.format('YYYY-MM-DD'));;
+        tempEndDate = new Date(m.format('MM/DD/YYYY'));;
         count++;
         index++;
       }
     }
     if (count) {
-      logs.push({ startDate: new Date(tempStartDate), endDate: new Date(tempEndDate), actualJobDuration: count })
+      logs.push({ startDate: tempStartDate, endDate: tempEndDate, actualJobDuration: count })
     }
   });
   return { actualJobDuration: uniqueDates.size, logs };

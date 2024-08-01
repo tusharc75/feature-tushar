@@ -37,7 +37,6 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
       files.forEach((file) => {
         formData.append('files', file);
       });
-      console.log(formData);
       if (initialMessage) {
         formData.append('messageId', messageId);
         await axiosInstance().put(`/work-space/channel/message`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });

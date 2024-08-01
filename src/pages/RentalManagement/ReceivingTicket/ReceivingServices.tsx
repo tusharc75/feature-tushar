@@ -212,10 +212,8 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
     setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
     data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
     data['type'] = type;
-    // data['date'] = values.date;
-    data['startDate'] = values.startDate;
-    data['endDate'] = values.endDate;
-
+    data['startDate'] = moment(values.startDate).format('MM/DD/YYYY');
+    data['endDate'] = moment(values.endDate).format('MM/DD/YYYY');
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {
