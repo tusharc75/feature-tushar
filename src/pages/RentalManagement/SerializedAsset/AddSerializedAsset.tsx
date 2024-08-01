@@ -31,7 +31,7 @@ import {
   DELIVERY_TICKET_TYPE,
   deliveryTicket,
   gridLoadingTimeout,
-  isObjectEmpty,
+  MATERIAL_TYPE,
   prepareDataForGrid,
   rentalManagement,
   serializedAsset,
@@ -56,7 +56,8 @@ const AddSerializedAsset = ({
   handleSuccess = null,
   chartOfAccount = null,
   replaceAssets = false,
-  assetPolicyData = null
+  assetPolicyData = null,
+  selectedRecordsOfMain = [],
 }) => {
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
   const toastConfig = useContext(CustomToastContext);
@@ -290,8 +291,6 @@ const AddSerializedAsset = ({
   const checkUniqRentalJob = () => {
     if (selectedRecords?.length === 0) {
       return true;
-      // } else if (uniq(map(selectedRecords, 'loadingTicket.rentalJob.optionLabel')).length === 1) {
-      //   return false;
     } else {
       return false;
     }
@@ -322,67 +321,6 @@ const AddSerializedAsset = ({
     if (((tabValue === 0 || tabValue === 1) && newValue === 2) || ((newValue === 0 || newValue === 1) && tabValue === 2)) {
       dispatch({ type: 'selection', selectedRecords: [] });
     }
-    // if (newValue === 0) {
-    //   setSelectedWarehouse(filterByPlant?.optionValue);
-    // } else {
-    //   setSelectedWarehouse(null);
-    // }
-  };
-
-  const handleTicketDialog = () => {
-    const loadingTicket = selectedRecords[0].loadingTicket;
-
-    const assetsAdd: any = [];
-    const assets = selectedRecords;
-    selectedProducts?.forEach((e: any) => {
-      if (e.type === 'product') {
-        let qty = e.realAssetQty - e.realAssetAssignedQty;
-        while (qty) {
-          const result = assets.filter((f) => f.productId === e.materialId && !f.isCounted);
-          if (result.length) {
-            let obj: any = {};
-            obj._id = e._id;
-            obj.inventory = result[0]._id;
-            obj.product = e.materialId;
-            assetsAdd.push(obj);
-            result[0].isCounted = true;
-          }
-          qty--;
-        }
-      }
-    });
-
-    if (assetsAdd?.length === 0) {
-      return;
-    }
-
-    const data = {};
-    data['ticketName'] = loadingTicket?.rentalJob?.optionLabel;
-    data['referenceId'] = loadingTicket?.rentalJob?.optionValue;
-
-    data['pickupFromType'] = DELIVERY_FROM_TO_TYPE.customer;
-    data['pickupFrom'] = loadingTicket?.deliveryTo;
-    data['pickupFromAddress'] = loadingTicket?.deliveryToAddress;
-    data['isPickupFromDisable'] = true;
-
-    data['deliveryToType'] = DELIVERY_FROM_TO_TYPE.customer;
-    data['deliveryTo'] = referenceData?.customerAccount;
-    data['deliveryToAddress'] = referenceData?.shippingAddress;
-    data['isDeliveryToDisable'] = true;
-
-    data['startDate'] = referenceData?.fromDate;
-    data['endDate'] = referenceData?.toDate;
-    data['wellName'] = referenceData?.wellName;
-    if (referenceData?.wellNumber) {
-      data['wellNumber'] = referenceData?.wellNumber;
-    }
-    data['afeNumber'] = referenceData?.afeNumber;
-    if (referenceData?.processor) {
-      data['processor'] = referenceData?.processor;
-    }
-    data['status'] = DELIVERY_TICKET_STATUS.delivered;
-
-    setShowTicketDialog({ open: true, data: data, assets: assetsAdd });
   };
 
   const handleCreateLoadingTicketAddAsstes = (data) => {
@@ -410,8 +348,8 @@ const AddSerializedAsset = ({
 
   const handleAutoTransferAssets = (assetsData = null) => {
     const assetsAdd: any = [];
-    selectedProducts?.forEach((e: any) => {
-      if (e.type === 'product') {
+    selectedRecordsOfMain?.forEach((e: any) => {
+      if (e.type === MATERIAL_TYPE.product) {
         let qty = e.realAssetQty - e.realAssetAssignedQty;
         while (qty) {
           const result = selectedRecords?.filter((f) => f.productId === e.materialId && !f.isCounted);
@@ -473,30 +411,29 @@ const AddSerializedAsset = ({
               <div className="flex flex-grow flex-wrap items-center gap-2">
                 {serializedProducts.length > 0
                   ? serializedProducts.map((d, i) => (
-                      <Box
-                        border={1}
-                        className={`cursor-pointer p-2 text-[13px] ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                    <Box
+                      border={1}
+                      className={`cursor-pointer p-2 text-[13px] ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                        borderColor="var(--common-border-color)"
-                        id={`serialized-products-${i}`}
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
+                      borderColor="var(--common-border-color)"
+                      id={`serialized-products-${i}`}
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                    >
+                      {d?.qty < 0 ? (
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      ) : d?.qty === 0 ? (
+                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                      ) : (
+                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                      )}
+                    </Box>
+                  ))
                   : null}
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
                   <div className="text-error font-weight-bold">You have selected more assets than required</div>
@@ -753,7 +690,7 @@ const AddSerializedAsset = ({
         <AssetDetailsChangeDialog
           ids={selectedRecords?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {

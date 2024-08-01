@@ -19,7 +19,7 @@ type SendMessageProps = {
   editorId?: string;
 };
 
-const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => {}, editorId = '' }: SendMessageProps) => {
+const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => { }, editorId = '' }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const [isLoading, setIsLoading] = useState(false);
@@ -35,7 +35,6 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
       files.forEach((file) => {
         formData.append('files', file);
       });
-      console.log(formData);
       if (initialMessage) {
         formData.append('messageId', messageId);
         await axiosInstance().put(`/work-space/channel/message`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -65,7 +64,6 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
   };
 
-  console.log(files);
 
   return (
     <div className={`send-message bg-[var(--dark-primary,white)] p-3`}>
