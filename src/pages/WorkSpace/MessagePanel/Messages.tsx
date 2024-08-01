@@ -1,9 +1,9 @@
 import { Avatar, IconButton, Menu, MenuItem, Popper } from '@material-ui/core';
-import { MoreVert, Delete, GetApp, } from '@material-ui/icons';
+import { MoreVert, Delete, GetApp } from '@material-ui/icons';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
 import moment from 'moment';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { BsEmojiGrin, BsReply } from 'react-icons/bs';
 import { Socket } from 'socket.io-client';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -38,6 +38,11 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
   const [anchorEl, setAnchorEl] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState<Message>(null);
   const [editingMessage, setEditingMessage] = useState(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
+  }, [messages]);
 
   const fetchMessages = async (after: string = null) => {
     try {
@@ -123,7 +128,10 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
   return (
     <div className={cn('message-panel flex ')}>
       <div className="flex w-full flex-col">
-        <div className={cn('messages-container my-2 max-h-[max(500px,_calc(100vh-430px))] min-h-[500px] flex-grow overflow-y-auto')}>
+        <div
+          ref={containerRef}
+          className={cn('messages-container my-2 max-h-[max(500px,_calc(100vh-430px))] min-h-[500px] flex-grow overflow-y-auto scroll-smooth')}
+        >
           {messages !== null ? (
             <ul className="mt-8 list-none">
               {Object.keys(messages).map((date) => (
@@ -209,7 +217,7 @@ export const DisplaySingleMessage = ({
   handleEditComplete,
   setThreadDialogOpen,
   handleMenuClick,
-  messageTimeFormatter = (date) => moment(date).format('hh:mm A'),
+  messageTimeFormatter = (date) => moment(date).format('hh:mm A')
 }: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
@@ -221,7 +229,11 @@ export const DisplaySingleMessage = ({
     setEmojiPanelAnchor(null);
   };
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
 
   if (!message) return null;
 
@@ -326,7 +338,9 @@ export const DisplaySingleMessage = ({
                                     <HtmlTooltip title="Delete Attachment" placement="top" enterTouchDelay={0}>
                                       <IconButton
                                         size={'small'}
-                                        onClick={() => { setAttachmentConfirmBox({ open: true, messageId: message?._id, attachmentId: attachment?._id }) }}
+                                        onClick={() => {
+                                          setAttachmentConfirmBox({ open: true, messageId: message?._id, attachmentId: attachment?._id });
+                                        }}
                                         style={{ paddingBottom: 3, width: 30, height: 30 }}
                                       >
                                         {<Delete color="error" />}
@@ -337,7 +351,7 @@ export const DisplaySingleMessage = ({
                               </div>
                             </div>
                           </>
-                        )
+                        );
                       })}
                     </div>
                   )}
