@@ -36,6 +36,9 @@ export default function AssetDetailsChangeDialog({
   const [decimalFields, setDecimalFields] = useState([]);
   const [allFields, setAllFields] = useState([]);
 
+  const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '' });
+
+
   useEffect(() => {
     fetchFields();
   }, []);
@@ -46,6 +49,11 @@ export default function AssetDetailsChangeDialog({
 
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     let fieldsData = fields?.data?.data;
+
+    setAssetHeaders({
+      assetNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'assetNumber')?.fieldData?.fieldLabel || 'Asset',
+      product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product'
+    })
     setAllFields(JSON.parse(JSON.stringify(fieldsData)));
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
     let fieldsDataForUpdate = fieldsData?.map((d: any) => d.fieldData);
@@ -196,8 +204,8 @@ export default function AssetDetailsChangeDialog({
       }, {});
 
       return {
-        'Asset Number': _data?.assetNumber || '',
-        'Product': _data?.productName || '',
+        [assetHeaders.assetNumber]: _data?.assetNumber || '',
+        [assetHeaders.product]: _data?.productName || '',
         ...dynamicFields
       };
     });
@@ -221,7 +229,7 @@ export default function AssetDetailsChangeDialog({
       json_data_value.push(mergedObject);
     }
 
-    const header1 = ['Asset Number', 'Product', ...initialData?.fields?.map((f) => f?.fieldLabel)];
+    const header1 = [assetHeaders.assetNumber, assetHeaders.product, ...initialData?.fields?.map((f) => f?.fieldLabel)];
 
     const header2 = initialData?.fields?.filter((f) => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map((f) => f?.fieldLabel);
 
