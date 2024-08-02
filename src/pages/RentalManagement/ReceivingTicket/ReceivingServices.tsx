@@ -418,6 +418,13 @@ const ActionButtonMenuItems = ({
           if (dates?.length) {
             date = new Date(Math.max(...dates));
           }
+          date = selectedRecords?.reduce((maxDate, record) => {
+            if (record?.maxInvoiceDate) {
+              const recordDate = new Date(record.maxInvoiceDate);
+              return recordDate > maxDate ? recordDate : maxDate;
+            }
+            return maxDate;
+          }, date);
           setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
         }
       }}
