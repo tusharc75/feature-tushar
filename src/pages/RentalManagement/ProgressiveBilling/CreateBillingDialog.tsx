@@ -813,8 +813,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           { minStartDate: null, maxEndDate: null }
         );
 
-        sumValues['actualStartDate'] = minStartDate.toISOString();
-        sumValues['actualEndDate'] = maxEndDate.toISOString();
+        sumValues['actualStartDate'] = minStartDate;
+        sumValues['actualEndDate'] = maxEndDate;
       } else {
         child.forEach(element => {
           sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
