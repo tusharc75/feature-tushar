@@ -12,7 +12,7 @@ import { CustomDialogTransition, getObjKeys, sidebarResource } from 'src/constan
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 
-const InvoiceCaptureFieldsDialog = ({ onClose, onSuccess, rentalInvoiceCaptureFields }) => {
+const InvoiceDataDialog = ({ onClose, onSuccess, rentalInvoiceFields }) => {
 	const toastConfig = useContext(CustomToastContext);
 
 	const [fullScreen, setFullScreen] = useState(isMobile || isTablet)
@@ -27,13 +27,11 @@ const InvoiceCaptureFieldsDialog = ({ onClose, onSuccess, rentalInvoiceCaptureFi
 			let fieldData;
 			const response: any = await axiosInstance().get(`/field?resource=${sidebarResource.invoice}`);
 			fieldData = response?.data?.data;
-
-			const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate && rentalInvoiceCaptureFields?.includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
+			const fieldsDataForCreate = fieldData?.filter((obj) => obj.isCreate && rentalInvoiceFields?.includes(obj?.fieldData?.fieldName)).map((d: any) => d.fieldData);
 			setInitialData({
 				fields: fieldsDataForCreate,
 				values: getObjKeys('', fieldsDataForCreate)
 			});
-			// setLoading(false);
 		} catch (error) {
 			toastConfig.setToastConfig(error);
 		}
@@ -42,7 +40,6 @@ const InvoiceCaptureFieldsDialog = ({ onClose, onSuccess, rentalInvoiceCaptureFi
 	const handleSubmit = (values) => {
 		onSuccess(values)
 	}
-
 
 	return (
 		<Dialog
@@ -113,4 +110,4 @@ const InvoiceCaptureFieldsDialog = ({ onClose, onSuccess, rentalInvoiceCaptureFi
 	);
 };
 
-export default InvoiceCaptureFieldsDialog;
+export default InvoiceDataDialog;
