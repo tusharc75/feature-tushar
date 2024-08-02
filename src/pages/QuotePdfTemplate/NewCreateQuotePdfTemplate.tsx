@@ -345,6 +345,7 @@ export default function NewCreateQuotePdfTemplate() {
   };
 
   const handleSubmit = (values) => {
+    const trimmedName = values.name.trim();
     if (isPreview === true) {
       setIsUpdatingAndPreview(true);
     } else {
@@ -355,7 +356,7 @@ export default function NewCreateQuotePdfTemplate() {
       axiosInstance()
         .post('/quote-pdf-template', {
           ...details,
-          name: values.name,
+          name: trimmedName,
           pageNumberInFooter: values.pageNumberInFooter,
           entity: values?.entity,
           type: values?.type,
@@ -400,7 +401,7 @@ export default function NewCreateQuotePdfTemplate() {
         .put(api, {
           _id: id,
           ...details,
-          name: values.name,
+          name: trimmedName,
           pageNumberInFooter: values.pageNumberInFooter,
           entity: values?.entity,
           type: values?.type,
