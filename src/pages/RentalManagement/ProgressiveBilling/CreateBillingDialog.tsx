@@ -526,7 +526,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
-    let tempValues: any = { actualEndDate: endDate };
     const childRows: any = [];
     var inUseStandByDays = [];
     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
@@ -574,6 +573,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     let rows: any = [];
 
     records?.forEach((element) => {
+      let values: any = { actualEndDate: endDate };
+
       if (element.type === MATERIAL_TYPE.manualEntry) {
         element.isAppliedBill = true;
         rows.push(element);
@@ -599,7 +600,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (element?.manualEndDate) {
           const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
           if (selectedEndDateTime > productManualEndDate) {
-            tempValues.actualEndDate = element?.manualEndDate;
+            values.actualEndDate = element?.manualEndDate;
           }
           if (productManualEndDate < productStartDateTime) {
             element.invalidDate = true;
@@ -611,7 +612,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         const extraRows: any = []
         const priceField = allFields?.find((e) => e.fieldName === 'price');
         let calValues: any;
-        let values = JSON.parse(JSON.stringify(tempValues));
 
         if (inUseStandByDays?.length) {
           const daysFound = inUseStandByDays?.find((e) => e.parentIds?.includes(element._id));
