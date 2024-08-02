@@ -117,7 +117,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 				<Box>
 					<CustomDialogHeader
 						onClose={onClose}
-						title={"Transfer to Another Package"}
+						title={"Transfer to another Package"}
 						showManimizeMaximize={false}
 						showRequiredLabel={false}
 					/>
@@ -127,7 +127,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 								<CustomButton
 									loading={isSubmitting}
 									disabled={isSubmitting || selectedRecords?.length === 0 ||
-										assets?.reduce((sum, cur) => sum + cur?.qty, 0) != selectedRecords?.reduce((sum, cur) => sum + cur?.qty, 0)
+										assets?.length >= selectedRecords?.reduce((sum, cur) => sum + cur?.qty, 0) ? false : true
 									}
 									variant="contained"
 									color="primary"
@@ -142,7 +142,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 										}
 									}}
 								>
-									Add
+									{`Add ${selectedRecords?.length ? `(${selectedRecords?.length})` : ''}`}
 								</CustomButton>
 							</Box>
 							<Box>
