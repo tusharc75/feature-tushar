@@ -540,9 +540,6 @@ const ManageDeliveryTicket = ({
       if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }
-      if (moment(values['createDate']).isAfter(moment())) {
-        errors['createDate'] = `Please select valid date`;
-      }
     }
     return errors;
   }
@@ -639,11 +636,10 @@ const ManageDeliveryTicket = ({
                     onClose();
                   }
                 }}
-                title={`${
-                  deliveryTicketId
-                    ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
-                    : `Create Transaction Ticket`
-                }`}
+                title={`${deliveryTicketId
+                  ? `Update ${initialData.values?.ticketName ? `(${initialData.values?.ticketName})` : ''}`
+                  : `Create Transaction Ticket`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -697,11 +693,11 @@ const ManageDeliveryTicket = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        //minDate={new Date()}
-                                        //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
-                                        // maxDate={
-                                        //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
-                                        //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
+                                      //minDate={new Date()}
+                                      //maxDate={moment(values["deliveryDate"]).subtract(1, "day")}
+                                      // maxDate={
+                                      //     referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob ? referenceData.estimateStartDate ? moment(referenceData?.estimateStartDate) : moment().add(1, 'years').calendar()
+                                      //         : referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset ? moment(values["deliveryDate"]) : moment().add(1, 'years').calendar()}
                                       />
                                     ) : field.fieldName === 'createDate' ? (
                                       <FormTypes
@@ -726,7 +722,6 @@ const ManageDeliveryTicket = ({
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
                                         minDate={createDateMin}
-                                        maxDate={new Date()}
                                       />
                                     ) : field.fieldName === 'deliveryDate' ? (
                                       <FormTypes

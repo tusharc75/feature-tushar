@@ -80,6 +80,8 @@ export default function AssetDetailsChangeDialog({
       }
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
+      initialValues['productName'] = data?.product?.optionLabel;
+
 
       const assetDefaultData = productsDefaultData?.find((e) => e.materialId === data?.product?.optionValue)?.assetDefaultData;
       if (!index) {
@@ -195,6 +197,7 @@ export default function AssetDetailsChangeDialog({
 
       return {
         'Asset Number': _data?.assetNumber || '',
+        'Product': _data?.productName || '',
         ...dynamicFields
       };
     });
@@ -218,7 +221,7 @@ export default function AssetDetailsChangeDialog({
       json_data_value.push(mergedObject);
     }
 
-    const header1 = ['Asset Number', ...initialData?.fields?.map((f) => f?.fieldLabel)];
+    const header1 = ['Asset Number', 'Product', ...initialData?.fields?.map((f) => f?.fieldLabel)];
 
     const header2 = initialData?.fields?.filter((f) => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map((f) => f?.fieldLabel);
 
@@ -283,7 +286,7 @@ export default function AssetDetailsChangeDialog({
         let row = parsedData.slice(1, parsedData.length);
         row.forEach((item: any[]) => {
           item?.forEach((_d, i) => {
-            if (i != 0) {
+            if (i != 0 && i != 1) {
               const { index, fieldName, value } = getValueInImport(_d, item[0], header[i], values?.assetData);
               setFieldValue(`assetData.${index}.${fieldName}`, value);
             }
@@ -360,7 +363,7 @@ export default function AssetDetailsChangeDialog({
                               key={index}
                             >
                               <div>
-                                <span className="font-semibold text-[var(--primary-text)]">{data.assetNumber}</span>
+                                <span className="font-semibold text-[var(--primary-text)]">{`${data?.assetNumber} (${data?.productName})`}</span>
                               </div>
                               <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (
