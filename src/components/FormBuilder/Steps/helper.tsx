@@ -156,5 +156,16 @@ export const resourcePolicy = [
         defaultValue: false
       }
     ]
-  }
+  },
+  {
+    resource: sidebarResource.invoice,
+    policy: [
+      {
+        fieldName: 'rentalInvoiceCaptureFields',
+        fieldLabel: 'Rental Invoice Capture Fields',
+        type: 'multiSelect',
+        defaultValue: []
+      }
+    ]
+  },
 ];
