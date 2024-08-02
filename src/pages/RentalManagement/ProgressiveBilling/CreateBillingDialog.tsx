@@ -37,6 +37,7 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import InvoiceCaptureFieldsDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceCaptureFieldsDialog';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -88,6 +89,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
   const [resourceData, setResourceData] = useState(null);
+  const [invoiceResourceData, setInvoiceResourceData] = useState(null);
+  const [openInvoiceCaptureFieldsDialog, setOpenInvoiceCaptureFieldsDialog] = useState(false)
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -98,6 +101,15 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
       .then(({ data: { data } }) => {
         setResourceData(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+
+    axiosInstance()
+      .get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`)
+      .then(({ data: { data } }) => {
+        setInvoiceResourceData(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -859,7 +871,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     setIsProductEdit({ open: false, rowData: null });
   };
 
-  const handleCreateBill = () => {
+  const handleCreateBill = (invoiceData = null) => {
     rowsApplied?.forEach((element) => {
       delete element?.index;
       if (element.type !== MATERIAL_TYPE.other) {
@@ -889,7 +901,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     axiosInstance()
       .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
         material: rowsApplied.filter((d) => d.type !== MATERIAL_TYPE.manualEntry),
-        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry)
+        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry),
+        invoiceData: invoiceData
       })
       .then(() => {
         setUpdating(false);
@@ -1038,7 +1051,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 size="small"
                 disabled={isUpdating || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
-                  handleCreateBill();
+                  if (invoiceResourceData?.policy?.rentalInvoiceCaptureFields?.length > 0) {
+                    setOpenInvoiceCaptureFieldsDialog(true)
+                  } else {
+                    handleCreateBill();
+                  }
                 }}
               >
                 Create Bill
@@ -1061,6 +1078,19 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           loading={isUpdating}
           isQtyOnly={true}
           isRateRequired={false}
+        />
+      )}
+
+      {openInvoiceCaptureFieldsDialog && (
+        <InvoiceCaptureFieldsDialog
+          onClose={() => {
+            setOpenInvoiceCaptureFieldsDialog(false)
+          }}
+          rentalInvoiceCaptureFields={invoiceResourceData?.policy?.rentalInvoiceCaptureFields}
+          onSuccess={(data) => {
+            handleCreateBill(data)
+            setOpenInvoiceCaptureFieldsDialog(false)
+          }}
         />
       )}
     </Fragment>
