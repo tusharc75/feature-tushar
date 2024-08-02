@@ -20,7 +20,7 @@ type SendMessageProps = {
   editorId?: string;
 };
 
-const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => {}, editorId = '' }: SendMessageProps) => {
+const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => { }, editorId = '' }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
   const [isLoading, setIsLoading] = useState(false);
@@ -277,7 +277,6 @@ const ImageViewer = ({ src, open, onClose }: { src: string | string[]; open: boo
             key={currentSrc}
             onLoad={(e) => {
               const target = e.currentTarget || (e.target as HTMLImageElement);
-              console.log(target.clientWidth, target.clientHeight);
               if (target) setSize([target.width, target.height]);
             }}
             width={size[0] > 0 ? size[0] : undefined}

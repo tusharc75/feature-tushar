@@ -6,7 +6,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -28,6 +28,7 @@ import {
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -80,14 +81,18 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceMethodList, setPriceMethodList] = useState([]);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   useEffect(() => {
     fetchData();
   }, [rowData]);
 
-  const fetchTaxRate = async (billingAddress: any) => {
-    const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state;
-    const county = billingAddress?.county;
+  const fetchTaxRate = async (address: any) => {
+    const zipCode = address?.zipCode;
+    const state = address?.state;
+    const county = address?.county;
     let materialType;
     if (isBulkedit) materialType = rowData[0]?.type;
     else materialType = rowData?.type;
@@ -216,10 +221,13 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
+    const taxApplicableField = user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== '' ?
+      fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn) : 'billingAddress'
+
     if (rentalManagementData?.customerAccount?.taxApplicable &&
-      (rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state || rentalManagementData?.billingAddress?.county)
+      (rentalManagementData?.[taxApplicableField]?.zipCode || rentalManagementData?.[taxApplicableField]?.state || rentalManagementData?.[taxApplicableField]?.county)
     ) {
-      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress);
+      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField]);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
