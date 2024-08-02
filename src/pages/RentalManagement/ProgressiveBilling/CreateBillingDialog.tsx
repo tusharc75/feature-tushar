@@ -37,7 +37,7 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
-import InvoiceCaptureFieldsDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceCaptureFieldsDialog';
+import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -88,24 +88,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
-  const [resourceData, setResourceData] = useState(null);
   const [invoiceResourceData, setInvoiceResourceData] = useState(null);
-  const [openInvoiceCaptureFieldsDialog, setOpenInvoiceCaptureFieldsDialog] = useState(false)
+  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false)
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   useEffect(() => {
-    axiosInstance()
-      .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
-      .then(({ data: { data } }) => {
-        setResourceData(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-
     axiosInstance()
       .get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`)
       .then(({ data: { data } }) => {
@@ -538,7 +528,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
-    let tempValues: any = { actualEndDate: endDate };
     const childRows: any = [];
     var inUseStandByDays = [];
     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
@@ -586,6 +575,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     let rows: any = [];
 
     records?.forEach((element) => {
+      let values: any = { actualEndDate: endDate };
+
       if (element.type === MATERIAL_TYPE.manualEntry) {
         element.isAppliedBill = true;
         rows.push(element);
@@ -611,7 +602,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (element?.manualEndDate) {
           const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
           if (selectedEndDateTime > productManualEndDate) {
-            tempValues.actualEndDate = element?.manualEndDate;
+            values.actualEndDate = element?.manualEndDate;
           }
           if (productManualEndDate < productStartDateTime) {
             element.invalidDate = true;
@@ -623,7 +614,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         const extraRows: any = []
         const priceField = allFields?.find((e) => e.fieldName === 'price');
         let calValues: any;
-        let values = JSON.parse(JSON.stringify(tempValues));
 
         if (inUseStandByDays?.length) {
           const daysFound = inUseStandByDays?.find((e) => e.parentIds?.includes(element._id));
@@ -1051,8 +1041,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 size="small"
                 disabled={isUpdating || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
-                  if (invoiceResourceData?.policy?.rentalInvoiceCaptureFields?.length > 0) {
-                    setOpenInvoiceCaptureFieldsDialog(true)
+                  if (invoiceResourceData?.policy?.rentalInvoiceFields?.length > 0) {
+                    setOpenInvoiceDataDialog(true)
                   } else {
                     handleCreateBill();
                   }
@@ -1080,16 +1070,15 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           isRateRequired={false}
         />
       )}
-
-      {openInvoiceCaptureFieldsDialog && (
-        <InvoiceCaptureFieldsDialog
+      {openInvoiceDataDialog && (
+        <InvoiceDataDialog
           onClose={() => {
-            setOpenInvoiceCaptureFieldsDialog(false)
+            setOpenInvoiceDataDialog(false)
           }}
-          rentalInvoiceCaptureFields={invoiceResourceData?.policy?.rentalInvoiceCaptureFields}
+          rentalInvoiceFields={invoiceResourceData?.policy?.rentalInvoiceFields}
           onSuccess={(data) => {
             handleCreateBill(data)
-            setOpenInvoiceCaptureFieldsDialog(false)
+            setOpenInvoiceDataDialog(false)
           }}
         />
       )}

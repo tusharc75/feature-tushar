@@ -155,8 +155,8 @@ export const resourcePolicy = [
     resource: sidebarResource.invoice,
     policy: [
       {
-        fieldName: 'rentalInvoiceCaptureFields',
-        fieldLabel: 'Rental Invoice Capture Fields',
+        fieldName: 'rentalInvoiceFields',
+        fieldLabel: 'Rental Invoice Fields',
         type: 'multiSelect',
         defaultValue: []
       }
