@@ -37,6 +37,7 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -87,7 +88,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
-  const [resourceData, setResourceData] = useState(null);
+  const [invoiceResourceData, setInvoiceResourceData] = useState(null);
+  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false)
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -95,9 +97,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
+      .get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`)
       .then(({ data: { data } }) => {
-        setResourceData(data);
+        setInvoiceResourceData(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -526,7 +528,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
-    let tempValues: any = { actualEndDate: endDate };
     const childRows: any = [];
     var inUseStandByDays = [];
     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
@@ -574,6 +575,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     let rows: any = [];
 
     records?.forEach((element) => {
+      let values: any = { actualEndDate: endDate };
+
       if (element.type === MATERIAL_TYPE.manualEntry) {
         element.isAppliedBill = true;
         rows.push(element);
@@ -599,7 +602,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (element?.manualEndDate) {
           const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
           if (selectedEndDateTime > productManualEndDate) {
-            tempValues.actualEndDate = element?.manualEndDate;
+            values.actualEndDate = element?.manualEndDate;
           }
           if (productManualEndDate < productStartDateTime) {
             element.invalidDate = true;
@@ -611,7 +614,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         const extraRows: any = []
         const priceField = allFields?.find((e) => e.fieldName === 'price');
         let calValues: any;
-        let values = JSON.parse(JSON.stringify(tempValues));
 
         if (inUseStandByDays?.length) {
           const daysFound = inUseStandByDays?.find((e) => e.parentIds?.includes(element._id));
@@ -859,7 +861,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     setIsProductEdit({ open: false, rowData: null });
   };
 
-  const handleCreateBill = () => {
+  const handleCreateBill = (invoiceData = null) => {
     rowsApplied?.forEach((element) => {
       delete element?.index;
       if (element.type !== MATERIAL_TYPE.other) {
@@ -889,7 +891,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     axiosInstance()
       .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
         material: rowsApplied.filter((d) => d.type !== MATERIAL_TYPE.manualEntry),
-        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry)
+        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry),
+        invoiceData: invoiceData
       })
       .then(() => {
         setUpdating(false);
@@ -1038,7 +1041,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 size="small"
                 disabled={isUpdating || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
-                  handleCreateBill();
+                  if (invoiceResourceData?.policy?.rentalInvoiceFields?.length > 0) {
+                    setOpenInvoiceDataDialog(true)
+                  } else {
+                    handleCreateBill();
+                  }
                 }}
               >
                 Create Bill
@@ -1061,6 +1068,18 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           loading={isUpdating}
           isQtyOnly={true}
           isRateRequired={false}
+        />
+      )}
+      {openInvoiceDataDialog && (
+        <InvoiceDataDialog
+          onClose={() => {
+            setOpenInvoiceDataDialog(false)
+          }}
+          rentalInvoiceFields={invoiceResourceData?.policy?.rentalInvoiceFields}
+          onSuccess={(data) => {
+            handleCreateBill(data)
+            setOpenInvoiceDataDialog(false)
+          }}
         />
       )}
     </Fragment>
