@@ -150,19 +150,13 @@ const Entity: FC = () => {
         </HtmlTooltip>
 
         <HtmlTooltip
-          title={
-            !permissions[entityResource]?.isDelete
-              ? `You do not have permission to delete entity`
-              : row?.original?.createdById === user?.user?._id
-                ? 'Delete'
-                : `You must be the owner of this entity to get the delete functionality`
-          }
+          title={!permissions[entityResource]?.isDelete ? `You do not have permission to delete entity` : 'Delete'}
         >
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={!(permissions[entityResource]?.isDelete && row?.original?.createdById === user?.user?._id)}
+              disabled={!(permissions[entityResource]?.isDelete)}
               onClick={() => {
                 setDeleteEntity(row?.original);
                 setShowDeleteDialog(true);
@@ -170,7 +164,7 @@ const Entity: FC = () => {
             >
               <DeleteIcon
                 fontSize="small"
-                color={permissions[entityResource]?.isDelete && row?.original?.createdById === user?.user?._id ? 'error' : 'disabled'}
+                color={permissions[entityResource]?.isDelete ? 'error' : 'disabled'}
               />
             </IconButton>
           </span>
@@ -252,13 +246,7 @@ const Entity: FC = () => {
     return (
       <>
         <MenuItem
-          disabled={
-            permissions[entityResource]?.isDelete && selectedRecords.length > 1
-              ? true
-              : Boolean(!(selectedRecords[0] && selectedRecords[0].createdById === user?.user?._id))
-                ? true
-                : false
-          }
+          disabled={permissions[entityResource]?.isDelete && selectedRecords.length ? true : false}
           onClick={() => {
             if (selectedRecords[0] && selectedRecords[0]?._id) {
               setDeleteEntity(selectedRecords[0]);
