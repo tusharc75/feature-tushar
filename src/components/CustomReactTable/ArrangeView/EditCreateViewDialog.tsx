@@ -35,6 +35,7 @@ import { DragHandle } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { CSS } from '@dnd-kit/utilities';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { cn } from 'src/constants/helpers';
 
 type EditCreateViewDialogProps = {
   onClose: () => void;
@@ -307,7 +308,12 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
 
               {/* <h3 className="px-4 py-2 text-[0.86rem] font-medium text-black/50 dark:text-white/70">Toggle and Drag & Drop to arrange</h3> */}
 
-              <div className="max-h-[350px] overflow-auto rounded-md px-3 shadow-md [border:1px_solid_var(--common-border-color)]">
+              <div
+                className={cn(
+                  ' overflow-auto rounded-md px-3 shadow-md [border:1px_solid_var(--common-border-color)]',
+                  !isMinimized || (isMobile && !isTablet) || isMobileView ? 'max-h-[270px] md:max-h-[500px]' : 'max-h-[350px]'
+                )}
+              >
                 <DndContext
                   onDragEnd={(e) => moveItem(e, setFieldValue)}
                   modifiers={[restrictToVerticalAxis]}

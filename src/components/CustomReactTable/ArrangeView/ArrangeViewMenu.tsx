@@ -216,7 +216,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                                       <div className="flex  w-full justify-between gap-2">
                                         <span className=" flex items-center gap-1">
                                           <span className="line-clamp-1 ">{d.name}</span>
-                                          {defaultView._id === d._id && (
+                                          {defaultView?._id === d._id && (
                                             <>
                                               <HtmlTooltip title="Default view">
                                                 <FaStar size={10} className="text-[var(--new-theme-color)]" />
