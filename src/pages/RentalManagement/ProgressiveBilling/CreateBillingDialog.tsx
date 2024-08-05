@@ -37,6 +37,7 @@ import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
   const uniqueDates = new Set<string>();
@@ -87,7 +88,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
-  const [resourceData, setResourceData] = useState(null);
+  const [invoiceResourceData, setInvoiceResourceData] = useState(null);
+  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false)
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -95,9 +97,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
+      .get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`)
       .then(({ data: { data } }) => {
-        setResourceData(data);
+        setInvoiceResourceData(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -526,7 +528,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
-    let tempValues: any = { actualEndDate: endDate };
     const childRows: any = [];
     var inUseStandByDays = [];
     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
@@ -574,6 +575,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     let rows: any = [];
 
     records?.forEach((element) => {
+      let values: any = { actualEndDate: endDate };
+
       if (element.type === MATERIAL_TYPE.manualEntry) {
         element.isAppliedBill = true;
         rows.push(element);
@@ -599,7 +602,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (element?.manualEndDate) {
           const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
           if (selectedEndDateTime > productManualEndDate) {
-            tempValues.actualEndDate = element?.manualEndDate;
+            values.actualEndDate = element?.manualEndDate;
           }
           if (productManualEndDate < productStartDateTime) {
             element.invalidDate = true;
@@ -611,7 +614,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         const extraRows: any = []
         const priceField = allFields?.find((e) => e.fieldName === 'price');
         let calValues: any;
-        let values = JSON.parse(JSON.stringify(tempValues));
 
         if (inUseStandByDays?.length) {
           const daysFound = inUseStandByDays?.find((e) => e.parentIds?.includes(element._id));
@@ -813,8 +815,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           { minStartDate: null, maxEndDate: null }
         );
 
-        sumValues['actualStartDate'] = minStartDate.toISOString();
-        sumValues['actualEndDate'] = maxEndDate.toISOString();
+        sumValues['actualStartDate'] = minStartDate;
+        sumValues['actualEndDate'] = maxEndDate;
       } else {
         child.forEach(element => {
           sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
@@ -859,7 +861,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     setIsProductEdit({ open: false, rowData: null });
   };
 
-  const handleCreateBill = () => {
+  const handleCreateBill = (invoiceData = null) => {
     rowsApplied?.forEach((element) => {
       delete element?.index;
       if (element.type !== MATERIAL_TYPE.other) {
@@ -889,7 +891,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     axiosInstance()
       .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
         material: rowsApplied.filter((d) => d.type !== MATERIAL_TYPE.manualEntry),
-        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry)
+        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry),
+        invoiceData: invoiceData
       })
       .then(() => {
         setUpdating(false);
@@ -901,106 +904,90 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       });
   };
 
-  const selectItems = (rows) => {
-    const records = [...rows]
-    records?.forEach((element) => {
-      element.isAppliedBill = true;
-      if (!element['actualJobDuration']) {
-        element.invalidDate = true;
-      }
-    })
-    let tempRows = orginalMaterial?.map((obj) => records.find((o) => o._id === obj._id) || obj);
-    setMaterial(tempRows);
-    initializeTable(tempRows);
-    setRowsApplied(records);
-  }
-
   return (
     <Fragment>
       <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true}>
         <CustomDialogHeader title={`Create Billing `} onClose={onClose} showRequiredLabel={false}></CustomDialogHeader>
         <CustomDialogContent>
-          {!resourceData?.policy?.disableProgressiveBilling &&
-            <Fragment>
-              <MuiPickersUtilsProvider utils={MomentUtils}>
-                <Grid container className={styles.rental_header_layout}>
-                  <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
-                  <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
-                    <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
-                      <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
-                        <div>
-                          <FormGroup>
-                            <FormControlLabel
-                              control={<Checkbox checked={proRata} />}
-                              key="proRata"
-                              placeholder="Pro Rata"
-                              label="Pro Rata"
-                              style={{ whiteSpace: 'nowrap' }}
-                              onChange={() => {
-                                setProRata(!proRata);
+          <Fragment>
+            <MuiPickersUtilsProvider utils={MomentUtils}>
+              <Grid container className={styles.rental_header_layout}>
+                <Grid item xs={12} md={6} sm={12} className="d-flex align-items-center layout-for-tablet gap-1"></Grid>
+                <Grid item xs={12} sm={12} md={6} className={styles.filter_side}>
+                  <Box className={isMobile ? styles.mobile_filter_side_header : styles.filter_side_header} component="div">
+                    <Grid style={{ display: 'flex', flex: 1, gap: '5px', alignItems: 'center' }} className={isMobile ? styles.content_box : ''}>
+                      <div>
+                        <FormGroup>
+                          <FormControlLabel
+                            control={<Checkbox checked={proRata} />}
+                            key="proRata"
+                            placeholder="Pro Rata"
+                            label="Pro Rata"
+                            style={{ whiteSpace: 'nowrap' }}
+                            onChange={() => {
+                              setProRata(!proRata);
+                            }}
+                          />
+                        </FormGroup>
+                      </div>
+                      <KeyboardDatePicker
+                        autoOk
+                        fullWidth
+                        size="small"
+                        variant="inline"
+                        inputVariant="outlined"
+                        // minDate={endDate || new Date()}
+                        value={endDate}
+                        name="endDate"
+                        label="Invoice Closing Date"
+                        onChange={(date: any) => {
+                          setEndDate(date ? date : null);
+                        }}
+                        format={dateFormat}
+                        InputLabelProps={{
+                          shrink: true
+                        }}
+                        margin="dense"
+                      />
+                      <Box style={{ display: 'flex', gap: '5px' }}>
+                        <HtmlTooltip
+                          title={
+                            !Boolean(
+                              selectedRecords &&
+                              selectedRecords?.length &&
+                              (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                            ) ? 'Please select items to apply'
+                              : ''
+                          }
+                        >
+                          <span>
+                            <Button
+                              variant="contained"
+                              color="primary"
+                              disabled={
+                                isApplingDate ||
+                                !Boolean(
+                                  selectedRecords &&
+                                  selectedRecords?.length &&
+                                  (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                )
+                              }
+                              size="small"
+                              onClick={() => {
+                                handleApplyDate();
                               }}
-                            />
-                          </FormGroup>
-                        </div>
-                        <KeyboardDatePicker
-                          autoOk
-                          fullWidth
-                          size="small"
-                          variant="inline"
-                          inputVariant="outlined"
-                          // minDate={endDate || new Date()}
-                          value={endDate}
-                          name="endDate"
-                          label="Invoice Closing Date"
-                          onChange={(date: any) => {
-                            setEndDate(date ? date : null);
-                          }}
-                          format={dateFormat}
-                          InputLabelProps={{
-                            shrink: true
-                          }}
-                          margin="dense"
-                        />
-                        <Box style={{ display: 'flex', gap: '5px' }}>
-                          <HtmlTooltip
-                            title={
-                              !Boolean(
-                                selectedRecords &&
-                                selectedRecords?.length &&
-                                (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                              ) ? 'Please select items to apply'
-                                : ''
-                            }
-                          >
-                            <span>
-                              <Button
-                                variant="contained"
-                                color="primary"
-                                disabled={
-                                  isApplingDate ||
-                                  !Boolean(
-                                    selectedRecords &&
-                                    selectedRecords?.length &&
-                                    (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                                  )
-                                }
-                                size="small"
-                                onClick={() => {
-                                  handleApplyDate();
-                                }}
-                              >
-                                Apply
-                              </Button>
-                            </span>
-                          </HtmlTooltip>
-                        </Box>
-                      </Grid>
-                    </Box>
-                  </Grid>
+                            >
+                              Apply
+                            </Button>
+                          </span>
+                        </HtmlTooltip>
+                      </Box>
+                    </Grid>
+                  </Box>
                 </Grid>
-              </MuiPickersUtilsProvider>
-            </Fragment>
-          }
+              </Grid>
+            </MuiPickersUtilsProvider>
+          </Fragment>
           {columns ? (
             <Box zIndex={5} p={1}>
               <CustomReactTable
@@ -1012,11 +999,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                   if (rowData?.invalidDate) return 'error';
                   if (rowData?.isAppliedBill) return 'isAppliedBill';
                   return '';
-                }}
-                onSelect={(rows) => {
-                  if (resourceData?.policy?.disableProgressiveBilling) {
-                    selectItems(rows)
-                  }
                 }}
                 refreshGrid={() => {
                   setRowsApplied([])
@@ -1059,7 +1041,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 size="small"
                 disabled={isUpdating || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
-                  handleCreateBill();
+                  if (invoiceResourceData?.policy?.rentalInvoiceFields?.length > 0) {
+                    setOpenInvoiceDataDialog(true)
+                  } else {
+                    handleCreateBill();
+                  }
                 }}
               >
                 Create Bill
@@ -1082,6 +1068,18 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           loading={isUpdating}
           isQtyOnly={true}
           isRateRequired={false}
+        />
+      )}
+      {openInvoiceDataDialog && (
+        <InvoiceDataDialog
+          onClose={() => {
+            setOpenInvoiceDataDialog(false)
+          }}
+          rentalInvoiceFields={invoiceResourceData?.policy?.rentalInvoiceFields}
+          onSuccess={(data) => {
+            handleCreateBill(data)
+            setOpenInvoiceDataDialog(false)
+          }}
         />
       )}
     </Fragment>

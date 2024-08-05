@@ -148,13 +148,18 @@ export const resourcePolicy = [
         fieldLabel: 'Customer Account Wise Packages',
         type: 'checkBox',
         defaultValue: false
-      },
-      {
-        fieldName: 'disableProgressiveBilling',
-        fieldLabel: 'Disable Progressive Billing',
-        type: 'checkBox',
-        defaultValue: false
       }
     ]
-  }
+  },
+  {
+    resource: sidebarResource.invoice,
+    policy: [
+      {
+        fieldName: 'rentalInvoiceFields',
+        fieldLabel: 'Rental Invoice Fields',
+        type: 'multiSelect',
+        defaultValue: []
+      }
+    ]
+  },
 ];

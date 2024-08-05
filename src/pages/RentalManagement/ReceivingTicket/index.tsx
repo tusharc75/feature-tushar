@@ -2915,6 +2915,7 @@ const ActionButtonMenuItems = ({
           </MenuItem>
         )}
       {selectedRecords?.length &&
+        uniq(map(selectedRecords, 'productId')).length === 1 &&
         selectedRecords?.every((e) => e?.status === ASSET_STATUS.inUse) &&
         selectedRecords?.every((e) => e?.loadingTicketId) &&
         !selectedRecords?.some((e) => e?.receivingTicketId || e?.returnTicketId) &&
@@ -2925,7 +2926,7 @@ const ActionButtonMenuItems = ({
               setTransferAnotherPackageialog(true);
             }}
           >
-            {`Transfer to Another Package`}
+            {`Transfer to another Package`}
           </MenuItem>
         )}
       {currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep && (

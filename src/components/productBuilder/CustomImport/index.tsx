@@ -261,7 +261,27 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
 
         jsonData[0] = newHeaders;
 
-        const updatedData = jsonData?.filter((row) => !isEmpty(row));
+        const indexes = []
+        // const updatedData = jsonData?.filter((row) => !isEmpty(row));
+        const updatedData = jsonData?.filter((row) => !isEmpty(row))?.map((_r: any, i) => {
+          const _row: any = []
+          if (i === 0) {
+            _r?.forEach((ele, j) => {
+              if (templateImportHeader?.some(t => t?.value === ele)) {
+                _row.push(ele)
+              } else {
+                indexes.push(j)
+              }
+            });
+          } else {
+            _r?.forEach((ele, j) => {
+              if (!indexes?.includes(j)) {
+                _row.push(ele)
+              }
+            });
+          }
+          return _row;
+        });
 
         const newWorksheet = utils.json_to_sheet(updatedData, { skipHeader: true });
 
@@ -524,12 +544,13 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                 (ele) => !keyValue.some((e) => e.customImportHeader === ele.value) || ele?.value === selectedCustomInputHeader
                               )}
                               getOptionLabel={(option) => option?.label || ''}
-                              value={customImportHeader.find((_value) => {
-                                if (_value?.value === selectedCustomInputHeader) {
-                                  return true;
-                                }
-                                return null;
-                              })}
+                              // value={customImportHeader.find((_value) => {
+                              //   if (_value?.value === selectedCustomInputHeader) {
+                              //     return true;
+                              //   }
+                              //   return null;
+                              // })}
+                              value={customImportHeader?.filter(h => h?.value === selectedCustomInputHeader)?.length > 0 ? customImportHeader?.filter(h => h?.value === selectedCustomInputHeader)[0] : ''}
                               onChange={(event, newValue) => {
                                 const tempKeyValues = keyValue?.filter((e) => e.templateImportHeader !== _key?.value);
                                 setKeyValue([...tempKeyValues, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
