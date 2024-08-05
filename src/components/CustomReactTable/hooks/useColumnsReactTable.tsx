@@ -160,7 +160,6 @@ export default function useColumns() {
       currency = user?.user?.brandCurrency || 'USD';
     }
 
-    let gridMetaData = getGridMetaDataFromLocalStorage();
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
     const _fields = fields?.map((e) => e?.fieldData || e);
