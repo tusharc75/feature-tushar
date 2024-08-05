@@ -8,7 +8,7 @@ import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -55,7 +55,7 @@ const Opportunities = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.opportunity));
   const [deleteLoading, setDeleteLoading] = useState(false);

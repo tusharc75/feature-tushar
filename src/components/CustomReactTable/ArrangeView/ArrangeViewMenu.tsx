@@ -1,11 +1,11 @@
 import { Divider, Fade, IconButton, List, ListItem, Popper } from '@material-ui/core';
 import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
-import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import ClickAwayListener from 'react-click-away-listener';
+import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
 import { ImSpinner2 } from 'react-icons/im';
 import axiosInstance from 'src/axios/axiosInstance';
 import EditCreateViewDialog from 'src/components/CustomReactTable/ArrangeView/EditCreateViewDialog';
+import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
 import { TActios, TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
 import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -43,6 +43,7 @@ type ArrangeViewMenuProps = {
 };
 const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander }: ArrangeViewMenuProps) => {
   const { loading } = state;
+  const { gridMetaData, setGridMetaData } = useGridMetaData();
 
   const {
     state: { user },
@@ -60,31 +61,48 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   const [arrowRef, setArrowRef] = React.useState<HTMLElement | null>(null);
   const [editCreateDialogData, setEditCreateDialogData] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
   const [confirmationDialog, setConfirmationDialog] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
+  const popupRef = useRef<HTMLDivElement>(null);
 
-  const applyViewInTable = useCallback(
-    (order: string[], hide: string[]) => {
-      const stickycolumns = getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander });
-      let columnOrder = [];
-      const columnHiddenStateData = {};
-      columns.forEach((column) => {
-        columnHiddenStateData[column.id] = !hide.includes(column.id);
-      });
-      if (order.length > 0) {
-        columnOrder = [...stickycolumns.left, ...order, ...stickycolumns.right];
-      } else {
-        columnOrder = [...stickycolumns.left, ...columns.map((c) => c.id), ...stickycolumns.right];
+  useEffect(() => {
+    const handleClick = (event) => {
+      if (popupRef.current && !popupRef.current.contains(event.target)) {
+        setAnchorEl(null);
       }
-      dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
-      dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
-    },
-    [columns, dispatch, expander, hideSelection]
-  );
+    };
+    document.addEventListener('click', handleClick, true);
+    return () => {
+      document.removeEventListener('click', handleClick, true);
+    };
+  }, [anchorEl]);
+
+  const applyViewInTable = (order: string[], hide: string[]) => {
+    const stickycolumns = getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander });
+    let columnOrder = [];
+    const columnHiddenStateData = {};
+    columns.forEach((column) => {
+      columnHiddenStateData[column.id] = !hide.includes(column.id);
+    });
+    if (order.length > 0) {
+      columnOrder = [...stickycolumns.left, ...order, ...stickycolumns.right];
+    } else {
+      columnOrder = [...stickycolumns.left, ...columns.map((c) => c.id), ...stickycolumns.right];
+    }
+    dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
+    dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
+
+    const newData = {
+      ...gridMetaData,
+      [renderedFrom]: { hide, order }
+    };
+
+    setGridMetaData(newData);
+  };
 
   useEffect(() => {
     if (defaultView) {
       applyViewInTable(defaultView?.order || [], defaultView?.hide || []);
     }
-  }, [renderedFrom, defaultView, applyViewInTable]);
+  }, [renderedFrom, defaultView]);
 
   const getAllSavedViews = useCallback(async () => {
     try {
@@ -178,93 +196,90 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
         }}
       >
         {({ TransitionProps }) => (
-          <Fade {...TransitionProps} timeout={350} in={Boolean(anchorEl)}>
+          <Fade {...TransitionProps} timeout={0} in={Boolean(anchorEl)}>
             <>
               <span ref={setArrowRef} className="popper-arrow"></span>
               <div className="mt-[10px] min-w-[min(400px,100vw)] max-w-[400px] rounded-md bg-[var(--dark-primary,white)] shadow-lg [border:1px_solid_var(--common-border-color)] ">
-                <ClickAwayListener
+                {/* <ClickAwayListener
                   onClickAway={() => {
                     setAnchorEl(null);
                   }}
-                >
-                  <div className="body">
-                    <div className="head p-2 text-center [border-bottom:1px_solid_var(--common-border-color)]">
-                      <h5 className="bold text-lg">Views</h5>
-                    </div>
-                    <div className="content max-h-[350px] overflow-auto p-3">
-                      {!savedData ? (
-                        <div className="relative flex min-h-[60px]">
-                          <ImSpinner2 className="absolute inset-0 m-auto animate-spin" size={50} />
-                        </div>
-                      ) : (
-                        <div>
-                          <List>
-                            {savedData.length > 0 ? (
-                              savedData.map((d, i) => {
-                                return (
-                                  <Fragment key={d._id}>
-                                    {i !== 0 && <Divider />}
-                                    <ListItem
-                                      button
-                                      key={d._id}
-                                      component={'li'}
-                                      onClick={() => {
-                                        setAnchorEl(null);
-                                        applyView(d);
-                                      }}
-                                    >
-                                      <div className="flex  w-full justify-between gap-2">
-                                        <span className=" flex items-center gap-1">
-                                          <span className="line-clamp-1 ">{d.name}</span>
-                                          {defaultView?._id === d._id && (
-                                            <>
-                                              <HtmlTooltip title="Default View">
-                                                <FaStar size={10} className="text-[var(--new-theme-color)]" />
-                                              </HtmlTooltip>
-                                            </>
-                                          )}
-                                        </span>
-                                        <div className="flex gap-2">
-                                          <HtmlTooltip title={'Edit'}>
-                                            <IconButton size={'small'} onClick={(e) => openEditModal(e, d)}>
-                                              <Edit fontSize="small" />
-                                            </IconButton>
-                                          </HtmlTooltip>
-                                          <HtmlTooltip title={'Delete'}>
-                                            <IconButton size={'small'} onClick={(e) => openDeleteConfirmationModal(e, d)}>
-                                              <Delete fontSize="small" color="error" />
-                                            </IconButton>
-                                          </HtmlTooltip>
-                                        </div>
-                                      </div>
-                                    </ListItem>
-                                  </Fragment>
-                                );
-                              })
-                            ) : (
-                              <>
-                                <p className="text-md select-none text-center text-gray-400 dark:text-gray-700">No views found.</p>
-                                <p className="select-none text-center text-sm text-gray-400 dark:text-gray-700">Please create a view first.</p>
-                              </>
-                            )}
-                          </List>
-                        </div>
-                      )}
-                    </div>
-                    <div className="footer mt-2 flex justify-end gap-2 p-2 [border-top:1px_solid_var(--common-border-color)]">
-                      <ThemeButton
-                        iconForMobile={false}
-                        onClick={() => {
-                          applyViewInTable([], [])
-                        }}>
-                        Reset
-                      </ThemeButton>
-                      <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
-                        Create View
-                      </ThemeButton>
-                    </div>
+                > */}
+                <div className="body" ref={popupRef}>
+                  <div className="head p-2 text-center [border-bottom:1px_solid_var(--common-border-color)]">
+                    <h5 className="bold text-lg">Views</h5>
                   </div>
-                </ClickAwayListener>
+                  <div className="content max-h-[350px] overflow-auto p-3">
+                    {!savedData ? (
+                      <div className="relative flex min-h-[60px]">
+                        <ImSpinner2 className="absolute inset-0 m-auto animate-spin" size={50} />
+                      </div>
+                    ) : (
+                      <div>
+                        <List>
+                          {savedData.length > 0 ? (
+                            savedData.map((d, i) => {
+                              return (
+                                <Fragment key={d._id}>
+                                  {i !== 0 && <Divider />}
+                                  <ListItem
+                                    button
+                                    key={d._id}
+                                    component={'li'}
+                                    onClick={() => {
+                                      setAnchorEl(null);
+                                      applyView(d);
+                                    }}
+                                  >
+                                    <div className="flex  w-full justify-between gap-2">
+                                      <span className=" flex items-center gap-1">
+                                        <span className="line-clamp-1 ">{d.name}</span>
+                                        {defaultView?._id === d._id && (
+                                          <>
+                                            <HtmlTooltip title="Default view">
+                                              <FaStar size={10} className="text-[var(--new-theme-color)]" />
+                                            </HtmlTooltip>
+                                            {/* <span className="block flex-shrink-0 text-[10px] text-gray-400">(default view)</span> */}
+                                          </>
+                                        )}
+                                      </span>
+                                      <div className="flex gap-2">
+                                        <HtmlTooltip title={'Edit'}>
+                                          <IconButton size={'small'} onClick={(e) => openEditModal(e, d)}>
+                                            <Edit fontSize="small" />
+                                          </IconButton>
+                                        </HtmlTooltip>
+                                        <HtmlTooltip title={'Delete'}>
+                                          <IconButton size={'small'} onClick={(e) => openDeleteConfirmationModal(e, d)}>
+                                            <Delete fontSize="small" color="error" />
+                                          </IconButton>
+                                        </HtmlTooltip>
+                                      </div>
+                                    </div>
+                                  </ListItem>
+                                </Fragment>
+                              );
+                            })
+                          ) : (
+                            <>
+                              <p className="text-md select-none text-center text-gray-400 dark:text-gray-700">No views found.</p>
+                              <p className="select-none text-center text-sm text-gray-400 dark:text-gray-700">Please create a view first.</p>
+                            </>
+                          )}
+                        </List>
+                      </div>
+                    )}
+                  </div>
+                  <div className="footer mt-2 flex justify-end gap-2 p-2 [border-top:1px_solid_var(--common-border-color)]">
+                    <ThemeButton iconForMobile={false} onClick={() => applyViewInTable([], [])}>
+                      Reset
+                    </ThemeButton>
+                    <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
+                      Create view
+                    </ThemeButton>
+                  </div>
+                </div>
+                {/* </ClickAwayListener> */}
               </div>
             </>
           </Fade>

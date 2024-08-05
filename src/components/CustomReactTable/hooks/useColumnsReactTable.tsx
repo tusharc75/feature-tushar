@@ -1,30 +1,23 @@
-import camelCase from 'lodash/camelCase';
-import { Link } from 'react-router-dom';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
 import { Avatar, Box } from '@material-ui/core';
-import {
-  dateFormat,
-  dateTimeFormat,
-  formatAmountWithCurrency,
-  getFileIconSrc,
-  getUniqueCurrencies,
-  sidebarResourceObjectFromValues
-} from 'src/constants/helpers';
-import routes from '../../Helpers/Routes';
-import { useData } from 'src/StateProvider/Provider';
 import { Image } from '@material-ui/icons';
-import CopyToClipboard from '../../Helpers/CopyToClipboard';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
-import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { find, isArray, isObject, result } from 'lodash';
 import InfoIcon from '@material-ui/icons/Info';
-import { getGridMetaDataFromLocalStorage } from '../utils';
-import DataListCell from '../Cells/DataListCell';
-import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
-import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
+import { isArray, isObject } from 'lodash';
+import camelCase from 'lodash/camelCase';
+import moment from 'moment';
+import { Link } from 'react-router-dom';
+import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
+import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
+import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
+import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
+import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies, sidebarResourceObjectFromValues } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
+import CopyToClipboard from '../../Helpers/CopyToClipboard';
+import routes from '../../Helpers/Routes';
+import DataListCell from '../Cells/DataListCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -122,25 +115,6 @@ export const getCompletedByField = () => {
   ];
 };
 
-export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
-  let gridMetaData = getGridMetaDataFromLocalStorage();
-  if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-    return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
-  }
-  return true;
-};
-
-export const checkStaticField = (renderedFrom, fieldData) => {
-  let gridMetaData = getGridMetaDataFromLocalStorage();
-  if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-    return {
-      ...fieldData,
-      show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true
-    };
-  }
-  return fieldData;
-};
-
 export const getSortedColumns = (columns = []) => {
   return columns.sort(function (a, b) {
     let columnNameA = a?.headerName?.toUpperCase(); // ignore upper and lowercase
@@ -157,18 +131,29 @@ export const getSortedColumns = (columns = []) => {
 
 export const staticColumns = ['createdBy', 'updatedBy'];
 
-const getTitle = (data) => {
-  if (data.length) {
-    let restParams = data.map((o) => (o?.optionLabel ? o?.optionLabel : typeof o !== 'object' ? o : '')).join(', ');
-    return restParams;
-  }
-  return '';
-};
-
 export default function useColumns() {
   const {
     state: { permissions, user }
   }: any = useData();
+
+  const { gridMetaData } = useGridMetaData();
+
+  const getColumnHiddenStatus = (renderedFrom, fieldName) => {
+    if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+      return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
+    }
+    return true;
+  };
+
+  const checkStaticField = (renderedFrom, fieldData) => {
+    if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+      return {
+        ...fieldData,
+        show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true
+      };
+    }
+    return fieldData;
+  };
 
   const generateColumns = (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null) => {
     if (!currency) {
@@ -176,7 +161,6 @@ export default function useColumns() {
     }
 
     let gridMetaData = getGridMetaDataFromLocalStorage();
-
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
     const _fields = fields?.map((e) => e?.fieldData || e);
@@ -573,5 +557,5 @@ export default function useColumns() {
     return column;
   };
 
-  return { generateColumns };
+  return { generateColumns, checkStaticField, getColumnHiddenStatus };
 }

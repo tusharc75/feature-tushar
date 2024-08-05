@@ -1,7 +1,7 @@
 import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer, checkStaticField, gridFilterParser } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
@@ -18,7 +18,6 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice }) => {
-
   const renderedFrom = camelCase(routes?.invoice?.title);
 
   const toastConfig = useContext(CustomToastContext);
@@ -29,7 +28,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
   }: any = useData();
   const { state, dispatch } = useTableReducer();
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -237,12 +236,12 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
           rentalManagementData={rentalManagementData}
           invoiceId={viewBillDialog?.invoiceData?._id}
           onClose={() => {
-            setViewBillDialog({ open: false, invoiceData: null });
             fetchData();
+            setViewBillDialog({ open: false, invoiceData: null });
           }}
           onSuccess={() => {
-            setViewBillDialog({ open: false, invoiceData: null });
             fetchData();
+            setViewBillDialog({ open: false, invoiceData: null });
           }}
           allowCreateInvoice={allowCreateInvoice}
           isLatestInvoice={viewBillDialog?.invoiceData?.isLatestInvoice}
