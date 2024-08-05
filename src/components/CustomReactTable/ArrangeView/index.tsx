@@ -1,13 +1,13 @@
 import { IconButton } from '@material-ui/core';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import ArrangeViewMenu from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
 import { useData } from '../../../StateProvider/Provider';
 import { SET_GRID_METADATA } from '../../../StateProvider/actionTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../CustomTooltipTitle';
 import { TInitialState } from '../hooks/useTableReducer';
-import { getGridMetaDataFromLocalStorage, getStickyColumnNames, getTableDataFromLocalStorage } from '../utils';
+import { getGridMetaDataFromLocalStorage } from '../utils';
 import ArrangeViewReportDialog from './ArrangeViewReportDialog';
 
 let timeout;
