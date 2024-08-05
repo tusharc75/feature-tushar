@@ -9,7 +9,7 @@ import routes from './../../components/Helpers/Routes';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import {
@@ -237,8 +237,11 @@ const CustomReport = () => {
         });
       }
     });
-    if (customDeepFilter && customDeepFilter?.length > 0) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(customDeepFilter))}`;
+
+    const { deepFilters } = gridFilterParser(filters);
+
+    if ((customDeepFilter && customDeepFilter?.length > 0) || deepFilters?.length>0) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([...customDeepFilter,...deepFilters]))}`;
     }
     if (customDeepFilter?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
