@@ -1,3 +1,7 @@
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
+import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
+import { SortableContext, useSortable } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import {
   Checkbox,
   CircularProgress,
@@ -13,27 +17,23 @@ import {
   TextField,
   useMediaQuery
 } from '@material-ui/core';
+import { DragHandle } from '@material-ui/icons';
+import { Formik, FormikErrors } from 'formik';
+import update from 'immutability-helper';
+import { startCase } from 'lodash';
 import React, { useContext, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import axiosInstance from 'src/axios/axiosInstance';
 import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
+import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { cn } from 'src/constants/helpers';
+import { useDndSensors } from 'src/hooks';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { object, string } from 'yup';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
-import { object, string } from 'yup';
-import { Formik, FormikErrors } from 'formik';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
-import { useDndSensors } from 'src/hooks';
-import { SortableContext, useSortable } from '@dnd-kit/sortable';
-import update from 'immutability-helper';
-import { DragHandle } from '@material-ui/icons';
-import { startCase } from 'lodash';
-import { CSS } from '@dnd-kit/utilities';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { cn } from 'src/constants/helpers';
 
 type EditCreateViewDialogProps = {
   onClose: () => void;

@@ -28,40 +28,6 @@ const ArrangeView = ({
 
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
 
-  // const stickycolumns = useMemo(
-  //   () => getStickyColumnNames({ allColumn: columns, hideSelection: hideSelection, expander: expander }),
-  //   [columns, expander, hideSelection]
-  // );
-
-  // // for recalculating column order if new dynamic columns are added to the grid.
-  // const columnCount = useMemo(() => columns?.length || 0, [columns]);
-
-  // useEffect(() => {
-  //   const gridMetaData = getTableDataFromLocalStorage(renderedFrom);
-
-  //   if (gridMetaData && gridMetaData?.order && gridMetaData?.order?.length) {
-  //     let tempColumnOrder = [...stickycolumns.left, ...gridMetaData.order];
-  //     const missingColumns = columns.filter((c) => ![...stickycolumns.stickyColumns, ...gridMetaData.order].includes(c.id)).map((c) => c.id);
-  //     tempColumnOrder = [...tempColumnOrder, ...missingColumns, ...stickycolumns.right];
-  //     dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
-  //   } else {
-  //     dispatchTable({ type: 'setColumnOrder', columnOrder: columns.map((c) => c.id) });
-  //   }
-  //   if (gridMetaData && gridMetaData?.hide && gridMetaData?.hide?.length) {
-  //     const visibleColumns = {};
-  //     for (const col of columns) {
-  //       visibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
-  //     }
-  //     dispatchTable({ type: 'setVisibleColumns', visibleColumns: visibleColumns });
-  //   } else {
-  //     const visibleColumns = {};
-  //     columns.forEach((col) => {
-  //       visibleColumns[col.id] = col?.show === false ? false : true;
-  //     });
-  //     dispatchTable({ type: 'setVisibleColumns', visibleColumns });
-  //   }
-  // }, [renderedFrom, columnCount]);
-
   const {
     state: { user }
   }: any = useData();

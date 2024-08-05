@@ -7,24 +7,10 @@ import useColumns, {
   detailPagePath,
   getStaticFields,
   getCompletedByField,
-  getColumnHiddenStatus,
-  checkStaticField,
   getSortedColumns,
   staticColumns
 } from './hooks/useColumnsReactTable';
 export default CustomReactTable;
-export {
-  useTableReducer,
-  Pagination,
-  useColumns,
-  headerName,
-  detailPagePath,
-  getStaticFields,
-  getCompletedByField,
-  getColumnHiddenStatus,
-  checkStaticField,
-  getSortedColumns,
-  staticColumns
-};
+export { useTableReducer, Pagination, useColumns, headerName, detailPagePath, getStaticFields, getCompletedByField, getSortedColumns, staticColumns };
 export type { TInitialState, TActios };
 export * from './utils';
