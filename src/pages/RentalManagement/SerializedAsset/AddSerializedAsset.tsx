@@ -85,6 +85,7 @@ const AddSerializedAsset = ({
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, type: '' });
+  const [underReviewAssetData, setUnderReviewAssetData] = useState(null);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -346,7 +347,7 @@ const AddSerializedAsset = ({
       });
   };
 
-  const handleAutoTransferAssets = (assetsData = null) => {
+  const handleAutoTransferAssets = (underReviewAssetsData = null, reserveAssetsData = null) => {
     const assetsAdd: any = [];
     selectedRecordsOfMain?.forEach((e: any) => {
       if (e.type === MATERIAL_TYPE.product) {
@@ -363,11 +364,18 @@ const AddSerializedAsset = ({
             if (rentalAsset) {
               obj.uniqueId = rentalAsset?.uniqueId;
             }
-            if (assetsData) {
-              const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+            if (underReviewAssetsData) {
+              const matchedAsset = underReviewAssetsData?.find((asset) => asset._id === obj.asset);
               if (matchedAsset) {
                 const { _id, ...assetData } = matchedAsset;
-                obj.assetData = assetData;
+                obj.underReviewAssetsData = assetData;
+              }
+            }
+            if (reserveAssetsData) {
+              const matchedAsset = reserveAssetsData?.find((asset) => asset._id === obj.asset);
+              if (matchedAsset) {
+                const { _id, ...assetData } = matchedAsset;
+                obj.reserveAssetsData = assetData;
               }
             }
             assetsAdd.push(obj);
@@ -677,7 +685,7 @@ const AddSerializedAsset = ({
               setOpenAssetDataDialog({
                 open: true,
                 statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
-                type: 'add'
+                type: 'underReview'
               });
             } else {
               handleAutoTransferAssets();
@@ -701,7 +709,24 @@ const AddSerializedAsset = ({
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
-              handleAutoTransferAssets(data);
+              if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                if (openAssetDataDialog.type === 'underReview') {
+                  setUnderReviewAssetData(data)
+                  setOpenAssetDataDialog({
+                    open: true,
+                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                    type: 'reserved'
+                  });
+                }
+                else {
+                  handleAutoTransferAssets(underReviewAssetData, data);
+                  setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+                }
+              }
+              else {
+                handleAutoTransferAssets(data);
+                setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+              }
             } else {
               if (openAssetDataDialog.type === 'add') {
                 addSerializedAsset(selectedRecords, false, data);
@@ -709,8 +734,8 @@ const AddSerializedAsset = ({
               else {
                 setShowTransferAssetDialog({ open: true, data: data });
               }
+              setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
             }
-            setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
           productsDefaultData={selectedProducts}
