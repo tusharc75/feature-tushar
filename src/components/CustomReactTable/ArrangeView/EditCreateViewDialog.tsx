@@ -1,4 +1,5 @@
 import {
+  Checkbox,
   CircularProgress,
   Dialog,
   FormControl,
@@ -34,6 +35,7 @@ import { DragHandle } from '@material-ui/icons';
 import { startCase } from 'lodash';
 import { CSS } from '@dnd-kit/utilities';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { cn } from 'src/constants/helpers';
 
 type EditCreateViewDialogProps = {
   onClose: () => void;
@@ -244,93 +246,104 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
             onMinimizeMaximize={() => setMinimized((prevState) => !prevState)}
           />
           <CustomDialogContent>
-            <div className="form grid gap-2">
-              <div>
-                <TextField
-                  fullWidth
-                  value={values['name']}
-                  onChange={(e) => {
-                    setFieldValue('name', e.target.value.trimStart());
-                  }}
-                  id="view-name"
-                  name="name"
-                  label="Name"
-                  variant="outlined"
-                  size="small"
-                  required
-                  error={touched['name'] && Boolean(errors['name'])}
-                  helperText={touched['name'] && errors['name']}
-                />
-              </div>
-              <div className="mt-2 flex items-center justify-between gap-2">
-                <FormControl size="small">
-                  <FormLabel id="view-access-radio-button">Access</FormLabel>
-                  <RadioGroup
-                    row
-                    aria-labelledby="view-access-radio-button"
-                    value={values['access']}
+            <div className="my-2">
+              <div className="form grid gap-2 rounded-md p-3 shadow-md [border:1px_solid_var(--common-border-color)] ">
+                <div>
+                  <TextField
+                    fullWidth
+                    value={values['name']}
                     onChange={(e) => {
-                      setFieldValue('access', e.target.value.trimStart());
+                      setFieldValue('name', e.target.value.trimStart());
                     }}
-                    name="access"
-                  >
-                    <FormControlLabel value="everyone" control={<Radio size="small" />} label="Everyone" />
-                    <FormControlLabel value="private" control={<Radio size="small" />} label="Private" />
-                  </RadioGroup>
-                </FormControl>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      size="small"
-                      checked={values['default']}
+                    id="view-name"
+                    name="name"
+                    label="Name"
+                    variant="outlined"
+                    size="small"
+                    required
+                    error={touched['name'] && Boolean(errors['name'])}
+                    helperText={touched['name'] && errors['name']}
+                  />
+                </div>
+                <div className="mt-2 flex items-center justify-between gap-2">
+                  <FormControl size="small">
+                    <FormLabel id="view-access-radio-button">Access</FormLabel>
+                    <RadioGroup
+                      row
+                      aria-labelledby="view-access-radio-button"
+                      value={values['access']}
                       onChange={(e) => {
-                        setFieldValue('default', e.target.checked);
+                        setFieldValue('access', e.target.value.trimStart());
                       }}
-                      name="default"
-                    />
-                  }
-                  label="Set as Default"
-                />
-              </div>
-            </div>
-            <div className="list-none px-[5px]">
-              <ListItem disableGutters>
-                <ListItemText primary="All Columns" />
-                <ListItemSecondaryAction>
-                  <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
-                </ListItemSecondaryAction>
-              </ListItem>
-            </div>
-            <div className="max-h-[350px] overflow-auto py-2">
-              <DndContext
-                onDragEnd={(e) => moveItem(e, setFieldValue)}
-                modifiers={[restrictToVerticalAxis]}
-                onDragStart={onDragStart}
-                sensors={sensors}
-              >
-                <SortableContext items={sortedColumns.map((c) => c.accessor)}>
-                  <ul className="list-none">
-                    {sortedColumns.map((column, index) => (
-                      <RenderListItem
-                        key={column.accessor}
-                        checked={stateVisibleColumns[column.id]}
-                        column={column}
-                        index={index}
-                        handleToggle={handleToggle}
-                        setFieldValue={setFieldValue}
-                        values={values}
+                      name="access"
+                    >
+                      <FormControlLabel value="everyone" control={<Radio size="small" />} label="Everyone" />
+                      <FormControlLabel value="private" control={<Radio size="small" />} label="Private" />
+                    </RadioGroup>
+                  </FormControl>
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        size="small"
+                        checked={values['default']}
+                        onChange={(e) => {
+                          setFieldValue('default', e.target.checked);
+                        }}
+                        name="default"
                       />
-                    ))}
-                  </ul>
-                </SortableContext>
-                <DragOverlay>
-                  {activeItem && (
-                    <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
-                      <RenderListItem {...activeItem} />
-                    </span>
-                  )}
-                </DragOverlay>
-              </DndContext>
+                    }
+                    label="Set as Default"
+                  />
+                </div>
+              </div>
+              <div className="h-[1px] py-3 [border-bottom:1px_solid_var(--common-border-color)]" />
+              <div className="my-3 list-none px-[20px] ">
+                <div className="flex justify-between gap-2">
+                  <p className="flex-grow text-sm font-normal">Toggle and Drag & Drop to arrange</p>
+                  <span className="mr-[16px] flex-shrink-0">
+                    <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
+                  </span>
+                </div>
+              </div>
+
+              {/* <h3 className="px-4 py-2 text-[0.86rem] font-medium text-black/50 dark:text-white/70">Toggle and Drag & Drop to arrange</h3> */}
+
+              <div
+                className={cn(
+                  ' overflow-auto rounded-md px-3 shadow-md [border:1px_solid_var(--common-border-color)]',
+                  !isMinimized || (isMobile && !isTablet) || isMobileView ? 'max-h-[270px] md:max-h-[500px]' : 'max-h-[350px]'
+                )}
+              >
+                <DndContext
+                  onDragEnd={(e) => moveItem(e, setFieldValue)}
+                  modifiers={[restrictToVerticalAxis]}
+                  onDragStart={onDragStart}
+                  sensors={sensors}
+                >
+                  <SortableContext items={sortedColumns.map((c) => c.accessor)}>
+                    <ul className="list-none">
+                      {sortedColumns.map((column, index) => (
+                        <RenderListItem
+                          key={column.accessor}
+                          checked={stateVisibleColumns[column.id]}
+                          column={column}
+                          index={index}
+                          handleToggle={handleToggle}
+                          setFieldValue={setFieldValue}
+                          values={values}
+                        />
+                      ))}
+                    </ul>
+                  </SortableContext>
+                  <DragOverlay>
+                    {activeItem && (
+                      <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
+                        <RenderListItem {...activeItem} />
+                      </span>
+                    )}
+                  </DragOverlay>
+                </DndContext>
+              </div>
             </div>
           </CustomDialogContent>
           <CustomDialogFooter>
