@@ -72,7 +72,7 @@ const AddSerializedAsset = ({
 
   const [serializedProducts, setSerializedProducts] = useState([]);
   const [columns, setColumns] = useState(null);
-  const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
+  const [showTransferAssetDialog, setShowTransferAssetDialog] = useState({ open: false, data: null });
   const [warehouseOption, setWarehouseOption] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(filterByPlant?.optionValue);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -84,7 +84,7 @@ const AddSerializedAsset = ({
   const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, type: '' });
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -308,8 +308,8 @@ const AddSerializedAsset = ({
       })
       .then(({ data }) => {
         fetchAssets();
-        setShowTransferAssetDialog(false);
-        addSerializedAsset(selectedRecords, true);
+        setShowTransferAssetDialog({ open: false, data: null });
+        addSerializedAsset(selectedRecords, true, showTransferAssetDialog.data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -411,30 +411,29 @@ const AddSerializedAsset = ({
               <div className="flex flex-grow flex-wrap items-center gap-2">
                 {serializedProducts.length > 0
                   ? serializedProducts.map((d, i) => (
-                      <Box
-                        border={1}
-                        className={`cursor-pointer p-2 text-[13px] ${
-                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                    <Box
+                      border={1}
+                      className={`cursor-pointer p-2 text-[13px] ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                        borderColor="var(--common-border-color)"
-                        id={`serialized-products-${i}`}
-                        onClick={() => {
-                          if (selectedProduct === d.id) {
-                            setSelectedProduct(null);
-                          } else {
-                            setSelectedProduct(d.id);
-                          }
-                        }}
-                      >
-                        {d?.qty < 0 ? (
-                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                        ) : d?.qty === 0 ? (
-                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                        ) : (
-                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                        )}
-                      </Box>
-                    ))
+                      borderColor="var(--common-border-color)"
+                      id={`serialized-products-${i}`}
+                      onClick={() => {
+                        if (selectedProduct === d.id) {
+                          setSelectedProduct(null);
+                        } else {
+                          setSelectedProduct(d.id);
+                        }
+                      }}
+                    >
+                      {d?.qty < 0 ? (
+                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                      ) : d?.qty === 0 ? (
+                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                      ) : (
+                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                      )}
+                    </Box>
+                  ))
                   : null}
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
                   <div className="text-error font-weight-bold">You have selected more assets than required</div>
@@ -483,7 +482,16 @@ const AddSerializedAsset = ({
                         size="small"
                         color="primary"
                         onClick={() => {
-                          setShowTransferAssetDialog(true);
+                          if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                            setOpenAssetDataDialog({
+                              open: true,
+                              statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                              type: 'transfer'
+                            });
+                          }
+                          else {
+                            setShowTransferAssetDialog({ open: true, data: null });
+                          }
                         }}
                         variant={isMobile && !isTablet ? 'text' : 'contained'}
                         disabled={isAdding || serializedProducts.some((d) => d?.qty < 0)}
@@ -528,7 +536,8 @@ const AddSerializedAsset = ({
                             } else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
                               setOpenAssetDataDialog({
                                 open: true,
-                                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)
+                                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                                type: 'add'
                               });
                             } else if (checkMTRValidation) {
                               if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
@@ -608,11 +617,11 @@ const AddSerializedAsset = ({
           </Box>
         </CustomDialogContent>
       </Dialog>
-      {showTransferAssetDialog ? (
+      {showTransferAssetDialog.open ? (
         <ManageTransferAsset
           isClone={false}
           transferAssetId={null}
-          onClose={() => setShowTransferAssetDialog(false)}
+          onClose={() => setShowTransferAssetDialog({ open: false, data: null })}
           onSuccess={(data) => {
             handleAddAssetToTransferAsset(data?._id);
           }}
@@ -667,7 +676,8 @@ const AddSerializedAsset = ({
             if (assetPolicyData?.policy?.statusChangeFields?.find((e) => e.status === ASSET_STATUS.underReview)) {
               setOpenAssetDataDialog({
                 open: true,
-                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)
+                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
+                type: 'add'
               });
             } else {
               handleAutoTransferAssets();
@@ -687,15 +697,20 @@ const AddSerializedAsset = ({
         <AssetDetailsChangeDialog
           ids={selectedRecords?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+          setAssetsData={() => { }}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
               handleAutoTransferAssets(data);
             } else {
-              addSerializedAsset(selectedRecords, false, data);
+              if (openAssetDataDialog.type === 'add') {
+                addSerializedAsset(selectedRecords, false, data);
+              }
+              else {
+                setShowTransferAssetDialog({ open: true, data: data });
+              }
             }
-            setOpenAssetDataDialog({ open: false, statusPolicy: null });
+            setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
           productsDefaultData={selectedProducts}
