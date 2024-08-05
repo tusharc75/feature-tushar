@@ -16,7 +16,7 @@ import {
 } from '@material-ui/core';
 import React, { useContext, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { SavedData } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
+import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
@@ -37,7 +37,7 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 type EditCreateViewDialogProps = {
   onClose: () => void;
-  data: SavedData | null;
+  data: GridViewSavedData | null;
   getAllSavedViews: () => void;
   renderedFrom: string;
   columns: any[];
@@ -193,7 +193,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
     );
   };
 
-  const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleToggleAll = (event: React.ChangeEvent<HTMLInputElement>, setFieldValue: SetFieldValue) => {
     const visibleColumns = {};
     columnsWithoutSticky?.forEach((c: any) => {
       if (c.disabled) {
@@ -203,6 +203,12 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
       }
     });
     setStateVisibleColumns(visibleColumns);
+    setFieldValue(
+      'hide',
+      Object.entries(visibleColumns)
+        .filter(([, visible]) => !visible)
+        .map(([columnId]) => columnId)
+    );
   };
 
   const isAllChecked = () => {
@@ -291,7 +297,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
               <ListItem disableGutters>
                 <ListItemText primary="All Columns" />
                 <ListItemSecondaryAction>
-                  <Switch size="small" checked={isAllChecked()} onChange={handleToggleAll} />
+                  <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
                 </ListItemSecondaryAction>
               </ListItem>
             </div>

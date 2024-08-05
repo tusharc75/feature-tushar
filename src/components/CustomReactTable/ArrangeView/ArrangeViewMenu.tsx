@@ -1,19 +1,21 @@
 import { Divider, Fade, IconButton, List, ListItem, Popper } from '@material-ui/core';
 import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
-import React, { Dispatch, Fragment, useCallback, useContext, useMemo, useState } from 'react';
+import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import ClickAwayListener from 'react-click-away-listener';
+import { FaStar } from 'react-icons/fa6';
 import { ImSpinner2 } from 'react-icons/im';
 import axiosInstance from 'src/axios/axiosInstance';
-import { getLocalGridMetaData, removeLocalSelectedViewId, setLocalGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
+import EditCreateViewDialog from 'src/components/CustomReactTable/ArrangeView/EditCreateViewDialog';
 import { TActios, TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
 import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { SET_USER } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import EditCreateViewDialog from 'src/components/CustomReactTable/ArrangeView/EditCreateViewDialog';
 
-export type SavedData = {
+export type GridViewSavedData = {
   _id: string;
   name: string;
   access: string;
@@ -41,18 +43,48 @@ type ArrangeViewMenuProps = {
 };
 const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander }: ArrangeViewMenuProps) => {
   const { loading } = state;
+
+  const {
+    state: { user },
+    dispatch: contextDispatch
+  }: any = useData();
+
+  const contextGridViews = useMemo(() => (user?.gridViews || []) as GridViewSavedData[], [user?.gridViews]);
+
+  const savedDataForThisGrid = useMemo(() => contextGridViews.filter((d) => d.key === renderedFrom), [contextGridViews, renderedFrom]);
+  const defaultView = useMemo(() => savedDataForThisGrid.find((d) => d.default), [savedDataForThisGrid]);
+
   const toastConfig = useContext(CustomToastContext);
-  const [savedData, setSavedData] = useState<SavedData[]>(null);
+  const [savedData, setSavedData] = useState<GridViewSavedData[]>(savedDataForThisGrid);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [arrowRef, setArrowRef] = React.useState<HTMLElement | null>(null);
-  const [selectedViewId, setSelectedViewId] = useState<string>(null);
-  const [editCreateDialogData, setEditCreateDialogData] = useState<{ open: boolean; data: SavedData | null }>({ open: false, data: null });
-  const [confirmationDialog, setConfirmationDialog] = useState<{ open: boolean; data: SavedData | null }>({ open: false, data: null });
+  const [editCreateDialogData, setEditCreateDialogData] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
+  const [confirmationDialog, setConfirmationDialog] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
 
-  const stickycolumns = useMemo(
-    () => getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander }),
-    [columns, expander, hideSelection]
+  const applyViewInTable = useCallback(
+    (order: string[], hide: string[]) => {
+      const stickycolumns = getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander });
+      let columnOrder = [];
+      const columnHiddenStateData = {};
+      columns.forEach((column) => {
+        columnHiddenStateData[column.id] = !hide.includes(column.id);
+      });
+      if (order.length > 0) {
+        columnOrder = [...stickycolumns.left, ...order, ...stickycolumns.right];
+      } else {
+        columnOrder = [...stickycolumns.left, ...columns.map((c) => c.id), ...stickycolumns.right];
+      }
+      dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
+      dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
+    },
+    [columns, dispatch, expander, hideSelection]
   );
+
+  useEffect(() => {
+    if (defaultView) {
+      applyViewInTable(defaultView?.order || [], defaultView?.hide || []);
+    }
+  }, [renderedFrom, defaultView, applyViewInTable]);
 
   const getAllSavedViews = useCallback(async () => {
     try {
@@ -60,42 +92,23 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
         data: { data }
       } = await axiosInstance().get('/user/grid-view');
       setSavedData(data.filter((d) => d.key === renderedFrom));
-      const { selectedViews } = getLocalGridMetaData();
-      setSelectedViewId(selectedViews[renderedFrom]);
+      contextDispatch({ type: SET_USER, payload: { ...user, gridViews: data } });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  }, [renderedFrom, toastConfig]);
+  }, [renderedFrom, toastConfig, contextDispatch, user]);
 
-  const applyView = (data: SavedData) => {
-    setLocalGridMetaData({ [renderedFrom]: { hide: data.hide, order: data.order } }, data._id);
+  const applyView = (data: GridViewSavedData) => {
     applyViewInTable(data.order, data.hide);
-    getAllSavedViews();
   };
 
-  const applyViewInTable = (order: string[], hide: string[]) => {
-    let columnOrder = [];
-    const columnHiddenStateData = {};
-    columns.forEach((column) => {
-      columnHiddenStateData[column.id] = !hide.includes(column.id);
-    });
-    if (order.length > 0) {
-      columnOrder = [...stickycolumns.left, ...order, ...stickycolumns.right];
-    } else {
-      columnOrder = [...stickycolumns.left, ...columns.map((c) => c.id), ...stickycolumns.right];
-    }
-    dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
-    dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
-  };
-
-  const deleteView = async (data: SavedData) => {
+  const deleteView = async (data: GridViewSavedData) => {
     if (!data) return;
     try {
       await axiosInstance().put('/user/grid-view/remove', { ids: [data._id] });
       getAllSavedViews();
       setConfirmationDialog({ open: false, data: null });
-      if (selectedViewId === data._id) {
-        removeLocalSelectedViewId(data._id, renderedFrom);
+      if (defaultView._id === data._id) {
         applyViewInTable([], []);
       }
       toastConfig.setToastConfig({
@@ -108,7 +121,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
     }
   };
 
-  const openEditModal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: SavedData) => {
+  const openEditModal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: GridViewSavedData) => {
     e.preventDefault();
     e.stopPropagation();
     setEditCreateDialogData({ open: true, data: data });
@@ -121,7 +134,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
     setEditCreateDialogData({ open: false, data: null });
   };
 
-  const openDeleteConfirmationModal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: SavedData) => {
+  const openDeleteConfirmationModal = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>, data: GridViewSavedData) => {
     e.preventDefault();
     e.stopPropagation();
     setAnchorEl(null);
@@ -138,7 +151,6 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           disabled={loading}
           className="refresh-arrange-button"
           onClick={(e) => {
-            getAllSavedViews();
             setAnchorEl(e.currentTarget);
           }}
         >
@@ -194,7 +206,6 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                                     {i !== 0 && <Divider />}
                                     <ListItem
                                       button
-                                      selected={selectedViewId === d._id}
                                       key={d._id}
                                       component={'li'}
                                       onClick={() => {
@@ -202,8 +213,15 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                                         applyView(d);
                                       }}
                                     >
-                                      <div className="flex w-full justify-between gap-2">
-                                        <span>{d.name}</span>
+                                      <div className="flex w-full  justify-between gap-2">
+                                        <span className="flex items-center gap-2">
+                                          {d.name}
+                                          {defaultView._id === d._id && (
+                                            <HtmlTooltip title="This view is set as the default view">
+                                              <FaStar size={10} className="text-[var(--new-theme-color)]" />
+                                            </HtmlTooltip>
+                                          )}
+                                        </span>
                                         <div className="span">
                                           <IconButton size={'small'} onClick={(e) => openEditModal(e, d)}>
                                             <Edit fontSize="small" />
@@ -219,8 +237,8 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                               })
                             ) : (
                               <>
-                                <p className="select-none text-center text-3xl font-semibold text-gray-300">No views found.</p>
-                                <p className="text-md select-none text-center text-gray-300">Please create a view first.</p>
+                                <p className="select-none text-center text-3xl font-semibold text-gray-300 dark:text-gray-700">No views found.</p>
+                                <p className="text-md select-none text-center text-gray-300 dark:text-gray-700">Please create a view first.</p>
                               </>
                             )}
                           </List>
