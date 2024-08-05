@@ -181,7 +181,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           <Fade {...TransitionProps} timeout={350} in={Boolean(anchorEl)}>
             <>
               <span ref={setArrowRef} className="popper-arrow"></span>
-              <div className="mt-[10px] min-w-[400px] max-w-[400px] rounded-md bg-[var(--dark-primary,white)] shadow-lg [border:1px_solid_var(--common-border-color)] ">
+              <div className="mt-[10px] min-w-[min(400px,100vw)] max-w-[400px] rounded-md bg-[var(--dark-primary,white)] shadow-lg [border:1px_solid_var(--common-border-color)] ">
                 <ClickAwayListener
                   onClickAway={() => {
                     setAnchorEl(null);
