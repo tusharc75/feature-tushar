@@ -77,7 +77,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     state: { user }
   }: any = useData();
 
-  const [isUpdating, setUpdating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [material, setMaterial] = useState([]);
   const [orginalMaterial, setOrginalMaterial] = useState([]);
@@ -888,7 +888,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
-    setUpdating(true);
+    setIsSubmitting(true);
     axiosInstance()
       .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
         material: rowsApplied.filter((d) => d.type !== MATERIAL_TYPE.manualEntry),
@@ -896,11 +896,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         invoiceData: invoiceData
       })
       .then(() => {
-        setUpdating(false);
+        setIsSubmitting(false);
         onSuccess();
       })
       .catch((error) => {
-        setUpdating(false);
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -1040,7 +1040,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 variant="contained"
                 color="primary"
                 size="small"
-                disabled={isUpdating || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
+                disabled={isSubmitting || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
                   if (invoiceResourceData?.policy?.rentalInvoiceFields?.length > 0) {
                     setOpenInvoiceDataDialog(true)
@@ -1066,7 +1066,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           rowData={orginalMaterial.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}
-          loading={isUpdating}
+          loading={isSubmitting}
           isQtyOnly={true}
           isRateRequired={false}
         />

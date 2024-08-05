@@ -8,7 +8,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
-import { CustomDialogTransition, getObjKeys, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, getObjKeys, sidebarResource, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 
@@ -56,7 +56,7 @@ const InvoiceDataDialog = ({ onClose, onSuccess, rentalInvoiceFields }) => {
 			}}
 		>
 			{initialData?.fields?.length ? (
-				<Formik initialValues={initialData?.values} onSubmit={handleSubmit} validate={() => { }}>
+				<Formik initialValues={initialData?.values} onSubmit={handleSubmit} validationSchema={yupSchema(initialData.fields)} >
 					{({ values, submitForm, setFieldValue, errors, touched }) => (
 						<>
 							<CustomDialogHeader
@@ -67,7 +67,6 @@ const InvoiceDataDialog = ({ onClose, onSuccess, rentalInvoiceFields }) => {
 									setFullScreen((prevState) => !prevState);
 								}}
 								showManimizeMaximize={true}
-								showRequiredLabel={false}
 							/>
 							<CustomDialogContent>
 								<Form>

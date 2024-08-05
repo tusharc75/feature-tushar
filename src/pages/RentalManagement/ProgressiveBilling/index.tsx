@@ -236,12 +236,12 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
           rentalManagementData={rentalManagementData}
           invoiceId={viewBillDialog?.invoiceData?._id}
           onClose={() => {
-            setViewBillDialog({ open: false, invoiceData: null });
             fetchData();
+            setViewBillDialog({ open: false, invoiceData: null });
           }}
           onSuccess={() => {
-            setViewBillDialog({ open: false, invoiceData: null });
             fetchData();
+            setViewBillDialog({ open: false, invoiceData: null });
           }}
           allowCreateInvoice={allowCreateInvoice}
           isLatestInvoice={viewBillDialog?.invoiceData?.isLatestInvoice}
