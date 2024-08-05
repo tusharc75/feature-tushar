@@ -18,7 +18,6 @@ import {
   downloadExcel,
   primaryFields,
   sidebarResource,
-  isObjectEmpty,
   REPORT_LIST
 } from './../../constants/helpers';
 import MomentUtils from '@date-io/moment';
@@ -57,7 +56,7 @@ const CustomReport = () => {
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, loading } = state;
+  const { page, limit, search, filters, sorting, loading } = state;
 
   const renderedFrom = `custom-report_${id}`;
 
@@ -179,18 +178,17 @@ const CustomReport = () => {
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-    const api = `/report${
-      camelCase(resource) === 'quotes'
-        ? '/quote-builder'
-        : routes[camelCase(resource)]
+    const api = `/report${camelCase(resource) === 'quotes'
+      ? '/quote-builder'
+      : routes[camelCase(resource)]
         ? routes[camelCase(resource)]?.path
         : `/${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
-    }${queryString}`;
+      }${queryString}`;
 
     axiosInstance()
       .get(api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count, columns } }) => {
-        if(camelCase(resource) == 'numberOfAssetsByStatus') {
+        if (camelCase(resource) == 'numberOfAssetsByStatus') {
           setLoadingColumns(true);
           setResourceColumns(columns);
           let col = [];
@@ -223,7 +221,10 @@ const CustomReport = () => {
     if (isExport) {
       deepFilter = `?`;
     }
-    let customDeepFilter = [];
+
+    const { deepFilters } = gridFilterParser(filters);
+
+    let customDeepFilter = [...deepFilters];
     customReportData?.filters?.forEach((filter: any) => {
       if (filter?.type === 'checkBox') {
         customDeepFilter.push({
@@ -238,10 +239,8 @@ const CustomReport = () => {
       }
     });
 
-    const { deepFilters } = gridFilterParser(filters);
-
-    if ((customDeepFilter && customDeepFilter?.length > 0) || deepFilters?.length>0) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify([...customDeepFilter,...deepFilters]))}`;
+    if (customDeepFilter?.length) {
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(customDeepFilter))}`;
     }
     if (customDeepFilter?.length) {
       deepFilter = `${deepFilter}&filterType=and`;
@@ -271,10 +270,9 @@ const CustomReport = () => {
     let queryString = getQueryString(true);
     axiosInstance()
       .get(
-        `/report/${
-          camelCase(resource) === 'quotes'
-            ? 'quote-builder'
-            : routes[camelCase(resource)]
+        `/report/${camelCase(resource) === 'quotes'
+          ? 'quote-builder'
+          : routes[camelCase(resource)]
             ? routes[camelCase(resource)]?.path
             : `${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
         }/export?exportColumn=${JSON.stringify(exportColumns)}&export=1&${queryString}`,
@@ -310,16 +308,14 @@ const CustomReport = () => {
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
                   {showGrid && (
-                    <div id="importExportLinks" style={{ minWidth: 80 }}>
-                      <span
-                        aria-disabled={isExporting}
-                        onClick={exportData}
-                        className={`${isExporting ? 'cursor-stop' : 'cursor-pointer'} mr-2 setLink`}
-                        style={{ color: theme.palette.info.light }}
-                      >
-                        Export All
-                      </span>
-                    </div>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={isExporting}
+                      onClick={exportData}
+                      className={`btn-outline-v-1`}>
+                      Export All
+                    </Button>
                   )}
                 </Grid>
               </Grid>
