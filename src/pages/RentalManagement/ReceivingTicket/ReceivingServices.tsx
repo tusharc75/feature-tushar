@@ -172,10 +172,13 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         canDrag: false,
         Cell: ({ row }) => {
           const serviceLogCount = row?.original?.serviceLog?.length;
-          const cannotDelete = !serviceLogCount || (row?.original?.serviceLog[serviceLogCount - 1]?.endDate && row?.original?.serviceLog[serviceLogCount - 1]?.endDate <= row?.original?.maxInvoiceDate);
+          const recentServiceLogStartDate = serviceLogCount ? row?.original?.serviceLog[serviceLogCount - 1]?.startDate : null;
+          const recentServiceLogEndDate = serviceLogCount ? row?.original?.serviceLog[serviceLogCount - 1]?.endDate : null;
+          const maxInvoiceDate = row?.original?.maxInvoiceDate;
+          const cannotDelete = !serviceLogCount || (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) || (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) || (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
           return (
             <>
-              <HtmlTooltip title={'Delete recent log'}>
+              <HtmlTooltip title={!serviceLogCount ? rentalManagementMessage.serviceNotstarted : cannotDelete ? rentalManagementMessage.invoiceCreated :  'Delete recent log'}>
                 <span>
                   <IconButton
                     size="small"
@@ -371,9 +374,14 @@ const ActionButtonMenuItems = ({
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
         }
       } else if (action === rentalManagementActions.deleteServiceLog) {
-        if (!e?.serviceLog?.length) {
+        const serviceLogCount = e?.serviceLog?.length;
+        const recentServiceLogStartDate = serviceLogCount ? e?.serviceLog[serviceLogCount - 1]?.startDate : null;
+        const recentServiceLogEndDate = serviceLogCount ? e?.serviceLog[serviceLogCount - 1]?.endDate : null;
+        const maxInvoiceDate = e?.maxInvoiceDate;
+        const cannotDelete = !serviceLogCount || (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) || (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) || (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
+        if (!serviceLogCount) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
-        } else if (e?.maxInvoiceDate && e?.serviceLog[e?.serviceLog?.length - 1]?.endDate <= e?.maxInvoiceDate) {
+        } else if (cannotDelete) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.invoiceCreated });
         }
       }

@@ -416,6 +416,14 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
+    let rentalManagementEstimateStartDate = moment(rentalManagementData?.estimateStartDate);
+    let rentalManagementEstimateEndDate = moment(rentalManagementData?.estimateEndDate);
+    if (estimateStartDate.diff(rentalManagementEstimateStartDate, 'days') < 0) {
+      errors['estimateStartDate'] = 'Please enter valid estimate start date';
+    }
+    if (estimateEndDate.diff(rentalManagementEstimateEndDate, 'days') > 0) {
+      errors['estimateEndDate'] = 'Please enter valid estimate end date';
+    }
     if (rowData && rowData.hideSelection) {
       if (rowData.parentId) {
         const _package = material?.filter((e) => e._id === rowData.parentId);
