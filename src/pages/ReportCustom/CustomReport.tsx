@@ -26,6 +26,7 @@ import ReportFilters from '../Report/ReportFilters';
 import { useHistory } from 'react-router-dom';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 
 let cancelTokenSource = null;
 
@@ -295,6 +296,23 @@ const CustomReport = () => {
         toastConfig.setToastConfig(err);
       });
   };
+console.log(resource)
+  const getApi = () => {
+    let exportColumns = [];
+    exportColumns =
+      customReportData?.column && customReportData?.column.length > 0
+        ? columns?.filter((col) => customReportData?.column.includes(col.accessor))?.map((col) => col.accessor)
+        : columns?.map((col) => col.accessor); 
+    let queryString = getQueryString(true);
+    console.log(queryString)
+    let resourceCamelCase = camelCase(resource)
+    let resourcePath = resourceCamelCase === 'quotes'
+    ? 'quote-builder'
+    : routes[resourceCamelCase]
+    ? routes[resourceCamelCase]?.path
+    : ``
+    return `/report${resourcePath}/export?exportColumn=${JSON.stringify(exportColumns)}&${queryString}`;
+  };
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -308,6 +326,17 @@ const CustomReport = () => {
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
                   {showGrid && (
+                   ['dynamic','inUsedSerializedAsset']?.includes(REPORT_LIST?.find((r)=> r?.title === resource)?.type) ?
+                    <AsynImportExportMenu
+                    resource={resource}
+                    subResource={'report'}
+                    permissions={resource === 'In Used Serialized Asset' ? permissions?.report : permissions[camelCase(resource) === 'quotes' ? 'quoteBuilder' : camelCase(resource)]}
+                    module={''}
+                    api={resource === 'In Used Serialized Asset' ? `/report/${kebabCase(resource)}` : getApi()}
+                    afterImportCompleted={() => { }}
+                    onlyExport={true}
+                  />
+                  :
                     <Button
                       variant="outlined"
                       size="small"
