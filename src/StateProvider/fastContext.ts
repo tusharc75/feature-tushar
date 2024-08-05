@@ -1,4 +1,4 @@
-import { WalkmeData, StateWalkmeInstance } from 'src/components/CustomIntro';
+import { StateWalkmeInstance, WalkmeData } from 'src/components/CustomIntro';
 import createFastContext from './createFastContext';
 
 export const SEARCH = 'searchQuery';
@@ -11,6 +11,7 @@ export const SIDEBAR_OPEN = 'isSidebarOpen';
 export const SIDEBAR_OPENED_BY_BUTTON = 'isSidebarOpenedByButton';
 export const WALK_ME_STEPS = 'walkMeSteps';
 export const WALK_ME_INSTANCE = 'walkMeInstance';
+export const GRID_METADATA = 'gridMetaData';
 
 const initialState: {
   searchQuery: string;
@@ -23,6 +24,7 @@ const initialState: {
   isSidebarOpenedByButton: boolean;
   walkMeSteps: WalkmeData[];
   walkMeInstance: StateWalkmeInstance | null;
+  gridMetaData: { [key: string]: { hide: string[]; order: string[] } | null };
 } = {
   searchQuery: '',
   themeColor: 'light',
@@ -33,7 +35,8 @@ const initialState: {
   isSidebarOpen: false,
   isSidebarOpenedByButton: false,
   walkMeSteps: [],
-  walkMeInstance: null
+  walkMeInstance: null,
+  gridMetaData: {}
 };
 
 const { Provider, useStore } = createFastContext(initialState);
