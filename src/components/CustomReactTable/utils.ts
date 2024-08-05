@@ -30,57 +30,6 @@ export const gridFilterParser = (filters) => {
   return { filterByIds, deepFilters };
 };
 
-let timeout;
-export const updateGridHiddenColumns = ({
-  hiddenColumns = [],
-  columnOrder = [],
-  renderedFrom,
-  user,
-  callback
-}: {
-  hiddenColumns?: string[];
-  columnOrder?: string[];
-  renderedFrom: string;
-  user: any;
-  callback?: (data) => void;
-}) => {
-  if (timeout) clearTimeout(timeout);
-  timeout = setTimeout(function () {
-    let request = getGridMetaDataFromLocalStorage();
-    if (request[renderedFrom]) {
-      request[renderedFrom].order = columnOrder.length > 0 ? columnOrder : request[renderedFrom].order;
-      request[renderedFrom].hide = hiddenColumns.length > 0 ? hiddenColumns : request[renderedFrom].hide;
-    } else {
-      request[renderedFrom] = {
-        order: columnOrder,
-        hide: hiddenColumns
-      };
-    }
-    if (callback) callback(request[renderedFrom]);
-    postGridMetadata(request, user, callback);
-  }, 600);
-};
-
-const postGridMetadata = (request, user, callback) => {
-  axiosInstance()
-    .post(`user/meta-grid`, {
-      _id: user?.user?._id,
-      gridMetaData: { ...request }
-    })
-    .then((data) => {
-      fetchGridMetaData(user);
-    });
-};
-
-const fetchGridMetaData = (user) => {
-  axiosInstance()
-    .get(`user/meta-grid/${user?.user?._id}`)
-    .then(({ data: { data } }) => {
-      let tempMetaData = JSON.stringify(data?.gridMetaData);
-      localStorage.setItem('gridMetaData', tempMetaData);
-    });
-};
-
 export const getGridMetaDataFromLocalStorage = () => {
   try {
     const data = localStorage.getItem('gridMetaData');
@@ -427,7 +376,6 @@ export const createFilterModel = (formValues, coloums) => {
       case 'currency':
       case 'lookUpDisplay':
       case 'url':
-
         if (formValues[fieldName]) {
           filterModel.set(fieldName, { filter: formValues[fieldName] });
         }

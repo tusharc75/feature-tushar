@@ -4656,3 +4656,32 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
     }
   }
 }
+
+.popper-arrow {
+  position: absolute;
+  width: 20px;
+
+  &::before {
+    content: '';
+    position: absolute;
+    display: block;
+    width: 20px;
+    height: 20px;
+    transform: rotate(45deg);
+    background-color: var(--dark-primary, white);
+    z-index: -1;
+    border: 1px solid var(--common-border-color);
+    @apply shadow-lg;
+  }
+  &::after {
+    content: '';
+    left: -3px;
+    top: 10px;
+    position: absolute;
+    display: block;
+    width: 26px;
+    height: 1px;
+    background-color: var(--dark-primary, white);
+    z-index: 1;
+  }
+}
