@@ -18,7 +18,6 @@ import {
 import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
-import { useData } from 'src/StateProvider/Provider';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
@@ -38,9 +37,7 @@ import {
   extractLastNumberFromDataRange,
   fitToColumn,
   getExcelColumnNameFromRange,
-  getStickyColumnNames,
   getUniqueDataByKey,
-  updateGridHiddenColumns,
   useSkipper
 } from './utils';
 
@@ -89,10 +86,6 @@ const CustomReactTable = ({
     columnOrder,
     sorting
   }: TInitialState = state;
-
-  const {
-    state: { user }
-  }: any = useData();
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -148,14 +141,9 @@ const CustomReactTable = ({
       0,
       columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string
     );
-    const stickyColumns = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection }).stickyColumns;
-    const newcolumnOrderToSave = newColumnOrder?.filter((o) => !stickyColumns?.includes(o));
+    // const stickyColumns = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection }).stickyColumns;
+    // const newcolumnOrderToSave = newColumnOrder?.filter((o) => !stickyColumns?.includes(o));
 
-    updateGridHiddenColumns({
-      renderedFrom,
-      user,
-      columnOrder: newcolumnOrderToSave
-    });
     dispatch({ type: 'setColumnOrder', columnOrder: newColumnOrder });
     table.setColumnOrder(newColumnOrder);
     return [...columnOrder];

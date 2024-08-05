@@ -172,7 +172,10 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         canDrag: false,
         Cell: ({ row }) => {
           const serviceLogCount = row?.original?.serviceLog?.length;
-          const cannotDelete = !serviceLogCount || (row?.original?.serviceLog[serviceLogCount - 1]?.endDate && row?.original?.serviceLog[serviceLogCount - 1]?.endDate <= row?.original?.maxInvoiceDate);
+          const recentServiceLogStartDate = serviceLogCount ? row?.original?.serviceLog[serviceLogCount - 1]?.startDate : null;
+          const recentServiceLogEndDate = serviceLogCount ? row?.original?.serviceLog[serviceLogCount - 1]?.endDate : null;
+          const maxInvoiceDate = row?.original?.maxInvoiceDate;
+          const cannotDelete = !serviceLogCount || (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) || (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) || (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
           return (
             <>
               <HtmlTooltip title={'Delete recent log'}>
