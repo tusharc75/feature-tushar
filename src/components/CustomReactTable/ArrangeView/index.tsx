@@ -1,14 +1,14 @@
 import { IconButton } from '@material-ui/core';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import { useEffect, useMemo, useState } from 'react';
+import ArrangeViewMenu from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
 import { useData } from '../../../StateProvider/Provider';
 import { SET_GRID_METADATA } from '../../../StateProvider/actionTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../CustomTooltipTitle';
-import ArrangeViewDialog from './ArrangeViewDialog';
-import ArrangeViewReportDialog from './ArrangeViewReportDialog';
 import { TInitialState } from '../hooks/useTableReducer';
-import { getTableDataFromLocalStorage, getStickyColumnNames, getGridMetaDataFromLocalStorage } from '../utils';
+import { getGridMetaDataFromLocalStorage, getStickyColumnNames, getTableDataFromLocalStorage } from '../utils';
+import ArrangeViewReportDialog from './ArrangeViewReportDialog';
 
 let timeout;
 
@@ -28,39 +28,39 @@ const ArrangeView = ({
 
   const [openColumnSelection, setOpenColumnSelection] = useState(false);
 
-  const stickycolumns = useMemo(
-    () => getStickyColumnNames({ allColumn: columns, hideSelection: hideSelection, expander: expander }),
-    [columns, expander, hideSelection]
-  );
+  // const stickycolumns = useMemo(
+  //   () => getStickyColumnNames({ allColumn: columns, hideSelection: hideSelection, expander: expander }),
+  //   [columns, expander, hideSelection]
+  // );
 
-  // for recalculating column order if new dynamic columns are added to the grid.
-  const columnCount = useMemo(() => columns?.length || 0, [columns]);
+  // // for recalculating column order if new dynamic columns are added to the grid.
+  // const columnCount = useMemo(() => columns?.length || 0, [columns]);
 
-  useEffect(() => {
-    const gridMetaData = getTableDataFromLocalStorage(renderedFrom);
+  // useEffect(() => {
+  //   const gridMetaData = getTableDataFromLocalStorage(renderedFrom);
 
-    if (gridMetaData && gridMetaData?.order && gridMetaData?.order?.length) {
-      let tempColumnOrder = [...stickycolumns.left, ...gridMetaData.order];
-      const missingColumns = columns.filter((c) => ![...stickycolumns.stickyColumns, ...gridMetaData.order].includes(c.id)).map((c) => c.id);
-      tempColumnOrder = [...tempColumnOrder, ...missingColumns, ...stickycolumns.right];
-      dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
-    } else {
-      dispatchTable({ type: 'setColumnOrder', columnOrder: columns.map((c) => c.id) });
-    }
-    if (gridMetaData && gridMetaData?.hide && gridMetaData?.hide?.length) {
-      const visibleColumns = {};
-      for (const col of columns) {
-        visibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
-      }
-      dispatchTable({ type: 'setVisibleColumns', visibleColumns: visibleColumns });
-    } else {
-      const visibleColumns = {};
-      columns.forEach((col) => {
-        visibleColumns[col.id] = col?.show === false ? false : true;
-      });
-      dispatchTable({ type: 'setVisibleColumns', visibleColumns });
-    }
-  }, [renderedFrom, columnCount]);
+  //   if (gridMetaData && gridMetaData?.order && gridMetaData?.order?.length) {
+  //     let tempColumnOrder = [...stickycolumns.left, ...gridMetaData.order];
+  //     const missingColumns = columns.filter((c) => ![...stickycolumns.stickyColumns, ...gridMetaData.order].includes(c.id)).map((c) => c.id);
+  //     tempColumnOrder = [...tempColumnOrder, ...missingColumns, ...stickycolumns.right];
+  //     dispatchTable({ type: 'setColumnOrder', columnOrder: tempColumnOrder });
+  //   } else {
+  //     dispatchTable({ type: 'setColumnOrder', columnOrder: columns.map((c) => c.id) });
+  //   }
+  //   if (gridMetaData && gridMetaData?.hide && gridMetaData?.hide?.length) {
+  //     const visibleColumns = {};
+  //     for (const col of columns) {
+  //       visibleColumns[col.id] = !gridMetaData.hide?.includes(col.id);
+  //     }
+  //     dispatchTable({ type: 'setVisibleColumns', visibleColumns: visibleColumns });
+  //   } else {
+  //     const visibleColumns = {};
+  //     columns.forEach((col) => {
+  //       visibleColumns[col.id] = col?.show === false ? false : true;
+  //     });
+  //     dispatchTable({ type: 'setVisibleColumns', visibleColumns });
+  //   }
+  // }, [renderedFrom, columnCount]);
 
   const {
     state: { user }
@@ -109,47 +109,45 @@ const ArrangeView = ({
 
   return (
     <>
-      <HtmlTooltip title="Arrange View" placement="top" arrow>
-        <IconButton
-          aria-describedby="columnSelection"
-          size="small"
-          color="primary"
-          disabled={loading}
-          className="refresh-arrange-button"
-          onClick={(event) => {
-            setOpenColumnSelection(true);
-          }}
-        >
-          <SwapHorizIcon />
-        </IconButton>
-      </HtmlTooltip>
+      {reportSave ? (
+        <HtmlTooltip title="Arrange View" placement="top" arrow>
+          <IconButton
+            aria-describedby="columnSelection"
+            size="small"
+            color="primary"
+            disabled={loading}
+            className="refresh-arrange-button"
+            onClick={(event) => {
+              setOpenColumnSelection(true);
+            }}
+          >
+            <SwapHorizIcon />
+          </IconButton>
+        </HtmlTooltip>
+      ) : (
+        <ArrangeViewMenu
+          dispatch={dispatchTable}
+          renderedFrom={renderedFrom}
+          state={state}
+          columns={columns}
+          hideSelection={hideSelection}
+          expander={expander}
+        />
+      )}
 
       {openColumnSelection && (
         <>
-          {reportSave ? (
-            <ArrangeViewReportDialog
-              columns={columns}
-              onClose={() => setOpenColumnSelection(false)}
-              updateGridHiddenColumns={updateGridHiddenColumns}
-              renderedFrom={renderedFrom}
-              getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-              dispatch={dispatchTable}
-              setSelectedReportView={setSelectedReportView}
-              selectedReportView={selectedReportView}
-              state={state}
-            />
-          ) : (
-            <ArrangeViewDialog
-              columns={columns}
-              onClose={() => setOpenColumnSelection(false)}
-              updateGridHiddenColumns={updateGridHiddenColumns}
-              renderedFrom={renderedFrom}
-              getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-              dispatch={dispatchTable}
-              state={state}
-              stickycolumns={stickycolumns}
-            />
-          )}
+          <ArrangeViewReportDialog
+            columns={columns}
+            onClose={() => setOpenColumnSelection(false)}
+            updateGridHiddenColumns={updateGridHiddenColumns}
+            renderedFrom={renderedFrom}
+            getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+            dispatch={dispatchTable}
+            setSelectedReportView={setSelectedReportView}
+            selectedReportView={selectedReportView}
+            state={state}
+          />
         </>
       )}
     </>
