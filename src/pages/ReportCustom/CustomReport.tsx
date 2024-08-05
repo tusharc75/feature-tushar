@@ -237,6 +237,16 @@ const CustomReport = () => {
         });
       }
     });
+
+    if (!isObjectEmpty(filters)) {
+      Object.keys(filters).forEach((field) => {
+        customDeepFilter.push({
+          field: field,
+          term: filters[field].filter
+        });
+      });
+    }
+    
     if (customDeepFilter && customDeepFilter?.length > 0) {
       deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(customDeepFilter))}`;
     }
