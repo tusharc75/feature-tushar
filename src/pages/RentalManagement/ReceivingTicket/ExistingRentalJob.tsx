@@ -96,8 +96,6 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     }
   };
 
-  console.log(productInventory)
-
   const calculateNestedQty = (material, parent) => {
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
     childProduct?.forEach((child) => {
@@ -393,7 +391,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         <AssetDetailsChangeDialog
           ids={productInventory?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, data: null })}
           onSuccess={(_assetData) => {
             handleCreateReceivingTicket(openAssetDataDialog.data, false, _assetData);
