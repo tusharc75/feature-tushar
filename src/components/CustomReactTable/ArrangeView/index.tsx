@@ -1,14 +1,14 @@
 import { IconButton } from '@material-ui/core';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import { useEffect, useMemo, useState } from 'react';
+import ArrangeViewMenu from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
 import { useData } from '../../../StateProvider/Provider';
 import { SET_GRID_METADATA } from '../../../StateProvider/actionTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import HtmlTooltip from '../../CustomTooltipTitle';
-import ArrangeViewDialog from './ArrangeViewDialog';
-import ArrangeViewReportDialog from './ArrangeViewReportDialog';
 import { TInitialState } from '../hooks/useTableReducer';
-import { getTableDataFromLocalStorage, getStickyColumnNames, getGridMetaDataFromLocalStorage } from '../utils';
+import { getGridMetaDataFromLocalStorage, getStickyColumnNames, getTableDataFromLocalStorage } from '../utils';
+import ArrangeViewReportDialog from './ArrangeViewReportDialog';
 
 let timeout;
 
@@ -109,47 +109,45 @@ const ArrangeView = ({
 
   return (
     <>
-      <HtmlTooltip title="Arrange View" placement="top" arrow>
-        <IconButton
-          aria-describedby="columnSelection"
-          size="small"
-          color="primary"
-          disabled={loading}
-          className="refresh-arrange-button"
-          onClick={(event) => {
-            setOpenColumnSelection(true);
-          }}
-        >
-          <SwapHorizIcon />
-        </IconButton>
-      </HtmlTooltip>
+      {reportSave ? (
+        <HtmlTooltip title="Arrange View" placement="top" arrow>
+          <IconButton
+            aria-describedby="columnSelection"
+            size="small"
+            color="primary"
+            disabled={loading}
+            className="refresh-arrange-button"
+            onClick={(event) => {
+              setOpenColumnSelection(true);
+            }}
+          >
+            <SwapHorizIcon />
+          </IconButton>
+        </HtmlTooltip>
+      ) : (
+        <ArrangeViewMenu
+          dispatch={dispatchTable}
+          renderedFrom={renderedFrom}
+          state={state}
+          columns={columns}
+          hideSelection={hideSelection}
+          expander={expander}
+        />
+      )}
 
       {openColumnSelection && (
         <>
-          {reportSave ? (
-            <ArrangeViewReportDialog
-              columns={columns}
-              onClose={() => setOpenColumnSelection(false)}
-              updateGridHiddenColumns={updateGridHiddenColumns}
-              renderedFrom={renderedFrom}
-              getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-              dispatch={dispatchTable}
-              setSelectedReportView={setSelectedReportView}
-              selectedReportView={selectedReportView}
-              state={state}
-            />
-          ) : (
-            <ArrangeViewDialog
-              columns={columns}
-              onClose={() => setOpenColumnSelection(false)}
-              updateGridHiddenColumns={updateGridHiddenColumns}
-              renderedFrom={renderedFrom}
-              getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
-              dispatch={dispatchTable}
-              state={state}
-              stickycolumns={stickycolumns}
-            />
-          )}
+          <ArrangeViewReportDialog
+            columns={columns}
+            onClose={() => setOpenColumnSelection(false)}
+            updateGridHiddenColumns={updateGridHiddenColumns}
+            renderedFrom={renderedFrom}
+            getToggleHideAllColumnsProps={getToggleHideAllColumnsProps}
+            dispatch={dispatchTable}
+            setSelectedReportView={setSelectedReportView}
+            selectedReportView={selectedReportView}
+            state={state}
+          />
         </>
       )}
     </>

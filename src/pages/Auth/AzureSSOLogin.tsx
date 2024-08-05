@@ -7,24 +7,26 @@ import { backendApi } from 'src/config';
 
 const AzureSSOLogin = () => {
   const { dispatch }: any = useData();
-  const history = useHistory()
+  const history = useHistory();
   useEffect(() => {
     const searchParams = new URLSearchParams(document.location.search);
     const token = searchParams.get('token');
     (async () => {
       if (token) {
-        const res = await axios.get(backendApi + "/user/me", {
+        const res = await axios.get(backendApi + '/user/me', {
           headers: {
             Authorization: `Bearer ${token}`
           }
-        })
-        const { data: { data } } = res;
+        });
+        const {
+          data: { data }
+        } = res;
 
-        if (data?.user?.gridMetaData) {
-          let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
-          localStorage.setItem('gridMetaData', tempMetaData);
-          dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
-        }
+        // if (data?.user?.gridMetaData) {
+        //   let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
+        //   localStorage.setItem('gridMetaData', tempMetaData);
+        //   dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
+        // }
 
         dispatch({ type: SET_USER, payload: data });
 

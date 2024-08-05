@@ -25,11 +25,11 @@ const AzureLogin = () => {
           });
           const { data } = res.data;
 
-          if (data?.user?.gridMetaData) {
-            let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
-            localStorage.setItem('gridMetaData', tempMetaData);
-            dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
-          }
+          // if (data?.user?.gridMetaData) {
+          //   let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
+          //   localStorage.setItem('gridMetaData', tempMetaData);
+          //   dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
+          // }
 
           dispatch({ type: SET_USER, payload: data });
 
@@ -41,7 +41,6 @@ const AzureLogin = () => {
           }
 
           localStorage.setItem('token', data.token);
-
         } catch (e) {
           setCounter(10);
           setInvalidAzureLogin(true);

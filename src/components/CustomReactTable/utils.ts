@@ -427,7 +427,6 @@ export const createFilterModel = (formValues, coloums) => {
       case 'currency':
       case 'lookUpDisplay':
       case 'url':
-
         if (formValues[fieldName]) {
           filterModel.set(fieldName, { filter: formValues[fieldName] });
         }
