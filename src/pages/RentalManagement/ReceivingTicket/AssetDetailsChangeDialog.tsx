@@ -41,7 +41,7 @@ export default function AssetDetailsChangeDialog({
 
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [statusPolicy]);
 
   const fetchFields = async () => {
     const data = await axiosInstance().get(`${serializedAsset.api}?getById=${JSON.stringify(ids)}`);
