@@ -176,7 +176,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           o.cell = ({ row }) =>
             row?.original?.assetNumber ? (
               <div
-                className="flex items-center gap-2"
+                className="d-flex items-center gap-2"
                 style={{
                   backgroundColor: row?.original?.isReplaced
                     ? COLOUR_MASTER.replaceAssetColor.background
@@ -195,11 +195,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
                 {row?.original?.isReplaced && (
-                  <Box>
-                    <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
-                      <InfoIcon fontSize="small" color={'primary'} />
-                    </HtmlTooltip>
-                  </Box>
+                  <HtmlTooltip enterTouchDelay={0} title={`Replaced Asset ${row?.original?.replaceAsset} Reason-${row?.original?.replaceReason}`}>
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </HtmlTooltip>
                 )}
               </div>
             ) : (
