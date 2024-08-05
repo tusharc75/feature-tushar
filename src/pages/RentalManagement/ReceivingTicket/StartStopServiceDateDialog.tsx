@@ -37,7 +37,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
   const validate = (values) => {
     const errors = {};
     if (values?.endDate && normalizeDate(values?.startDate) > normalizeDate(values.endDate)) {
-      errors['endDate'] = `Actual End Date can't be less than Actual Start Date`;
+      errors['endDate'] = `Please enter valid end date`;
     }
     if (minStartDate && normalizeDate(values?.startDate) < normalizeDate(minStartDate)) {
       errors['startDate'] = `Actual Start Date can't be less than ${displayDate(minStartDate)}`;
