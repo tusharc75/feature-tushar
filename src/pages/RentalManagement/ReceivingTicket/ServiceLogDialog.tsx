@@ -20,7 +20,6 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allowedToEdit, fetchRecords, maxInvoiceDate = null }) => {
 
-
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services_logs`;
 
   const { state: { user } }: any = useData();
@@ -44,7 +43,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
         if (index === 0) {
           log.canDelete = true;
         }
-        if (maxInvoiceDate && log.endDate <= maxInvoiceDate) {
+        if ((maxInvoiceDate && log?.endDate >= maxInvoiceDate && log.startDate <= maxInvoiceDate) || (maxInvoiceDate >= log.startDate && !log?.endDate) || (maxInvoiceDate && log?.endDate <= maxInvoiceDate)) {
           log.canEdit = false;
           log.canDelete = false;
         } else {
