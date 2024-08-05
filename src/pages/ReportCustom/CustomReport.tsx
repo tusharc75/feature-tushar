@@ -296,7 +296,7 @@ const CustomReport = () => {
         toastConfig.setToastConfig(err);
       });
   };
-console.log(resource)
+
   const getApi = () => {
     let exportColumns = [];
     exportColumns =
@@ -304,7 +304,6 @@ console.log(resource)
         ? columns?.filter((col) => customReportData?.column.includes(col.accessor))?.map((col) => col.accessor)
         : columns?.map((col) => col.accessor); 
     let queryString = getQueryString(true);
-    console.log(queryString)
     let resourceCamelCase = camelCase(resource)
     let resourcePath = resourceCamelCase === 'quotes'
     ? 'quote-builder'
