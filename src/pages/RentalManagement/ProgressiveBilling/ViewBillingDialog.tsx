@@ -366,6 +366,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
         });
         setShowDeleteConfirmBox(false);
         setIsSubmitting(false);
+        onSuccess();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -514,7 +515,6 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
           okBtnLoading={isSubmitting}
           onOk={() => {
             handleDeleteInvoice();
-            onClose();
           }}
         />
       )}
