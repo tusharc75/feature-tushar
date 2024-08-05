@@ -60,7 +60,7 @@ import ManageRepairJob from '../../RepairJob/ManageRepairJob';
 import DateDialog from '../LoadingTicket/DateDialog';
 import AddSerializedAsset from '../SerializedAsset/AddSerializedAsset';
 import ShowNonSerializeAssets from '../SerializedAsset/ShowNonSerializeAssets';
-import { getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from './../rentalOfflineHelper';
+import { getNestedQty, getRentalDeliveryTicket, getRentalProductAssets, uniqueProduct } from './../rentalOfflineHelper';
 import ChangeActualDateDialog from './ChangeActualDateDialog';
 import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
@@ -978,6 +978,7 @@ const ReceivingTicket = ({
           if (parent) {
             s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
           }
+          s.qty = getNestedQty(material, s)
           services.push(s);
         });
       }
