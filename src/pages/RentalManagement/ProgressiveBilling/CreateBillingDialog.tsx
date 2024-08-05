@@ -585,14 +585,15 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
         const product = invoicedProducts?.material?.find((p) => p._id === element._id);
 
-        const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
-        const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
+        const productStartDateTime = moment(new Date(element.actualStartDate));
+        const selectedEndDateTime = moment(new Date(endDate));
 
-        if (selectedEndDateTime < productStartDateTime) {
+        if (productStartDateTime.isAfter(selectedEndDateTime)) {
           element.invalidDate = true;
-        } else if (product) {
-          const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
-          if (selectedEndDateTime < productEndDateTime) {
+        }
+        else if (product) {
+          const productEndDateTime = moment(new Date(product?.endDate));
+          if (productEndDateTime.isAfter(selectedEndDateTime)) {
             element.invalidDate = true;
           } else {
             element.invalidDate = false;
@@ -600,11 +601,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         }
 
         if (element?.manualEndDate) {
-          const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
-          if (selectedEndDateTime > productManualEndDate) {
+          const productManualEndDate = moment(new Date(element?.manualEndDate));
+          if (selectedEndDateTime.isAfter(productManualEndDate)) {
             values.actualEndDate = element?.manualEndDate;
           }
-          if (productManualEndDate < productStartDateTime) {
+          if (productStartDateTime.isAfter(productManualEndDate)) {
             element.invalidDate = true;
           }
         }
