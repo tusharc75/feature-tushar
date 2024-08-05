@@ -1,3 +1,4 @@
+
 export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
   const schema = {};
   values.forEach((element) => {
@@ -17,8 +18,9 @@ export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
 };
 
 export const generateColumn = (fields, renderedFrom = '') => {
-  const hiddenColumns = JSON.parse(localStorage.getItem('gridMetaData'))[renderedFrom]?.hide || [];
-  const columnOrder = JSON.parse(localStorage.getItem('gridMetaData'))[renderedFrom]?.order || [];
+
+  let hiddenColumns = []
+  let columnOrder = []
 
   const newColumns: any = [
     {
