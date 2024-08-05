@@ -218,10 +218,9 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                                           <span className="line-clamp-1 ">{d.name}</span>
                                           {defaultView?._id === d._id && (
                                             <>
-                                              <HtmlTooltip title="Default view">
+                                              <HtmlTooltip title="Default View">
                                                 <FaStar size={10} className="text-[var(--new-theme-color)]" />
                                               </HtmlTooltip>
-                                              {/* <span className="block flex-shrink-0 text-[10px] text-gray-400">(default view)</span> */}
                                             </>
                                           )}
                                         </span>
@@ -253,11 +252,15 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                       )}
                     </div>
                     <div className="footer mt-2 flex justify-end gap-2 p-2 [border-top:1px_solid_var(--common-border-color)]">
-                      <ThemeButton iconForMobile={false} onClick={() => applyViewInTable([], [])}>
+                      <ThemeButton
+                        iconForMobile={false}
+                        onClick={() => {
+                          applyViewInTable([], [])
+                        }}>
                         Reset
                       </ThemeButton>
                       <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
-                        Create view
+                        Create View
                       </ThemeButton>
                     </div>
                   </div>

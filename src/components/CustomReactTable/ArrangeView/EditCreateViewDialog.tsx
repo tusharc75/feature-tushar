@@ -5,9 +5,7 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
-  ListItem,
   ListItemIcon,
-  ListItemSecondaryAction,
   ListItemText,
   Radio,
   RadioGroup,
@@ -109,7 +107,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: 'View updated'
+        message: 'Updated successfully'
       });
       getAllSavedViews();
       onClose();
@@ -128,7 +126,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: 'View created'
+        message: 'Created successfully'
       });
       getAllSavedViews();
       onClose();
@@ -238,7 +236,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
       {({ submitForm, values, errors, touched, setFieldValue, dirty }) => (
         <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet) || isMobileView}>
           <CustomDialogHeader
-            title={data ? 'Edit Arrange View' : 'Create Arrange View'}
+            title={data ? 'Edit View' : 'Create View'}
             onClose={onClose}
             showRequiredLabel={true}
             showManimizeMaximize={isMobileView ? false : true}
@@ -247,7 +245,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
           />
           <CustomDialogContent>
             <div className="my-2">
-              <div className="form grid gap-2 rounded-md p-3 shadow-md [border:1px_solid_var(--common-border-color)] ">
+              <div className="form grid gap-2 my-5">
                 <div>
                   <TextField
                     fullWidth
@@ -261,6 +259,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
                     variant="outlined"
                     size="small"
                     required
+                    autoComplete='off'
                     error={touched['name'] && Boolean(errors['name'])}
                     helperText={touched['name'] && errors['name']}
                   />
@@ -292,25 +291,21 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
                         name="default"
                       />
                     }
-                    label="Set as Default"
+                    label="Default"
                   />
                 </div>
               </div>
-              <div className="h-[1px] py-3 [border-bottom:1px_solid_var(--common-border-color)]" />
-              <div className="my-3 list-none px-[20px] ">
+              <div className="list-none px-[20px] shadow-md p-3 [border:1px_solid_var(--common-border-color)]">
                 <div className="flex justify-between gap-2">
                   <p className="flex-grow text-sm font-normal">Toggle and Drag & Drop to arrange</p>
-                  <span className="mr-[16px] flex-shrink-0">
+                  <span className="mr-[12px] flex-shrink-0">
                     <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
                   </span>
                 </div>
               </div>
-
-              {/* <h3 className="px-4 py-2 text-[0.86rem] font-medium text-black/50 dark:text-white/70">Toggle and Drag & Drop to arrange</h3> */}
-
               <div
                 className={cn(
-                  ' overflow-auto rounded-md px-3 shadow-md [border:1px_solid_var(--common-border-color)]',
+                  'overflow-auto shadow-md [border:1px_solid_var(--common-border-color)]',
                   !isMinimized || (isMobile && !isTablet) || isMobileView ? 'max-h-[270px] md:max-h-[500px]' : 'max-h-[350px]'
                 )}
               >
@@ -392,14 +387,12 @@ const RenderListItem = ({ column, handleToggle, checked, index, values, setField
     <li
       ref={setNodeRef}
       style={style}
-      className={`${
-        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-      } list-none transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+        } list-none transition-colors`}
     >
       <div
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
-          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-        } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+          } `}
       >
         <ListItemIcon className={` cursor-grab pl-2 ${isDragging ? ' cursor-grabbing' : ''}`} {...attributes} {...listeners}>
           <DragHandle />
