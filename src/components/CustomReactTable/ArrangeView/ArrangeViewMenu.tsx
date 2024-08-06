@@ -101,6 +101,8 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   useEffect(() => {
     if (defaultView) {
       applyViewInTable(defaultView?.order || [], defaultView?.hide || []);
+    } else {
+      applyViewInTable([], []);
     }
   }, [renderedFrom, defaultView]);
 
