@@ -70,7 +70,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
           product: e?.materialId,
           qty: parseInt(e?.consumedQty),
           storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null,
-          ...(consumablesSerialNumberRequired && { serialNumber: e?.serialNumber })
+          serialNumber: e?.serialNumber
         });
       }
     });
@@ -157,6 +157,9 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         if (consumablesSerialNumberRequired && parseInt(d.consumedQty) !== d.serialNumber.length) {
           errors.serialNumber = `Serial Number must be equal to Consume Qty`;
         }
+        if (parseInt(d.consumedQty) < d.serialNumber.length) {
+          errors.serialNumber = `Serial Number must be less than or equal to Consume Qty`;
+        }
       });
     }
     return errors;
@@ -192,7 +195,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
             qty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
             consumedQty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
             storageLocation: null,
-            ...(consumablesSerialNumberRequired && { serialNumber: [] })
+            serialNumber: []
           }))
         }}
         enableReinitialize={true}
@@ -218,7 +221,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                     {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">Storage Location</TableCell>}
                                     <TableCell align="left">{'Qty'}</TableCell>
                                     <TableCell align="left">{consumeRequest ? 'Request Qty' : 'Consume Qty'}</TableCell>
-                                    {consumablesSerialNumberRequired && <TableCell align="left">Serial Numbers</TableCell>}
+                                    <TableCell align="left">Serial Numbers</TableCell>
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -304,37 +307,35 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                           }
                                         />
                                       </TableCell>
-                                      {consumablesSerialNumberRequired && (
-                                        <TableCell align="left">
-                                          <Autocomplete
-                                            size="small"
-                                            options={[]}
-                                            freeSolo={true}
-                                            multiple={true}
-                                            disableCloseOnSelect
-                                            value={values['serialNumber']}
-                                            onChange={(_, val) => {
-                                              arrayHelpers.replace(index, {
-                                                ...values.products[index],
-                                                serialNumber: val
-                                              });
-                                            }}
-                                            getOptionSelected={(item, current) => item === current}
-                                            getOptionLabel={(option) => option}
-                                            renderInput={(props) => (
-                                              <TextField
-                                                {...props}
-                                                placeholder={'Enter serial number and press enter'}
-                                                variant="outlined"
-                                                name="serialNumber"
-                                                label={'Serial Number'}
-                                                error={validate([value])?.serialNumber}
-                                                helperText={validate([value])?.serialNumber}
-                                              />
-                                            )}
-                                          />
-                                        </TableCell>
-                                      )}
+                                      <TableCell align="left">
+                                        <Autocomplete
+                                          size="small"
+                                          options={[]}
+                                          freeSolo={true}
+                                          multiple={true}
+                                          disableCloseOnSelect
+                                          value={values['serialNumber']}
+                                          onChange={(_, val) => {
+                                            arrayHelpers.replace(index, {
+                                              ...values.products[index],
+                                              serialNumber: val
+                                            });
+                                          }}
+                                          getOptionSelected={(item, current) => item === current}
+                                          getOptionLabel={(option) => option}
+                                          renderInput={(props) => (
+                                            <TextField
+                                              {...props}
+                                              placeholder={'Enter serial number and press enter'}
+                                              variant="outlined"
+                                              name="serialNumber"
+                                              label={'Serial Number'}
+                                              error={validate([value])?.serialNumber}
+                                              helperText={validate([value])?.serialNumber}
+                                            />
+                                          )}
+                                        />
+                                      </TableCell>
                                     </TableRow>
                                   ))}
                                 </TableBody>
@@ -439,40 +440,37 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                   />
                                 </div>
 
-                                {consumablesSerialNumberRequired && (
-                                  <>
-                                    <h5 className="mt-2 text-[#aaa]">Serial Number:</h5>
-                                    <div>
-                                      <Autocomplete
-                                        size="small"
-                                        options={[]}
-                                        freeSolo={true}
-                                        multiple={true}
-                                        disableCloseOnSelect
-                                        value={values['serialNumber']}
-                                        onChange={(_, val) => {
-                                          arrayHelpers.replace(index, {
-                                            ...values.products[index],
-                                            serialNumber: val
-                                          });
-                                        }}
-                                        getOptionSelected={(item, current) => item === current}
-                                        getOptionLabel={(option) => option}
-                                        renderInput={(props) => (
-                                          <TextField
-                                            {...props}
-                                            placeholder={'Enter serial number and press enter'}
-                                            variant="outlined"
-                                            name="serialNumber"
-                                            label={'Serial Number'}
-                                            error={validate([value])?.serialNumber}
-                                            helperText={validate([value])?.serialNumber}
-                                          />
-                                        )}
+                                <h5 className="mt-2 text-[#aaa]">Serial Number:</h5>
+                                <div>
+                                  <Autocomplete
+                                    size="small"
+                                    options={[]}
+                                    freeSolo={true}
+                                    multiple={true}
+                                    disableCloseOnSelect
+                                    value={values['serialNumber']}
+                                    onChange={(_, val) => {
+                                      arrayHelpers.replace(index, {
+                                        ...values.products[index],
+                                        serialNumber: val
+                                      });
+                                    }}
+                                    getOptionSelected={(item, current) => item === current}
+                                    getOptionLabel={(option) => option}
+                                    renderInput={(props) => (
+                                      <TextField
+                                        {...props}
+                                        placeholder={'Enter serial number and press enter'}
+                                        variant="outlined"
+                                        name="serialNumber"
+                                        label={'Serial Number'}
+                                        error={validate([value])?.serialNumber}
+                                        helperText={validate([value])?.serialNumber}
                                       />
-                                    </div>
-                                  </>
-                                )}
+                                    )}
+                                  />
+                                </div>
+
                               </div>
                             ))}
                           </div>
