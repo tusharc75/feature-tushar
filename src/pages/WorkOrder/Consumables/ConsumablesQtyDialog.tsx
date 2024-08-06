@@ -30,7 +30,8 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest }) => {
+const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest, consumablesSerialNumberRequired }) => {
+
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
 
@@ -68,7 +69,8 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
           _id: e?._id,
           product: e?.materialId,
           qty: parseInt(e?.consumedQty),
-          storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null,
+          ...(consumablesSerialNumberRequired && { serialNumber: e?.serialNumber })
         });
       }
     });
@@ -152,6 +154,9 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         if (d.consumedQty < 1) {
           errors.consumedQty = `Consume Qty cannot be 0`;
         }
+        if (consumablesSerialNumberRequired && parseInt(d.consumedQty) !== d.serialNumber.length) {
+          errors.serialNumber = `Serial Number must be equal to Consume Qty`;
+        }
       });
     }
     return errors;
@@ -186,7 +191,8 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
             product: item?.product,
             qty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
             consumedQty: item.qty - ((item?.consumedQty || 0) + (item?.requestedQty || 0)),
-            storageLocation: null
+            storageLocation: null,
+            ...(consumablesSerialNumberRequired && { serialNumber: [] })
           }))
         }}
         enableReinitialize={true}
@@ -212,6 +218,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                     {user?.user?.brandPolicy?.storageLocation && <TableCell align="left">Storage Location</TableCell>}
                                     <TableCell align="left">{'Qty'}</TableCell>
                                     <TableCell align="left">{consumeRequest ? 'Request Qty' : 'Consume Qty'}</TableCell>
+                                    {consumablesSerialNumberRequired && <TableCell align="left">Serial Numbers</TableCell>}
                                   </TableRow>
                                 </TableHead>
                                 <TableBody>
@@ -297,6 +304,37 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                           }
                                         />
                                       </TableCell>
+                                      {consumablesSerialNumberRequired && (
+                                        <TableCell align="left">
+                                          <Autocomplete
+                                            size="small"
+                                            options={[]}
+                                            freeSolo={true}
+                                            multiple={true}
+                                            disableCloseOnSelect
+                                            value={values['serialNumber']}
+                                            onChange={(_, val) => {
+                                              arrayHelpers.replace(index, {
+                                                ...values.products[index],
+                                                serialNumber: val
+                                              });
+                                            }}
+                                            getOptionSelected={(item, current) => item === current}
+                                            getOptionLabel={(option) => option}
+                                            renderInput={(props) => (
+                                              <TextField
+                                                {...props}
+                                                placeholder={'Enter serial number and press enter'}
+                                                variant="outlined"
+                                                name="serialNumber"
+                                                label={'Serial Number'}
+                                                error={validate([value])?.serialNumber}
+                                                helperText={validate([value])?.serialNumber}
+                                              />
+                                            )}
+                                          />
+                                        </TableCell>
+                                      )}
                                     </TableRow>
                                   ))}
                                 </TableBody>
@@ -400,6 +438,41 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                     }
                                   />
                                 </div>
+
+                                {consumablesSerialNumberRequired && (
+                                  <>
+                                    <h5 className="mt-2 text-[#aaa]">Serial Number:</h5>
+                                    <div>
+                                      <Autocomplete
+                                        size="small"
+                                        options={[]}
+                                        freeSolo={true}
+                                        multiple={true}
+                                        disableCloseOnSelect
+                                        value={values['serialNumber']}
+                                        onChange={(_, val) => {
+                                          arrayHelpers.replace(index, {
+                                            ...values.products[index],
+                                            serialNumber: val
+                                          });
+                                        }}
+                                        getOptionSelected={(item, current) => item === current}
+                                        getOptionLabel={(option) => option}
+                                        renderInput={(props) => (
+                                          <TextField
+                                            {...props}
+                                            placeholder={'Enter serial number and press enter'}
+                                            variant="outlined"
+                                            name="serialNumber"
+                                            label={'Serial Number'}
+                                            error={validate([value])?.serialNumber}
+                                            helperText={validate([value])?.serialNumber}
+                                          />
+                                        )}
+                                      />
+                                    </div>
+                                  </>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -435,7 +508,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
               ) : (
                 <Button
                   onClick={() => {
-                    if (!Boolean(validate(values.products).consumedQty) && !Boolean(validate(values.products).storageLocation)) {
+                    if (!Boolean(validate(values.products).consumedQty) && !Boolean(validate(values.products).storageLocation) && !Boolean(validate(values.products).serialNumber)) {
                       handleSubmit(values);
                     }
                   }}
