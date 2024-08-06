@@ -181,7 +181,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           className: '!rounded-md !shadow-lg [border:1px_solid_var(--common-border-color)] '
         }}
         MenuListProps={{
-          className: '!p-0 min-w-[min(400px,100vw)] max-w-[400px] '
+          className: '!p-0 min-w-[min(400px,calc(100vw-40px))] max-w-[400px] '
         }}
       >
         <>
