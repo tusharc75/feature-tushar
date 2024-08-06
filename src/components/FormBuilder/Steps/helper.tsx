@@ -125,6 +125,12 @@ export const resourcePolicy = [
         fieldLabel: 'Show BOM',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'consumablesSerialNumberRequired',
+        fieldLabel: 'Consumables Serial Number Required',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
