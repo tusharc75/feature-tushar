@@ -343,6 +343,7 @@ export const DraggableHeader: React.FC<DraggableHeaderProps> = ({
     id: header.column.columnDef.id,
     data: {
       index,
+      isNotDraggable,
       props: {
         header,
         table,
