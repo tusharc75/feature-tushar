@@ -589,7 +589,7 @@ const WorkOrderDetails = () => {
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.consumable}
               workOrderData={workOrderData}
-              consumablesSerialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
+              serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
             />
           )}
         </TabPanel>
@@ -604,7 +604,7 @@ const WorkOrderDetails = () => {
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.bom}
               workOrderData={workOrderData}
-              consumablesSerialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
+              serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
             />
           )}
         </TabPanel>
