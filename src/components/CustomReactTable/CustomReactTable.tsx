@@ -393,7 +393,8 @@ const CustomReactTable = ({
   const handleTableExport = () => {
     clearTimeout(exportTimeout);
     setExportTableView(true);
-    const isFooterPresent = newColumns.some((c) => typeof c.Footer === 'function');
+    const { columnVisibility } = table.getState();
+    const isFooterPresent = newColumns.some((c) => columnVisibility[c?.id] && typeof c.Footer === 'function');
     exportTimeout = setTimeout(() => {
       if (!tableRef.current) return;
       const wb = xlsx.utils.book_new();
