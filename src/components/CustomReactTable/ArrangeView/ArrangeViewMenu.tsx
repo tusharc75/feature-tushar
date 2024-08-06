@@ -147,6 +147,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
     setEditCreateDialogData({ open: true, data: data });
   };
   const openCreateEditModal = () => {
+    setAnchorEl(null);
     setEditCreateDialogData({ open: true, data: null });
   };
 
