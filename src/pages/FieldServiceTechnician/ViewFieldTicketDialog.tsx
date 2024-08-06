@@ -2,7 +2,6 @@ import { Button, Dialog } from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition, SERVICE_ORDER_STATUS, checkIsAllowedToEdit, sidebarResource } from 'src/constants/helpers';
 import FieldTicket from '../FieldServiceOrder/FieldTicket';
 import { useData } from 'src/StateProvider/Provider';
@@ -33,6 +32,7 @@ export default function ViewFieldTicketDialog({ onClose, serviceOrderData }) {
             setNextStep={() => { }}
             allowedToEdit={allowedToEdit}
             handleChangeStatus={() => { }}
+            fetchServiceOrderData={() => { }}
             resource={sidebarResource.fieldServiceTechnician}
           />
         </CustomDialogContent>

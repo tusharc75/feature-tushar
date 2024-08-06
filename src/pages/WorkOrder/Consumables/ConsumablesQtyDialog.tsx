@@ -30,7 +30,7 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest, consumablesSerialNumberRequired }) => {
+const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest, serialNumberRequired }) => {
 
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
@@ -154,7 +154,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
         if (d.consumedQty < 1) {
           errors.consumedQty = `Consume Qty cannot be 0`;
         }
-        if (consumablesSerialNumberRequired && parseInt(d.consumedQty) !== d.serialNumber.length) {
+        if (serialNumberRequired && parseInt(d.consumedQty) !== d.serialNumber.length) {
           errors.serialNumber = `Serial Number must be equal to Consume Qty`;
         }
         if (parseInt(d.consumedQty) < d.serialNumber.length) {
@@ -329,6 +329,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                               placeholder={'Enter serial number and press enter'}
                                               variant="outlined"
                                               name="serialNumber"
+                                              required={serialNumberRequired}
                                               label={'Serial Number'}
                                               error={validate([value])?.serialNumber}
                                               helperText={validate([value])?.serialNumber}
@@ -410,7 +411,6 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                     placeholder="Qty"
                                   />
                                 </div>
-
                                 <h5 className="mt-2 text-[#aaa]">Consumed Qty:</h5>
                                 <div>
                                   <TextField
@@ -439,7 +439,6 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                     }
                                   />
                                 </div>
-
                                 <h5 className="mt-2 text-[#aaa]">Serial Number:</h5>
                                 <div>
                                   <Autocomplete
@@ -463,6 +462,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                         placeholder={'Enter serial number and press enter'}
                                         variant="outlined"
                                         name="serialNumber"
+                                        required={serialNumberRequired}
                                         label={'Serial Number'}
                                         error={validate([value])?.serialNumber}
                                         helperText={validate([value])?.serialNumber}
