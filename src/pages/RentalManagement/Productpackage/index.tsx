@@ -877,6 +877,15 @@ const Productpackage = ({
       });
     } else {
       if (inputField.hasOwnProperty('qtyDisplay')) {
+        if(inputField['qtyDisplay']===0){
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'error',
+            message: 'Please enter valid quantity'
+          });
+          setShowConfirmationDialog({ open: false, data: {} });
+          return;
+        }
         inputField['qty'] = inputField['qtyDisplay'];
         if (rowData.hideSelection && (inputField['qty'] < rowData?.assetQty || inputField['qty'] < rowData?.nonSerializedQty)) {
           toastConfig.setToastConfig({
