@@ -952,13 +952,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                       />
                       <Box style={{ display: 'flex', gap: '5px' }}>
                         <HtmlTooltip
-                          title={
-                            !Boolean(
-                              selectedRecords &&
-                              selectedRecords?.length &&
-                              (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                            ) ? 'Please select items to apply'
-                              : ''
+                          title={selectedRecords?.length === 0 ? 'Please select items to apply'
+                            : selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry) ? ''
+                              : !moment(endDate)?.isValid() ? 'Please select valid date' : ''
                           }
                         >
                           <span>
@@ -967,10 +963,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                               color="primary"
                               disabled={
                                 isApplingDate ||
-                                !Boolean(
-                                  selectedRecords &&
-                                  selectedRecords?.length &&
-                                  (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                !Boolean(selectedRecords?.length &&
+                                  (endDate && moment(endDate)?.isValid() || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
                               }
                               size="small"

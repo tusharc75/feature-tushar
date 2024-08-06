@@ -16,6 +16,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { useGridMetaData } from 'src/components/CustomReactTable';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -31,6 +32,8 @@ const CustomEditableGrid = ({
   renderedFrom = ''
 }) => {
   const toastConfig = useContext(CustomToastContext);
+  const { gridMetaData } = useGridMetaData();
+  const tableData = gridMetaData[renderedFrom] || { order: [], hide: [] };
 
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
@@ -47,7 +50,7 @@ const CustomEditableGrid = ({
       fetchColumns();
     } else {
       setAllFields(JSON.parse(JSON.stringify(fields)));
-      const { newColumns, constColumns } = generateColumn(fields, renderedFrom);
+      const { newColumns, constColumns } = generateColumn(fields, tableData.order, tableData.hide);
       setColumns(newColumns);
       setConstColummns(constColumns);
     }
@@ -65,7 +68,7 @@ const CustomEditableGrid = ({
           return levalOrderBy.indexOf(item.leval);
         });
         setAllFields(JSON.parse(JSON.stringify(_fields)));
-        const { newColumns, constColumns } = generateColumn(_fields, renderedFrom);
+        const { newColumns, constColumns } = generateColumn(_fields, tableData.order, tableData.hide);
         setColumns(newColumns);
         setConstColummns(constColumns);
       })
@@ -149,7 +152,7 @@ const CustomEditableGrid = ({
 
     setAddedField([...addedField, { ..._field }]);
     setAllFields(JSON.parse(JSON.stringify([...allFields, { ..._field }])));
-    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }]);
+    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }], tableData.order, tableData.hide);
     setColumns(newColumns);
     setConstColummns(constColumns);
 

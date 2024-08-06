@@ -1,4 +1,3 @@
-
 export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
   const schema = {};
   values.forEach((element) => {
@@ -17,11 +16,7 @@ export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
   return schema;
 };
 
-export const generateColumn = (fields, renderedFrom = '') => {
-
-  let hiddenColumns = []
-  let columnOrder = []
-
+export const generateColumn = (fields, columnOrder: string[] = [], hiddenColumns: string[] = []) => {
   const newColumns: any = [
     {
       accessor: 'index',
