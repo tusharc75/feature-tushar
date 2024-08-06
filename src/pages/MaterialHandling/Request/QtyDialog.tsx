@@ -98,7 +98,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                       setFieldValue('serialNumber', values);
                     }}
                     renderInput={(params) => (
-                      <TextField {...params} label="Select Serial Number" name="serialNumber" variant="outlined" error={touched['serialNumber'] && Boolean(errors['serialNumber'])} helperText={touched['serialNumber'] && errors['serialNumber']} />
+                      <TextField required={true} {...params} label="Select Serial Number" name="serialNumber" variant="outlined" error={touched['serialNumber'] && Boolean(errors['serialNumber'])} helperText={touched['serialNumber'] && errors['serialNumber']} />
                     )}
                   />
                 </>
