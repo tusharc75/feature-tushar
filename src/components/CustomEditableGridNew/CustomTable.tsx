@@ -136,7 +136,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                   return (
                     <TableCell
                       {...cell.getCellProps()}
-                      className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}`}
+                      className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} snap-center `}
                     >
                       {['index']?.includes(cell.column.id) ? (
                         <div className="full-height-cell">{cell.render('Cell')}</div>
