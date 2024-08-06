@@ -100,6 +100,13 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 		})
 	}
 
+	const addButtonDisabled = () => {
+		if (assets?.length >= selectedRecords?.reduce((sum, cur) => sum + cur?.qty, 0)) {
+			return false
+		}
+		return true
+	}
+
 	return (
 		<>
 			<Dialog
@@ -126,9 +133,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 							<Box display={'flex'} justifyContent={'end'} alignItems={'center'}>
 								<CustomButton
 									loading={isSubmitting}
-									disabled={isSubmitting || selectedRecords?.length === 0 ||
-										assets?.length >= selectedRecords?.reduce((sum, cur) => sum + cur?.qty, 0) ? false : true
-									}
+									disabled={isSubmitting || selectedRecords?.length === 0 || addButtonDisabled()}
 									variant="contained"
 									color="primary"
 									type="submit"

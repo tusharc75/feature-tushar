@@ -1,4 +1,4 @@
-import { Divider, Fade, IconButton, List, ListItem, Popper } from '@material-ui/core';
+import { Divider, Fade, IconButton, List, ListItem, Menu, Popper } from '@material-ui/core';
 import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
 import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
@@ -58,22 +58,8 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   const toastConfig = useContext(CustomToastContext);
   const [savedData, setSavedData] = useState<GridViewSavedData[]>(savedDataForThisGrid);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [arrowRef, setArrowRef] = React.useState<HTMLElement | null>(null);
   const [editCreateDialogData, setEditCreateDialogData] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
   const [confirmationDialog, setConfirmationDialog] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
-  const popupRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const handleClick = (event) => {
-      if (popupRef.current && !popupRef.current.contains(event.target)) {
-        setAnchorEl(null);
-      }
-    };
-    document.addEventListener('click', handleClick, true);
-    return () => {
-      document.removeEventListener('click', handleClick, true);
-    };
-  }, [anchorEl]);
 
   const applyViewInTable = (order: string[], hide: string[]) => {
     const stickycolumns = getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander });
@@ -101,6 +87,8 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   useEffect(() => {
     if (defaultView) {
       applyViewInTable(defaultView?.order || [], defaultView?.hide || []);
+    } else {
+      applyViewInTable([], []);
     }
   }, [renderedFrom, defaultView]);
 
@@ -175,116 +163,104 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           <SwapHoriz />
         </IconButton>
       </HtmlTooltip>
-      <Popper
+      <Menu
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
+        onClose={() => setAnchorEl(null)}
         keepMounted={false}
-        transition
-        placement="bottom"
-        modifiers={{
-          flip: {
-            enabled: true
-          },
-          preventOverflow: {
-            enabled: true,
-            boundariesElement: 'scrollParent'
-          },
-          arrow: {
-            enabled: true,
-            element: arrowRef
-          }
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'right'
+        }}
+        transformOrigin={{
+          vertical: 'top',
+          horizontal: 'right'
+        }}
+        PaperProps={{
+          className: '!rounded-md !shadow-lg [border:1px_solid_var(--common-border-color)] '
+        }}
+        MenuListProps={{
+          className: '!p-0 min-w-[min(400px,calc(100vw-40px))] max-w-[400px] '
         }}
       >
-        {({ TransitionProps }) => (
-          <Fade {...TransitionProps} timeout={0} in={Boolean(anchorEl)}>
-            <>
-              <span ref={setArrowRef} className="popper-arrow"></span>
-              <div className="mt-[10px] min-w-[min(400px,100vw)] max-w-[400px] rounded-md bg-[var(--dark-primary,white)] shadow-lg [border:1px_solid_var(--common-border-color)] ">
-                {/* <ClickAwayListener
-                  onClickAway={() => {
-                    setAnchorEl(null);
-                  }}
-                > */}
-                <div className="body" ref={popupRef}>
-                  <div className="head p-2 text-center [border-bottom:1px_solid_var(--common-border-color)]">
-                    <h5 className="bold text-lg">Views</h5>
-                  </div>
-                  <div className="content max-h-[350px] overflow-auto p-3">
-                    {!savedData ? (
-                      <div className="relative flex min-h-[60px]">
-                        <ImSpinner2 className="absolute inset-0 m-auto animate-spin" size={50} />
-                      </div>
-                    ) : (
-                      <div>
-                        <List>
-                          {savedData.length > 0 ? (
-                            savedData.map((d, i) => {
-                              return (
-                                <Fragment key={d._id}>
-                                  {i !== 0 && <Divider />}
-                                  <ListItem
-                                    button
-                                    key={d._id}
-                                    component={'li'}
-                                    onClick={() => {
-                                      setAnchorEl(null);
-                                      applyView(d);
-                                    }}
-                                  >
-                                    <div className="flex  w-full justify-between gap-2">
-                                      <span className=" flex items-center gap-1">
-                                        <span className="line-clamp-1 ">{d.name}</span>
-                                        {defaultView?._id === d._id && (
-                                          <>
-                                            <HtmlTooltip title="Default view">
-                                              <FaStar size={10} className="text-[var(--new-theme-color)]" />
-                                            </HtmlTooltip>
-                                            {/* <span className="block flex-shrink-0 text-[10px] text-gray-400">(default view)</span> */}
-                                          </>
-                                        )}
-                                      </span>
-                                      <div className="flex gap-2">
-                                        <HtmlTooltip title={'Edit'}>
-                                          <IconButton size={'small'} onClick={(e) => openEditModal(e, d)}>
-                                            <Edit fontSize="small" />
-                                          </IconButton>
-                                        </HtmlTooltip>
-                                        <HtmlTooltip title={'Delete'}>
-                                          <IconButton size={'small'} onClick={(e) => openDeleteConfirmationModal(e, d)}>
-                                            <Delete fontSize="small" color="error" />
-                                          </IconButton>
-                                        </HtmlTooltip>
-                                      </div>
-                                    </div>
-                                  </ListItem>
-                                </Fragment>
-                              );
-                            })
-                          ) : (
-                            <>
-                              <p className="text-md select-none text-center text-gray-400 dark:text-gray-700">No views found.</p>
-                              <p className="select-none text-center text-sm text-gray-400 dark:text-gray-700">Please create a view first.</p>
-                            </>
-                          )}
-                        </List>
-                      </div>
-                    )}
-                  </div>
-                  <div className="footer mt-2 flex justify-end gap-2 p-2 [border-top:1px_solid_var(--common-border-color)]">
-                    <ThemeButton iconForMobile={false} onClick={() => applyViewInTable([], [])}>
-                      Reset
-                    </ThemeButton>
-                    <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
-                      Create view
-                    </ThemeButton>
-                  </div>
+        <>
+          <div className="body">
+            <div className="head p-2 text-center [border-bottom:1px_solid_var(--common-border-color)]">
+              <h5 className="bold text-lg">Views</h5>
+            </div>
+            <div className="content max-h-[350px] overflow-auto p-3">
+              {!savedData ? (
+                <div className="relative flex min-h-[60px]">
+                  <ImSpinner2 className="absolute inset-0 m-auto animate-spin" size={50} />
                 </div>
-                {/* </ClickAwayListener> */}
-              </div>
-            </>
-          </Fade>
-        )}
-      </Popper>
+              ) : (
+                <div>
+                  <List>
+                    {savedData.length > 0 ? (
+                      savedData.map((d, i) => {
+                        return (
+                          <Fragment key={d._id}>
+                            {i !== 0 && <Divider />}
+                            <ListItem
+                              button
+                              key={d._id}
+                              component={'li'}
+                              onClick={() => {
+                                setAnchorEl(null);
+                                applyView(d);
+                              }}
+                            >
+                              <div className="flex  w-full justify-between gap-2">
+                                <span className=" flex items-center gap-1">
+                                  <span className="line-clamp-1 ">{d.name}</span>
+                                  {defaultView?._id === d._id && (
+                                    <>
+                                      <HtmlTooltip title="Default view">
+                                        <FaStar size={10} className="text-[var(--new-theme-color)]" />
+                                      </HtmlTooltip>
+                                      {/* <span className="block flex-shrink-0 text-[10px] text-gray-400">(default view)</span> */}
+                                    </>
+                                  )}
+                                </span>
+                                <div className="flex gap-2">
+                                  <HtmlTooltip title={'Edit'}>
+                                    <IconButton size={'small'} onClick={(e) => openEditModal(e, d)}>
+                                      <Edit fontSize="small" />
+                                    </IconButton>
+                                  </HtmlTooltip>
+                                  <HtmlTooltip title={'Delete'}>
+                                    <IconButton size={'small'} onClick={(e) => openDeleteConfirmationModal(e, d)}>
+                                      <Delete fontSize="small" color="error" />
+                                    </IconButton>
+                                  </HtmlTooltip>
+                                </div>
+                              </div>
+                            </ListItem>
+                          </Fragment>
+                        );
+                      })
+                    ) : (
+                      <>
+                        <p className="text-md select-none text-center text-gray-400 dark:text-gray-700">No views found.</p>
+                        <p className="select-none text-center text-sm text-gray-400 dark:text-gray-700">Please create a view first.</p>
+                      </>
+                    )}
+                  </List>
+                </div>
+              )}
+            </div>
+            <div className="footer mt-2 flex justify-end gap-2 p-2 [border-top:1px_solid_var(--common-border-color)]">
+              <ThemeButton iconForMobile={false} onClick={() => applyViewInTable([], [])}>
+                Reset
+              </ThemeButton>
+              <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
+                Create view
+              </ThemeButton>
+            </div>
+          </div>
+        </>
+      </Menu>
 
       {editCreateDialogData.open && (
         <EditCreateViewDialog
