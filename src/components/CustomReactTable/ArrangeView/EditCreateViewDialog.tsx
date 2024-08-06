@@ -245,7 +245,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
           />
           <CustomDialogContent>
             <div className="my-2">
-              <div className="form grid gap-2 my-5">
+              <div className="form my-5 grid gap-2">
                 <div>
                   <TextField
                     fullWidth
@@ -259,7 +259,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
                     variant="outlined"
                     size="small"
                     required
-                    autoComplete='off'
+                    autoComplete="off"
                     error={touched['name'] && Boolean(errors['name'])}
                     helperText={touched['name'] && errors['name']}
                   />
@@ -295,49 +295,51 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
                   />
                 </div>
               </div>
-              <div className="list-none px-[20px] shadow-md p-3 [border:1px_solid_var(--common-border-color)]">
-                <div className="flex justify-between gap-2">
-                  <p className="flex-grow text-sm font-normal">Toggle and Drag & Drop to arrange</p>
-                  <span className="mr-[12px] flex-shrink-0">
-                    <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
-                  </span>
+              <div className="shadow-md [border:1px_solid_var(--common-border-color)]">
+                <div className="p-3 px-[20px] [border-bottom:1px_solid_var(--common-border-color)]">
+                  <div className="flex justify-between gap-2">
+                    <p className="flex-grow text-sm font-normal">Toggle and Drag & Drop to arrange</p>
+                    <span className="mr-[12px] flex-shrink-0">
+                      <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
+                    </span>
+                  </div>
                 </div>
-              </div>
-              <div
-                className={cn(
-                  'overflow-auto shadow-md [border:1px_solid_var(--common-border-color)]',
-                  !isMinimized || (isMobile && !isTablet) || isMobileView ? 'max-h-[270px] md:max-h-[500px]' : 'max-h-[350px]'
-                )}
-              >
-                <DndContext
-                  onDragEnd={(e) => moveItem(e, setFieldValue)}
-                  modifiers={[restrictToVerticalAxis]}
-                  onDragStart={onDragStart}
-                  sensors={sensors}
+                <div
+                  className={cn(
+                    'overflow-auto ',
+                    !isMinimized || (isMobile && !isTablet) || isMobileView ? 'max-h-[270px] md:max-h-[500px]' : 'max-h-[350px]'
+                  )}
                 >
-                  <SortableContext items={sortedColumns.map((c) => c.accessor)}>
-                    <ul className="list-none">
-                      {sortedColumns.map((column, index) => (
-                        <RenderListItem
-                          key={column.accessor}
-                          checked={stateVisibleColumns[column.id]}
-                          column={column}
-                          index={index}
-                          handleToggle={handleToggle}
-                          setFieldValue={setFieldValue}
-                          values={values}
-                        />
-                      ))}
-                    </ul>
-                  </SortableContext>
-                  <DragOverlay>
-                    {activeItem && (
-                      <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
-                        <RenderListItem {...activeItem} />
-                      </span>
-                    )}
-                  </DragOverlay>
-                </DndContext>
+                  <DndContext
+                    onDragEnd={(e) => moveItem(e, setFieldValue)}
+                    modifiers={[restrictToVerticalAxis]}
+                    onDragStart={onDragStart}
+                    sensors={sensors}
+                  >
+                    <SortableContext items={sortedColumns.map((c) => c.accessor)}>
+                      <ul className="list-none">
+                        {sortedColumns.map((column, index) => (
+                          <RenderListItem
+                            key={column.accessor}
+                            checked={stateVisibleColumns[column.id]}
+                            column={column}
+                            index={index}
+                            handleToggle={handleToggle}
+                            setFieldValue={setFieldValue}
+                            values={values}
+                          />
+                        ))}
+                      </ul>
+                    </SortableContext>
+                    <DragOverlay>
+                      {activeItem && (
+                        <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
+                          <RenderListItem {...activeItem} />
+                        </span>
+                      )}
+                    </DragOverlay>
+                  </DndContext>
+                </div>
               </div>
             </div>
           </CustomDialogContent>
@@ -387,12 +389,14 @@ const RenderListItem = ({ column, handleToggle, checked, index, values, setField
     <li
       ref={setNodeRef}
       style={style}
-      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-        } list-none transition-colors`}
+      className={`${
+        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+      } list-none transition-colors`}
     >
       <div
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-          } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
+          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+        } `}
       >
         <ListItemIcon className={` cursor-grab pl-2 ${isDragging ? ' cursor-grabbing' : ''}`} {...attributes} {...listeners}>
           <DragHandle />
