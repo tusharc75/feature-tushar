@@ -307,7 +307,9 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
                 <div
                   className={cn(
                     'overflow-auto ',
-                    !isMinimized || (isMobile && !isTablet) || isMobileView ? 'max-h-[calc(100vh-324px)]' : 'max-h-[350px]'
+                    !isMinimized || (isMobile && !isTablet) || isMobileView
+                      ? 'max-h-[calc(100vh-324px)] md:max-h-[calc(100vh-338px)]'
+                      : 'max-h-[350px]'
                   )}
                 >
                   <DndContext
