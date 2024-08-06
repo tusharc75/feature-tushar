@@ -19,14 +19,16 @@ const MyCalendar = (props: Props) => {
   const isMobile = useMediaQuery('(max-width: 768px)');
   return (
     <Calendar
+      key={isMobile ? 'mobile' : 'desktop'}
       defaultDate={moment().toDate()}
-      defaultView="month"
+      defaultView={isMobile ? 'day' : 'month'}
       events={activities}
       localizer={localizer}
       formats={formats}
       style={{ height: 'calc(100vh - 200px)', borderRadius: '4px', overflow: 'auto' }}
       popup={!isMobile}
-      views={{ month: true, week: true, day: true }}
+      // views={{ month: !isMobile, week: !isMobile, day: true }}
+      views={isMobile ? ['day'] : ['month', 'week', 'day']}
       eventPropGetter={(obj) => {
         const newStyles = {
           backgroundColor:

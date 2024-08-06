@@ -730,7 +730,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           referenceType={'consumables'}
         />
       )}
-
       {openConsumablesQtyDialog && (
         <ConsumablesQtyDialog
           referenceId={fieldTicketData?._id}
@@ -745,9 +744,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           selectedRecords={selectedRecords?.map((e) => ({ ...e, product: e?.productName }))}
           serviceName={null}
           consumeRequest={consumeRequest}
+          serialNumberRequired={false}
         />
       )}
-
       {openLogDialog.open && (
         <QtyRequestLog
           uniqueId={openLogDialog.uniqueId}

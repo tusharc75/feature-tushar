@@ -1,9 +1,9 @@
-import { Box, Button, Dialog, MenuItem } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton, MenuItem } from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import { useContext, useEffect, useState } from 'react';
+import { RefObject, useContext, useEffect, useRef, useState } from 'react';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
@@ -17,6 +17,8 @@ import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { useGridMetaData } from 'src/components/CustomReactTable';
+import { useScrollController } from 'src/hooks';
+import { ChevronLeft, ChevronRight } from '@material-ui/icons';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -44,6 +46,13 @@ const CustomEditableGrid = ({
   const [isAddField, setIsAddField] = useState(false);
   const [addedField, setAddedField] = useState([]);
   const [scrollToHeader, setScrollToHeader] = useState('');
+  const {
+    isLeftDisabled,
+    isRightDisabled,
+    scrollLeft,
+    scrollRight,
+    setRef: scrollContainerRef
+  } = useScrollController({ scrollDistance: Math.floor(window.innerWidth / 2) });
 
   useEffect(() => {
     if (referenceId) {
@@ -198,6 +207,20 @@ const CustomEditableGrid = ({
                   addButtonMenuItems={addButtonMenuItems()}
                   isActionButtonVisible={false}
                   rightSideContents={rightSideContents()}
+                  leftSideContents={
+                    <div className="sr-only flex gap-2 lg:not-sr-only">
+                      <HtmlTooltip title="Scroll left">
+                        <IconButton style={{ borderRadius: 999, padding: 8 }} disabled={isLeftDisabled} onClick={scrollLeft}>
+                          <ChevronLeft />
+                        </IconButton>
+                      </HtmlTooltip>
+                      <HtmlTooltip title="Scroll right">
+                        <IconButton style={{ borderRadius: 999, padding: 8 }} disabled={isRightDisabled} onClick={scrollRight}>
+                          <ChevronRight />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </div>
+                  }
                   hasXpadding={false}
                 />
                 <div
@@ -207,6 +230,7 @@ const CustomEditableGrid = ({
                     height: 'calc(100vh - 200px)',
                     marginTop: '10px'
                   }}
+                  ref={scrollContainerRef}
                   className="custom-react-table editable-table-v1 border"
                 >
                   <CustomTable

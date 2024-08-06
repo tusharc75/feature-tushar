@@ -37,6 +37,7 @@ const Consumables = ({
   serviceName,
   materialSubType = MATERIAL_SUB_TYPE.consumable,
   workOrderData,
+  serialNumberRequired = false
 }) => {
   let renderedFrom = `${camelCase(routes?.workOrder.title)}_consumable`;
 
@@ -582,6 +583,7 @@ const Consumables = ({
             selectedRecords={selectedRecords?.filter((e) => !e?.hideSelection)}
             serviceName={serviceName}
             consumeRequest={consumeRequest}
+            serialNumberRequired={serialNumberRequired}
           />
         )}
         {openLogDialog.open && (

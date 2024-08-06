@@ -531,12 +531,15 @@ const ManageDeliveryTicket = ({
 
   function validate(values) {
     const errors = {};
-    if (initialData?.fields?.some((field) => field?.fieldName === 'createDate') && assets?.length) {
-      let startDate = moment(values?.pickUpDate);
-      let endDate = moment(values?.deliveryDate);
-      if (endDate.diff(startDate, 'days') < 0) {
+    if (initialData?.fields?.find((e) => e?.fieldName === 'pickUpDate')
+      && initialData?.fields?.find((e) => e?.fieldName === 'deliveryDate')) {
+      let pickUpDate = moment(values?.pickUpDate);
+      let deliveryDate = moment(values?.deliveryDate);
+      if (deliveryDate.diff(pickUpDate, 'days') < 0) {
         errors['pickUpDate'] = 'Please enter valid pick-Up date';
       }
+    }
+    if (initialData?.fields?.find((e) => e?.fieldName === 'createDate') && assets?.length) {
       if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }
