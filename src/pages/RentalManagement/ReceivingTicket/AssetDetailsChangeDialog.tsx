@@ -248,8 +248,9 @@ export default function AssetDetailsChangeDialog({
     writeFile(wb, `${routes.serializedAsset.title} Data.xlsx`);
   };
 
-  const getValueInImport = (data: any, asset: string, fieldLabel: string, assetData: any[]) => {
-    const index = assetData?.findIndex((a) => a?.assetNumber === asset);
+  const getValueInImport = (data: any, asset: string, product: string, fieldLabel: string, assetData: any[]) => {
+    console.log('assetData', assetData, asset)
+    const index = assetData?.findIndex((a) => a?.assetNumber === asset && a?.productName === product);
     const field = initialData?.fields?.find((f) => f?.fieldLabel === fieldLabel);
     if (index > -1 && field) {
       if (field?.type === 'multiSelect') {
@@ -295,7 +296,7 @@ export default function AssetDetailsChangeDialog({
         row.forEach((item: any[]) => {
           item?.forEach((_d, i) => {
             if (i != 0 && i != 1) {
-              const { index, fieldName, value } = getValueInImport(_d, item[0], header[i], values?.assetData);
+              const { index, fieldName, value } = getValueInImport(_d, item[0], item[1], header[i], values?.assetData);
               setFieldValue(`assetData.${index}.${fieldName}`, value);
             }
           });
