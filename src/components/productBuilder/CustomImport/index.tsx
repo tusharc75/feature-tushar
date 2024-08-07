@@ -34,6 +34,7 @@ import { AddField } from 'src/components/FormBuilder/AddField';
 import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddColumnDialog';
 import { Add, Delete } from '@material-ui/icons';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import RowNumberDialog from 'src/components/productBuilder/CustomImport/RowNumberDialog';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -49,12 +50,14 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [templateImportHeader, setTemplateImportHeaader] = useState([]);
   const [customImportHeader, setCustomImportHeaader] = useState([]);
   const [keyValue, setKeyValue] = useState([]);
+  const [files, setFiles] = useState();
   const [file, setFile] = useState();
   const [addSystemColumn, setAddSystemColumn] = useState(false);
   const [addImportedColumn, setAddImportedColumn] = useState(false);
   const [addedField, setAddedField] = useState([]);
   const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
+  const [openRowNumberDialog, setOpenRowNumberDialog] = useState(false)
 
   useEffect(() => {
     axiosInstance()
@@ -144,11 +147,81 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     }
   }, [values]);
 
-  const handleFileImport = (e) => {
+  const handleImport = (e) => {
+    let files = e.target.files[0];
+    setFiles(files)
+    setOpenRowNumberDialog(true)
+  }
+
+  const handleFileImport = (val) => {
+    setOpenRowNumberDialog(false)
+    if (val?.fromRow > 0 && val?.toRow > 0) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const data = e.target.result;
+        let readedData = read(data, { type: 'array' });
+        const wsname = readedData.SheetNames[1];
+        const ws = readedData.Sheets[wsname];
+        const jsonData = utils.sheet_to_json(ws, { header: 1 });
+        const headers: any = jsonData[val?.fromRow - 1];
+        const units: any = jsonData[val?.fromRow];
+        const newHeader: any = []
+        let j;
+        headers.forEach((h, i) => {
+          let name = units[i] ? h + '_' + units[i] : h;
+          let index = i
+
+          const diff = i - j
+          if (diff != 1) {
+            for (let k = j + 1; k < i; k++) {
+              if (units[k]) {
+                newHeader.push({
+                  name: headers[j] + '_' + units[k],
+                  index: k
+                })
+              }
+            }
+          }
+          j = index
+
+          newHeader.push({
+            name: name,
+            index: index
+          })
+        });
+
+        const newJsonData: any = []
+
+        for (let i = (val?.fromRow - 1) + 2; i <= (val?.toRow - 1); i++) {
+          const obj: any = {}
+          newHeader?.forEach(ele => {
+            obj[ele?.name] = jsonData[i][ele?.index]
+          });
+          newJsonData.push(obj)
+        }
+
+        const worksheet = utils.json_to_sheet(newJsonData);
+
+        const workbook = utils.book_new();
+
+        utils.book_append_sheet(workbook, worksheet, "Sheet1");
+
+        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+        const excelBuffer = write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([excelBuffer], { type: fileType });
+
+        handleFileImport1(blob)
+      };
+      reader.readAsArrayBuffer(files);
+    } else {
+      handleFileImport1(files)
+    }
+  }
+
+  const handleFileImport1 = (file) => {
     setCustomImportHeaader([]);
     setIsUploading(true);
-    let files = e.target.files[0];
-    setFile(files);
+    setFile(file);
     const reader = new FileReader();
     reader.onload = (e) => {
       const data = e.target.result;
@@ -188,7 +261,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
       setCustomImportHeaader(headers);
       setIsUploading(false);
     };
-    reader.readAsArrayBuffer(files);
+    reader.readAsArrayBuffer(file);
   };
 
   const generateTemplateHeader = (fields) => {
@@ -420,7 +493,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                 <input
                   id={`customImportFile`}
                   name={`customImportFile`}
-                  onChange={handleFileImport}
+                  onChange={handleImport}
                   style={{ display: 'none' }}
                   onClick={(e: any) => (e.target.value = null)}
                   type="file"
@@ -628,6 +701,16 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               }}
               fields={fields}
               section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
+            />
+          )}
+          {openRowNumberDialog && (
+            <RowNumberDialog
+              handleClose={() => {
+                setOpenRowNumberDialog(false)
+              }}
+              onSuccess={(data) => {
+                handleFileImport(data)
+              }}
             />
           )}
         </>
