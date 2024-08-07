@@ -207,27 +207,13 @@ const CustomEditableGrid = ({
                   addButtonMenuItems={addButtonMenuItems()}
                   isActionButtonVisible={false}
                   rightSideContents={rightSideContents()}
-                  leftSideContents={
-                    <div className="sr-only flex gap-2 lg:not-sr-only">
-                      <HtmlTooltip title="Scroll left">
-                        <IconButton style={{ borderRadius: 999, padding: 8 }} disabled={isLeftDisabled} onClick={scrollLeft}>
-                          <ChevronLeft />
-                        </IconButton>
-                      </HtmlTooltip>
-                      <HtmlTooltip title="Scroll right">
-                        <IconButton style={{ borderRadius: 999, padding: 8 }} disabled={isRightDisabled} onClick={scrollRight}>
-                          <ChevronRight />
-                        </IconButton>
-                      </HtmlTooltip>
-                    </div>
-                  }
                   hasXpadding={false}
                 />
                 <div
                   style={{
                     display: 'block',
                     overflow: 'auto',
-                    height: 'calc(100vh - 200px)',
+                    height: 'calc(100vh - 230px)',
                     marginTop: '10px'
                   }}
                   ref={scrollContainerRef}
@@ -244,6 +230,26 @@ const CustomEditableGrid = ({
                     updateData={updateData}
                     scrollToHeader={scrollToHeader}
                   />
+                </div>
+                <div className="sr-only mt-1 flex justify-end gap-2 lg:not-sr-only">
+                  <HtmlTooltip title="Scroll left">
+                    <IconButton
+                      style={{ borderRadius: 999, padding: 2, background: 'var(--new-theme-color)', opacity: isLeftDisabled ? '50%' : '100%' }}
+                      disabled={isLeftDisabled}
+                      onClick={scrollLeft}
+                    >
+                      <ChevronLeft className="text-white" fontSize="large" />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title="Scroll right">
+                    <IconButton
+                      style={{ borderRadius: 999, padding: 2, background: 'var(--new-theme-color)', opacity: isRightDisabled ? '50%' : '100%' }}
+                      disabled={isRightDisabled}
+                      onClick={scrollRight}
+                    >
+                      <ChevronRight className="text-white" fontSize="large" />
+                    </IconButton>
+                  </HtmlTooltip>
                 </div>
               </Box>
             </CustomDialogContent>
