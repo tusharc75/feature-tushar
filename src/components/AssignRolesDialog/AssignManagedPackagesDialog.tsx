@@ -13,7 +13,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmitting = false }) => {
-  const renderedFrom = `${camelCase(routes.managedPackages?.title)}_Assign`;
+  const renderedFrom = `${camelCase(routes.managedPackages?.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();

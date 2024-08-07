@@ -14,7 +14,7 @@ import { ListingPageHeader } from '../PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
 const AssignEmployeeDialog = ({ reference, onSuccess, handleClose, ids = [], defaultCompetency = [], extraStaticFilter = [], warehouse = null }) => {
-  const renderedFrom = `${routes.employeeMaster.title}_${reference}_selected`;
+  const renderedFrom = `${routes.employeeMaster.title}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
