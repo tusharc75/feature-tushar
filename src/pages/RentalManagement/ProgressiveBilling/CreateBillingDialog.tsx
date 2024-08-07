@@ -88,6 +88,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
+  const [rentalResourceData, setRentalResourceData] = useState(null);
   const [invoiceResourceData, setInvoiceResourceData] = useState(null);
   const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false)
 
@@ -96,6 +97,14 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const { generateColumns } = useColumns();
 
   useEffect(() => {
+    axiosInstance()
+      .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
+      .then(({ data: { data } }) => {
+        setRentalResourceData(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
     axiosInstance()
       .get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`)
       .then(({ data: { data } }) => {
@@ -305,6 +314,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     });
 
     data.material = data?.material?.filter((e) => e[`price_${rentalManagementData?.currency?.toLowerCase()}`]);
+
+    if (rentalResourceData?.policy?.hidePackageInInvoice) {
+      data.material = data.material?.filter((e) => e.type !== MATERIAL_TYPE.package)
+      data.material?.forEach((e) => {
+        e.parentId = null;
+      })
+    }
 
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
@@ -1001,7 +1017,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 }}
                 renderedFrom={renderedFrom}
                 isClientSideGrid={true}
-                expander={true}
+                expander={rentalResourceData?.policy?.hidePackageInInvoice ? false : true}
               />
             </Box>
           ) : (

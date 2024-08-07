@@ -96,25 +96,25 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              Cell: ({ row }) => {
-                return row?.original['storageLocation'] ? (
-                  <a
-                    className="link text-truncate"
-                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
-                    target="_blank"
-                  >
-                    {row?.original['storageLocation']}
-                  </a>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            width: 200,
+            Cell: ({ row }) => {
+              return row?.original['storageLocation'] ? (
+                <a
+                  className="link text-truncate"
+                  href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                  target="_blank"
+                >
+                  {row?.original['storageLocation']}
+                </a>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'processBy',
@@ -148,6 +148,26 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
         width: 200,
         Cell: ({ row }) => {
           return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'serialNumber',
+        Header: 'Serial Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return (
+            <>
+              {row?.original['serialNumber']?.length ? (
+                <>
+                  <p className="text-truncate">
+                    {row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}
+                  </p>
+                </>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
         }
       },
       {

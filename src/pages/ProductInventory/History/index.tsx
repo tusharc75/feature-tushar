@@ -9,7 +9,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { dateTimeFormat, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import { PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -40,7 +40,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(storageLocation);
-  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
+  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
   const [duration, setDuration] = useState({
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
@@ -65,7 +65,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     let rows = response?.data?.data?.map((u) => {
       let finalObject: any = prepareDataForGrid(u, user);
       finalObject.type = capitalize(u.type);
-      finalObject.serialNumber = u?.serialNumber?.map((e) => e.serialNumber)?.toString();
+      finalObject.serialNumber = u.serialNumber || [];
       return finalObject;
     });
     dispatch({ type: 'initialize', data: rows, count: response?.data?.count });
@@ -96,7 +96,7 @@ const History = ({ product, warehouse, storageLocation }) => {
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }
-  
+
     if (duration) {
       deepFilters.push({
         field: 'date',
@@ -480,9 +480,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       disableSortBy: true,
       Cell: ({ row }) => (
         <div>
-          {row?.original?.serialNumber ? (
-            <h5 className="text-truncate" title={row?.original?.serialNumber}>
-              {row?.original?.serialNumber}
+          {row?.original?.serialNumber?.length ? (
+            <h5 className="text-truncate" title={row?.original['serialNumber']?.map((e) => e?.optionLabel)?.join(', ')}>
+              {row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}
             </h5>
           ) : (
             <NoDataCell />
@@ -549,7 +549,8 @@ const History = ({ product, warehouse, storageLocation }) => {
                           product: row?.original?.product,
                           qty: row?.original?.qty,
                           revertedQty: row?.original?.revertedQty || 0,
-                          ledgerId: row?.original?._id
+                          ledgerId: row?.original?._id,
+                          serialNumber: row?.original?.serialNumber || []
                         });
                       } else {
                         setIsRevertConfirmation({ open: true, _id: row?.original?._id, product: row?.original?.product });
@@ -678,13 +679,18 @@ const History = ({ product, warehouse, storageLocation }) => {
           revertedQty={revertQtyDialog.revertedQty}
           ledgerId={revertQtyDialog.ledgerId}
           onClose={() => {
-            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
+            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
           }}
           onSuccess={() => {
-            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '' });
+            setRevertQtyDialog({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
             dispatch({ type: 'initialize', data: [], count: 0 });
             fetchRecords();
           }}
+          serialNumber={revertQtyDialog.serialNumber?.map(s => {
+            if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.unAvailable) {
+              return s;
+            }
+          })?.filter(Boolean) || []}
         />
       )}
     </>

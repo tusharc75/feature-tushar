@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { dateTimeFormat } from 'src/constants/helpers';
+import { PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -18,7 +18,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
 
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
-  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, qty: 0, revertedQty: 0, ledgerId: '' });
+  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
 
   const { state, dispatch } = useTableReducer();
 
@@ -76,6 +76,26 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
         Cell: ({ row }) => {
           return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'serialNumber',
+        Header: 'Serial Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return (
+            <>
+              {row?.original['serialNumber']?.length ? (
+                <>
+                  <p className="text-truncate">
+                    {row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}
+                  </p>
+                </>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        }
       }
     ];
     column.push({
@@ -99,7 +119,8 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
                     open: true,
                     qty: row.original?.qty,
                     revertedQty: row.original?.revertedQty || 0,
-                    ledgerId: row.original?._id
+                    ledgerId: row.original?._id,
+                    serialNumber: row.original?.serialNumber
                   });
                 }}
               >
@@ -178,12 +199,17 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
           revertedQty={revertQtyDialog.revertedQty}
           ledgerId={revertQtyDialog.ledgerId}
           onClose={() => {
-            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' });
+            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
           }}
           onSuccess={() => {
-            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '' });
+            setRevertQtyDialog({ open: false, qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
             onClose();
           }}
+          serialNumber={revertQtyDialog.serialNumber?.map(s => {
+            if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.unAvailable) {
+              return s;
+            }
+          })?.filter(Boolean) || []}
         />
       )}
     </Dialog>

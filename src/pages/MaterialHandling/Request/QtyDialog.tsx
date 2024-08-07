@@ -1,12 +1,15 @@
-import { Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
 import { Form, Formik } from 'formik';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { CustomDialogTransition, MATERIAL_REQUEST_STATUS } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS } from 'src/constants/helpers';
 
 function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
+
+  const serialNumberOptions = data?.serialNumber?.filter((s: any) => s?.status === PRODUCT_SERIAL_NUMBER_STATUS.available) || [];
 
   function validate(values) {
     const errors = {};
@@ -23,6 +26,9 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
         errors['comment'] = 'Comment is required';
       }
     }
+    if (status === MATERIAL_REQUEST_STATUS.processed && serialNumberOptions.length && values.serialNumber?.length !== parseInt(values.qty)) {
+      errors['serialNumber'] = 'Please select serial number for each qty';
+    }
     return errors;
   }
 
@@ -34,7 +40,7 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
         showManimizeMaximize={false}
         showRequiredLabel={true}
       />
-      <Formik initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0), comment: '' }} onSubmit={onSuccess} validateOnMount validate={validate}>
+      <Formik initialValues={{ qty: parseInt(data?.qty) - parseInt(data?.processedQty || 0), comment: '', serialNumber: [] }} onSubmit={onSuccess} validateOnMount validate={validate}>
         {({ touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <CustomDialogContent>
@@ -56,6 +62,30 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                   }}
                 />
               }
+              {status === MATERIAL_REQUEST_STATUS.processed && data && serialNumberOptions?.length ? (
+                <Box mt={2} mb={1}>
+                  <Autocomplete
+                    options={[
+                      { optionValue: 'all', optionLabel: 'Select All' },
+                      ...serialNumberOptions
+                    ]}
+                    fullWidth
+                    multiple
+                    size="small"
+                    value={values?.serialNumber ? serialNumberOptions?.filter((data: any) => values?.serialNumber?.includes(data.optionValue)) : []}
+                    getOptionLabel={(option) => option.optionLabel}
+                    getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                    onChange={(_, newVal: any) => {
+                      const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
+                      const values = isAll ? [...serialNumberOptions?.map((o) => o.optionValue)] : newVal?.map((val) => val.optionValue);
+                      setFieldValue('serialNumber', values);
+                    }}
+                    renderInput={(params) => (
+                      <TextField required={true} {...params} label="Select Serial Number" name="serialNumber" variant="outlined" error={touched['serialNumber'] && Boolean(errors['serialNumber'])} helperText={touched['serialNumber'] && errors['serialNumber']} />
+                    )}
+                  />
+                </Box>
+              ) : null}
               <TextField
                 margin="dense"
                 type="text"
