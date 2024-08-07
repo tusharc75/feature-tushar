@@ -30,7 +30,7 @@ const AssignPackageDialog = ({
   isSubmitting = false,
   hideQty = false
 }) => {
-  const renderedFrom = `${camelCase(routes.packages?.title)}_Assign`;
+  const renderedFrom = `${camelCase(routes.packages?.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
