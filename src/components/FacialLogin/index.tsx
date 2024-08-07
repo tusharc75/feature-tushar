@@ -63,14 +63,6 @@ const LogIn = ({ dispatch, notification, chatNotification }) => {
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
-
-        // axiosInstance()
-        //   .get(`user/meta-grid/${data?.user?._id}`)
-        //   .then(({ data: { data } }) => {
-        //     let tempMetaData = JSON.stringify(data?.gridMetaData);
-        //     localStorage.setItem('gridMetaData', tempMetaData);
-        //     dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
-        //   });
       })
       .catch((error) => {
         setCamOpen(false);
