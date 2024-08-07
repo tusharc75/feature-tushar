@@ -59,7 +59,7 @@ const AddSerializedAsset = ({
   assetPolicyData = null,
   selectedRecordsOfMain = []
 }) => {
-  const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_assign`;
+  const renderedFrom = `${camelCase(routes?.serializedAsset.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
