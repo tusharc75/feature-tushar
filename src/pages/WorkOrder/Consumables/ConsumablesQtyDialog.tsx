@@ -110,7 +110,8 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
           _id: e?._id,
           product: e?.materialId,
           qty: parseInt(e?.consumedQty),
-          storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null
+          storageLocation: user?.user?.brandPolicy?.storageLocation ? e?.storageLocation : null,
+          serialNumber: e?.serialNumber
         });
       }
     });
