@@ -71,9 +71,11 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       columnHiddenStateData[column.id] = !hide.includes(column.id);
     });
     if (order.length > 0) {
-      columnOrder = [...stickycolumns.left, ...order, ...stickycolumns.right];
+      const newOrder = order.filter((d) => !stickycolumns.stickyColumns.includes(d));
+      columnOrder = [...stickycolumns.left, ...newOrder, ...stickycolumns.right];
     } else {
-      columnOrder = [...stickycolumns.left, ...columns.map((c) => c.id), ...stickycolumns.right];
+      const columnsWithoutSticky = columns.filter((d) => !stickycolumns.stickyColumns.includes(d.id)).map((c) => c.id);
+      columnOrder = [...stickycolumns.left, ...columnsWithoutSticky, ...stickycolumns.right];
     }
     dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
     dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
@@ -254,7 +256,13 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
               )}
             </div>
             <div className="footer mt-2 flex justify-end gap-2 p-2 [border-top:1px_solid_var(--common-border-color)]">
-              <ThemeButton iconForMobile={false} onClick={() => applyViewInTable([], [])}>
+              <ThemeButton
+                iconForMobile={false}
+                onClick={() => {
+                  setAnchorEl(null);
+                  applyViewInTable([], []);
+                }}
+              >
                 Reset
               </ThemeButton>
               <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
