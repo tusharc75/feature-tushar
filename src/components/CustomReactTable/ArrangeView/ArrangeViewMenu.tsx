@@ -1,4 +1,4 @@
-import { Divider, Fade, IconButton, List, ListItem, Menu, Popper } from '@material-ui/core';
+import { Divider, Fade, IconButton, List, ListItem, Menu, MenuItem, Popper } from '@material-ui/core';
 import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
 import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
@@ -184,7 +184,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           className: '!p-0 min-w-[min(400px,calc(100vw-40px))] max-w-[400px] '
         }}
       >
-        <>
+        <div>
           <div className="body">
             <div className="head p-2 text-center [border-bottom:1px_solid_var(--common-border-color)]">
               <h5 className="bold text-lg">Views</h5>
@@ -259,7 +259,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
               </ThemeButton>
             </div>
           </div>
-        </>
+        </div>
       </Menu>
 
       {editCreateDialogData.open && (
