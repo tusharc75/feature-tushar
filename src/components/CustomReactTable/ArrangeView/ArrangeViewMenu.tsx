@@ -14,6 +14,7 @@ import { SET_USER } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 export type GridViewSavedData = {
   _id: string;
@@ -42,6 +43,7 @@ type ArrangeViewMenuProps = {
   expander: boolean;
 };
 const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander }: ArrangeViewMenuProps) => {
+  const walkmeInstance = useGetWalkmeInstance();
   const { loading } = state;
   const { gridMetaData, setGridMetaData } = useGridMetaData();
 
@@ -169,6 +171,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
         onClose={() => setAnchorEl(null)}
         keepMounted={false}
         getContentAnchorEl={null}
+        transitionDuration={walkmeInstance ? 0 : 250}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
