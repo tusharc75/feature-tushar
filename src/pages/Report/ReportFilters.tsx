@@ -1,31 +1,27 @@
-import React, { useEffect } from 'react';
 import {
   Box,
-  Container,
-  TextField,
-  Grid,
   Button,
-  CircularProgress,
-  Typography,
-  IconButton,
-  FormControlLabel,
   Checkbox,
+  CircularProgress,
+  Container,
   FormControl,
+  FormControlLabel,
   InputLabel,
   MenuItem,
-  Select
+  Select,
+  TextField,
+  Typography
 } from '@material-ui/core';
+import { List } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
-import { Delete, List } from '@material-ui/icons';
 import { KeyboardDatePicker } from '@material-ui/pickers';
 import { startCase } from 'lodash';
+import moment from 'moment';
+import React, { useEffect } from 'react';
+import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
+import FormTypes from '../../components/Helpers/FormTypes';
 import VirtualizedList from '../../components/VirtualizedList';
 import { dateFormat } from '../../constants/helpers';
-import FormTypes from '../../components/Helpers/FormTypes';
-import ConfirmDialog from '../../components/Helpers/ConfirmationDialog';
-import axiosInstance from '../../axios/axiosInstance';
-import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
-import moment from 'moment';
 
 interface FiltersProps {
   resource: string;
@@ -44,10 +40,6 @@ interface FiltersProps {
   formValues: any;
   setFormValues: any;
   loadingColumns?: boolean;
-  setSelectedReportView: any;
-  selectedReportView: any;
-  reportList: any;
-  setReportList: any;
   statusPeriod?: boolean;
   setStatusPeriod?: any;
   statusPeriodDate?: any;
@@ -79,10 +71,6 @@ const ReportFilters = (props: FiltersProps) => {
     formValues,
     setFormValues,
     loadingColumns,
-    setSelectedReportView,
-    selectedReportView,
-    reportList,
-    setReportList,
     statusPeriod,
     setStatusPeriod,
     statusPeriodDate,
@@ -91,13 +79,10 @@ const ReportFilters = (props: FiltersProps) => {
     setStatusPeriodDate,
     selectedData,
     customReportData,
-    isCustomReport,
     defaultResource = [],
     reportConfig
   } = props;
 
-  const [showConfirmDialog, setShowConfirmDialog] = React.useState({ open: false, id: null, name: '' });
-  const [isDeleting, setDeleting] = React.useState(false);
   const [isStatusPeriod, setIsStatusPeriod] = React.useState(false);
   const [errors, setErrors] = React.useState({});
   const [dataLoading, setLoading] = React.useState(false);
@@ -231,28 +216,6 @@ const ReportFilters = (props: FiltersProps) => {
         return prev;
       });
     }
-  };
-
-  const handleRemoveOption = () => {
-    setReportList((prevState) => {
-      return prevState.filter((item) => item._id !== showConfirmDialog.id);
-    });
-    setDeleting(true);
-    axiosInstance()
-      .put(`report-colum-setting/remove`, {
-        ids: [showConfirmDialog.id]
-      })
-      .then(() => {
-        setDeleting(false);
-        if (selectedReportView?._id === showConfirmDialog.id) {
-          setSelectedReportView(null);
-        }
-        setShowConfirmDialog({ open: false, id: null, name: '' });
-      })
-      .catch((err) => {
-        setDeleting(false);
-        setShowConfirmDialog({ open: false, id: null, name: '' });
-      });
   };
 
   useEffect(() => {
@@ -776,23 +739,6 @@ const ReportFilters = (props: FiltersProps) => {
           </Button>
         </Box>
       </Box>
-      {showConfirmDialog.open && (
-        <ConfirmDialog
-          onClose={() => setShowConfirmDialog({ open: false, id: null, name: '' })}
-          onOk={() => handleRemoveOption()}
-          open={true}
-          okBtnLoading={isDeleting}
-          message={
-            <>
-              Are you sure you want to delete view{' '}
-              <Box component={'span'} px={1} bgcolor="#eee">
-                {showConfirmDialog.name}
-              </Box>
-              ?
-            </>
-          }
-        />
-      )}
     </Container>
   );
 };

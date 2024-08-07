@@ -13,13 +13,13 @@ import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import {
-    prepareDataForGrid,
-    gridLoadingTimeout,
-    downloadExcel,
-    isObjectEmpty,
-    sidebarResource,
-    dateFormat,
-    REPORT_LIST,
+  prepareDataForGrid,
+  gridLoadingTimeout,
+  downloadExcel,
+  isObjectEmpty,
+  sidebarResource,
+  dateFormat,
+  REPORT_LIST
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -39,851 +39,834 @@ import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import WarningIcon from '@material-ui/icons/Warning';
 import PadData from 'src/pages/Report/PadData';
 
-
 let cancelTokenSource = null;
 
 const Report = () => {
+  const [themeColor] = useAppTheme();
+  const isDarkTheme = themeColor === 'dark';
+  const initialRender = React.useRef(true);
+  const toastConfig = React.useContext(CustomToastContext);
+  const {
+    state: { selectedEntity, permissions }
+  } = useData();
+  const { type } = useParams();
+  const history = useHistory();
 
-    const [themeColor] = useAppTheme();
-    const isDarkTheme = themeColor === 'dark';
-    const initialRender = React.useRef(true);
-    const toastConfig = React.useContext(CustomToastContext);
-    const {
-        state: { selectedEntity, permissions }
-    } = useData();
-    const { type } = useParams();
-    const history = useHistory();
+  const resourceCamelCase = camelCase(type);
+  const resourceStartCase = startCase(type);
+  const renderedFrom = `${type}_report_new`;
+  const reportConfig = REPORT_LIST?.find((e) => e.type === resourceCamelCase);
 
-    const resourceCamelCase = camelCase(type);
-    const resourceStartCase = startCase(type);
-    const renderedFrom = `${type}_report_new`;
-    const reportConfig = REPORT_LIST?.find((e) => e.type === resourceCamelCase);
+  const [showGrid, setShowGrid] = React.useState(false);
+  const [selectedData, setSelectedData] = React.useState(null);
+  const [betweenDate, setBetweenDate] = React.useState(null);
+  const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
+  const [filterOptions, setFilterOptions] = React.useState([]);
+  const [selectedResources, setSelectedResources] = React.useState([]);
+  const [resourceOptions, setResourceOptions] = React.useState(null);
+  const [formValues, setFormValues] = React.useState({});
+  const [resourceColumns, setResourceColumns] = React.useState([]);
+  const [isExporting, setExporting] = React.useState(false);
+  const [loadingColumns, setLoadingColumns] = React.useState(false);
+  const [statusPeriod, setStatusPeriod] = React.useState(false);
+  const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
+  const [defaultColumns, setDefaultColumns] = React.useState([]);
 
-    const [showGrid, setShowGrid] = React.useState(false);
-    const [selectedData, setSelectedData] = React.useState(null);
-    const [betweenDate, setBetweenDate] = React.useState(null);
-    const [statusPeriodDate, setStatusPeriodDate] = React.useState(null);
-    const [filterOptions, setFilterOptions] = React.useState([]);
-    const [selectedResources, setSelectedResources] = React.useState([]);
-    const [resourceOptions, setResourceOptions] = React.useState(null);
-    const [formValues, setFormValues] = React.useState({});
-    const [resourceColumns, setResourceColumns] = React.useState([]);
-    const [isExporting, setExporting] = React.useState(false);
-    const [loadingColumns, setLoadingColumns] = React.useState(false);
-    const [statusPeriod, setStatusPeriod] = React.useState(false);
-    const [reportList, setReportList] = React.useState([]);
-    const [selectedReportView, setSelectedReportView] = React.useState(null);
-    const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
-    const [defaultColumns, setDefaultColumns] = React.useState([]);
+  // Grid Configs
+  const { generateColumns } = useColumns();
+  const [columns, setColumns] = React.useState(null);
+  const { state, dispatch } = useTableReducer();
+  const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
 
-    // Grid Configs
-    const { generateColumns } = useColumns();
-    const [columns, setColumns] = React.useState(null);
-    const { state, dispatch } = useTableReducer();
-    const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
+  const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
+  const [showPadData, setShowPadData] = React.useState({ open: false, data: [] });
+  const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
 
-    const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
-    const [showPadData, setShowPadData] = React.useState({ open: false, data: [] })
-    const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
-
-    const fetchGridColumns = async () => {
-        try {
-            setLoadingColumns(true);
-            let columns = [];
-            let { data: { data: { columnFields, filterFields } } } = await axiosInstance().get(`/report/${type}/column`);
-            let newColumns = generateColumns(type, columnFields);
-            newColumns?.forEach(o => {
-                if (type === "inventory-history") {
-                    if (o?.accessor === 'type') {
-                        o.cell = ({ row }) => CreditDebitTypeRenderer(row)
-                    }
-                    if (o?.accessor === 'qty') {
-                        o.cell = ({ row }) => CreditDebitRenderer(row)
-                    }
-                }
-                if (type === "fleet-report") {
-                    if (o?.accessor === 'unitNumber') {
-                        o.cell = ({ row }) => UnitNameRenderer(row)
-                    }
-                }
-                if (o?.accessor === 'reference') {
-                    o.cell = ({ row }) => ReferenceRenderer(row);
-                    o.disableFilters = true;
-                    o.disableSortBy = true;
-                }
-                if (o?.accessor === 'serialNumber') {
-                    o.cell = ({ row }) => SerialNumberRenderer(row)
-                    o.disableFilters = true;
-                    o.disableSortBy = true;
-                }
-                if (type === "number-of-assets-by-status" && (o?.accessor === 'productName' || o?.accessor === 'product')) {
-                    o.cell = ({ row }) => ProductRenderer(row)
-                }
-                if (o?.accessor === "serviceName") {
-                    o.cell = ({ row }) => ServiceRenderer(row)
-                }
-                o.editable = false
-            });
-            if (type === 'inventory-evaluation') {
-                newColumns?.forEach((e) => {
-                    if (e.accessor === 'productName') {
-                        e.cell = ({ row }) => ProductRenderer(row)
-                    }
-                    if (!['productName', 'productDescription', 'productNumber', 'productCategory', 'totalQty',
-                        'averagePrice', 'totalPrice', 'margin']?.includes(e.accessor)) {
-                        e.show = false;
-                    }
-                })
-                columns = [...newColumns, ActionsRenderer]
-            }
-            else if (type === 'in-used-serialized-asset') {
-                newColumns?.forEach((e) => {
-                    if (['billingAddress', 'shippingAddress']?.includes(e.accessor)) {
-                        e.disableFilters = true;
-                        e.disableSortBy = true;
-                    }
-                })
-                columns = [...newColumns]
-            }
-            else if (type === 'day-wise-volume-report') {
-                newColumns?.forEach((e) => {
-                    if (['asset', 'customerAccount', 'padName']?.includes(e.accessor)) {
-                        e.disableFilters = true;
-                        e.disableSortBy = true;
-                    }
-                })
-                columns = [...newColumns]
-            }
-            else if (type === 'purchase-order-details') {
-                newColumns?.forEach((e) => {
-                    if (['productId', 'productNumber', 'productDescription', 'serviceName', 'serviceDescription', 'description']?.includes(e.accessor)) {
-                        e.disableFilters = true;
-                        e.disableSortBy = true;
-                    }
-                })
-                columns = [...newColumns]
-            } else if (type === 'historical-report') {
-                newColumns?.forEach((e) => {
-                    if (['startDate']?.includes(e.accessor)) {
-                        e.cell = ({ row }) => <div>
-                            {row?.original?.startDate ?
-                                <h5
-                                    title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
-                                    {moment(row?.original?.startDate)?.format(dateFormat)}
-                                </h5>
-                                :
-                                'Total'
-                            }
-                        </div>
-                    }
-                })
-                columns = [...newColumns, ActionsRenderer]
-            } else {
-                columns = [...newColumns]
-            }
-            setResourceColumns(filterFields);
-            if (reportConfig?.defaultColumn) {
-                setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
-                setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
-            }
-            setColumns(columns);
-            setLoadingColumns(false);
-        } catch (error) {
-            setLoadingColumns(false);
-            toastConfig.setToastConfig(error);
+  const fetchGridColumns = async () => {
+    try {
+      setLoadingColumns(true);
+      let columns = [];
+      let {
+        data: {
+          data: { columnFields, filterFields }
         }
-    };
-
-    React.useEffect(() => {
-        if (initialRender.current) {
-            fetchGridColumns();
-            initialRender.current = false;
+      } = await axiosInstance().get(`/report/${type}/column`);
+      let newColumns = generateColumns(type, columnFields);
+      newColumns?.forEach((o) => {
+        if (type === 'inventory-history') {
+          if (o?.accessor === 'type') {
+            o.cell = ({ row }) => CreditDebitTypeRenderer(row);
+          }
+          if (o?.accessor === 'qty') {
+            o.cell = ({ row }) => CreditDebitRenderer(row);
+          }
         }
-    }, []);
-
-    React.useEffect(() => {
-        axiosInstance()
-            .get(`/report-colum-setting?resource=${type}`)
-            .then(({ data: { data } }) => {
-                setReportList(data);
-            })
-            .catch((error) => {
-                toastConfig.setToastConfig(error);
-            });
-    }, [showGrid]);
-
-    React.useEffect(() => {
-        if (showGrid) {
-            fetchResourceData();
+        if (type === 'fleet-report') {
+          if (o?.accessor === 'unitNumber') {
+            o.cell = ({ row }) => UnitNameRenderer(row);
+          }
         }
-    }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
-
-    React.useEffect(() => {
-        if (!selectedData) return;
-        setSelectedData((prevState: any) => {
-            const dataKeys = Object.keys(prevState);
-            const selectedKeys = Object.keys(selectedResources);
-
-            if (selectedResources.length > 0 && dataKeys.length > 0) {
-                dataKeys.forEach((key) => {
-                    if (selectedKeys.includes(key) && prevState?.hasOwnProperty(key)) {
-                        delete prevState[key];
-                    }
-                });
-            }
-            return prevState;
+        if (o?.accessor === 'reference') {
+          o.cell = ({ row }) => ReferenceRenderer(row);
+          o.disableFilters = true;
+          o.disableSortBy = true;
+        }
+        if (o?.accessor === 'serialNumber') {
+          o.cell = ({ row }) => SerialNumberRenderer(row);
+          o.disableFilters = true;
+          o.disableSortBy = true;
+        }
+        if (type === 'number-of-assets-by-status' && (o?.accessor === 'productName' || o?.accessor === 'product')) {
+          o.cell = ({ row }) => ProductRenderer(row);
+        }
+        if (o?.accessor === 'serviceName') {
+          o.cell = ({ row }) => ServiceRenderer(row);
+        }
+        o.editable = false;
+      });
+      if (type === 'inventory-evaluation') {
+        newColumns?.forEach((e) => {
+          if (e.accessor === 'productName') {
+            e.cell = ({ row }) => ProductRenderer(row);
+          }
+          if (
+            !['productName', 'productDescription', 'productNumber', 'productCategory', 'totalQty', 'averagePrice', 'totalPrice', 'margin']?.includes(
+              e.accessor
+            )
+          ) {
+            e.show = false;
+          }
         });
-    }, [selectedData, selectedResources]);
-
-    const CreditDebitRenderer = (row) => {
-        return (
-            <div
-                style={{
-                    backgroundColor:
-                        row?.original?.type === 'credit'
-                            ? isDarkTheme
-                                ? 'hsl(120 73% 40% / 1)'
-                                : '#90ee90'
-                            : row?.original?.type === 'debit'
-                                ? isDarkTheme
-                                    ? 'hsl(1 100% 65% / 1)'
-                                    : '#FFCCCB'
-                                : ''
-                }}
-            >
-                {row?.original?.qty ? (
-                    <h5 className="text-truncate" title={row?.original?.qty}>
-                        {row?.original?.type === 'debit' ? `-${row?.original?.qty}` : row?.original?.qty}
-                    </h5>
-                ) : (
-                    <NoDataCell />
-                )}
-            </div>
-        )
-    }
-
-    const ProductRenderer = (row) => {
-        return (
-            <div>{row?.original?.productName ? (
-                <Link className="link" title={row?.original?.productName} to={`${routes.productDetail.path}/${row?.original?.productId || row?.original?._id}`} target="_blank">
-                    {row?.original?.productName}
-                </Link>
-            ) : <NoDataCell />}</div>
-        )
-    }
-
-    const ServiceRenderer = (row) => {
-        return (
-            <div>{row?.original?.serviceName ? (
-                <Link className="link" title={row?.original?.serviceName} to={`${routes.serviceMasterDetail.path}/${row?.original?.serviceId}`} target="_blank">
-                    {row?.original?.serviceName}
-                </Link>
-            ) : <NoDataCell />}</div>
-        )
-    }
-
-    const ReferenceRenderer = (row) => {
-        return (
-            <div>
-                {row?.original?.reference ? (
-                    row?.original?.referenceType === 'Purchase Order' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : row?.original?.referenceType === 'Transfer Inventory' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : row?.original?.referenceType === 'Transfer Asset' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : row?.original?.referenceType === 'Sales Order' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : row?.original?.referenceType === 'Serialized Asset' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : row?.original?.referenceType === 'Rental Job' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : row?.original?.referenceType === 'Work Order' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : row?.original?.referenceType === 'Field Ticket' ? (
-                        <Link
-                            className="link"
-                            target="_blank"
-                            title={row?.original?.reference}
-                            to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
-                        >
-                            {row?.original?.reference}
-                        </Link>
-                    ) : (
-                        row?.original?.reference
-                    )
-                ) : row?.original?.referenceType === 'Product Inventory' ? (
-                    <h5 className="text-truncate">Manual Entry</h5>
-                ) : (
-                    <NoDataCell />
-                )
-                }
-            </div>
-        )
-    }
-
-    const UnitNameRenderer = (row) => {
-        return <div>
-            <Link
-                className="link text-truncate"
-                title={row?.original?.unitNumber}
-                to={`${routes.unitDetail.path}/${row?.original?._id}`}
-                target="_blank">
-                {row?.original?.unitNumber}
-            </Link>
-            {row?.original?.unitInOtherDeal &&
-                <Box ml={1} >
-                    <HtmlTooltip title={"Unit is assigned to multiple active contracts"} placement="top" arrow>
-                        <WarningIcon
-                            style={{ fontSize: '16px' }}
-                            fontSize="small" color="error" />
-                    </HtmlTooltip>
-                </Box>
-            }
-        </div>
-    }
-
-    const CreditDebitTypeRenderer = (row) => {
-        return <div>
-            {row?.original?.type ? (
-                <span>
-                    {capitalize(row?.original?.type)}
-                </span>
-            ) : (
-                <NoDataCell />
-            )}
-        </div>
-    }
-
-    const SerialNumberRenderer = (row) => {
-        return (<div>{row.original?.serialNumber
-            && isArray(row.original.serialNumber)
-            && row.original.serialNumber?.length ? row?.original?.serialNumber?.map((e) => e?.serialNumber)?.toString() : <NoDataCell />}</div>)
-    }
-
-    const ActionsRenderer = {
-        accessor: 'action',
-        Header: 'Actions',
-        minWidth: 100,
-        width: 100,
-        sticky: 'right',
-        disableFilters: true,
-        disableSortBy: true,
-        canDrag: false,
-        Cell: ({ row }) => (
-            <>
-                {type === 'inventory-evaluation' && (
-                    <HtmlTooltip title={'View History'}>
-                        <span>
-                            <IconButton
-                                size="small"
-                                aria-label="Delete"
-                                onClick={() => {
-                                    setShowPriceHistory({ open: true, product: row?.original?._id, productName: row?.original?.productName });
-                                }}
-                            >
-                                <HistoryIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </span>
-                    </HtmlTooltip>
-                )}
-                {type === 'historical-report' && row?.original['startDate'] && (
-                    <HtmlTooltip title={'View Pad Wise Data'}>
-                        <span>
-                            <IconButton
-                                size="small"
-                                aria-label="View Pad Wise Data"
-                                onClick={() => {
-                                    setShowPadData({ open: true, data: row?.original || [] })
-                                }}
-                            >
-                                <VisibilityIcon fontSize="small" color="primary" />
-                            </IconButton>
-                        </span>
-                    </HtmlTooltip>
-                )}
-            </>
-        )
-    };
-
-
-    const fetchResourceData = () => {
-        setShowGrid(true);
-        let filterQuery = getQueryString();
-        if (cancelTokenSource) {
-            cancelTokenSource.cancel();
-        }
-        cancelTokenSource = axios.CancelToken.source();
-        dispatch({ type: 'loading', loading: true })
-
-        var api = `/report/${type}`;
-        axiosInstance().get(`${api}${filterQuery}`, {
-            cancelToken: cancelTokenSource?.token
-        })
-            .then(({ data: { data, count, columns } }) => {
-                if (resourceCamelCase === 'userSession') {
-                    setLoadingColumns(true);
-                    columns = columns?.map((e) => {
-                        return {
-                            accessor: e.fieldName,
-                            Header: e.fieldLabel,
-                            disableSortBy: true,
-                            disableFilters: true,
-                            Cell: ({ row }) => {
-                                return (
-                                    <div>
-                                        {row?.original?.[e?.fieldName] ? (
-                                            e.fieldName === "user" ? (
-                                                <Link
-                                                    className="link"
-                                                    title={row?.original?.[e?.fieldName]}
-                                                    to={`${routes.userDetail.path}/${row?.original?.userId}`}
-                                                    target="_blank">
-                                                    {row?.original?.[e?.fieldName]}
-                                                </Link>
-                                            ) : (
-                                                <h5 className="text-truncate" title={row?.original?.[e?.fieldName]}>
-                                                    {row?.original?.[e?.fieldName]}
-                                                </h5>
-                                            )
-                                        ) : (
-                                            <NoDataCell />
-                                        )}
-                                    </div>
-                                );
-                            }
-                        }
-                    });
-                    setColumns(columns);
-                    setLoadingColumns(false);
-                }
-                if (resourceCamelCase === 'iotDataPoints') {
-                    setLoadingColumns(true);
-                    let newColumns = generateColumns(type, columns);
-                    setColumns(newColumns);
-                    setLoadingColumns(false);
-                }
-                data = data.map((u: any) => {
-                    let finalObject: any = prepareDataForGrid(u);
-                    return finalObject;
-                });
-                dispatch({ type: 'initialize', data: data, count: count });
-                setTimeout(() => {
-                    dispatch({ type: 'loading', loading: false });
-                }, gridLoadingTimeout);
-            })
-            .catch((err) => {
-                if (!axios.isCancel(err)) {
-                    setTimeout(() => {
-                        dispatch({ type: 'loading', loading: false });
-                    }, gridLoadingTimeout);
-                    toastConfig.setToastConfig(err);
-                }
-            });
-    };
-
-    const getQueryString = (isExport = false) => {
-        if (!isExport) {
-            setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
-        }
-        let filterQuery = ``;
-        let deepFilter = [];
-
-        if (!isExport) {
-            filterQuery = `page=${page}&limit=${limit}&`;
-        }
-        if (type === 'iot-data-points') {
-            filterQuery += `column=true&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}&`;
-        }
-        if (sorting.length > 0) {
-            filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
-        }
-        if (search) {
-            filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
-        }
-        if (selectedResources.length > 0) {
-            if (selectedData) {
-                const keys = selectedData ? Object.keys(selectedData) : [];
-                const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
-                const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
-                let filterById = idFilter.map((key) => {
-                    if (key === 'warehouse') {
-                        if (!isExport) {
-                            setShowPricefilter((prevState) => ({
-                                ...prevState,
-                                warehouse: selectedData[key]?.value?.map((d: any) => d.optionValue)
-                            }));
-                        }
-                    }
-                    if (!Array.isArray(selectedData[key].value)) {
-                        return { field: key, term: selectedData[key].value.optionValue }
-                    }
-                    return {
-                        field: key,
-                        term: {
-                            $in: selectedData[key]?.value?.map((d: any) => d.optionValue)
-                        }
-                    };
-                });
-
-                forDeepFilter.forEach((key) => {
-                    if (selectedData[key].type === 'checkBox') {
-                        deepFilter.push({
-                            field: key,
-                            term: selectedData[key].value ? 'Yes' : 'No'
-                        });
-                    } else if (selectedData[key].type === 'singleLine') {
-                        deepFilter.push({
-                            field: key,
-                            term: selectedData[key].value
-                        });
-                    } else if (!Array.isArray(selectedData[key].value)) {
-                        deepFilter.push({
-                            field: key,
-                            term: selectedData[key]?.value
-                        });
-                    } else {
-                        deepFilter.push({
-                            field: key,
-                            term: selectedData[key].value?.map((d: any) => d.optionValue)
-                        });
-                    }
-                });
-
-                if (filterById.length > 0) {
-                    filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
-                }
-            }
-
-            if (betweenDate) {
-                const fields = Object.keys(betweenDate);
-                fields.forEach((field) => {
-                    if (betweenDate[field]) {
-                        if (!isExport) {
-                            if (field === 'from_date') {
-                                setShowPricefilter((prevState) => ({ ...prevState, fromDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
-                            }
-                            if (field === 'to_date') {
-                                setShowPricefilter((prevState) => ({ ...prevState, toDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
-                            }
-                        }
-                        deepFilter.push({
-                            field,
-                            term: moment(betweenDate[field]).format('MM/DD/YYYY')
-                        });
-                    }
-                });
-            }
-        }
-        if (!isObjectEmpty(filters)) {
-            Object.keys(filters).forEach((field) => {
-                deepFilter.push({
-                    field: field,
-                    term: filters[field].filter
-                });
-            });
-        }
-        if (deepFilter && deepFilter.length > 0) {
-            filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
-        }
-        if (statusPeriod && statusPeriodDate) {
-            const fields = Object.keys(statusPeriodDate);
-            fields.forEach((field) => {
-                if (statusPeriodDate[field]) {
-                    filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}& `;
-                }
-            });
-        }
-        if (resourceCamelCase === 'userSession') {
-            return `?column=true&${filterQuery}`;
-        }
-
-        if (isExport) {
-            let newColumns = columns.map((col) => col.accessor);
-            if (colState.length) {
-                newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor)
-            }
-            filterQuery = `${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`;
-        }
-
-        return `?${filterQuery}`;
-    };
-
-    const exportData = () => {
-        if (isExporting) return;
-        toastConfig.setToastConfig({
-            open: true,
-            message: 'Please wait exporting data',
-            type: 'info'
+        columns = [...newColumns, ActionsRenderer];
+      } else if (type === 'in-used-serialized-asset') {
+        newColumns?.forEach((e) => {
+          if (['billingAddress', 'shippingAddress']?.includes(e.accessor)) {
+            e.disableFilters = true;
+            e.disableSortBy = true;
+          }
         });
-        let newColumns = columns.map((col) => col.accessor);
-        if (colState.length) {
-            newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor)
-        }
-        setExporting(true);
-        let filterQuery = getQueryString(true);
+        columns = [...newColumns];
+      } else if (type === 'day-wise-volume-report') {
+        newColumns?.forEach((e) => {
+          if (['asset', 'customerAccount', 'padName']?.includes(e.accessor)) {
+            e.disableFilters = true;
+            e.disableSortBy = true;
+          }
+        });
+        columns = [...newColumns];
+      } else if (type === 'purchase-order-details') {
+        newColumns?.forEach((e) => {
+          if (['productId', 'productNumber', 'productDescription', 'serviceName', 'serviceDescription', 'description']?.includes(e.accessor)) {
+            e.disableFilters = true;
+            e.disableSortBy = true;
+          }
+        });
+        columns = [...newColumns];
+      } else if (type === 'historical-report') {
+        newColumns?.forEach((e) => {
+          if (['startDate']?.includes(e.accessor)) {
+            e.cell = ({ row }) => (
+              <div>
+                {row?.original?.startDate ? (
+                  <h5 title={`${moment(row?.original?.startDate).format(dateFormat)}`}>{moment(row?.original?.startDate)?.format(dateFormat)}</h5>
+                ) : (
+                  'Total'
+                )}
+              </div>
+            );
+          }
+        });
+        columns = [...newColumns, ActionsRenderer];
+      } else {
+        columns = [...newColumns];
+      }
+      setResourceColumns(filterFields);
+      if (reportConfig?.defaultColumn) {
+        setDefaultColumns(filterFields.filter((field) => field?.fieldData?.required)?.map((field) => field?.fieldData?.fieldName));
+        setSelectedResources(filterFields.filter((field) => field?.fieldData?.required));
+      }
+      setColumns(columns);
+      setLoadingColumns(false);
+    } catch (error) {
+      setLoadingColumns(false);
+      toastConfig.setToastConfig(error);
+    }
+  };
 
-        var api = '';
-        api = `/report/${type}/export`;
+  React.useEffect(() => {
+    if (initialRender.current) {
+      fetchGridColumns();
+      initialRender.current = false;
+    }
+  }, []);
 
-        axiosInstance()
-            .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`, {
-                responseType: 'arraybuffer'
-            })
-            .then((res) => {
-                const fileName = res.headers['content-disposition'].split('filename=')[1];
-                downloadExcel(res.data, fileName);
-                setExporting(false);
-                toastConfig.setToastConfig({
-                    open: true,
-                    message: 'Successfully Exported',
-                    type: 'success'
-                });
-            })
-            .catch((err) => {
-                setExporting(false);
-                toastConfig.setToastConfig(err);
-            });
-    };
+  React.useEffect(() => {
+    if (showGrid) {
+      fetchResourceData();
+    }
+  }, [page, sorting, search, limit, filters, pageSizes, selectedEntity]);
 
+  React.useEffect(() => {
+    if (!selectedData) return;
+    setSelectedData((prevState: any) => {
+      const dataKeys = Object.keys(prevState);
+      const selectedKeys = Object.keys(selectedResources);
+
+      if (selectedResources.length > 0 && dataKeys.length > 0) {
+        dataKeys.forEach((key) => {
+          if (selectedKeys.includes(key) && prevState?.hasOwnProperty(key)) {
+            delete prevState[key];
+          }
+        });
+      }
+      return prevState;
+    });
+  }, [selectedData, selectedResources]);
+
+  const CreditDebitRenderer = (row) => {
     return (
-        <MuiPickersUtilsProvider utils={MomentUtils}>
-            <div className="main-container-v1">
-                <div className="headerbox-v1">
-                    <CustomBreadCrumbs
-                        routes={[
-                            { title: 'Reports', path: '/reports' },
-                            { title: reportConfig?.title }
-                        ]}
-                    />
-                    {showGrid && (
-                        <div id="importExportLinks" style={{ minWidth: 80 }}>
-                            {type === 'in-used-serialized-asset' ?
-                                <AsynImportExportMenu
-                                    resource={sidebarResource.report}
-                                    subResource={type}
-                                    referenceId={null}
-                                    permissions={permissions?.report}
-                                    module={routes.productionOrder.title}
-                                    api={`/report/${type}`}
-                                    afterImportCompleted={() => {
-                                    }}
-                                    isExportCount={true}
-                                    exportCount={0}
-                                    ids={[]}
-                                    onlyExport={true}
-                                    additionalParams={getQueryString(true)}
-                                /> :
-                                <Button
-                                    variant="outlined"
-                                    size="small"
-                                    disabled={isExporting}
-                                    onClick={exportData}
-                                    className={`btn-outline-v-1`}>
-                                    Export All
-                                </Button>
-                            }
-                        </div>
-                    )}
-                </div>
-                <CustomContainer>
-                    <div className="header-panel">
-                        <Grid container className={styles.filter_side_container}>
-                            <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
-                                <Box display="flex" justifyContent="center" alignItems="center">
-                                    {showGrid && (
-                                        <Box mr={1}>
-                                            <Button
-                                                size="small"
-                                                variant="outlined"
-                                                color="primary"
-                                                disableElevation
-                                                onClick={() => {
-                                                    setShowGrid(false);
-                                                    dispatch({ type: 'onlyFilter', filters: {} });
-                                                }}
-                                                startIcon={<MdFilterList />}
-                                            >
-                                                Show Filters
-                                            </Button>
-                                        </Box>
-                                    )}
-                                    <MdDescription size={22} className="headerLogo" />
-                                    <span className="listingHeader">{` ${selectedReportView?.name ?? 'Reports'} `}</span>
-                                </Box>
-                            </Grid>
-                        </Grid>
-                    </div>
-                    {!showGrid && (
-                        <Dialog
-                            open={true}
-                            maxWidth="md"
-                            fullWidth
-                            onClose={(e, reason) => {
-                                if (reason !== 'backdropClick') {
-                                    if (defaultColumns?.length) {
-                                        history.push(routes.reports.path);
-                                    }
-                                    else {
-                                        setShowGrid(true);
-                                        dispatch({ type: 'onlyFilter', filters: {} });
-                                    }
-                                }
-                            }}
-                        >
-                            <CustomDialogHeader
-                                title={`Set Filters`}
-                                onClose={() => {
-                                    if (defaultColumns?.length) {
-                                        history.push(routes.reports.path);
-                                    }
-                                    else {
-                                        setShowGrid(true);
-                                        dispatch({ type: 'onlyFilter', filters: {} });
-                                    }
-                                }}
-                            />
-                            <div className="p-4 min-h-[600px]">
-                                <DialogContent>
-                                    <ReportFilters
-                                        resourceColumns={resourceColumns}
-                                        betweenDate={betweenDate}
-                                        setBetweenDate={setBetweenDate}
-                                        resource={resourceStartCase}
-                                        setSelectedData={setSelectedData}
-                                        loading={loading}
-                                        fetchReportData={fetchResourceData}
-                                        filterOptions={filterOptions}
-                                        setFilterOptions={setFilterOptions}
-                                        selectedResources={selectedResources}
-                                        setSelectedResources={setSelectedResources}
-                                        resourceOptions={resourceOptions}
-                                        setResourceOptions={setResourceOptions}
-                                        formValues={formValues}
-                                        setFormValues={setFormValues}
-                                        loadingColumns={loadingColumns}
-                                        setSelectedReportView={setSelectedReportView}
-                                        selectedReportView={selectedReportView}
-                                        reportList={reportList}
-                                        setReportList={setReportList}
-                                        statusPeriod={statusPeriod}
-                                        setStatusPeriod={setStatusPeriod}
-                                        statusPeriodDate={statusPeriodDate}
-                                        setStatusPeriodDate={setStatusPeriodDate}
-                                        statusTimeFrame={statusTimeFrame}
-                                        setStatusTimeFrame={setStatusTimeFrame}
-                                        selectedData={selectedData}
-                                        defaultResource={defaultColumns}
-                                        reportConfig={reportConfig}
-                                    />
-                                </DialogContent>
-                            </div>
-                        </Dialog>
-                    )}
-                    <div>
-                        {columns ? (
-                            <CustomReactTable
-                                height={'calc(100vh - 200px)'}
-                                columns={columns}
-                                state={state}
-                                dispatch={dispatch}
-                                renderedFrom={renderedFrom}
-                                refreshGrid={fetchResourceData}
-                                hideSelection={true}
-                                reportSave={true}
-                                setSelectedReportView={setSelectedReportView}
-                                selectedReportView={selectedReportView}
-                                setWholeRowsCellColor={(rowData) => {
-                                    if (!rowData?.startDate && type === 'historical-report') return 'footerRow';
-                                    return '';
-                                }}
-                                isClientSideGrid={type === 'historical-report' ? true : false}
-                            />
-                        ) : <Box p={2} height={500}>
-                            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                        </Box>}
-                    </div>
-                </CustomContainer>
-            </div>
-            {showPriceHistory.open && (
-                <AverageCostHistory
-                    product={showPriceHistory.product}
-                    productName={showPriceHistory.productName}
-                    handleClose={() => {
-                        setShowPriceHistory({ open: false, product: '', productName: '' });
-                    }}
-                    showPricefilter={showPricefilter}
-                />
-            )}
-            {showPadData.open && (
-                <PadData
-                    handleClose={() => {
-                        setShowPadData({ open: false, data: [] })
-                    }}
-                    column={columns}
-                    data={showPadData.data}
-                />
-            )}
-        </MuiPickersUtilsProvider>
+      <div
+        style={{
+          backgroundColor:
+            row?.original?.type === 'credit'
+              ? isDarkTheme
+                ? 'hsl(120 73% 40% / 1)'
+                : '#90ee90'
+              : row?.original?.type === 'debit'
+                ? isDarkTheme
+                  ? 'hsl(1 100% 65% / 1)'
+                  : '#FFCCCB'
+                : ''
+        }}
+      >
+        {row?.original?.qty ? (
+          <h5 className="text-truncate" title={row?.original?.qty}>
+            {row?.original?.type === 'debit' ? `-${row?.original?.qty}` : row?.original?.qty}
+          </h5>
+        ) : (
+          <NoDataCell />
+        )}
+      </div>
     );
+  };
+
+  const ProductRenderer = (row) => {
+    return (
+      <div>
+        {row?.original?.productName ? (
+          <Link
+            className="link"
+            title={row?.original?.productName}
+            to={`${routes.productDetail.path}/${row?.original?.productId || row?.original?._id}`}
+            target="_blank"
+          >
+            {row?.original?.productName}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )}
+      </div>
+    );
+  };
+
+  const ServiceRenderer = (row) => {
+    return (
+      <div>
+        {row?.original?.serviceName ? (
+          <Link
+            className="link"
+            title={row?.original?.serviceName}
+            to={`${routes.serviceMasterDetail.path}/${row?.original?.serviceId}`}
+            target="_blank"
+          >
+            {row?.original?.serviceName}
+          </Link>
+        ) : (
+          <NoDataCell />
+        )}
+      </div>
+    );
+  };
+
+  const ReferenceRenderer = (row) => {
+    return (
+      <div>
+        {row?.original?.reference ? (
+          row?.original?.referenceType === 'Purchase Order' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.purchaseOrderDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Transfer Inventory' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.transferInventoryDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Transfer Asset' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.transferAssetDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Sales Order' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.salesOrderDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Bulk Asset Creation' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.bulkAssetCreationDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Serialized Asset' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.serializedAssetDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Rental Job' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.rentalManagementDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Work Order' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.workOrderDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : row?.original?.referenceType === 'Field Ticket' ? (
+            <Link
+              className="link"
+              target="_blank"
+              title={row?.original?.reference}
+              to={`${routes.fieldTicketDetail.path}/${row?.original?.referenceId}`}
+            >
+              {row?.original?.reference}
+            </Link>
+          ) : (
+            row?.original?.reference
+          )
+        ) : row?.original?.referenceType === 'Product Inventory' ? (
+          <h5 className="text-truncate">Manual Entry</h5>
+        ) : (
+          <NoDataCell />
+        )}
+      </div>
+    );
+  };
+
+  const UnitNameRenderer = (row) => {
+    return (
+      <div>
+        <Link className="link text-truncate" title={row?.original?.unitNumber} to={`${routes.unitDetail.path}/${row?.original?._id}`} target="_blank">
+          {row?.original?.unitNumber}
+        </Link>
+        {row?.original?.unitInOtherDeal && (
+          <Box ml={1}>
+            <HtmlTooltip title={'Unit is assigned to multiple active contracts'} placement="top" arrow>
+              <WarningIcon style={{ fontSize: '16px' }} fontSize="small" color="error" />
+            </HtmlTooltip>
+          </Box>
+        )}
+      </div>
+    );
+  };
+
+  const CreditDebitTypeRenderer = (row) => {
+    return <div>{row?.original?.type ? <span>{capitalize(row?.original?.type)}</span> : <NoDataCell />}</div>;
+  };
+
+  const SerialNumberRenderer = (row) => {
+    return (
+      <div>
+        {row.original?.serialNumber && isArray(row.original.serialNumber) && row.original.serialNumber?.length ? (
+          row?.original?.serialNumber?.map((e) => e?.serialNumber)?.toString()
+        ) : (
+          <NoDataCell />
+        )}
+      </div>
+    );
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {type === 'inventory-evaluation' && (
+          <HtmlTooltip title={'View History'}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                onClick={() => {
+                  setShowPriceHistory({ open: true, product: row?.original?._id, productName: row?.original?.productName });
+                }}
+              >
+                <HistoryIcon fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        )}
+        {type === 'historical-report' && row?.original['startDate'] && (
+          <HtmlTooltip title={'View Pad Wise Data'}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="View Pad Wise Data"
+                onClick={() => {
+                  setShowPadData({ open: true, data: row?.original || [] });
+                }}
+              >
+                <VisibilityIcon fontSize="small" color="primary" />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  };
+
+  const fetchResourceData = () => {
+    setShowGrid(true);
+    let filterQuery = getQueryString();
+    if (cancelTokenSource) {
+      cancelTokenSource.cancel();
+    }
+    cancelTokenSource = axios.CancelToken.source();
+    dispatch({ type: 'loading', loading: true });
+
+    var api = `/report/${type}`;
+    axiosInstance()
+      .get(`${api}${filterQuery}`, {
+        cancelToken: cancelTokenSource?.token
+      })
+      .then(({ data: { data, count, columns } }) => {
+        if (resourceCamelCase === 'userSession') {
+          setLoadingColumns(true);
+          columns = columns?.map((e) => {
+            return {
+              accessor: e.fieldName,
+              Header: e.fieldLabel,
+              disableSortBy: true,
+              disableFilters: true,
+              Cell: ({ row }) => {
+                return (
+                  <div>
+                    {row?.original?.[e?.fieldName] ? (
+                      e.fieldName === 'user' ? (
+                        <Link
+                          className="link"
+                          title={row?.original?.[e?.fieldName]}
+                          to={`${routes.userDetail.path}/${row?.original?.userId}`}
+                          target="_blank"
+                        >
+                          {row?.original?.[e?.fieldName]}
+                        </Link>
+                      ) : (
+                        <h5 className="text-truncate" title={row?.original?.[e?.fieldName]}>
+                          {row?.original?.[e?.fieldName]}
+                        </h5>
+                      )
+                    ) : (
+                      <NoDataCell />
+                    )}
+                  </div>
+                );
+              }
+            };
+          });
+          setColumns(columns);
+          setLoadingColumns(false);
+        }
+        if (resourceCamelCase === 'iotDataPoints') {
+          setLoadingColumns(true);
+          let newColumns = generateColumns(type, columns);
+          setColumns(newColumns);
+          setLoadingColumns(false);
+        }
+        data = data.map((u: any) => {
+          let finalObject: any = prepareDataForGrid(u);
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: data, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((err) => {
+        if (!axios.isCancel(err)) {
+          setTimeout(() => {
+            dispatch({ type: 'loading', loading: false });
+          }, gridLoadingTimeout);
+          toastConfig.setToastConfig(err);
+        }
+      });
+  };
+
+  const getQueryString = (isExport = false) => {
+    if (!isExport) {
+      setShowPricefilter({ warehouse: null, fromDate: null, toDate: null });
+    }
+    let filterQuery = ``;
+    let deepFilter = [];
+
+    if (!isExport) {
+      filterQuery = `page=${page}&limit=${limit}&`;
+    }
+    if (type === 'iot-data-points') {
+      filterQuery += `column=true&timezone=${Intl?.DateTimeFormat()?.resolvedOptions()?.timeZone}&`;
+    }
+    if (sorting.length > 0) {
+      filterQuery = `${filterQuery}sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}&`;
+    }
+    if (search) {
+      filterQuery = `${filterQuery}search=${encodeURIComponent(search)}&`;
+    }
+    if (selectedResources.length > 0) {
+      if (selectedData) {
+        const keys = selectedData ? Object.keys(selectedData) : [];
+        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
+        const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
+        let filterById = idFilter.map((key) => {
+          if (key === 'warehouse') {
+            if (!isExport) {
+              setShowPricefilter((prevState) => ({
+                ...prevState,
+                warehouse: selectedData[key]?.value?.map((d: any) => d.optionValue)
+              }));
+            }
+          }
+          if (!Array.isArray(selectedData[key].value)) {
+            return { field: key, term: selectedData[key].value.optionValue };
+          }
+          return {
+            field: key,
+            term: {
+              $in: selectedData[key]?.value?.map((d: any) => d.optionValue)
+            }
+          };
+        });
+
+        forDeepFilter.forEach((key) => {
+          if (selectedData[key].type === 'checkBox') {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value ? 'Yes' : 'No'
+            });
+          } else if (selectedData[key].type === 'singleLine') {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value
+            });
+          } else if (!Array.isArray(selectedData[key].value)) {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key]?.value
+            });
+          } else {
+            deepFilter.push({
+              field: key,
+              term: selectedData[key].value?.map((d: any) => d.optionValue)
+            });
+          }
+        });
+
+        if (filterById.length > 0) {
+          filterQuery = `${filterQuery}filterById=${JSON.stringify(filterById)}&`;
+        }
+      }
+
+      if (betweenDate) {
+        const fields = Object.keys(betweenDate);
+        fields.forEach((field) => {
+          if (betweenDate[field]) {
+            if (!isExport) {
+              if (field === 'from_date') {
+                setShowPricefilter((prevState) => ({ ...prevState, fromDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+              }
+              if (field === 'to_date') {
+                setShowPricefilter((prevState) => ({ ...prevState, toDate: moment(betweenDate[field]).format('MM/DD/YYYY') }));
+              }
+            }
+            deepFilter.push({
+              field,
+              term: moment(betweenDate[field]).format('MM/DD/YYYY')
+            });
+          }
+        });
+      }
+    }
+    if (!isObjectEmpty(filters)) {
+      Object.keys(filters).forEach((field) => {
+        deepFilter.push({
+          field: field,
+          term: filters[field].filter
+        });
+      });
+    }
+    if (deepFilter && deepFilter.length > 0) {
+      filterQuery = `${filterQuery}deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}&`;
+    }
+    if (statusPeriod && statusPeriodDate) {
+      const fields = Object.keys(statusPeriodDate);
+      fields.forEach((field) => {
+        if (statusPeriodDate[field]) {
+          filterQuery = `${filterQuery}${field}=${moment(statusPeriodDate[field]).format('MM/DD/YYYY')}& `;
+        }
+      });
+    }
+    if (resourceCamelCase === 'userSession') {
+      return `?column=true&${filterQuery}`;
+    }
+
+    if (isExport) {
+      let newColumns = columns.map((col) => col.accessor);
+      if (colState.length) {
+        newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor);
+      }
+      filterQuery = `${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`;
+    }
+
+    return `?${filterQuery}`;
+  };
+
+  const exportData = () => {
+    if (isExporting) return;
+    toastConfig.setToastConfig({
+      open: true,
+      message: 'Please wait exporting data',
+      type: 'info'
+    });
+    let newColumns = columns.map((col) => col.accessor);
+    if (colState.length) {
+      newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor);
+    }
+    setExporting(true);
+    let filterQuery = getQueryString(true);
+
+    var api = '';
+    api = `/report/${type}/export`;
+
+    axiosInstance()
+      .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`, {
+        responseType: 'arraybuffer'
+      })
+      .then((res) => {
+        const fileName = res.headers['content-disposition'].split('filename=')[1];
+        downloadExcel(res.data, fileName);
+        setExporting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          message: 'Successfully Exported',
+          type: 'success'
+        });
+      })
+      .catch((err) => {
+        setExporting(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  return (
+    <MuiPickersUtilsProvider utils={MomentUtils}>
+      <div className="main-container-v1">
+        <div className="headerbox-v1">
+          <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: reportConfig?.title }]} />
+          {showGrid && (
+            <div id="importExportLinks" style={{ minWidth: 80 }}>
+              {type === 'in-used-serialized-asset' ? (
+                <AsynImportExportMenu
+                  resource={sidebarResource.report}
+                  subResource={type}
+                  referenceId={null}
+                  permissions={permissions?.report}
+                  module={routes.productionOrder.title}
+                  api={`/report/${type}`}
+                  afterImportCompleted={() => {}}
+                  isExportCount={true}
+                  exportCount={0}
+                  ids={[]}
+                  onlyExport={true}
+                  additionalParams={getQueryString(true)}
+                />
+              ) : (
+                <Button variant="outlined" size="small" disabled={isExporting} onClick={exportData} className={`btn-outline-v-1`}>
+                  Export All
+                </Button>
+              )}
+            </div>
+          )}
+        </div>
+        <CustomContainer>
+          <div className="header-panel">
+            <Grid container className={styles.filter_side_container}>
+              <Grid item xs={12} className="d-flex align-items-center layout-for-tablet gap-1">
+                <Box display="flex" justifyContent="center" alignItems="center">
+                  {showGrid && (
+                    <Box mr={1}>
+                      <Button
+                        size="small"
+                        variant="outlined"
+                        color="primary"
+                        disableElevation
+                        onClick={() => {
+                          setShowGrid(false);
+                          dispatch({ type: 'onlyFilter', filters: {} });
+                        }}
+                        startIcon={<MdFilterList />}
+                      >
+                        Show Filters
+                      </Button>
+                    </Box>
+                  )}
+                  <MdDescription size={22} className="headerLogo" />
+                </Box>
+              </Grid>
+            </Grid>
+          </div>
+          {!showGrid && (
+            <Dialog
+              open={true}
+              maxWidth="md"
+              fullWidth
+              onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                  if (defaultColumns?.length) {
+                    history.push(routes.reports.path);
+                  } else {
+                    setShowGrid(true);
+                    dispatch({ type: 'onlyFilter', filters: {} });
+                  }
+                }
+              }}
+            >
+              <CustomDialogHeader
+                title={`Set Filters`}
+                onClose={() => {
+                  if (defaultColumns?.length) {
+                    history.push(routes.reports.path);
+                  } else {
+                    setShowGrid(true);
+                    dispatch({ type: 'onlyFilter', filters: {} });
+                  }
+                }}
+              />
+              <div className="min-h-[600px] p-4">
+                <DialogContent>
+                  <ReportFilters
+                    resourceColumns={resourceColumns}
+                    betweenDate={betweenDate}
+                    setBetweenDate={setBetweenDate}
+                    resource={resourceStartCase}
+                    setSelectedData={setSelectedData}
+                    loading={loading}
+                    fetchReportData={fetchResourceData}
+                    filterOptions={filterOptions}
+                    setFilterOptions={setFilterOptions}
+                    selectedResources={selectedResources}
+                    setSelectedResources={setSelectedResources}
+                    resourceOptions={resourceOptions}
+                    setResourceOptions={setResourceOptions}
+                    formValues={formValues}
+                    setFormValues={setFormValues}
+                    loadingColumns={loadingColumns}
+                    statusPeriod={statusPeriod}
+                    setStatusPeriod={setStatusPeriod}
+                    statusPeriodDate={statusPeriodDate}
+                    setStatusPeriodDate={setStatusPeriodDate}
+                    statusTimeFrame={statusTimeFrame}
+                    setStatusTimeFrame={setStatusTimeFrame}
+                    selectedData={selectedData}
+                    defaultResource={defaultColumns}
+                    reportConfig={reportConfig}
+                  />
+                </DialogContent>
+              </div>
+            </Dialog>
+          )}
+          <div>
+            {columns ? (
+              <CustomReactTable
+                height={'calc(100vh - 200px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                renderedFrom={renderedFrom}
+                refreshGrid={fetchResourceData}
+                hideSelection={true}
+                reportSave={true}
+                setWholeRowsCellColor={(rowData) => {
+                  if (!rowData?.startDate && type === 'historical-report') return 'footerRow';
+                  return '';
+                }}
+                isClientSideGrid={type === 'historical-report' ? true : false}
+              />
+            ) : (
+              <Box p={2} height={500}>
+                <CommonSkeleton lenArray={[...Array(10).keys()]} />
+              </Box>
+            )}
+          </div>
+        </CustomContainer>
+      </div>
+      {showPriceHistory.open && (
+        <AverageCostHistory
+          product={showPriceHistory.product}
+          productName={showPriceHistory.productName}
+          handleClose={() => {
+            setShowPriceHistory({ open: false, product: '', productName: '' });
+          }}
+          showPricefilter={showPricefilter}
+        />
+      )}
+      {showPadData.open && (
+        <PadData
+          handleClose={() => {
+            setShowPadData({ open: false, data: [] });
+          }}
+          column={columns}
+          data={showPadData.data}
+        />
+      )}
+    </MuiPickersUtilsProvider>
+  );
 };
 
 export default Report;

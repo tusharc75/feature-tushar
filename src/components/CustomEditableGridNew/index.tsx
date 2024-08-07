@@ -231,23 +231,23 @@ const CustomEditableGrid = ({
                     scrollToHeader={scrollToHeader}
                   />
                 </div>
-                <div className="sr-only mt-1 flex justify-end gap-2 lg:not-sr-only">
+                <div className="sr-only mt-1 flex justify-end gap-3 lg:not-sr-only">
                   <HtmlTooltip title="Scroll left">
                     <IconButton
-                      style={{ borderRadius: 999, padding: 2, background: 'var(--new-theme-color)', opacity: isLeftDisabled ? '50%' : '100%' }}
+                      style={{ borderRadius: 999, padding: 4, background: 'var(--new-theme-color)', opacity: isLeftDisabled ? '50%' : '100%' }}
                       disabled={isLeftDisabled}
                       onClick={scrollLeft}
                     >
-                      <ChevronLeft className="text-white" fontSize="large" />
+                      <ChevronLeft className="text-white" />
                     </IconButton>
                   </HtmlTooltip>
                   <HtmlTooltip title="Scroll right">
                     <IconButton
-                      style={{ borderRadius: 999, padding: 2, background: 'var(--new-theme-color)', opacity: isRightDisabled ? '50%' : '100%' }}
+                      style={{ borderRadius: 999, padding: 4, background: 'var(--new-theme-color)', opacity: isRightDisabled ? '50%' : '100%' }}
                       disabled={isRightDisabled}
                       onClick={scrollRight}
                     >
-                      <ChevronRight className="text-white" fontSize="large" />
+                      <ChevronRight className="text-white" />
                     </IconButton>
                   </HtmlTooltip>
                 </div>
