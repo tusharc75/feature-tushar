@@ -52,7 +52,6 @@ const Login = () => {
           });
           const { data } = res.data;
           localStorage.setItem('token', data.token);
-
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
             dispatch({
