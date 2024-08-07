@@ -71,7 +71,8 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       columnHiddenStateData[column.id] = !hide.includes(column.id);
     });
     if (order.length > 0) {
-      columnOrder = [...stickycolumns.left, ...order, ...stickycolumns.right];
+      const newOrder = order.filter((d) => !stickycolumns.stickyColumns.includes(d));
+      columnOrder = [...stickycolumns.left, ...newOrder, ...stickycolumns.right];
     } else {
       const columnsWithoutSticky = columns.filter((d) => !stickycolumns.stickyColumns.includes(d.id)).map((c) => c.id);
       columnOrder = [...stickycolumns.left, ...columnsWithoutSticky, ...stickycolumns.right];
