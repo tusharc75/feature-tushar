@@ -94,7 +94,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
     } else {
       applyViewInTable([], []);
     }
-  }, [renderedFrom, defaultView]);
+  }, [renderedFrom, defaultView, columns.length]);
 
   const getAllSavedViews = useCallback(async () => {
     try {
