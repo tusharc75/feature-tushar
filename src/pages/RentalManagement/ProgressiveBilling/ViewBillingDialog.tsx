@@ -388,6 +388,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                   referenceId={invoiceData?._id}
                   columns={columns}
                   isSendEmail={true}
+                  hideDetailButton={dataRows?.find((e) => e?.subRows?.length) ? false : true}
                 />
               )}
               <Box display="flex" alignItems="center">

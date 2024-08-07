@@ -24,7 +24,7 @@ import { dateFormat } from '../../constants/helpers';
 import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmDialog from '../../components/Helpers/ConfirmationDialog';
 import axiosInstance from '../../axios/axiosInstance';
-import AsyncDropdown from "src/components/Helpers/FormTypes/AsyncDropdown";
+import AsyncDropdown from 'src/components/Helpers/FormTypes/AsyncDropdown';
 import moment from 'moment';
 
 interface FiltersProps {
@@ -58,7 +58,7 @@ interface FiltersProps {
   customReportData?: any;
   isCustomReport?: boolean;
   defaultResource?: any[];
-  reportConfig?: any
+  reportConfig?: any;
 }
 
 const ReportFilters = (props: FiltersProps) => {
@@ -157,7 +157,11 @@ const ReportFilters = (props: FiltersProps) => {
       .filter(
         (d: any) =>
           d.isRead &&
-          (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect' || d.fieldData.type === 'date' || d.fieldData.type === 'checkBox' || d.fieldData.type === "singleLine")
+          (d.fieldData.type === 'dropDown' ||
+            d.fieldData.type === 'multiSelect' ||
+            d.fieldData.type === 'date' ||
+            d.fieldData.type === 'checkBox' ||
+            d.fieldData.type === 'singleLine')
       )
       .map((d: any) => {
         if (d.fieldData.type === 'dropDown' || d.fieldData.type === 'multiSelect') {
@@ -177,7 +181,10 @@ const ReportFilters = (props: FiltersProps) => {
   }, [resourceColumns]);
 
   const setDefaultResource = (val = []) => {
-    setSelectedResources([...filterOptions?.filter((f) => defaultResource.includes(f?.fieldName)), ...val?.filter((f) => !defaultResource.includes(f?.fieldName))]);
+    setSelectedResources([
+      ...filterOptions?.filter((f) => defaultResource.includes(f?.fieldName)),
+      ...val?.filter((f) => !defaultResource.includes(f?.fieldName))
+    ]);
   };
 
   useEffect(() => {
@@ -251,9 +258,9 @@ const ReportFilters = (props: FiltersProps) => {
   useEffect(() => {
     setIsStatusPeriod(
       resource?.includes('Serialized Asset') &&
-      Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
-      formValues?.hasOwnProperty('status') &&
-      formValues.status.length > 0
+        Boolean(selectedResources.find((res) => res.fieldName === 'status')) &&
+        formValues?.hasOwnProperty('status') &&
+        formValues.status.length > 0
     );
   }, [selectedResources, formValues]);
 
@@ -304,15 +311,15 @@ const ReportFilters = (props: FiltersProps) => {
         setStatusTimeFrame('custom');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: '',
-            [`to_statusPeriod`]: ''
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: '',
+              [`to_statusPeriod`]: ''
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: '',
-            [`to_${field.fieldName}`]: ''
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: '',
+              [`to_${field.fieldName}`]: ''
+            }));
 
         break;
 
@@ -320,60 +327,60 @@ const ReportFilters = (props: FiltersProps) => {
         setStatusTimeFrame('1-month');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
-            [`to_statusPeriod`]: new Date()
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: new Date(moment().subtract('1', 'month').calendar()),
+              [`to_statusPeriod`]: new Date()
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
-            [`to_${field.fieldName}`]: new Date()
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'month').calendar()),
+              [`to_${field.fieldName}`]: new Date()
+            }));
 
         break;
       case '3-months':
         setStatusTimeFrame('3-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
-            [`to_statusPeriod`]: new Date()
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: new Date(moment().subtract('3', 'months').calendar()),
+              [`to_statusPeriod`]: new Date()
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
-            [`to_${field.fieldName}`]: new Date()
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: new Date(moment().subtract('3', 'months').calendar()),
+              [`to_${field.fieldName}`]: new Date()
+            }));
         break;
 
       case '6-months':
         setStatusTimeFrame('6-months');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
-            [`to_statusPeriod`]: new Date()
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: new Date(moment().subtract('6', 'months').calendar()),
+              [`to_statusPeriod`]: new Date()
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
-            [`to_${field.fieldName}`]: new Date()
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: new Date(moment().subtract('6', 'months').calendar()),
+              [`to_${field.fieldName}`]: new Date()
+            }));
         break;
 
       case '1-year':
         setStatusTimeFrame('1-year');
         isStatus
           ? setStatusPeriodDate((prevState) => ({
-            ...prevState,
-            [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
-            [`to_statusPeriod`]: new Date()
-          }))
+              ...prevState,
+              [`from_statusPeriod`]: new Date(moment().subtract('1', 'year').calendar()),
+              [`to_statusPeriod`]: new Date()
+            }))
           : setBetweenDate((prevState) => ({
-            ...prevState,
-            [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
-            [`to_${field.fieldName}`]: new Date()
-          }));
+              ...prevState,
+              [`from_${field.fieldName}`]: new Date(moment().subtract('1', 'year').calendar()),
+              [`to_${field.fieldName}`]: new Date()
+            }));
         break;
 
       default:
@@ -387,7 +394,7 @@ const ReportFilters = (props: FiltersProps) => {
           delete prev[`to_${field?.fieldName}`];
           return prev;
         });
-    }
+      }
     }
   };
 
@@ -406,7 +413,7 @@ const ReportFilters = (props: FiltersProps) => {
         if (!formValues[field]) {
           error[field] = `${startCase(field)} is required`;
         }
-      })
+      });
     }
     setError(error);
     return error;
@@ -498,7 +505,7 @@ const ReportFilters = (props: FiltersProps) => {
           )}
         />
         <Box py={2}>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 w-full-chip">
+          <div className="w-full-chip grid grid-cols-1 gap-3 md:grid-cols-2">
             {selectedResources.length > 0 ? (
               selectedResources.map((field: any) => (
                 <React.Fragment key={field._id}>
@@ -509,7 +516,9 @@ const ReportFilters = (props: FiltersProps) => {
                           resource={field.lookupResource}
                           errors={error}
                           touched={error}
-                          multiple={reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? false : true : true}
+                          multiple={
+                            reportConfig?.defaultColumn ? (reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? false : true) : true
+                          }
                           value={formValues[field.fieldName]}
                           onChange={(_, value) => {
                             handleSelectFilter(field?.type, field?.fieldName, value);
@@ -525,9 +534,15 @@ const ReportFilters = (props: FiltersProps) => {
                           touched={error}
                           label={field.fieldLabel}
                           name={field.fieldName}
-                          type={field.type === 'dropDown' ?
-                            reportConfig?.defaultColumn ? reportConfig?.notMultiSelectFields?.includes(field.fieldName) ? field.type : 'multiSelect' : 'multiSelect'
-                            : field.type}
+                          type={
+                            field.type === 'dropDown'
+                              ? reportConfig?.defaultColumn
+                                ? reportConfig?.notMultiSelectFields?.includes(field.fieldName)
+                                  ? field.type
+                                  : 'multiSelect'
+                                : 'multiSelect'
+                              : field.type
+                          }
                           options={field.option}
                           setFieldValue={(name, value) => {
                             handleSelectFilter(field?.type, name, value);
@@ -644,69 +659,71 @@ const ReportFilters = (props: FiltersProps) => {
                     label="Status Period"
                   />
                 </div>
-                {statusPeriod && <>
-                  <FormControl fullWidth size="small" variant="outlined">
-                    <InputLabel id="statusPeriod">Select Duration</InputLabel>
-                    <Select
-                      labelId="statusPeriod"
-                      id="time-duration"
-                      value={statusTimeFrame}
-                      onChange={(e) => {
-                        handleDuration(e.target.value, null, true);
-                        setStatusTimeFrame(e.target.value);
+                {statusPeriod && (
+                  <>
+                    <FormControl fullWidth size="small" variant="outlined">
+                      <InputLabel id="statusPeriod">Select Duration</InputLabel>
+                      <Select
+                        labelId="statusPeriod"
+                        id="time-duration"
+                        value={statusTimeFrame}
+                        onChange={(e) => {
+                          handleDuration(e.target.value, null, true);
+                          setStatusTimeFrame(e.target.value);
+                        }}
+                        label="Select Duration"
+                      >
+                        <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+                        <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+                        <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+                        <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+                        <MenuItem value={'custom'}>Custom</MenuItem>
+                      </Select>
+                    </FormControl>
+                    <KeyboardDatePicker
+                      autoOk
+                      fullWidth
+                      disabled={statusTimeFrame !== 'custom'}
+                      size="small"
+                      variant="inline"
+                      inputVariant="outlined"
+                      name={`from_statusPeriod`}
+                      label={`From Status Period`}
+                      value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
+                      onChange={(date: any) => {
+                        setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
                       }}
-                      label="Select Duration"
-                    >
-                      <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-                      <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-                      <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-                      <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-                      <MenuItem value={'custom'}>Custom</MenuItem>
-                    </Select>
-                  </FormControl>
-                  <KeyboardDatePicker
-                    autoOk
-                    fullWidth
-                    disabled={statusTimeFrame !== 'custom'}
-                    size="small"
-                    variant="inline"
-                    inputVariant="outlined"
-                    name={`from_statusPeriod`}
-                    label={`From Status Period`}
-                    value={statusPeriodDate && statusPeriodDate[`from_statusPeriod`] ? statusPeriodDate[`from_statusPeriod`] : null}
-                    onChange={(date: any) => {
-                      setStatusPeriodDate((prevState) => ({ ...prevState, [`from_statusPeriod`]: date }));
-                    }}
-                    format={dateFormat}
-                    InputLabelProps={{
-                      shrink: true
-                    }}
-                  />
-                  <KeyboardDatePicker
-                    autoOk
-                    fullWidth
-                    size="small"
-                    variant="inline"
-                    disabled={statusTimeFrame !== 'custom'}
-                    inputVariant="outlined"
-                    name={`to_statusPeriod`}
-                    label={`To Status Period`}
-                    value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
-                    onChange={(date: any) => {
-                      setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
-                    }}
-                    format={dateFormat}
-                    InputLabelProps={{
-                      shrink: true
-                    }}
-                  />
-                </>}
+                      format={dateFormat}
+                      InputLabelProps={{
+                        shrink: true
+                      }}
+                    />
+                    <KeyboardDatePicker
+                      autoOk
+                      fullWidth
+                      size="small"
+                      variant="inline"
+                      disabled={statusTimeFrame !== 'custom'}
+                      inputVariant="outlined"
+                      name={`to_statusPeriod`}
+                      label={`To Status Period`}
+                      value={statusPeriodDate && statusPeriodDate[`to_statusPeriod`] ? statusPeriodDate[`to_statusPeriod`] : null}
+                      onChange={(date: any) => {
+                        setStatusPeriodDate((prevState) => ({ ...prevState, [`to_statusPeriod`]: date }));
+                      }}
+                      format={dateFormat}
+                      InputLabelProps={{
+                        shrink: true
+                      }}
+                    />
+                  </>
+                )}
               </>
             )}
           </div>
         </Box>
         <Box mt={2}>
-          {!isCustomReport && (
+          {/* {!isCustomReport && (
             <Box height={'100%'} mb={2}>
               <Autocomplete
                 options={reportList}
@@ -740,7 +757,7 @@ const ReportFilters = (props: FiltersProps) => {
                 renderInput={(params) => <TextField {...params} variant="outlined" label="Select View" size="small" />}
               />
             </Box>
-          )}
+          )} */}
           <Button
             onClick={() => {
               const error = validate(formValues);

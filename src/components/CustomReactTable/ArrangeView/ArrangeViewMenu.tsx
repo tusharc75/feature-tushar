@@ -1,4 +1,4 @@
-import { Divider, Fade, IconButton, List, ListItem, Menu, Popper } from '@material-ui/core';
+import { Divider, Fade, IconButton, List, ListItem, Menu, MenuItem, Popper } from '@material-ui/core';
 import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
 import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
@@ -14,6 +14,7 @@ import { SET_USER } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 export type GridViewSavedData = {
   _id: string;
@@ -42,6 +43,7 @@ type ArrangeViewMenuProps = {
   expander: boolean;
 };
 const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander }: ArrangeViewMenuProps) => {
+  const walkmeInstance = useGetWalkmeInstance();
   const { loading } = state;
   const { gridMetaData, setGridMetaData } = useGridMetaData();
 
@@ -169,6 +171,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
         onClose={() => setAnchorEl(null)}
         keepMounted={false}
         getContentAnchorEl={null}
+        transitionDuration={walkmeInstance ? 0 : 250}
         anchorOrigin={{
           vertical: 'bottom',
           horizontal: 'right'
@@ -184,7 +187,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           className: '!p-0 min-w-[min(400px,calc(100vw-40px))] max-w-[400px] '
         }}
       >
-        <>
+        <div>
           <div className="body">
             <div className="head p-2 text-center [border-bottom:1px_solid_var(--common-border-color)]">
               <h5 className="bold text-lg">Views</h5>
@@ -259,7 +262,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
               </ThemeButton>
             </div>
           </div>
-        </>
+        </div>
       </Menu>
 
       {editCreateDialogData.open && (
