@@ -22,12 +22,6 @@ const AzureSSOLogin = () => {
           data: { data }
         } = res;
 
-        // if (data?.user?.gridMetaData) {
-        //   let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
-        //   localStorage.setItem('gridMetaData', tempMetaData);
-        //   dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
-        // }
-
         dispatch({ type: SET_USER, payload: data });
 
         if (data?.role?.selectedEntity?._id) {
