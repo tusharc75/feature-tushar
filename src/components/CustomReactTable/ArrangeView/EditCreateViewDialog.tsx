@@ -315,7 +315,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
               </p>
               <div className="shadow-md [border:1px_solid_var(--common-border-color)]">
                 <div className="p-3 px-[20px] [border-bottom:1px_solid_var(--common-border-color)]">
-                  <div className="flex justify-between gap-2">
+                  <div className="flex items-center justify-between gap-2">
                     <TextField
                       label="Search..."
                       className="max-w-[350px] flex-grow"
