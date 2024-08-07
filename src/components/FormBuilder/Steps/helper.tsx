@@ -154,6 +154,12 @@ export const resourcePolicy = [
         fieldLabel: 'Customer Account Wise Packages',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'hidePackageInInvoice',
+        fieldLabel: 'Hide Package In Invoice',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
