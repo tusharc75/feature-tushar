@@ -249,7 +249,6 @@ export default function AssetDetailsChangeDialog({
   };
 
   const getValueInImport = (data: any, asset: string, product: string, fieldLabel: string, assetData: any[]) => {
-    console.log('assetData', assetData, asset)
     const index = assetData?.findIndex((a) => a?.assetNumber === asset && a?.productName === product);
     const field = initialData?.fields?.find((f) => f?.fieldLabel === fieldLabel);
     if (index > -1 && field) {
