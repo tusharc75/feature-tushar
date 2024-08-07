@@ -75,7 +75,7 @@ const LogIn = ({ dispatch, notification, chatNotification }) => {
       <Button fullWidth variant="outlined" className="azure-login" onClick={handleFaceLogin}>
         Face Login
       </Button>
-      {camOpen && <FaceLiveNess open={camOpen} onClose={() => setCamOpen(false)} onComplete={handleCapture} />}
+      {camOpen && <FaceLiveNess onClose={() => setCamOpen(false)} onComplete={handleCapture} />}
     </div>
   );
 };
