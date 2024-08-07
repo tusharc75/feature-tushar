@@ -25,7 +25,7 @@ export const userManual = {
     link: 'https://docs.equip-t.com/auth/login'
   };
 
-const DocsLogin = () => {
+const Oauth = () => {
 
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
@@ -71,16 +71,16 @@ const DocsLogin = () => {
 //     }
 //   }, [account]);
 
-  useEffect(() => {
-    if (invalidAzureLogin) {
-      if (invalidAzureLogin && counter) {
-        setTimeout(() => setCounter(counter - 1), 1000);
-      } else {
-        instance.logout();
-        setInvalidAzureLogin(false);
-      }
-    }
-  }, [invalidAzureLogin, counter]);
+//   useEffect(() => {
+//     if (invalidAzureLogin) {
+//       if (invalidAzureLogin && counter) {
+//         setTimeout(() => setCounter(counter - 1), 1000);
+//       } else {
+//         instance.logout();
+//         setInvalidAzureLogin(false);
+//       }
+//     }
+//   }, [invalidAzureLogin, counter]);
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
@@ -134,16 +134,9 @@ const DocsLogin = () => {
               >
                 {({ submitForm, values, errors, touched, setFieldValue }) => (
                   <Form>
-                    <UnauthenticatedTemplate>
-                      <AzureLogin />
-                      {/* <FacialLogin
-                        dispatch={dispatch}
-                        notification={notification}
-                        chatNotification={chatNotification} /> */}
-                    </UnauthenticatedTemplate>
-                    <Box className={styles.or}>
+                    {/* <Box className={styles.or}>
                       <Typography>or sign in with</Typography>
-                    </Box>
+                    </Box> */}
                     <div className={styles.fields}>
                       <div className={styles.input}>
                         <TextField
@@ -204,23 +197,6 @@ const DocsLogin = () => {
                       >
                         Sign In
                       </Button>
-
-                      <AuthenticatedTemplate>
-                        {invalidAzureLogin ? (
-                          <span>Not authorized loging out in {counter}</span>
-                        ) : (
-                          <Button
-                            className="logo-bg-color"
-                            variant="contained"
-                            fullWidth
-                            startIcon={<SiMicrosoftoffice />}
-                            disabled={isSubmitting}
-                            onClick={() => instance.logoutPopup()}
-                          >
-                            Office 365 Log Out
-                          </Button>
-                        )}
-                      </AuthenticatedTemplate>
                     </Box>
                   </Form>
                 )}
@@ -236,4 +212,4 @@ const DocsLogin = () => {
   );
 };
 
-export default DocsLogin;
+export default Oauth;

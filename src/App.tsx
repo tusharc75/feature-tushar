@@ -258,7 +258,8 @@ import Integration from 'src/pages/Integration';
 import EquiptAi from 'src/pages/EquiptAi';
 import WorkSpace from 'src/pages/WorkSpace';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
-import DocsLogin from './pages/Auth/DocsLogin';
+import Oauth from './pages/Auth/Oauth';
+
 
 var notificationInterval: any = null;
 
@@ -410,8 +411,8 @@ function App() {
             />
             <Route
               // exact
-              path="/docslogin"
-              render={({ location }) => conditionalRedirect(DocsLogin, location)}
+              path="/auth/login"
+              render={({ location }) => conditionalRedirect(Oauth, location)}
             />
             <Route
               // exact
