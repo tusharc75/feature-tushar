@@ -21,7 +21,7 @@ const RowNumberDialog = ({ handleClose, onSuccess }) => {
 			fullScreen={isMobile || isTablet}
 			TransitionComponent={CustomDialogTransition}
 			disableEnforceFocus
-			maxWidth={'sm'}
+			maxWidth={'xs'}
 			open={true}
 			onClose={(e, reason) => {
 				if (reason !== 'backdropClick') {
@@ -31,15 +31,15 @@ const RowNumberDialog = ({ handleClose, onSuccess }) => {
 			<Formik initialValues={initialValues} onSubmit={handleSave}>
 				{({ submitForm, touched, errors, setFieldValue, values }) => (
 					<>
-						<CustomDialogHeader title={'Excel Rows'} showRequiredLabel={false} onClose={handleClose} ></CustomDialogHeader>
+						<CustomDialogHeader title={'Enter Excel Row Number'} showRequiredLabel={false} onClose={handleClose} ></CustomDialogHeader>
 						<CustomDialogContent>
 							<Form autoComplete="off" autoCorrect="off" noValidate>
 								<Grid container spacing={2}>
-									<Grid item sm={12} xs={6} md={6} lg={6}>
+									<Grid item sm={12} xs={12} md={12} lg={12}>
 										<TextField
 											variant="outlined"
 											type="number"
-											label={'From'}
+											label={'From Row Number'}
 											name="fromRow"
 											fullWidth
 											margin="dense"
@@ -50,11 +50,11 @@ const RowNumberDialog = ({ handleClose, onSuccess }) => {
 											}}
 										/>
 									</Grid>
-									<Grid item sm={12} xs={6} md={6} lg={6}>
+									<Grid item sm={12} xs={12} md={12} lg={12}>
 										<TextField
 											variant="outlined"
 											type="number"
-											label={'To'}
+											label={'To Row Number'}
 											name="toRow"
 											fullWidth
 											margin="dense"
@@ -74,7 +74,7 @@ const RowNumberDialog = ({ handleClose, onSuccess }) => {
 								Cancel
 							</Button>
 							<Button size="small" type="submit" color="primary" onClick={submitForm} variant="contained">
-								Ok
+								Submit
 							</Button>
 						</CustomDialogFooter>
 					</>

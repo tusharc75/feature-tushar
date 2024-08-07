@@ -488,8 +488,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     <TextField {...params} margin="dense" variant="outlined" label="Price Template" placeholder="Price Template" />
                   )}
                 />
-              </div>
-              <div className="ml-auto flex flex-wrap items-center gap-2">
                 <input
                   id={`customImportFile`}
                   name={`customImportFile`}
@@ -517,7 +515,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     </span>
                   </HtmlTooltip>
                 </label>
-
+              </div>
+              <div className="ml-auto flex flex-wrap items-center gap-2">
                 <>
                   <HtmlTooltip title={'Add'}>
                     <span>
