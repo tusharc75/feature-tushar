@@ -30,33 +30,6 @@ export const gridFilterParser = (filters) => {
   return { filterByIds, deepFilters };
 };
 
-export const getGridMetaDataFromLocalStorage = () => {
-  try {
-    const data = localStorage.getItem('gridMetaData');
-    if (data && data !== 'undefined') {
-      return JSON.parse(data);
-    } else {
-      return {};
-    }
-  } catch (ex) {
-    return {};
-  }
-};
-
-export const getTableDataFromLocalStorage = (renderedFrom: string): { hide?: string[]; order?: string[] } | false => {
-  const data = getGridMetaDataFromLocalStorage();
-  return data[renderedFrom] || null;
-};
-
-export const returnHiddenCols = (renderedFrom, hideAction) => {
-  const gridMetaData = getGridMetaDataFromLocalStorage();
-  const hiddenCols = gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide ? gridMetaData[renderedFrom]?.hide : [];
-  if (hideAction) {
-    hiddenCols.push('action');
-  }
-  return hiddenCols;
-};
-
 export const getStickyPosition = (columnDef: TColType, index, table) => {
   const obj = {
     className: columnDef.sticky ? `sticky-cell-${columnDef.sticky}` : '',
