@@ -1,4 +1,4 @@
-import { Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Form, Formik } from 'formik';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -10,7 +10,7 @@ import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_
 function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
 
   const serialNumberOptions = data?.serialNumber?.filter((s: any) => s?.status === PRODUCT_SERIAL_NUMBER_STATUS.available) || [];
-  
+
   function validate(values) {
     const errors = {};
     if (status === MATERIAL_REQUEST_STATUS.processed && data) {
@@ -62,25 +62,8 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                   }}
                 />
               }
-              <TextField
-                margin="dense"
-                type="text"
-                label="Comment"
-                name="comment"
-                fullWidth
-                multiline
-                rows={2}
-                required={status === MATERIAL_REQUEST_STATUS.processed ? false : true}
-                variant="outlined"
-                value={values['comment']}
-                error={touched['comment'] && Boolean(errors['comment'])}
-                helperText={touched['comment'] && errors['comment']}
-                onChange={(e) => {
-                  setFieldValue('comment', e.target.value);
-                }}
-              />
               {status === MATERIAL_REQUEST_STATUS.processed && data && serialNumberOptions?.length ? (
-                <>
+                <Box mt={2} mb={1}>
                   <Autocomplete
                     options={[
                       { optionValue: 'all', optionLabel: 'Select All' },
@@ -101,8 +84,25 @@ function QtyDialog({ open, loading, onClose, data, status, onSuccess }) {
                       <TextField required={true} {...params} label="Select Serial Number" name="serialNumber" variant="outlined" error={touched['serialNumber'] && Boolean(errors['serialNumber'])} helperText={touched['serialNumber'] && errors['serialNumber']} />
                     )}
                   />
-                </>
+                </Box>
               ) : null}
+              <TextField
+                margin="dense"
+                type="text"
+                label="Comment"
+                name="comment"
+                fullWidth
+                multiline
+                rows={2}
+                required={status === MATERIAL_REQUEST_STATUS.processed ? false : true}
+                variant="outlined"
+                value={values['comment']}
+                error={touched['comment'] && Boolean(errors['comment'])}
+                helperText={touched['comment'] && errors['comment']}
+                onChange={(e) => {
+                  setFieldValue('comment', e.target.value);
+                }}
+              />
             </CustomDialogContent>
             <CustomDialogFooter>
               <Button
