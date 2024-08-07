@@ -458,6 +458,7 @@ function Dropdown({
                 {...rest}
                 limitTags={2}
                 multiple
+                disabled={fieldData?.isUneditable || rest?.disabled || isDisabled}
                 disableCloseOnSelect={true}
                 options={[
                   ...(dropdownOptions(option, values, fields, fieldData).length > 0 ? [{ optionValue: 'selectAll', optionLabel: 'Select All' }] : []),
