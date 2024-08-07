@@ -77,7 +77,6 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       const columnsWithoutSticky = columns.filter((d) => !stickycolumns.stickyColumns.includes(d.id)).map((c) => c.id);
       columnOrder = [...stickycolumns.left, ...columnsWithoutSticky, ...stickycolumns.right];
     }
-    console.log(columnOrder);
     dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
     dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
 
