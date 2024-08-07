@@ -256,7 +256,13 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
               )}
             </div>
             <div className="footer mt-2 flex justify-end gap-2 p-2 [border-top:1px_solid_var(--common-border-color)]">
-              <ThemeButton iconForMobile={false} onClick={() => applyViewInTable([], [])}>
+              <ThemeButton
+                iconForMobile={false}
+                onClick={() => {
+                  setAnchorEl(null);
+                  applyViewInTable([], []);
+                }}
+              >
                 Reset
               </ThemeButton>
               <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>
