@@ -493,7 +493,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
               {consumeRequest ? (
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).consumedQty && !validate(values.products).storageLocation) {
+                    if (!validate(values.products).consumedQty && !validate(values.products).storageLocation && !Boolean(validate(values.products).serialNumber)) {
                       handleRequest(values);
                     }
                   }}
