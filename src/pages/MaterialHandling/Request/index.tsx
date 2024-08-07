@@ -343,9 +343,15 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
           data={qtyDialog.data}
           onSuccess={(data) => {
             if (qtyDialog?.data) {
+              let serialNumbers = [];
+              if (qtyDialog.status === MATERIAL_REQUEST_STATUS.closed) {
+                serialNumbers = qtyDialog.data?.serialNumber?.map((s: any) => s.optionValue) || [];
+              } else {
+                serialNumbers = data?.serialNumber || [];
+              }
               handleUpdateStatus(
                 qtyDialog.status,
-                [{ _id: qtyDialog.data?._id, uniqueId: qtyDialog.data?.uniqueId, qty: parseInt(data?.qty), serialNumber: data?.serialNumber || [] }],
+                [{ _id: qtyDialog.data?._id, uniqueId: qtyDialog.data?.uniqueId, qty: parseInt(data?.qty), serialNumber: serialNumbers }],
                 data.comment || ''
               );
             } else if (selectedRecords?.length) {
