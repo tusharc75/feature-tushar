@@ -1,37 +1,28 @@
-import React from 'react';
-import { useParams } from 'react-router-dom';
-import { Grid, useTheme, Button, Box } from '@material-ui/core';
-import { camelCase, kebabCase, startCase } from 'lodash';
+import MomentUtils from '@date-io/moment';
+import { Box, Button, Grid } from '@material-ui/core';
+import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import axios from 'axios';
+import { camelCase, kebabCase, startCase } from 'lodash';
+import React from 'react';
 import { MdChevronLeft } from 'react-icons/md';
-import styles from '../Leads/Header.module.scss';
-import routes from './../../components/Helpers/Routes';
+import { useHistory, useParams } from 'react-router-dom';
+import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
-import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
-import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import {
-  prepareDataForGrid,
-  gridLoadingTimeout,
-  downloadExcel,
-  primaryFields,
-  sidebarResource,
-  REPORT_LIST
-} from './../../constants/helpers';
-import MomentUtils from '@date-io/moment';
-import { MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { useData } from '../../StateProvider/Provider';
+import styles from '../Leads/Header.module.scss';
 import ReportFilters from '../Report/ReportFilters';
-import { useHistory } from 'react-router-dom';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
+import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import routes from './../../components/Helpers/Routes';
+import { downloadExcel, gridLoadingTimeout, prepareDataForGrid, primaryFields, REPORT_LIST, sidebarResource } from './../../constants/helpers';
 
 let cancelTokenSource = null;
 
 const CustomReport = () => {
-  const theme = useTheme();
   const history = useHistory();
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -51,7 +42,6 @@ const CustomReport = () => {
   const [isExporting, setExporting] = React.useState(false);
   const [loadingColumns, setLoadingColumns] = React.useState(false);
   const [statusPeriod, setStatusPeriod] = React.useState(false);
-  const [reportList, setReportList] = React.useState([]);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
   const [customReportData, setCustomReportData] = React.useState(null);
   const { generateColumns } = useColumns();
@@ -64,12 +54,12 @@ const CustomReport = () => {
   const fetchGridColumns = async (res) => {
     let result = [];
     setLoadingColumns(true);
-    if (REPORT_LIST?.find(r => r?.title === startCase(res))?.key === 'standardReport') {
+    if (REPORT_LIST?.find((r) => r?.title === startCase(res))?.key === 'standardReport') {
       let {
         data: {
           data: { columnFields }
         }
-      } = await axiosInstance().get(`/report/${kebabCase(REPORT_LIST?.find(r => r?.title === startCase(res))?.type)}/column`);
+      } = await axiosInstance().get(`/report/${kebabCase(REPORT_LIST?.find((r) => r?.title === startCase(res))?.type)}/column`);
 
       result = columnFields;
     } else {
@@ -137,19 +127,6 @@ const CustomReport = () => {
   }, [id]);
 
   React.useEffect(() => {
-    if (resource) {
-      axiosInstance()
-        .get(`/report-colum-setting?resource=${kebabCase(resource)}`)
-        .then(({ data: { data } }) => {
-          setReportList(data);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  }, [showGrid, resource]);
-
-  React.useEffect(() => {
     if (showGrid && resource) {
       fetchResourceData();
     }
@@ -179,17 +156,18 @@ const CustomReport = () => {
     }
     cancelTokenSource = axios.CancelToken.source();
     dispatch({ type: 'loading', loading: true });
-    const api = `/report${camelCase(resource) === 'quotes'
-      ? '/quote-builder'
-      : routes[camelCase(resource)]
-        ? routes[camelCase(resource)]?.path
-        : `/${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
-      }${queryString}`;
+    const api = `/report${
+      camelCase(resource) === 'quotes'
+        ? '/quote-builder'
+        : routes[camelCase(resource)]
+          ? routes[camelCase(resource)]?.path
+          : `/${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
+    }${queryString}`;
 
     axiosInstance()
       .get(api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count, columns } }) => {
-        if (camelCase(resource) == 'numberOfAssetsByStatus') {
+        if (camelCase(resource) === 'numberOfAssetsByStatus') {
           setLoadingColumns(true);
           setResourceColumns(columns);
           let col = [];
@@ -271,11 +249,12 @@ const CustomReport = () => {
     let queryString = getQueryString(true);
     axiosInstance()
       .get(
-        `/report/${camelCase(resource) === 'quotes'
-          ? 'quote-builder'
-          : routes[camelCase(resource)]
-            ? routes[camelCase(resource)]?.path
-            : `${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
+        `/report/${
+          camelCase(resource) === 'quotes'
+            ? 'quote-builder'
+            : routes[camelCase(resource)]
+              ? routes[camelCase(resource)]?.path
+              : `${kebabCase(REPORT_LIST?.find((r) => r?.title === resource)?.type)}`
         }/export?exportColumn=${JSON.stringify(exportColumns)}&export=1&${queryString}`,
         {
           responseType: 'arraybuffer'
@@ -302,14 +281,10 @@ const CustomReport = () => {
     exportColumns =
       customReportData?.column && customReportData?.column.length > 0
         ? columns?.filter((col) => customReportData?.column.includes(col.accessor))?.map((col) => col.accessor)
-        : columns?.map((col) => col.accessor); 
+        : columns?.map((col) => col.accessor);
     let queryString = getQueryString(true);
-    let resourceCamelCase = camelCase(resource)
-    let resourcePath = resourceCamelCase === 'quotes'
-    ? 'quote-builder'
-    : routes[resourceCamelCase]
-    ? routes[resourceCamelCase]?.path
-    : ``
+    let resourceCamelCase = camelCase(resource);
+    let resourcePath = resourceCamelCase === 'quotes' ? 'quote-builder' : routes[resourceCamelCase] ? routes[resourceCamelCase]?.path : ``;
     return `/report${resourcePath}/export?exportColumn=${JSON.stringify(exportColumns)}&${queryString}`;
   };
 
@@ -324,27 +299,26 @@ const CustomReport = () => {
             <Grid container direction="row">
               <Grid item xs={12} sm={12}>
                 <Grid container justifyContent="flex-end">
-                  {showGrid && (
-                   ['dynamic','inUsedSerializedAsset']?.includes(REPORT_LIST?.find((r)=> r?.title === resource)?.type) ?
-                    <AsynImportExportMenu
-                    resource={resource}
-                    subResource={'report'}
-                    permissions={resource === 'In Used Serialized Asset' ? permissions?.report : permissions[camelCase(resource) === 'quotes' ? 'quoteBuilder' : camelCase(resource)]}
-                    module={''}
-                    api={resource === 'In Used Serialized Asset' ? `/report/${kebabCase(resource)}` : getApi()}
-                    afterImportCompleted={() => { }}
-                    onlyExport={true}
-                  />
-                  :
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      disabled={isExporting}
-                      onClick={exportData}
-                      className={`btn-outline-v-1`}>
-                      Export All
-                    </Button>
-                  )}
+                  {showGrid &&
+                    (['dynamic', 'inUsedSerializedAsset']?.includes(REPORT_LIST?.find((r) => r?.title === resource)?.type) ? (
+                      <AsynImportExportMenu
+                        resource={resource}
+                        subResource={'report'}
+                        permissions={
+                          resource === 'In Used Serialized Asset'
+                            ? permissions?.report
+                            : permissions[camelCase(resource) === 'quotes' ? 'quoteBuilder' : camelCase(resource)]
+                        }
+                        module={''}
+                        api={resource === 'In Used Serialized Asset' ? `/report/${kebabCase(resource)}` : getApi()}
+                        afterImportCompleted={() => {}}
+                        onlyExport={true}
+                      />
+                    ) : (
+                      <Button variant="outlined" size="small" disabled={isExporting} onClick={exportData} className={`btn-outline-v-1`}>
+                        Export All
+                      </Button>
+                    ))}
                 </Grid>
               </Grid>
             </Grid>
@@ -353,7 +327,7 @@ const CustomReport = () => {
         <CustomContainer>
           <div className="header-panel">
             <Grid container className={styles.filter_side_container}>
-              <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+              <Grid item xs={12} className="d-flex align-items-center layout-for-tablet gap-1">
                 <Box display="flex" justifyContent="center" alignItems="center">
                   {showGrid && (
                     <Box mr={1}>
@@ -397,10 +371,6 @@ const CustomReport = () => {
               formValues={formValues}
               setFormValues={setFormValues}
               loadingColumns={loadingColumns}
-              setSelectedReportView={null}
-              selectedReportView={null}
-              reportList={reportList}
-              setReportList={setReportList}
               statusPeriod={statusPeriod}
               setStatusPeriod={setStatusPeriod}
               statusPeriodDate={statusPeriodDate}
