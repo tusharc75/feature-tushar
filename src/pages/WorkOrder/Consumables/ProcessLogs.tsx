@@ -76,6 +76,26 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
         Cell: ({ row }) => {
           return row?.original['comment'] ? <p className="text-truncate">{row?.original['comment']}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'serialNumber',
+        Header: 'Serial Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return (
+            <>
+              {row?.original['serialNumber']?.length ? (
+                <>
+                  <p className="text-truncate">
+                    {row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}
+                  </p>
+                </>
+              ) : (
+                <NoDataCell />
+              )}
+            </>
+          )
+        }
       }
     ];
     column.push({

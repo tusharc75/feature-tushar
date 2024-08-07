@@ -2764,6 +2764,11 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   needReperform: 'Need Reperform'
 };
 
+export const PRODUCT_SERIAL_NUMBER_STATUS = {
+  available: 'Available',
+  unAvailable: 'Unavailable',
+};
+
 type ChipStatus =
   | 'Pending'
   | 'Backlog'
