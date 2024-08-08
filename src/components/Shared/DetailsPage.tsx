@@ -1,5 +1,5 @@
-import { Avatar, Box, GridSize, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
-import { Image, InfoOutlined } from '@material-ui/icons';
+import { Avatar, Box, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
+import { Image, InfoOutlined, MoreHoriz } from '@material-ui/icons';
 import { camelCase, kebabCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
@@ -23,6 +23,9 @@ import CarouselDialog from '../CarouselDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
 import CopyToClipboard from '../Helpers/CopyToClipboard';
 import { FiExternalLink } from 'react-icons/fi';
+import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
+import axios, { CancelTokenSource } from 'axios';
+import axiosInstance from 'src/axios/axiosInstance';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -85,6 +88,8 @@ interface DetailProps {
   gridSize?: GridSize;
   containerPadding?: string | number;
   fullHeight?: boolean;
+  resource?: string;
+  referenceId?: string;
 }
 
 const Details = (props: DetailProps) => {
@@ -92,11 +97,13 @@ const Details = (props: DetailProps) => {
   const {
     state: { permissions, user }
   }: any = useData();
-  const { data, fields, gridSize, containerPadding, fullHeight = false } = props;
+  const { data, fields, gridSize, containerPadding, fullHeight = false, resource = null, referenceId = null } = props;
 
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [dialogData, setDialogData] = useState<any>(null);
+  const [open, setOpen] = useState({ open: false, section: null });
+  const [taskData, setTaskdata] = useState(null)
 
   useEffect(() => {
     sortArray();
@@ -388,6 +395,23 @@ const Details = (props: DetailProps) => {
     }
   };
 
+  useEffect(() => {
+    if (resource && referenceId) {
+      const cancelTokenSource = axios.CancelToken.source();
+      fetchtaskData(cancelTokenSource);
+      return () => cancelTokenSource.cancel();
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }
+  }, [resource, referenceId])
+
+  const fetchtaskData = async (cancelTokenSource?: CancelTokenSource) => {
+    axiosInstance()
+      .get(`/task?relatedTo=${JSON.stringify([{ type: resource, referenceId: referenceId, access: true }])}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
+        setTaskdata(data)
+      })
+  };
+
   return (
     <div className="form-v1">
       {formsData?.map((form) => {
@@ -403,6 +427,22 @@ const Details = (props: DetailProps) => {
                   <h3 className="form-label-style-v1" title={form.name}>
                     {form.name}
                   </h3>
+                  {resource && referenceId && (
+                    <div>
+                      <IconButton
+                        style={{ padding: '0px' }}
+                        title="Follow-Ups"
+                        size="small"
+                        color="primary"
+                        aria-label="follow-ups"
+                        onClick={() => {
+                          setOpen({ open: true, section: { name: form?.name, sectionFields: form?.sectionFields?.map(f => f?.fieldData) } });
+                        }}
+                      >
+                        <MoreHoriz fontSize="small" />
+                      </IconButton>
+                    </div>
+                  )}
                 </div>
                 <div className="formdata-v1 grid grid-cols-12">
                   {form.sectionFields.map((field, i) => (
@@ -492,6 +532,16 @@ const Details = (props: DetailProps) => {
         );
       })}
       {dialogData && dialogData.open && <CarouselDialog index={dialogData.index} close={() => setDialogData(null)} images={dialogData.images} />}
+      {open?.open && (
+        <FollowUpsDialog
+          onClose={() => {
+            setOpen({ open: false, section: null });
+          }}
+          section={open?.section}
+          resource={resource}
+          referenceId={referenceId}
+        />
+      )}
     </div>
   );
 };
