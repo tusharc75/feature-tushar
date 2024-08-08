@@ -9,7 +9,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField
+  TextField,
+  useMediaQuery
 } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
@@ -31,12 +32,14 @@ import './calendarView.scss';
 import { useData } from 'src/StateProvider/Provider';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
+
 const localizer = momentLocalizer(moment);
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
+  const isMobile = useMediaQuery('(max-width:768px)');
   const {
     state: { permissions }
   }: any = useData();
@@ -681,7 +684,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             localizer={localizer}
             onEventDrop={moveEvent}
             onEventResize={resizeEvent}
-            popup={true}
+            popup={!isMobile}
             messages={{
               agenda: 'List'
             }}
@@ -709,7 +712,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             events={events}
             formats={formats}
             localizer={localizer}
-            popup={true}
+            popup={!isMobile}
             messages={{
               agenda: 'List'
             }}
