@@ -419,13 +419,15 @@ const WorkOrderDetails = () => {
       onClick: () => {
         if (workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length) {
           setOpenTotalCostDialog(true)
-        } else {
+        } else if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
           const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.available);
           if (statusPolicy) {
             setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy })
           } else {
             updateStatus(WORK_ORDER_STATUS.completed)
           }
+        } else {
+          updateStatus(WORK_ORDER_STATUS.completed)
         }
       },
       iconForMobile: <FaDoorClosed />,
