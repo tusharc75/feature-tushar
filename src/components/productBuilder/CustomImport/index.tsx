@@ -15,7 +15,8 @@ import {
   IconButton,
   useMediaQuery,
   Menu,
-  MenuItem
+  MenuItem,
+  Typography
 } from '@material-ui/core';
 import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
@@ -592,11 +593,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   <TableBody>
                     {templateImportHeader?.map((_key) => {
                       const selectedCustomInputHeader = keyValue.find((kv) => kv.templateImportHeader === _key?.value)?.customImportHeader;
+                      const field = fields?.find(f => f?.fieldName === 'productName')
                       return (
                         <TableRow key={_key?.value}>
                           <TableCell component="th" scope="row">
                             {' '}
                             {_key?.label}{' '}
+                            {_key?.value === field?.fieldLabel?.toUpperCase() && (
+                              <span style={{ color: "#dc3545" }}>*</span>
+                            )}
                             {addedField?.map(f => f?.fieldLabel?.toUpperCase())?.includes(_key?.label) && (
                               <IconButton
                                 size="small"
@@ -628,7 +633,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                 setKeyValue([...tempKeyValues, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
                               }}
                               style={{ maxWidth: '500px' }}
-                              renderInput={(params) => <TextField {...params} label="" variant="outlined" />}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  label=""
+                                  variant="outlined"
+                                  error={_key?.value === field?.fieldLabel?.toUpperCase() && !keyValue?.some(k => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)}
+                                  helperText={(_key?.value === field?.fieldLabel?.toUpperCase() && !keyValue?.some(k => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)) && 'Required field'}
+                                />
+                              )}
                             />
                           </TableCell>
                         </TableRow>
@@ -647,7 +660,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               onClick={handleCustomImport}
               variant="contained"
               color="primary"
-              disabled={loading || !values?.productCategory || !values?.productTemplate || !values?.priceTemplate}
+              disabled={loading || !values?.productCategory || !values?.productTemplate || !values?.priceTemplate || !keyValue?.some(k => k?.templateImportHeader === fields?.find(f => f?.fieldName === 'productName')?.fieldLabel?.toUpperCase() && k?.customImportHeader)}
               loading={loading}
             >
               Save
