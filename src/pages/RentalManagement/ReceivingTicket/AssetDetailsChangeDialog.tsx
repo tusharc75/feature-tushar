@@ -155,7 +155,9 @@ export default function AssetDetailsChangeDialog({
       }
       data.push({ ...obj, ...resetValues });
     });
-    setAssetsData(data);
+    if (setAssetsData) {
+      setAssetsData(data);
+    }
     onSuccess(data);
     setSubmitting(false);
   };
