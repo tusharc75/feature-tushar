@@ -13,7 +13,14 @@ import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImage
 import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { dateFormat, dateTimeFormat, formatAmountWithCurrency, getUniqueCurrencies, sidebarResourceObjectFromValues } from 'src/constants/helpers';
+import {
+  dateFormat,
+  dateTimeFormat,
+  formatAmountWithCurrency,
+  formatTotalforTableFooter,
+  getUniqueCurrencies,
+  sidebarResourceObjectFromValues
+} from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import routes from '../../Helpers/Routes';
@@ -254,7 +261,7 @@ export default function useColumns() {
                   <>
                     {field?.isHideColumnSum
                       ? ''
-                      : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}`}
+                      : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? formatTotalforTableFooter(total)}`}
                   </>
                 );
               }
@@ -495,7 +502,7 @@ export default function useColumns() {
             const total = rows
               ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
               .reduce((sum, row) => Number(row.original[commonFieldData.accessor]) + sum, 0);
-            return <>{field?.isHideColumnSum ? '' : total}</>;
+            return <>{field?.isHideColumnSum ? '' : formatTotalforTableFooter(total)}</>;
           }
         });
       } else if (field.type === 'signature') {
