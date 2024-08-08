@@ -150,6 +150,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
                         type="text"
                         size="small"
                         name="name"
+                        autoComplete="off"
                         value={values?.name}
                         required
                         onChange={(e) => {

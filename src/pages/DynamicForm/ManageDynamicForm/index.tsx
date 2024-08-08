@@ -23,7 +23,8 @@ const ManageDynamicForm = ({
   redirected = true,
   isClone = false,
   id = null,
-  referenceData = null
+  referenceData = null,
+  collaborateTools = false
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -241,8 +242,8 @@ const ManageDynamicForm = ({
                     onImageUploadCompletePercentage={(completePercentage) => {
                       setUploadingImageOrFileProgress(completePercentage);
                     }}
-                    resource={resource}
-                    referenceId={id}
+                    resource={collaborateTools ? resource : null}
+                    referenceId={collaborateTools ? id : null}
                   />
                 </Form>
               </CustomDialogContent>

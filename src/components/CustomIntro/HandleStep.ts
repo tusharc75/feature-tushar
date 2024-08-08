@@ -133,6 +133,7 @@ export class HandleSteps {
   }
 
   attachObservers() {
+    this.attachedOvservers.map((o) => o.cleanup());
     const currStepData = this.currentStepData;
     if (!currStepData) return;
     const isObserverPresent = this.attachedOvservers.find((o) => o.actualIndex === this.currentIndex);
@@ -181,7 +182,12 @@ export class HandleSteps {
         this.attachedOvservers.push(observer);
       } else {
         // Track Text input via observer
-        let validator = (value: string) => value.length > 0 && value !== '0';
+        let validator = (value: string) => {
+          if (['decimal', 'currencyAmount'].includes(this.currentStepData.fieldType)) {
+            return value.length > 0 && Number(value) !== 0;
+          }
+          return value.length > 0;
+        };
         if (typeof this.currentStepData.nextOnValueChange === 'function') {
           validator = this.currentStepData.nextOnValueChange;
         }
@@ -302,21 +308,21 @@ export class HandleSteps {
       // this.scrollToCurrentStep(element);
 
       // Check if value exist then move on to the next step
-      if (activeStep.skipIfValueExist) {
-        const inputElement = element as HTMLInputElement;
-        let validator = (value: string) => {
-          if (['decimal', 'currencyAmount'].includes(activeStep.fieldType)) {
-            return value.length > 0 && Number(value) !== 0;
-          }
-          return value.length > 0;
-        };
+      // if (activeStep.skipIfValueExist) {
+      //   const inputElement = element as HTMLInputElement;
+      //   let validator = (value: string) => {
+      //     if (['decimal', 'currencyAmount'].includes(activeStep.fieldType)) {
+      //       return value.length > 0 && Number(value) !== 0;
+      //     }
+      //     return value.length > 0;
+      //   };
 
-        if (validator(inputElement.value)) {
-          this.clicked = false;
-          this.next();
-          return;
-        }
-      }
+      //   if (validator(inputElement.value)) {
+      //     this.clicked = false;
+      //     this.next();
+      //     return;
+      //   }
+      // }
 
       this.currentStepData = {
         ...activeStep,
@@ -334,9 +340,11 @@ export class HandleSteps {
 
   private initializeStepData(steps: StepDefination[]) {
     const newSteps: Step[] = [];
-    for (const data of steps) {
+    for (let i = 0; i < steps.length; i++) {
+      const data = steps[i];
       const normalStep: NormalStep = {
         title: data.title,
+        index: i,
         content: data.content,
         target: data.target,
         isHiddenStep: false,
@@ -353,6 +361,7 @@ export class HandleSteps {
         newSteps.push(normalStep);
         newSteps.push({
           ...data,
+          index: i,
           target: data.target,
           isHiddenStep: true
         });

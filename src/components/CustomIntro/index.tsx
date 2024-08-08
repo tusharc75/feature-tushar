@@ -59,6 +59,7 @@ export type NormalStep = {
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
   fieldType?: string;
+  index: number;
 };
 export type HiddenStep = {
   target: string;
@@ -73,6 +74,7 @@ export type HiddenStep = {
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
   fieldType?: string;
+  index: number;
 };
 
 let timeout: NodeJS.Timeout;
@@ -334,7 +336,16 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
             </IconButton>
           </div>
           <div className="pb-2 pt-3">
-            <TextField autoFocus label="Search topic..." variant="outlined" size="small" fullWidth onChange={handleSearch} value={search} />
+            <TextField
+              autoFocus
+              label="Search topic..."
+              type="search"
+              variant="outlined"
+              size="small"
+              fullWidth
+              onChange={handleSearch}
+              value={search}
+            />
           </div>
           <div className=" mt-4  h-[200px] space-y-3 overflow-y-auto">
             {filteredSteps?.map((intro, index) => (
