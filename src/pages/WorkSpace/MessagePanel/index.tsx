@@ -1,5 +1,5 @@
 import { Avatar, IconButton } from '@material-ui/core';
-import { ArrowBack, Visibility } from '@material-ui/icons';
+import { ArrowBack } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import io, { Socket } from 'socket.io-client';
 import axiosInstance from 'src/axios/axiosInstance';

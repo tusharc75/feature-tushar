@@ -5,10 +5,10 @@ import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DashboardModal from 'src/components/DashboardModal';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 type ViewMembersProps = {
   selectedChannel: TChannel | null;
