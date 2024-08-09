@@ -65,7 +65,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
         }}
         contentMaxHeight="350px"
       >
-        <div className="flex items-center gap-2">
+        <div className="sticky -top-[16px] z-10 flex items-center gap-2 bg-[var(--dark-primary,white)]">
           <TextField
             size="small"
             id="search-member"
@@ -87,9 +87,9 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
             </IconButton>
           </HtmlTooltip>
         </div>
-        <ul className="mt-4 max-h-[230px] space-y-2 overflow-y-auto">
+        <ul className={'mt-4  space-y-2 overflow-y-auto'}>
           {members?.map((member) => (
-            <ListItem button key={member.optionValue} className="!list-none !items-center !justify-between">
+            <ListItem component={'li'} button key={member.optionValue} className="!list-none !items-center !justify-between">
               <div className="flex items-center gap-2">
                 <Avatar
                   style={{
