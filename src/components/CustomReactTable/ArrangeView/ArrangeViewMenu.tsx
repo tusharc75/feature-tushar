@@ -62,6 +62,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editCreateDialogData, setEditCreateDialogData] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
   const [confirmationDialog, setConfirmationDialog] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
+  const [selected, setSelected] = useState(defaultView);
 
   const applyViewInTable = (order: string[], hide: string[]) => {
     const stickycolumns = getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander });
@@ -110,6 +111,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
 
   const applyView = (data: GridViewSavedData) => {
     applyViewInTable(data.order, data.hide);
+    setSelected(data);
   };
 
   const deleteView = async (data: GridViewSavedData) => {
@@ -211,6 +213,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                               button
                               key={d._id}
                               component={'li'}
+                              selected={selected?._id === d._id}
                               onClick={() => {
                                 setAnchorEl(null);
                                 applyView(d);
