@@ -61,8 +61,8 @@ const Sidebar = ({ channels, selectedChannel, setSelectedChannel, setCreateChann
                       className={cn(
                         'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
                         selectedChannel?._id === c._id
-                          ? '[background-image:linear-gradient(270deg,_#dfdfdf_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#2f2f38_60%,_transparent_100%)]'
-                          : '[background-image:linear-gradient(270deg,_#e8e8e8_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#1a1a25_60%,_transparent_100%)]'
+                          ? '[background-image:linear-gradient(270deg,_#ebebeb_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#353546_60%,_transparent_100%)]'
+                          : '[background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#212134_60%,_transparent_100%)]'
                       )}
                     >
                       <IconButton
