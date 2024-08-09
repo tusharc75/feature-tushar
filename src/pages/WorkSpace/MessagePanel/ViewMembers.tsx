@@ -6,7 +6,6 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DashboardModal from 'src/components/DashboardModal';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
-import { cn } from 'src/constants/helpers';
 import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -88,7 +87,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
             </IconButton>
           </HtmlTooltip>
         </div>
-        <ul className={cn('mt-4  space-y-2 overflow-y-auto')}>
+        <ul className={'mt-4  space-y-2 overflow-y-auto'}>
           {members?.map((member) => (
             <ListItem component={'li'} button key={member.optionValue} className="!list-none !items-center !justify-between">
               <div className="flex items-center gap-2">
