@@ -10,6 +10,7 @@ import {
   cn,
   colSpans,
   columnSize,
+  dateFormat,
   displayDate,
   displayDateTime,
   formatAmountWithCurrency,
@@ -26,6 +27,8 @@ import { FiExternalLink } from 'react-icons/fi';
 import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
+import moment from 'moment';
+import { FaUserPlus } from 'react-icons/fa6';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -101,9 +104,10 @@ const Details = (props: DetailProps) => {
 
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
+  const [formDataWithFollowUps, setFormDataWithFollowUps] = useState([]);
   const [dialogData, setDialogData] = useState<any>(null);
   const [open, setOpen] = useState({ open: false, section: null });
-  const [taskData, setTaskdata] = useState(null)
+  const [taskData, setTaskdata] = useState(null);
 
   useEffect(() => {
     sortArray();
@@ -241,7 +245,7 @@ const Details = (props: DetailProps) => {
                       className="link"
                       rel="noopener noreferrer"
                     >
-                      <span className={`text-truncate link`}>
+                      <span className={`text-truncate link block`}>
                         {_val.optionLabel}
                         {i < data[fieldData.fieldName].length - 1 ? ',' : ''}
                       </span>
@@ -255,7 +259,7 @@ const Details = (props: DetailProps) => {
               )
             ) : data[fieldData.fieldName] ? (
               <Link to={`/${kebabCase(fieldData.lookupResource)}/detail/${val[fieldData.fieldName]}`} target="_blank" rel="noopener noreferrer">
-                <span className={`text-truncate link`}>
+                <span className={`text-truncate link block`}>
                   {data[fieldData.fieldName].optionLabel || value}
                   {data[fieldData.fieldName]?.staticData?.approved && data[fieldData.fieldName]?.staticData?.approved === true ? (
                     <FcApproval className={classes.approvalIcon} title="Approved" size={20} />
@@ -300,7 +304,7 @@ const Details = (props: DetailProps) => {
           <div className="flex items-center gap-2 p-[8.6px_10px] pt-0">
             <Icon />
             <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
-              <span className={`text-truncate tooltip-asdfkljashdfkjas text-gray-500 dark:text-gray-400`}>{value}</span>
+              <span className={`text-truncate tooltip-asdfkljashdfkjas block text-gray-500 dark:text-gray-400`}>{value}</span>
             </Typography>
             <PreviewFile fileName={value} showDownload />
           </div>
@@ -317,7 +321,7 @@ const Details = (props: DetailProps) => {
                   <div className="flex gap-2" key={d.fileName}>
                     <Icon />
                     <Typography className={classes.fieldText} variant="body2">
-                      <span className={`text-truncate tooltip-asdfkljashdfkjas text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
+                      <span className={`text-truncate tooltip-asdfkljashdfkjas block text-gray-500 dark:text-gray-400`}>{d.fileName}</span>
                     </Typography>
                     <PreviewFile fileName={d.fileName} showDownload />
                   </div>
@@ -382,12 +386,12 @@ const Details = (props: DetailProps) => {
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
               <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank" rel="noopener noreferrer">
-                <span className={`text-truncate `}> {value} </span>
+                <span className={`text-truncate block`}> {value} </span>
               </MuiLink>
               {fieldData.type === 'email' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
             </>
           ) : (
-            <span className={`text-truncate `}>{value}</span>
+            <span className={`text-truncate block`}>{value}</span>
           )}
           {fieldData.type === 'mobileNumber' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
         </Typography>
@@ -402,19 +406,45 @@ const Details = (props: DetailProps) => {
       return () => cancelTokenSource.cancel();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }
-  }, [resource, referenceId])
+  }, [resource, referenceId]);
 
   const fetchtaskData = async (cancelTokenSource?: CancelTokenSource) => {
     axiosInstance()
-      .get(`/task?relatedTo=${JSON.stringify([{ type: resource, referenceId: referenceId, access: true }])}`, { cancelToken: cancelTokenSource?.token })
-      .then(({ data: { data } }) => {
-        setTaskdata(data)
+      .get(`/task?relatedTo=${JSON.stringify([{ type: resource, referenceId: referenceId, access: true }])}`, {
+        cancelToken: cancelTokenSource?.token
       })
+      .then(({ data: { data } }) => {
+        setTaskdata(data);
+      });
   };
+
+  useEffect(() => {
+    const generateFormDataWithFollowUps = () => {
+      if (formsData.length === 0 || !taskData || taskData?.length === 0) return [];
+      const newFormData = [...formsData];
+      taskData.forEach((task, i) => {
+        const taskName = task.formRelatedTo?.fields?.[0]?.fieldLabel;
+        const sectionIndex = newFormData.findIndex((section) => section.name === task.formRelatedTo.section);
+        if (sectionIndex !== -1) {
+          const fieldIndex = newFormData[sectionIndex].sectionFields.findIndex((field) => field.fieldData.fieldLabel === taskName);
+          if (fieldIndex !== -1 && sectionIndex > -1) {
+            if (newFormData[sectionIndex].sectionFields[fieldIndex].followUpData) {
+              newFormData[sectionIndex].sectionFields[fieldIndex].followUpData.push(taskData[i]);
+            } else {
+              newFormData[sectionIndex].sectionFields[fieldIndex].followUpData = [taskData[i]];
+            }
+          }
+        }
+      });
+      return newFormData;
+    };
+    setFormDataWithFollowUps(generateFormDataWithFollowUps());
+    return () => setFormDataWithFollowUps([]);
+  }, [formsData, taskData]);
 
   return (
     <div className="form-v1">
-      {formsData?.map((form) => {
+      {formDataWithFollowUps?.map((form) => {
         return (
           form.name && (
             <React.Fragment key={form.name}>
@@ -428,20 +458,19 @@ const Details = (props: DetailProps) => {
                     {form.name}
                   </h3>
                   {resource && referenceId && (
-                    <div>
+                    <HtmlTooltip title="Follow-Ups">
                       <IconButton
                         style={{ padding: '0px' }}
-                        title="Follow-Ups"
                         size="small"
                         color="primary"
                         aria-label="follow-ups"
                         onClick={() => {
-                          setOpen({ open: true, section: { name: form?.name, sectionFields: form?.sectionFields?.map(f => f?.fieldData) } });
+                          setOpen({ open: true, section: { name: form?.name, sectionFields: form?.sectionFields?.map((f) => f?.fieldData) } });
                         }}
                       >
-                        <MoreHoriz fontSize="small" />
+                        <FaUserPlus />
                       </IconButton>
-                    </div>
+                    </HtmlTooltip>
                   )}
                 </div>
                 <div className="formdata-v1 grid grid-cols-12">
@@ -456,11 +485,11 @@ const Details = (props: DetailProps) => {
                       <div
                         className={cn(
                           isTypeFile(field.fieldData.type) && 'flex-wrap',
-                          'flex items-center [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                          'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
                         )}
                       >
                         <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
-                          <div className={cn('d-flex align-items-center formdata-title-v1', isTypeFile(field.fieldData.type) && '!border-r-0')}>
+                          <div className={cn('d-flex formdata-title-v1 min-h-full', isTypeFile(field.fieldData.type) && '!border-r-0')}>
                             <h4 title={field.fieldData.fieldLabel} className={`text-truncate `}>
                               {field.fieldData.fieldLabel}
                             </h4>
@@ -520,6 +549,7 @@ const Details = (props: DetailProps) => {
                               {renderData(initialVals, field.fieldData)}
                             </Box>
                           )}
+                          {field.followUpData?.length > 0 && <RenderFollowUP data={field.followUpData} />}
                         </div>
                       </div>
                       {/* {field.fieldData.type !== 'imageUpload' && field.fieldData.type !== 'fileUpload'} */}
@@ -547,3 +577,65 @@ const Details = (props: DetailProps) => {
 };
 
 export default Details;
+
+export type FollowUP = {
+  _id: string;
+  brand: string;
+  name: string;
+  description: string;
+  status: string;
+  parentId: null;
+  assignee: string[];
+  reporter: string;
+  startDate: Date;
+  dueDate: Date | null;
+  relatedTo: RelatedTo[];
+  createdBy: CreatedBy;
+  position: number;
+  formRelatedTo: FormRelatedTo;
+};
+
+export type CreatedBy = {
+  user: string;
+  date: Date;
+};
+
+export type FormRelatedTo = {
+  section: string;
+  fields: Field[];
+};
+
+export type Field = {
+  fieldLabel: string;
+  fieldName: string;
+};
+
+export type RelatedTo = {
+  type: string;
+  referenceId: string;
+  name: string;
+};
+
+const RenderFollowUP = ({ data }: { data: FollowUP[] }) => {
+  return (
+    <div>
+      <p className="mx-[10px] text-[12px] font-semibold text-gray-500">FOLLOW-UPS</p>
+      {data.map((d) => (
+        <div className="relative mx-[10px] my-1 max-w-[300px] rounded-md p-2 [border:1px_solid_var(--common-border-color)]">
+          <div
+            className={cn(
+              'flex items-start justify-between gap-2',
+              d.description && 'mb-1 pb-1 [border-bottom:1px_solid_var(--common-border-color)]'
+            )}
+          >
+            <p className={cn('text-[14px] font-semibold')}>
+              {d.name} on {moment(d.startDate).format(dateFormat)}, {d.dueDate && <>Due {moment(d.dueDate).format(dateFormat)}</>}
+            </p>
+            <span className="block flex-shrink-0 rounded-md bg-[var(--new-theme-color)] px-2 py-1 text-white">{d.status}</span>
+          </div>
+          <p className="text-gray-600 dark:text-gray-400">{d.description}</p>
+        </div>
+      ))}
+    </div>
+  );
+};
