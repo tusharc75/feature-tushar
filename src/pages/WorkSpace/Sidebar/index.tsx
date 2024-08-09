@@ -27,8 +27,8 @@ const Sidebar = ({ channels, selectedChannel, setSelectedChannel, setCreateChann
     <>
       <div
         className={cn(
-          'min-h-full flex-shrink-0 flex-grow bg-[#f2f2f2] p-2 transition-transform duration-300 [border-right:1px_solid_var(--common-border-color)] dark:bg-[#070712]',
-          mobScreen ? 'w-full' : ' w-[300px] max-w-[300px]'
+          'min-h-full flex-shrink-0 flex-grow  p-2 transition-transform duration-300 [border-right:1px_solid_var(--common-border-color)] ',
+          mobScreen ? 'w-full' : ' w-[270px] max-w-[270px]'
         )}
       >
         <div className="flex items-center px-2">
