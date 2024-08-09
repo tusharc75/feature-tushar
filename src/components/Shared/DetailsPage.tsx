@@ -550,7 +550,12 @@ const Details = (props: DetailProps) => {
                               {renderData(initialVals, field.fieldData)}
                             </Box>
                           )}
-                          {field.followUpData?.length > 0 && <RenderFollowUP data={field.followUpData} />}
+                          {field.followUpData?.length > 0 && (
+                            <RenderFollowUP
+                              data={field.followUpData}
+                              columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
+                            />
+                          )}
                         </div>
                       </div>
                       {/* {field.fieldData.type !== 'imageUpload' && field.fieldData.type !== 'fileUpload'} */}
@@ -617,24 +622,32 @@ export type RelatedTo = {
   name: string;
 };
 
-const RenderFollowUP = ({ data }: { data: FollowUP[] }) => {
+const RenderFollowUP = ({ data, columnSize }: { data: FollowUP[]; columnSize: 6 | 12 }) => {
+  console.log(columnSize === 12);
   return (
-    <div>
-      <p className="mx-[10px] text-[12px] font-semibold text-gray-500">FOLLOW-UPS</p>
+    <div className="my-2">
+      <p className="mx-[10px] pb-1 text-[12px] font-semibold text-gray-500">FOLLOW-UPS</p>
       {data.map((d) => (
-        <div className="relative mx-[10px] my-1 max-w-[300px] rounded-md p-2 [border:1px_solid_var(--common-border-color)]">
+        <div
+          className={cn(
+            `relative mx-[10px] my-2  rounded-md p-2 [border:1px_solid_var(--common-border-color)]`,
+            columnSize === 12 ? 'md:w-[calc(50%-20px)]' : ''
+          )}
+        >
           <div
             className={cn(
-              'flex items-start justify-between gap-2',
+              'flex items-start justify-between gap-2 [flex-wrap:wrap] md:flex-nowrap',
               d.description && 'mb-1 pb-1 [border-bottom:1px_solid_var(--common-border-color)]'
             )}
           >
-            <p className={cn('text-[14px] font-semibold')}>
-              {d.name} on {moment(d.startDate).format(dateFormat)}, {d.dueDate && <>Due {moment(d.dueDate).format(dateFormat)}</>}
-            </p>
+            <p className={cn('text-[14px] font-semibold')}>{d.name}</p>
             <span className="block flex-shrink-0 rounded-md bg-[var(--new-theme-color)] px-2 py-1 text-white">{d.status}</span>
           </div>
-          <p className="text-gray-600 dark:text-gray-400">{d.description}</p>
+          {d.description && <p className="py-2 text-gray-600 dark:text-gray-400">{d.description}</p>}
+          <span className="block text-[12px] font-bold text-gray-500 dark:text-gray-600">
+            Start date: {moment(d.startDate).format(dateFormat)}
+            {d.dueDate && <>, Due date: {moment(d.dueDate).format(dateFormat)}</>}
+          </span>
         </div>
       ))}
     </div>

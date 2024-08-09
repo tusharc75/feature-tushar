@@ -264,6 +264,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                 onClick={() => {
                   setAnchorEl(null);
                   applyViewInTable([], []);
+                  setSelected(null);
                 }}
               >
                 Reset
