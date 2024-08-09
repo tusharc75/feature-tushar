@@ -74,6 +74,21 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 >
                                   {data?.oldValue?.label}
                                 </p>
+                              ) : data?.type === 'multiSelect' && data?.lookup ? (
+                                data?.oldValue?.map((oldValue) => {
+                                  return (
+                                    <p
+                                      className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''}text-truncate`}
+                                      title={oldValue?.label}
+                                      onClick={() => {
+                                        if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                          window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${oldValue?.value}`);
+                                      }}
+                                    >
+                                      {oldValue?.label}
+                                    </p>
+                                  )
+                                })
                               ) : (
                                 data?.oldValue
                               )
@@ -96,23 +111,39 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
                                 >
                                   {data?.newValue?.label}
                                 </p>
-                              ) : data?.newValue === true ? (
-                                <Typography>True</Typography>
-                              ) : data?.newValue === false ? (
-                                <Typography>False</Typography>
-                              ) : data?.fieldLabel === 'updatedBy' ? (
-                                `${updatedBy}`
-                              ) : Array.isArray(data?.newValue) ? (
-                                data?.newValue?.map((value: any, index: any) => {
+                              ) : data?.type === 'multiSelect' && data?.lookup ? (
+                                data?.newValue?.map((newValue) => {
                                   return (
-                                    <Typography key={index} className="text-truncate">
-                                      {value?.product?.optionLabel}
-                                    </Typography>
-                                  );
+                                    <p
+                                      className={`${permissions[`${camelCase(data?.lookupResource)}`]?.isRead ? 'link' : ''}text-truncate`}
+                                      title={newValue?.label}
+                                      onClick={() => {
+                                        if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
+                                          window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${newValue?.value}`);
+                                      }}
+                                    >
+                                      {newValue?.label}
+                                    </p>
+                                  )
                                 })
-                              ) : (
-                                data?.newValue
-                              )
+                              ) :
+                                data?.newValue === true ? (
+                                  <Typography>True</Typography>
+                                ) : data?.newValue === false ? (
+                                  <Typography>False</Typography>
+                                ) : data?.fieldLabel === 'updatedBy' ? (
+                                  `${updatedBy}`
+                                ) : Array.isArray(data?.newValue) ? (
+                                  data?.newValue?.map((value: any, index: any) => {
+                                    return (
+                                      <Typography key={index} className="text-truncate">
+                                        {value?.product?.optionLabel}
+                                      </Typography>
+                                    );
+                                  })
+                                ) : (
+                                  data?.newValue
+                                )
                             ) : (
                               <NoDataCell />
                             )}
