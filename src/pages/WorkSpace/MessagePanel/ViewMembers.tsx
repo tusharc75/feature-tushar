@@ -66,7 +66,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
         }}
         contentMaxHeight="350px"
       >
-        <div className="flex items-center gap-2">
+        <div className="sticky -top-[16px] z-10 flex items-center gap-2 bg-[var(--dark-primary,white)]">
           <TextField
             size="small"
             id="search-member"
