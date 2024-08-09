@@ -420,9 +420,10 @@ const Details = (props: DetailProps) => {
 
   useEffect(() => {
     const generateFormDataWithFollowUps = () => {
-      if (formsData.length === 0 || !taskData || taskData?.length === 0) return [];
+      if (formsData.length === 0) return [];
       const newFormData = [...formsData];
-      taskData.forEach((task, i) => {
+      if (!taskData || taskData?.length === 0) return newFormData;
+      taskData?.forEach((task, i) => {
         const taskName = task.formRelatedTo?.fields?.[0]?.fieldLabel;
         const sectionIndex = newFormData.findIndex((section) => section.name === task.formRelatedTo.section);
         if (sectionIndex !== -1) {
