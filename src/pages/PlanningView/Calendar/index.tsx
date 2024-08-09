@@ -47,57 +47,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
-          {
-            label: routes.warehouse.title,
-            value: 'Warehouse',
-            key: 'warehouse'
-          }
-        ]
+        {
+          label: routes.warehouse.title,
+          value: 'Warehouse',
+          key: 'warehouse'
+        }
+      ]
       : []),
     ...(permissions?.product?.isRead
       ? [
-          {
-            label: routes.product.title,
-            value: 'Product',
-            key: 'product'
-          }
-        ]
+        {
+          label: routes.product.title,
+          value: 'Product',
+          key: 'product'
+        }
+      ]
       : []),
     ...(permissions?.serializedAsset?.isRead
       ? [
-          {
-            label: routes.serializedAsset.title,
-            value: 'Serialized Asset',
-            key: 'asset'
-          }
-        ]
+        {
+          label: routes.serializedAsset.title,
+          value: 'Serialized Asset',
+          key: 'asset'
+        }
+      ]
       : []),
     ...(permissions?.serviceMaster?.isRead
       ? [
-          {
-            label: routes.serviceMaster.title,
-            value: 'Service Master',
-            key: 'service'
-          }
-        ]
+        {
+          label: routes.serviceMaster.title,
+          value: 'Service Master',
+          key: 'service'
+        }
+      ]
       : []),
     ...(permissions?.customerAccount?.isRead
       ? [
-          {
-            label: routes.customerAccount.title,
-            value: 'Customer Account',
-            key: 'customerAccount'
-          }
-        ]
+        {
+          label: routes.customerAccount.title,
+          value: 'Customer Account',
+          key: 'customerAccount'
+        }
+      ]
       : []),
     ...(permissions?.competencies?.isRead
       ? [
-          {
-            label: routes.competencies.title,
-            value: 'Competencies',
-            key: 'competencies'
-          }
-        ]
+        {
+          label: routes.competencies.title,
+          value: 'Competencies',
+          key: 'competencies'
+        }
+      ]
       : [])
   ];
 
@@ -359,9 +359,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               });
             }
           }
+          let title = d[selectedResource.fieldName];
+
+          if (selectedResource.resource === sidebarResource.rentalManagement) {
+            if (d?.parentAccount?.optionLabel) {
+              title = `${title} (Parent-${d?.parentAccount?.optionLabel})`
+            }
+            if (d?.padName?.optionLabel) {
+              title = `${title}(Pad-${d?.padName?.optionLabel})`
+            }
+          }
           return {
             id: d._id,
-            title: d[selectedResource.fieldName],
+            title: title,
             start: new Date(d[selectedResource.start]),
             end: new Date(d[selectedResource.end]),
             allDay: true,
@@ -372,7 +382,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => {})
+      .catch((err) => { })
       .finally(() => setIsDataFetching(false));
   };
 
@@ -497,6 +507,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        fetchData();
       });
   };
 
@@ -796,6 +807,7 @@ const RenderTable = ({ data }) => {
             <TableCell>Qty</TableCell>
             <TableCell>{routes.warehouse.title}</TableCell>
             <TableCell>{routes.customerAccount.title}</TableCell>
+            {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -837,6 +849,10 @@ const RenderTable = ({ data }) => {
               <TableCell component="th" scope="row">
                 {row?.customerAccount?.optionLabel ? row?.customerAccount?.optionLabel : <NoDataCell />}
               </TableCell>
+              {data?.find((e) => e?.padName) &&
+                <TableCell component="th" scope="row">
+                  {row?.padName?.optionLabel ? row?.padName?.optionLabel : <NoDataCell />}
+                </TableCell>}
             </TableRow>
           ))}
         </TableBody>
