@@ -1,4 +1,4 @@
-import { Avatar, IconButton, Menu, MenuItem, Popper } from '@material-ui/core';
+import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@material-ui/core';
 import { MoreVert, Delete, GetApp } from '@material-ui/icons';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
@@ -229,16 +229,42 @@ export const DisplaySingleMessage = ({
     setEmojiPanelAnchor(null);
   };
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
+  const { state: { user: { user } } } = useData();
 
   if (!message) return null;
 
   const replies = message.replies || [];
   const uniqueReplies = setThreadDialogOpen ? uniqBy(replies, (d) => d.user.optionLabel) : [];
+
+  const groupedReactions = Object.values(groupBy(message.reactions, 'emoji')).map((reactions) => ({
+    emoji: reactions[0].emoji,
+    count: reactions.length,
+    users: reactions.map((reaction) => reaction.user),
+  }))
+
+  const handleReaction = async (emoji) => {
+    try {
+      await axiosInstance().post('/work-space/channel/message/reaction', { messageId: message._id, emoji });
+      socket.emit('newMessagePosted', { channelId, messageId: message._id });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      closeEmojiPanel();
+    }
+  };
+
+  const handleReactionClick = async (reaction) => {
+    try {
+      if (reaction?.users?.find((u) => u.optionValue === user?._id)) {
+        await axiosInstance().delete(`/work-space/channel/message/reaction`, { data: { messageId: message._id, emoji: reaction.emoji } });
+      } else {
+        await axiosInstance().post(`/work-space/channel/message/reaction`, { messageId: message._id, emoji: reaction.emoji });
+      }
+      socket.emit('newMessagePosted', { channelId, messageId: message._id });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const downloadFile = (attachment) => {
     axiosInstance()
@@ -307,6 +333,33 @@ export const DisplaySingleMessage = ({
                       __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
                     }}
                   ></span>
+                  {groupedReactions?.length > 0 && (
+                    <div className="reactions flex gap-1 mt-2">
+                      {groupedReactions?.map((reaction, index) => (
+                        <Tooltip
+                          key={index}
+                          title={
+                            <div className="p-1">
+                              <p>{reaction.users.map((u) => {
+                                if (u.optionValue === user?._id) return 'You';
+                                else return u.optionLabel;
+                              }).join(', ')} reacted with {reaction.emoji}</p>
+                            </div>
+                          }
+                        >
+                          <div className="reaction flex items-center gap-1 bg-gray-200 p-1 rounded-md">
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleReactionClick(reaction);
+                              }}
+                            >{reaction.emoji}</span>
+                            <span>{reaction.count}</span>
+                          </div>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  )}
                   {message?.attachments?.length > 0 && (
                     <div className="flex flex-wrap gap-2 py-3">
                       {message?.attachments?.map((attachment) => {
@@ -446,7 +499,9 @@ export const DisplaySingleMessage = ({
                       width={400}
                       height={400}
                       reactions={[]}
-                      onReactionClick={(d) => console.log(d)}
+                      onEmojiClick={(d) => {
+                        handleReaction(d.emoji);
+                      }}
                     />
                   </Popper>
                 </div>
