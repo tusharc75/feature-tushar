@@ -126,52 +126,47 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
   };
 
   return (
-    <div className={cn('message-panel flex ')}>
-      <div className="flex w-full flex-col">
-        <div
-          ref={containerRef}
-          className={cn('messages-container my-2 max-h-[max(500px,_calc(100vh-430px))] min-h-[500px] flex-grow overflow-y-auto scroll-smooth')}
-        >
-          {messages !== null ? (
-            <ul className="mt-8 list-none">
-              {Object.keys(messages).map((date) => (
-                <li key={date} className="mb- list-none">
-                  <div className="relative my-[20px] h-[1px] bg-[var(--common-border-color)]">
-                    <p
-                      className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center 
+    <>
+      <div ref={containerRef} className={cn('messages-container my-2 flex-shrink flex-grow overflow-y-auto scroll-smooth')}>
+        {messages !== null ? (
+          <ul className="mt-8 list-none">
+            {Object.keys(messages).map((date) => (
+              <li key={date} className="mb- list-none">
+                <div className="relative my-[20px] h-[1px] bg-[var(--common-border-color)]">
+                  <p
+                    className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center 
                     text-gray-400 [border:1px_solid_var(--common-border-color)] [left:50%] [top:50%] [transform:translate(-50%,_-50%)]`}
-                    >
-                      {formatDateWithTodayYestarday(date, { onlyMonths: true, dateFormat })}
-                    </p>
-                  </div>
-                  <ul className="list-none space-y-5">
-                    {messages[date].map((message) => {
-                      return (
-                        <DisplaySingleMessage
-                          key={message._id}
-                          message={message}
-                          selectedMessage={selectedMessage}
-                          editingMessage={editingMessage}
-                          channelId={channelId}
-                          socket={socket}
-                          handleEditComplete={handleEditComplete}
-                          setThreadDialogOpen={setThreadDialogOpen}
-                          handleMenuClick={handleMenuClick}
-                        />
-                      );
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="p-3">
-              <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
-            </div>
-          )}
-        </div>
-        <SendMessage channelId={channelId} socket={socket} />
+                  >
+                    {formatDateWithTodayYestarday(date, { onlyMonths: true, dateFormat })}
+                  </p>
+                </div>
+                <ul className="list-none space-y-5">
+                  {messages[date].map((message) => {
+                    return (
+                      <DisplaySingleMessage
+                        key={message._id}
+                        message={message}
+                        selectedMessage={selectedMessage}
+                        editingMessage={editingMessage}
+                        channelId={channelId}
+                        socket={socket}
+                        handleEditComplete={handleEditComplete}
+                        setThreadDialogOpen={setThreadDialogOpen}
+                        handleMenuClick={handleMenuClick}
+                      />
+                    );
+                  })}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="p-3">
+            <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
+          </div>
+        )}
       </div>
+      <SendMessage channelId={channelId} socket={socket} />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
@@ -190,7 +185,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
         channelId={channelId}
         deleteMessage={deleteMessage}
       />
-    </div>
+    </>
   );
 };
 

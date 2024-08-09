@@ -63,8 +63,8 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
         )}
       >
         {selectedChannel && channelData && (
-          <>
-            <div className={cn('head p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
+          <div className="flex h-[var(--h)] flex-col">
+            <div className={cn('p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
                 <div className="flex min-h-[32px] items-center gap-2">
                   {mobScreen && (
@@ -122,15 +122,13 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
               </div>
               <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel.description}</p>
             </div>
-            <div className="body ">
-              <Messages
-                channelId={selectedChannel?._id}
-                socket={socket}
-                threadDialogOpen={threadDialogOpen}
-                setThreadDialogOpen={setThreadDialogOpen}
-              />
-            </div>
-          </>
+            <Messages
+              channelId={selectedChannel?._id}
+              socket={socket}
+              threadDialogOpen={threadDialogOpen}
+              setThreadDialogOpen={setThreadDialogOpen}
+            />
+          </div>
         )}
       </div>
       {isMemberDialogOpen && (

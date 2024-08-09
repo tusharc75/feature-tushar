@@ -35,8 +35,8 @@ const Workspace = () => {
         <div className="headerbox-v1">
           <CustomBreadCrumbs routes={[{ title: routes.workSpace.title }]} />
         </div>
-        <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
-          <div className="flex min-h-[max(600px,_var(--container-height))] overflow-hidden rounded-lg">
+        <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] [--h:max(500px,_var(--container-height))] max-[768px]:[--container-height:calc(100vh-179px)]">
+          <div className="flex min-h-[var(--h)] overflow-hidden rounded-lg">
             {mobScreen && !selectedChannel ? (
               <Sidebar
                 channels={channels}
