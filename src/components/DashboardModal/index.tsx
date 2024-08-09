@@ -67,7 +67,7 @@ const DashboardModal: FC<ModalProps> = ({
       }}
       PaperProps={{
         style: {
-          borderRadius: 16,
+          borderRadius: maximized ? 0 : 16,
           margin: dialogProps?.fullScreen || maximized ? 0 : 15,
           marginBottom: dialogProps?.fullScreen ? 0 : dialogProps?.maxWidth ? 15 : 94,
           width: dialogProps?.maxWidth || dialogProps?.fullScreen ? '100%' : 'unset',
