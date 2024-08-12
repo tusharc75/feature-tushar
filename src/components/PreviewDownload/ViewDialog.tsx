@@ -19,7 +19,7 @@ const ACCESS_OPTIONS = {
   everyone: "everyone"
 }
 
-export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewData, sortColumn = null, sortOrder = null }) => {
+export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewData, sortBy= null, orderBy= null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValue] = useState({
@@ -34,7 +34,7 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
       name: values?.name,
       access: values?.access,
       columns: columns?.toString(),
-      ...(sortColumn && sortOrder ? { sortColumn: sortColumn?.fieldName, sortOrder } : {}),
+      ...(sortBy && orderBy ? { sortBy: sortBy?.fieldName, orderBy } : { sortBy: '', orderBy: '' }),
     };
 
     setLoading(true);

@@ -59,7 +59,7 @@ function PreviewDownload({
 
   const [emailAttachments, setEmailAttachments] = useState([]);
 
-  const handleView = (type, operation, subType, visibleColumns, sortColumn= '', sortOrder= '') => {
+  const handleView = (type, operation, subType, visibleColumns, sortBy= '', orderBy= '') => {
     setLoadingType(subType);
     setBtnLoading(operation);
 
@@ -77,9 +77,12 @@ function PreviewDownload({
         }
       } else {
         if (subType === 'Detail') {
-          api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}&sortColumn=${sortColumn}&sortOrder=${sortOrder}`;
+          api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
         } else {
-          api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}&sortColumn=${sortColumn}&sortOrder=${sortOrder}`;
+          api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+        }
+        if(sortBy && orderBy) {
+          api = `${api}&sortBy=${sortBy}&orderBy=${orderBy}`;
         }
       }
     }
@@ -239,7 +242,7 @@ function PreviewDownload({
           handleClose={() => {
             setShowColumnsDialog({ open: false, type: '', operation: '' });
           }}
-          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortColumn= '', sortOrder= '') => {
+          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortBy= '', orderBy= '') => {
             if (showColumnsDialog.operation === 'Send Email') {
               setLoadingType('email');
               handleView('PDF', 'base64', 'Regular', visibleColumnsPdf);
@@ -256,8 +259,8 @@ function PreviewDownload({
                 showColumnsDialog.operation,
                 subType,
                 showColumnsDialog.type === 'Excel' ? visibleColumnsExcel : visibleColumnsPdf,
-                sortColumn,
-                sortOrder
+                sortBy,
+                orderBy
               );
             }
           }}
