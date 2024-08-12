@@ -1,18 +1,17 @@
 import { Box, IconButton } from '@material-ui/core';
-import queryString from 'query-string';
+import { FormatListNumbered } from '@material-ui/icons';
+import DateRangeIcon from '@material-ui/icons/DateRange';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CalendarView from './Calendar';
 import ListView from './List';
-import { FormatListNumbered } from '@material-ui/icons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import RefreshIcon from '@material-ui/icons/Refresh';
 
 const PLANNING_RESOURCE = [
   {

@@ -1,6 +1,7 @@
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import { useMediaQuery } from '@material-ui/core';
+import { isMobile } from 'react-device-detect';
 
 const localizer = momentLocalizer(moment);
 
@@ -16,7 +17,6 @@ const formats = {
 
 const MyCalendar = (props: Props) => {
   const { activities, setActivityData } = props;
-  const isMobile = useMediaQuery('(max-width: 768px)');
   return (
     <Calendar
       key={isMobile ? 'mobile' : 'desktop'}
