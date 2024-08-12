@@ -120,8 +120,9 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       await axiosInstance().put('/user/grid-view/remove', { ids: [data._id] });
       getAllSavedViews();
       setConfirmationDialog({ open: false, data: null });
-      if (defaultView._id === data._id) {
+      if (selected._id === data._id) {
         applyViewInTable([], []);
+        setSelected(null);
       }
       toastConfig.setToastConfig({
         open: true,
