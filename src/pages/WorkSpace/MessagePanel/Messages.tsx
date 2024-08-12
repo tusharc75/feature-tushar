@@ -104,7 +104,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
             u.forEach((m) => {
               if (m._id === messageId) {
                 if (m['reactions']) {
-                  m['reactions'] = m['reactions'].filter((reaction) => reaction.emoji !== emoji && reaction.user.optionValue !== user);
+                  m['reactions'] = m['reactions'].filter((reaction) => reaction.emoji !== emoji || reaction.user.optionValue !== user);
                 }
               }
             });
