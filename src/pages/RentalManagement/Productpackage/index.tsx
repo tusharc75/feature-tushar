@@ -628,24 +628,6 @@ const Productpackage = ({
       });
   };
 
-  const handleAddAsset = async (rows) => {
-    setIsSubmitting(true);
-    const assetIds = rows?.map((item) => item._id);
-    axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
-        ids: assetIds
-      })
-      .then(() => {
-        setAddExistingAssets(false);
-        setIsSubmitting(false);
-        fetchData();
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   const AddMaterial = async (material, priceData) => {
     const tempMaterial = [...material];
     if (priceData) {
@@ -1149,10 +1131,8 @@ const Productpackage = ({
               : null,
             afeNumber: rentalManagementData?.afeNumber
           }}
-          isAssigning={isSubmitting}
           handleClose={() => setAddExistingAssets(false)}
-          handleSucess={handleAddAsset}
-          handleSuccessInUseAsset={() => {
+          handleSucess={() => {
             setAddExistingAssets(false);
             fetchData();
           }}
