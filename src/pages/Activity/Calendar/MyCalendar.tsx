@@ -1,6 +1,7 @@
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import { useMediaQuery } from '@material-ui/core';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const localizer = momentLocalizer(moment);
 
@@ -16,19 +17,19 @@ const formats = {
 
 const MyCalendar = (props: Props) => {
   const { activities, setActivityData } = props;
-  const isMobile = useMediaQuery('(max-width: 768px)');
+  const mobileView = isMobile && !isTablet;
   return (
     <Calendar
-      key={isMobile ? 'mobile' : 'desktop'}
+      key={mobileView ? 'mobile' : 'desktop'}
       defaultDate={moment().toDate()}
-      defaultView={isMobile ? 'day' : 'month'}
+      defaultView={mobileView ? 'day' : 'month'}
       events={activities}
       localizer={localizer}
       formats={formats}
       style={{ height: 'calc(100vh - 200px)', borderRadius: '4px', overflow: 'auto' }}
-      popup={!isMobile}
-      // views={{ month: !isMobile, week: !isMobile, day: true }}
-      views={isMobile ? ['day'] : ['month', 'week', 'day']}
+      popup={!mobileView}
+      // views={{ month: !mobileView, week: !mobileView, day: true }}
+      views={mobileView ? ['day'] : ['month', 'week', 'day']}
       eventPropGetter={(obj) => {
         const newStyles = {
           backgroundColor:

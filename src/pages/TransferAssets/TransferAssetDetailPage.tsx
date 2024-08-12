@@ -172,8 +172,8 @@ const TransferAssetDetailPage = () => {
           data?.transferType === 'Internal'
             ? data?.transfertoPlant?.entity
             : data?.transferType === 'External Customer'
-            ? data?.transfertoCustomer?.entity
-            : data?.transfertoSupplier?.entity;
+              ? data?.transfertoCustomer?.entity
+              : data?.transfertoSupplier?.entity;
 
         if (warehouseEntity?.length) {
           const isReceiveable = warehouseEntity.filter((w: any) => userEntity.indexOf(w) > -1)?.length > 0;

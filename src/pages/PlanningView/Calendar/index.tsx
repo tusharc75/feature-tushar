@@ -30,6 +30,7 @@ import { cn, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import { useData } from 'src/StateProvider/Provider';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 
@@ -39,7 +40,6 @@ const formats = {
 };
 
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
-  const isMobile = useMediaQuery('(max-width:768px)');
   const {
     state: { permissions }
   }: any = useData();
@@ -137,9 +137,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
+  const mobileView = isMobile && !isTablet;
 
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState<View>('month');
+  const [view, setView] = useState<View>(mobileView ? 'day' : 'month');
   const [lookupResource, setLookUpResource] = useState(null);
   const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null);
 
@@ -411,13 +412,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       });
     }
   }, [selectedFilters]);
-
-  const onView = useCallback(
-    (view) => {
-      setView(view);
-    },
-    [setView]
-  );
 
   const clickableEventInListView = () => {
     const header = document.getElementsByClassName('rbc-header')[2];
@@ -706,75 +700,81 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         </Box>
         <div className={cn('relative')}>
           {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
-            <DragAndDropCalendar
-              defaultDate={defaultDate}
-              defaultView={'day'}
-              events={events}
-              formats={formats}
-              localizer={localizer}
-              onEventDrop={moveEvent}
-              onEventResize={resizeEvent}
-              popup={!isMobile}
-              messages={{
-                agenda: 'List'
-              }}
-              resizable
-              views={{ month: true, week: true, day: true, agenda: true }}
-              onView={onView}
-              view={view}
-              eventPropGetter={(obj: any) => {
-                const style = setEventStyle(obj);
-                return {
-                  style
-                };
-              }}
-              onNavigate={(date) => {
-                onNavigate(date);
-              }}
-              onSelectEvent={(event: any) => {
-                window.open(`${selectedResource.path}/${event.id}`);
-              }}
-            />
+            <>
+              <DragAndDropCalendar
+                defaultDate={defaultDate}
+                key={mobileView ? 'mobile' : 'desktop'}
+                defaultView={mobileView ? 'day' : 'month'}
+                events={events}
+                formats={formats}
+                localizer={localizer}
+                onEventDrop={moveEvent}
+                onEventResize={resizeEvent}
+                popup={!mobileView}
+                messages={{
+                  agenda: 'List'
+                }}
+                resizable
+                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                onView={setView}
+                view={view}
+                eventPropGetter={(obj: any) => {
+                  const style = setEventStyle(obj);
+                  return {
+                    style
+                  };
+                }}
+                onNavigate={(date) => {
+                  onNavigate(date);
+                }}
+                onSelectEvent={(event: any) => {
+                  window.open(`${selectedResource.path}/${event.id}`);
+                }}
+              />
+            </>
           ) : (
-            <Calendar
-              defaultDate={defaultDate}
-              defaultView={'day'}
-              events={events}
-              formats={formats}
-              localizer={localizer}
-              popup={!isMobile}
-              messages={{
-                agenda: 'List'
-              }}
-              views={{ month: true, week: true, day: true, agenda: true }}
-              onView={onView}
-              view={view}
-              eventPropGetter={(obj: any) => {
-                const style = setEventStyle(obj);
-                return {
-                  style
-                };
-              }}
-              onNavigate={(date) => {
-                onNavigate(date);
-              }}
-              onSelectEvent={(data: any, event: any) => {
-                if (selectedResource.resource === sidebarResource.product) {
-                  setAnchor(event.nativeEvent.target);
-                  if (data?.type) {
-                    const newData: OnSelectDataType[] = data.data;
-                    setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
-                  }
-                } else {
-                  if (data.resource) {
-                    const resource = resourceList?.find((r) => r.resource === data.resource);
-                    window.open(`${resource.path}/${data.id}`);
+            <>
+              <Calendar
+                defaultDate={defaultDate}
+                key={mobileView ? 'mobile' : 'desktop'}
+                defaultView={mobileView ? 'day' : 'month'}
+                events={events}
+                formats={formats}
+                localizer={localizer}
+                popup={!mobileView}
+                messages={{
+                  agenda: 'List'
+                }}
+                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                onView={setView}
+                view={view}
+                eventPropGetter={(obj: any) => {
+                  const style = setEventStyle(obj);
+                  return {
+                    style
+                  };
+                }}
+                onNavigate={(date) => {
+                  onNavigate(date);
+                }}
+                onSelectEvent={(data: any, event: any) => {
+                  if (selectedResource.resource === sidebarResource.product) {
+                    setAnchor(event.nativeEvent.target);
+                    if (data?.type) {
+                      const newData: OnSelectDataType[] = data.data;
+                      setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
+                    }
                   } else {
-                    window.open(`${selectedResource.path}/${data.id}`);
+                    if (data.resource) {
+                      const resource = resourceList?.find((r) => r.resource === data.resource);
+                      window.open(`${resource.path}/${data.id}`);
+                    } else {
+                      window.open(`${selectedResource.path}/${data.id}`);
+                    }
                   }
-                }
-              }}
-            />
+                }}
+              />
+            </>
           )}
           {isDataFetching && (
             <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
@@ -864,10 +864,11 @@ const RenderTable = ({ data }) => {
               <TableCell component="th" scope="row">
                 {row?.customerAccount?.optionLabel ? row?.customerAccount?.optionLabel : <NoDataCell />}
               </TableCell>
-              {data?.find((e) => e?.padName) &&
+              {data?.find((e) => e?.padName) && (
                 <TableCell component="th" scope="row">
                   {row?.padName?.optionLabel ? row?.padName?.optionLabel : <NoDataCell />}
-                </TableCell>}
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>
