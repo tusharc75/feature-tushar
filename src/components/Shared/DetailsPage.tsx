@@ -108,6 +108,7 @@ const Details = (props: DetailProps) => {
   const [dialogData, setDialogData] = useState<any>(null);
   const [open, setOpen] = useState({ open: false, section: null });
   const [taskData, setTaskdata] = useState(null);
+  const [imageViewerModal, setImageViewerModal] = useState<{ open: boolean; images: string[] }>({ open: false, images: [] });
 
   useEffect(() => {
     sortArray();
@@ -286,7 +287,7 @@ const Details = (props: DetailProps) => {
                   <img
                     className="cursor-pointer"
                     onClick={() => {
-                      setDialogData({ index: i, open: true, images: val[fieldData.fieldName] });
+                      setDialogData({ index: i, open: true, title: fieldData.fieldLabel, images: val[fieldData.fieldName] });
                     }}
                     src={item}
                     alt={item}
@@ -505,9 +506,23 @@ const Details = (props: DetailProps) => {
                         <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
                           {field.fieldData.type === 'imageUpload' ? (
                             <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
-                              <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
-                                <Image style={{ fontSize: 30 }} />
-                              </Avatar>
+                              <span
+                                className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
+                                onClick={() => {
+                                  if (initialVals[field.fieldData.fieldName]) {
+                                    setDialogData({
+                                      index: 0,
+                                      title: field.fieldData.fieldLabel,
+                                      open: true,
+                                      images: [initialVals[field.fieldData.fieldName]]
+                                    });
+                                  }
+                                }}
+                              >
+                                <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
+                                  <Image style={{ fontSize: 30 }} />
+                                </Avatar>
+                              </span>
                             </Box>
                           ) : field.fieldData.type === 'groupSignature' ? (
                             <div className="grid grid-cols-1 md:grid-cols-2">
@@ -567,7 +582,9 @@ const Details = (props: DetailProps) => {
           )
         );
       })}
-      {dialogData && dialogData.open && <CarouselDialog index={dialogData.index} close={() => setDialogData(null)} images={dialogData.images} />}
+      {dialogData && dialogData.open && (
+        <CarouselDialog index={dialogData.index} {...dialogData} close={() => setDialogData(null)} images={dialogData.images} />
+      )}
       {open?.open && (
         <FollowUpsDialog
           onClose={() => {
