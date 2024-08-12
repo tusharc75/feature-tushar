@@ -376,6 +376,11 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             }
           }
           let title = d[selectedResource.fieldName];
+          let start = new Date(d[selectedResource.start]);
+          let end = new Date(d[selectedResource.end]);
+          let fulfillStatus = d?.fulfillStatus;
+          let startDraggable = true;
+          let endDraggable = true;
 
           if (selectedResource.resource === sidebarResource.rentalManagement) {
             if (d?.parentAccount?.optionLabel) {
@@ -384,17 +389,31 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             if (d?.padName?.optionLabel) {
               title = `${title}(Pad-${d?.padName?.optionLabel})`;
             }
+            if (d?.actualStartDate) {
+              start = new Date(d?.actualStartDate);
+              startDraggable = false;
+            }
+            if (d?.actualEndDate) {
+              end = new Date(d?.actualEndDate);
+              endDraggable = false;
+            }
+            if (!d?.actualEndDate && moment(new Date()).isAfter(moment(d?.estimateEndDate))) {
+              fulfillStatus = 'ERROR';
+            }
           }
           return {
             id: d._id,
             title: title,
-            start: new Date(d[selectedResource.start]),
-            end: new Date(d[selectedResource.end]),
+            start: start,
+            end: end,
             allDay: true,
             resource: selectedResource.resource,
-            fulfillStatus: d?.fulfillStatus
+            fulfillStatus: fulfillStatus,
+            startDraggable: startDraggable,
+            endDraggable: endDraggable
           };
         });
+
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
@@ -520,18 +539,45 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       });
   };
 
-  const moveEvent = ({ event, start, end }) => {
+  const resize = (event, start, end) => {
     const filterEvents = staticEvents.filter((ev) => ev.id !== event.id);
     const existing = staticEvents.find((ev) => ev.id === event.id) ?? {};
     setEvents([...filterEvents, { ...existing, start, end }]);
     updateData(event, start, end);
   };
 
+  const moveEvent = ({ event, start, end }) => {
+    if (event?.resource === sidebarResource?.rentalManagement && !(event?.startDraggable && event?.endDraggable)) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'warning',
+        message: `can't change start date or end date`
+      });
+    } else {
+      resize(event, start, end);
+    }
+  };
+
   const resizeEvent = ({ event, start, end }) => {
-    const filterEvents = staticEvents.filter((ev) => ev.id !== event.id);
-    const existing = staticEvents.find((ev) => ev.id === event.id) ?? {};
-    setEvents([...filterEvents, { ...existing, start, end }]);
-    updateData(event, start, end);
+    if (event?.resource === sidebarResource?.rentalManagement) {
+      if (!event?.startDraggable && !moment(event?.start).isSame(moment(start))) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'warning',
+          message: `can't change start date`
+        });
+      } else if (!event?.endDraggable && !moment(event?.end).isSame(moment(end))) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'warning',
+          message: `can't change end date`
+        });
+      } else {
+        resize(event, start, end);
+      }
+    } else {
+      resize(event, start, end);
+    }
   };
 
   const onNavigate = (date) => {
@@ -584,6 +630,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         color = 'white';
       } else if (obj?.type === 'debit') {
         backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+      }
+    }
+
+    if (obj?.resource === sidebarResource.rentalManagement) {
+      if (obj?.fulfillStatus === 'ERROR') {
+        backgroundColor = 'rgb(220, 53, 69)';
+        color = 'white';
       }
     }
 
