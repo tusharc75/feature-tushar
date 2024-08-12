@@ -30,7 +30,7 @@ import { cn, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import { useData } from 'src/StateProvider/Provider';
-import { isMobile } from 'react-device-detect';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
 
@@ -124,9 +124,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
+  const mobileView = isMobile && !isTablet;
 
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState<View>(isMobile ? 'day' : 'month');
+  const [view, setView] = useState<View>(mobileView ? 'day' : 'month');
   const [lookupResource, setLookUpResource] = useState(null);
   const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null);
 
@@ -687,19 +688,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             <>
               <DragAndDropCalendar
                 defaultDate={defaultDate}
-                key={isMobile ? 'mobile' : 'desktop'}
-                defaultView={isMobile ? 'day' : 'month'}
+                key={mobileView ? 'mobile' : 'desktop'}
+                defaultView={mobileView ? 'day' : 'month'}
                 events={events}
                 formats={formats}
                 localizer={localizer}
                 onEventDrop={moveEvent}
                 onEventResize={resizeEvent}
-                popup={!isMobile}
+                popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
                 resizable
-                views={isMobile ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={(obj: any) => {
@@ -720,16 +721,16 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
             <>
               <Calendar
                 defaultDate={defaultDate}
-                key={isMobile ? 'mobile' : 'desktop'}
-                defaultView={isMobile ? 'day' : 'month'}
+                key={mobileView ? 'mobile' : 'desktop'}
+                defaultView={mobileView ? 'day' : 'month'}
                 events={events}
                 formats={formats}
                 localizer={localizer}
-                popup={!isMobile}
+                popup={!mobileView}
                 messages={{
                   agenda: 'List'
                 }}
-                views={isMobile ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
                 onView={setView}
                 view={view}
                 eventPropGetter={(obj: any) => {
