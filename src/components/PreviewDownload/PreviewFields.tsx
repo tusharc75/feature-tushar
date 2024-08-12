@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { Box, Checkbox, FormControl, IconButton, TextField } from '@material-ui/core';
+import { Box, Checkbox, FormControl, IconButton, InputLabel, Menu, MenuItem, Select, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { AiFillEdit } from 'react-icons/ai';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
@@ -11,6 +11,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ViewDialog } from './ViewDialog';
 import ArrangeView from './ArrangeView';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { RESOURCE_LABEL } from 'src/constants/helpers';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -25,7 +26,11 @@ export const PreviewFields = ({
     allColumn,
     resource,
     type,
-    defaultColumns = []
+    defaultColumns = [],
+    sortColumn = null,
+    setSortColumn = null,
+    sortOrder = null,
+    setSortOrder = null,
 }) => {
     const toastConfig = useContext(CustomToastContext);
 
@@ -35,7 +40,7 @@ export const PreviewFields = ({
     const setDefaultColumns = () => {
         const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
         setVisibleColumns([...temp]);
-      };
+    };
 
     const handleDeleteView = () => {
         axiosInstance()
@@ -58,9 +63,15 @@ export const PreviewFields = ({
 
     const handleSelectView = (data) => {
         setSelectedView(data);
-        if (data && data.columns) {
+        if (data?.columns) {
             const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
             setVisibleColumns(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
+        }
+        if (setSortColumn && data?.sortColumn) {
+            setSortColumn(allColumn.find(col => col.fieldName === data?.sortColumn));
+        }
+        if (setSortOrder && data?.sortOrder) {
+            setSortOrder(data?.sortOrder);
         }
     };
 
@@ -111,8 +122,14 @@ export const PreviewFields = ({
                                     setVisibleColumns(allColumn);
                                 } else if (['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() === val?.map((e) => e?.fieldName).sort().toString()) {
                                     setVisibleColumns([]);
+                                    setSortColumn(null);
+                                    setSortOrder(null);
                                 } else {
                                     setVisibleColumns(val);
+                                    if (!val.find((e) => e?.fieldName === sortColumn?.fieldName)) {
+                                        setSortColumn(null);
+                                        setSortOrder(null);
+                                    }
                                 }
                             }}
                             options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...allColumn]}
@@ -146,6 +163,44 @@ export const PreviewFields = ({
                             setColumns={setVisibleColumns} />
                     </Box>
                 </Box>
+                {resource === RESOURCE_LABEL.invoice && type === 'PDF' && (
+                    <Box display="flex" justifyContent="space-between" alignItems="center" mt={2}>
+                        <Box width="70%">
+                            <Autocomplete
+                                options={visibleColumns?.filter((e) => e?.fieldName !== 'index')}
+                                getOptionLabel={(option: any) => option.fieldLabel}
+                                getOptionSelected={(option: any, value: any) => option.fieldName === value.fieldName}
+                                fullWidth
+                                value={sortColumn}
+                                onChange={(event, newValue) => {
+                                    setSortColumn(newValue);
+                                    if (!newValue) {
+                                        setSortOrder(null);
+                                    }
+                                }}
+                                size="small"
+                                renderInput={(params) => (
+                                    <TextField {...params} label={`Select sort column`} variant="outlined" />
+                                )}
+                            />
+                        </Box>
+                        <Box width="25%">
+                            <FormControl variant="outlined" size="small"    >
+                                <InputLabel id="sort-order-label" required={true}>Sort Order</InputLabel>
+                                <Select
+                                    labelId="sort-order-label"
+                                    value={sortOrder}
+                                    onChange={(event) => setSortOrder(event.target.value)}
+                                    label="Sort Order"
+                                    disabled={!sortColumn}
+                                >
+                                    <MenuItem value="ascending">Ascending</MenuItem>
+                                    <MenuItem value="descending">Descending</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </Box>
+                    </Box>
+                )}
             </FormControl>
 
             {isViewDeleteConfirm.open && (
@@ -168,6 +223,8 @@ export const PreviewFields = ({
                         setShowSaveViewDialog({ open: false, data: null });
                     }}
                     viewData={showSaveViewDialog.data}
+                    sortColumn={sortColumn}
+                    sortOrder={sortOrder}
                 />
             )}
         </>
