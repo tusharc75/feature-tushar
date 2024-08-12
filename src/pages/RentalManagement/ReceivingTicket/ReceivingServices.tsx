@@ -412,7 +412,7 @@ const ActionButtonMenuItems = ({
         }
       }}
     >
-      Set Actual Start Date
+      Start Service(s)
     </MenuItem>
     <MenuItem
       onClick={() => {
@@ -437,7 +437,7 @@ const ActionButtonMenuItems = ({
         }
       }}
     >
-      Set Actual End Date
+      Stop Service(s)
     </MenuItem>
     <MenuItem onClick={() => {
       if (!validateAction(rentalManagementActions.startService)) {
