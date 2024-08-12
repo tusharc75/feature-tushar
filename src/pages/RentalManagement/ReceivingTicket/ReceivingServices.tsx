@@ -412,7 +412,7 @@ const ActionButtonMenuItems = ({
         }
       }}
     >
-      Set Actual start Date
+      Set Actual Start Date
     </MenuItem>
     <MenuItem
       onClick={() => {
