@@ -40,10 +40,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
   const [editingMessage, setEditingMessage] = useState(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
-  }, [messages]);
-
   const fetchMessages = async (after: string = null) => {
     try {
       let api = `/work-space/channel/message/${channelId}`;
@@ -60,6 +56,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
           return groupByDate(newMessages);
         }
       });
+      containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
       setThreadDialogOpen((prevDialog) => {
         if (prevDialog.open && (prevDialog.message?._id === after || !after)) {
           const updatedMessage = data?.data?.find((message) => message._id === prevDialog.message?._id);
@@ -86,9 +83,40 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
       socket.on('fetchMessages', () => {
         fetchMessages();
       });
+      socket.on('addReaction', ({ messageId, emoji, user }) => {
+        setMessages((prevMessages) => {
+          let updatedMessages: any = Object.assign({}, prevMessages);
+          Object.values(updatedMessages).forEach((u: any) => {
+            u.forEach((m) => {
+              if (m._id === messageId) {
+                if (!m['reactions']) m['reactions'] = [];
+                m['reactions'].push({ emoji, user });
+              }
+            });
+          })
+          return updatedMessages;
+        });
+      })
+      socket.on('removeReaction', ({ messageId, emoji, user }) => {
+        setMessages((prevMessages) => {
+          let updatedMessages: any = Object.assign({}, prevMessages);
+          Object.values(updatedMessages).forEach((u: any) => {
+            u.forEach((m) => {
+              if (m._id === messageId) {
+                if (m['reactions']) {
+                  m['reactions'] = m['reactions'].filter((reaction) => reaction.emoji !== emoji && reaction.user.optionValue !== user);
+                }
+              }
+            });
+          })
+          return updatedMessages;
+        });
+      });
       return () => {
         socket.off('fetchNewMessage');
         socket.off('fetchMessages');
+        socket.off('addReaction');
+        socket.off('removeReaction');
         socket.emit('leaveChannel', channelId);
       };
     }
@@ -240,7 +268,7 @@ export const DisplaySingleMessage = ({
   const handleReaction = async (emoji) => {
     try {
       await axiosInstance().post('/work-space/channel/message/reaction', { messageId: message._id, emoji });
-      socket.emit('newMessagePosted', { channelId, messageId: message._id });
+      socket.emit('reaction', { channelId, messageId: message._id, emoji });
     } catch (error) {
       toastConfig.setToastConfig(error);
     } finally {
@@ -252,10 +280,10 @@ export const DisplaySingleMessage = ({
     try {
       if (reaction?.users?.find((u) => u.optionValue === user?._id)) {
         await axiosInstance().delete(`/work-space/channel/message/reaction`, { data: { messageId: message._id, emoji: reaction.emoji } });
+        socket.emit('removeReaction', { channelId, messageId: message._id, emoji: reaction.emoji });
       } else {
-        await axiosInstance().post(`/work-space/channel/message/reaction`, { messageId: message._id, emoji: reaction.emoji });
+        await handleReaction(reaction.emoji);
       }
-      socket.emit('newMessagePosted', { channelId, messageId: message._id });
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
