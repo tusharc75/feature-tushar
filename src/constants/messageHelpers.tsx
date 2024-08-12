@@ -41,6 +41,7 @@ export const rentalManagementActions = {
 export const rentalManagementMessage = {
     addProductPackage: 'Add Products or Packages to proceed',
     validPrice: 'Enter Price to proceed',
+    validServicePrice: 'Enter Service Price to proceed',
     acceptRejectQuotation: `Accept/Reject ${routes.quotation.title} to proceed`,
     addProductInPackage: 'Add Product in package to proceed',
     addServiceInPackage: 'Add Service in package to proceed',
