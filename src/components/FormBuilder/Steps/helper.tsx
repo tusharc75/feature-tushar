@@ -160,6 +160,12 @@ export const resourcePolicy = [
         fieldLabel: 'Hide Package In Invoice',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'servicePriceRequired',
+        fieldLabel: 'Service Price Required',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },

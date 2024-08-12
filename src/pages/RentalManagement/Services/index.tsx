@@ -326,6 +326,9 @@ const Services = ({
         parent.serializedProduct = parent.type === 'product' ? parent?.productDetail?.serializedProduct : false;
         parent.qtyDisplay = parent.qty;
         parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
+        if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
+          parent.isValid = parent['price_' + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+        }
         if (!parent.isValid) {
           nextStepMessage = rentalManagementMessage.validPrice;
         }
@@ -339,8 +342,12 @@ const Services = ({
           nextStepMessage = rentalManagementMessage.addServiceInPackage;
         }
       });
-
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+        if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
+          if ((flattenArray(rows))?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
+            nextStepMessage = rentalManagementMessage.validServicePrice
+          }
+        }
         setNextStep(false);
         setNextStepToolTip(nextStepMessage);
       } else {
@@ -392,6 +399,9 @@ const Services = ({
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty}`;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
+      if (_subRow?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
+        _subRow.isValid = _subRow['price_' + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+      }
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
@@ -399,10 +409,13 @@ const Services = ({
         _subRow.type === MATERIAL_TYPE.service && _subRow?.serviceLog ? true : _subRow.assetQty > 0 ? true : _subRow?.status ? true : false;
       _subRow.subRows = generateNestedData(material, inventory, nonSerializeAsset, _subRow, isPriceRequired);
     });
-    if (subRows.length === 0 && parent.type === 'package') {
+    if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
     }
-    if (parent.type === 'package') {
+    if (subRows?.length && rentalPolicyData?.servicePriceRequired) {
+      parent.isValid = subRows.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid) ? false : parent.isValid;
+    }
+    if (parent.type === MATERIAL_TYPE.package) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
     }
     return subRows;
