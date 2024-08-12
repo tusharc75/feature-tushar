@@ -41,6 +41,9 @@ export const PreviewDialog = ({
   const [selectedExcelView, setSelectedExcelView] = useState(null);
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
 
+  const [sortBy, setSortBy] = useState(null);
+  const [orderBy, setOrderBy] = useState(null);
+
   useEffect(() => {
     setDefaultColumns();
   }, [columns]);
@@ -74,7 +77,7 @@ export const PreviewDialog = ({
 
   const handleSelectView = (data) => {
     setSelectedPdfView(data);
-    if (data && data.columns) {
+    if (data?.columns) {
       const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
       setVisibleColumnsPdf(
         columnsArray
@@ -90,6 +93,12 @@ export const PreviewDialog = ({
           })
           .filter((col) => col !== undefined)
       );
+      if (data?.sortBy) {
+        setSortBy(allColumn.find(col => col.fieldName === data?.sortBy));
+      }
+      if (data?.orderBy) {
+        setOrderBy(data?.orderBy);
+      }
     }
   };
 
@@ -135,6 +144,10 @@ export const PreviewDialog = ({
                   resource={resource}
                   type={'PDF'}
                   defaultColumns={defaultColumns}
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  orderBy={orderBy}
+                  setOrderBy={setOrderBy}
                 />
               )}
               {type?.includes('Excel') && (
@@ -164,7 +177,7 @@ export const PreviewDialog = ({
               onClick={() => {
                 setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
               }}
-              disabled={visibleColumnsPdf?.length == 0}
+              disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy)}
               size="small"
               className="yellow-button"
             >
@@ -180,7 +193,7 @@ export const PreviewDialog = ({
               loading={loadingType === 'Regular'}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
-                handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
+                handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
               }}
               id={'show-column-dialog-send-email-button'}
             >
@@ -195,9 +208,9 @@ export const PreviewDialog = ({
                 id={'show-column-dialog-export-button'}
                 size="small"
                 loading={loadingType === 'Regular'}
-                disabled={loadingType || visibleColumnsPdf?.length === 0}
+                disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                 onClick={(e) => {
-                  handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
+                  handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                 }}
               >
                 {type === 'Excel' ? 'Export' : hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
@@ -210,9 +223,9 @@ export const PreviewDialog = ({
                   id={'show-column-dialog-operation-2-button'}
                   size="small"
                   loading={loadingType === 'Detail'}
-                  disabled={loadingType || visibleColumnsPdf?.length === 0}
+                  disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                   onClick={(e) => {
-                    handleView('Detail', visibleColumnsPdf, visibleColumnsExcel);
+                    handleView('Detail', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                   }}
                 >
                   {`${button2Title} ${operation}`}
@@ -234,6 +247,8 @@ export const PreviewDialog = ({
             setShowSaveViewDialog({ open: false, data: null });
           }}
           viewData={showSaveViewDialog.data}
+          sortBy={sortBy}
+          orderBy={orderBy}
         />
       )}
     </>
