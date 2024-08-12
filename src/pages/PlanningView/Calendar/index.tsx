@@ -47,57 +47,57 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const FILTERS = [
     ...(permissions?.warehouse?.isRead
       ? [
-        {
-          label: routes.warehouse.title,
-          value: 'Warehouse',
-          key: 'warehouse'
-        }
-      ]
+          {
+            label: routes.warehouse.title,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
       : []),
     ...(permissions?.product?.isRead
       ? [
-        {
-          label: routes.product.title,
-          value: 'Product',
-          key: 'product'
-        }
-      ]
+          {
+            label: routes.product.title,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
       : []),
     ...(permissions?.serializedAsset?.isRead
       ? [
-        {
-          label: routes.serializedAsset.title,
-          value: 'Serialized Asset',
-          key: 'asset'
-        }
-      ]
+          {
+            label: routes.serializedAsset.title,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
       : []),
     ...(permissions?.serviceMaster?.isRead
       ? [
-        {
-          label: routes.serviceMaster.title,
-          value: 'Service Master',
-          key: 'service'
-        }
-      ]
+          {
+            label: routes.serviceMaster.title,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
       : []),
     ...(permissions?.customerAccount?.isRead
       ? [
-        {
-          label: routes.customerAccount.title,
-          value: 'Customer Account',
-          key: 'customerAccount'
-        }
-      ]
+          {
+            label: routes.customerAccount.title,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
       : []),
     ...(permissions?.competencies?.isRead
       ? [
-        {
-          label: routes.competencies.title,
-          value: 'Competencies',
-          key: 'competencies'
-        }
-      ]
+          {
+            label: routes.competencies.title,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
       : [])
   ];
 
@@ -119,6 +119,19 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       label: routes.warehouse.title,
       value: 'Warehouse',
       key: 'warehouse'
+    }
+  ];
+
+  const RENTAL_JOB_FILTERS = [
+    {
+      label: routes.rentalManagement.title,
+      value: 'Rental Management',
+      key: 'rentalJob'
+    },
+    {
+      label: routes.padMaster.title,
+      value: 'Pad Master',
+      key: 'padMaster'
     }
   ];
 
@@ -196,7 +209,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [dateRange]);
 
   useEffect(() => {
-    let lookupResource = [...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS]?.map((e) => e.value)?.toString();
+    let lookupResource = [...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value)?.toString();
     if (lookupResource) {
       setLookupLoading(true);
       axiosInstance()
@@ -235,6 +248,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           setFilters(ASSET_FILTERS);
         } else if (selectedResource.resource === sidebarResource.product) {
           setFilters(PRODUCT_FILTERS);
+        } else if (selectedResource.resource === sidebarResource.rentalManagement) {
+          setFilters([...FILTERS, ...RENTAL_JOB_FILTERS]);
         } else {
           setFilters(FILTERS);
         }
@@ -363,10 +378,10 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
 
           if (selectedResource.resource === sidebarResource.rentalManagement) {
             if (d?.parentAccount?.optionLabel) {
-              title = `${title} (Parent-${d?.parentAccount?.optionLabel})`
+              title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
             }
             if (d?.padName?.optionLabel) {
-              title = `${title}(Pad-${d?.padName?.optionLabel})`
+              title = `${title}(Pad-${d?.padName?.optionLabel})`;
             }
           }
           return {
@@ -382,7 +397,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => { })
+      .catch((err) => {})
       .finally(() => setIsDataFetching(false));
   };
 
