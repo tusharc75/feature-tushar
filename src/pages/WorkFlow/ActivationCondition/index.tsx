@@ -158,7 +158,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
           ) : null
         ) : (
           <Box p={2} height={200}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            <CommonSkeleton lenArray={[...Array(5).keys()]} />
           </Box>
         )}
       </Box>
