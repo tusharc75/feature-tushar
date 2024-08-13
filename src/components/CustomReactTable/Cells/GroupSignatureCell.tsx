@@ -5,6 +5,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import Carousel from 'react-material-ui-carousel';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
+import { isArray } from 'lodash';
 
 function GroupSignatureCell({ field, original }) {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
@@ -23,7 +24,7 @@ function GroupSignatureCell({ field, original }) {
 
   const open = Boolean(anchorEl);
 
-  const signatures = original[field.fieldName]?.filter((ele) => ele.user && ele.signature) ?? [];
+  const signatures = isArray(original?.[field.fieldName]) ? original?.[field.fieldName]?.filter((ele) => ele.user && ele.signature) : [];
 
   return (
     <div>

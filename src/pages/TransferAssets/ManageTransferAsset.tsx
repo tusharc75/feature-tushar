@@ -264,7 +264,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
         errors['transfertoPlant'] = 'Transfer from and to plant can not be same';
       }
     }
-    if (initialData?.fields?.find((e) => e?.fieldName === 'createDate') && assets && assets?.length) {
+    if (allFields?.find((e) => e?.fieldName === 'createDate')) {
       if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }

@@ -8,7 +8,7 @@ export const getLookupResource = async () => {
 
 export const getResourceField = async (resource, view = false) => {
     const { data: { data } } = await axiosInstance().get(`/field?resource=${resource}&view=${view}`)
-    return data?.map((e) => { return { fieldName: e.fieldData.fieldName, fieldLabel: e.fieldData.fieldLabel } })
+    return data?.map((e) => { return { fieldName: e.fieldData.fieldName, fieldLabel: e.fieldData.fieldLabel, lookup: e.fieldData.lookup } })
 }
 
 export const getEntity = async (brandId) => {
