@@ -224,12 +224,12 @@ const ManageSteps = ({ data, onSuccess, onClose, id }) => {
                         getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
                         getOptionSelected={(option: any, val) => option?.fieldName === val}
                         value={
-                          resourceFieldOption && resourceFieldOption.filter((data) => values['linkResourceField']?.includes(data?.fieldName)).length>0
+                          resourceFieldOption && resourceFieldOption.filter((data) => values['linkResourceField']?.includes(data?.fieldName)).length > 0
                             ? resourceFieldOption && resourceFieldOption.filter((data) => values['linkResourceField']?.includes(data?.fieldName))
                             : []
                         }
                         onChange={(e, val) => {
-                          setFieldValue('linkResourceField', val && val?.length>0 ? val?.map((ele)=> ele.fieldName) : []);
+                          setFieldValue('linkResourceField', val && val?.length > 0 ? val?.map((ele) => ele.fieldName) : []);
                         }}
                         renderInput={(params) => (
                           <TextField

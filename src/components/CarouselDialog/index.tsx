@@ -44,7 +44,7 @@ const CarouselDialog = ({ images, index, close, title = 'Images' }: CarouselDial
         >
           {images.map((item: any, i) => (
             <div key={i} className={classes.imageContainer}>
-              <img className={classes.img} src={item} alt={item} />
+              <img className={classes.img} src={item} alt={''} />
             </div>
           ))}
         </Carousel>

@@ -56,6 +56,7 @@ import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalM
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
+import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataDialog';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -121,11 +122,27 @@ const LoadingTicket = ({
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState(false);
 
   useEffect(() => {
     fetchRecords();
     getColumn();
+    fetchPolicy();
   }, []);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchRecords = async () => {
     setNextStep(false);
@@ -1041,7 +1058,11 @@ const LoadingTicket = ({
 
   const handleChangeStatusInUse = (status, prevStatus, date) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }));
-    const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => { return { asset: e._id, uniqueId: e.uniqueId } });
+    const assets = selectedRecords
+      ?.filter((e: any) => e.type === 'Asset')
+      ?.map((e) => {
+        return { asset: e._id, uniqueId: e.uniqueId };
+      });
     if (assets?.length) {
       axiosInstance()
         .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, {
@@ -1264,6 +1285,37 @@ const LoadingTicket = ({
     );
   };
 
+  const handleAssetData = (assetsData) => {
+    const assetsAdd: any = [];
+    selectedRecords.forEach((r) => {
+      const obj: any = {};
+      obj._id = r?.uniqueId;
+      obj.asset = r?._id;
+      const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+      if (matchedAsset) {
+        const { _id, ...assetData } = matchedAsset;
+        obj.assetData = assetData;
+      }
+      assetsAdd.push(obj);
+    });
+    setReplaceLoading(true)
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/change-asset-data`, assetsAdd)
+      .then(({ data }) => {
+        fetchRecords();
+        setReplaceLoading(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setOpenAssetDataDialog(false)
+      })
+      .catch((error) => {
+        setReplaceLoading(false)
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <>
       <DetailsPageHeader
@@ -1284,7 +1336,9 @@ const LoadingTicket = ({
               setShowConformationRevertTicket,
               setShowConformationCancleTicket,
               hideDeliveryTicketDelivered,
-              permissions
+              permissions,
+              assetPolicyData,
+              setOpenAssetDataDialog
             }}
           />
         }
@@ -1596,6 +1650,22 @@ const LoadingTicket = ({
           assets={openDateDialog.assets}
         />
       )}
+      {openAssetDataDialog && (
+        <AssetDataDialog
+          onClose={() => {
+            setOpenAssetDataDialog(false);
+          }}
+          statusPolicy={assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)}
+          staticLookUpFilters={{
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null
+          }}
+          ids={selectedRecords?.map((r) => r?._id)}
+          onSuccess={handleAssetData}
+          loading={replaceLoading}
+        />
+      )}
     </>
   );
 };
@@ -1615,7 +1685,9 @@ const ActionButtonMenuItems = ({
   setShowConformationRevertTicket,
   setShowConformationCancleTicket,
   hideDeliveryTicketDelivered,
-  permissions
+  permissions,
+  assetPolicyData,
+  setOpenAssetDataDialog
 }) => {
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -1848,6 +1920,24 @@ const ActionButtonMenuItems = ({
           Cancel Loading Ticket(s)
         </MenuItem>
       </HtmlTooltip>
+      {assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) &&
+        selectedRecords?.length > 0 && selectedRecords?.every((r) => r?.type === 'Asset' &&
+          [
+            RENTAL_INTERNAL_ASSET_STATUS.reserved,
+            RENTAL_INTERNAL_ASSET_STATUS.inUse,
+            RENTAL_INTERNAL_ASSET_STATUS.standBy,
+            RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+          ]?.includes(r?.rentalAssetStatus)
+        ) && (
+          <MenuItem
+            onClick={() => {
+              setOpenAssetDataDialog(true);
+            }}
+            id={'change-asset-data-menu-item'}
+          >
+            Change Assets Data
+          </MenuItem>
+        )}
     </>
   );
 };

@@ -65,7 +65,6 @@ import ChangeActualDateDialog from './ChangeActualDateDialog';
 import ExistingRentalJob from './ExistingRentalJob';
 import ReturnTicketDialog from './ReturnTicketDialog';
 import AssetDetailsChangeDialog from './AssetDetailsChangeDialog';
-import ChangeAssetsDetailsDialog from './ChangeAssetsDetailsDialog';
 import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
 import { FiExternalLink } from 'react-icons/fi';
 import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalManagment/helper';
@@ -75,6 +74,7 @@ import ReceivingServices from './ReceivingServices';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { useGetWalkmeInstance, useSetWalkmeData, WalkmeData } from 'src/components/CustomIntro';
 import { generateCreateReceivingTicket, generateReceiveItem, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
+import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataDialog';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -146,12 +146,12 @@ const ReceivingTicket = ({
 
   const [columns, setColumns] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, referenceData: {}, ticketType: null });
+  const [openAssetDetailDialog, setOpenAssetDetailDialog] = useState({ open: false, statusPolicy: null, referenceData: {}, ticketType: null });
   const [assetsData, setAssetsData] = useState([]);
-  const [openAssetsDetailsChangeDialog, setOpenAssetsDetailsChangeDialog] = useState(false);
   const [transferAnotherPackageDialog, setTransferAnotherPackageialog] = useState(false);
   const [serviceData, setServiceData] = useState([]);
   const [tabValue, setTabValue] = useState(0);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState(false);
 
   const {
     state: { user, permissions, selectedEntity }
@@ -964,23 +964,25 @@ const ReceivingTicket = ({
 
       const services: any = [];
       if (rentalPolicyData?.showServiceOnFieldStep) {
-        material?.filter((m) => m.type === MATERIAL_TYPE.service)?.forEach((s: any, index: any) => {
-          s.index = index + 1;
-          s.uniqueId = s._id;
-          s.materialId = s?.materialId;
-          s.description = s?.serviceDetail?.serviceDescription || '';
-          s.displayType = startCase(MATERIAL_TYPE.service);
-          s.serviceName = s?.serviceDetail?.serviceName;
-          s.startDate = s?.actualStartDate;
-          s.endDate = s?.actualEndDate;
-          s.maxInvoiceDate = invoiceData?.find((ele) => ele._id === s.uniqueId)?.endDate;
-          const parent = material?.find((e) => e._id === s?.parentId);
-          if (parent) {
-            s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
-          }
-          s.qty = getNestedQty(material, s)
-          services.push(s);
-        });
+        material
+          ?.filter((m) => m.type === MATERIAL_TYPE.service)
+          ?.forEach((s: any, index: any) => {
+            s.index = index + 1;
+            s.uniqueId = s._id;
+            s.materialId = s?.materialId;
+            s.description = s?.serviceDetail?.serviceDescription || '';
+            s.displayType = startCase(MATERIAL_TYPE.service);
+            s.serviceName = s?.serviceDetail?.serviceName;
+            s.startDate = s?.actualStartDate;
+            s.endDate = s?.actualEndDate;
+            s.maxInvoiceDate = invoiceData?.find((ele) => ele._id === s.uniqueId)?.endDate;
+            const parent = material?.find((e) => e._id === s?.parentId);
+            if (parent) {
+              s['parentName'] = parent?.packageDetail?.packageName || parent?.productDetail?.productName || parent?.serviceDetail?.serviceName;
+            }
+            s.qty = getNestedQty(material, s);
+            services.push(s);
+          });
       }
       setServiceData(services);
 
@@ -1479,7 +1481,7 @@ const ReceivingTicket = ({
 
     const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
-      setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy, referenceData: data, ticketType: ticketType });
+      setOpenAssetDetailDialog({ open: true, statusPolicy: statusPolicy, referenceData: data, ticketType: ticketType });
     } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     }
@@ -1808,7 +1810,7 @@ const ReceivingTicket = ({
       data.startDate = moment(values.manualStartDate).format('MM/DD/YYYY');
     }
     if (values.manualEndDate) {
-      data.endDate = moment(values.manualEndDate).format('MM/DD/YYYY');;
+      data.endDate = moment(values.manualEndDate).format('MM/DD/YYYY');
     }
     axiosInstance()
       .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
@@ -1830,7 +1832,11 @@ const ReceivingTicket = ({
 
   const handleChangeStatusInUse = (status, prevStatus, date) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }));
-    const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => { return { asset: e._id, uniqueId: e.uniqueId } });
+    const assets = selectedRecords
+      ?.filter((e: any) => e.type === 'Asset')
+      ?.map((e) => {
+        return { asset: e._id, uniqueId: e.uniqueId };
+      });
     if (assets?.length) {
       axiosInstance()
         .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, {
@@ -2020,6 +2026,38 @@ const ReceivingTicket = ({
     );
   };
 
+  const handleAssetData = (assetsData) => {
+    const assetsAdd: any = [];
+    selectedRecords.forEach((r) => {
+      const obj: any = {};
+      obj._id = r?.uniqueId;
+      obj.asset = r?._id;
+      const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+      if (matchedAsset) {
+        const { _id, ...assetData } = matchedAsset;
+        obj.assetData = assetData;
+      }
+      assetsAdd.push(obj);
+    });
+    setIsSubmitting(true);
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/change-asset-data`, assetsAdd)
+      .then(({ data }) => {
+        fetchRecords();
+        setIsSubmitting(false);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setOpenAssetDataDialog(false);
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleMainTabChange = (event: any, newValue: number) => {
     setTabValue(newValue);
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -2057,7 +2095,6 @@ const ReceivingTicket = ({
                 setShowConformationCancleTicket,
                 setShowConformationConsume,
                 setShowConformationConsumeMultiple,
-                setOpenAssetsDetailsChangeDialog,
                 dataRows,
                 user,
                 setOpenDateDialog,
@@ -2069,6 +2106,8 @@ const ReceivingTicket = ({
                 hideDeliveryTicketDelivered,
                 openChangeActualDateDialog,
                 setOpenChangeActualDateDialog,
+                setOpenAssetDataDialog,
+                assetPolicyData,
                 validateAction
               }}
             />
@@ -2265,17 +2304,17 @@ const ReceivingTicket = ({
           }}
         />
       )}
-      {openAssetDataDialog.open && (
+      {openAssetDetailDialog.open && (
         <AssetDetailsChangeDialog
           ids={selectedRecords?.filter((e) => e.type === 'Asset')?.map((e) => e._id)}
-          statusPolicy={openAssetDataDialog.statusPolicy}
+          statusPolicy={openAssetDetailDialog.statusPolicy}
           setAssetsData={setAssetsData}
-          ticketType={openAssetDataDialog.ticketType}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null })}
+          ticketType={openAssetDetailDialog.ticketType}
+          onClose={() => setOpenAssetDetailDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null })}
           onSuccess={() => {
-            const referenceData = openAssetDataDialog.referenceData;
-            const ticketType = openAssetDataDialog.ticketType;
-            setOpenAssetDataDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null });
+            const referenceData = openAssetDetailDialog.referenceData;
+            const ticketType = openAssetDetailDialog.ticketType;
+            setOpenAssetDetailDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null });
             setShowTicketDialog({ open: true, ticketType: ticketType, data: referenceData });
           }}
         />
@@ -2567,17 +2606,6 @@ const ReceivingTicket = ({
           }}
         />
       )}
-      {openAssetsDetailsChangeDialog && (
-        <ChangeAssetsDetailsDialog
-          handleClose={() => setOpenAssetsDetailsChangeDialog(false)}
-          wellNumberOptions={rentalManagementData?.wellNumber}
-          assets={selectedRecords?.filter((ele) => ele.type === 'Asset')?.map((e) => e._id)}
-          handleSucess={() => {
-            setOpenAssetsDetailsChangeDialog(false);
-            fetchRecords();
-          }}
-        />
-      )}
 
       {transferAnotherPackageDialog && (
         <TransferToAnotherPackageDialog
@@ -2591,6 +2619,23 @@ const ReceivingTicket = ({
           assets={selectedRecords}
           rentalManagementData={rentalManagementData}
           assetPolicyData={assetPolicyData}
+        />
+      )}
+
+      {openAssetDataDialog && (
+        <AssetDataDialog
+          onClose={() => {
+            setOpenAssetDataDialog(false);
+          }}
+          statusPolicy={assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)}
+          staticLookUpFilters={{
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null
+          }}
+          ids={selectedRecords?.map((r) => r?._id)}
+          onSuccess={handleAssetData}
+          loading={isSubmitting}
         />
       )}
     </>
@@ -2617,7 +2662,6 @@ const ActionButtonMenuItems = ({
   setShowConformationCancleTicket,
   setShowConformationConsume,
   setShowConformationConsumeMultiple,
-  setOpenAssetsDetailsChangeDialog,
   dataRows,
   user,
   setOpenDateDialog,
@@ -2628,6 +2672,8 @@ const ActionButtonMenuItems = ({
   hideDeliveryTicketDelivered,
   openChangeActualDateDialog,
   setOpenChangeActualDateDialog,
+  setOpenAssetDataDialog,
+  assetPolicyData,
   validateAction
 }) => {
   const checkUniqStatus = () => {
@@ -3081,19 +3127,6 @@ const ActionButtonMenuItems = ({
             {`Revert Consumed Qty`}
           </MenuItem>
         )}
-      {selectedRecords?.length > 0 &&
-        columns?.some((col) => col.accessor === 'wellNumber') &&
-        rentalManagementData?.wellNumber?.length > 0 &&
-        selectedRecords?.filter((e) => e.type === 'Asset')?.length === selectedRecords?.length && (
-          <MenuItem
-            id={'change-well-number-menu-item'}
-            onClick={() => {
-              setOpenAssetsDetailsChangeDialog(true);
-            }}
-          >
-            Change Well Number
-          </MenuItem>
-        )}
       {selectedRecords?.length > 0 && (
         <MenuItem
           id={'update-start-date-end-date-menu-item'}
@@ -3116,6 +3149,24 @@ const ActionButtonMenuItems = ({
           Update - Start Date/End Date
         </MenuItem>
       )}
+      {assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) &&
+        selectedRecords?.length > 0 && selectedRecords?.every((r) => r?.type === 'Asset' &&
+          [
+            RENTAL_INTERNAL_ASSET_STATUS.reserved,
+            RENTAL_INTERNAL_ASSET_STATUS.inUse,
+            RENTAL_INTERNAL_ASSET_STATUS.standBy,
+            RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+          ]?.includes(r?.rentalAssetStatus)
+        ) && (
+          <MenuItem
+            onClick={() => {
+              setOpenAssetDataDialog(true);
+            }}
+            id={'change-asset-data-menu-item'}
+          >
+            Change Assets Data
+          </MenuItem>
+        )}
     </>
   );
 };

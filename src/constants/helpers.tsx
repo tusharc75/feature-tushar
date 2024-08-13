@@ -1001,6 +1001,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'counter' || key.type === 'multiFileUpload' || key.type === 'multiImageUpload') {
       obj[key.fieldName] = [];
     } else if (key.type === 'description') {
+    } else if (key.type === 'groupSignature') {
+      obj[key.fieldName] = [];
     } else {
       obj[key.fieldName] = value;
     }

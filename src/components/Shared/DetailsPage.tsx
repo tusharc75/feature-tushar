@@ -227,11 +227,8 @@ const Details = (props: DetailProps) => {
 
   const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload', 'groupSignature'].includes(type);
 
-  /**
-   * Render Link  or Typography component
-   */
   const renderData = (val: any, fieldData: any) => {
-    const value = normalizeValues(val, fieldData);
+    const value: any = normalizeValues(val, fieldData);
     if (fieldData?.hasOwnProperty('lookup') && fieldData?.lookup && permissions && permissions[camelCase(fieldData?.lookupResource)]?.isRead) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
@@ -455,7 +452,6 @@ const Details = (props: DetailProps) => {
                 style={containerPadding ? { padding: containerPadding } : {}}
               >
                 <div className={'form-head-v1'}>
-                  {/* <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} /> */}
                   <h3 className="form-label-style-v1" title={form.name}>
                     {form.name}
                   </h3>
@@ -530,7 +526,7 @@ const Details = (props: DetailProps) => {
                                 <div
                                   className={cn(
                                     `flex items-center justify-between p-[0px_10px]`,
-                                    initialVals[field.fieldData.fieldName].length === index - 1
+                                    initialVals[field.fieldData.fieldName]?.length === index - 1
                                       ? ''
                                       : '[border-top:1px_solid_var(--common-border-color)]',
                                     index % 2 === 0 ? 'md:[border-right:1px_solid_var(--common-border-color)]' : ''
@@ -640,7 +636,6 @@ export type RelatedTo = {
 };
 
 const RenderFollowUP = ({ data, columnSize }: { data: FollowUP[]; columnSize: 6 | 12 }) => {
-  console.log(columnSize === 12);
   return (
     <div className="my-2">
       <p className="mx-[10px] pb-1 text-[12px] font-semibold text-gray-500">FOLLOW-UPS</p>
