@@ -6,7 +6,6 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import { getLookupOption } from 'src/components/FormBuilder/helper';
-import { uniqBy } from 'lodash';
 import { Form, Formik } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -18,9 +17,6 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
   const [options, setOptions] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [defaultOptions, setDefaultOptions] = useState([]);
-  // const [currentPage, setCurrentPage] = useState(0);
-  // const [inputValues, setInputValues] = useState('');
 
   useEffect(() => {
     if (data) {
@@ -89,24 +85,6 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
         toastConfig.setToastConfig(error);
       });
     }
-    // let visibilityCondition = fieldValue?.visibilityCondition || [];
-    // visibilityCondition = visibilityCondition?.map((v) => {
-    //   if (v?.index === group) {
-    //     if (v?.fields?.some((_f) => _f?.fieldName === value?.fieldName)) {
-    //       v?.fields?.map((f) => {
-    //         if (f?.fieldName === value?.fieldName) {
-    //           f.value = value?.value;
-    //         }
-    //         return f;
-    //       });
-    //     } else {
-    //       v.fields = [...v?.fields, value];
-    //     }
-    //   }
-    //   return v;
-    // });
-    // setValue('visibilityCondition', visibilityCondition);
-    // onClose();
   };
 
   const validate = (values: any) => {

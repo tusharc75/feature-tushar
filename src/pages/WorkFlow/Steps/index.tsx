@@ -67,15 +67,6 @@ const Steps = ({ resource, loading, id }) => {
         toastConfig.setToastConfig(error);
         setDeleteData(null);
       });
-    // let filteredSteps = steps?.filter((ele)=> ele.id!==step.id);
-    // filteredSteps = filteredSteps?.map((ele,idx)=> {
-    //   return {
-    //     ...ele,
-    //     order: idx
-    //   }
-    // })
-    // setSteps(filteredSteps);
-    // setDeleteData(null);
   };
 
   const handleUpdateOrder = (steps) => {

@@ -19,8 +19,6 @@ const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
 });
 
-const MATERIAL_TYPE = ['product', 'service', 'package'];
-
 const ManageSteps = ({ data, onSuccess, onClose, id }) => {
   const toastConfig = useContext(CustomToastContext);
 
