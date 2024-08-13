@@ -149,7 +149,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
       errors['fields'] = 'please select Fields';
       toastConfig.setToastConfig({open: true, type: 'error', message: 'please select Fields'});
     }
-    console.log(errors)
+ 
     return errors;
   };
 
