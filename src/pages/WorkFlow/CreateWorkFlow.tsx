@@ -1,8 +1,9 @@
 import { useState, useEffect, Fragment, useContext } from 'react';
 import Grid from '@material-ui/core/Grid';
-import { Box } from '@material-ui/core';
+import { Box, Button, CircularProgress, useMediaQuery } from '@material-ui/core';
 import { useHistory, useParams } from 'react-router-dom';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
+import { isTablet } from 'react-device-detect';
 import routes from './../../components/Helpers/Routes';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -13,6 +14,7 @@ import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import Steps from './Steps';
 import ActivationCondition from './ActivationCondition';
 import Notifications from 'src/pages/WorkFlow/Notifications';
+import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
 
 const CreateWorkFlow = () => {
   const {
@@ -21,9 +23,13 @@ const CreateWorkFlow = () => {
 
   const history = useHistory();
   const { id } = useParams();
+  const isMobile = useMediaQuery('(max-width: 960px)');
   const toastConfig = useContext(CustomToastContext);
   const [workFlowData, setWorkFlowData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [workFlowName, setWorkFlowName] = useState('');
+  const [isEdit, setIsEdit] = useState(false);
 
   const onBackButtonEvent = (e) => {
     e.preventDefault();
@@ -52,9 +58,29 @@ const CreateWorkFlow = () => {
         .then(({ data: { data } }) => {
           setLoading(false);
           setWorkFlowData(data);
+          setWorkFlowName(data?.workFlowName)
         })
         .catch((error) => {
           setLoading(false);
+          toastConfig.setToastConfig(error);
+        }); 
+  };
+
+  const handleSave = async () => {
+    setIsUpdating(true);
+    const values = {
+      _id: workFlowData?._id,
+      workFlowName: workFlowName
+    }
+      axiosInstance()
+        .put(`${routes?.workFlow?.path}`, values)
+        .then(({ data: { data } }) => {
+          setIsUpdating(false);
+          setIsEdit(false);
+          fetchWorkFlowData();
+        })
+        .catch((error) => {
+          setIsUpdating(false);
           toastConfig.setToastConfig(error);
         }); 
   };
@@ -70,9 +96,6 @@ const CreateWorkFlow = () => {
               isConfirmBeforeClick={true}
               onBreadCrumbClick={(path) => {
                 history.push({ pathname: path });
-                // if (!isEqual(orisection, section) && permissions?.isUpdate?.isUpdate) {
-                //   setShowConfirmDialog(true);
-                // } else 
               }}
             />
           </Box>
@@ -87,22 +110,22 @@ const CreateWorkFlow = () => {
               <Box mb={2} width={'100%'}>
                 <Grid container alignItems="center">
                   <Grid item container xs={9} spacing={1}>
-                    <Grid item xs={4}>
+                    <Grid item xs={6} md={4}>
                       <TextField
                         variant="outlined"
                         type="text"
                         label="Work Flow Name"
-                        disabled={true}
+                        disabled={!isEdit || isUpdating}
                         name="workFlowName"
                         fullWidth
                         margin="dense"
-                        value={workFlowData.workFlowName || ''}
-                        // onChange={(e) => {
-                        //   setWorkFlowName(e.target.value.trimStart());
-                        // }}
+                        value={workFlowName || ''}
+                        onChange={(e) => {
+                          setWorkFlowName(e.target.value.trimStart());
+                        }}
                       />
                     </Grid>
-                    <Grid item xs={4} >
+                    <Grid item xs={6} md={4}>
                     <TextField
                         variant="outlined"
                         type="text"
@@ -112,11 +135,39 @@ const CreateWorkFlow = () => {
                         fullWidth
                         margin="dense"
                         value={workFlowData.workFlowResource || ''}
-                        // onChange={(e) => {
-                        //   setWorkFlowName(e.target.value.trimStart());
-                        // }}
                       />
                     </Grid>
+                  </Grid>
+                  <Grid item xs={3} container justifyContent="flex-end">
+                    <Box>
+                      {permissions?.workFlow?.isUpdate && (
+                        <Button
+                          disabled={isUpdating}
+                          color="primary"
+                          size="small"
+                          onClick={isEdit ? handleSave : () => setIsEdit(true)}
+                          variant={isMobile && !isTablet ? 'text' : 'contained'}
+                          style={isMobile && !isTablet ? { color: 'var(--success)' } : {}}
+                        >
+                          {isMobile && !isTablet ? <RiSaveFill size={24} /> : (isEdit ? 'Save' : 'Edit')}
+                          {isUpdating && <CircularProgress className='ml-1' size={24} />}
+                        </Button>
+                      )}
+                    </Box>
+                    <Box ml={1}>
+                      <Button
+                        color="primary"
+                        variant={isMobile && !isTablet ? 'text' : 'contained'}
+                        size="small"
+                        style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
+                        onClick={() => {
+                          history.push({ pathname: routes.workFlow.path });
+                        }}
+                      >
+                        {' '}
+                        {isMobile && !isTablet ? <RiCloseCircleFill size={24} /> : 'Close'}
+                      </Button>
+                    </Box>
                   </Grid>
                 </Grid>
               </Box>
