@@ -2,13 +2,9 @@ import { Box, Button, Grid } from '@material-ui/core';
 import { Skeleton } from '@material-ui/lab';
 import { camelCase } from 'lodash';
 import React, { useContext, useEffect, useState } from 'react';
-import { BiPackage } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
 import { useHistory, useParams } from 'react-router-dom';
 import { Edit } from '@material-ui/icons';
 import { isMobile, isTablet } from 'react-device-detect';
-import { MdMiscellaneousServices } from 'react-icons/md';
-import { RiShoppingBag3Fill } from 'react-icons/ri';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -138,18 +134,16 @@ const PackageDetails = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <MdMiscellaneousServices className="mr-1" fontSize="inherit" />
-            individual Services
+            Individual Services
           </CustomTab>
           <CustomTab value={2}>
-            <RiShoppingBag3Fill className="mr-1" fontSize="inherit" />
-            individual Products
+            Individual Products
           </CustomTab>
           <CustomTab value={3}>
-            <BiPackage className="mr-1" fontSize="inherit" /> Sub Packages
+            Sub Packages
           </CustomTab>
         </CustomTabs>
         <Grid container spacing={2}>
@@ -165,13 +159,13 @@ const PackageDetails = () => {
               </Box>
             </TabPanel>
             <TabPanel value={tabValue} index={1}>
-              {tabValue === 1 && <Services packageData={packageData} packageId={id} />}
+              {tabValue === 1 && <Services packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={2}>
-              {tabValue === 2 && <Products packageData={packageData} packageId={id} />}
+              {tabValue === 2 && <Products packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
             <TabPanel value={tabValue} index={3}>
-              {tabValue === 3 && <Packages packageData={packageData} packageId={id} />}
+              {tabValue === 3 && <Packages packageData={packageData} packageId={id} allowedToEdit={permissions?.packages?.isUpdate} />}
             </TabPanel>
           </Grid>
         </Grid>

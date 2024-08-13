@@ -92,6 +92,11 @@ export class HandleSteps {
   }
 
   private loop() {
+    if (this.error) {
+      console.error(this.message);
+      this.error = false;
+      this.message = '';
+    }
     window.requestAnimationFrame(() => {
       this.checkPreviousObservers();
       this.loop();
@@ -122,12 +127,13 @@ export class HandleSteps {
     }
   }
   handleNextOnKeyDown(e: KeyboardEvent) {
-    if (this.currentStepData.isHiddenStep && e.key === this.currentStepData.nextOnKeyPress) {
+    if (this.currentStepData.isHiddenStep && this.currentStepData.nextOnKeyPress(e)) {
       this.next();
     }
   }
 
   attachObservers() {
+    this.attachedOvservers.map((o) => o.cleanup());
     const currStepData = this.currentStepData;
     if (!currStepData) return;
     const isObserverPresent = this.attachedOvservers.find((o) => o.actualIndex === this.currentIndex);
@@ -143,12 +149,19 @@ export class HandleSteps {
     if (!this.currentStepData.isHiddenStep) return;
     const currData = this.currentStepData;
     if (currData.nextOnFocusOut) {
-      currData.element.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
-      this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
+      if (currData.element.tagName === 'IFRAME') {
+        const element = currData.element as HTMLIFrameElement;
+        element.contentDocument.body.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
+        this.listenerAttachedElements.push({ elm: element.contentDocument.body, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
+      } else {
+        currData.element.addEventListener('blur', this.handleNextOnFocusOut.bind(this));
+        this.listenerAttachedElements.push({ elm: currData.element, event: 'blur', func: this.handleNextOnFocusOut.bind(this) });
+      }
     }
     if (currData.nextOnValueChange) {
       const parent = this.currentStepData?.element?.parentElement?.parentElement?.parentElement?.getAttribute('datatype');
       const isMultiInputAutoComplete = parent === 'multiSelect';
+
       const isAutoComplete = this.currentStepData.element.classList.contains('MuiAutocomplete-input');
 
       if (isMultiInputAutoComplete) {
@@ -169,7 +182,12 @@ export class HandleSteps {
         this.attachedOvservers.push(observer);
       } else {
         // Track Text input via observer
-        let validator = (value: string) => value.length > 0 && value !== '0';
+        let validator = (value: string) => {
+          if (['decimal', 'currencyAmount'].includes(this.currentStepData.fieldType)) {
+            return value.length > 0 && Number(value) !== 0;
+          }
+          return value.length > 0;
+        };
         if (typeof this.currentStepData.nextOnValueChange === 'function') {
           validator = this.currentStepData.nextOnValueChange;
         }
@@ -199,8 +217,9 @@ export class HandleSteps {
       if (observer.actualIndex < this.currentIndex) {
         this.tempIndex = this.currentStepData.isHiddenStep ? this.currentIndex - 1 : this.currentIndex;
         this.currentIndex = observer.stepIndex;
-        this.next(false);
         this.tempIndex = -1;
+        this.clicked = false;
+        this.next(false);
         break;
       }
     }
@@ -227,8 +246,9 @@ export class HandleSteps {
     if (this.currentIndex === this.steps.length - 1) {
       this.reset();
     }
-    // To debounce click only register first click
-    if ((this.clicked || this.waiting) && shouldCheck) return;
+    // // To debounce click only register first click
+    // if ((this.clicked || this.waiting) && shouldCheck) return;
+    // this.clicked = !shouldCheck;
 
     if (shouldCheck) {
       this.clicked = true;
@@ -262,13 +282,14 @@ export class HandleSteps {
     this.findingElement = true;
     const activeStep = this.steps[index];
     clearInterval(this.interval);
-    let element = document.querySelector(activeStep.target) as HTMLElement;
     this.sendUpdateSignal();
+    let element = document.querySelector(activeStep.target) as HTMLElement;
+
     if (!element) {
       this.retry++;
       if (this.retry >= RETRY) {
         clearInterval(this.interval);
-        this.message = 'Element not found';
+        this.message = `Element not found with selector: ${activeStep.target}`;
         this.error = true;
 
         this.reset();
@@ -280,47 +301,57 @@ export class HandleSteps {
     } else {
       this.retry = 0;
       this.findingElement = false;
+      this.clicked = false;
+      this.sendUpdateSignal();
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
       const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
       // this.scrollToCurrentStep(element);
 
       // Check if value exist then move on to the next step
-      if (activeStep.skipIfValueExist) {
-        const inputElement = element as HTMLInputElement;
-        if (inputElement.value?.length > 0) {
-          this.clicked = false;
-          this.next();
-          return;
-        }
-      }
+      // if (activeStep.skipIfValueExist) {
+      //   const inputElement = element as HTMLInputElement;
+      //   let validator = (value: string) => {
+      //     if (['decimal', 'currencyAmount'].includes(activeStep.fieldType)) {
+      //       return value.length > 0 && Number(value) !== 0;
+      //     }
+      //     return value.length > 0;
+      //   };
 
-      this.clicked = false;
+      //   if (validator(inputElement.value)) {
+      //     this.clicked = false;
+      //     this.next();
+      //     return;
+      //   }
+      // }
+
       this.currentStepData = {
         ...activeStep,
         positionData,
         index: index,
         element
       };
-
       // Settimeout with 0 sec delay will move these function calls to js task queue and will execute later
-      setTimeout(() => {
-        this.attachObservers();
-        this.sendUpdateSignal();
-      }, 0);
+      // setTimeout(() => {
+      this.attachObservers();
+      this.sendUpdateSignal();
+      // }, 0);
     }
   }
 
   private initializeStepData(steps: StepDefination[]) {
     const newSteps: Step[] = [];
-    for (const data of steps) {
+    for (let i = 0; i < steps.length; i++) {
+      const data = steps[i];
       const normalStep: NormalStep = {
         title: data.title,
+        index: i,
         content: data.content,
         target: data.target,
         isHiddenStep: false,
         nextButtonName: data.nextButtonName,
         willOpenDialog: data.willOpenDialog,
-        waitForStepInsertion: data.waitForStepInsertion
+        waitForStepInsertion: data.waitForStepInsertion,
+        fieldType: data.fieldType
       };
       if (data.skipIfValueExist) {
         normalStep.skipIfValueExist = data.skipIfValueExist;
@@ -330,6 +361,7 @@ export class HandleSteps {
         newSteps.push(normalStep);
         newSteps.push({
           ...data,
+          index: i,
           target: data.target,
           isHiddenStep: true
         });
@@ -344,9 +376,11 @@ export class HandleSteps {
     this.steps.push(...this.initializeStepData(steps));
   }
   insert(steps: StepDefination[], index: number) {
+    if (!steps || steps.length === 0 || !index) return;
     this.steps.splice(index, 0, ...this.initializeStepData(steps));
   }
   insertAtCurrentIndex(steps: StepDefination[]) {
+    if (!steps || steps.length === 0) return;
     this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps));
   }
   pop() {

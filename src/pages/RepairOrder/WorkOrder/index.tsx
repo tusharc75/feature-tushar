@@ -42,6 +42,7 @@ import {
   workOrder
 } from '../../../constants/helpers';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
+import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -61,6 +62,7 @@ const WorkOrder = ({
   const { state: { user, permissions } } = useData();
 
   const [columns, setColumns] = useState(null);
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
   const [deleteData, setDeleteData] = useState(null);
   const [autoCompleteData, setAutoCompleteData] = useState(null);
   const [isDeleting, setDeleting] = useState(false);
@@ -83,6 +85,7 @@ const WorkOrder = ({
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
   const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -102,6 +105,7 @@ const WorkOrder = ({
   useEffect(() => {
     fetchFields();
     fetchData();
+    fetchPolicy()
   }, [repairOrderData]);
 
   useEffect(() => {
@@ -123,6 +127,19 @@ const WorkOrder = ({
     );
     setAllAssignedWorkStations(uniqueAssignedWorkStations);
   }, [selectedRecords]);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.workOrderService, repairOrderData?.currency, allowedToEdit);
@@ -501,7 +518,7 @@ const WorkOrder = ({
     }
   };
 
-  const handleAutoComplete = () => {
+  const handleAutoComplete = (assetData = null) => {
     let ids = [];
     if (autoCompleteData && autoCompleteData.length > 0) {
       autoCompleteData.forEach((d) => {
@@ -514,11 +531,13 @@ const WorkOrder = ({
     if (ids.length) {
       axiosInstance()
         .put(`${repairOrder.api}/${repairOrderData._id}/work-order/auto-complete`, {
-          workOrders: ids
+          workOrders: ids,
+          assets: assetData ? assetData : []
         })
         .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
+          setOpenAssetDataDialog({ open: false, statusPolicy: null })
           fetchData();
           toastConfig.setToastConfig({
             open: true,
@@ -1349,7 +1368,26 @@ const WorkOrder = ({
               onClose={() => {
                 setCompleteConfirmBox(false);
               }}
-              onOk={handleAutoComplete}
+              onOk={() => {
+                const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.available);
+                if (statusPolicy) {
+                  setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy })
+                } else {
+                  handleAutoComplete()
+                }
+              }}
+            />
+          )}
+
+          {openAssetDataDialog.open && (
+            <AssetDetailsChangeDialog
+              ids={autoCompleteData?.map((e) => e.materialId)}
+              statusPolicy={openAssetDataDialog.statusPolicy}
+              setAssetsData={null}
+              onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+              onSuccess={(data) => {
+                handleAutoComplete(data)
+              }}
             />
           )}
 

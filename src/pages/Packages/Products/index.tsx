@@ -1,31 +1,28 @@
-import { Box, IconButton, MenuItem } from '@material-ui/core';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { camelCase, startCase } from 'lodash';
+import { Box, MenuItem } from '@material-ui/core';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
-import { FiExternalLink } from 'react-icons/fi';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import AssignProductDialog from 'src/components/AssignRolesDialog/AssignProductDialog';
-import AssignSerializedAssetDialog from 'src/components/AssignRolesDialog/AssignSerializedAssetDialog';
-import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { flattenArray } from 'src/constants/columns';
-import { packages } from 'src/constants/helpers';
+import { packages, sidebarResource, prepareDataForGrid } from 'src/constants/helpers';
 
-const Products = ({ packageId, packageData }) => {
-  const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
+const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
+
+  const renderedFrom = `${camelCase(routes?.packages.title)}_product`;
+
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
-    state: { permissions }
+    state: { permissions, user }
   }: any = useData();
 
   const [columns, setColumns] = useState(null);
@@ -33,12 +30,10 @@ const Products = ({ packageId, packageData }) => {
   const [showProductAssignDialog, setShowProductAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
 
-  const [assignAssetDialog, setAssignAssetDialog] = useState({ open: false, products: [] });
-  const [isAssetAdding, setIsAssetAdding] = useState(false);
-
   const [isSubmitting, setSubmitting] = useState(false);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
+  const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchColumns();
@@ -48,62 +43,29 @@ const Products = ({ packageId, packageData }) => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
-    const allAssetsResponce: any = await axiosInstance().get(`${packages.api}/${packageId}/products/assets`);
-    const assets = allAssetsResponce?.data?.data || [];
-
     axiosInstance()
       .get(`${packages.api}/${packageId}/products`)
       .then(({ data: { data } }) => {
-        let rows = data;
-        rows.forEach((parent, i) => {
-          parent.index = i + 1;
-          parent.type = 'product';
-          parent.detail = parent?.productName;
-          parent.description = parent?.productDescription;
-          parent.productNumber = parent?.productNumber;
-          parent.productCategory = parent?.productCategory?.optionLabel;
-          parent.parentId = null;
-          parent.qty = parent.qty;
-          parent.assetQty = assets?.filter((i) => i.product === parent._id)?.length;
-          parent.subRows = generateNestedData(assets, parent);
+        let rows = data.map((u, index) => {
+          let res: any = {
+            ...prepareDataForGrid(u, user),
+          };
+          res.index = index + 1;
+          return res;
         });
-        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        dispatch({ type: 'initialize', data: rows, count: data.length });
         dispatch({ type: 'loading', loading: false });
       })
       .catch((err) => {
+        dispatch({ type: 'loading', loading: false });
         setToastConfig(err);
       });
   };
 
-  const generateNestedData = (material, parent) => {
-    const subRows: any = material.filter((e) => e.product === parent._id);
-    subRows.forEach((_subRow, j) => {
-      _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.type = 'asset';
-      _subRow.detail = _subRow?.assetNumber;
-      _subRow.description = parent?.description;
-      _subRow.productCategory = _subRow?.productCategory?.optionLabel;
-      _subRow.position = _subRow?.position;
-      _subRow.parentId = _subRow.product;
-      _subRow.qty = 1;
-    });
-    return subRows;
-  };
-
   const fetchColumns = async () => {
-    const {
-      data: { data }
-    } = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [
-        {
-          resource: 'Product',
-          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct', 'position']
-        }
-      ]
-    });
-
-    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-
+    let data;
+    const response = await axiosInstance().get(`/field?resource=${sidebarResource.product}&view=true`);
+    data = response?.data?.data;
     let coloum: any = [
       {
         accessor: 'index',
@@ -111,211 +73,55 @@ const Products = ({ packageId, packageData }) => {
         width: 70,
         sticky: isMobile ? 'none' : 'left',
         Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-        Footer: () => {
-          return <>Total</>;
-        }
       },
-      {
-        accessor: 'type',
-        Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
-        width: 100,
-        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-      },
-      {
-        accessor: 'detail',
-        Header: 'Details',
-        width: 200,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) =>
-          row?.original?.type ? (
-            <div className="flex items-center gap-2">
-              <p className="text-truncate">{row.original.detail}</p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row?.original?.type === 'product') {
-                    window.open(`${routes.productDetail.path}/${row.original._id}`);
-                  } else {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
-                  }
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
-        accessor: 'description',
-        Header: 'Description',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['description'] ? <div>
-            <p className="text-truncate">{row.original.description}</p>
-          </div> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'productNumber',
-        Header: productFields?.find((e) => e.fieldName === 'productNumber')?.fieldLabel || 'Product Number',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'productCategory',
-        Header: 'Product Category',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['productCategory'] ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
-        }
-      },
-      ...(productFields?.find((e) => e.fieldName === 'position') ? [{
-        accessor: 'position',
-        Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['position'] ? <div>
-            <p className="text-truncate">{row.original.position}</p>
-          </div> : <NoDataCell />;
-        }
-      }] : []),
       {
         accessor: 'qty',
         Header: 'Qty',
-        width: 150,
-        editable: permissions?.packages?.isCreate || permissions?.packages?.isUpdate,
-        Cell: ({ row }) => {
-          return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
-        }
+        editable: allowedToEdit,
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        disabled: true,
+        Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
       }
     ];
-    coloum.push({
-      accessor: 'action',
-      Header: 'Actions',
-      minWidth: 100,
-      width: 100,
-      sticky: 'right',
-      disableFilters: true,
-      disableSortBy: true,
-      canDrag: false,
-      Cell: ({ row }) => {
-        return (
-          <HtmlTooltip title={'Delete'}>
-            <span>
-              <IconButton
-                size="small"
-                aria-label="Details"
-                disabled={row.original.hideSelection}
-                onClick={() => {
-                  setShowProductConfirmBox({ open: true, data: [row.original] });
-                }}
-              >
-                <DeleteIcon fontSize="small" color={'error'} />
-              </IconButton>
-            </span>
-          </HtmlTooltip>
-        );
-      }
-    });
-    setColumns([...coloum]);
+    const newColumns = generateColumns(renderedFrom, data);
+    setColumns([...coloum, ...newColumns]);
   };
 
-  const onSaveInlineEdit = (inputField, updatedData) => {
-    handleUpdateQuantity(updatedData);
-  };
-
-  const handleUpdateQuantity = (row) => {
-    if (row.type === 'product') {
-      axiosInstance()
-        .put(`${packages.api}/${packageId}/products`, {
-          ids: [row._id],
-          qty: Number(row.qty)
-        })
-        .then(({ data }) => {
-          setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-          fetchData();
-        })
-        .catch((err) => setToastConfig(err));
-    }
+  const onSaveInlineEdit = (data, row) => {
+    axiosInstance().put(`${packages.api}/${packageId}/products`, {
+      ids: [row._id],
+      qty: Number(data.qty)
+    })
+      .then(({ data }) => {
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        fetchData();
+      }).catch((err) => setToastConfig(err));
   };
 
   const removeProducts = () => {
     setRemovingProducts(true);
-    const allRecords = [...showProductConfirmBox?.data];
-    selectedRecords?.forEach((record) => {
-      for (let i = 0; i < (record?.subRows || [])?.length; i++) {
-        allRecords.push(record.subRows[i]);
-      }
-    });
-    const productIds = allRecords?.filter((d) => d.type === 'product')?.map((d) => d._id) || [];
-    const assetIds = allRecords?.filter((d) => d.type === 'asset')?.map((d) => d.id) || [];
-    if (productIds?.length) {
-      axiosInstance()
-        .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds })
-        .then(({ data }) => {
-          setRemovingProducts(false);
-          setShowProductConfirmBox({ open: false, data: null });
-          fetchData();
-          setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((err) => {
-          setRemovingProducts(false);
-          setShowProductConfirmBox({ open: false, data: null });
-          setToastConfig(err);
-        });
-    }
-    if (assetIds?.length) {
-      axiosInstance()
-        .put(`${packages.api}/${packageId}/products/asset/remove`, { ids: assetIds })
-        .then(({ data }) => {
-          setRemovingProducts(false);
-          setShowProductConfirmBox({ open: false, data: null });
-          fetchData();
-          setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((err) => {
-          setRemovingProducts(false);
-          setShowProductConfirmBox({ open: false, data: null });
-          setToastConfig(err);
-        });
-    }
-  };
-
-  const handleAssignAssets = (data) => {
-    setIsAssetAdding(true);
-    axiosInstance()
-      .post(`${packages.api}/${packageId}/products/assign-assets`, {
-        packageId,
-        assets: data?.map((e) => {
-          return { product: e.product, asset: e.asset };
-        })
-      })
-      .then(() => {
-        setAssignAssetDialog({ open: false, products: [] });
-        setIsAssetAdding(false);
-        fetchData();
-      })
-      .catch((err) => {
-        setIsAssetAdding(false);
-        setToastConfig(err);
+    const productIds = showProductConfirmBox?.data?.map((d) => d._id) || [];
+    axiosInstance().put(`${packages.api}/${packageId}/products/remove`, { ids: productIds }).then(({ data }) => {
+      setRemovingProducts(false);
+      setShowProductConfirmBox({ open: false, data: null });
+      fetchData();
+      setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
       });
+    }).catch((err) => {
+      setRemovingProducts(false);
+      setShowProductConfirmBox({ open: false, data: null });
+      setToastConfig(err);
+    });
+
   };
 
   const handleAdd = async (rows) => {
@@ -341,16 +147,10 @@ const Products = ({ packageId, packageData }) => {
       });
   };
 
-  const disableAssignSerializedAssets = () => {
-    if (selectedRecords.length === 0) return true;
-    const flatArray = selectedRecords.filter((f) => f.type === 'product' && f.serializedProduct && f.qty > f.assetQty);
-    return flatArray.length === 0;
-  };
-
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Products</MenuItem>
+        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Existing Products</MenuItem>
       </>
     );
   };
@@ -358,26 +158,8 @@ const Products = ({ packageId, packageData }) => {
   const actionButtonMenuItems = () => {
     return (
       <>
-        {permissions?.serializedAsset?.isRead &&
-          <MenuItem
-            disabled={disableAssignSerializedAssets()}
-            onClick={() => {
-              const products = [];
-              selectedRecords
-                .filter((i) => i.type === 'product' && i.serializedProduct)
-                ?.forEach((e) => {
-                  if (e?.qty - e?.assetQty > 0) {
-                    products.push({ _id: e._id, product: e._id, qty: e?.qty - e?.assetQty, productName: e?.detail });
-                  }
-                });
-              setAssignAssetDialog({ open: true, products: products });
-            }}
-          >
-            {`Assign ${routes.serializedAsset.title}`}
-          </MenuItem>
-        }
         <MenuItem
-          disabled={permissions?.packages?.isUpdate && (selectedRecords.length === 0 || isRemovingProducts)}
+          disabled={(selectedRecords.length === 0 || isRemovingProducts)}
           onClick={() => {
             setShowProductConfirmBox({ open: true, data: selectedRecords });
           }}
@@ -391,7 +173,7 @@ const Products = ({ packageId, packageData }) => {
   const rightSideContents = () => {
     return (
       <>
-        {permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
+        {allowedToEdit && (
           <ImportExportMenu
             permissions={permissions?.packages}
             module="products"
@@ -403,7 +185,7 @@ const Products = ({ packageId, packageData }) => {
             ids={[]}
             additionalParams={`refrenceId=${packageId}`}
           />
-        }
+        )}
       </>
     );
   };
@@ -411,9 +193,9 @@ const Products = ({ packageId, packageData }) => {
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isCreate || permissions?.packages?.isUpdate}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={permissions?.packages?.isCreate || permissions?.packages?.isUpdate}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: !Boolean(selectedRecords && selectedRecords.filter((e) => !e.hideSelection).length) }}
         rightSideContents={rightSideContents()}
@@ -421,7 +203,7 @@ const Products = ({ packageId, packageData }) => {
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 393px)'}
+          height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
@@ -429,9 +211,9 @@ const Products = ({ packageId, packageData }) => {
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           onSaveEdit={onSaveInlineEdit}
-          expander={true}
-          hideAction={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
-          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
+          hideAction={!allowedToEdit}
+          hideSelection={!allowedToEdit}
+          hideExportTable={true}
         />
       ) : (
         <Box p={2} height={500}>
@@ -458,18 +240,6 @@ const Products = ({ packageId, packageData }) => {
           }}
           okBtnLoading={isRemovingProducts}
           onOk={removeProducts}
-        />
-      )}
-      {assignAssetDialog.open && (
-        <AssignSerializedAssetDialog
-          reference={'package'}
-          ids={flattenArray(dataRows)
-            ?.filter((e) => e.type === 'asset')
-            ?.map((e) => e._id)}
-          handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
-          handleSucess={handleAssignAssets}
-          isAssigning={isAssetAdding}
-          selectedProducts={assignAssetDialog.products}
         />
       )}
     </>

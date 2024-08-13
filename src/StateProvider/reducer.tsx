@@ -25,7 +25,7 @@ export const initialState = {
     start: false,
     stepIndex: 0
   },
-  gridMetaData: {},
+  gridMetaData: {}
 };
 
 const reducer = (state = initialState, action) => {

@@ -1,4 +1,5 @@
-import { Button, Dialog, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@material-ui/core';
+import { Autocomplete } from '@material-ui/lab';
 import { Form, Formik } from 'formik';
 import React from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -9,7 +10,7 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomDialogTransition, RESOURCE_LABEL, productInventory, sidebarResource } from 'src/constants/helpers';
 
-function RevertQtyDialog({ referenceType, productName, product, onClose, onSuccess, qty, revertedQty, ledgerId }) {
+function RevertQtyDialog({ referenceType, productName, product, onClose, onSuccess, qty, revertedQty, ledgerId, serialNumber = [] }) {
 
   const toastConfig = React.useContext(CustomToastContext);
   const [loading, setLoading] = React.useState(false);
@@ -22,12 +23,15 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
     if (parseInt(values.revertQty) > (qty - revertedQty)) {
       errors['revertQty'] = 'Insufficient Quantity !';
     }
+    if (serialNumber?.length && values.serialNumber?.length !== parseInt(values.revertQty)) {
+      errors['serialNumber'] = 'Please select serial number for each qty';
+    }
     return errors;
   }
 
   const handleSubmit = (values) => {
     setLoading(true);
-    let data = { revertQty: parseInt(values.revertQty), comment: values.comment };
+    let data = { revertQty: parseInt(values.revertQty), comment: values.comment, ...(serialNumber?.length ? { serialNumber: values.serialNumber } : {}) };
     if (referenceType === "workOrder") {
       axiosInstance().put(`/material-handling/revert/${ledgerId}`, { ...data, referenceType: sidebarResource.workOrder })
         .then(({ data: { data } }) => {
@@ -60,7 +64,7 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
         showManimizeMaximize={false}
         showRequiredLabel={false} />
       <Formik
-        initialValues={{ revertQty: (qty - revertedQty), comment: 'Reverted' }}
+        initialValues={{ revertQty: (qty - revertedQty), comment: 'Reverted', ...(serialNumber?.length ? { serialNumber: [] } : {}) }}
         onSubmit={handleSubmit}
         validateOnMount
         validate={validate}
@@ -84,6 +88,30 @@ function RevertQtyDialog({ referenceType, productName, product, onClose, onSucce
                   setFieldValue('revertQty', e.target.value?.replace(/\D/g, ''));
                 }}
               />
+              {serialNumber?.length ?
+                <Box mt={2} mb={1}>
+                  <Autocomplete
+                    options={[
+                      { optionValue: 'all', optionLabel: 'Select All' },
+                      ...serialNumber
+                    ]}
+                    fullWidth
+                    multiple
+                    size="small"
+                    value={values?.serialNumber ? serialNumber?.filter((data: any) => values?.serialNumber?.includes(data.optionValue)) : []}
+                    getOptionLabel={(option) => option.optionLabel}
+                    getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                    onChange={(_, newVal: any) => {
+                      const isAll = Boolean(newVal?.find((v) => v?.optionValue === 'all'));
+                      const values = isAll ? [...serialNumber?.map((o) => o.optionValue)] : newVal?.map((val) => val.optionValue);
+                      setFieldValue('serialNumber', values);
+                    }}
+                    renderInput={(params) => (
+                      <TextField required={true} {...params} label="Select Serial Number" name="serialNumber" variant="outlined" error={touched['serialNumber'] && Boolean(errors['serialNumber'])} helperText={touched['serialNumber'] && errors['serialNumber']} />
+                    )}
+                  />
+                </Box>
+                : null}
               <TextField
                 margin="dense"
                 type="text"

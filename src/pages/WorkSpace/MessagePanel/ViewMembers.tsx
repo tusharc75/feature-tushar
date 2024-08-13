@@ -1,11 +1,11 @@
-import { Button, Dialog, IconButton, TextField } from '@material-ui/core';
-import { Add, Delete, Remove } from '@material-ui/icons';
+import { Avatar, IconButton, ListItem, TextField } from '@material-ui/core';
+import { Add, Remove } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DashboardModal from 'src/components/DashboardModal';
-import { ThemeButton } from 'src/components/Helpers/Buttons';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -23,6 +23,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
   const [members, setMembers] = useState(channelData?.members || []);
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, data: null });
 
   const handleRemoveMember = useCallback(
     async (userId) => {
@@ -64,12 +65,12 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
         }}
         contentMaxHeight="350px"
       >
-        <div className="flex items-center gap-2">
+        <div className="sticky -top-[16px] z-10 flex items-center gap-2 bg-[var(--dark-primary,white)]">
           <TextField
             size="small"
             id="search-member"
             type="search"
-            label="Outlined"
+            label="Search.."
             variant="outlined"
             value={searchTerm}
             onChange={handleSearch}
@@ -86,16 +87,31 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
             </IconButton>
           </HtmlTooltip>
         </div>
-        <ul className="mt-4 max-h-[230px] space-y-2 overflow-y-auto">
+        <ul className={'mt-4  space-y-2 overflow-y-auto'}>
           {members?.map((member) => (
-            <li key={member.optionValue} className="flex list-none items-center justify-between">
-              <span>{member.optionLabel}</span>
+            <ListItem component={'li'} button key={member.optionValue} className="!list-none !items-center !justify-between">
+              <div className="flex items-center gap-2">
+                <Avatar
+                  style={{
+                    width: 22,
+                    height: 22,
+                    borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)',
+                    fontSize: 12
+                  }}
+                  variant="rounded"
+                  className="my-[2px]"
+                  src={member.avatar}
+                >
+                  {member?.optionLabel.match(/(\b\S)?/g).join('')}
+                </Avatar>
+                <span>{member.optionLabel}</span>
+              </div>
               <HtmlTooltip title={<span className="block w-[200px] py-2 text-center">Remove {member.optionLabel}</span>}>
-                <IconButton onClick={() => handleRemoveMember(member.optionValue)} size="small">
+                <IconButton onClick={() => setConfirmDialog({ open: true, data: member })} size="small">
                   <Remove color="error" />
                 </IconButton>
               </HtmlTooltip>
-            </li>
+            </ListItem>
           ))}
         </ul>
       </DashboardModal>
@@ -105,6 +121,23 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
           ignoreIds={channelData?.members?.map((member) => member.optionValue)}
           onClose={() => setIsAddMemberDialogOpen(false)}
           onSuccess={fetchChannelData}
+        />
+      )}
+      {confirmDialog.open && (
+        <ConfirmationDialog
+          open={true}
+          message={
+            <>
+              Are you sure you want to remove user <br /> <span className="font-semibold text-gray-500">{confirmDialog.data?.optionLabel}</span>?
+            </>
+          }
+          onClose={() => {
+            setConfirmDialog({ open: false, data: null });
+          }}
+          onOk={() => {
+            handleRemoveMember(confirmDialog.data?.optionValue);
+            setConfirmDialog({ open: false, data: null });
+          }}
         />
       )}
     </>

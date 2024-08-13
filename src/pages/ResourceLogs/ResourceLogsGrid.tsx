@@ -183,6 +183,9 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
                     } else if (e?.type === 'dropDown' && e?.lookup) {
                       oldValue = oldValue?.label;
                       newValue = newValue?.label;
+                    } else if (e?.type === 'multiSelect' && e?.lookup) {
+                      oldValue = oldValue?.map((e) => e?.label)?.toString();
+                      newValue = newValue?.map((e) => e?.label)?.toString();
                     }
                     if (oldValue && newValue) {
                       changeString.push(`${e.fieldLabel} changed from ${oldValue} to ${newValue}`);

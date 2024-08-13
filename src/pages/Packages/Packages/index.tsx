@@ -9,14 +9,15 @@ import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 import { useData } from 'src/StateProvider/Provider';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
-import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import AssignPackageDialog from 'src/components/AssignRolesDialog/AssignPackageDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
+import { isMobile } from 'react-device-detect';
 
-const PackagesTable = ({ packageId, packageData }) => {
-  const renderedFrom = `${camelCase(routes?.packages.title)}_${packageData?.packageType || 'product'}`;
+const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
+
+  const renderedFrom = `${camelCase(routes?.packages.title)}_packages'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
   const {
@@ -45,18 +46,11 @@ const PackagesTable = ({ packageId, packageData }) => {
     axiosInstance()
       .get(`${packages.api}/${packageId}/package`)
       .then(({ data: { data } }) => {
-        let rows = data.map((u) => {
-          let res = {
+        let rows = data.map((u, index) => {
+          let res: any = {
             ...prepareDataForGrid(u, user),
-            inventoryCount: u?.qty,
-            warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
-            productCategoryChipColor: u.productCategory?.chipColour
           };
-          for (let col in res) {
-            if (res[col] && res[col].optionLabel) {
-              res[col] = res[col].optionLabel;
-            }
-          }
+          res.index = index + 1;
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: data.length });
@@ -73,10 +67,26 @@ const PackagesTable = ({ packageId, packageData }) => {
     const response = await axiosInstance().get(`/field?resource=Packages`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path);
-    setColumns([...newColumns, ActionsRenderer]);
+    setColumns([
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+      },
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        editable: allowedToEdit,
+        disableFilters: true,
+        disableSortBy: true,
+        disabled: true,
+        Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
+      }, ...newColumns]);
   };
 
-  const handleUpdateQuantity = (data, row) => {
+  const onSaveInlineEdit = (data, row) => {
     if (Number(row?.qty) > 0) {
       axiosInstance()
         .put(`${packages.api}/${packageId}/package`, {
@@ -109,20 +119,6 @@ const PackagesTable = ({ packageId, packageData }) => {
       });
   };
 
-  const ActionsRenderer = {
-    accessor: 'qty',
-    Header: 'Qty',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    editable: permissions?.packages?.isUpdate,
-    cellEditor: 'numericCellEditor',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
-  };
-
   const handleAssignPackage = (rows) => {
     setSubmitting(true);
     axiosInstance()
@@ -145,9 +141,9 @@ const PackagesTable = ({ packageId, packageData }) => {
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Product Packages</MenuItem>
+        <MenuItem onClick={() => setShowProductAssignDialog(true)}>Add Existing Product Packages</MenuItem>
         <Box ml={1} />
-        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Service Packages</MenuItem>
+        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Existing Service Packages</MenuItem>
       </>
     );
   };
@@ -168,8 +164,7 @@ const PackagesTable = ({ packageId, packageData }) => {
   };
 
   const rightSideContents = () => {
-    return (
-      permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
+    return (allowedToEdit && (
       <>
         <ImportExportMenu
           permissions={permissions?.packages}
@@ -183,15 +178,16 @@ const PackagesTable = ({ packageId, packageData }) => {
           additionalParams={`refrenceId=${packageId}`}
         />
       </>
+    )
     );
   };
 
   return (
     <>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isUpdate}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={permissions?.packages?.isUpdate}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingProducts }}
         rightSideContents={rightSideContents()}
@@ -199,15 +195,16 @@ const PackagesTable = ({ packageId, packageData }) => {
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 393px)'}
+          height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchData}
-          onSaveEdit={handleUpdateQuantity}
-          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
+          onSaveEdit={onSaveInlineEdit}
+          hideSelection={allowedToEdit ? false : true}
+          hideExportTable={true}
         />
       ) : (
         <Box p={2} height={500}>

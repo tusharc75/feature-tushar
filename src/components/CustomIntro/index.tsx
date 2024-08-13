@@ -1,4 +1,4 @@
-import { Dialog, IconButton, Popper, TextField } from '@material-ui/core';
+import { Dialog, IconButton, Popper, TextField, useMediaQuery } from '@material-ui/core';
 import { Close } from '@material-ui/icons';
 import { KeyboardEvent, ReactNode, useRef, useState } from 'react';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
@@ -39,12 +39,13 @@ export type StepDefination = {
   nextOnFocusOut?: boolean;
   formFields?: boolean;
   nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
-  nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  nextOnKeyPress?: (e: KeyboardEvent) => boolean;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
 };
 
 export type NormalStep = {
@@ -57,6 +58,8 @@ export type NormalStep = {
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
+  index: number;
 };
 export type HiddenStep = {
   target: string;
@@ -64,12 +67,14 @@ export type HiddenStep = {
   nextOnUserClicks?: number;
   nextOnFocusOut?: boolean;
   nextOnValueChange?: boolean | ((value: string | string[]) => boolean);
-  nextOnKeyPress?: KeyboardEvent<HTMLElement>['key'];
+  nextOnKeyPress?: (e: KeyboardEvent) => boolean;
   skipIfValueExist?: boolean;
   nextButtonName?: string;
   waitForEnable?: boolean;
   willOpenDialog?: boolean;
   waitForStepInsertion?: boolean;
+  fieldType?: string;
+  index: number;
 };
 
 let timeout: NodeJS.Timeout;
@@ -98,8 +103,15 @@ const CustomIntro = () => {
   };
 
   const handleNext = (checkForStepInsertion = true) => {
+    clearTimeout(timeout);
     if (checkForStepInsertion) {
-      currentStepData?.element.click();
+      if (currentStepData?.element.tagName === 'IFRAME') {
+        const frame = currentStepData?.element as HTMLIFrameElement;
+        frame.contentDocument.body.focus();
+        frame.contentDocument.body.click();
+      } else {
+        currentStepData?.element.click();
+      }
       if (currentStepData?.waitForStepInsertion) {
         handleSteps.current?.pause();
         return;
@@ -108,7 +120,6 @@ const CustomIntro = () => {
       handleSteps.current.resume();
     }
 
-    clearTimeout(timeout);
     if (currentStepData?.willOpenDialog) {
       // check if dialog will open then wait for 500ms to let dialog open properly
       timeout = setTimeout(() => {
@@ -116,9 +127,12 @@ const CustomIntro = () => {
       }, 500);
     } else {
       // wait for any layout change
-      timeout = setTimeout(() => {
-        handleSteps.current?.next();
-      }, 100);
+      timeout = setTimeout(
+        () => {
+          handleSteps.current?.next();
+        },
+        checkForStepInsertion ? 100 : 500
+      );
     }
   };
 
@@ -164,10 +178,10 @@ const CustomIntro = () => {
             className="backdrop absolute inset-0 z-[1301] bg-black/50 mix-blend-hard-light"
             style={{ height: handleSteps.current?.documentHeight }}
           >
-            {currentStepData.element && !isFindingElement && (
+            {currentStepData?.element && !isFindingElement && (
               <div
                 ref={(ref) => setAnchorEl(ref)}
-                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten transition-all duration-200"
+                className="item pointer-events-auto absolute cursor-pointer rounded-md bg-blend-lighten"
                 onClick={() => {
                   handleNext();
                 }}
@@ -259,6 +273,7 @@ const CustomIntro = () => {
 export default CustomIntro;
 
 const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void }) => {
+  const isMobile = useMediaQuery('(max-width:768px)');
   const location = useLocation();
   const [walkMeSteps] = useStore((store) => store[WALK_ME_STEPS]);
   const [stepsForThisPage, setStepsForThisPage] = useState<WalkmeData[]>([]);
@@ -283,7 +298,7 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
     }
   };
 
-  if (stepsForThisPage.length === 0) return null;
+  if (stepsForThisPage.length === 0 || isMobile) return null;
 
   return (
     <>
@@ -321,7 +336,16 @@ const SelectIntro = ({ handleStart }: { handleStart: (intro: WalkmeData) => void
             </IconButton>
           </div>
           <div className="pb-2 pt-3">
-            <TextField autoFocus label="Search topic..." variant="outlined" size="small" fullWidth onChange={handleSearch} value={search} />
+            <TextField
+              autoFocus
+              label="Search topic..."
+              type="search"
+              variant="outlined"
+              size="small"
+              fullWidth
+              onChange={handleSearch}
+              value={search}
+            />
           </div>
           <div className=" mt-4  h-[200px] space-y-3 overflow-y-auto">
             {filteredSteps?.map((intro, index) => (

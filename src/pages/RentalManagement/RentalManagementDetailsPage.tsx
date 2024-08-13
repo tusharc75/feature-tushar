@@ -445,6 +445,7 @@ const RentalManagementDetailsPage = () => {
                   {permissions?.iotChart?.isRead && (
                     <Button
                       className="btn-outline-v1"
+                      id={'rental-management-view-iot-chart-button'}
                       variant="outlined"
                       color="primary"
                       size="small"
@@ -457,10 +458,11 @@ const RentalManagementDetailsPage = () => {
                   )}
                   <Button
                     variant={isMobile && !isTablet ? 'text' : 'outlined'}
-                    className="btn-outline-v1"
+                    className={`btn-outline-v1 ${(isMobile || isTablet) && 'no-hover'}`}
+                    id={'rental-management-download-button'}
                     type="button"
                     size="small"
-                    disabled={isDownloading ? true : false}
+                    // disabled={isDownloading ? true : false}
                     startIcon={isMobile ? '' : <IoMdDownload />}
                     onClick={(e) => {
                       handleDownload();
@@ -473,6 +475,7 @@ const RentalManagementDetailsPage = () => {
                     (rentalManagementData?.addQuotationStep || user?.user?.brandPolicy?.rentalQuotation) && (
                       <Button
                         className="btn-outline-v1"
+                        id={'rental-management-create-new-version-button'}
                         variant="contained"
                         size="small"
                         onClick={() => {
@@ -489,6 +492,7 @@ const RentalManagementDetailsPage = () => {
                     allowedToEdit && (
                       <Fragment>
                         <ButtonWithPulse
+                          id={'rental-management-close-button'}
                           variant={'outlined'}
                           color="default"
                           size="small"
@@ -502,6 +506,7 @@ const RentalManagementDetailsPage = () => {
                   {user?.role?.selectedEntity?.policy?.isRentalReopen && rentalManagementData?.status === RENTAL_STATUS.closed && (
                     <Button
                       className="buttonStyleBigScreen"
+                      id={'rental-management-re-open-button'}
                       variant="contained"
                       color="primary"
                       size="small"
@@ -525,6 +530,7 @@ const RentalManagementDetailsPage = () => {
                               variant={isMobile && !isTablet ? 'text' : 'contained'}
                               className={'btn-outline-v1'}
                               onClick={handleOpenUpdateDialog}
+                              id={'rental-management-edit-button'}
                             >
                               {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                             </Button>
@@ -637,7 +643,6 @@ const RentalManagementDetailsPage = () => {
                   rentalPolicyData={resourceData?.policy}
                 />
               )}
-
               {rentalSteps[currentStep]?.name === 'Quotation' && rentalManagementData && (
                 <Quotation
                   rentalManagementData={rentalManagementData}
@@ -658,6 +663,7 @@ const RentalManagementDetailsPage = () => {
                   setNextStepToolTip={setNextStepToolTip}
                   stepFullScreen={stepFullScreen}
                   allowedToEdit={allowedToEdit}
+                  checkProgressiveBilling={checkProgressiveBilling}
                 />
               )}
               {rentalSteps[currentStep]?.name === 'Loading Ticket' && rentalManagementData && (
@@ -717,7 +723,13 @@ const RentalManagementDetailsPage = () => {
             />
           </TabPanel>
           <TabPanel value={tabValue} index={3}>
-            <ProgressiveBilling rentalId={id} rentalManagementData={rentalManagementData} allowCreateInvoice={allowedToEdit} />
+            <ProgressiveBilling
+              rentalId={id}
+              rentalManagementData={rentalManagementData}
+              allowCreateInvoice={
+                allowedToEdit && ![RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status) ? true : false
+              }
+            />
           </TabPanel>
           <TabPanel value={tabValue} index={4}>
             <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />

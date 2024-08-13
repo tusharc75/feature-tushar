@@ -22,7 +22,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEmpty, isEqual } from 'lodash';
+import { isArray, isEmpty, isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
 import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
@@ -822,7 +822,8 @@ const Steps = ({
   let isStepsAllowToPerform = false;
   if (selectedService?.assignedUsers?.length) {
     isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false;
-  } else if (selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length) {
+  } else if (isArray(selectedService?.competencies) && isArray(user?.competencies) &&
+    selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length) {
     isStepsAllowToPerform = true;
   } else if (allowedToEdit) {
     isStepsAllowToPerform = true;

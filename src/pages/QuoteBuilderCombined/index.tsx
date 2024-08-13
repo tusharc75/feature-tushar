@@ -5,7 +5,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -59,7 +59,7 @@ const QuoteBuilders = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.quoteBuilder));
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -115,7 +115,7 @@ const QuoteBuilders = () => {
             </Link>
             <HtmlTooltip title="Versions">
               <span
-                className="cursor-pointer link ml-1"
+                className="link ml-1 cursor-pointer"
                 onClick={() => {
                   setShowVersionsDialog({ open: true, id: row.original._id, quoteData: row.original });
                   // getVersionStatus(row.original._id, row.original.currency);
@@ -576,7 +576,7 @@ const QuoteBuilders = () => {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            onSelect={() => { }}
+            onSelect={() => {}}
             state={state}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
@@ -657,7 +657,7 @@ const QuoteBuilders = () => {
           quoteId={showVersionsDialog.id}
           quoteData={showVersionsDialog.quoteData}
           quotePermissions={permissions?.quoteBuilder}
-          fetchQuoteData={() => { }}
+          fetchQuoteData={() => {}}
           handleChangeVersionFromAllVersion={(versionNumber) => {
             history.push(`quotes/detail/${showVersionsDialog.id}`, {
               versionNumber: `${versionNumber}`,

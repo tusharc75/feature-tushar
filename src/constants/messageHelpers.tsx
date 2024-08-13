@@ -4,11 +4,16 @@ export const ownerAndColaborator = 'You have to be either owner or collaborator 
 
 export const entityDisable = 'You do not have permission to update entity';
 
+export const actionDisable = "You don't have permission to perform this action";
+
+
 export const actionSelection = 'Select at least one line item to enable this button';
 
 export const cloneDisable = 'You do not have permission to Clone/Create';
 export const deleteDisable = 'You do not have permission to Delete';
 export const editDisable = 'You do not have permission to Edit';
+export const addDisable = 'You do not have permission to Add';
+export const updateDisable = 'You do not have permission to Update';
 export const childDisable = 'You do not have permission to View Child';
 
 export const rentalManagementActions = {
@@ -29,12 +34,14 @@ export const rentalManagementActions = {
     swapInUseAssets: 'Swap In-Use Assets',
     updateStartDateEndDate: 'Update Start Date/End Date',
     startService: 'Start Service',
-    stopService: 'Stop Service'
+    stopService: 'Stop Service',
+    deleteServiceLog: 'Delete Service Log',
 };
 
 export const rentalManagementMessage = {
     addProductPackage: 'Add Products or Packages to proceed',
     validPrice: 'Enter Price to proceed',
+    validServicePrice: 'Enter Service Price to proceed',
     acceptRejectQuotation: `Accept/Reject ${routes.quotation.title} to proceed`,
     addProductInPackage: 'Add Product in package to proceed',
     addServiceInPackage: 'Add Service in package to proceed',
@@ -80,13 +87,12 @@ export const rentalManagementMessage = {
     onlySwapAssets: 'Only Assets can be swapped',
     onlySwapInUseAssets: 'Only In-Use assets can be swapped',
     onlyAssetsCanBeRepaired: 'Only assets can be repaired',
-    serviceAlreadyStarted: 'Service already in progress',
+    serviceAlreadyStarted: 'Service already started',
     serviceNotstarted: 'Service not started yet',
-    serviceCannotbeSelect: `Service cannot be select for this action`,
     canNotChangeStartDateEndDate: `Can not change Start Date/End Date`,
     canNotChangeStartDate: `Can not change Start Date`,
-    canNotChangeEndDate: `Can not change End Date`
-
+    canNotChangeEndDate: `Can not change End Date`,
+    invoiceCreated: `Invoice already created`
 };
 
 export const subleaseActions = {

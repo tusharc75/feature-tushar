@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
-import { Box, Button, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, FormControlLabel, Checkbox, TextField, IconButton, Typography, Grid } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -20,6 +20,8 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
   const [initialValues, setInitialValues] = useState({ data: [] });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fields, setFields] = useState([]);
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     let currentPolicy = resourceData?.policy || {};
@@ -36,6 +38,17 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
       })
     });
   }, []);
+
+  useEffect(() => {
+    if (resource) {
+      setLoading(true)
+      axiosInstance().get(`/field?resource=${resource}`)
+        .then(({ data: { data } }) => {
+          setFields(data)
+          setLoading(false)
+        })
+    }
+  }, [resource])
 
   const updateData = (values) => {
     setIsSubmitting(true);
@@ -137,6 +150,8 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
                                   }
                                 });
                               }}
+                              fields={fields}
+                              loading={loading}
                             />
                           );
                         })
@@ -175,7 +190,8 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
 
 export default PolicyDialog;
 
-const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource, setFieldValue }) => {
+const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource, setFieldValue, fields, loading }) => {
+
   if (type === 'checkBox') {
     return <CheckBoxField data={data} onChange={onChange} />;
   } else if (type === 'multipleFields') {
@@ -188,8 +204,46 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         errors={errors}
         touched={touched}
         setFieldValue={setFieldValue}
+        fields={fields}
       />
     );
+  } else if (type === 'multiSelect') {
+
+    const options = fields?.filter((ele) => !ele.fieldData?.primaryField)?.map((e) => {
+      return {
+        optionLabel: e?.fieldData?.fieldLabel,
+        optionValue: e?.fieldData?.fieldName,
+        order: e?.fieldData?.order
+      };
+    })
+
+    return (
+      <>
+        {!loading ? (
+          <Grid container spacing={2}>
+            <Grid item lg={6} md={6} sm={6} xs={12}>
+              <DropDownField
+                options={options}
+                error={null}
+                touched={null}
+                onChange={(e, val) => {
+                  onChange(null, isArray(val) ? val?.map((ele) => ele.optionValue) : [])
+                }}
+                value={options?.filter((_f) => data?.data?.includes(_f?.optionValue))?.length > 0 ? options?.filter((opt) => data?.data?.includes(opt?.optionValue)) : []}
+                multiple={type === 'multiSelect'}
+                required={false}
+                fieldLabel={data?.fieldLabel}
+                fieldName={data?.fieldName}
+              />
+            </Grid>
+          </Grid>
+        ) : (
+          <Box className="h-fit" p={2}>
+            <CommonSkeleton lenArray={[...Array(5).keys()]} />
+          </Box>
+        )}
+      </>
+    )
   }
   return null;
 };
@@ -212,6 +266,7 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
       }}
       value={value}
       onChange={onChange}
+      limitTags={2}
       renderInput={(params) => (
         <TextField
           {...params}
@@ -230,19 +285,14 @@ const DropDownField = ({ onChange, value, options, multiple = false, error, touc
   );
 };
 
-const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue }) => {
+const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resource, setFieldValue, fields }) => {
 
   const [fieldOptions, setFieldOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
   const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data] });
 
   useEffect(() => {
-    fetchOptions();
-  }, []);
-
-  const fetchOptions = async () => {
-    const fields = await axiosInstance().get(`/field?resource=${resource}`);
-    let fieldsData = fields?.data?.data;
+    let fieldsData = [...fields];
     let statusOptions = fieldsData?.find((ele) => ele?.fieldData?.fieldName === 'status')?.fieldData?.option;
     setStatusOptions(statusOptions);
     fieldsData = fieldsData?.filter((ele) => !ele.fieldData?.primaryField)?.map((e) => {
@@ -253,7 +303,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
       };
     });
     setFieldOptions(fieldsData);
-  };
+  }, [fields]);
 
   const getStatusOptions = (data) => {
     const options = statusOptions?.filter((ele) => !data?.some((e) => e?.status === ele.optionValue));

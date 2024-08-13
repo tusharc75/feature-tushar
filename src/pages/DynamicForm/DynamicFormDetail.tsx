@@ -194,7 +194,7 @@ const DynamicFormDetail = () => {
               <CommonSkeleton lenArray={[...Array(7).keys()]} />
             </Grid>
           ) : (
-            <DetailsPage data={detailData} fields={fields} />
+              <DetailsPage data={detailData} fields={fields} resource={resourceData?.collaborateTools ? resource : null} referenceId={resourceData?.collaborateTools ? id : null} />
           )}
         </TabPanel>
         <TabPanel value={tabValue} index={1}>
@@ -228,6 +228,7 @@ const DynamicFormDetail = () => {
             closeUpdateDialog();
             fetchData();
           }}
+          collaborateTools={resourceData?.collaborateTools}
         />
       )}
     </Box>

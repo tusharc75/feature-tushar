@@ -1,18 +1,17 @@
 import { Box, IconButton } from '@material-ui/core';
-import queryString from 'query-string';
+import { FormatListNumbered } from '@material-ui/icons';
+import DateRangeIcon from '@material-ui/icons/DateRange';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import { useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { sidebarResource } from 'src/constants/helpers';
 import CalendarView from './Calendar';
 import ListView from './List';
-import { FormatListNumbered } from '@material-ui/icons';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import DateRangeIcon from '@material-ui/icons/DateRange';
-import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
-import RefreshIcon from '@material-ui/icons/Refresh';
 
 const PLANNING_RESOURCE = [
   {
@@ -169,7 +168,7 @@ function PlanningView() {
     if (ref?.current) {
       ref?.current?.fetchData();
     }
-  }
+  };
 
   return (
     <>
@@ -178,16 +177,17 @@ function PlanningView() {
           <Box className="nav-v1">
             <CustomBreadCrumbs routes={[{ title: routes.planningView.title, path: routes.planningView.path }]} />
           </Box>
-          {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product &&
+          {view === 'calendar' && selectedResource && selectedResource?.resource === sidebarResource.product && (
             <ImportExportLinks
               permissions={permissions?.planningView}
               module={routes.planningView.title}
               api={routes.planningView.path}
-              afterImportCompleted={() => { }}
-              onExportToExcelSuccess={() => { }}
+              afterImportCompleted={() => {}}
+              onExportToExcelSuccess={() => {}}
               additionalParams={queryString}
               onlyExport={true}
-            />}
+            />
+          )}
         </Box>
         <Box className={`detail-container-v1`}>
           <div className="absolute right-[25px] top-[25px] flex justify-end gap-1 max-md:right-[15px] max-md:top-[15px] ">
@@ -199,22 +199,33 @@ function PlanningView() {
             <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton size="small" onClick={() => setView('calendar')} disabled={view === 'calendar'}>
-                  <DateRangeIcon color={view === 'calendar' ? "primary" : "disabled"} />
+                  <DateRangeIcon color={view === 'calendar' ? 'disabled' : 'primary'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
             <HtmlTooltip title={'List View'} placement="top" arrow enterTouchDelay={0}>
               <span>
                 <IconButton size="small" onClick={() => setView('table')} disabled={view === 'table'}>
-                  <FormatListNumbered color={view === 'table' ? "primary" : "disabled"} />
+                  <FormatListNumbered color={view === 'table' ? 'disabled' : 'primary'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
           </div>
           {view === 'calendar' ? (
-            <CalendarView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString} ref={ref} />
+            <CalendarView
+              resourceList={resourceList}
+              selectedResource={selectedResource}
+              setSelectedResource={setSelectedResource}
+              setQueryString={setQueryString}
+              ref={ref}
+            />
           ) : (
-            <ListView resourceList={resourceList} selectedResource={selectedResource} setSelectedResource={setSelectedResource} setQueryString={setQueryString} />
+            <ListView
+              resourceList={resourceList}
+              selectedResource={selectedResource}
+              setSelectedResource={setSelectedResource}
+              setQueryString={setQueryString}
+            />
           )}
         </Box>
       </Box>

@@ -52,12 +52,6 @@ const Login = () => {
           });
           const { data } = res.data;
           localStorage.setItem('token', data.token);
-          const gridRequest = await axiosInstance().get(`user/meta-grid/${data.user?._id}`);
-
-          let tempMetaData = JSON.stringify(gridRequest.data.data?.gridMetaData);
-          localStorage.setItem('gridMetaData', tempMetaData);
-          dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
-
           dispatch({ type: SET_USER, payload: data });
           if (data?.role?.selectedEntity?._id) {
             dispatch({
@@ -136,14 +130,6 @@ const Login = () => {
           })
           .catch((error) => {
             toastConfig.setToastConfig(error);
-          });
-
-        axiosInstance()
-          .get(`user/meta-grid/${data?.user?._id}`)
-          .then(({ data: { data } }) => {
-            let tempMetaData = JSON.stringify(data?.gridMetaData);
-            localStorage.setItem('gridMetaData', tempMetaData);
-            dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
           });
       })
       .catch((error) => {

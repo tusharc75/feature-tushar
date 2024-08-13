@@ -1,43 +1,34 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Dialog } from '@material-ui/core';
 import axios, { CancelTokenSource } from 'axios';
-import { startCase } from 'lodash';
+import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import SearchBox from 'src/components/Helpers/SearchBox';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import {
   CustomDialogTransition,
-  MATERIAL_TYPE,
   gridLoadingTimeout,
-  isObjectEmpty,
-  packages,
   prepareDataForGrid,
   sidebarResource
 } from 'src/constants/helpers';
 
-const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData, isAddingProducts, handleClose, addMaterial, rentalPolicyData }) => {
+const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handleClose, addMaterial }) => {
+
+  const renderedFrom = `${camelCase(routes.product?.title)}`;
+
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
-
-  const {
-    state: { user, selectedEntity }
-  }: any = useData();
-
   const [columns, setColumns] = useState(null);
-  const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
 
-  const qtyColumn = [
+  const defaultColumns = [
     {
       accessor: 'qty',
       Header: 'Qty',
@@ -46,37 +37,30 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
       editable: true,
       disableFilters: true,
       disableSortBy: true,
+      disabled:true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
+    },
+    {
+      accessor: 'availableAssetCount',
+      Header: 'Available Asset',
+      minWidth: 180,
+      width: 180,
+      disabled: true,
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
     }
   ];
-
-  const defaultColumns =
-    type === MATERIAL_TYPE.product
-      ? [
-          ...qtyColumn,
-          {
-            accessor: 'availableAssetCount',
-            Header: 'Available Asset',
-            minWidth: 180,
-            width: 180,
-            disabled: true,
-            disableFilters: true,
-            disableSortBy: true,
-            Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.availableAssetCount || <NoDataCell />}</h5>
-          }
-        ]
-      : qtyColumn;
 
   useEffect(() => {
     fetchGridColumns();
   }, []);
 
   const fetchGridColumns = () => {
-    axiosInstance()
-      .get(type === MATERIAL_TYPE.product ? '/field?resource=Product&view=true' : `/field?resource=Packages&entity=${selectedEntity}&view=true`)
+    axiosInstance().get('/field?resource=Product&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
-        let newColumns = generateColumns(renderedFrom, data, type === MATERIAL_TYPE.product ? routes.productDetail.path : routes.packagesDetail.path);
+        let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
         columns = [...newColumns, ...getStaticFields()];
         setColumns([...defaultColumns, ...columns]);
       });
@@ -89,6 +73,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
   }, [search, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const getQueryString = () => {
+
     let deepFilter = `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}`;
 
     if (showFilteredRecordsOnly) {
@@ -99,10 +84,6 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
 
     const updatedDeepFilters = [...deepFilters];
     const updatedFilterByIds = [...filterByIds];
-
-    if (type === MATERIAL_TYPE.package) {
-      updatedDeepFilters.push({ field: 'packageType', term: 'product' });
-    }
 
     if (updatedFilterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(updatedFilterByIds)}`;
@@ -120,24 +101,19 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
-    if (type === MATERIAL_TYPE.package && rentalPolicyData?.customerAccountWisePackages) {
-      deepFilter = `${deepFilter}&customerAccount=${rentalManagementData?.customerAccount?.optionValue}`;
-    }
     return deepFilter;
   };
 
   const fetchMaterial = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance()
-      .get(`${type === MATERIAL_TYPE.product ? `/rental-management/product-with-inventory` : packages.api}${queryString}`, {
-        cancelToken: cancelTokenSource?.token
-      })
+    axiosInstance().get(`/rental-management/product-with-inventory${queryString}`, {
+      cancelToken: cancelTokenSource?.token
+    })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['type'] = type;
           finalObject['qty'] = 1;
           const qtyAdded = selectedRecords?.filter((e) => e._id === u._id);
           if (qtyAdded.length) {
@@ -202,8 +178,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
       fullWidth
     >
       <>
-        <CustomDialogHeader title={`Add ${startCase(type)}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
-
+        <CustomDialogHeader title={`Add ${routes.product.title}`} onClose={handleClose} showRequiredLabel={false}></CustomDialogHeader>
         <div className="listing-grid p-3">
           <ListingPageHeader
             showSearchInMobile={true}
@@ -211,22 +186,17 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
             onSearch={handleSearch}
             isActionButtonVisible={false}
             addButtonProps={{
-              disabled: !selectedRecords?.length || isAddingProducts,
-              loading: isAddingProducts,
+              disabled: !selectedRecords?.length || isSubmitting,
+              loading: isSubmitting,
               iconsEnabled: false,
               text: selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''
             }}
             addButtonOnclick={() => {
-              if (type === MATERIAL_TYPE.package && selectedRecords?.some((r) => r?.qty > 1)) {
-                setShowConfirmationDialog(true);
-              } else {
-                addMaterial(selectedRecords);
-              }
+              addMaterial(selectedRecords);
             }}
             isAddButtonVisible={true}
             setQueryString={false}
           />
-
           {columns ? (
             <CustomReactTable
               height={'calc(100vh - 250px)'}
@@ -238,7 +208,7 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
               refreshGrid={fetchMaterial}
               showOnlyShowFilteredRecordSwitch={true}
               showFilters={true}
-              resource={type === MATERIAL_TYPE.product ? sidebarResource.product : sidebarResource.packages}
+              resource={sidebarResource.product}
             />
           ) : (
             <Box p={2} height={500}>
@@ -246,30 +216,6 @@ const AddExistingProductInventory = ({ type, renderedFrom, rentalManagementData,
             </Box>
           )}
         </div>
-
-        {showConfirmationDialog && (
-          <ConfirmationDialog
-            open={true}
-            message="Please confirm this if you want to split this quantity into multiple line item(s)?"
-            onOk={() => {
-              setShowConfirmationDialog(false);
-              const data: any = [];
-              selectedRecords?.forEach((r) => {
-                for (let i = 0; i < r?.qty; i++) {
-                  data.push({
-                    ...r,
-                    qty: 1
-                  });
-                }
-              });
-              addMaterial(data);
-            }}
-            onClose={() => {
-              setShowConfirmationDialog(false);
-              addMaterial(selectedRecords);
-            }}
-          />
-        )}
       </>
     </Dialog>
   );

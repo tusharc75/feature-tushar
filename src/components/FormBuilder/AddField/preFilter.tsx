@@ -2,7 +2,7 @@ import { CircularProgress, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { useCallback, useEffect, useState } from 'react';
 import { getLookupOption } from '../helper';
-import { debounce, uniqBy } from 'lodash';
+import { debounce, isEmpty, uniqBy } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 
@@ -13,11 +13,50 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
   const [currentPage, setCurrentPage] = useState(0);
   const [inputValues, setInputValues] = useState('');
   const [selectedOption, setSelectedOption] = useState(null);
+  const [prefilterFields, setPrefilterFields] = useState(null);
+
+  const [lookupOptionsMap, setLookupOptionsMap] = useState({});
+
+  useEffect(() => {
+    fetchPrefilterFieldLookupOptions();
+  }, [prefilterFields, values]);
+
+  const fetchPrefilterFieldLookupOptions = async () => {
+    if (prefilterFields?.length > 0 && values['lookupPreFilterFields']?.length > 0) {
+      const optionsMap = {};
+      
+      for (const field of values['lookupPreFilterFields']) {
+        const preFilterField = prefilterFields?.find((e) => e.optionValue === field.fieldName);
+        if (preFilterField?.lookupResource && !lookupOptionsMap[field.fieldName]) {
+          const lookupOptions = await getLookupOption(null, preFilterField.lookupResource);
+          optionsMap[field.fieldName] = lookupOptions;
+        }
+      }
+      
+      setLookupOptionsMap({...lookupOptionsMap,...optionsMap});
+    }
+  };
 
   const fetchLookupOptions = async () => {
     const options = await getLookupOption(null, lookupResource);
     setOptions(options);
   };
+
+  const fetchLookupFieldOptions = async ()=>{
+    try {
+      const { data: { data } } = await axiosInstance().get(`/field?resource=${lookupResource}&view=true`);
+      const lookupOptions = data?.filter((ele)=> ele.fieldData?.lookup)?.map((e)=> {
+        return {
+          optionValue: e?.fieldData?.fieldName,
+          optionLabel: e?.fieldData?.fieldLabel,
+          lookupResource: e?.fieldData?.lookupResource
+        }
+      })
+      setPrefilterFields(lookupOptions);
+    } catch (e) {
+      console.error(e)
+    }
+  }
 
   const fetchOptions = useCallback(
     debounce(async (searchKey: string = '', page: number = 0) => {
@@ -49,7 +88,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
       }
     }, 1000),
     []
-  );
+  ); 
 
   const handleInputChangeMulti = (event, value, reason) => {
     if (reason === 'input') {
@@ -68,6 +107,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
   useEffect(() => {
     if (lookupResource) {
       fetchLookupOptions();
+      fetchLookupFieldOptions();
     }
   }, [lookupResource]);
 
@@ -148,6 +188,7 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
       }}
     />
   ) : (
+    <>
     <Autocomplete
       fullWidth
       disableCloseOnSelect={true}
@@ -178,6 +219,84 @@ const PreFilter = ({ dataList = false, dataListId = null, lookupResource = null,
         />
       )}
     />
+  {prefilterFields?.length>0 ?
+    <Autocomplete
+      fullWidth
+      disableCloseOnSelect={true}
+      id="lookupPreFilterFields"
+      options={prefilterFields ?? []}
+      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+      onChange={(e, val) => {
+        const updatedValues = val?.map((v)=> {
+          return {
+            fieldName: v.optionValue,
+            value: values['lookupPreFilterFields']?.find((ele)=> ele.fieldName===v.optionValue)?.value ?? []
+          }
+        })
+        setFieldValue('lookupPreFilterFields', updatedValues);
+      }}
+      multiple
+      size={'small'}
+      value={
+        prefilterFields?.filter((o) => values['lookupPreFilterFields']?.map((ele)=> ele.fieldName)?.includes(o?.optionValue))?.length > 0
+          ? prefilterFields?.filter((o) => values['lookupPreFilterFields']?.map((ele)=> ele.fieldName)?.includes(o?.optionValue))
+          : []
+      }
+      filterSelectedOptions={true}
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          margin="dense"
+          size={'small'}
+          name="lookupPreFilterFields"
+          label="Lookup Pre Filter Fields"
+          placeholder="Lookup Pre Filter Fields"
+          variant="outlined"
+          fullWidth
+        />
+      )}
+    />
+    : null}
+    <div className="flex flex-col gap-2 mt-2">
+    {values['lookupPreFilterFields']?.length>0 && !isEmpty(lookupOptionsMap) ? values['lookupPreFilterFields']?.map((field, index)=> {
+      const preFilterField = prefilterFields?.find((e)=>e.optionValue===field.fieldName);
+      return (
+        <Autocomplete
+        fullWidth
+        disableCloseOnSelect={true}
+        id={`lookupPreFilterFields_${index+1}`}
+        options={lookupOptionsMap[field.fieldName] ?? []}
+        getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+        onChange={(e, val) => {
+         const updatedValues = values['lookupPreFilterFields']?.map((ele)=>{
+                    if(ele.fieldName===field.fieldName){
+                        ele.value = val?.map((e)=> e?.optionValue);
+                      }
+                      return ele;
+                    })
+              setFieldValue('lookupPreFilterFields', updatedValues);
+        }}
+        multiple
+        size={'small'}
+        value={lookupOptionsMap[field.fieldName]?.filter((ele)=> [...field?.value].includes(ele.optionValue)) ?? []}
+        filterSelectedOptions={true}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            margin="dense"
+            size={'small'}
+            name={preFilterField.optionValue}
+            label={preFilterField.optionLabel}
+            placeholder={preFilterField.optionLabel}
+            variant="outlined"
+            fullWidth
+          />
+        )}
+      />
+      )
+    }): null}
+    </div>
+    </>
   );
 };
 

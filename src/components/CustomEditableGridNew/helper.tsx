@@ -2,15 +2,21 @@ export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
   const schema = {};
   values.forEach((element) => {
     fields.forEach((input) => {
-      if (input.required && !Boolean(element[`${input.fieldName}`])) {
-        schema[`${element._id}_${input.fieldName}`] = `${input.fieldLabel} is required`;
+      if (input.type === 'multiSelect') {
+        if (input.required && !Boolean(element[`${input.fieldName}`]?.length)) {
+          schema[`${element._id}_${input.fieldName}`] = `${input.fieldLabel} is required`;
+        }
+      } else {
+        if (input.required && !Boolean(element[`${input.fieldName}`])) {
+          schema[`${element._id}_${input.fieldName}`] = `${input.fieldLabel} is required`;
+        }
       }
     });
   });
   return schema;
 };
 
-export const generateColumn = (fields) => {
+export const generateColumn = (fields, columnOrder: string[] = [], hiddenColumns: string[] = []) => {
   const newColumns: any = [
     {
       accessor: 'index',
@@ -34,6 +40,7 @@ export const generateColumn = (fields) => {
             accessorKey: fieldName,
             Header: fieldLabel,
             id: fieldName,
+            required: _field?.required,
             unit: _unit,
             minWidth: 180,
             width: 200
@@ -45,12 +52,13 @@ export const generateColumn = (fields) => {
         _field?.displayUnits.forEach((_unit) => {
           _field?.displayCurrency.forEach((_currency) => {
             const fieldName = _field?.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-            const fieldLabel = _field?.fieldLabel + ' ' + _unit + '/' + _currency;
+            const fieldLabel = _field?.fieldLabel + ' ' + _currency + '/' + _unit;
             newColumns.push({
               accessor: fieldName,
               accessorKey: fieldName,
               Header: fieldLabel,
               id: fieldName,
+              required: _field?.required,
               currency: _currency,
               unit: _unit,
               minWidth: 180,
@@ -68,6 +76,7 @@ export const generateColumn = (fields) => {
             accessorKey: fieldName,
             Header: fieldLabel,
             id: fieldName,
+            required: _field?.required,
             currency: _currency,
             minWidth: 180,
             width: 200
@@ -81,6 +90,7 @@ export const generateColumn = (fields) => {
         accessorKey: _field?.fieldName,
         Header: _field?.fieldLabel,
         id: _field?.fieldName,
+        required: _field?.required,
         minWidth: 260,
         width: 280
       });
@@ -88,7 +98,12 @@ export const generateColumn = (fields) => {
     }
   });
 
-  newColumns.push({
+  let updatedColumns = newColumns.filter((d) => !hiddenColumns.includes(d.accessor));
+  if (columnOrder.length > 0) {
+    updatedColumns = [...updatedColumns].sort((a, b) => columnOrder.indexOf(a.accessor) - columnOrder.indexOf(b.accessor));
+  }
+
+  updatedColumns.push({
     accessor: 'action',
     accessorKey: 'action',
     Header: 'Action',
@@ -97,8 +112,7 @@ export const generateColumn = (fields) => {
     minWidth: 120,
     width: 120
   });
-
-  return { newColumns, constColumns };
+  return { newColumns: updatedColumns, constColumns };
 };
 
 export const generateRows = (data, fields) => {

@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
-import { Grid, Box, InputAdornment } from '@material-ui/core';
+import { Grid, Box, InputAdornment, IconButton } from '@material-ui/core';
 import FormTypes from './FormTypes';
 import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
+import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
+import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 
 const InputField = (props) => {
-  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, ...rest } = props;
+  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, resource = null, referenceId = null, ...rest } = props;
 
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
+  const [open, setOpen] = useState({ open: false, section: null });
 
   useEffect(() => {
     setFormsData(setFieldsInAscendingOrder(fieldsData));
@@ -19,9 +22,27 @@ const InputField = (props) => {
       {formsData &&
         formsData.map((form, i) => (
           <div key={i}>
-            <div className={'detail-box-content'}>
-              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+            <div className={'detail-box-new'}>
+              <div className={'detail-box-content-new'}>
+                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+              </div>
+              {resource && referenceId && (
+                <div>
+                  <IconButton
+                    style={{ padding: '0px' }}
+                    title="Follow-Ups"
+                    size="small"
+                    color="primary"
+                    aria-label="delete"
+                    onClick={() => {
+                      setOpen({ open: true, section: form });
+                    }}
+                  >
+                    <MoreHorizIcon fontSize="small" style={{ color: '#ffffff' }} />
+                  </IconButton>
+                </div>
+              )}
             </div>
             <Box marginY={2}>
               <Grid spacing={3} container>
@@ -145,6 +166,16 @@ const InputField = (props) => {
             </Box>
           </div>
         ))}
+      {open?.open && (
+        <FollowUpsDialog
+          onClose={() => {
+            setOpen({ open: false, section: null });
+          }}
+          section={open?.section}
+          resource={resource}
+          referenceId={referenceId}
+        />
+      )}
     </React.Fragment>
   );
 };

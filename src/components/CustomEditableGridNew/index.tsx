@@ -1,9 +1,9 @@
-import { Box, Button, Dialog, MenuItem } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton, MenuItem } from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import { useContext, useEffect, useState } from 'react';
+import { RefObject, useContext, useEffect, useRef, useState } from 'react';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
@@ -16,11 +16,26 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { useGridMetaData } from 'src/components/CustomReactTable';
+import { useScrollController } from 'src/hooks';
+import { ChevronLeft, ChevronRight } from '@material-ui/icons';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
-const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, handleSave, isSubmitting, referenceId = null, restData = [] }) => {
+const CustomEditableGrid = ({
+  onClose,
+  fields = [],
+  data,
+  extraDisabledFields,
+  handleSave,
+  isSubmitting,
+  referenceId = null,
+  restData = [],
+  renderedFrom = ''
+}) => {
   const toastConfig = useContext(CustomToastContext);
+  const { gridMetaData } = useGridMetaData();
+  const tableData = gridMetaData[renderedFrom] || { order: [], hide: [] };
 
   const [columns, setColumns] = useState(null);
   const [allFields, setAllFields] = useState([]);
@@ -30,13 +45,21 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [isAddField, setIsAddField] = useState(false);
   const [addedField, setAddedField] = useState([]);
+  const [scrollToHeader, setScrollToHeader] = useState('');
+  const {
+    isLeftDisabled,
+    isRightDisabled,
+    scrollLeft,
+    scrollRight,
+    setRef: scrollContainerRef
+  } = useScrollController({ scrollDistance: Math.floor(window.innerWidth / 2) });
 
   useEffect(() => {
     if (referenceId) {
       fetchColumns();
     } else {
       setAllFields(JSON.parse(JSON.stringify(fields)));
-      const { newColumns, constColumns } = generateColumn(fields);
+      const { newColumns, constColumns } = generateColumn(fields, tableData.order, tableData.hide);
       setColumns(newColumns);
       setConstColummns(constColumns);
     }
@@ -53,9 +76,8 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
         _fields = sortBy(_fields, function (item) {
           return levalOrderBy.indexOf(item.leval);
         });
-
         setAllFields(JSON.parse(JSON.stringify(_fields)));
-        const { newColumns, constColumns } = generateColumn(_fields);
+        const { newColumns, constColumns } = generateColumn(_fields, tableData.order, tableData.hide);
         setColumns(newColumns);
         setConstColummns(constColumns);
       })
@@ -97,13 +119,13 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
   const addButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title="Add Existing Product">
+        <HtmlTooltip title="Add Existing Products">
           <MenuItem
             onClick={() => {
               setIsAddExistingProduct(true);
             }}
           >
-            Add Existing Product
+            Add Existing Products
           </MenuItem>
         </HtmlTooltip>
       </>
@@ -139,7 +161,7 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
 
     setAddedField([...addedField, { ..._field }]);
     setAllFields(JSON.parse(JSON.stringify([...allFields, { ..._field }])));
-    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }]);
+    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }], tableData.order, tableData.hide);
     setColumns(newColumns);
     setConstColummns(constColumns);
 
@@ -191,9 +213,10 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
                   style={{
                     display: 'block',
                     overflow: 'auto',
-                    height: '100%',
+                    height: 'calc(100vh - 230px)',
                     marginTop: '10px'
                   }}
+                  ref={scrollContainerRef}
                   className="custom-react-table editable-table-v1 border"
                 >
                   <CustomTable
@@ -205,7 +228,28 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
                     extraDisabledFields={extraDisabledFields}
                     error={error}
                     updateData={updateData}
+                    scrollToHeader={scrollToHeader}
                   />
+                </div>
+                <div className="sr-only mt-1 flex justify-end gap-3 lg:not-sr-only">
+                  <HtmlTooltip title="Scroll left">
+                    <IconButton
+                      style={{ borderRadius: 999, padding: 4, background: 'var(--new-theme-color)', opacity: isLeftDisabled ? '50%' : '100%' }}
+                      disabled={isLeftDisabled}
+                      onClick={scrollLeft}
+                    >
+                      <ChevronLeft className="text-white" />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title="Scroll right">
+                    <IconButton
+                      style={{ borderRadius: 999, padding: 4, background: 'var(--new-theme-color)', opacity: isRightDisabled ? '50%' : '100%' }}
+                      disabled={isRightDisabled}
+                      onClick={scrollRight}
+                    >
+                      <ChevronRight className="text-white" />
+                    </IconButton>
+                  </HtmlTooltip>
                 </div>
               </Box>
             </CustomDialogContent>
@@ -222,6 +266,11 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
                 onClick={() => {
                   if (isEmpty(error)) {
                     handleSave([...flatRows?.map((f) => ({ ...f, fields: [...(f?.fields || []), ...addedField] })), ...restData]);
+                  } else {
+                    const err = Object.keys(error);
+                    if (err?.length) {
+                      setScrollToHeader(err[0]);
+                    }
                   }
                 }}
               >

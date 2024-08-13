@@ -16,6 +16,7 @@ import ManageDynamicForm from '../../ManageDynamicForm';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
+
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -34,8 +35,6 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
 
   const [allowedToEdit, setAllowedToEdit] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isUpdate);
   const [allowedToDelete, setAllowedToDelete] = useState(permissions?.[camelCase(step?.linkResourceName)]?.isDelete);
-
-
   const [linkResourceFieldType, setLinkResourceFieldType] = useState(null);
 
   useEffect(() => {
@@ -43,6 +42,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
   }, [step]);
 
   const fetchColumn = async () => {
+    setColumns(null)
     try {
       const {
         data: { data }
@@ -108,12 +108,11 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
 
   useEffect(() => {
     fetchData();
-  }, [page, limit, filters, sorting]);
+  }, [page, limit, filters, sorting, step]);
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
     axiosInstance()
       .get(`dynamic-form/${queryString}`, {
         headers: {
@@ -237,7 +236,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={`${renderedFrom}_${step?.stepName}`}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             resource={step?.linkResourceName}
             hideSelection={step?.readOnly}

@@ -226,10 +226,10 @@ export default function QuoteProcess(props) {
               setDOAApproved(data.canApprove);
               setDOARequestId(data.requestId);
             })
-            .catch((err) => {});
+            .catch((err) => { });
         }
       })
-      .catch((error) => {});
+      .catch((error) => { });
   }, [currentVersion]);
 
   useEffect(() => {
@@ -337,7 +337,7 @@ export default function QuoteProcess(props) {
         data['commissionPercentPerUnit'] === null || data['commissionPercentPerUnit'] === undefined ? 0 : data['commissionPercentPerUnit'],
       [`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]:
         data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === null ||
-        data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
+          data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`] === undefined
           ? 0
           : data[`totalCostPerUnit_${quoteData.currency.toLowerCase()}`]
     }));
@@ -646,61 +646,57 @@ export default function QuoteProcess(props) {
   const addButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title="Add New Product">
-          <MenuItem
-            disabled={!permissions.product?.isCreate}
-            onClick={() => {
-              setIsAddNewProduct(true);
-            }}
-          >
-            Add New Product
-          </MenuItem>
-        </HtmlTooltip>
-        <HtmlTooltip title="Add Existing Product">
-          <MenuItem
-            onClick={() => {
-              setIsAddExistingProduct(true);
-            }}
-          >
-            Add Existing Product
-          </MenuItem>
-        </HtmlTooltip>
+        <MenuItem
+          disabled={!permissions.product?.isCreate}
+          onClick={() => {
+            setIsAddNewProduct(true);
+          }}
+        >
+          Add New Product
+        </MenuItem>
+        <MenuItem
+          onClick={() => {
+            setIsAddExistingProduct(true);
+          }}
+        >
+          Add Existing Products
+        </MenuItem>
       </>
     );
   };
 
   const previewDownloadProps = ![QUOTE_PROCESS_STATUS.new, QUOTE_PROCESS_STATUS.priceBuilder].includes(processStatus)
     ? {
-        resource: sidebarResource.quoteBuilder,
-        referenceId: quoteData?._id,
-        fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
-        columns: columns,
-        hideDetailButton: true,
-        isSendEmail:
-          processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
+      resource: sidebarResource.quoteBuilder,
+      referenceId: quoteData?._id,
+      fileName: `${`Quote-${quoteData?.quoteName}-V(${currentVersion})`}`,
+      columns: columns,
+      hideDetailButton: true,
+      isSendEmail:
+        processStatus === QUOTE_PROCESS_STATUS.sendToCustomer &&
           versionStatus !== 'Send To Customer' &&
           !ifQuoteApproved.approved &&
           !quoteData?.versions[currentVersion]?.offered &&
           allowedToEdit
-            ? true
-            : false,
-        isExcelDownload: true,
-        extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
-        versionNumber: currentVersion,
-        subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
-        defaultColumns: [
-          'productName',
-          'unit',
-          'qty',
-          `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
-          `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
-        ],
-        handleRefresh: () => {
-          fetchQuoteData(currentVersion);
-        },
-        toEmails: userEmails?.to,
-        ccEmails: userEmails?.cc ?? []
-      }
+          ? true
+          : false,
+      isExcelDownload: true,
+      extraQueryParams: { uniqueId: quoteData?.versions[currentVersion]?._id },
+      versionNumber: currentVersion,
+      subject: `${user?.user?.brandName ?? 'Brand'} Offer - ${quoteData?.quoteName ?? ''}`,
+      defaultColumns: [
+        'productName',
+        'unit',
+        'qty',
+        `salesPricePerUnit_${quoteData?.currency?.toLowerCase()}`,
+        `totalSalesPrice_${quoteData?.currency?.toLowerCase()}`
+      ],
+      handleRefresh: () => {
+        fetchQuoteData(currentVersion);
+      },
+      toEmails: userEmails?.to,
+      ccEmails: userEmails?.cc ?? []
+    }
     : null;
 
   const leftSideContents = () => {
@@ -796,8 +792,8 @@ export default function QuoteProcess(props) {
             DOAneeded
               ? DOASteps.findIndex((d) => d?.key === processStatus)
               : processStatus === QUOTE_PROCESS_STATUS.doaProcess
-              ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
-              : OtherSteps.findIndex((d) => d?.key === processStatus)
+                ? OtherSteps.findIndex((d) => d?.key === QUOTE_PROCESS_STATUS.quoteBuilder)
+                : OtherSteps.findIndex((d) => d?.key === processStatus)
           }
           id={quoteData._id}
           version={currentVersion}

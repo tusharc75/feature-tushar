@@ -44,6 +44,7 @@ import Step from '../DynamicForm/Step';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import WorkOrderCostDialog from './WorkOrderCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 
 type ToolbarMenuItem = {
   type: 'menuItem';
@@ -107,6 +108,8 @@ const WorkOrderDetails = () => {
   const [openTotalCostDialog, setOpenTotalCostDialog] = useState(false)
 
   const [workOrderCostFields, setWorkOrderCostFields] = useState(null)
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -145,6 +148,7 @@ const WorkOrderDetails = () => {
       fetchWorkOrderData();
       fetchTotalConsumablesCost();
       fetchPolicy();
+      fetchSerializedAssetPolicy()
     }
   }, [id]);
 
@@ -202,6 +206,19 @@ const WorkOrderDetails = () => {
     }
   };
 
+  const fetchSerializedAssetPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   const fetchTotalConsumablesCost = () => {
     axiosInstance()
       .get(`${routes.workOrder.path}/total-consumables-cost/${id}`)
@@ -234,7 +251,7 @@ const WorkOrderDetails = () => {
     }
   };
 
-  const updateStatus = (status, assetStatus = null, workOrderCost = null) => {
+  const updateStatus = (status, assetStatus = null, workOrderCost = null, assetsData = null) => {
     setIsSubmitting(true);
     const data: any = { status: status };
     if (assetStatus) {
@@ -242,6 +259,13 @@ const WorkOrderDetails = () => {
     }
     if (workOrderCost) {
       data.workOrderCost = workOrderCost;
+    }
+    if (assetsData) {
+      const matchedAsset = assetsData?.find((asset) => asset._id === workOrderData?.serializedAsset?.optionValue);
+      if (matchedAsset) {
+        const { _id, ...assetData } = matchedAsset;
+        data.assetData = assetData;
+      }
     }
     axiosInstance().patch(`${workOrder.api}/status/${id}`, data)
       .then(({ data: { data } }) => {
@@ -251,6 +275,7 @@ const WorkOrderDetails = () => {
           type: 'success',
           message: data
         });
+        setOpenAssetDataDialog({ open: false, statusPolicy: null })
         fetchWorkOrderData();
         setIsSubmitting(false);
       })
@@ -391,8 +416,20 @@ const WorkOrderDetails = () => {
       type: 'button',
       ripple: true,
       isVisible: Boolean(allowedToEdit && workOrderData?.canComplete),
-      onClick: () => workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length
-        ? setOpenTotalCostDialog(true) : updateStatus(WORK_ORDER_STATUS.completed),
+      onClick: () => {
+        if (workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length) {
+          setOpenTotalCostDialog(true)
+        } else if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
+          const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.available);
+          if (statusPolicy) {
+            setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy })
+          } else {
+            updateStatus(WORK_ORDER_STATUS.completed)
+          }
+        } else {
+          updateStatus(WORK_ORDER_STATUS.completed)
+        }
+      },
       iconForMobile: <FaDoorClosed />,
       tooltip: 'Complete Work Order',
       name: 'Close'
@@ -589,6 +626,7 @@ const WorkOrderDetails = () => {
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.consumable}
               workOrderData={workOrderData}
+              serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
             />
           )}
         </TabPanel>
@@ -603,6 +641,7 @@ const WorkOrderDetails = () => {
               serviceName={null}
               materialSubType={MATERIAL_SUB_TYPE.bom}
               workOrderData={workOrderData}
+              serialNumberRequired={resourceData?.policy?.consumablesSerialNumberRequired}
             />
           )}
         </TabPanel>
@@ -736,6 +775,17 @@ const WorkOrderDetails = () => {
           }}
           onOk={reOpenWorkOrder}
           okBtnLoading={isSubmitting}
+        />
+      )}
+      {openAssetDataDialog.open && (
+        <AssetDetailsChangeDialog
+          ids={[workOrderData?.serializedAsset?.optionValue]}
+          statusPolicy={openAssetDataDialog.statusPolicy}
+          setAssetsData={null}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+          onSuccess={(data) => {
+            updateStatus(WORK_ORDER_STATUS.completed, null, null, data)
+          }}
         />
       )}
     </Box>

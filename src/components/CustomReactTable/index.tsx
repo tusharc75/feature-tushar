@@ -2,13 +2,12 @@ import { useTableReducer } from './hooks/useTableReducer';
 import type { TInitialState, TActios } from './hooks/useTableReducer';
 import CustomReactTable from './CustomReactTable';
 import Pagination from './TableComponents/Pagination';
+import { useGridMetaData } from './ArrangeView/utils';
 import useColumns, {
   headerName,
   detailPagePath,
   getStaticFields,
   getCompletedByField,
-  getColumnHiddenStatus,
-  checkStaticField,
   getSortedColumns,
   staticColumns
 } from './hooks/useColumnsReactTable';
@@ -21,10 +20,9 @@ export {
   detailPagePath,
   getStaticFields,
   getCompletedByField,
-  getColumnHiddenStatus,
-  checkStaticField,
   getSortedColumns,
-  staticColumns
+  staticColumns,
+  useGridMetaData
 };
 export type { TInitialState, TActios };
 export * from './utils';

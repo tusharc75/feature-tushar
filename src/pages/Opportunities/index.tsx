@@ -8,7 +8,7 @@ import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { isMobile } from 'react-device-detect';
 import { useHistory } from 'react-router-dom';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
@@ -20,7 +20,16 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { customerAccount, getDefaultMyRecordType, gridLoadingTimeout, opportunity, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  customerAccount,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  opportunity,
+  prepareDataForGrid,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageOpportunityDialog from './ManageOpportunityDialog';
@@ -46,7 +55,7 @@ const Opportunities = () => {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
   const { opportunityResource, opportunityApi } = opportunity;
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.opportunity));
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -191,42 +200,36 @@ const Opportunities = () => {
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
-    if (selectedEntity) {
-      const queryString = getQueryString();
-      dispatch({ type: 'loading', loading: true });
-      axiosInstance()
-        .get(`${opportunityApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
-        .then(({ data: { data, count } }) => {
-          let rows = data.map((u) => {
-            let finalObject = prepareDataForGrid(u);
-            finalObject['canDelete'] = u.owner?.optionValue === user?.user._id && permissions?.opportunity?.isDelete;
-            finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-            let res = {
-              ...finalObject,
-              stage: u.stage,
-              closeDate: u?.closeDate
-            };
-            return res;
-          });
-          dispatch({ type: 'initialize', data: rows, count: count });
-          setTimeout(() => {
-            dispatch({ type: 'loading', loading: false });
-          }, gridLoadingTimeout);
-        })
-        .catch((error) => {
-          dispatch({ type: 'loading', loading: false });
-          toastConfig.setToastConfig(error);
+    const queryString = getQueryString();
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance()
+      .get(`${opportunityApi}${queryString}`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
+          finalObject['canDelete'] =
+            permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, finalObject?.ownerId);
+          let res = {
+            ...finalObject,
+            stage: u.stage,
+            closeDate: u?.closeDate
+          };
+          return res;
         });
-    }
+        dispatch({ type: 'initialize', data: rows, count: count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
+      .catch((error) => {
+        dispatch({ type: 'loading', loading: false });
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleSearch = (e) => {
     dispatch({ type: 'search', search: e.target.value });
-  };
-
-  const handleOpportunityTypeChange = (filterValues) => {
-    dispatch({ type: 'pageChange', page: 0 });
-    setSelectedType(filterValues);
   };
 
   const handleTransferEntityDialog = () => {
@@ -265,10 +268,8 @@ const Opportunities = () => {
       });
   };
 
-  const handleFilter = (event, newFilter) => {
-    if (newFilter != null) {
-      handleOpportunityTypeChange(types.find((d) => d.key === newFilter).value);
-    }
+  const onTypeChange = (event, type) => {
+    dispatch({ type: 'pageChange', page: 0 });
   };
 
   const ActionMenuItems = () => {
@@ -318,17 +319,14 @@ const Opportunities = () => {
       <CustomContainer>
         <ListingPageHeader
           toggleButtonList={types}
-          onToggle={handleFilter}
+          onToggle={onTypeChange}
           selectedType={selectedType}
           setSelectedType={setSelectedType}
-          // leftSideContents
           searchValue={search}
           onSearch={handleSearch}
-          // rightSideContents
           isActionButtonVisible={true}
           actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          // addButtonProps
           addButtonOnclick={() => {
             setShowCreateOpportunityDialog({ open: true, isClone: false, idToClone: null });
           }}
@@ -363,8 +361,9 @@ const Opportunities = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? 's' : ''}   ${deleteRecord.opportunityName || ''
-              }?`}
+            message={`Are you sure you want to delete ${routes.opportunity.title}${selectedRecords.length ? 's' : ''}   ${
+              deleteRecord.opportunityName || ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);
