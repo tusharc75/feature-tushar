@@ -3,11 +3,13 @@ import { Grid, Box, InputAdornment, IconButton } from '@material-ui/core';
 import FormTypes from './FormTypes';
 import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
-import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
+import { FaUserPlus } from 'react-icons/fa6';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const InputField = (props) => {
-  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage, resource = null, referenceId = null, ...rest } = props;
+  const { fieldsData, errors, touched, values, setFieldValue, onImageUploadCompletePercentage,
+    resource = null, referenceId = null, collaborateTools = false, ...rest } = props;
 
   const [formsData, setFormsData] = useState([]);
   const [currencySymbol, setCurrencySymbol] = useState(null);
@@ -27,20 +29,18 @@ const InputField = (props) => {
                 <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
                 <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
               </div>
-              {resource && referenceId && (
+              {resource && referenceId && collaborateTools && (
                 <div>
-                  <IconButton
-                    style={{ padding: '0px' }}
-                    title="Follow-Ups"
-                    size="small"
-                    color="primary"
-                    aria-label="delete"
-                    onClick={() => {
-                      setOpen({ open: true, section: form });
-                    }}
-                  >
-                    <MoreHorizIcon fontSize="small" style={{ color: '#ffffff' }} />
-                  </IconButton>
+                  <HtmlTooltip title='Follow-Ups'>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setOpen({ open: true, section: form });
+                      }}
+                    >
+                      <FaUserPlus />
+                    </IconButton>
+                  </HtmlTooltip>
                 </div>
               )}
             </div>
@@ -64,6 +64,7 @@ const InputField = (props) => {
                       tooltipMessage={field.tooltipMessage}
                       fields={fieldsData}
                       fieldData={field}
+                      disabled={(Boolean(referenceId) && field.disableOnEdit)}
                     />
                   ) : field.fieldName === 'day' ? (
                     values.recurrence === 'Monthly' && (
@@ -84,6 +85,7 @@ const InputField = (props) => {
                           tooltipMessage={field.tooltipMessage}
                           fields={fieldsData}
                           fieldData={field}
+                          disabled={(Boolean(referenceId) && field.disableOnEdit)}
                         />
                       </Grid>
                     )
@@ -106,6 +108,7 @@ const InputField = (props) => {
                           tooltipMessage={field.tooltipMessage}
                           fields={fieldsData}
                           fieldData={field}
+                          disabled={(Boolean(referenceId) && field.disableOnEdit)}
                         />
                       </Grid>
                     )
@@ -137,27 +140,28 @@ const InputField = (props) => {
                         onChange={
                           field.fieldName === 'currency'
                             ? (e, val) => {
-                                if (val && val.currencyCode) {
-                                  setFieldValue(field.fieldName, val.currencyCode);
-                                  setCurrencySymbol(val.symbolNative);
-                                } else {
-                                  setFieldValue(field.fieldName, '');
-                                  setCurrencySymbol(null);
-                                }
+                              if (val && val.currencyCode) {
+                                setFieldValue(field.fieldName, val.currencyCode);
+                                setCurrencySymbol(val.symbolNative);
+                              } else {
+                                setFieldValue(field.fieldName, '');
+                                setCurrencySymbol(null);
                               }
+                            }
                             : null
                         }
                         imageOrFileUploadCompletePercentage={
                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                             ? (completePercentage) => {
-                                if (onImageUploadCompletePercentage) {
-                                  onImageUploadCompletePercentage(completePercentage);
-                                }
+                              if (onImageUploadCompletePercentage) {
+                                onImageUploadCompletePercentage(completePercentage);
                               }
+                            }
                             : null
                         }
                         fields={fieldsData}
                         fieldData={field}
+                        disabled={(Boolean(referenceId) && field.disableOnEdit)}
                       />
                     </Grid>
                   )
