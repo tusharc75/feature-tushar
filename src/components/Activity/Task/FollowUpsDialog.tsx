@@ -15,7 +15,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
 
-const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
+const FollowUpsDialog = ({ onClose, section, resource, referenceId, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -62,7 +62,7 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
       .post('/task', values)
       .then(({ data }) => {
         setSubmitting(false);
-        onClose();
+        onSuccess();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
