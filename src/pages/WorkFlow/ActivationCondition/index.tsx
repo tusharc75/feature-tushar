@@ -1,4 +1,4 @@
-import { Box, Button, IconButton, Menu, MenuItem, Typography } from '@material-ui/core';
+import { Box, Button, IconButton, Typography } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -31,7 +31,6 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
   const fetchResourceFields = async () => {
     try {
       const { data } = await axiosInstance().get(`/field?resource=${resource}`);
-      console.log(data);
       const fields = data?.data?.map((ele) => ele?.fieldData);
       setResourceFields(fields);
     } catch (e) {
