@@ -1,5 +1,8 @@
+import { Close } from '@material-ui/icons';
 import React, { memo, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';
+import { cn } from 'src/constants/helpers';
 import { useDebounce } from 'src/hooks';
 
 type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
@@ -39,10 +42,25 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
           value={inputvalue}
           onChange={onChangeWrapper}
           placeholder={placeholder || 'Search..'}
-          type={'search'}
-          className={`${className} small-searchbar h-[32px] w-full min-w-0 flex-grow rounded-[4px] bg-transparent p-[10px_5px_10px_32px] shadow-none outline-transparent [border:1px_solid_var(--common-border-color)] placeholder:text-[#737373] focus-within:[outline:1px_solid_var(--new-theme-color)] focus:[outline:1px_solid_var(--new-theme-color)] dark:bg-[var(--dark-secondary)] dark:text-white sm:min-w-[150px] sm:max-w-[300px] `}
+          type={isMobile || isTablet ? 'text' : 'search'}
+          className={cn(
+            `small-searchbar h-[32px] w-full min-w-0 flex-grow rounded-[4px] bg-transparent p-[10px_5px_10px_32px] shadow-none outline-transparent [border:1px_solid_var(--common-border-color)] placeholder:text-[#737373] focus-within:[outline:1px_solid_var(--new-theme-color)] focus:[outline:1px_solid_var(--new-theme-color)] dark:bg-[var(--dark-secondary)] dark:text-white sm:min-w-[150px] sm:max-w-[300px]`,
+            className,
+            isMobile || isTablet ? 'pr-6' : ''
+          )}
           {...otherProps}
         />
+        {inputvalue && (
+          <span
+            className={cn('absolute right-[5px] cursor-pointer [top:50%] [transform:translateY(-50%)]', isMobile || isTablet ? 'block' : 'hidden')}
+            onClick={(e) => {
+              setInputValue('');
+              onChangeWrapper({ ...e, target: { ...e.target, value: '' }, currentTarget: { ...e.currentTarget, value: '' } });
+            }}
+          >
+            <Close className="!text-[18px]" />
+          </span>
+        )}
       </div>
     </>
   );
