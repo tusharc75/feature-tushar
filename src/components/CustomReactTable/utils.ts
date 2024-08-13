@@ -349,8 +349,8 @@ export const createFilterModel = (formValues, coloums) => {
       case 'currency':
       case 'lookUpDisplay':
       case 'url':
-        if (formValues[fieldName]) {
-          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        if (formValues[fieldName]?.trim()) {
+          filterModel.set(fieldName, { filter: formValues[fieldName]?.trim() });
         }
         break;
       case 'number':

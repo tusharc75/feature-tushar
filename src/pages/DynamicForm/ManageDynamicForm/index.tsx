@@ -242,8 +242,9 @@ const ManageDynamicForm = ({
                     onImageUploadCompletePercentage={(completePercentage) => {
                       setUploadingImageOrFileProgress(completePercentage);
                     }}
-                    resource={collaborateTools ? resource : null}
-                    referenceId={collaborateTools ? id : null}
+                    resource={resource}
+                    referenceId={id || null}
+                    collaborateTools={collaborateTools}
                   />
                 </Form>
               </CustomDialogContent>
