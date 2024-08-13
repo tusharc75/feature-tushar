@@ -153,6 +153,8 @@ const ReceivingTicket = ({
   const [tabValue, setTabValue] = useState(0);
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState(false);
 
+  const [allMaterial, setAllMaterial] = useState(false);
+
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -561,6 +563,8 @@ const ReceivingTicket = ({
 
         setInvoiceData(invoiceData);
       }
+
+      setAllMaterial(material)
 
       if (permissions?.repairJob?.isRead && transactionData?.repairJob?.length) {
         setRepairJobCount(transactionData?.repairJob?.length);
@@ -2606,7 +2610,6 @@ const ReceivingTicket = ({
           }}
         />
       )}
-
       {transferAnotherPackageDialog && (
         <TransferToAnotherPackageDialog
           onClose={() => {
@@ -2618,10 +2621,10 @@ const ReceivingTicket = ({
           }}
           assets={selectedRecords}
           rentalManagementData={rentalManagementData}
+          material={allMaterial}
           assetPolicyData={assetPolicyData}
         />
       )}
-
       {openAssetDataDialog && (
         <AssetDataDialog
           onClose={() => {
