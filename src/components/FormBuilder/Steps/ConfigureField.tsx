@@ -69,24 +69,7 @@ const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) 
       });
       return false;
     }
-    if (step?._id) {
-      setSubmitting(true);
-      axiosInstance()
-        .put(`/sa-formbuilder/steps/fields/${resourceId}`, { stepId: step?._id, fields: data })
-        .then(({ data }) => {
-          setSubmitting(false);
-          handleSucess();
-          toastConfig.setToastConfig({
-            open: true,
-            message: data.message,
-            severity: 'success'
-          });
-        })
-        .catch((err) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(err);
-        });
-    }
+    handleSucess(data);
   };
 
 
@@ -112,7 +95,7 @@ const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) 
 
   return (
     <Dialog open aria-labelledby="customized-dialog-title" onClose={handleClose} TransitionComponent={CustomDialogTransition} fullWidth fullScreen>
-      <CustomDialogHeader showRequiredLabel={false} title={`Fields Configuration ${step?.stepName}`} onClose={handleClose} />
+      <CustomDialogHeader showRequiredLabel={false} title={`Fields Configuration`} onClose={handleClose} />
       <CustomDialogContent>
         <Box display="flex" justifyContent="flex-end">
           <Box pb={1}>
