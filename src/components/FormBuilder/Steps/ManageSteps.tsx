@@ -13,6 +13,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 import { getLookupResource, getResourceField } from '../helper';
+import ConfigureField from 'src/components/FormBuilder/Steps/ConfigureField';
 
 const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
@@ -30,6 +31,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
   const [resourceOption, setResourceOption] = useState([]);
   const [resourceFieldOption, setResourceFieldOption] = useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
+  const [openField, setOpenField] = useState(false);
 
   useEffect(() => {
     getResourceList();
@@ -66,7 +68,8 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
         linkWithResource: data?.linkWithResource || false,
         linkResourceName: data?.linkResourceName || '',
         linkResourceField: data?.linkResourceField || '',
-        readOnly: data?.readOnly || false
+        readOnly: data?.readOnly || false,
+        fields: data?.fields || []
       });
     } else {
       setInitialValues({
@@ -79,13 +82,17 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
         linkWithResource: false,
         linkResourceName: '',
         linkResourceField: '',
-        readOnly: false
+        readOnly: false,
+        fields: []
       });
     }
   }, [data]);
 
   const handleSubmit = (values) => {
     setSubmitting(true);
+    if(values?.linkWithResource || values?.linkWithMaterial){
+      values.fields = []
+    }
     if (data?._id) {
       axiosInstance()
         .put(`/sa-formbuilder/steps/${resourceId}`, { ...values, stepId: data?._id })
@@ -137,6 +144,12 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
     if (values.linkWithMaterial && !values?.linkedMaterial?.length) {
       errors['linkedMaterial'] = 'please select Material';
     }
+    
+    if(!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length){
+      errors['fields'] = 'please select Fields';
+      toastConfig.setToastConfig({open: true, type: 'error', message: 'please select Fields'});
+    }
+    console.log(errors)
     return errors;
   };
 
@@ -374,6 +387,20 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     label="Show In Pdf"
                   />
                 </Box>
+                {!values['linkWithResource'] && !values['linkWithMaterial'] && (
+                  <Box className="mt-2">
+                  <Button
+                   variant="contained"
+                   color="primary"
+                   size="small"
+                   onClick={() => {
+                    setOpenField(true);
+                   }}
+                  >
+                  Add Fields
+                  </Button>
+                </Box>
+              )}
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -416,6 +443,20 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                 }}
               />
             ) : null}
+
+          {openField && (
+          <ConfigureField
+            resourceId={resourceId}
+            step={values}
+            handleClose={() => {
+              setOpenField(false);
+            }}
+            handleSucess={(data) => {
+              setFieldValue('fields',data)
+              setOpenField(false);
+            }}
+          />
+        )}
           </>
         )}
       </Formik>
