@@ -538,7 +538,8 @@ export const RESOURCE_LABEL = {
   integration: 'Integration',
   equiptAi: 'Equipt Ai',
   trainAiModel: 'Train Ai Model',
-  workSpace: 'Work Space'
+  workSpace: 'Work Space',
+  workFlow: 'Work Flow'
 };
 
 export const CHILD_RESOURCE = {

@@ -1272,6 +1272,16 @@ const routes = {
     title: storedRoutes && storedRoutes.workSpace && storedRoutes.workSpace?.title ? storedRoutes.workSpace?.title
       : RESOURCE_LABEL.workSpace,
     path: '/work-space'
+  },
+  workFlow: {
+    title: storedRoutes && storedRoutes.workFlow && storedRoutes.workFlow?.title ? storedRoutes.workFlow?.title
+      : RESOURCE_LABEL.workFlow,
+    path: '/work-flow'
+  },
+  workFlowDetail: {
+    title: storedRoutes && storedRoutes.workFlow && storedRoutes.workFlow?.title ? storedRoutes.workFlow?.title
+      : RESOURCE_LABEL.workFlow,
+    path: '/work-flow/:id'
   }
 };
 
