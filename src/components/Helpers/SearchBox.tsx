@@ -1,9 +1,8 @@
 import { Close } from '@material-ui/icons';
-import React, { memo, useEffect, useState } from 'react';
+import React, { memo, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { FiSearch } from 'react-icons/fi';
-import { cn } from 'src/constants/helpers';
-import { useDebounce } from 'src/hooks';
+import { cn, DebounceCallBack, debounceCallBack } from 'src/constants/helpers';
 
 type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   width?: string;
@@ -13,21 +12,24 @@ type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
 
 function SearchBox({ onChange, value, size, width, placeholder, className, containerProps = {}, ...otherProps }: SerachBoxProps) {
   const [inputvalue, setInputValue] = useState<string>(value ?? '');
-  const [event, setEvent] = useState<React.ChangeEvent<HTMLInputElement>>();
   const { className: containerClassName, ...restOfContainerProps } = containerProps;
-  const debouncedEvent = useDebounce(event, 800);
+  const debounceRef = useRef<DebounceCallBack>(null);
 
-  const onChangeWrapper = (e) => {
-    setInputValue(e.target.value);
-    setEvent(e);
-  };
-
-  useEffect(() => {
-    if (debouncedEvent) {
-      onChange(debouncedEvent);
+  const onChangeWrapper = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setInputValue(value);
+    if (!value) {
+      onChange(e);
+      return;
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedEvent]);
+    if (!debounceRef.current) {
+      debounceRef.current = debounceCallBack((e: React.ChangeEvent<HTMLInputElement>) => {
+        onChange(e);
+      }, 400);
+    }
+    const [debouncedTracker, _] = debounceRef.current;
+    debouncedTracker(e);
+  };
 
   return (
     <>
