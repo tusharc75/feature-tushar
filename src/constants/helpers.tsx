@@ -1569,6 +1569,14 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
   };
 };
 
+export const formatTotalforTableFooter = (num: number): number => {
+  if (Number.isInteger(num)) {
+    return num;
+  } else {
+    return parseFloat(num.toFixed(2));
+  }
+};
+
 /**
  *
  * @param date From when to convert amount
@@ -2490,13 +2498,13 @@ export const REPORT_LIST = [
   },
   {
     title: 'Inventory Evaluation',
-    permission: 'purchaseOrder',
+    permission: 'productInventory',
     key: 'standardReport',
     type: 'inventoryEvaluation'
   },
   {
     title: 'Inventory History',
-    permission: 'purchaseOrder',
+    permission: 'productInventory',
     key: 'standardReport',
     type: 'inventoryHistory'
   },
@@ -2767,7 +2775,7 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
 
 export const PRODUCT_SERIAL_NUMBER_STATUS = {
   available: 'Available',
-  unAvailable: 'Unavailable',
+  unAvailable: 'Unavailable'
 };
 
 type ChipStatus =

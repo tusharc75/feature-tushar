@@ -1,9 +1,10 @@
-import { Divider, Fade, IconButton, List, ListItem, Menu, MenuItem, Popper } from '@material-ui/core';
+import { Divider, IconButton, List, ListItem, Menu } from '@material-ui/core';
 import { Delete, Edit, SwapHoriz } from '@material-ui/icons';
-import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Dispatch, Fragment, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FaStar } from 'react-icons/fa6';
 import { ImSpinner2 } from 'react-icons/im';
 import axiosInstance from 'src/axios/axiosInstance';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import EditCreateViewDialog from 'src/components/CustomReactTable/ArrangeView/EditCreateViewDialog';
 import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
 import { TActios, TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
@@ -14,7 +15,6 @@ import { SET_USER } from 'src/StateProvider/actionTypes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import ConfirmationDialog from '../../Helpers/ConfirmationDialog';
-import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 export type GridViewSavedData = {
   _id: string;
@@ -62,6 +62,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editCreateDialogData, setEditCreateDialogData] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
   const [confirmationDialog, setConfirmationDialog] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
+  const [selected, setSelected] = useState(defaultView);
 
   const applyViewInTable = (order: string[], hide: string[]) => {
     const stickycolumns = getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander });
@@ -71,9 +72,11 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       columnHiddenStateData[column.id] = !hide.includes(column.id);
     });
     if (order.length > 0) {
-      columnOrder = [...stickycolumns.left, ...order, ...stickycolumns.right];
+      const newOrder = order.filter((d) => !stickycolumns.stickyColumns.includes(d));
+      columnOrder = [...stickycolumns.left, ...newOrder, ...stickycolumns.right];
     } else {
-      columnOrder = [...stickycolumns.left, ...columns.map((c) => c.id), ...stickycolumns.right];
+      const columnsWithoutSticky = columns.filter((d) => !stickycolumns.stickyColumns.includes(d.id)).map((c) => c.id);
+      columnOrder = [...stickycolumns.left, ...columnsWithoutSticky, ...stickycolumns.right];
     }
     dispatch({ type: 'setVisibleColumns', visibleColumns: columnHiddenStateData });
     dispatch({ type: 'setColumnOrder', columnOrder: columnOrder });
@@ -92,7 +95,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
     } else {
       applyViewInTable([], []);
     }
-  }, [renderedFrom, defaultView]);
+  }, [renderedFrom, defaultView, columns.length]);
 
   const getAllSavedViews = useCallback(async () => {
     try {
@@ -108,6 +111,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
 
   const applyView = (data: GridViewSavedData) => {
     applyViewInTable(data.order, data.hide);
+    setSelected(data);
   };
 
   const deleteView = async (data: GridViewSavedData) => {
@@ -116,8 +120,9 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
       await axiosInstance().put('/user/grid-view/remove', { ids: [data._id] });
       getAllSavedViews();
       setConfirmationDialog({ open: false, data: null });
-      if (defaultView._id === data._id) {
+      if (selected._id === data._id) {
         applyViewInTable([], []);
+        setSelected(null);
       }
       toastConfig.setToastConfig({
         open: true,
@@ -209,6 +214,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
                               button
                               key={d._id}
                               component={'li'}
+                              selected={selected?._id === d._id}
                               onClick={() => {
                                 setAnchorEl(null);
                                 applyView(d);
@@ -254,7 +260,14 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
               )}
             </div>
             <div className="footer mt-2 flex justify-end gap-2 p-2 [border-top:1px_solid_var(--common-border-color)]">
-              <ThemeButton iconForMobile={false} onClick={() => applyViewInTable([], [])}>
+              <ThemeButton
+                iconForMobile={false}
+                onClick={() => {
+                  setAnchorEl(null);
+                  applyViewInTable([], []);
+                  setSelected(null);
+                }}
+              >
                 Reset
               </ThemeButton>
               <ThemeButton borderColor="none" color="primary" iconForMobile={false} onClick={openCreateEditModal}>

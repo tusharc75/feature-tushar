@@ -19,7 +19,7 @@ import {
 
 const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handleClose, addMaterial }) => {
 
-  const renderedFrom = `${camelCase(routes.rentalManagement?.title)}_Product_Assign`;
+  const renderedFrom = `${camelCase(routes.product?.title)}`;
 
   const toastConfig = useContext(CustomToastContext);
 
@@ -37,6 +37,7 @@ const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handl
       editable: true,
       disableFilters: true,
       disableSortBy: true,
+      disabled:true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
     },
     {

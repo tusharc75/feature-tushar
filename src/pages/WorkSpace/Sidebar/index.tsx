@@ -27,8 +27,8 @@ const Sidebar = ({ channels, selectedChannel, setSelectedChannel, setCreateChann
     <>
       <div
         className={cn(
-          'min-h-full flex-shrink-0 flex-grow bg-[#f2f2f2] p-2 transition-transform duration-300 [border-right:1px_solid_var(--common-border-color)] dark:bg-[#070712]',
-          mobScreen ? 'w-full' : ' w-[300px] max-w-[300px]'
+          'min-h-full flex-shrink-0 flex-grow  p-2 transition-transform duration-300 [border-right:1px_solid_var(--common-border-color)] ',
+          mobScreen ? 'w-full' : ' w-[270px] max-w-[270px]'
         )}
       >
         <div className="flex items-center px-2">
@@ -61,8 +61,8 @@ const Sidebar = ({ channels, selectedChannel, setSelectedChannel, setCreateChann
                       className={cn(
                         'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
                         selectedChannel?._id === c._id
-                          ? '[background-image:linear-gradient(270deg,_#dfdfdf_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#2f2f38_60%,_transparent_100%)]'
-                          : '[background-image:linear-gradient(270deg,_#e8e8e8_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#1a1a25_60%,_transparent_100%)]'
+                          ? '[background-image:linear-gradient(270deg,_#ebebeb_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#353546_60%,_transparent_100%)]'
+                          : '[background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#212134_60%,_transparent_100%)]'
                       )}
                     >
                       <IconButton

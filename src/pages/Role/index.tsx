@@ -69,6 +69,7 @@ const Roles: FC = () => {
       minWidth: 150,
       width: 150,
       primaryField: true,
+      disabled: true,
       Cell: ({ row }) => (
         <>
           {row?.original?.name ? (

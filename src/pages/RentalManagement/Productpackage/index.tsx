@@ -110,6 +110,51 @@ const Productpackage = ({
     setWalkmeData([generateAddExistingProduct()]);
   }, []);
 
+  const addWalkmeData = (rows: any[]) => {
+    // Adding Step Data
+
+    if (rows?.length > 0) {
+      let stepData = [generateAddExistingProduct()];
+      const stepDataAdded = {
+        stepEditProduct: false,
+        addChildProduct: false,
+        deleteAddedProduct: false,
+        addExistingProduct: true
+      };
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i];
+        if (r.type !== MATERIAL_TYPE.manualEntry && !isOffline && allowedToEdit && !quotationApproved) {
+          if (!stepDataAdded.stepEditProduct && !r.isValid) {
+            stepData.push(generateAddStepEditProduct(i));
+            stepDataAdded.stepEditProduct = true;
+            if (walkmeInstance && walkmeInstance.type === 'flow') {
+              const steps = generateAddStepEditProduct(i).steps;
+              steps.push(nextButtonStep, { ...nextButtonStep, waitForStepInsertion: true });
+              walkmeInstance.instance.push(steps);
+              walkmeInstance.handleNext();
+            }
+          } else if (!stepDataAdded.stepEditProduct) {
+            stepDataAdded.stepEditProduct = true;
+            if (walkmeInstance && walkmeInstance.type === 'flow') {
+              const steps = [nextButtonStep, { ...nextButtonStep, waitForStepInsertion: true }];
+              walkmeInstance.instance.push(steps);
+              walkmeInstance.handleNext();
+            }
+          }
+          if (!stepDataAdded.addChildProduct) {
+            stepData.push(generateAddChildProduct(i));
+            stepDataAdded.addChildProduct = true;
+          }
+          if (!stepDataAdded.deleteAddedProduct && r.hideSelection === false) {
+            stepData.push(generateDeleteAddedProductSteps(i));
+            stepDataAdded.deleteAddedProduct = true;
+          }
+        }
+      }
+      setWalkmeData(stepData);
+    }
+  };
+
   useEffect(() => {
     fetchData();
   }, [allFields]);
@@ -408,6 +453,9 @@ const Productpackage = ({
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
+      if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
+        parent.isValid = parent['price_' + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+      }
       if (!parent.isValid) {
         nextStepMessage = rentalManagementMessage.validPrice;
       }
@@ -448,6 +496,11 @@ const Productpackage = ({
     });
 
     if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
+      if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
+        if ((flattenArray(rows))?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
+          nextStepMessage = rentalManagementMessage.validServicePrice
+        }
+      }
       setNextStep(false);
       setNextStepToolTip(nextStepMessage || rentalManagementMessage.addProductPackage);
     } else {
@@ -458,51 +511,6 @@ const Productpackage = ({
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-  };
-
-  const addWalkmeData = (rows: any[]) => {
-    // Adding Step Data
-
-    if (rows?.length > 0) {
-      let stepData = [generateAddExistingProduct()];
-      const stepDataAdded = {
-        stepEditProduct: false,
-        addChildProduct: false,
-        deleteAddedProduct: false,
-        addExistingProduct: true
-      };
-      for (let i = 0; i < rows.length; i++) {
-        const r = rows[i];
-        if (r.type !== MATERIAL_TYPE.manualEntry && !isOffline && allowedToEdit && !quotationApproved) {
-          if (!stepDataAdded.stepEditProduct && !r.isValid) {
-            stepData.push(generateAddStepEditProduct(i));
-            stepDataAdded.stepEditProduct = true;
-            if (walkmeInstance && walkmeInstance.type === 'flow') {
-              const steps = generateAddStepEditProduct(i).steps;
-              steps.push(nextButtonStep, { ...nextButtonStep, waitForStepInsertion: true });
-              walkmeInstance.instance.push(steps);
-              walkmeInstance.handleNext();
-            }
-          } else if (!stepDataAdded.stepEditProduct) {
-            stepDataAdded.stepEditProduct = true;
-            if (walkmeInstance && walkmeInstance.type === 'flow') {
-              const steps = [nextButtonStep, { ...nextButtonStep, waitForStepInsertion: true }];
-              walkmeInstance.instance.push(steps);
-              walkmeInstance.handleNext();
-            }
-          }
-          if (!stepDataAdded.addChildProduct) {
-            stepData.push(generateAddChildProduct(i));
-            stepDataAdded.addChildProduct = true;
-          }
-          if (!stepDataAdded.deleteAddedProduct && r.hideSelection === false) {
-            stepData.push(generateDeleteAddedProductSteps(i));
-            stepDataAdded.deleteAddedProduct = true;
-          }
-        }
-      }
-      setWalkmeData(stepData);
-    }
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts) => {
@@ -528,6 +536,9 @@ const Productpackage = ({
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
       _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
+      if (_subRow?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
+        _subRow.isValid = _subRow['price_' + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+      }
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
         : nonSerializeAsset?.filter((e) => e._id === _subRow._id).length;
@@ -555,6 +566,9 @@ const Productpackage = ({
     });
     if (subRows.length === 0 && parent.type === MATERIAL_TYPE.package) {
       parent.isValid = false;
+    }
+    if (subRows?.length && rentalPolicyData?.servicePriceRequired) {
+      parent.isValid = subRows.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid) ? false : parent.isValid;
     }
     if (subRows?.length && !parent.hideSelection) {
       parent.hideSelection = subRows.filter((e) => e.hideSelection).length ? true : false;
@@ -605,24 +619,6 @@ const Productpackage = ({
       })
       .then(() => {
         setAddExistingManagedPackages(false);
-        setIsSubmitting(false);
-        fetchData();
-      })
-      .catch((error) => {
-        setIsSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const handleAddAsset = async (rows) => {
-    setIsSubmitting(true);
-    const assetIds = rows?.map((item) => item._id);
-    axiosInstance()
-      .post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/assets`, {
-        ids: assetIds
-      })
-      .then(() => {
-        setAddExistingAssets(false);
         setIsSubmitting(false);
         fetchData();
       })
@@ -877,7 +873,7 @@ const Productpackage = ({
       });
     } else {
       if (inputField.hasOwnProperty('qtyDisplay')) {
-        if(inputField['qtyDisplay']===0){
+        if (inputField['qtyDisplay'] === 0) {
           toastConfig.setToastConfig({
             open: true,
             type: 'error',
@@ -1135,10 +1131,8 @@ const Productpackage = ({
               : null,
             afeNumber: rentalManagementData?.afeNumber
           }}
-          isAssigning={isSubmitting}
           handleClose={() => setAddExistingAssets(false)}
-          handleSucess={handleAddAsset}
-          handleSuccessInUseAsset={() => {
+          handleSucess={() => {
             setAddExistingAssets(false);
             fetchData();
           }}

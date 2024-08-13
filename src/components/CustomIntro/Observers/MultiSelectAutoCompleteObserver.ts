@@ -5,16 +5,15 @@ export class MultiSelectAutoCompleteObserver extends Observer {
   target: HTMLElement;
   next: () => void;
   observer: MutationObserver;
-  valiDator: (value: string[]) => boolean;
+  validator: (value: string[]) => boolean;
   targetParent: HTMLElement;
 
-  constructor(handleSteps: HandleSteps, element: HTMLElement, valiDator: (value: string[]) => boolean = (value) => value.length > 0) {
-    super(handleSteps, element);
+  constructor(handleSteps: HandleSteps, element: HTMLElement, validator: (value: string[]) => boolean = (value) => value.length > 0) {
+    super(handleSteps, element, validator);
     this.options = {
       attributes: true
     };
     this.targetParent = this.target.parentElement;
-    this.valiDator = valiDator;
     this.observe();
   }
 
@@ -22,7 +21,7 @@ export class MultiSelectAutoCompleteObserver extends Observer {
     const chipFound: NodeListOf<HTMLSpanElement> = this.targetParent.querySelectorAll('.MuiAutocomplete-tag .MuiChip-label');
     let success = false;
     if (chipFound) {
-      success = this.valiDator(Array.from(chipFound).map((chip) => chip.textContent || chip.innerText));
+      success = this.validator(Array.from(chipFound).map((chip) => chip.textContent || chip.innerText));
     } else {
       success = false;
     }

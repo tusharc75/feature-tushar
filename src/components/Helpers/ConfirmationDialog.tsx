@@ -22,7 +22,25 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-export default function ConfirmationDialogRaw({ onClose, onOk, open, message, okBtnLoading, forwardText = null, cancelText = null }) {
+type ConfirmationDialogRawProps = {
+  onClose: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  onOk: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+  open: boolean;
+  message: React.ReactNode;
+  okBtnLoading?: boolean;
+  forwardText?: string;
+  cancelText?: string;
+};
+
+export default function ConfirmationDialogRaw({
+  onClose,
+  onOk,
+  open,
+  message,
+  okBtnLoading,
+  forwardText = null,
+  cancelText = null
+}: ConfirmationDialogRawProps) {
   const classes = useStyles();
 
   return (
@@ -54,11 +72,3 @@ export default function ConfirmationDialogRaw({ onClose, onOk, open, message, ok
     </Dialog>
   );
 }
-
-ConfirmationDialogRaw.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  message: PropTypes.node.isRequired,
-  onOk: PropTypes.func,
-  okBtnLoading: PropTypes.any
-};

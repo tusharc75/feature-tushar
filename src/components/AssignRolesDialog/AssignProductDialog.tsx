@@ -28,7 +28,7 @@ const AssignProductDialog = ({
   hideQty = false,
   pricingCondition = null
 }) => {
-  const renderedFrom = `${camelCase(routes.product?.title)}_Assign`;
+  const renderedFrom = `${camelCase(routes.product?.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
@@ -53,6 +53,7 @@ const AssignProductDialog = ({
       editable: true,
       disableFilters: true,
       disableSortBy: true,
+      disabled:true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
     }
   ];

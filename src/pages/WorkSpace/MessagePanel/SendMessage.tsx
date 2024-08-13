@@ -32,16 +32,15 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
   const postMessage = async () => {
     setIsLoading(true);
     try {
-      let formData = new FormData();
-      formData.append('message', message);
-      files.forEach((file) => {
-        formData.append('files', file);
-      });
       if (initialMessage) {
-        formData.append('messageId', messageId);
-        await axiosInstance().put(`/work-space/channel/message`, formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+        await axiosInstance().put(`/work-space/channel/message`, { message, messageId });
         onEditComplete();
       } else {
+        let formData = new FormData();
+        formData.append('message', message);
+        files.forEach((file) => {
+          formData.append('files', file);
+        });
         formData.append('channelId', channelId);
         if (messageId) formData.append('parentId', messageId);
         await axiosInstance().post('/work-space/channel/message', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
@@ -153,47 +152,27 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
             height: 100,
             menubar: false,
             paste_as_text: true,
-            plugins: [
-              'advlist',
-              'paste',
-              'autolink',
-              'lists',
-              'link',
-              'image',
-              'charmap',
-              'preview',
-              'anchor',
-              'searchreplace',
-              'visualblocks',
-              'fullscreen',
-              'insertdatetime',
-              'media',
-              'table',
-              'code',
-              'wordcount'
-            ],
+            plugins: ['advlist', 'paste', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview', 'anchor', 'searchreplace', 'visualblocks', 'fullscreen', 'insertdatetime', 'media', 'table', 'code', 'wordcount'],
             toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
             content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
           }}
         />
         <div className="footer flex justify-between gap-2 [border-top:1px_solid_var(--common-border-color)]">
-          <div>
-            <input
-              accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-              style={{ display: 'none' }}
-              id="file-upload"
-              multiple
-              type="file"
-              onChange={handleFileChange}
-            />
-            <label htmlFor="file-upload">
-              <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }}>
-                <AttachFile />
-              </IconButton>
-            </label>
-          </div>
           {!initialMessage ? (
             <>
+              <input
+                accept="image/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                style={{ display: 'none' }}
+                id="file-upload"
+                multiple
+                type="file"
+                onChange={handleFileChange}
+              />
+              <label htmlFor="file-upload">
+                <IconButton color="primary" aria-label="upload" component="span" style={{ padding: 5, borderRadius: 0 }}>
+                  <AttachFile />
+                </IconButton>
+              </label>
               <IconButton
                 style={{ padding: 5 }}
                 disabled={!message || isLoading}

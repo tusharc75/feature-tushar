@@ -1,4 +1,4 @@
-import { Avatar, IconButton, Menu, MenuItem, Popper } from '@material-ui/core';
+import { Avatar, IconButton, Menu, MenuItem, Popper, Tooltip } from '@material-ui/core';
 import { MoreVert, Delete, GetApp } from '@material-ui/icons';
 import EmojiPicker from 'emoji-picker-react';
 import { groupBy, uniqBy } from 'lodash';
@@ -40,10 +40,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
   const [editingMessage, setEditingMessage] = useState(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
-  }, [messages]);
-
   const fetchMessages = async (after: string = null) => {
     try {
       let api = `/work-space/channel/message/${channelId}`;
@@ -60,6 +56,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
           return groupByDate(newMessages);
         }
       });
+      containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
       setThreadDialogOpen((prevDialog) => {
         if (prevDialog.open && (prevDialog.message?._id === after || !after)) {
           const updatedMessage = data?.data?.find((message) => message._id === prevDialog.message?._id);
@@ -86,9 +83,40 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
       socket.on('fetchMessages', () => {
         fetchMessages();
       });
+      socket.on('addReaction', ({ messageId, emoji, user }) => {
+        setMessages((prevMessages) => {
+          let updatedMessages: any = Object.assign({}, prevMessages);
+          Object.values(updatedMessages).forEach((u: any) => {
+            u.forEach((m) => {
+              if (m._id === messageId) {
+                if (!m['reactions']) m['reactions'] = [];
+                m['reactions'].push({ emoji, user });
+              }
+            });
+          })
+          return updatedMessages;
+        });
+      })
+      socket.on('removeReaction', ({ messageId, emoji, user }) => {
+        setMessages((prevMessages) => {
+          let updatedMessages: any = Object.assign({}, prevMessages);
+          Object.values(updatedMessages).forEach((u: any) => {
+            u.forEach((m) => {
+              if (m._id === messageId) {
+                if (m['reactions']) {
+                  m['reactions'] = m['reactions'].filter((reaction) => reaction.emoji !== emoji || reaction.user.optionValue !== user);
+                }
+              }
+            });
+          })
+          return updatedMessages;
+        });
+      });
       return () => {
         socket.off('fetchNewMessage');
         socket.off('fetchMessages');
+        socket.off('addReaction');
+        socket.off('removeReaction');
         socket.emit('leaveChannel', channelId);
       };
     }
@@ -126,52 +154,47 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
   };
 
   return (
-    <div className={cn('message-panel flex ')}>
-      <div className="flex w-full flex-col">
-        <div
-          ref={containerRef}
-          className={cn('messages-container my-2 max-h-[max(500px,_calc(100vh-430px))] min-h-[500px] flex-grow overflow-y-auto scroll-smooth')}
-        >
-          {messages !== null ? (
-            <ul className="mt-8 list-none">
-              {Object.keys(messages).map((date) => (
-                <li key={date} className="mb- list-none">
-                  <div className="relative my-[20px] h-[1px] bg-[var(--common-border-color)]">
-                    <p
-                      className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center 
+    <>
+      <div ref={containerRef} className={cn('messages-container my-2 flex-shrink flex-grow overflow-y-auto scroll-smooth')}>
+        {messages !== null ? (
+          <ul className="mt-8 list-none">
+            {Object.keys(messages).map((date) => (
+              <li key={date} className="mb- list-none">
+                <div className="relative my-[20px] h-[1px] bg-[var(--common-border-color)]">
+                  <p
+                    className={`absolute rounded-lg bg-[var(--dark-primary,white)] p-2 px-2 text-center 
                     text-gray-400 [border:1px_solid_var(--common-border-color)] [left:50%] [top:50%] [transform:translate(-50%,_-50%)]`}
-                    >
-                      {formatDateWithTodayYestarday(date, { onlyMonths: true, dateFormat })}
-                    </p>
-                  </div>
-                  <ul className="list-none space-y-5">
-                    {messages[date].map((message) => {
-                      return (
-                        <DisplaySingleMessage
-                          key={message._id}
-                          message={message}
-                          selectedMessage={selectedMessage}
-                          editingMessage={editingMessage}
-                          channelId={channelId}
-                          socket={socket}
-                          handleEditComplete={handleEditComplete}
-                          setThreadDialogOpen={setThreadDialogOpen}
-                          handleMenuClick={handleMenuClick}
-                        />
-                      );
-                    })}
-                  </ul>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <div className="p-3">
-              <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
-            </div>
-          )}
-        </div>
-        <SendMessage channelId={channelId} socket={socket} />
+                  >
+                    {formatDateWithTodayYestarday(date, { onlyMonths: true, dateFormat })}
+                  </p>
+                </div>
+                <ul className="list-none space-y-5">
+                  {messages[date].map((message) => {
+                    return (
+                      <DisplaySingleMessage
+                        key={message._id}
+                        message={message}
+                        selectedMessage={selectedMessage}
+                        editingMessage={editingMessage}
+                        channelId={channelId}
+                        socket={socket}
+                        handleEditComplete={handleEditComplete}
+                        setThreadDialogOpen={setThreadDialogOpen}
+                        handleMenuClick={handleMenuClick}
+                      />
+                    );
+                  })}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="p-3">
+            <CommonSkeleton lenArray={[...Array(2).keys()]} xs={12} sm={12} md={12} lg={12} />
+          </div>
+        )}
       </div>
+      <SendMessage channelId={channelId} socket={socket} />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
@@ -190,7 +213,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
         channelId={channelId}
         deleteMessage={deleteMessage}
       />
-    </div>
+    </>
   );
 };
 
@@ -229,16 +252,42 @@ export const DisplaySingleMessage = ({
     setEmojiPanelAnchor(null);
   };
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: {
-      user: { user }
-    }
-  } = useData();
+  const { state: { user: { user } } } = useData();
 
   if (!message) return null;
 
   const replies = message.replies || [];
   const uniqueReplies = setThreadDialogOpen ? uniqBy(replies, (d) => d.user.optionLabel) : [];
+
+  const groupedReactions = Object.values(groupBy(message.reactions, 'emoji')).map((reactions) => ({
+    emoji: reactions[0].emoji,
+    count: reactions.length,
+    users: reactions.map((reaction) => reaction.user),
+  }))
+
+  const handleReaction = async (emoji) => {
+    try {
+      await axiosInstance().post('/work-space/channel/message/reaction', { messageId: message._id, emoji });
+      socket.emit('reaction', { channelId, messageId: message._id, emoji });
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    } finally {
+      closeEmojiPanel();
+    }
+  };
+
+  const handleReactionClick = async (reaction) => {
+    try {
+      if (reaction?.users?.find((u) => u.optionValue === user?._id)) {
+        await axiosInstance().delete(`/work-space/channel/message/reaction`, { data: { messageId: message._id, emoji: reaction.emoji } });
+        socket.emit('removeReaction', { channelId, messageId: message._id, emoji: reaction.emoji });
+      } else {
+        await handleReaction(reaction.emoji);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  }
 
   const downloadFile = (attachment) => {
     axiosInstance()
@@ -307,6 +356,33 @@ export const DisplaySingleMessage = ({
                       __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
                     }}
                   ></span>
+                  {groupedReactions?.length > 0 && (
+                    <div className="reactions flex gap-1 mt-2">
+                      {groupedReactions?.map((reaction, index) => (
+                        <Tooltip
+                          key={index}
+                          title={
+                            <div className="p-1">
+                              <p>{reaction.users.map((u) => {
+                                if (u.optionValue === user?._id) return 'You';
+                                else return u.optionLabel;
+                              }).join(', ')} reacted with {reaction.emoji}</p>
+                            </div>
+                          }
+                        >
+                          <div className="reaction flex items-center gap-1 bg-gray-200 p-1 rounded-md">
+                            <span
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleReactionClick(reaction);
+                              }}
+                            >{reaction.emoji}</span>
+                            <span>{reaction.count}</span>
+                          </div>
+                        </Tooltip>
+                      ))}
+                    </div>
+                  )}
                   {message?.attachments?.length > 0 && (
                     <div className="flex flex-wrap gap-2 py-3">
                       {message?.attachments?.map((attachment) => {
@@ -446,7 +522,9 @@ export const DisplaySingleMessage = ({
                       width={400}
                       height={400}
                       reactions={[]}
-                      onReactionClick={(d) => console.log(d)}
+                      onEmojiClick={(d) => {
+                        handleReaction(d.emoji);
+                      }}
                     />
                   </Popper>
                 </div>

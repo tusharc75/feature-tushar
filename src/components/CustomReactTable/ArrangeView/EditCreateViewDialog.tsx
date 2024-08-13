@@ -17,7 +17,7 @@ import {
   TextField,
   useMediaQuery
 } from '@material-ui/core';
-import { DragHandle } from '@material-ui/icons';
+import { DragHandle, Info } from '@material-ui/icons';
 import { Formik, FormikErrors } from 'formik';
 import update from 'immutability-helper';
 import { startCase } from 'lodash';
@@ -34,6 +34,7 @@ import { object, string } from 'yup';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 type EditCreateViewDialogProps = {
   onClose: () => void;
@@ -77,6 +78,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
   const [sortedColumns, setSortedColumns] = useState(
     data?.order ? columnsWithoutSticky.sort((a, b) => data.order?.indexOf(a.id) - data.order?.indexOf(b.id)) : columnsWithoutSticky
   );
+  const [filteredColumns, setFilteredColumns] = useState([]);
   const [stateVisibleColumns, setStateVisibleColumns] = useState(() => {
     const temp = {};
     if (data?.hide?.length > 0) {
@@ -96,6 +98,7 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
   const [defaultValue] = useState(
     data ? { name: data.name, access: data.access, default: data.default, order: data.order, hide: data.hide } : initialValue
   );
+  const [serchedValue, setSearchedValue] = useState('');
 
   const [loading, setLoading] = useState(false);
 
@@ -220,6 +223,17 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
     });
   };
 
+  const handeSearch = (e: React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
+    const value = e.target.value;
+    setSearchedValue(value);
+    if (value.trim() !== '') {
+      const filteredColumns = columnsWithoutSticky.filter((column) => column.Header.toLowerCase().includes(value.trim().toLowerCase()));
+      setFilteredColumns(filteredColumns);
+    } else {
+      setFilteredColumns([]);
+    }
+  };
+
   return (
     <Formik
       initialValues={defaultValue ? defaultValue : initialValue}
@@ -295,10 +309,22 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
                   />
                 </div>
               </div>
+              <p className="mb-2 flex items-center gap-1 text-[12px] font-semibold text-gray-500">
+                <Info fontSize="small" />
+                Toggle and Drag & Drop to arrange
+              </p>
               <div className="shadow-md [border:1px_solid_var(--common-border-color)]">
                 <div className="p-3 px-[20px] [border-bottom:1px_solid_var(--common-border-color)]">
-                  <div className="flex justify-between gap-2">
-                    <p className="flex-grow text-sm font-normal">Toggle and Drag & Drop to arrange</p>
+                  <div className="flex items-center justify-between gap-2">
+                    <TextField
+                      label="Search..."
+                      className="max-w-[350px] flex-grow"
+                      value={serchedValue}
+                      onChange={handeSearch}
+                      type="search"
+                      size="small"
+                      variant="outlined"
+                    />
                     <span className="mr-[12px] flex-shrink-0">
                       <Switch size="small" checked={isAllChecked()} onChange={(e) => handleToggleAll(e, setFieldValue)} />
                     </span>
@@ -307,20 +333,13 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
                 <div
                   className={cn(
                     'overflow-auto ',
-                    !isMinimized || (isMobile && !isTablet) || isMobileView
-                      ? 'max-h-[calc(100vh-324px)] md:max-h-[calc(100vh-338px)]'
-                      : 'max-h-[350px]'
+                    !isMinimized || (isMobile && !isTablet) || isMobileView ? 'h-[calc(100vh-324px)] md:h-[calc(100vh-338px)]' : 'h-[350px]'
                   )}
                 >
-                  <DndContext
-                    onDragEnd={(e) => moveItem(e, setFieldValue)}
-                    modifiers={[restrictToVerticalAxis]}
-                    onDragStart={onDragStart}
-                    sensors={sensors}
-                  >
-                    <SortableContext items={sortedColumns.map((c) => c.accessor)}>
+                  {serchedValue.trim().length > 0 ? (
+                    <>
                       <ul className="list-none">
-                        {sortedColumns.map((column, index) => (
+                        {filteredColumns.map((column, index) => (
                           <RenderListItem
                             key={column.accessor}
                             checked={stateVisibleColumns[column.id]}
@@ -329,18 +348,42 @@ const EditCreateViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, c
                             handleToggle={handleToggle}
                             setFieldValue={setFieldValue}
                             values={values}
+                            isFilteredColumn={true}
                           />
                         ))}
                       </ul>
-                    </SortableContext>
-                    <DragOverlay>
-                      {activeItem && (
-                        <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
-                          <RenderListItem {...activeItem} />
-                        </span>
-                      )}
-                    </DragOverlay>
-                  </DndContext>
+                    </>
+                  ) : (
+                    <DndContext
+                      onDragEnd={(e) => moveItem(e, setFieldValue)}
+                      modifiers={[restrictToVerticalAxis]}
+                      onDragStart={onDragStart}
+                      sensors={sensors}
+                    >
+                      <SortableContext items={sortedColumns.map((c) => c.accessor)}>
+                        <ul className="list-none">
+                          {sortedColumns.map((column, index) => (
+                            <RenderListItem
+                              key={column.accessor}
+                              checked={stateVisibleColumns[column.id]}
+                              column={column}
+                              index={index}
+                              handleToggle={handleToggle}
+                              setFieldValue={setFieldValue}
+                              values={values}
+                            />
+                          ))}
+                        </ul>
+                      </SortableContext>
+                      <DragOverlay>
+                        {activeItem && (
+                          <span className="[&_.MuiListItemIcon-root]:!cursor-grabbing">
+                            <RenderListItem {...activeItem} />
+                          </span>
+                        )}
+                      </DragOverlay>
+                    </DndContext>
+                  )}
                 </div>
               </div>
             </div>
@@ -368,16 +411,18 @@ interface ItemProps {
   index: number;
   values: FormSchema;
   setFieldValue: any;
+  isFilteredColumn?: boolean;
 }
 
-const RenderListItem = ({ column, handleToggle, checked, index, values, setFieldValue }: ItemProps) => {
+const RenderListItem = ({ column, handleToggle, checked, index, values, setFieldValue, isFilteredColumn = false }: ItemProps) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: column.accessor,
     data: {
       type: 'Column',
       index,
       props: { column, handleToggle, checked, index, values, setFieldValue }
-    }
+    },
+    disabled: isFilteredColumn
   });
 
   const style = {
@@ -391,16 +436,25 @@ const RenderListItem = ({ column, handleToggle, checked, index, values, setField
     <li
       ref={setNodeRef}
       style={style}
-      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-        } list-none transition-colors`}
+      className={`${
+        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+      } list-none transition-colors`}
     >
       <div
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-          } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
+          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+        } `}
       >
-        <ListItemIcon className={` cursor-grab pl-2 ${isDragging ? ' cursor-grabbing' : ''}`} {...attributes} {...listeners}>
-          <DragHandle />
-        </ListItemIcon>
+        <HtmlTooltip title={isFilteredColumn ? 'Clear search filter to arrange' : ''}>
+          <ListItemIcon
+            aria-disabled={isFilteredColumn}
+            className={` cursor-grab pl-2 ${isDragging ? ' cursor-grabbing' : ''}`}
+            {...attributes}
+            {...listeners}
+          >
+            <DragHandle color={isFilteredColumn ? 'disabled' : 'primary'} />
+          </ListItemIcon>
+        </HtmlTooltip>
         <ListItemText id={column.accessor} primary={column.header || startCase(column?.accessor)} className=" select-none" />
         <Switch
           size="small"
