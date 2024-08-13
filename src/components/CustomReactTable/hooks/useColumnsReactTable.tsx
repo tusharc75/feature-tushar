@@ -523,6 +523,15 @@ export default function useColumns() {
             </div>
           )
         });
+      } else if (field.type === 'counter') {
+        column.push({
+          ...commonFieldData,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => (
+            <NoDataCell />
+          )
+        });
       } else if (field.type === 'percent') {
         column.push({
           ...commonFieldData,
