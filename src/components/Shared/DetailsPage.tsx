@@ -1,6 +1,6 @@
 import { Avatar, Box, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
 import { Image, InfoOutlined, MoreHoriz } from '@material-ui/icons';
-import { camelCase, kebabCase } from 'lodash';
+import { camelCase, isArray, kebabCase } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
 import { Link } from 'react-router-dom';
@@ -527,7 +527,7 @@ const Details = (props: DetailProps) => {
                             </Box>
                           ) : field.fieldData.type === 'groupSignature' ? (
                             <div className="grid grid-cols-1 md:grid-cols-2">
-                              {initialVals[field.fieldData.fieldName]?.map((ele, index) => (
+                              {isArray(initialVals[field.fieldData.fieldName]) && initialVals[field.fieldData.fieldName]?.map((ele, index) => (
                                 <div
                                   className={cn(
                                     `flex items-center justify-between p-[0px_10px]`,
