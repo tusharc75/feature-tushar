@@ -58,7 +58,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [addedField, setAddedField] = useState([]);
   const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
-  const [openRowNumberDialog, setOpenRowNumberDialog] = useState(false)
+  const [openRowNumberDialog, setOpenRowNumberDialog] = useState(false);
 
   useEffect(() => {
     axiosInstance()
@@ -150,74 +150,73 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
 
   const handleImport = (e) => {
     let files = e.target.files[0];
-    setFiles(files)
-    setOpenRowNumberDialog(true)
-  }
+    setFiles(files);
+    setOpenRowNumberDialog(true);
+  };
 
-  const handleFileImport = (val) => {
-    setOpenRowNumberDialog(false)
+  const handleFileImport = (val, sheetName) => {
+    setOpenRowNumberDialog(false);
     if (val?.fromRow > 0 && val?.toRow > 0) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = e.target.result;
         let readedData = read(data, { type: 'array' });
-        const wsname = readedData.SheetNames[1];
-        const ws = readedData.Sheets[wsname];
+        const ws = readedData.Sheets[sheetName || readedData.SheetNames[1]];
         const jsonData = utils.sheet_to_json(ws, { header: 1 });
         const headers: any = jsonData[val?.fromRow - 1];
         const units: any = jsonData[val?.fromRow];
-        const newHeader: any = []
+        const newHeader: any = [];
         let j;
         headers.forEach((h, i) => {
           let name = units[i] ? h + '_' + units[i] : h;
-          let index = i
+          let index = i;
 
-          const diff = i - j
+          const diff = i - j;
           if (diff != 1) {
             for (let k = j + 1; k < i; k++) {
               if (units[k]) {
                 newHeader.push({
                   name: headers[j] + '_' + units[k],
                   index: k
-                })
+                });
               }
             }
           }
-          j = index
+          j = index;
 
           newHeader.push({
             name: name,
             index: index
-          })
+          });
         });
 
-        const newJsonData: any = []
+        const newJsonData: any = [];
 
-        for (let i = (val?.fromRow - 1) + 2; i <= (val?.toRow - 1); i++) {
-          const obj: any = {}
-          newHeader?.forEach(ele => {
-            obj[ele?.name] = jsonData[i][ele?.index]
+        for (let i = val?.fromRow - 1 + 2; i <= val?.toRow - 1; i++) {
+          const obj: any = {};
+          newHeader?.forEach((ele) => {
+            obj[ele?.name] = jsonData[i][ele?.index];
           });
-          newJsonData.push(obj)
+          newJsonData.push(obj);
         }
 
         const worksheet = utils.json_to_sheet(newJsonData);
 
         const workbook = utils.book_new();
 
-        utils.book_append_sheet(workbook, worksheet, "Sheet1");
+        utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
         const excelBuffer = write(workbook, { bookType: 'xlsx', type: 'array' });
         const blob = new Blob([excelBuffer], { type: fileType });
 
-        handleFileImport1(blob)
+        handleFileImport1(blob);
       };
       reader.readAsArrayBuffer(files);
     } else {
-      handleFileImport1(files)
+      handleFileImport1(files);
     }
-  }
+  };
 
   const handleFileImport1 = (file) => {
     setCustomImportHeaader([]);
@@ -335,27 +334,29 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
 
         jsonData[0] = newHeaders;
 
-        const indexes = []
+        const indexes = [];
         // const updatedData = jsonData?.filter((row) => !isEmpty(row));
-        const updatedData = jsonData?.filter((row) => !isEmpty(row))?.map((_r: any, i) => {
-          const _row: any = []
-          if (i === 0) {
-            _r?.forEach((ele, j) => {
-              if (templateImportHeader?.some(t => t?.value === ele)) {
-                _row.push(ele)
-              } else {
-                indexes.push(j)
-              }
-            });
-          } else {
-            _r?.forEach((ele, j) => {
-              if (!indexes?.includes(j)) {
-                _row.push(ele)
-              }
-            });
-          }
-          return _row;
-        });
+        const updatedData = jsonData
+          ?.filter((row) => !isEmpty(row))
+          ?.map((_r: any, i) => {
+            const _row: any = [];
+            if (i === 0) {
+              _r?.forEach((ele, j) => {
+                if (templateImportHeader?.some((t) => t?.value === ele)) {
+                  _row.push(ele);
+                } else {
+                  indexes.push(j);
+                }
+              });
+            } else {
+              _r?.forEach((ele, j) => {
+                if (!indexes?.includes(j)) {
+                  _row.push(ele);
+                }
+              });
+            }
+            return _row;
+          });
 
         const newWorksheet = utils.json_to_sheet(updatedData, { skipHeader: true });
 
@@ -423,9 +424,9 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   };
 
   const handleDeleteCustomColumns = (obj) => {
-    setAddedField([...addedField?.filter(f => f?.fieldLabel?.toUpperCase() != obj?.label)])
-    setTemplateImportHeaader([...templateImportHeader?.filter(t => t?.value != obj?.value)]);
-  }
+    setAddedField([...addedField?.filter((f) => f?.fieldLabel?.toUpperCase() != obj?.label)]);
+    setTemplateImportHeaader([...templateImportHeader?.filter((t) => t?.value != obj?.value)]);
+  };
 
   return (
     <>
@@ -593,20 +594,17 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   <TableBody>
                     {templateImportHeader?.map((_key) => {
                       const selectedCustomInputHeader = keyValue.find((kv) => kv.templateImportHeader === _key?.value)?.customImportHeader;
-                      const field = fields?.find(f => f?.fieldName === 'productName')
+                      const field = fields?.find((f) => f?.fieldName === 'productName');
                       return (
                         <TableRow key={_key?.value}>
                           <TableCell component="th" scope="row">
                             {' '}
-                            {_key?.label}{' '}
-                            {_key?.value === field?.fieldLabel?.toUpperCase() && (
-                              <span style={{ color: "#dc3545" }}>*</span>
-                            )}
-                            {addedField?.map(f => f?.fieldLabel?.toUpperCase())?.includes(_key?.label) && (
+                            {_key?.label} {_key?.value === field?.fieldLabel?.toUpperCase() && <span style={{ color: '#dc3545' }}>*</span>}
+                            {addedField?.map((f) => f?.fieldLabel?.toUpperCase())?.includes(_key?.label) && (
                               <IconButton
                                 size="small"
                                 onClick={() => {
-                                  handleDeleteCustomColumns(_key)
+                                  handleDeleteCustomColumns(_key);
                                 }}
                               >
                                 <Delete fontSize="small" color="error" />
@@ -627,7 +625,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                               //   }
                               //   return null;
                               // })}
-                              value={customImportHeader?.filter(h => h?.value === selectedCustomInputHeader)?.length > 0 ? customImportHeader?.filter(h => h?.value === selectedCustomInputHeader)[0] : ''}
+                              value={
+                                customImportHeader?.filter((h) => h?.value === selectedCustomInputHeader)?.length > 0
+                                  ? customImportHeader?.filter((h) => h?.value === selectedCustomInputHeader)[0]
+                                  : ''
+                              }
                               onChange={(event, newValue) => {
                                 const tempKeyValues = keyValue?.filter((e) => e.templateImportHeader !== _key?.value);
                                 setKeyValue([...tempKeyValues, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
@@ -638,8 +640,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                  error={_key?.value === field?.fieldLabel?.toUpperCase() && !keyValue?.some(k => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)}
-                                  helperText={(_key?.value === field?.fieldLabel?.toUpperCase() && !keyValue?.some(k => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)) && 'Required field'}
+                                  error={
+                                    _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                    !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                  }
+                                  helperText={
+                                    _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                    !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                    'Required field'
+                                  }
                                 />
                               )}
                             />
@@ -660,7 +669,17 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               onClick={handleCustomImport}
               variant="contained"
               color="primary"
-              disabled={loading || !values?.productCategory || !values?.productTemplate || !values?.priceTemplate || !keyValue?.some(k => k?.templateImportHeader === fields?.find(f => f?.fieldName === 'productName')?.fieldLabel?.toUpperCase() && k?.customImportHeader)}
+              disabled={
+                loading ||
+                !values?.productCategory ||
+                !values?.productTemplate ||
+                !values?.priceTemplate ||
+                !keyValue?.some(
+                  (k) =>
+                    k?.templateImportHeader === fields?.find((f) => f?.fieldName === 'productName')?.fieldLabel?.toUpperCase() &&
+                    k?.customImportHeader
+                )
+              }
               loading={loading}
             >
               Save
@@ -715,14 +734,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               section={uniqBy(fields, 'sectionName')?.map((_section: any) => _section?.sectionName)}
             />
           )}
-          {openRowNumberDialog && (
+          {openRowNumberDialog && files && (
             <RowNumberDialog
               handleClose={() => {
-                setOpenRowNumberDialog(false)
+                setOpenRowNumberDialog(false);
               }}
-              onSuccess={(data) => {
-                handleFileImport(data)
+              onSuccess={(data, sheetName) => {
+                handleFileImport(data, sheetName);
               }}
+              file={files}
             />
           )}
         </>
