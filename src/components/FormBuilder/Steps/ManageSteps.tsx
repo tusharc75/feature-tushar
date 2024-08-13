@@ -281,7 +281,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     <Box>
                       <Autocomplete
                         id="linkResourceField"
-                        options={resourceFieldOption}
+                        options={resourceFieldOption?.filter((e) => e?.lookup)}
                         disabled={resourceFieldsLoading}
                         getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
                         getOptionSelected={(option: any, val) => option?.fieldName === val}
