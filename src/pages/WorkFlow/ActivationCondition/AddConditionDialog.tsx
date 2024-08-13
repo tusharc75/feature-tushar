@@ -97,7 +97,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
     }
     return errors;
   };
-console.log(selectedField)
+
   return (
     <Dialog
       maxWidth="sm"
@@ -181,7 +181,6 @@ console.log(selectedField)
                           }
                           onChange={(e, val) => {
                             if (selectedField?.type === 'checkBox') {
-                              console.log(val)
                               setFieldValue('fieldValue', val && val?.optionValue ? val?.optionValue : '');
                             } else {
                               setFieldValue('fieldValue', val?.map((v) => v?.optionValue)?.join(',') || '');
