@@ -90,7 +90,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-    if(values?.linkWithResource || values?.linkWithMaterial){
+    if (values?.linkWithResource || values?.linkWithMaterial) {
       values.fields = []
     }
     if (data?._id) {
@@ -144,12 +144,12 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
     if (values.linkWithMaterial && !values?.linkedMaterial?.length) {
       errors['linkedMaterial'] = 'please select Material';
     }
-    
-    if(!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length){
+
+    if (!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length) {
       errors['fields'] = 'please select Fields';
-      toastConfig.setToastConfig({open: true, type: 'error', message: 'please select Fields'});
+      //toastConfig.setToastConfig({open: true, type: 'error', message: 'please select Fields'});
     }
- 
+
     return errors;
   };
 
@@ -389,18 +389,18 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                 </Box>
                 {!values['linkWithResource'] && !values['linkWithMaterial'] && (
                   <Box className="mt-2">
-                  <Button
-                   variant="contained"
-                   color="primary"
-                   size="small"
-                   onClick={() => {
-                    setOpenField(true);
-                   }}
-                  >
-                  Add Fields
-                  </Button>
-                </Box>
-              )}
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        setOpenField(true);
+                      }}
+                    >
+                      Add Fields
+                    </Button>
+                  </Box>
+                )}
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -444,19 +444,19 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
               />
             ) : null}
 
-          {openField && (
-          <ConfigureField
-            resourceId={resourceId}
-            step={values}
-            handleClose={() => {
-              setOpenField(false);
-            }}
-            handleSucess={(data) => {
-              setFieldValue('fields',data)
-              setOpenField(false);
-            }}
-          />
-        )}
+            {openField && (
+              <ConfigureField
+                resourceId={resourceId}
+                step={values}
+                handleClose={() => {
+                  setOpenField(false);
+                }}
+                handleSucess={(data) => {
+                  setFieldValue('fields', data)
+                  setOpenField(false);
+                }}
+              />
+            )}
           </>
         )}
       </Formik>
