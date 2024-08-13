@@ -526,7 +526,7 @@ const Details = (props: DetailProps) => {
                                 <div
                                   className={cn(
                                     `flex items-center justify-between p-[0px_10px]`,
-                                    initialVals[field.fieldData.fieldName].length === index - 1
+                                    initialVals[field.fieldData.fieldName]?.length === index - 1
                                       ? ''
                                       : '[border-top:1px_solid_var(--common-border-color)]',
                                     index % 2 === 0 ? 'md:[border-right:1px_solid_var(--common-border-color)]' : ''

@@ -584,8 +584,8 @@ const LoadingTicket = ({
           style={{
             backgroundColor:
               row?.original?.warehouseId &&
-              row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
-              !row?.original?.loadingTicketId
+                row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
+                !row?.original?.loadingTicketId
                 ? COLOUR_MASTER.transferAsset.background
                 : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
                   ? COLOUR_MASTER.lostAssets.background
@@ -640,26 +640,26 @@ const LoadingTicket = ({
           </IconButton>
           {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
             (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-            <Box>
-              <HtmlTooltip title={`Serial Numbers`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setShowInfo({
-                      open: true,
-                      data: {
-                        productName: row?.original?.productName,
-                        data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
-                      },
-                      type: `Serial Numbers`
-                    });
-                  }}
-                >
-                  <InfoIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            </Box>
-          )}
+              <Box>
+                <HtmlTooltip title={`Serial Numbers`}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setShowInfo({
+                        open: true,
+                        data: {
+                          productName: row?.original?.productName,
+                          data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                        },
+                        type: `Serial Numbers`
+                      });
+                    }}
+                  >
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            )}
         </div>
       )
     },
@@ -703,30 +703,30 @@ const LoadingTicket = ({
     },
     ...(findHeader(columnHeader?.assetFields, 'serialNumber')
       ? [
-          {
-            accessor: 'serialNumber',
-            Header: findHeader(columnHeader?.assetFields, 'serialNumber'),
-            Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-          }
-        ]
+        {
+          accessor: 'serialNumber',
+          Header: findHeader(columnHeader?.assetFields, 'serialNumber'),
+          Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+        }
+      ]
       : []),
     ...(findHeader(columnHeader?.assetFields, 'position')
       ? [
-          {
-            accessor: 'position',
-            Header: findHeader(columnHeader?.assetFields, 'position'),
-            Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
-          }
-        ]
+        {
+          accessor: 'position',
+          Header: findHeader(columnHeader?.assetFields, 'position'),
+          Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+        }
+      ]
       : []),
     ...(findHeader(columnHeader?.assetFields, 'jobCount')
       ? [
-          {
-            accessor: 'jobCount',
-            Header: findHeader(columnHeader?.assetFields, 'jobCount'),
-            Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
-          }
-        ]
+        {
+          accessor: 'jobCount',
+          Header: findHeader(columnHeader?.assetFields, 'jobCount'),
+          Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
+        }
+      ]
       : []),
     {
       accessor: 'productName',
@@ -785,29 +785,29 @@ const LoadingTicket = ({
     },
     ...(findHeader(columnHeader?.assetFields, 'wellNumber')
       ? [
-          {
-            accessor: 'wellNumber',
-            Header: findHeader(columnHeader?.assetFields, 'wellNumber'),
-            accessorFn: (original) => {
-              return isArray(original?.wellNumber)
-                ? original?.wellNumber[0]?.optionLabel
-                : isObject(original?.wellNumber)
-                  ? original?.wellNumber?.optionLabel
-                  : original?.wellNumber;
-            },
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'wellNumber',
-                  lookupResource: sidebarResource.wellNumber
-                }}
-                original={row?.original}
-              />
-            )
-          }
-        ]
+        {
+          accessor: 'wellNumber',
+          Header: findHeader(columnHeader?.assetFields, 'wellNumber'),
+          accessorFn: (original) => {
+            return isArray(original?.wellNumber)
+              ? original?.wellNumber[0]?.optionLabel
+              : isObject(original?.wellNumber)
+                ? original?.wellNumber?.optionLabel
+                : original?.wellNumber;
+          },
+          Cell: ({ row }) => (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'wellNumber',
+                lookupResource: sidebarResource.wellNumber
+              }}
+              original={row?.original}
+            />
+          )
+        }
+      ]
       : [])
   ];
 
@@ -830,10 +830,10 @@ const LoadingTicket = ({
     canDrag: false,
     Cell: ({ row }) =>
       user?.user?.brandPolicy?.assetDeliveredStatus &&
-      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-        row?.original?.rentalAssetStatus
-      ) &&
-      row?.original?.type === 'Asset' ? (
+        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+          row?.original?.rentalAssetStatus
+        ) &&
+        row?.original?.type === 'Asset' ? (
         <HtmlTooltip title={`Change ${routes.serializedAsset.title} Last Status Date`}>
           <IconButton
             size="small"
@@ -1248,7 +1248,7 @@ const LoadingTicket = ({
         {(allowedToEdit || isProcessor) && (
           <>
             {selectedRecords.length &&
-            selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
               selectedRecords?.length ? (
               <HtmlTooltip title="Remove Assets From Loading Ticket(s)">
                 <Button
@@ -1300,20 +1300,20 @@ const LoadingTicket = ({
     });
     setReplaceLoading(true)
     axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/change-asset-data`, assetsAdd)
-    .then(({ data }) => {
-      fetchRecords();
-      setReplaceLoading(false)
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+      .then(({ data }) => {
+        fetchRecords();
+        setReplaceLoading(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setOpenAssetDataDialog(false)
+      })
+      .catch((error) => {
+        setReplaceLoading(false)
+        toastConfig.setToastConfig(error);
       });
-      setOpenAssetDataDialog(false)
-    })
-    .catch((error) => {
-      setReplaceLoading(false)
-      toastConfig.setToastConfig(error);
-    });
   };
 
   return (
@@ -1892,28 +1892,6 @@ const ActionButtonMenuItems = ({
           Replace Asset
         </MenuItem>
       )}
-      {assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) &&
-        selectedRecords?.every(
-          (r) =>
-            r?.type === 'Asset' &&
-            [
-              RENTAL_INTERNAL_ASSET_STATUS.reserved,
-              RENTAL_INTERNAL_ASSET_STATUS.inUse,
-              RENTAL_INTERNAL_ASSET_STATUS.standBy,
-              RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
-            ]?.includes(r?.rentalAssetStatus)
-        ) && (
-          <HtmlTooltip title={'Change Asset Data'}>
-            <MenuItem
-              onClick={() => {
-                setOpenAssetDataDialog(true);
-              }}
-              id={'change-asset-data-menu-item'}
-            >
-              Change Asset Data
-            </MenuItem>
-          </HtmlTooltip>
-        )}
       {!hideDeliveryTicketDelivered && (
         <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
           <MenuItem
@@ -1942,6 +1920,24 @@ const ActionButtonMenuItems = ({
           Cancel Loading Ticket(s)
         </MenuItem>
       </HtmlTooltip>
+      {assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) &&
+        selectedRecords?.length > 0 && selectedRecords?.every((r) => r?.type === 'Asset' &&
+          [
+            RENTAL_INTERNAL_ASSET_STATUS.reserved,
+            RENTAL_INTERNAL_ASSET_STATUS.inUse,
+            RENTAL_INTERNAL_ASSET_STATUS.standBy,
+            RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+          ]?.includes(r?.rentalAssetStatus)
+        ) && (
+          <MenuItem
+            onClick={() => {
+              setOpenAssetDataDialog(true);
+            }}
+            id={'change-asset-data-menu-item'}
+          >
+            Change Assets Data
+          </MenuItem>
+        )}
     </>
   );
 };
