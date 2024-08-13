@@ -68,6 +68,7 @@ import LeadAccordionInUserDetailPage from './LeadAccordionInUserDetailPage';
 import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSession from './UserSession';
+
 import { isMobile, isTablet } from "react-device-detect";
 
 const useStyles = makeStyles((theme) => ({
