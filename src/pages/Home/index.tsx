@@ -20,7 +20,8 @@ import { DynamicIcon } from 'src/assets/IconGenerator';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
-  link: 'https://docs.equip-t.com/auth/login'
+  // link: 'https://docs.equip-t.com/auth/login',
+   link: 'https://docs.equip-t.com'
 };
 
 function Dashboard() {
