@@ -127,7 +127,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
   return (
     <>
       {showAssignEntityDialog && (
-        <Dialog fullWidth maxWidth="sm" open={showAssignEntityDialog} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="sm" open={showAssignEntityDialog} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
             entitiesDialogOpen={showAssignEntityDialog}
             handleCloseDialog={handleCloseDialog}
