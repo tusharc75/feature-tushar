@@ -62,7 +62,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       <Formik initialValues={initialValues} onSubmit={(val) => { onSubmit(val) }} enableReinitialize={true} validate={validate}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form >
-            <CustomDialogHeader title={`Set Actual Start/End Date`} onClose={onClose} />
+            <CustomDialogHeader title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
