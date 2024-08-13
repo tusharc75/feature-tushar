@@ -232,6 +232,7 @@ const EmployeeMasterDetail = () => {
       {showAssignEntityDialog && (
         <Dialog
           fullWidth
+          fullScreen={isMobile || isTablet}
           maxWidth="xs"
           open={showAssignEntityDialog}
           onClose={() => {

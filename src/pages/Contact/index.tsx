@@ -28,6 +28,7 @@ import WarhouseList from '../Account/Warehouse/WarhouseList';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
+import { isMobile, isTablet } from "react-device-detect";
 
 const types = [
   {
@@ -547,6 +548,7 @@ export default function Contact(props) {
           {showAssignEntityDialog && (
             <Dialog
               fullWidth
+              fullScreen={isMobile || isTablet}
               maxWidth="xs"
               open={showAssignEntityDialog}
               onClose={() => setShowAssignEntityDialog(false)}
