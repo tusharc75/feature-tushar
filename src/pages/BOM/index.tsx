@@ -130,8 +130,8 @@ const BOMTable = () => {
       .then(({ data: { data } }) => {
         data = data.map((o: any) => {
           let finalObject = {
-            ...o,
-            ...o?.childProductDetail
+            ...o?.childProductDetail,
+            ...o
           };
           return prepareDataForGrid(finalObject);
         });
