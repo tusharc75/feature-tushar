@@ -258,6 +258,7 @@ import Integration from 'src/pages/Integration';
 import EquiptAi from 'src/pages/EquiptAi';
 import WorkSpace from 'src/pages/WorkSpace';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
+import Oauth from './pages/Auth/Oauth';
 import WorkFlow from 'src/pages/WorkFlow';
 import CreateWorkFlow from 'src/pages/WorkFlow/CreateWorkFlow';
 
@@ -408,6 +409,11 @@ function App() {
               // exact
               path="/login"
               render={({ location }) => conditionalRedirect(Login, location)}
+            />
+            <Route
+              // exact
+              path="/auth/login"
+              render={({ location }) => conditionalRedirect(Oauth, location)}
             />
             <Route
               // exact
