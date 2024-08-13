@@ -89,6 +89,10 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
   }, [data]);
 
   const handleSubmit = (values) => {
+    if (!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length) {
+      toastConfig.setToastConfig({ open: true, type: 'error', message: 'Please add fields' });
+      return
+    }
     setSubmitting(true);
     if (values?.linkWithResource || values?.linkWithMaterial) {
       values.fields = []
@@ -136,20 +140,12 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
     if (values.linkWithResource && !values?.linkResourceName) {
       errors['linkResourceName'] = 'please select Resource';
     }
-
     if (values.linkWithResource && !values?.linkResourceField) {
       errors['linkResourceField'] = 'please select Field';
     }
-
     if (values.linkWithMaterial && !values?.linkedMaterial?.length) {
       errors['linkedMaterial'] = 'please select Material';
     }
-
-    if (!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length) {
-      errors['fields'] = 'please select Fields';
-      //toastConfig.setToastConfig({open: true, type: 'error', message: 'please select Fields'});
-    }
-
     return errors;
   };
 
