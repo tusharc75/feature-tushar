@@ -310,7 +310,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       true
     );
     setColumn([...columns, ...extraColumns]);
-  }, []);
+  }, [fields]);
 
   useEffect(() => {
     if (id) {
