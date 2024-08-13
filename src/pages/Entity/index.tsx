@@ -21,6 +21,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageEntity from './ManageEntity';
 import axios, { CancelTokenSource } from 'axios';
+import { isMobile, isTablet } from "react-device-detect";
 
 const Entity: FC = () => {
   const renderedFrom = camelCase(routes?.entity.title);
@@ -337,7 +338,7 @@ const Entity: FC = () => {
       )}
 
       {usersDialogOpen && !usersDialogLoding && (
-        <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
             entitiesDialogOpen={usersDialogOpen}
             handleCloseDialog={handleCloseDialog}

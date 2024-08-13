@@ -821,6 +821,7 @@ const ContactDetailsPage = (props) => {
       {showEntityRoleDialog && (
         <Dialog
           fullWidth
+          fullScreen={isMobile || isTablet}
           maxWidth="xs"
           open={showEntityRoleDialog}
           onClose={() => setShowEntityRoleDialog(false)}

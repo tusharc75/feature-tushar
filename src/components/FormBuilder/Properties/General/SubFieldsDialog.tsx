@@ -8,6 +8,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { uniq, map } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { FormBuilder } from '../..';
+import { checkFormulaLoop } from 'src/constants/formulaUtility';
 
 const SubFieldsDialog = ({ handleClose, fields = [], setFieldValue }) => {
   const {
@@ -62,25 +63,17 @@ const SubFieldsDialog = ({ handleClose, fields = [], setFieldValue }) => {
         data.push(_field_data);
       });
     });
-    const errorFields = [];
-    const fieldNameMap: any = [];
-    data?.forEach((e) => {
-      if (fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)) {
-        errorFields.push(fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)?.fieldLabel);
-      } else {
-        fieldNameMap.push({ fieldName: e.fieldName, fieldLabel: e.fieldLabel });
-      }
-    });
-    if (errorFields?.length) {
+    const result = checkFormulaLoop(data);
+    if (result.error) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: `Field ${errorFields?.toString()} duplicate`
+        message: result.message
       });
       return false;
     }
     setFieldValue('subFields', data);
-	handleClose()
+    handleClose()
   };
 
   return (
