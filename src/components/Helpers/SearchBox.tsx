@@ -50,7 +50,7 @@ function SearchBox({ onChange, value, size, width, placeholder, className, conta
           )}
           {...otherProps}
         />
-        {value && (
+        {inputvalue && (
           <span
             className={cn('absolute right-[5px] cursor-pointer [top:50%] [transform:translateY(-50%)]', isMobile || isTablet ? 'block' : 'hidden')}
             onClick={(e) => {
