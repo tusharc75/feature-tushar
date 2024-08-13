@@ -10,6 +10,7 @@ import { FormBuilder } from '../../../components/FormBuilder';
 import { map, uniq } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import routes from 'src/components/Helpers/Routes';
+import { checkFormulaLoop } from 'src/constants/formulaUtility';
 
 const ConfigureField = ({ id, step = null, handleClose, handleSucess }) => {
 
@@ -60,24 +61,15 @@ const ConfigureField = ({ id, step = null, handleClose, handleSucess }) => {
         data.push(_field_data);
       });
     });
-    const errorFields = [];
-    const fieldNameMap: any = [];
-    data?.forEach((e) => {
-      if (fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)) {
-        errorFields.push(fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)?.fieldLabel);
-      } else {
-        fieldNameMap.push({ fieldName: e.fieldName, fieldLabel: e.fieldLabel });
-      }
-    });
-    if (errorFields?.length) {
+    const result = checkFormulaLoop(data);
+    if (result.error) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: `Field ${errorFields?.toString()} duplicate`
+        message: result.message
       });
       return false;
     }
-
     if (step?._id) {
       setSubmitting(true);
       axiosInstance()

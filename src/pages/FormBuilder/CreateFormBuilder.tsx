@@ -210,6 +210,7 @@ const CreateFormBuilder = () => {
         }
       }
     }
+
     const result = checkFormulaLoop(data);
     if (result.error) {
       toastConfig.setToastConfig({
