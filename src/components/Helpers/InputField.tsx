@@ -175,6 +175,9 @@ const InputField = (props) => {
           onClose={() => {
             setOpen({ open: false, section: null });
           }}
+          onSuccess={() => {
+            setOpen({ open: false, section: null });
+          }}
           section={open?.section}
           resource={resource}
           referenceId={referenceId}

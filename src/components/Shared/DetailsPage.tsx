@@ -108,7 +108,6 @@ const Details = (props: DetailProps) => {
   const [dialogData, setDialogData] = useState<any>(null);
   const [open, setOpen] = useState({ open: false, section: null });
   const [taskData, setTaskdata] = useState(null);
-  const [imageViewerModal, setImageViewerModal] = useState<{ open: boolean; images: string[] }>({ open: false, images: [] });
 
   useEffect(() => {
     sortArray();
@@ -400,13 +399,13 @@ const Details = (props: DetailProps) => {
   useEffect(() => {
     if (resource && referenceId) {
       const cancelTokenSource = axios.CancelToken.source();
-      fetchtaskData(cancelTokenSource);
+      fetchTaskData(cancelTokenSource);
       return () => cancelTokenSource.cancel();
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }
   }, [resource, referenceId]);
 
-  const fetchtaskData = async (cancelTokenSource?: CancelTokenSource) => {
+  const fetchTaskData = async (cancelTokenSource?: CancelTokenSource) => {
     axiosInstance()
       .get(`/task?relatedTo=${JSON.stringify([{ type: resource, referenceId: referenceId, access: true }])}`, {
         cancelToken: cancelTokenSource?.token
@@ -421,6 +420,12 @@ const Details = (props: DetailProps) => {
       if (formsData.length === 0) return [];
       const newFormData = [...formsData];
       if (!taskData || taskData?.length === 0) return newFormData;
+      formsData?.forEach((ele) => {
+        ele.followUpData = []
+        ele?.sectionFields?.forEach((e) => {
+          e.followUpData = []
+        })
+      })
       taskData?.forEach((task, i) => {
         const taskName = task.formRelatedTo?.fields?.[0]?.fieldLabel;
         const sectionIndex = newFormData.findIndex((section) => section.name === task.formRelatedTo.section);
@@ -569,7 +574,6 @@ const Details = (props: DetailProps) => {
                           )}
                         </div>
                       </div>
-                      {/* {field.fieldData.type !== 'imageUpload' && field.fieldData.type !== 'fileUpload'} */}
                     </div>
                   ))}
                 </div>
@@ -584,6 +588,10 @@ const Details = (props: DetailProps) => {
       {open?.open && (
         <FollowUpsDialog
           onClose={() => {
+            setOpen({ open: false, section: null });
+          }}
+          onSuccess={() => {
+            fetchTaskData()
             setOpen({ open: false, section: null });
           }}
           section={open?.section}
