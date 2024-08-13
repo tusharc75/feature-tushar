@@ -635,13 +635,14 @@ const AddSerializedAsset = ({
           }}
           referenceId={referenceData._id}
           referenceType={referenceType}
+          assets={selectedRecords?.map((e) => e._id)}
           referenceData={{
             transferFromPlant: selectedRecords[0]?.warehouseId,
             transfertoPlant: referenceData?.warehouse,
             wellName: referenceData?.wellName,
             wellNumber: referenceData?.wellNumber,
             afeNumber: referenceData?.afeNumber,
-            transferType: 'Internal'
+            transferType: 'Internal',
           }}
         />
       ) : null}
