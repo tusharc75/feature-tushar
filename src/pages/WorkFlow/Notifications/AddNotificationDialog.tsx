@@ -126,7 +126,11 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
               <Grid>
                 <ToggleButtonGroup size="small" value={values?.type} exclusive onChange={(e, newFilter)=>{
                     setFieldValue('type', newFilter);
-                    setFieldValue('ids', []);
+                    if(data && newFilter === data?.type){
+                      setFieldValue('ids', data?.ids?.map((e)=> e.optionValue) ?? []);
+                    }else{
+                      setFieldValue('ids', []);
+                    }
                 }}>
                   {NotifSendType.map((k, index) => {
                     return (

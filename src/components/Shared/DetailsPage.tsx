@@ -640,7 +640,6 @@ export type RelatedTo = {
 };
 
 const RenderFollowUP = ({ data, columnSize }: { data: FollowUP[]; columnSize: 6 | 12 }) => {
-  console.log(columnSize === 12);
   return (
     <div className="my-2">
       <p className="mx-[10px] pb-1 text-[12px] font-semibold text-gray-500">FOLLOW-UPS</p>
