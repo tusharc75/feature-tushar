@@ -1,6 +1,5 @@
 import { Box, Button, Dialog, TextField } from "@material-ui/core";
 import { Autocomplete } from "@material-ui/lab";
-import _, { camelCase, uniqBy } from "lodash";
 import { useContext, useEffect, useState } from "react";
 import { isMobile, isTablet } from "react-device-detect";
 import { CustomToastContext } from "src/StateProvider/CustomToastContext/CustomToastContext";
@@ -8,282 +7,141 @@ import axiosInstance from "src/axios/axiosInstance";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogFooter from "src/components/CustomDialog/CustomDialogFooter";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
-import CustomReactTable, { useTableReducer } from "src/components/CustomReactTable";
 import CustomButton from "src/components/Helpers/CustomButton";
-import NoDataCell from "src/components/Helpers/NoDataCell";
-import routes from "src/components/Helpers/Routes";
-import { ASSET_STATUS, CustomDialogTransition, MATERIAL_TYPE, rentalManagement, sidebarResource } from "src/constants/helpers";
+import { ASSET_STATUS, CustomDialogTransition, MATERIAL_TYPE, rentalManagement } from "src/constants/helpers";
 import AssetDetailsChangeDialog from "src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog";
 
-const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementData, assets, assetPolicyData }) =>{
+const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementData, assets, material, assetPolicyData }) => {
+
 	const toastConfig = useContext(CustomToastContext);
 	const [packageOptions, setPackageOptions] = useState([]);
-	const [selectedPackages, setSelectedPackages] = useState(null);
-	const [submitting, setSubmitting] = useState(false);
-	useEffect(()=>{
-    fetchData()
-	},[])
+	const [selectedPackage, setSelectedPackage] = useState(null);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
 
-const fetchData = async ()=>{
-	const packageIds = rentalManagementData?.material.filter((ele)=> ele.type===MATERIAL_TYPE.package && !ele.parentId)?.map((e)=> e.materialId);
-  const query: any = [
-		{
-			resource: sidebarResource.packages,
-			fieldName: 'packages',
-			_id: packageIds,
-			dataList: false
-		}
-	];
-	const response = await axiosInstance().get(`/sa-formbuilder/resource/fieldLabel?data=${JSON.stringify(query)}`);
-	setPackageOptions(response?.data?.data['packages']);
-}
+	useEffect(() => {
+		fetchData()
+	}, [])
 
-	const handleSubmit = ()=>{
-     setSubmitting(true);
-		 const data = []
-		 	assets?.forEach((ele) => {
-			const {_id, ...assetData} = ele
-      const obj = {asset: _id, fromId: ele.uniqueId,assetData: assetData }
-      data.push(obj);
-		})
-	
-		 	axiosInstance().post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/move-asset-inter-package-product-2`, {assets: data, packageId: selectedPackages.optionValue}).then(({ data }) => {
-			toastConfig.setToastConfig({
-				open: true,
-				type: 'success',
-				message: data.message
-			});
-			setSubmitting(false)
-			onSuccess()
-		}).catch((error) => {
-			setSubmitting(false)
-			toastConfig.setToastConfig(error);
-		})
-	}
-	return (
-		<Dialog
-		maxWidth="sm"
-		fullScreen={isMobile || isTablet}
-		TransitionComponent={CustomDialogTransition}
-		aria-labelledby="customized-dialog-title"
-		open={true}
-		fullWidth
-		onClose={(e, reason) => {
-			if (reason !== 'backdropClick') {
-				onClose();
+	const fetchData = async () => {
+		const data = material?.filter((e) => e.type === MATERIAL_TYPE.package)?.map((e) => {
+			return {
+				optionLabel: e?.packageDetail?.packageName,
+				optionValue: e?._id,
 			}
-		}}
-	>
-		<CustomDialogHeader onClose={onClose} title={`Transfer to Another Package`} showRequiredLabel={false} showManimizeMaximize={false} />
-		<CustomDialogContent>
-			<Box m={1}>
-				<Autocomplete
-					size="small"
-					options={packageOptions}
-					value={selectedPackages}
-					onChange={(_, val) => {
-						setSelectedPackages(val);
-					}}
-					getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-					getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-					renderInput={(props) => <TextField {...props} placeholder={''} variant="outlined" name="packages" label={'Packages'} />}
-				/>
-			</Box>
-		</CustomDialogContent>
-		<CustomDialogFooter>
-			<Button variant="outlined" color="primary" size="small" onClick={onClose} >
-				Cancel
-			</Button>
-			<CustomButton
-				loading={submitting}
-				variant="contained"
-				color="primary"
-				disabled={submitting}
-				onClick={(e) => {
-					e.preventDefault();
-					handleSubmit();
+		})
+		setPackageOptions(data);
+	}
+
+	const handleSubmit = (assetData: any) => {
+		setIsSubmitting(true);
+		const data = []
+		assets?.forEach((ele) => {
+			const obj: any = {}
+			obj.asset = ele?._id
+			obj.uniqueId = ele?.uniqueId
+			obj.productId = ele?.productId
+			const matchedAsset = assetData?.find((e) => e._id === ele?._id);
+			if (matchedAsset) {
+				const { _id, ...assetData } = matchedAsset;
+				obj.assetData = assetData;
+			}
+			data.push(obj);
+		})
+		axiosInstance().post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/move-asset-inter-package`,
+			{ assets: data, uniqueId: selectedPackage.optionValue }).then(({ data }) => {
+				toastConfig.setToastConfig({
+					open: true,
+					type: 'success',
+					message: data.message
+				});
+				setIsSubmitting(false)
+				onSuccess()
+			}).catch((error) => {
+				setIsSubmitting(false)
+				toastConfig.setToastConfig(error);
+			})
+	}
+
+	return (
+		<>
+			<Dialog
+				maxWidth="sm"
+				fullScreen={isMobile || isTablet}
+				TransitionComponent={CustomDialogTransition}
+				aria-labelledby="customized-dialog-title"
+				open={true}
+				fullWidth
+				onClose={(e, reason) => {
+					if (reason !== 'backdropClick') {
+						onClose();
+					}
 				}}
 			>
-				Save
-			</CustomButton>
-		</CustomDialogFooter>
-	</Dialog>
+				<CustomDialogHeader onClose={onClose} title={`Transfer to Another Package`} showRequiredLabel={false} showManimizeMaximize={false} />
+				<CustomDialogContent>
+					<Box m={1}>
+						<Autocomplete
+							size="small"
+							options={packageOptions}
+							value={selectedPackage}
+							onChange={(_, val) => {
+								setSelectedPackage(val);
+							}}
+							getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+							getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+							renderInput={(props) => <TextField
+								{...props}
+								placeholder={''}
+								variant="outlined"
+								name="packages"
+								required={true}
+								label={'Select Package'} />
+							}
+						/>
+					</Box>
+				</CustomDialogContent>
+				<CustomDialogFooter>
+					<Button variant="outlined" color="primary" size="small" onClick={onClose} >
+						Cancel
+					</Button>
+					<CustomButton
+						loading={isSubmitting}
+						variant="contained"
+						color="primary"
+						disabled={!selectedPackage || isSubmitting}
+						onClick={(e) => {
+							const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved);
+							if (statusPolicy) {
+								setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy });
+							}
+							else {
+								handleSubmit([])
+							}
+						}}
+					>
+						Save
+					</CustomButton>
+				</CustomDialogFooter>
+			</Dialog>
+			{openAssetDataDialog.open && (
+				<AssetDetailsChangeDialog
+					ids={assets?.map((e) => e._id)}
+					statusPolicy={openAssetDataDialog.statusPolicy}
+					setAssetsData={() => { }}
+					onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+					onSuccess={(data) => {
+						handleSubmit(data)
+						setOpenAssetDataDialog({ open: false, statusPolicy: null });
+					}}
+					staticLookUpFilters={{
+						wellNumber: rentalManagementData?.wellNumber
+							? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+							: null,
+					}}
+				/>
+			)}</>
 	)
 }
-
-// const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementData, assets, assetPolicyData }) => {
-
-// 	const toastConfig = useContext(CustomToastContext);
-// 	const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_TransferToAnotherPackage`;
-
-// 	const { state, dispatch } = useTableReducer();
-// 	const { dataRows, selectedRecords } = state;
-// 	const [isSubmitting, setIsSubmitting] = useState(false)
-// 	const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
-
-// 	useEffect(() => {
-// 		fetchData()
-// 	}, [])
-
-// 	const column = [
-// 		{
-// 			accessor: 'productName',
-// 			Header: 'Product',
-// 			width: 200,
-// 			disabled: true,
-// 			Cell: ({ row }) => {
-// 				return row.original['productName'] ? <p className="text-truncate">{row.original.productName}</p> : <NoDataCell />;
-// 			}
-// 		},
-// 		{
-// 			accessor: 'packageName',
-// 			Header: 'Package',
-// 			width: 200,
-// 			disabled: true,
-// 			Cell: ({ row }) => {
-// 				return row.original['packageName'] ? <p className="text-truncate">{row.original.packageName}</p> : <NoDataCell />;
-// 			}
-// 		},
-// 		{
-// 			accessor: 'qty',
-// 			Header: 'Qty',
-// 			width: 200,
-// 			disabled: true,
-// 			Cell: ({ row }) => {
-// 				return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
-// 			}
-// 		},
-// 	]
-
-// 	const fetchData = async () => {
-// 		const data = assets?.map(e => ({ asset: e?._id, _id: e?.uniqueId }));
-// 		dispatch({ type: 'loading', loading: true });
-// 		axiosInstance().patch(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/package-similar-product`, data).then(({ data: { data } }) => {
-// 			dispatch({ type: 'initialize', data: data, count: data?.length });
-// 			dispatch({ type: 'loading', loading: false });
-// 		}).catch((error) => {
-// 			toastConfig.setToastConfig(error);
-// 		})
-// 	}
-
-// 	const handleAdd = (rows) => {
-// 		setIsSubmitting(true)
-// 		const tempAssets = [...assets]
-// 		const data = [];
-// 		selectedRecords?.forEach((ele) => {
-// 			for (let i = 0; i < ele.qty; i++) {
-// 				const asset = tempAssets?.find((e) => e.productId === ele.materialId && !e.isCount)
-// 				if (asset) {
-// 					const obj: any = { asset: asset?._id, fromId: asset.uniqueId, toId: ele._id }
-// 					const matchedAsset = rows?.find((e) => e._id === asset?._id);
-// 					if (matchedAsset) {
-// 						const { _id, ...assetData } = matchedAsset;
-// 						obj.assetData = assetData;
-// 					}
-// 					asset.isCount = true;
-// 					data.push(obj)
-// 				}
-// 			}
-// 		})
-// 		axiosInstance().post(`${rentalManagement.api}/productpackage/${rentalManagementData._id}/move-asset-inter-package-product`, data).then(({ data }) => {
-// 			toastConfig.setToastConfig({
-// 				open: true,
-// 				type: 'success',
-// 				message: data.message
-// 			});
-// 			setIsSubmitting(false)
-// 			onSuccess()
-// 		}).catch((error) => {
-// 			setIsSubmitting(false)
-// 			toastConfig.setToastConfig(error);
-// 		})
-// 	}
-
-// 	const addButtonDisabled = () => {
-// 		if (assets?.length >= selectedRecords?.reduce((sum, cur) => sum + cur?.qty, 0)) {
-// 			return false
-// 		}
-// 		return true
-// 	}
-
-// 	return (
-// 		<>
-// 			<Dialog
-// 				TransitionComponent={CustomDialogTransition}
-// 				open={true}
-// 				fullScreen={true}
-// 				aria-labelledby="customized-dialog-title"
-// 				fullWidth
-// 				maxWidth={'md'}
-// 				onClose={(e, reason) => {
-// 					if (reason !== 'backdropClick') {
-// 					}
-// 				}}
-// 			>
-// 				<Box>
-// 					<CustomDialogHeader
-// 						onClose={onClose}
-// 						title={"Transfer to another Package"}
-// 						showManimizeMaximize={false}
-// 						showRequiredLabel={false}
-// 					/>
-// 					<CustomDialogContent>
-// 						<Box>
-// 							<Box display={'flex'} justifyContent={'end'} alignItems={'center'}>
-// 								<CustomButton
-// 									loading={isSubmitting}
-// 									disabled={isSubmitting || selectedRecords?.length === 0 || addButtonDisabled()}
-// 									variant="contained"
-// 									color="primary"
-// 									type="submit"
-// 									onClick={() => {
-// 										const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved);
-// 										if (statusPolicy) {
-// 											setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy });
-// 										}
-// 										else {
-// 											handleAdd([])
-// 										}
-// 									}}
-// 								>
-// 									{`Add ${selectedRecords?.length ? `(${selectedRecords?.length})` : ''}`}
-// 								</CustomButton>
-// 							</Box>
-// 							<Box>
-// 								<CustomReactTable
-// 									height={'calc(100vh - 210px)'}
-// 									columns={column}
-// 									state={state}
-// 									dispatch={dispatch}
-// 									refreshGrid={fetchData}
-// 									renderedFrom={renderedFrom}
-// 									isClientSideGrid={true}
-// 								/>
-// 							</Box>
-// 						</Box>
-// 					</CustomDialogContent>
-// 				</Box>
-// 			</Dialog>
-// 			{openAssetDataDialog.open && (
-// 				<AssetDetailsChangeDialog
-// 					ids={assets?.map((e) => e._id)}
-// 					statusPolicy={openAssetDataDialog.statusPolicy}
-// 					setAssetsData={() => { }}
-// 					onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
-// 					onSuccess={(data) => {
-// 						handleAdd(data)
-// 						setOpenAssetDataDialog({ open: false, statusPolicy: null });
-// 					}}
-// 					staticLookUpFilters={{
-// 						wellNumber: rentalManagementData?.wellNumber
-// 							? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
-// 							: null,
-// 					}}
-// 					productsDefaultData={selectedRecords?.map(d => ({ materialId: d?.materialId, assetDefaultData: [{ wellNumber: d?.wellNumber, qty: d?.qty, package: d?.packageId }] }))}
-// 				/>
-// 			)}
-// 		</>
-// 	)
-// }
 
 export default TransferToAnotherPackageDialog;
