@@ -150,7 +150,7 @@ const CreateWorkFlow = () => {
                           style={isMobile && !isTablet ? { color: 'var(--success)' } : {}}
                         >
                           {isMobile && !isTablet ? <RiSaveFill size={24} /> : (isEdit ? 'Save' : 'Edit')}
-                          {isUpdating && <CircularProgress size={24} />}
+                          {isUpdating && <CircularProgress className='ml-1' size={24} />}
                         </Button>
                       )}
                     </Box>
