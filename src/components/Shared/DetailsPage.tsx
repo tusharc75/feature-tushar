@@ -227,11 +227,8 @@ const Details = (props: DetailProps) => {
 
   const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload', 'groupSignature'].includes(type);
 
-  /**
-   * Render Link  or Typography component
-   */
   const renderData = (val: any, fieldData: any) => {
-    const value = normalizeValues(val, fieldData);
+    const value: any = normalizeValues(val, fieldData);
     if (fieldData?.hasOwnProperty('lookup') && fieldData?.lookup && permissions && permissions[camelCase(fieldData?.lookupResource)]?.isRead) {
       if (fieldData.type === 'multiSelect' || fieldData.type === 'dropDown') {
         return (
@@ -455,7 +452,6 @@ const Details = (props: DetailProps) => {
                 style={containerPadding ? { padding: containerPadding } : {}}
               >
                 <div className={'form-head-v1'}>
-                  {/* <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} /> */}
                   <h3 className="form-label-style-v1" title={form.name}>
                     {form.name}
                   </h3>

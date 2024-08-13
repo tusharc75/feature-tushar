@@ -72,11 +72,11 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
 
   const validate = (values) => {
     const errors = {};
-    if (!values?.assignee?.length) {
-      errors['assignee'] = 'This field is required';
-    }
     if (!values?.name) {
-      errors['name'] = 'This field is required';
+      errors['name'] = 'Please enter subject';
+    }
+    if (!values?.assignee?.length) {
+      errors['assignee'] = 'Please select assignee';
     }
     return errors;
   };
@@ -111,41 +111,9 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
                 <MuiPickersUtilsProvider utils={DateUtils}>
                   <Grid container spacing={2}>
                     <Grid item md={12} lg={12} xs={12} sm={12}>
-                      <Autocomplete
-                        id="field"
-                        multiple
-                        disableCloseOnSelect
-                        options={fieldOptions}
-                        limitTags={4}
-                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
-                        getOptionSelected={(option: any, val) => option?.fieldName === val?.fieldName}
-                        value={values?.formRelatedTo?.fields}
-                        onChange={(e, val) => {
-                          setFieldValue('formRelatedTo', { section: values?.formRelatedTo?.section, fields: val ? val : [] });
-                        }}
-                        renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Field" name="field" />}
-                      />
-                    </Grid>
-                    <Grid item md={12} lg={12} xs={12} sm={12}>
-                      <UserDropdown
-                        name="assignee"
-                        label="Assignee"
-                        errors={errors}
-                        touched={touched}
-                        required={true}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        multiple={true}
-                        value={values['assignee']}
-                        email={[]}
-                      />
-                    </Grid>
-
-                    <Grid item md={12} lg={12} xs={12} sm={12}>
                       <TextField
                         fullWidth
-                        label="Title"
+                        label="Subject"
                         variant="outlined"
                         type="text"
                         size="small"
@@ -176,6 +144,21 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
                         }}
                       />
                     </Grid>
+                    <Grid item md={12} lg={12} xs={12} sm={12}>
+                      <UserDropdown
+                        name="assignee"
+                        label="Assignee"
+                        errors={errors}
+                        touched={touched}
+                        required={true}
+                        setFieldValue={(name, value) => {
+                          setFieldValue(name, value);
+                        }}
+                        multiple={true}
+                        value={values['assignee']}
+                        email={[]}
+                      />
+                    </Grid>
                     <Grid item xs={6} sm={12} md={6} lg={6}>
                       <KeyboardDatePicker
                         label="Due Date"
@@ -191,6 +174,22 @@ const FollowUpsDialog = ({ onClose, section, resource, referenceId }) => {
                           setFieldValue('dueDate', value);
                         }}
                         format={dateFormatForInputControl}
+                      />
+                    </Grid>
+                    <Grid item md={12} lg={12} xs={12} sm={12}>
+                      <Autocomplete
+                        id="field"
+                        multiple
+                        disableCloseOnSelect
+                        options={fieldOptions}
+                        limitTags={4}
+                        getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
+                        getOptionSelected={(option: any, val) => option?.fieldName === val?.fieldName}
+                        value={values?.formRelatedTo?.fields}
+                        onChange={(e, val) => {
+                          setFieldValue('formRelatedTo', { section: values?.formRelatedTo?.section, fields: val ? val : [] });
+                        }}
+                        renderInput={(params) => <TextField {...params} margin="dense" variant="outlined" label="Field" name="field" />}
                       />
                     </Grid>
                   </Grid>
