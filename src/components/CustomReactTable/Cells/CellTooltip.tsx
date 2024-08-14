@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
 import { cn } from 'src/constants/helpers';
 import { Dialog } from '@material-ui/core';
-import Carousel from 'react-material-ui-carousel';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 
@@ -97,7 +96,9 @@ const CellTooltip = ({
             >
               <div className="translate-y-2 items-center text-center">{children('tooltip')}</div>
               {enableExpandView && (
-                <span className="mt-2 block text-center text-[12px] text-gray-400">Click "{text}" to see in a expanded modal</span>
+                <span className="mt-2 block text-center text-[12px] text-gray-400 [border-top:1px_solid_var(--common-border-color)]">
+                  Click "{text}" to see in a expanded modal
+                </span>
               )}
             </div>
           </div>
