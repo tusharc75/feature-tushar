@@ -2,17 +2,34 @@ import { Popper } from '@material-ui/core';
 import React, { useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
 import { cn } from 'src/constants/helpers';
+import { Dialog } from '@material-ui/core';
+import Carousel from 'react-material-ui-carousel';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+
+// import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+// import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 
 type CellTooltipProps = {
   children: React.ReactNode;
   text?: React.ReactNode;
   onTextClick?: () => void;
   className?: string;
+  enableExpandView?: boolean;
+  expandViewHead?: string;
 };
 
-const CellTooltip = ({ children, text = 'View', onTextClick = () => {}, className = '' }: CellTooltipProps) => {
+const CellTooltip = ({
+  children,
+  text = 'View',
+  onTextClick = () => {},
+  className = '',
+  enableExpandView = true,
+  expandViewHead = 'View'
+}: CellTooltipProps) => {
   const [anchorEl, setAnchorEl] = useState<HTMLSpanElement | HTMLDivElement | null>(null);
   const [arrowRef, setArrowRef] = useState<any | null>(null);
+  const [isExpandViewOpen, setIsExpandViewOpen] = useState(false);
 
   const handleMouseOver = (event: React.MouseEvent<HTMLSpanElement | HTMLDivElement>) => {
     event.stopPropagation();
@@ -28,10 +45,22 @@ const CellTooltip = ({ children, text = 'View', onTextClick = () => {}, classNam
 
   const open = Boolean(anchorEl);
 
+  const handleCloseExpandView = () => {
+    setIsExpandViewOpen(false);
+  };
+
+  const onTextClickWrapper = () => {
+    onTextClick();
+    if (enableExpandView) {
+      setAnchorEl(null);
+      setIsExpandViewOpen(true);
+    }
+  };
+
   return (
     <div>
       <>
-        <span onMouseOver={handleMouseOver} onClick={onTextClick} className="link">
+        <span onMouseOver={handleMouseOver} onClick={onTextClickWrapper} className="link">
           {text}
         </span>
         <Popper
@@ -43,7 +72,7 @@ const CellTooltip = ({ children, text = 'View', onTextClick = () => {}, classNam
               enabled: true
             },
             preventOverflow: {
-              enabled: true,
+              enabled: false,
               boundariesElement: 'scrollParent'
             },
             arrow: {
@@ -53,7 +82,7 @@ const CellTooltip = ({ children, text = 'View', onTextClick = () => {}, classNam
           }}
         >
           <div onMouseLeave={handleClose}>
-            <div className="filler absolute -bottom-[10px] -left-0 -right-0 z-[2] h-[48px]" onClick={onTextClick}>
+            <div className="filler absolute -bottom-[10px] -left-0 -right-0 z-[2] h-[48px]" onClick={onTextClickWrapper}>
               <span className="link absolute -bottom-[8px] cursor-pointer opacity-0 [left:50%] [transform:translateX(-50%)] ">{text}</span>
             </div>
             <span className="absolute bottom-0 left-0 z-[1] -mb-[9px]" ref={setArrowRef}>
@@ -71,6 +100,12 @@ const CellTooltip = ({ children, text = 'View', onTextClick = () => {}, classNam
           </div>
         </Popper>
       </>
+      {enableExpandView && (
+        <Dialog maxWidth="md" fullWidth open={isExpandViewOpen} onClose={handleCloseExpandView}>
+          <CustomDialogHeader title={expandViewHead} onClose={handleCloseExpandView} showRequiredLabel={false} />
+          <CustomDialogContent>{children}</CustomDialogContent>
+        </Dialog>
+      )}
     </div>
   );
 };
