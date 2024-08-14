@@ -883,8 +883,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
   const handleCreateBill = (invoiceData = null) => {
     rowsApplied?.forEach((element) => {
       delete element?.index;
-      if (element.type !== MATERIAL_TYPE.other) {
+      if (![MATERIAL_TYPE.other, MATERIAL_TYPE.manualEntry]?.includes(element.type)) {
         delete element?.detail;
+      }
+      if (element.type !== MATERIAL_TYPE.manualEntry) {
+        delete element?.description;
       }
       delete element?.qtyDisplay;
       delete element?.hideSelection;
@@ -896,9 +899,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       delete element?.manualEndDate;
       delete element?.isAppliedBill;
       delete element?.serviceLog;
-      if (element.type !== MATERIAL_TYPE.manualEntry) {
-        delete element?.description;
-      }
       if (element.type === MATERIAL_TYPE.service && element?.parentId) {
         if (!rowsApplied?.find((e) => e._id === element?.parentId)) {
           element.parentId = null;
