@@ -29,6 +29,7 @@ import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
 import moment from 'moment';
 import { FaUserPlus } from 'react-icons/fa6';
+import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -188,8 +189,6 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] ? displayDateTime(values[input.fieldName]) : '-';
     } else if (input.type === 'lookUpDisplay') {
       text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
-    } else if (input.type === 'counter') {
-      text = '-';
     } else if (input.type === 'groupSignature') {
       text = '-';
     } else {
@@ -377,6 +376,9 @@ const Details = (props: DetailProps) => {
             </Box>
           </Box>
         );
+      }
+      if (fieldData.type === 'counter') {
+        return <NumberCell field={fieldData} rowData={val} />;
       }
       return (
         <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">

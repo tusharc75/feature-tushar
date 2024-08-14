@@ -60,7 +60,7 @@ const CellTooltip = ({
   return (
     <div>
       <>
-        <span onMouseOver={handleMouseOver} onClick={onTextClickWrapper} className="link">
+        <span onMouseOver={handleMouseOver} onClick={onTextClickWrapper} className="link block !text-[var(--link)]">
           {text}
         </span>
         <Popper

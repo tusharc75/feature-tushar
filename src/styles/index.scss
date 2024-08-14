@@ -3471,7 +3471,7 @@ body {
 }
 
 .formdata-text-v1 {
-  & :is(h1, h2, h3, h4, h5, span:not(.tooltip-asdfkljashdfkjas)) {
+  & :is(h1, h2, h3, h4, h5, span:not(.tooltip-asdfkljashdfkjas), span:not(.link)) {
     padding: 7px 10px;
     font-size: 0.9rem;
     color: #5e5e5e;

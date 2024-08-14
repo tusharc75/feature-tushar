@@ -1,4 +1,3 @@
-import React from 'react';
 import CellTooltip from 'src/components/CustomReactTable/Cells/CellTooltip';
 import RenderCellTable, { GenericRowData, RenderCellTableColumnDef } from 'src/components/CustomReactTable/Cells/RenderCellTable';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
