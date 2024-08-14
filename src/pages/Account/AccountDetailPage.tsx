@@ -13,7 +13,7 @@ import { AccountHierarchyIcon, AccountsTeamsIcon, ContactsIcon, OpportunityIcon,
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { DeleteButton } from 'src/components/Helpers/Buttons';
+import { DeleteButton, ThemeButton } from 'src/components/Helpers/Buttons';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import { SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
@@ -29,7 +29,15 @@ import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAcc
 import QuickLinks, { IQuickLinks } from '../../components/QuickLinks/QuickLinks';
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { checkIsAllowedToDelete, checkIsAllowedToEdit, customerAccount, getObjKeysWithValues, isObjectEmpty, processFieldName, sidebarResource } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
+  customerAccount,
+  getObjKeysWithValues,
+  isObjectEmpty,
+  processFieldName,
+  sidebarResource
+} from '../../constants/helpers';
 import { accountPage } from '../../routes/Accounts';
 import ManageContactDialog from '../Contact/ManageContact';
 import Step from '../DynamicForm/Step';
@@ -115,7 +123,6 @@ export default function AccountDetailPage(props) {
   const [showCreateContactDialog, setShowCreateContactDialog] = useState(false);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
   const [allowedToDelete, setAllowedToDelete] = useState(false);
-
 
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
@@ -284,7 +291,7 @@ export default function AccountDetailPage(props) {
         {
           ...data,
           type: 'child',
-          current: true,
+          current: true
         }
       ];
       let newData = [];
@@ -660,45 +667,22 @@ export default function AccountDetailPage(props) {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions && permissions[accountResource] && permissions[accountResource].approveAccount && allowedToEdit
-              && (
-                <Button
-                  id="detailApproveButton"
-                  variant={isMobile ? 'text' : 'contained'}
-                  size="small"
-                  color={accountData.staticData?.approved ? 'secondary' : 'primary'}
-                  className={
-                    accountData.staticData?.approved
-                      ? isMobile
-                        ? accountClass.mobile_button_layout_secondary
-                        : ''
-                      : isMobile
-                        ? accountClass.mobile_button_layout
-                        : ''
-                  }
-                  onClick={() => {
-                    setShowApproveDisapproveConfirmBox(true);
-                  }}
-                >
-                  {accountData.staticData?.approved ? (
-                    isMobile ? (
-                      <FcDisapprove size={21} />
-                    ) : (
-                      'Disapprove'
-                    )
-                  ) : isMobile ? (
-                    <FcApproval size={21} />
-                  ) : (
-                    'Approve'
-                  )}
-                </Button>
-              )}
+            {permissions && permissions[accountResource] && permissions[accountResource].approveAccount && allowedToEdit && (
+              <ThemeButton
+                mobileTooltip={accountData.staticData?.approved ? 'Disapprove' : 'Approve'}
+                onClick={() => {
+                  setShowApproveDisapproveConfirmBox(true);
+                }}
+                borderColor={accountData.staticData?.approved ? 'red' : 'none'}
+                iconForMobile={accountData.staticData?.approved ? <FcDisapprove size={21} /> : <FcApproval size={21} />}
+                color={accountData.staticData?.approved ? 'secondary' : 'primary'}
+              >
+                {accountData.staticData?.approved ? 'Disapprove' : 'Approve'}
+              </ThemeButton>
+            )}
+
             {permissions && permissions[accountResource] && permissions[accountResource].isUpdate && allowedToEdit && (
-              <Button
-                variant={isMobile ? 'text' : 'contained'}
-                size="small"
-                onClick={handleOpneUpdateDialog}
-                className={'btn-outline-v1'}>
+              <Button variant={isMobile ? 'text' : 'contained'} size="small" onClick={handleOpneUpdateDialog} className={'btn-outline-v1'}>
                 {isMobile ? <Edit /> : 'Edit'}
               </Button>
             )}
@@ -965,8 +949,9 @@ export default function AccountDetailPage(props) {
       {showConfirmBox ? (
         <ConfirmationDialog
           open={showConfirmBox}
-          message={`Are you sure you want to delete this Account ${deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
-            }`}
+          message={`Are you sure you want to delete this Account ${
+            deleteAccount?.accountName ? deleteAccount?.accountName : accountData.accountName || ''
+          }`}
           onClose={() => {
             setShowConfirmBox(false);
             setDeleteAccountId({});
@@ -1023,7 +1008,7 @@ export default function AccountDetailPage(props) {
           handleSubmit={onUpdateAccount}
           accountId={editAccountData._id ? editAccountData._id : accountData?._id}
           formValues={formValues}
-          handleAddressDataSource={() => { }}
+          handleAddressDataSource={() => {}}
         />
       ) : null}
 

@@ -3471,7 +3471,7 @@ body {
 }
 
 .formdata-text-v1 {
-  & :is(h1, h2, h3, h4, h5, span:not(.tooltip-asdfkljashdfkjas)) {
+  & :is(h1, h2, h3, h4, h5, span:not(.tooltip-asdfkljashdfkjas), span:not(.link)) {
     padding: 7px 10px;
     font-size: 0.9rem;
     color: #5e5e5e;
@@ -4683,5 +4683,25 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
     height: 1px;
     background-color: var(--dark-primary, white);
     z-index: 1;
+  }
+}
+
+.mui-popper-arrow {
+  position: absolute;
+  font-size: 7px;
+  bottom: 0;
+  left: 0;
+  margin-bottom: -0.9em;
+  width: 3em;
+  height: 1em;
+  &::before {
+    content: '';
+    margin: auto;
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 1em 1em 0 1em;
+    border-color: var(--dark-primary, white) transparent transparent transparent;
   }
 }
