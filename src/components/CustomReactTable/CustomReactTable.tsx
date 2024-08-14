@@ -37,7 +37,7 @@ import {
   extractLastNumberFromDataRange,
   fitToColumn,
   getExcelColumnNameFromRange,
-  getUniqueDataByKey,
+  getUniqueRows,
   useSkipper
 } from './utils';
 
@@ -279,7 +279,7 @@ const CustomReactTable = ({
     onGlobalFilterChange: setGlobalFilter,
 
     // accessors
-    getRowId: (row) => `${row._id}_${row?.index || 0}`,
+    getRowId: (row) => `${row._id}_${row?.index}`,
     getSubRows: (row) => row[childrenProperty],
 
     // table models
@@ -331,7 +331,7 @@ const CustomReactTable = ({
       const { subRows, ...rest } = d.original;
       return { ...rest };
     });
-    const testData = getUniqueDataByKey([...currentPageSelectedRows, ...selectedRecords]);
+    const testData = getUniqueRows([...currentPageSelectedRows, ...selectedRecords]);
     const newData = [];
     for (const data of testData) {
       if (selectedRowIds.includes(`${data._id}_${data?.index || 0}`)) newData.push(data);
@@ -350,6 +350,7 @@ const CustomReactTable = ({
       table.resetRowSelection();
     }
   }, [selectedRecords.length, table]);
+
   useEffect(() => {
     if (selectedRecords.length !== Object.keys(rowSelection).length) {
       const selectedRowIds = selectedRecords.map((d) => d._id);
