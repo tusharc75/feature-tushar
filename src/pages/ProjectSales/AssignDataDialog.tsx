@@ -200,10 +200,10 @@ const AssignDataDialog = (props) => {
           return data.accountName.toLowerCase().search(value.toLowerCase()) !== -1;
         case 'customer-contact':
           return (
-            data.salutation.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.middleName.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.lastName.toLowerCase().search(value.toLowerCase()) !== -1
+            data?.salutation?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data?.firstName?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data?.middleName?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data?.lastName?.toLowerCase().search(value.toLowerCase()) !== -1
           );
         default:
           break;

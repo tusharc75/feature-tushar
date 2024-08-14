@@ -34,16 +34,13 @@ import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from 'src/pages/DynamicForm/Step';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isString } from 'lodash';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const parsed = queryString.parse(history.location.search);
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [fields, setFields] = useState([]);
@@ -106,17 +103,13 @@ const LeadDetailsPage = () => {
     fetchData();
     fetchFields();
     fetchPolicy();
-  }, [id, selectedEntity]);
+  }, [id]);
 
   const fetchData = async () => {
-    setLoading(true);
     axiosInstance()
       .get(`${leadApi}/${id}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
-
         let dontHavePermissions = [];
-
         if (!permissions['customerAccount'].isCreate) {
           dontHavePermissions.push('Customer Account');
         }
@@ -140,11 +133,9 @@ const LeadDetailsPage = () => {
         setAllowedToEdit(isAllowedToUpdate);
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
-        setCustomizedRoutes([routes.lead, { title: name }]);
-        setLoading(false);
+        setCustomizedRoutes([routes.lead, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') }]);
       })
       .catch((err) => {
-        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -154,14 +145,13 @@ const LeadDetailsPage = () => {
       .get(`/field?resource=Lead&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         setFields(data);
-
         const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
         if (processSteps && processSteps.isRead) {
           setSteps(
             processSteps.fieldData.option.map((m) => {
               return {
                 text: m.optionLabel,
-                canCompleteManually: true //  !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+                canCompleteManually: true
               };
             })
           );
@@ -175,10 +165,8 @@ const LeadDetailsPage = () => {
             setAdditionalFieldName(d.fieldData.sectionName);
           }
         });
-        setLoading(false);
       })
       .catch((err) => {
-        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -410,10 +398,10 @@ const LeadDetailsPage = () => {
               />
             </Box>
             <div className="bg-white dark:bg-[var(--dark-primary)_!important]">
-              {loading || !fields?.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
+              {!leadData || !fields?.length ? (
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
               ) : showAtLast ? (
                 <DetailsPage data={leadData} fields={fields} />
               ) : (
