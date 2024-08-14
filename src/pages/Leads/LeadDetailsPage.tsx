@@ -99,7 +99,7 @@ const LeadDetailsPage = () => {
         }
       }
     }
-  }, [steps]);
+  }, [steps, leadData]);
 
   useEffect(() => {
     fetchData();
@@ -147,8 +147,10 @@ const LeadDetailsPage = () => {
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
         setCustomizedRoutes([routes.lead, { title: name }]);
+        setLoading(false);
       })
       .catch((err) => {
+        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
