@@ -76,12 +76,12 @@ const ManageSteps = ({ data, onSuccess, onClose, id }) => {
   }, [data]);
 
   const handleSubmit = (values) => {
-    if (!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length) {
+    if (!values.linkWithResource && !values?.fields?.length) {
       toastConfig.setToastConfig({ open: true, type: 'error', message: 'Please add fields' });
       return;
     }
     setSubmitting(true);
-    if (values?.linkWithResource || values?.linkWithMaterial) {
+    if (values?.linkWithResource) {
       values.fields = [];
     }
     if (data?._id) {
