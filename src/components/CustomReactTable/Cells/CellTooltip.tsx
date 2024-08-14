@@ -96,6 +96,9 @@ const CellTooltip = ({
               style={{ transform: 'translateY(-11px)' }}
             >
               <div className="translate-y-2 items-center text-center">{children}</div>
+              {enableExpandView && (
+                <span className="mt-2 block text-center text-[12px] text-gray-400">Click "{text}" to see in a expanded modal</span>
+              )}
             </div>
           </div>
         </Popper>
