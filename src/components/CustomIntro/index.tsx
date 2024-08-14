@@ -175,8 +175,8 @@ const CustomIntro = () => {
       {handleSteps.current?.started && currentStepData && !isHiddenStep && (
         <div className="">
           <div
-            className="backdrop absolute inset-0 z-[1301] bg-black/50 mix-blend-hard-light"
-            style={{ height: handleSteps.current?.documentHeight }}
+            className="backdrop absolute left-0 right-0 top-0 z-[1301] bg-black/50 mix-blend-hard-light"
+            style={{ height: handleSteps.current?.documentHeight, minHeight: '100vh' }}
           >
             {currentStepData?.element && !isFindingElement && (
               <div
