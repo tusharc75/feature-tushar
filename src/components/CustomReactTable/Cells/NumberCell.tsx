@@ -20,7 +20,7 @@ const NumberCell = ({ rowData, field }) => {
   });
 
   return (
-    <CellTooltip className="max-w-[400px] overflow-auto">
+    <CellTooltip className="max-w-[400px] overflow-auto" expandViewHead={field.fieldLabel}>
       {(view) => <RenderCellTable columns={columns} data={data} dataMaxHeight={view === 'tooltip' ? '200px' : '400px'} />}
     </CellTooltip>
   );

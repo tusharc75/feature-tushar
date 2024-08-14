@@ -32,7 +32,7 @@ function GroupSignatureCell({ field, original }) {
   return (
     <div>
       {signatures?.length ? (
-        <CellTooltip>
+        <CellTooltip expandViewHead={field.fieldLabel}>
           {(view) => <RenderCellTable columns={columns} data={signatures} dataMaxHeight={view === 'tooltip' ? '200px' : '400px'} />}
         </CellTooltip>
       ) : (
