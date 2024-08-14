@@ -382,8 +382,20 @@ const Details = (props: DetailProps) => {
       if (fieldData.type === 'groupSignature') {
         return <GroupSignatureCell field={fieldData} original={val} enableDilaog={false} />;
       }
+      if (fieldData.type === 'mobileNumber') {
+        return (
+          <span className="flex items-center">
+            {value}
+            {value !== '-' ? (
+              <span className="!p-0 [&_span.html-custom-tooltip]:!p-0">
+                <CopyToClipboard textToCopy={value} className="ml-0 !p-2" />
+              </span>
+            ) : null}
+          </span>
+        );
+      }
       return (
-        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
+        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={cn(classes.fieldText)} variant="body2">
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
               <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank" rel="noopener noreferrer">
@@ -394,7 +406,6 @@ const Details = (props: DetailProps) => {
           ) : (
             <span className={`text-truncate block`}>{value}</span>
           )}
-          {fieldData.type === 'mobileNumber' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
         </Typography>
       );
     }
