@@ -313,7 +313,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
-    data.material = data?.material?.filter((e) => e[`price_${rentalManagementData?.currency?.toLowerCase()}`]);
+    const currency = rentalManagementData?.currency?.toLowerCase();
+
+    data.material = data?.material?.filter((e) => e[`price_${currency}`] || e[`finalPrice_${currency}`]);
 
     if (rentalResourceData?.policy?.hidePackageInInvoice) {
       data.material = data.material?.filter((e) => e.type !== MATERIAL_TYPE.package)
