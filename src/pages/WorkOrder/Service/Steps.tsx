@@ -471,7 +471,17 @@ const Steps = ({
       isStepValid = false;
     }
 
-    return { fieldData, stepData, isStepValid };
+    const fields = fieldData.fields;
+    let canSkip = true;
+
+    for (const field of fields) {
+      if (field.required === true) {
+        canSkip = false;
+        break; 
+      }
+    }
+
+    return { fieldData, stepData, isStepValid, canSkip };
   };
 
   const getNextStep = (currentStep: any): any | null => {
@@ -1448,6 +1458,7 @@ const Steps = ({
                   </Box>
                 );
               })}
+
               {anchorEl && (
                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
                   <MenuItem
@@ -1523,7 +1534,8 @@ const Steps = ({
                       setAnchorEl(null);
                     }}
                     disabled={
-                      isStepsAllowToPerform &&
+                      getFields(selectedStep).canSkip &&
+                        isStepsAllowToPerform &&
                         ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                           selectedService?.status
                         ) &&
