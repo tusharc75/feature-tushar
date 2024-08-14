@@ -34,6 +34,7 @@ import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from 'src/pages/DynamicForm/Step';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { isString } from 'lodash';
 
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -99,7 +100,7 @@ const LeadDetailsPage = () => {
         }
       }
     }
-  }, [steps]);
+  }, [steps, leadData]);
 
   useEffect(() => {
     fetchData();
@@ -125,30 +126,25 @@ const LeadDetailsPage = () => {
         if (!permissions['opportunity'].isCreate) {
           dontHavePermissions.push('Opportunity');
         }
-
         const isAllowedToUpdate = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data);
-
         setHasPermissionToConvertToOpportunity(
           dontHavePermissions.length === 0 &&
-            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-            isAllowedToUpdate &&
-            data[processFieldName] &&
-            data[processFieldName].toLowerCase() === 'qualified'
+          user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+          isAllowedToUpdate &&
+          data[processFieldName] &&
+          data[processFieldName].toLowerCase() === 'qualified'
         );
         setIsLeadAlreadyConvertedToOpportunity(
           data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
         );
-
-        if (data?.salutation?.optionLabel) {
-          name = data.salutation.optionLabel + name;
-        }
-
         setAllowedToEdit(isAllowedToUpdate);
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
         setCustomizedRoutes([routes.lead, { title: name }]);
+        setLoading(false);
       })
       .catch((err) => {
+        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };

@@ -173,10 +173,6 @@ const ContactDetailsPage = (props) => {
     axiosInstance()
       .get(`/${contactApi}/${id}`)
       .then(({ data: { data } }) => {
-        let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
-        if (data?.salutation?.optionLabel) {
-          name = data.salutation.optionLabel + name;
-        }
         handleAllowToEditList(data);
         setContactData(data);
         getContactFields();
@@ -192,7 +188,7 @@ const ContactDetailsPage = (props) => {
             excludeContacts.push(d._id);
             orgChartData.push({
               id: d._id,
-              name: [d.firstName, d.middleName, d.lastName].filter((d) => d).join(' '),
+              name: [data?.firstName, data?.middleName, data?.lastName].filter((d) => d).join(' '),
               parentId: d.reportsTo ? d.reportsTo : 0,
               logo: d.contactLogo,
               email: d.email,
@@ -205,7 +201,7 @@ const ContactDetailsPage = (props) => {
         getContacts(excludeContacts, data);
         orgChartData.push({
           id: data._id,
-          name: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' '),
+          name: [data?.firstName, data?.middleName, data?.lastName].filter((d) => d).join(' '),
           parentId: data.reportsTo ? data.reportsTo.optionValue : 0,
           logo: data.contactLogo,
           email: data.email,
@@ -233,11 +229,7 @@ const ContactDetailsPage = (props) => {
           }
           return u;
         });
-        let name = [contactData.firstName, contactData.middleName, contactData.lastName].filter((d) => d).join(' ');
-
-        if (contactData?.salutation?.optionLabel) {
-          name = contactData.salutation.optionLabel + name;
-        }
+        let name = [contactData?.firstName, contactData?.firstName, contactData?.middleName, contactData?.lastName].filter((d) => d).join(' ');
         let currentContact = {
           ...contactData,
           isExclude: true,
