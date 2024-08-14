@@ -392,7 +392,7 @@ const Productpackage = ({
     var nonSerializeAsset: any = [];
     var productSerialNumbers: any = [];
     var nextStepMessage = null;
-    var additionalCostInvoiceData: any = [];
+    var invoiceMaterialData: any = [];
     const loadingTicketProducts: any = [];
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -405,7 +405,7 @@ const Productpackage = ({
         `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
       const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
-      additionalCostInvoiceData = invoiceResponse?.data?.data?.additionalCost || [];
+      invoiceMaterialData = invoiceResponse?.data?.data?.additionalCost || [];
       data = response?.data?.data;
       additionalCosts = additionalData?.data?.data;
       additionalCosts = additionalCosts?.map((e: any) => {
@@ -458,7 +458,7 @@ const Productpackage = ({
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
-      if(parent?.type==MATERIAL_TYPE.manualEntry && additionalCostInvoiceData.find((e)=>{
+      if(parent?.type==MATERIAL_TYPE.manualEntry && invoiceMaterialData.find((e)=>{
         if(e._id===parent._id){
           parent.invoiceCreated=true;
         }
