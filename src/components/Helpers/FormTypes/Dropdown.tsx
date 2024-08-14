@@ -1108,7 +1108,7 @@ function Dropdown({
                           let tempNewOption = {
                             default: true,
                             email: data?.email,
-                            optionLabel: [data?.salutation, data?.firstName, data?.lastName]?.filter((e) => e && e !== '')?.join(' '),
+                            optionLabel: [data?.firstName, data?.middleName, data?.lastName].filter((d) => d).join(' '),
                             optionValue: data?._id,
                             order: option.length,
                             [fieldData.lookupDependentOn]: values[fieldData.lookupDependentOn]

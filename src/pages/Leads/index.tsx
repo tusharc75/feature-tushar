@@ -200,7 +200,7 @@ const Leads = () => {
     if (selectedEntity) {
       const queryString = getQueryString();
       dispatch({ type: 'loading', loading: true });
-
+      
       try {
         let data, count;
         const response: any = await axiosInstance().get(`${lead.leadApi}${queryString}`, { cancelToken: cancelTokenSource?.token });
@@ -336,12 +336,12 @@ const Leads = () => {
           message: data.message
         });
         dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
         setIsConformDialogVisible(false);
         setOkButtonLoading(false);
         if (deleteRecord.id) {
           setDeleteRecord({ id: null, name: null });
         }
-        fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
