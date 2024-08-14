@@ -14,6 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { Autocomplete } from '@material-ui/lab';
 import { getLookupResource, getResourceField } from 'src/components/FormBuilder/helper';
 import routes from 'src/components/Helpers/Routes';
+import ConfigureField from 'src/pages/WorkFlow/Steps/ConfigureFields';
 
 const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
@@ -29,6 +30,7 @@ const ManageSteps = ({ data, onSuccess, onClose, id }) => {
   const [resourceOption, setResourceOption] = useState([]);
   const [resourceFieldOption, setResourceFieldOption] = useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
+  const [openField, setOpenField] = useState(false);
 
   useEffect(() => {
     getResourceList();
@@ -60,6 +62,7 @@ const ManageSteps = ({ data, onSuccess, onClose, id }) => {
         linkWithResource: data?.linkWithResource || false,
         linkResourceName: data?.linkResourceName || '',
         linkResourceField: data?.linkResourceField || '',
+        fields: data?.fields || []
       });
     } else {
       setInitialValues({
@@ -67,12 +70,20 @@ const ManageSteps = ({ data, onSuccess, onClose, id }) => {
         linkWithResource: false,
         linkResourceName: '',
         linkResourceField: [],
+        fields: []
       });
     }
   }, [data]);
 
   const handleSubmit = (values) => {
+    if (!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length) {
+      toastConfig.setToastConfig({ open: true, type: 'error', message: 'Please add fields' });
+      return;
+    }
     setSubmitting(true);
+    if (values?.linkWithResource || values?.linkWithMaterial) {
+      values.fields = [];
+    }
     if (data?._id) {
       axiosInstance()
         .put(`${routes.workFlow.path}/${id}/steps`, { ...values, stepId: data?._id })
@@ -256,6 +267,20 @@ const ManageSteps = ({ data, onSuccess, onClose, id }) => {
                     </Box>
                   </>
                 )}
+                {!values['linkWithResource'] && (
+                      <Box className="mt-2">
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            setOpenField(true);
+                          }}
+                        >
+                          Add Fields
+                        </Button>
+                      </Box>
+                    )}
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -298,6 +323,19 @@ const ManageSteps = ({ data, onSuccess, onClose, id }) => {
                 }}
               />
             ) : null}
+            {openField && (
+              <ConfigureField
+                id={id}
+                step={values}
+                handleClose={() => {
+                  setOpenField(false);
+                }}
+                handleSucess={(data) => {
+                  setFieldValue('fields', data);
+                  setOpenField(false);
+                }}
+              />
+            )}
           </>
         )}
       </Formik>
