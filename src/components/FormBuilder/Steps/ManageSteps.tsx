@@ -21,7 +21,7 @@ const stepSchema = object().shape({
 
 const MATERIAL_TYPE = ['product', 'service', 'package'];
 
-const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
+const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValues, setInitialValues] = useState({});
@@ -93,43 +93,14 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
       toastConfig.setToastConfig({ open: true, type: 'error', message: 'Please add fields' });
       return
     }
-    setSubmitting(true);
-    if (values?.linkWithResource || values?.linkWithMaterial) {
-      values.fields = []
+   let updatedValues = values
+    if(data?._id){
+      updatedValues = {...values, stepId: data?._id}
     }
-    if (data?._id) {
-      axiosInstance()
-        .put(`/sa-formbuilder/steps/${resourceId}`, { ...values, stepId: data?._id })
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
-    } else {
-      axiosInstance()
-        .post(`/sa-formbuilder/steps/${resource}`, values)
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
+    if (updatedValues?.linkWithResource) {
+      updatedValues.fields = [];
     }
+    onSuccess(updatedValues)
   };
 
   const validate = (values) => {
@@ -383,7 +354,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     label="Show In Pdf"
                   />
                 </Box>
-                {!values['linkWithResource'] && !values['linkWithMaterial'] && (
+                {!values['linkWithResource'] && (
                   <Box className="mt-2">
                     <Button
                       variant="contained"
@@ -412,13 +383,13 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                 Cancel
               </Button>
               <Button
-                disabled={submitting}
+                disabled={isSubmitting}
                 variant="contained"
                 color="primary"
                 size="small"
                 type="submit"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
               >
                 {' '}
                 Save
@@ -442,7 +413,6 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
 
             {openField && (
               <ConfigureField
-                resourceId={resourceId}
                 step={values}
                 handleClose={() => {
                   setOpenField(false);

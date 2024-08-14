@@ -1,4 +1,4 @@
-import { flatMapDeep, isEmpty, snakeCase } from 'lodash';
+import { flatMapDeep, isEmpty, snakeCase, uniqBy } from 'lodash';
 import moment from 'moment';
 import React from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -172,8 +172,8 @@ export const getStickyColumnNames = ({
   return { left, right, stickyColumns };
 };
 
-export const getUniqueDataByKey = (rows: any[], key = '_id') => {
-  const arrayUniqueByKey = [...new Map(rows.map((item) => [item[key], item])).values()];
+export const getUniqueRows = (rows: any[], key = '_id') => {
+  const arrayUniqueByKey = uniqBy(rows, (d) => `${d[key]}_${d.index || 0}`);
   return arrayUniqueByKey;
 };
 

@@ -14,7 +14,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
-import ManageSteps from 'src/pages/WorkFlow/Steps/ManageSteps';
+import ManageSteps from 'src/components/FormBuilder/Steps/ManageSteps';
 import routes from 'src/components/Helpers/Routes';
 import { sortBy } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
@@ -27,6 +27,7 @@ const Steps = ({ resource, loading, id }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [steps, setSteps] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchData = useCallback(
     async (cancelTokenSource?: CancelTokenSource) => {
@@ -50,6 +51,43 @@ const Steps = ({ resource, loading, id }) => {
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
   }, []);
+
+  const handleSave = (values)=>{
+    setIsSubmitting(true);
+    if (values?.stepId) {
+      axiosInstance()
+        .put(`${routes.workFlow.path}/${id}/steps`, values )
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setIsSubmitting(false);
+          fetchData();
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      axiosInstance()
+        .post(`${routes?.workFlow.path}/${id}/steps`, values)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setIsSubmitting(false);
+          fetchData();
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
 
   const handleDelete = (step) => {
     setDeleting(true);
@@ -132,17 +170,17 @@ const Steps = ({ resource, loading, id }) => {
       </Box>
 
       <>
-        {open?.open && (
+        {(open?.open || isSubmitting) && (
           <ManageSteps
             data={open?.data}
-            onSuccess={() => {
-              fetchData();
+            onSuccess={(data) => {
+              handleSave(data);
               setOpen({ open: false, data: null });
             }}
             onClose={() => {
               setOpen({ open: false, data: null });
             }}
-            id={id}
+            isSubmitting={isSubmitting}
           />
         )}
 

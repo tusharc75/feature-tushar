@@ -43,6 +43,7 @@ const Steps = ({ resource }) => {
   const [openNotifications, setOpenNotifications] = useState(false);
   const [openPolicy, setOpenPolicy] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchData = useCallback(
     async (cancelTokenSource?: CancelTokenSource) => {
@@ -68,6 +69,43 @@ const Steps = ({ resource }) => {
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
   }, [resource]);
+
+  const handleSave = (values)=>{
+    setIsSubmitting(true);
+     if (values?.stepId) {
+      axiosInstance()
+        .put(`/sa-formbuilder/steps/${resourceId}`, values)
+        .then(({ data }) => {
+          setIsSubmitting(false);
+          fetchData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      axiosInstance()
+        .post(`/sa-formbuilder/steps/${resource}`, values)
+        .then(({ data }) => {
+          setIsSubmitting(false);
+          fetchData();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
 
   const handleDelete = (step) => {
     setDeleting(true);
@@ -195,13 +233,12 @@ const Steps = ({ resource }) => {
       </Box>
 
       <>
-        {open?.open && (
+        {(open?.open || isSubmitting) && (
           <ManageSteps
-            resource={resource}
-            resourceId={resourceId}
+            isSubmitting={isSubmitting}
             data={open?.data}
-            onSuccess={() => {
-              fetchData();
+            onSuccess={(data) => {
+              handleSave(data);
               setOpen({ open: false, data: null });
             }}
             onClose={() => {
