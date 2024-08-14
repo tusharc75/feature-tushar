@@ -15,6 +15,7 @@ import FormTypes from '../../../components/Helpers/FormTypes';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
+import moment from 'moment';
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -26,7 +27,7 @@ interface AdditionalCostDialogProps {
   showSaveAndNext?: Boolean;
 }
 
-const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, loadingEdit, showSaveAndNext  }) => {
+const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, loadingEdit, showSaveAndNext }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -78,6 +79,17 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
     }
   };
 
+  function validate(values) {
+    const errors = {};
+    let actualStartDate = moment(values?.actualStartDate);
+    let actualEndDate = moment(values?.actualEndDate);
+    if (actualEndDate.diff(actualStartDate, 'days') < 0) {
+      errors['actualEndDate'] = 'Please enter valid actual end date';
+    }
+    return errors;
+  }
+
+
   return (
     <Dialog
       maxWidth="md"
@@ -94,6 +106,7 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields?.filter(f => f?.isRead))}
           validateOnMount
+          validate={validate}
           onSubmit={handleSubmit}
         >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
