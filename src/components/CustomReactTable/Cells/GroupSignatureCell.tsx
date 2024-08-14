@@ -33,7 +33,7 @@ function GroupSignatureCell({ field, original }) {
     <div>
       {signatures?.length ? (
         <CellTooltip>
-          <RenderCellTable columns={columns} data={signatures} dataMaxHeight="200px" />
+          {(view) => <RenderCellTable columns={columns} data={signatures} dataMaxHeight={view === 'tooltip' ? '200px' : '400px'} />}
         </CellTooltip>
       ) : (
         <NoDataCell />

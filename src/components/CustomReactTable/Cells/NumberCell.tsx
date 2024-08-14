@@ -22,9 +22,7 @@ const NumberCell = ({ rowData, field }) => {
 
   return (
     <CellTooltip className="max-w-[400px] overflow-auto">
-      <div className="min-h-full">
-        <RenderCellTable columns={columns} data={data} />
-      </div>
+      {(view) => <RenderCellTable columns={columns} data={data} dataMaxHeight={view === 'tooltip' ? '200px' : '400px'} />}
     </CellTooltip>
   );
 };

@@ -11,7 +11,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 // import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 
 type CellTooltipProps = {
-  children: React.ReactNode;
+  children: (view: 'tooltip' | 'expanded') => React.ReactNode;
   text?: React.ReactNode;
   onTextClick?: () => void;
   className?: string;
@@ -95,7 +95,7 @@ const CellTooltip = ({
               )}
               style={{ transform: 'translateY(-11px)' }}
             >
-              <div className="translate-y-2 items-center text-center">{children}</div>
+              <div className="translate-y-2 items-center text-center">{children('tooltip')}</div>
               {enableExpandView && (
                 <span className="mt-2 block text-center text-[12px] text-gray-400">Click "{text}" to see in a expanded modal</span>
               )}
@@ -106,7 +106,7 @@ const CellTooltip = ({
       {enableExpandView && (
         <Dialog maxWidth="md" fullWidth open={isExpandViewOpen} onClose={handleCloseExpandView}>
           <CustomDialogHeader title={expandViewHead} onClose={handleCloseExpandView} showRequiredLabel={false} />
-          <CustomDialogContent>{children}</CustomDialogContent>
+          <CustomDialogContent>{children('expanded')}</CustomDialogContent>
         </Dialog>
       )}
     </div>
