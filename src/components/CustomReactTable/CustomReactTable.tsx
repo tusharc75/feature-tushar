@@ -279,7 +279,7 @@ const CustomReactTable = ({
     onGlobalFilterChange: setGlobalFilter,
 
     // accessors
-    getRowId: (row) => `${row._id}_${row?.index}`,
+    getRowId: (row) => `${row._id}_${row?.index || 0}`,
     getSubRows: (row) => row[childrenProperty],
 
     // table models
