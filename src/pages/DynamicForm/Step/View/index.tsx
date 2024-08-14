@@ -129,21 +129,22 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Edit"
-                  disabled={allowedToEdit ? false : true}
-                  onClick={() => {
-                    setOpen({ open: true, id: row?.original?._id });
-                  }}
-                >
-                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-
+            {step?.fields?.length > 0 &&
+              <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Edit"
+                    disabled={allowedToEdit ? false : true}
+                    onClick={() => {
+                      setOpen({ open: true, id: row?.original?._id });
+                    }}
+                  >
+                    <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            }
             <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
               <span>
                 <IconButton
