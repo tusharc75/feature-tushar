@@ -30,12 +30,15 @@ const CarouselDialog = ({ images, index, close, title = 'Images' }: CarouselDial
 
   const handleOnload = (e: SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
-    target.classList.remove('bg-gray-300', 'min-h-[400px]', 'dark:bg-gray-800', 'rounded-md', 'max-h-[200px]', 'max-w-[200px]');
+    target.classList.remove('bg-gray-300', 'min-h-[300px]', 'dark:bg-gray-800', 'rounded-md', '[filter:blur(6px)]', 'max-h-[200px]', 'max-w-[200px]');
   };
   const handleOnError = (e: SyntheticEvent<HTMLImageElement, Event>) => {
     const target = e.target as HTMLImageElement;
     target.src = imageLoadingFailed;
+    target.classList.remove('bg-gray-300', 'min-h-[300px]', 'dark:bg-gray-800', 'rounded-md', '[filter:blur(6px)]');
     target.classList.add('max-h-[200px]', 'max-w-[200px]', 'rounded-md');
+    target.width = 300;
+    target.height = 300;
   };
 
   return (
@@ -60,7 +63,7 @@ const CarouselDialog = ({ images, index, close, title = 'Images' }: CarouselDial
               <img
                 onError={handleOnError}
                 onLoad={handleOnload}
-                className={cn(classes.img, 'min-h-[300px] rounded-md bg-gray-300 dark:bg-gray-800')}
+                className={cn(classes.img, 'min-h-[300px] bg-gray-300 dark:bg-gray-800')}
                 src={item}
                 alt={''}
                 loading="lazy"
