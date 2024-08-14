@@ -343,7 +343,9 @@ const Productpackage = ({
                         : 'Inventory/Serial Numbers is already assigned'
                       : row.original?.status
                         ? rentalManagementMessage.loadingAlreadyCreated
-                        : ''
+                        : row.original?.invoiceCreated
+                        ? rentalManagementMessage.invoiceCreated
+                        : " "
                   }
                 >
                   <span>
@@ -390,6 +392,7 @@ const Productpackage = ({
     var nonSerializeAsset: any = [];
     var productSerialNumbers: any = [];
     var nextStepMessage = null;
+    var invoiceMaterialData: any = [];
     const loadingTicketProducts: any = [];
     if (isOffline) {
       data = await findOne(objectStore.rentalManagement, rentalManagementData._id);
@@ -401,6 +404,8 @@ const Productpackage = ({
       const loadingTicketResult = await axiosInstance().get(
         `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${rentalManagementData._id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
       );
+      const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalManagementData._id}/invoice/material-end-date-qty`);
+      invoiceMaterialData = invoiceResponse?.data?.data?.additionalCost || [];
       data = response?.data?.data;
       additionalCosts = additionalData?.data?.data;
       additionalCosts = additionalCosts?.map((e: any) => {
@@ -455,6 +460,11 @@ const Productpackage = ({
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
+      if(parent?.type==MATERIAL_TYPE.manualEntry && invoiceMaterialData.find((e)=>{
+        if(e._id===parent._id){
+          parent.invoiceCreated=true;
+        }
+      }))
       if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
         parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : false;
       }
@@ -471,6 +481,8 @@ const Productpackage = ({
           : parent?.assetQty > 0 || data.inventory?.filter((e) => e.isReplaced && e._id === parent._id)?.length
             ? true
             : parent?.status
+              ? true
+              : parent?.invoiceCreated
               ? true
               : false;
       parent.nonSerializedQty =
