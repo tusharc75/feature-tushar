@@ -70,29 +70,12 @@ const ConfigureField = ({ id, step = null, handleClose, handleSucess }) => {
       });
       return false;
     }
-    if (step?._id) {
-      setSubmitting(true);
-      axiosInstance()
-        .put(`${routes.workFlow.path}/${id}/steps/fields`, { stepId: step?._id, fields: data })
-        .then(({ data }) => {
-          setSubmitting(false);
-          handleSucess();
-          toastConfig.setToastConfig({
-            open: true,
-            message: data.message,
-            severity: 'success'
-          });
-        })
-        .catch((err) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(err);
-        });
-    }
+    handleSucess(data);
   };
 
   return (
     <Dialog open aria-labelledby="customized-dialog-title" onClose={handleClose} TransitionComponent={CustomDialogTransition} fullWidth fullScreen>
-      <CustomDialogHeader showRequiredLabel={false} title={`Fields Configuration ${step?.stepName}`} onClose={handleClose} />
+      <CustomDialogHeader showRequiredLabel={false} title={`Fields Configuration`} onClose={handleClose} />
       <CustomDialogContent>
         <FormBuilder
           section={section}
