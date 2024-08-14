@@ -25,6 +25,7 @@ import { useData } from 'src/StateProvider/Provider';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import routes from '../../Helpers/Routes';
 import DataListCell from '../Cells/DataListCell';
+import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -528,9 +529,9 @@ export default function useColumns() {
           ...commonFieldData,
           disableFilters: true,
           disableSortBy: true,
-          cell: ({ row }) => (
-            <NoDataCell />
-          )
+          cell: ({ row }) => {
+            return <NumberCell rowData={row.original} field={field} />;
+          }
         });
       } else if (field.type === 'percent') {
         column.push({

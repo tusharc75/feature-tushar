@@ -38,11 +38,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 const LeadDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const parsed = queryString.parse(history.location.search);
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const [loading, setLoading] = useState(true);
   const [leadData, setLeadData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [fields, setFields] = useState([]);
@@ -99,23 +97,19 @@ const LeadDetailsPage = () => {
         }
       }
     }
-  }, [steps]);
+  }, [steps, leadData]);
 
   useEffect(() => {
     fetchData();
     fetchFields();
     fetchPolicy();
-  }, [id, selectedEntity]);
+  }, [id]);
 
   const fetchData = async () => {
-    setLoading(true);
     axiosInstance()
       .get(`${leadApi}/${id}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        let name = [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ');
-
         let dontHavePermissions = [];
-
         if (!permissions['customerAccount'].isCreate) {
           dontHavePermissions.push('Customer Account');
         }
@@ -125,28 +119,21 @@ const LeadDetailsPage = () => {
         if (!permissions['opportunity'].isCreate) {
           dontHavePermissions.push('Opportunity');
         }
-
         const isAllowedToUpdate = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data);
-
         setHasPermissionToConvertToOpportunity(
           dontHavePermissions.length === 0 &&
-            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-            isAllowedToUpdate &&
-            data[processFieldName] &&
-            data[processFieldName].toLowerCase() === 'qualified'
+          user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+          isAllowedToUpdate &&
+          data[processFieldName] &&
+          data[processFieldName].toLowerCase() === 'qualified'
         );
         setIsLeadAlreadyConvertedToOpportunity(
           data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
         );
-
-        if (data?.salutation?.optionLabel) {
-          name = data.salutation.optionLabel + name;
-        }
-
         setAllowedToEdit(isAllowedToUpdate);
         setAllowedToDelete(permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, data.owner.optionValue));
         setLeadData(data);
-        setCustomizedRoutes([routes.lead, { title: name }]);
+        setCustomizedRoutes([routes.lead, { title: [data.firstName, data.middleName, data.lastName].filter((d) => d).join(' ') }]);
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -158,14 +145,13 @@ const LeadDetailsPage = () => {
       .get(`/field?resource=Lead&entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         setFields(data);
-
         const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
         if (processSteps && processSteps.isRead) {
           setSteps(
             processSteps.fieldData.option.map((m) => {
               return {
                 text: m.optionLabel,
-                canCompleteManually: true //  !stepsToIgnoreManualCompleteForOpportunity.some(s => s === m.optionValue.toLowerCase())
+                canCompleteManually: true
               };
             })
           );
@@ -179,10 +165,8 @@ const LeadDetailsPage = () => {
             setAdditionalFieldName(d.fieldData.sectionName);
           }
         });
-        setLoading(false);
       })
       .catch((err) => {
-        setLoading(false);
         toastConfig.setToastConfig(err);
       });
   };
@@ -414,10 +398,10 @@ const LeadDetailsPage = () => {
               />
             </Box>
             <div className="bg-white dark:bg-[var(--dark-primary)_!important]">
-              {loading || !fields?.length ? (
-                <Grid container spacing={2} style={{ padding: '8px' }}>
-                  <CommonSkeleton lenArray={[...Array(7).keys()]} />
-                </Grid>
+              {!leadData || !fields?.length ? (
+                <Box p={2} height={500}>
+                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                </Box>
               ) : showAtLast ? (
                 <DetailsPage data={leadData} fields={fields} />
               ) : (

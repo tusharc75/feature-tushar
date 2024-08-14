@@ -29,6 +29,8 @@ import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
 import moment from 'moment';
 import { FaUserPlus } from 'react-icons/fa6';
+import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
+import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -188,10 +190,6 @@ const Details = (props: DetailProps) => {
       text = values[input.fieldName] ? displayDateTime(values[input.fieldName]) : '-';
     } else if (input.type === 'lookUpDisplay') {
       text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
-    } else if (input.type === 'counter') {
-      text = '-';
-    } else if (input.type === 'groupSignature') {
-      text = '-';
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }
@@ -224,7 +222,7 @@ const Details = (props: DetailProps) => {
     setFormsData(customData);
   };
 
-  const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload', 'groupSignature'].includes(type);
+  const isTypeFile = (type: string) => ['imageUpload', 'fileUpload', 'multiFileUpload', 'multiImageUpload'].includes(type);
 
   const renderData = (val: any, fieldData: any) => {
     const value: any = normalizeValues(val, fieldData);
@@ -378,8 +376,26 @@ const Details = (props: DetailProps) => {
           </Box>
         );
       }
+      if (fieldData.type === 'counter') {
+        return <NumberCell field={fieldData} rowData={val} enableDilaog={false} />;
+      }
+      if (fieldData.type === 'groupSignature') {
+        return <GroupSignatureCell field={fieldData} original={val} enableDilaog={false} />;
+      }
+      if (fieldData.type === 'mobileNumber') {
+        return (
+          <span className="flex items-center">
+            {value}
+            {value !== '-' ? (
+              <span className="!p-0 [&_span.html-custom-tooltip]:!p-0">
+                <CopyToClipboard textToCopy={value} className="ml-0 !p-2" />
+              </span>
+            ) : null}
+          </span>
+        );
+      }
       return (
-        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={classes.fieldText} variant="body2">
+        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={cn(classes.fieldText)} variant="body2">
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
               <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank" rel="noopener noreferrer">
@@ -390,7 +406,6 @@ const Details = (props: DetailProps) => {
           ) : (
             <span className={`text-truncate block`}>{value}</span>
           )}
-          {fieldData.type === 'mobileNumber' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
         </Typography>
       );
     }
@@ -421,11 +436,11 @@ const Details = (props: DetailProps) => {
       const newFormData = [...formsData];
       if (!taskData || taskData?.length === 0) return newFormData;
       formsData?.forEach((ele) => {
-        ele.followUpData = []
+        ele.followUpData = [];
         ele?.sectionFields?.forEach((e) => {
-          e.followUpData = []
-        })
-      })
+          e.followUpData = [];
+        });
+      });
       taskData?.forEach((task, i) => {
         const taskName = task.formRelatedTo?.fields?.[0]?.fieldLabel;
         const sectionIndex = newFormData.findIndex((section) => section.name === task.formRelatedTo.section);
@@ -525,42 +540,6 @@ const Details = (props: DetailProps) => {
                                 </Avatar>
                               </span>
                             </Box>
-                          ) : field.fieldData.type === 'groupSignature' ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2">
-                              {isArray(initialVals[field.fieldData.fieldName]) && initialVals[field.fieldData.fieldName]?.map((ele, index) => (
-                                <div
-                                  className={cn(
-                                    `flex items-center justify-between p-[0px_10px]`,
-                                    initialVals[field.fieldData.fieldName]?.length === index - 1
-                                      ? ''
-                                      : '[border-top:1px_solid_var(--common-border-color)]',
-                                    index % 2 === 0 ? 'md:[border-right:1px_solid_var(--common-border-color)]' : ''
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <p title={ele?.user?.concatedName} className={`text-truncate font-normal`}>
-                                      {ele?.user?.concatedName}
-                                    </p>
-                                    <Link
-                                      title={ele?.user?.concatedName}
-                                      to={`${routes?.userDetail?.path}/${ele?.user?._id}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className={'mt-1 max-h-fit flex-shrink-0'}
-                                    >
-                                      <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
-                                    </Link>
-                                  </div>
-                                  <div className="flex h-[48px] items-center">
-                                    {ele?.signature ? (
-                                      <img alt={ele?.user?.concatedName} className="h-12 w-14 object-contain" src={ele.signature} />
-                                    ) : (
-                                      '-'
-                                    )}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
                           ) : (
                             <Box display="flex" alignItems="center" className="formdata-text-v1">
                               {renderData(initialVals, field.fieldData)}
@@ -591,7 +570,7 @@ const Details = (props: DetailProps) => {
             setOpen({ open: false, section: null });
           }}
           onSuccess={() => {
-            fetchTaskData()
+            fetchTaskData();
             setOpen({ open: false, section: null });
           }}
           section={open?.section}

@@ -21,6 +21,7 @@ import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
 import {
   checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
   getDefaultMyRecordType,
   gridLoadingTimeout,
   lead,
@@ -210,6 +211,7 @@ const Leads = () => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           finalObject['canDelete'] = permissions?.lead?.isDelete && checkIsAllowedToDelete(user, sidebarResource.lead, finalObject?.ownerId);
+          finalObject['isAllowedToUpdate'] = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, u);
           let res = {
             ...finalObject,
             convertedToOpportunity: u.staticData && u.staticData.convertedToOpportunity,
@@ -336,12 +338,12 @@ const Leads = () => {
           message: data.message
         });
         dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
         setIsConformDialogVisible(false);
         setOkButtonLoading(false);
         if (deleteRecord.id) {
           setDeleteRecord({ id: null, name: null });
         }
-        fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -519,9 +521,8 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${
-              deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
-            }?`}
+            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
+              }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

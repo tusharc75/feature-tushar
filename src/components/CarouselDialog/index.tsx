@@ -3,6 +3,9 @@ import Carousel from 'react-material-ui-carousel';
 
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import { cn } from 'src/constants/helpers';
+import { SyntheticEvent } from 'react';
+import imageLoadingFailed from 'src/assets/imageLoadingFailed.png';
 
 const useStyles = makeStyles(() => ({
   imageContainer: {
@@ -24,6 +27,20 @@ type CarouselDialogProps = {
 
 const CarouselDialog = ({ images, index, close, title = 'Images' }: CarouselDialogProps) => {
   const classes = useStyles();
+  const classList = ['min-h-[300px]', 'bg-gray-300', 'dark:bg-gray-800'];
+  const handleOnload = (e: SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    target.classList.remove(...classList);
+  };
+
+  const handleOnError = (e: SyntheticEvent<HTMLImageElement, Event>) => {
+    const target = e.target as HTMLImageElement;
+    target.src = imageLoadingFailed;
+    target.classList.remove(...classList);
+    target.classList.add('max-h-[200px]', 'max-w-[200px]', 'rounded-md');
+    target.width = 300;
+    target.height = 300;
+  };
 
   return (
     <Dialog maxWidth="md" fullWidth open={true} onClose={close}>
@@ -44,7 +61,7 @@ const CarouselDialog = ({ images, index, close, title = 'Images' }: CarouselDial
         >
           {images.map((item: any, i) => (
             <div key={i} className={classes.imageContainer}>
-              <img className={classes.img} src={item} alt={''} />
+              <img onError={handleOnError} onLoad={handleOnload} className={cn(classes.img, ...classList)} src={item} alt={''} loading="lazy" />
             </div>
           ))}
         </Carousel>

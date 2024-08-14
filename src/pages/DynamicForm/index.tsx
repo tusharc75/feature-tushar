@@ -175,7 +175,6 @@ const DynamicForm = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions[renderedFrom]?.isUpdate;
           finalObject['canDelete'] = permissions[renderedFrom]?.isDelete;
-          finalObject['test'] = '-';
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

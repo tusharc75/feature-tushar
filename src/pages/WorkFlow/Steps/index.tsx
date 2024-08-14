@@ -14,11 +14,10 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
-import ManageSteps from 'src/pages/WorkFlow/Steps/ManageSteps';
+import ManageSteps from 'src/components/FormBuilder/Steps/ManageSteps';
 import routes from 'src/components/Helpers/Routes';
 import { sortBy } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
-import ConfigureField from 'src/pages/WorkFlow/Steps/ConfigureFields';
 
 const Steps = ({ resource, loading, id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,7 +27,7 @@ const Steps = ({ resource, loading, id }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [steps, setSteps] = useState(null);
-  const [openField, setOpenField] = useState({ open: false, step: null });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const fetchData = useCallback(
     async (cancelTokenSource?: CancelTokenSource) => {
@@ -52,6 +51,43 @@ const Steps = ({ resource, loading, id }) => {
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
   }, []);
+
+  const handleSave = (values)=>{
+    setIsSubmitting(true);
+    if (values?.stepId) {
+      axiosInstance()
+        .put(`${routes.workFlow.path}/${id}/steps`, values )
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setIsSubmitting(false);
+          fetchData();
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    } else {
+      axiosInstance()
+        .post(`${routes?.workFlow.path}/${id}/steps`, values)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setIsSubmitting(false);
+          fetchData();
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  }
 
   const handleDelete = (step) => {
     setDeleting(true);
@@ -122,7 +158,7 @@ const Steps = ({ resource, loading, id }) => {
       </Box>
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
-          <RenderStepItems {...{ steps, setSteps, stepsLoading, loading, setOpen, setDeleteData, setOpenField }} />
+          <RenderStepItems {...{ steps, setSteps, stepsLoading, loading, setOpen, setDeleteData }} />
           <DragOverlay>
             {activeItem && (
               <span className="[&_.drag-handle]:!cursor-grabbing">
@@ -134,34 +170,19 @@ const Steps = ({ resource, loading, id }) => {
       </Box>
 
       <>
-        {open?.open && (
+        {(open?.open || isSubmitting) && (
           <ManageSteps
             data={open?.data}
-            onSuccess={() => {
-              fetchData();
+            onSuccess={(data) => {
+              handleSave(data);
               setOpen({ open: false, data: null });
             }}
             onClose={() => {
               setOpen({ open: false, data: null });
             }}
-            id={id}
+            isSubmitting={isSubmitting}
           />
         )}
-
-        {openField?.open && (
-          <ConfigureField
-            id={id}
-            step={openField?.step}
-            handleClose={() => {
-              setOpenField({ open: false, step: null });
-            }}
-            handleSucess={() => {
-              fetchData();
-              setOpenField({ open: false, step: null });
-            }}
-          />
-        )}
-
 
         {deleteData && (
           <ConfirmationDialog
@@ -179,14 +200,14 @@ const Steps = ({ resource, loading, id }) => {
 
 export default Steps;
 
-const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setDeleteData, setOpenField, loading }) => {
+const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setDeleteData, loading }) => {
   return (
     <div className="grid grid-cols-1 gap-2">
       {steps && steps?.length ? (
         <ul className="grid list-none items-start gap-2">
           <SortableContext items={steps.map((d) => d._id)}>
             {steps?.map((step, index) => {
-              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData, setOpenField, index }} />;
+              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData,index }} />;
             })}
           </SortableContext>
         </ul>
@@ -203,7 +224,7 @@ const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setDeleteData
   );
 };
 
-const SingleStep = ({ step, setOpen, setDeleteData, setOpenField, index }) => {
+const SingleStep = ({ step, setOpen, setDeleteData, index }) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: step._id,
     data: {
@@ -242,19 +263,6 @@ const SingleStep = ({ step, setOpen, setDeleteData, setOpenField, index }) => {
                   <EditIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
-              {!step?.linkWithResource && (
-                <HtmlTooltip title={'Add Fields'}>
-                  <IconButton
-                    size="small"
-                    aria-label="Edit"
-                    onClick={() => {
-                      setOpenField({ open: true, step: step });
-                    }}
-                  >
-                    <BuildIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
-              )}
               <HtmlTooltip title={'Delete'}>
                 <IconButton
                   size="small"
