@@ -582,7 +582,7 @@ const ContactDetailsPage = (props) => {
             )}
             {contactPermissions?.isDelete && allowedToDelete && (
               <DeleteButton
-                text={isMobile ? <MdDelete size={20} /> : 'Delete'}
+                text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'}
                 onClick={() => setShowConfirmBox(true)} />
             )}
             <ActivityButton
