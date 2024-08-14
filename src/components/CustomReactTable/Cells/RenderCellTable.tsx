@@ -5,6 +5,7 @@ type RenderCellTableProps<T> = {
   columns: RenderCellTableColumnDef<T>[];
   data: T[];
   dataMaxHeight?: string;
+  enableDilaog?: boolean;
 };
 
 export type GenericRowData = {
@@ -12,20 +13,25 @@ export type GenericRowData = {
 };
 
 export type RenderCellTableColumnDef<T> = {
-  head: React.ReactNode;
+  head?: React.ReactNode;
   accessor: string;
   cell: (d: T) => React.ReactNode;
   width?: string;
 };
 
-function RenderCellTable<T extends GenericRowData>({ columns, data, dataMaxHeight = '400px' }: RenderCellTableProps<T>) {
+function RenderCellTable<T extends GenericRowData>({ columns, data, dataMaxHeight = '400px', enableDilaog = true }: RenderCellTableProps<T>) {
   return (
     <TableContainer component={Paper} elevation={0} style={{ maxHeight: dataMaxHeight ? dataMaxHeight : 'auto' }}>
-      <Table stickyHeader>
+      <Table stickyHeader size={enableDilaog ? 'medium' : 'small'}>
         <TableHead>
           <TableRow>
             {columns.map((column) => (
-              <TableCell key={column.accessor} component={'th'} style={{ width: column.width ? column.width : 'auto' }}>
+              <TableCell
+                key={column.accessor}
+                component={'th'}
+                style={{ minWidth: column.width ? column.width : 'auto' }}
+                className="bg-white dark:!bg-[rgba(0,0,0,13%)]"
+              >
                 {column.head}
               </TableCell>
             ))}
