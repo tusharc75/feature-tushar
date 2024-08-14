@@ -94,7 +94,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
       return
     }
     setSubmitting(true);
-    if (values?.linkWithResource || values?.linkWithMaterial) {
+    if (values?.linkWithResource) {
       values.fields = []
     }
     if (data?._id) {
@@ -383,7 +383,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     label="Show In Pdf"
                   />
                 </Box>
-                {!values['linkWithResource'] && !values['linkWithMaterial'] && (
+                {!values['linkWithResource'] && (
                   <Box className="mt-2">
                     <Button
                       variant="contained"
