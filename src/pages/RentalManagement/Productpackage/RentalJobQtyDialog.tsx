@@ -274,7 +274,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
       let rows: any = [];
       let priceData: any = [];
-      const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+      const priceFieldName = `price_${currency}`;
       const fieldAll: any = allFields.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
 
       if ((values['unit'] || values['pricingMethod']) && !values[priceFieldName]) {

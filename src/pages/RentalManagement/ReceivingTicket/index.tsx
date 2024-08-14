@@ -2964,14 +2964,12 @@ const ActionButtonMenuItems = ({
             {`Transfer to another ${routes.rentalManagement.title}`}
           </MenuItem>
         )}
-      {selectedRecords?.length &&
-        uniq(map(selectedRecords, 'productId')).length === 1 &&
-        selectedRecords?.every((e) => e?.status === ASSET_STATUS.inUse) &&
+      {selectedRecords?.length && selectedRecords?.every((e) => e?.status === ASSET_STATUS.inUse) &&
         selectedRecords?.every((e) => e?.loadingTicketId) &&
         !selectedRecords?.some((e) => e?.receivingTicketId || e?.returnTicketId) &&
         selectedRecords?.map((r) => getParentPackageId(r?.uniqueId))?.every((_id) => _id === getParentPackageId(selectedRecords[0]?.uniqueId)) && (
           <MenuItem
-            // id={'transfer-to-another-package-menu-item'}
+            id={'transfer-to-another-package-menu-item'}
             onClick={() => {
               setTransferAnotherPackageialog(true);
             }}

@@ -430,6 +430,8 @@ const Productpackage = ({
     const isPriceRequired = allFields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
 
+    const currency = rentalManagementData?.currency?.toLowerCase();
+
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = `${parent.type === MATERIAL_TYPE.service
@@ -452,9 +454,9 @@ const Productpackage = ({
               : parent.description;
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       parent.qtyDisplay = parent.qty;
-      parent.isValid = parent['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
+      parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (parent?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
-        parent.isValid = parent['price_' + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+        parent.isValid = parent[`price_${currency}`] || parent[`finalPrice_${currency}`] ? true : false;
       }
       if (!parent.isValid) {
         nextStepMessage = rentalManagementMessage.validPrice;
@@ -514,6 +516,8 @@ const Productpackage = ({
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, productSerialNumbers, parent, isPriceRequired, loadingTicketProducts) => {
+    const currency = rentalManagementData?.currency?.toLowerCase();
+
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
@@ -535,9 +539,9 @@ const Productpackage = ({
               : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       _subRow.qtyDisplay = `${parent.qtyDisplay * _subRow.qty} `;
-      _subRow.isValid = _subRow['finalPrice_' + rentalManagementData?.currency?.toLowerCase()] ? true : !isPriceRequired;
+      _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : !isPriceRequired;
       if (_subRow?.type === MATERIAL_TYPE.service && rentalPolicyData?.servicePriceRequired) {
-        _subRow.isValid = _subRow['price_' + rentalManagementData?.currency?.toLowerCase()] ? true : false;
+        _subRow.isValid = _subRow[`price_${currency}`] || _subRow[`finalPrice_${currency}`] ? true : false;
       }
       _subRow.assetQty = _subRow.serializedProduct
         ? inventory?.filter((e) => e._id === _subRow._id).length + productSerialNumbers?.filter((e) => e._id === _subRow._id).length
