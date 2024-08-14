@@ -199,7 +199,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                 <Box ml={1} />
               </>
             )}
-            {row.original['type'] !== MATERIAL_TYPE.other && (
+            {row.original['type'] !== MATERIAL_TYPE.other && row.original.type!==MATERIAL_TYPE.manualEntry && (
               <IconButton
                 disabled={!isLatestInvoice}
                 size="small"
