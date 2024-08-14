@@ -421,11 +421,11 @@ const Details = (props: DetailProps) => {
       const newFormData = [...formsData];
       if (!taskData || taskData?.length === 0) return newFormData;
       formsData?.forEach((ele) => {
-        ele.followUpData = []
+        ele.followUpData = [];
         ele?.sectionFields?.forEach((e) => {
-          e.followUpData = []
-        })
-      })
+          e.followUpData = [];
+        });
+      });
       taskData?.forEach((task, i) => {
         const taskName = task.formRelatedTo?.fields?.[0]?.fieldLabel;
         const sectionIndex = newFormData.findIndex((section) => section.name === task.formRelatedTo.section);
@@ -527,39 +527,40 @@ const Details = (props: DetailProps) => {
                             </Box>
                           ) : field.fieldData.type === 'groupSignature' ? (
                             <div className="grid grid-cols-1 md:grid-cols-2">
-                              {isArray(initialVals[field.fieldData.fieldName]) && initialVals[field.fieldData.fieldName]?.map((ele, index) => (
-                                <div
-                                  className={cn(
-                                    `flex items-center justify-between p-[0px_10px]`,
-                                    initialVals[field.fieldData.fieldName]?.length === index - 1
-                                      ? ''
-                                      : '[border-top:1px_solid_var(--common-border-color)]',
-                                    index % 2 === 0 ? 'md:[border-right:1px_solid_var(--common-border-color)]' : ''
-                                  )}
-                                >
-                                  <div className="flex items-center gap-2">
-                                    <p title={ele?.user?.concatedName} className={`text-truncate font-normal`}>
-                                      {ele?.user?.concatedName}
-                                    </p>
-                                    <Link
-                                      title={ele?.user?.concatedName}
-                                      to={`${routes?.userDetail?.path}/${ele?.user?._id}`}
-                                      target="_blank"
-                                      rel="noopener noreferrer"
-                                      className={'mt-1 max-h-fit flex-shrink-0'}
-                                    >
-                                      <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
-                                    </Link>
-                                  </div>
-                                  <div className="flex h-[48px] items-center">
-                                    {ele?.signature ? (
-                                      <img alt={ele?.user?.concatedName} className="h-12 w-14 object-contain" src={ele.signature} />
-                                    ) : (
-                                      '-'
+                              {isArray(initialVals[field.fieldData.fieldName]) &&
+                                initialVals[field.fieldData.fieldName]?.map((ele, index) => (
+                                  <div
+                                    className={cn(
+                                      `flex items-center justify-between p-[0px_10px]`,
+                                      initialVals[field.fieldData.fieldName]?.length === index - 1
+                                        ? ''
+                                        : '[border-top:1px_solid_var(--common-border-color)]',
+                                      index % 2 === 0 ? 'md:[border-right:1px_solid_var(--common-border-color)]' : ''
                                     )}
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <p title={ele?.user?.concatedName} className={`text-truncate font-normal`}>
+                                        {ele?.user?.concatedName}
+                                      </p>
+                                      <Link
+                                        title={ele?.user?.concatedName}
+                                        to={`${routes?.userDetail?.path}/${ele?.user?._id}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className={'mt-1 max-h-fit flex-shrink-0'}
+                                      >
+                                        <FiExternalLink size={16} className=" align-baseline text-gray-500 dark:text-gray-300" />
+                                      </Link>
+                                    </div>
+                                    <div className="flex h-[48px] items-center">
+                                      {ele?.signature ? (
+                                        <img alt={ele?.user?.concatedName} className="h-12 w-14 object-contain" src={ele.signature} />
+                                      ) : (
+                                        '-'
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              ))}
+                                ))}
                             </div>
                           ) : (
                             <Box display="flex" alignItems="center" className="formdata-text-v1">
@@ -591,7 +592,7 @@ const Details = (props: DetailProps) => {
             setOpen({ open: false, section: null });
           }}
           onSuccess={() => {
-            fetchTaskData()
+            fetchTaskData();
             setOpen({ open: false, section: null });
           }}
           section={open?.section}

@@ -4685,3 +4685,23 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
     z-index: 1;
   }
 }
+
+.mui-popper-arrow {
+  position: absolute;
+  font-size: 7px;
+  bottom: 0;
+  left: 0;
+  margin-bottom: -0.9em;
+  width: 3em;
+  height: 1em;
+  &::before {
+    content: '';
+    margin: auto;
+    display: block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 1em 1em 0 1em;
+    border-color: var(--dark-primary, white) transparent transparent transparent;
+  }
+}
