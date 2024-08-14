@@ -11,7 +11,7 @@ import { map, uniq } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { checkFormulaLoop } from 'src/constants/formulaUtility';
 
-const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) => {
+const ConfigureField = ({ step = null, handleClose, handleSucess }) => {
 
   const { state: { user } }: any = useData();
 
