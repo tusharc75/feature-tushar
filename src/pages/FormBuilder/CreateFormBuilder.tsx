@@ -146,6 +146,14 @@ const CreateFormBuilder = () => {
       axiosInstance()
         .get(`/sa-formbuilder/resourcedata/` + resource)
         .then(({ data: { data } }) => {
+          data?.section?.forEach((s: any) => {
+            s?.field?.forEach((f: any) => {
+              if (f?.sectionVisibilityCondition?.length) {
+                s.visibilityCondition = f.sectionVisibilityCondition;
+                delete f.sectionVisibilityCondition;
+              }
+            })
+          })
           setSection(data.section);
           setsectionName(data.sectionName || '');
           setResourceLabel(data.resourceLabel);
@@ -177,6 +185,7 @@ const CreateFormBuilder = () => {
     let order = 0;
     section.forEach((_section) => {
       _section.field.forEach((_field) => {
+        _field.sectionVisibilityCondition = [];
         let _field_data = _field;
         _field_data._id = _field_data._id.toString();
         _field_data.sectionName = _section.sectionName;
@@ -186,6 +195,9 @@ const CreateFormBuilder = () => {
         _field_data.order = ++order;
         if (!_field_data.roleType) {
           _field_data.roleType = 0;
+        }
+        if (_section?.visibilityCondition?.length) {
+          _section.field[0].sectionVisibilityCondition = _section.visibilityCondition;
         }
         data.push(_field_data);
       });

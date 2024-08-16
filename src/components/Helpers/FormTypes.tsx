@@ -247,6 +247,39 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
   );
 };
 
+export const checkCondition = (fields, fieldName, value, values) => {
+  const _field = fields?.filter((f) => f?.fieldName === fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === fieldName)[0] : null;
+  if (_field) {
+    if (_field?.type === 'checkBox') {
+      if (value === 'yes') {
+        return values[fieldName];
+      } else {
+        return !values[fieldName];
+      }
+    } else if (_field?.type === 'dropDown') {
+      if (value?.split(',')?.includes(values[fieldName])) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (_field?.type === 'multiSelect') {
+      if (value?.split(',').some((v) => values[fieldName]?.includes(v))) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (values[fieldName] === value) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+};
+
 const FormTypes = (props) => {
   const theme = useTheme();
   const tempProps = {
@@ -794,48 +827,15 @@ const FormTypes = (props) => {
     return label;
   };
 
-  const checkCondition = (fieldName, value, values) => {
-    const _field = fields?.filter((f) => f?.fieldName === fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === fieldName)[0] : null;
-    if (_field) {
-      if (_field?.type === 'checkBox') {
-        if (value === 'yes') {
-          return values[fieldName];
-        } else {
-          return !values[fieldName];
-        }
-      } else if (_field?.type === 'dropDown') {
-        if (value?.split(',')?.includes(values[fieldName])) {
-          return true;
-        } else {
-          return false;
-        }
-      } else if (_field?.type === 'multiSelect') {
-        if (value?.split(',').some((v) => values[fieldName]?.includes(v))) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        if (values[fieldName] === value) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    } else {
-      return false;
-    }
-  };
-
   const isVisible = () => {
     if (fieldData?.visibilityCondition?.length > 0) {
       let visible = false;
       let show = true;
-      fieldData?.visibilityCondition.forEach((condition, i) => {
+      fieldData?.visibilityCondition?.forEach((condition, i) => {
         if (condition?.logic === LOGIC[0]) {
           condition?.fields?.forEach((field) => {
             if (field?.fieldName && field?.value) {
-              if (!checkCondition(field?.fieldName, field?.value, values)) {
+              if (!checkCondition(fields, field?.fieldName, field?.value, values)) {
                 show = false;
                 return;
               }
@@ -845,7 +845,7 @@ const FormTypes = (props) => {
           let count = 0;
           condition?.fields?.forEach((field) => {
             if (field?.fieldName && field?.value) {
-              if (checkCondition(field?.fieldName, field?.value, values)) {
+              if (checkCondition(fields, field?.fieldName, field?.value, values)) {
                 return;
               } else {
                 count = count + 1;
