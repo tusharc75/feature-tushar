@@ -13,7 +13,7 @@ import Visibility from './Visibility';
 import update from 'immutability-helper';
 
 export const SectionProperties = ({ handleClose, section, setSections, sections }) => {
-  const [initialValues, setInitialValues] = useState({ visibilityCondition: section?.visibilityCondition || [] });
+  const [initialValues, setInitialValues] = useState({ visibilityCondition: section?.sectionProperties?.visibilityCondition || [] });
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -73,8 +73,11 @@ export const SectionProperties = ({ handleClose, section, setSections, sections 
             if (item.sectionId !== section.sectionId) return item;
             return {
               ...item,
-              visibilityCondition: values.visibilityCondition
-            };
+              sectionProperties: {
+                ...(item?.sectionProperties || {}),
+                visibilityCondition: values.visibilityCondition
+              }
+            };            
           })
       })
     );

@@ -11,7 +11,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import { useData } from '../../StateProvider/Provider';
 import { checkFormulaLoop, checkUniqueValidation } from '../../constants/formulaUtility';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { isEqual, startCase, toLower } from 'lodash';
+import { isEmpty, isEqual, startCase, toLower } from 'lodash';
 import { isTablet } from 'react-device-detect';
 import { IoIosArrowDropdown } from 'react-icons/io';
 import { RiCloseCircleFill, RiSaveFill } from 'react-icons/ri';
@@ -148,9 +148,9 @@ const CreateFormBuilder = () => {
         .then(({ data: { data } }) => {
           data?.section?.forEach((s: any) => {
             s?.field?.forEach((f: any) => {
-              if (f?.sectionVisibilityCondition?.length) {
-                s.visibilityCondition = f.sectionVisibilityCondition;
-                delete f.sectionVisibilityCondition;
+              if (!isEmpty(f?.sectionProperties)) {
+                s.sectionProperties = f.sectionProperties;
+                delete f.sectionProperties;
               }
             })
           })
@@ -184,8 +184,8 @@ const CreateFormBuilder = () => {
     let data = [];
     let order = 0;
     section.forEach((_section) => {
-      _section.field.forEach((_field) => {
-        _field.sectionVisibilityCondition = [];
+      _section.field.forEach((_field, index) => {
+        _field.sectionProperties = {};
         let _field_data = _field;
         _field_data._id = _field_data._id.toString();
         _field_data.sectionName = _section.sectionName;
@@ -196,8 +196,8 @@ const CreateFormBuilder = () => {
         if (!_field_data.roleType) {
           _field_data.roleType = 0;
         }
-        if (_section?.visibilityCondition?.length) {
-          _section.field[0].sectionVisibilityCondition = _section.visibilityCondition;
+        if (index === 0 && _section?.sectionProperties) {
+          _field['sectionProperties'] = _section.sectionProperties || {};
         }
         data.push(_field_data);
       });

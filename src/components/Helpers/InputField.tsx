@@ -21,11 +21,11 @@ const InputField = (props) => {
   }, [fieldsData]);
 
   const isSectionVisible = (section) => {
-    const fieldData = section?.sectionFields?.find((field) => field?.sectionVisibilityCondition?.length > 0);
+    const fieldData = section?.sectionFields?.find((field) => field?.sectionProperties?.visibilityCondition?.length > 0);
     if (fieldData) {
       let visible = false;
       let show = true;
-      fieldData?.sectionVisibilityCondition?.forEach((condition, i) => {
+      fieldData?.sectionProperties?.visibilityCondition?.forEach((condition, i) => {
         if (condition?.logic === LOGIC[0]) {
           condition?.fields?.forEach((field) => {
             if (field?.fieldName && field?.value) {
@@ -57,7 +57,7 @@ const InputField = (props) => {
           return;
         }
 
-        if (i === fieldData?.sectionVisibilityCondition?.length - 1) {
+        if (i === fieldData?.sectionProperties?.visibilityCondition?.length - 1) {
           visible = show;
         }
       });
