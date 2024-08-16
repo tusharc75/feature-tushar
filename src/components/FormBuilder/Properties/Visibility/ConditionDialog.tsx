@@ -11,7 +11,7 @@ import { Form, Formik } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, fieldData }) => {
+const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, fieldsToExclude }) => {
   const [initialValues, setInitialValues] = useState({ fieldName: '', value: null });
   const [options, setOptions] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
@@ -168,7 +168,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                     options={
                       fields?.filter(
                         (f) =>
-                          f?.fieldName !== fieldData?.fieldName &&
+                          !fieldsToExclude?.includes(f.fieldName) &&
                           !fieldValue?.visibilityCondition
                             ?.find((_f) => _f?.index === group)
                             ?.fields?.map((d) => d?.fieldName)
@@ -177,7 +177,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                         ? fields
                             ?.filter(
                               (f) =>
-                                f?.fieldName !== fieldData?.fieldName &&
+                                !fieldsToExclude?.includes(f.fieldName) &&
                                 !fieldValue?.visibilityCondition
                                   ?.find((_f) => _f?.index === group)
                                   ?.fields?.map((d) => d?.fieldName)

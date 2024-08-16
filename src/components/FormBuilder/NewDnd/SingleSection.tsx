@@ -5,6 +5,7 @@ import { DragIndicator, Settings } from '@material-ui/icons';
 import update from 'immutability-helper';
 import React, { useMemo } from 'react';
 import Field from './Field';
+import { SectionProperties } from '../Properties/SectionProperties';
 
 type SingleSectionPorps = {
   section: any;
@@ -38,6 +39,7 @@ const SingleSection = ({
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
+  const [openProperties, setOpenProperties] = React.useState(false);
 
   const handleClose = () => {
     setAnchorEl(null);
@@ -108,9 +110,9 @@ const SingleSection = ({
         style={style}
         className={`p-2 ${
           isDragging
-            ? "bg-[var(--dark-secondary,theme('colors.cyan.100'))] [border:1px_dashed_var(--common-border-color)]"
-            : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
-        }   transition-all duration-300`}
+          ? "bg-[var(--dark-secondary,theme('colors.cyan.100'))] [border:1px_dashed_var(--common-border-color)]"
+          : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
+          }   transition-all duration-300`}
       >
         <div className={isDragging ? 'opacity-40' : ''}>
           <div className="mb-2 flex items-center justify-between gap-2">
@@ -129,12 +131,17 @@ const SingleSection = ({
             <IconButton
               aria-label="setting"
               onClick={handleClick}
-              disabled={section.field.filter((_field) => _field.editAble === false).length > 0 ? true : true}
             >
               <Settings fontSize="small" />
             </IconButton>
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-              <MenuItem onClick={() => deleteSection(section.sectionId)}>Delete</MenuItem>
+              <MenuItem onClick={() => setOpenProperties(true)}>Edit Properties</MenuItem>
+              <MenuItem
+                onClick={() => deleteSection(section.sectionId)}
+                disabled={section.field.filter((_field) => _field.editAble === false).length > 0 ? true : true}
+              >
+                Delete
+              </MenuItem>
             </Menu>
           </div>
 
@@ -178,6 +185,14 @@ const SingleSection = ({
           )}
         </div>
       </div>
+      {openProperties && (
+        <SectionProperties
+          handleClose={() => setOpenProperties(false)}
+          section={section}
+          setSections={setSections}
+          sections={sections}
+        />
+      )}
     </>
   );
 };
