@@ -12,7 +12,7 @@ import InputField from 'src/components/Helpers/InputField';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
-import { CHILD_RESOURCE, convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, getObjKeys, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, displayDate, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -31,6 +31,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
 
 	const [receiveDate, setReceiveDate] = useState(new Date());
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [minReceiveDate, setMinReceiveDate] = useState(null);
 
 	useEffect(() => {
 		fetchData();
@@ -40,6 +41,8 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
 		var fields = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyCost, subcontractAssemblyData?.currency, true, false);
 
 		axiosInstance().get(`${routes.subcontractAssembly.path}/total-consumables-cost/${subcontractAssemblyData?._id}/${_id}`).then(({ data: { data } }) => {
+			setReceiveDate(new Date(data?.minDate));
+			setMinReceiveDate(new Date(data?.minDate));
 			const tempInitialData = getObjKeys('', fields);
 			const calValues = autoCalculateSpecificFields({ [`consumableCost_${subcontractAssemblyData?.currency.toLowerCase()}`]: data?.totalConsumablesCost }, tempInitialData, fields);
 			Object.assign(tempInitialData, calValues);
@@ -70,6 +73,18 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
 				setIsSubmitting(false);
 			});
 	};
+
+	const validateDate = () => {
+		const errors: any = {};
+		if (!receiveDate) {
+			errors['receiveDate'] = `Please select receive date`;
+		}
+		if (minReceiveDate && receiveDate < minReceiveDate) {
+			errors['receiveDate'] = `Receive date can't be less than ${displayDate(minReceiveDate)}`;
+		}
+
+		return errors;
+	}
 
 	return (
 		<Dialog
@@ -136,8 +151,9 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
 													setReceiveDate(convertDateInDateTime(value))
 												}}
 												fullWidth
-											// error={validateDate(values)?.receiveDate}
-											// helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
+												{...(minReceiveDate ? { minDate: minReceiveDate } : {})}
+												error={validateDate()?.receiveDate}
+												helperText={validateDate()?.receiveDate ? validateDate()?.receiveDate : ''}
 											/>
 										</MuiPickersUtilsProvider>
 									</Grid>
@@ -156,7 +172,7 @@ export default function ReceivingCostDialog({ onClose, onSuccess, _id, subcontra
 									Cancel
 								</Button>
 								<CustomButton
-									disabled={isSubmitting}
+									disabled={validateDate()?.receiveDate || isSubmitting}
 									loading={isSubmitting}
 									variant="contained"
 									color="primary"
