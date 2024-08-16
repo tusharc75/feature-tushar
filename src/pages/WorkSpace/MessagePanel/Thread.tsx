@@ -8,7 +8,7 @@ import { Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import { DisplaySingleMessage, MoreMenuAndDeleteConfirmDialog } from './Messages';
 
-const Thread = ({ message, onClose, socket, channelId, deleteMessage, open }) => {
+const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, channelData }) => {
   const [messages, setMessages] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
 
@@ -105,7 +105,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open }) =>
           )}
         </div>
         <div className="footer">
-          <SendMessage channelId={channelId} socket={socket} messageId={message?._id} editorId={'from-thread'} />
+          <SendMessage channelId={channelId} socket={socket} messageId={message?._id} editorId={'from-thread'} channelData={channelData} />
         </div>
 
         <MoreMenuAndDeleteConfirmDialog
