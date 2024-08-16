@@ -14,7 +14,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, dateFormat, getFileIconSrc } from 'src/constants/helpers';
-import { Message } from 'src/pages/WorkSpace/types';
+import { ChannelData, Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
 import Thread from './Thread';
@@ -24,13 +24,14 @@ type MessagesProps = {
   socket: Socket;
   threadDialogOpen: { open: boolean; message: Message };
   setThreadDialogOpen: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
+  channelData: ChannelData;
 };
 
 export const groupByDate = (messages: Message[]) => {
   return groupBy(messages, (message) => moment(message.date).format(dateFormat));
 };
 
-const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: MessagesProps) => {
+const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -93,10 +94,10 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
                 m['reactions'].push({ emoji, user });
               }
             });
-          })
+          });
           return updatedMessages;
         });
-      })
+      });
       socket.on('removeReaction', ({ messageId, emoji, user }) => {
         setMessages((prevMessages) => {
           let updatedMessages: any = Object.assign({}, prevMessages);
@@ -108,7 +109,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
                 }
               }
             });
-          })
+          });
           return updatedMessages;
         });
       });
@@ -194,7 +195,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} />
+      <SendMessage channelId={channelId} socket={socket} channelData={channelData} />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
@@ -212,6 +213,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen }: 
         socket={socket}
         channelId={channelId}
         deleteMessage={deleteMessage}
+        channelData={channelData}
       />
     </>
   );
@@ -252,7 +254,11 @@ export const DisplaySingleMessage = ({
     setEmojiPanelAnchor(null);
   };
   const toastConfig = useContext(CustomToastContext);
-  const { state: { user: { user } } } = useData();
+  const {
+    state: {
+      user: { user }
+    }
+  } = useData();
 
   if (!message) return null;
 
@@ -262,8 +268,8 @@ export const DisplaySingleMessage = ({
   const groupedReactions = Object.values(groupBy(message.reactions, 'emoji')).map((reactions) => ({
     emoji: reactions[0].emoji,
     count: reactions.length,
-    users: reactions.map((reaction) => reaction.user),
-  }))
+    users: reactions.map((reaction) => reaction.user)
+  }));
 
   const handleReaction = async (emoji) => {
     try {
@@ -287,7 +293,7 @@ export const DisplaySingleMessage = ({
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  }
+  };
 
   const downloadFile = (attachment) => {
     axiosInstance()
@@ -357,26 +363,33 @@ export const DisplaySingleMessage = ({
                     }}
                   ></span>
                   {groupedReactions?.length > 0 && (
-                    <div className="reactions flex gap-1 mt-2">
+                    <div className="reactions mt-2 flex gap-1">
                       {groupedReactions?.map((reaction, index) => (
                         <Tooltip
                           key={index}
                           title={
                             <div className="p-1">
-                              <p>{reaction.users.map((u) => {
-                                if (u.optionValue === user?._id) return 'You';
-                                else return u.optionLabel;
-                              }).join(', ')} reacted with {reaction.emoji}</p>
+                              <p>
+                                {reaction.users
+                                  .map((u) => {
+                                    if (u.optionValue === user?._id) return 'You';
+                                    else return u.optionLabel;
+                                  })
+                                  .join(', ')}{' '}
+                                reacted with {reaction.emoji}
+                              </p>
                             </div>
                           }
                         >
-                          <div className="reaction flex items-center gap-1 bg-gray-200 p-1 rounded-md">
+                          <div className="reaction flex items-center gap-1 rounded-md bg-gray-200 p-1">
                             <span
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleReactionClick(reaction);
                               }}
-                            >{reaction.emoji}</span>
+                            >
+                              {reaction.emoji}
+                            </span>
                             <span>{reaction.count}</span>
                           </div>
                         </Tooltip>

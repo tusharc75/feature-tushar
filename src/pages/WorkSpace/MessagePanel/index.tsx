@@ -127,6 +127,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
               socket={socket}
               threadDialogOpen={threadDialogOpen}
               setThreadDialogOpen={setThreadDialogOpen}
+              channelData={channelData}
             />
           </div>
         )}

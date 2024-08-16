@@ -1,14 +1,15 @@
 import { Button, IconButton } from '@material-ui/core';
-import { AttachFile, Close, FindInPageRounded, Send } from '@material-ui/icons';
+import { AttachFile, Close, Send } from '@material-ui/icons';
 import { Editor } from '@tinymce/tinymce-react';
 import { useContext, useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Socket } from 'socket.io-client';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn, getFileIconSrc } from 'src/constants/helpers';
+import Mention from 'src/pages/WorkSpace/MessagePanel/Mention';
+import { ChannelData } from 'src/pages/WorkSpace/types';
 import { fileToBase64, isImageFile } from 'src/pages/WorkSpace/utils';
 
 type SendMessageProps = {
@@ -18,16 +19,37 @@ type SendMessageProps = {
   initialMessage?: string;
   onEditComplete?: () => void;
   editorId?: string;
+  channelData: ChannelData;
 };
 
-const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '', onEditComplete = () => { }, editorId = '' }: SendMessageProps) => {
+const SendMessage = ({
+  channelId,
+  socket,
+  messageId = null,
+  initialMessage = '',
+  onEditComplete = () => {},
+  editorId = '',
+  channelData
+}: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
+  const numberOfMentions = useRef(0);
   const [isLoading, setIsLoading] = useState(false);
   const [message, setMessage] = useState(initialMessage);
-  const editorRef = useRef(null);
+  const editorRef = useRef<Editor['editor'] | null>(null);
   const [files, setFiles] = useState([]);
   const [filesWithUrl, setFilesWithUrl] = useState([]);
+  const [mentionInitialPosition, setMentionInitialPosition] = useState<{
+    node: HTMLElement;
+    offsetIndex: number;
+    clientWidth: number;
+    clientHeight: number;
+    getBoundingClientRect: () => DOMRect;
+  } | null>(null);
+
+  useEffect(() => {
+    numberOfMentions.current = 0;
+  }, [channelId]);
 
   const postMessage = async () => {
     setIsLoading(true);
@@ -52,6 +74,7 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
       toastConfig.setToastConfig(error);
     } finally {
       setIsLoading(false);
+      numberOfMentions.current = 0;
     }
   };
 
@@ -75,6 +98,46 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
   const removeFile = (index) => {
     setFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     setFilesWithUrl((prevFiles) => prevFiles.filter((_, i) => i !== index));
+  };
+
+  const handleKeyDown = (e: KeyboardEvent) => {
+    const key = e.key;
+    if (key === 'Enter' && !e.ctrlKey) {
+      e.preventDefault();
+      postMessage();
+    }
+    if (key === '@') {
+      e.preventDefault();
+      e.stopPropagation();
+      numberOfMentions.current += 1;
+      if (!editorRef.current) return;
+
+      const elementRect = editorRef.current?.selection.getRng().getBoundingClientRect();
+      const frameRect = editorRef.current?.iframeElement?.getBoundingClientRect();
+      const range = editorRef.current?.selection.getRng();
+      const htmlElement = document.createElement('span');
+      htmlElement.id = `mention-${numberOfMentions.current || 0}`;
+      htmlElement.innerHTML = '@';
+
+      editorRef.current?.selection.setNode(htmlElement);
+      setMentionInitialPosition({
+        node: range.endContainer.parentElement,
+        offsetIndex: range.endOffset,
+        clientWidth: elementRect.width,
+        clientHeight: elementRect.height,
+        getBoundingClientRect: () => ({
+          bottom: elementRect.bottom + frameRect.bottom,
+          height: elementRect.height,
+          width: elementRect.width,
+          left: elementRect.left + frameRect.left,
+          right: elementRect.right + frameRect.right,
+          top: elementRect.top + frameRect.top,
+          x: elementRect.x + frameRect.x,
+          y: elementRect.y + frameRect.y,
+          toJSON: () => {}
+        })
+      });
+    }
   };
 
   return (
@@ -131,13 +194,8 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
               setMessage(d);
             }
           }}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && !e.ctrlKey) {
-              e.preventDefault();
-              postMessage();
-            }
-          }}
-          value={message}
+          onKeyDown={handleKeyDown}
+          value={message ? message : '<span></span>'}
           onInit={(_evt, editor) => {
             editorRef.current = editor;
             if (initialMessage) {
@@ -152,7 +210,25 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
             height: 100,
             menubar: false,
             paste_as_text: true,
-            plugins: ['advlist', 'paste', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview', 'anchor', 'searchreplace', 'visualblocks', 'fullscreen', 'insertdatetime', 'media', 'table', 'code', 'wordcount'],
+            plugins: [
+              'advlist',
+              'paste',
+              'autolink',
+              'lists',
+              'link',
+              'image',
+              'charmap',
+              'preview',
+              'anchor',
+              'searchreplace',
+              'visualblocks',
+              'fullscreen',
+              'insertdatetime',
+              'media',
+              'table',
+              'code',
+              'wordcount'
+            ],
             toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
             content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
           }}
@@ -202,73 +278,17 @@ const SendMessage = ({ channelId, socket, messageId = null, initialMessage = '',
           )}
         </div>
       </div>
+      {mentionInitialPosition && (
+        <Mention
+          editor={editorRef.current}
+          mentionInitialPosition={mentionInitialPosition}
+          setMentionInitialPosition={setMentionInitialPosition}
+          channelData={channelData}
+          numberOfMentions={numberOfMentions.current}
+        />
+      )}
     </div>
   );
 };
 
 export default SendMessage;
-
-const ImageViewer = ({ src, open, onClose }: { src: string | string[]; open: boolean; onClose: () => void }) => {
-  const [currentSrc, setCurrentSrc] = useState(Array.isArray(src) ? src[0] : src);
-  const imageRef = useRef<HTMLImageElement>(null);
-  const [size, setSize] = useState([imageRef.current?.width, imageRef.current?.height]);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setCurrentSrc(Array.isArray(src) ? src[0] : src);
-    return () => setSize([0, 0]);
-  }, [src]);
-
-  const portalContainer = document.getElementById('portal-container');
-  const isList = Array.isArray(src);
-
-  function ZoomIn() {
-    const image = imageRef.current;
-    let width = image.clientWidth;
-    let height = image.clientHeight;
-
-    setSize((prev) => [width + 50, height + 50]);
-  }
-  function ZoomOut() {
-    const image = imageRef.current;
-    let width = image.clientWidth;
-    let height = image.clientHeight;
-
-    setSize((prev) => [width - 50, height - 50]);
-  }
-
-  if (!open) return null;
-  return createPortal(
-    <div className="image-viewer fixed inset-0 z-[1499]  bg-black/50">
-      <span className="absolute right-5 top-5 overflow-hidden rounded-md">
-        <IconButton onClick={onClose}>
-          <Close className="text-white" />
-        </IconButton>
-      </span>
-      <span className="absolute right-20 top-5 overflow-hidden rounded-md">
-        <IconButton onClick={ZoomIn}>
-          <FindInPageRounded className="text-white" />
-        </IconButton>
-      </span>
-      <div className="flex h-full w-full items-center justify-center">
-        <div ref={containerRef} className="relative h-[calc(100%_-_20px)] w-[calc(100%_-_20px)] overflow-hidden md:h-[80%] md:w-[80%]">
-          <img
-            key={currentSrc}
-            onLoad={(e) => {
-              const target = e.currentTarget || (e.target as HTMLImageElement);
-              if (target) setSize([target.width, target.height]);
-            }}
-            width={size[0] > 0 ? size[0] : undefined}
-            height={size[1] > 0 ? size[1] : undefined}
-            ref={imageRef}
-            src={currentSrc}
-            alt=""
-            loading="lazy"
-            className="absolute inset-0 h-auto object-cover"
-          />
-        </div>
-      </div>
-    </div>,
-    portalContainer
-  );
-};
