@@ -2744,25 +2744,14 @@ const FormTypes = (props) => {
             }
           }}
         >
-          <CustomDialogHeader
-            showRequiredLabel={false}
-            onClose={() => {
-              if (!isImgUploading) {
-                setImage('');
-              }
-            }}
-            title="Edit Image"
+          <ImageCropTool
+            image={image}
+            setImage={setImage}
+            getImageUrl={getImageUrl}
+            isImgUploading={isImgUploading}
+            imageUploadProgress={imageUploadProgress}
+            imageFileName={imageFileName}
           />
-          <CustomDialogContent isFooterPresent={false}>
-            <ImageCropTool
-              image={image}
-              setImage={setImage}
-              getImageUrl={getImageUrl}
-              isImgUploading={isImgUploading}
-              imageUploadProgress={imageUploadProgress}
-              imageFileName={imageFileName}
-            />
-          </CustomDialogContent>
         </Dialog>
       </InfoLabel>
     ) : type === 'richTextEditor' ? (
