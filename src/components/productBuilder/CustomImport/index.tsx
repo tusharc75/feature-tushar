@@ -29,7 +29,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import _, { isEmpty, uniqBy } from 'lodash';
-import { read, utils, write } from 'xlsx';
+import { read, utils, write, writeFile } from 'xlsx';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddColumnDialog';
@@ -59,6 +59,14 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [openRowNumberDialog, setOpenRowNumberDialog] = useState(false);
+
+  const charToNum = (char) => {
+    let num = 0;
+    for (let i = 0; i < char?.length; i++) {
+      num = num * 26 + (char?.charCodeAt(i) - 'A'.charCodeAt(0) + 1);
+    }
+    return num;
+  };
 
   useEffect(() => {
     axiosInstance()
@@ -154,56 +162,90 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     setOpenRowNumberDialog(true);
   };
 
-  const handleFileImport = (val, sheetName) => {
+  const handleFileImport = (values) => {
     setOpenRowNumberDialog(false);
-    if (val?.fromRow > 0 && val?.toRow > 0) {
+    if (values?.length && values?.some((v) => v?.startRowCell && v?.endRowCell)) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = e.target.result;
         let readedData = read(data, { type: 'array' });
-        const ws = readedData.Sheets[sheetName || readedData.SheetNames[1]];
-        const jsonData = utils.sheet_to_json(ws, { header: 1 });
-        const headers: any = jsonData[val?.fromRow - 1];
-        const units: any = jsonData[val?.fromRow];
-        const newHeader: any = [];
-        let j;
-        headers.forEach((h, i) => {
-          let name = units[i] ? h + '_' + units[i] : h;
-          let index = i;
+        const newData: any = [];
 
-          const diff = i - j;
-          if (diff != 1) {
-            for (let k = j + 1; k < i; k++) {
-              if (units[k]) {
-                newHeader.push({
-                  name: headers[j] + '_' + units[k],
-                  index: k
+        values?.forEach((value: any) => {
+          const ws = readedData.Sheets[value?.sheetName || readedData.SheetNames[0]];
+          const jsonData = utils.sheet_to_json(ws, { header: 1 });
+
+          const startRowCell = value?.startRowCell?.match(/^(\D+)(\d+)$/);
+          const endRowCell = value?.endRowCell?.match(/^(\D+)(\d+)$/);
+          const headerRow = +value?.headerRow;
+          const fromCol = charToNum(startRowCell[1]) - 1;
+          const fromRow = +startRowCell[2] - 1;
+          const toCol = charToNum(endRowCell[1]) - 1;
+          const toRow = +endRowCell[2] - 1;
+
+          const header: any = jsonData[fromRow];
+          const newHeaders: any = [];
+
+          if (headerRow === 1) {
+            header?.forEach((h, i) => {
+              if (i >= fromCol && i <= toCol) {
+                newHeaders.push({
+                  header: h,
+                  column: i
                 });
               }
-            }
-          }
-          j = index;
+            });
+          } else if (headerRow === 2) {
+            const headers2: any = jsonData[fromRow + 1];
+            let j;
+            header.forEach((h, i) => {
+              if (i >= fromCol && i <= toCol) {
+                let name = headers2[i] ? h + '_' + headers2[i] : h;
+                let index = i;
 
-          newHeader.push({
-            name: name,
-            index: index
+                const diff = i - j;
+                if (diff != 1) {
+                  for (let k = j + 1; k < i; k++) {
+                    if (headers2[k]) {
+                      newHeaders.push({
+                        header: header[j] + '_' + headers2[k],
+                        column: k
+                      });
+                    }
+                  }
+                }
+                j = index;
+
+                newHeaders.push({
+                  header: name,
+                  column: index
+                });
+              }
+            });
+          }
+          newData.push({
+            header: newHeaders,
+            data: jsonData,
+            fromRow: headerRow === 1 ? fromRow + 1 : fromRow + 2,
+            toRow: toRow
           });
         });
-
         const newJsonData: any = [];
 
-        for (let i = val?.fromRow - 1 + 2; i <= val?.toRow - 1; i++) {
+        const noOfRow = Math.max(...newData?.map((obj) => obj.toRow - obj.fromRow));
+        for (let i = 0; i <= noOfRow; i++) {
           const obj: any = {};
-          newHeader?.forEach((ele) => {
-            obj[ele?.name] = jsonData[i][ele?.index];
+          newData?.forEach((_data) => {
+            _data?.header.forEach((_header) => {
+              obj[_header.header] = _data?.data[_data?.fromRow][_header?.column] || '';
+            });
+            _data.fromRow = _data.fromRow + 1;
           });
           newJsonData.push(obj);
         }
 
         const worksheet = utils.json_to_sheet(newJsonData);
-
         const workbook = utils.book_new();
-
         utils.book_append_sheet(workbook, worksheet, 'Sheet1');
 
         const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
@@ -739,8 +781,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               handleClose={() => {
                 setOpenRowNumberDialog(false);
               }}
-              onSuccess={(data, sheetName) => {
-                handleFileImport(data, sheetName);
+              onSuccess={(data) => {
+                handleFileImport(data);
               }}
               file={files}
             />
