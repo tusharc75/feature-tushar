@@ -295,11 +295,10 @@ const ManageDeliveryTicket = ({
 
         if ((assets || products) && referenceType && referenceData) {
           if (referenceType === DELIVERY_TICKET_REFERENCE_TYPE.transferInventory) {
-          } else if (
-            referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
-            user?.user?.brandPolicy?.storageLocation &&
-            user?.user?.brandPolicy?.rentalInventoryDebit
-          ) {
+          }
+          else if (user?.user?.brandPolicy?.storageLocation
+            && ((referenceType === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && user?.user?.brandPolicy?.rentalInventoryDebit)
+              || referenceType === DELIVERY_TICKET_REFERENCE_TYPE.subcontractAssembly)) {
             if (ticketType === DELIVERY_TICKET_TYPE.loading) {
               fieldsDataForCreate = fieldsDataForCreate?.filter((e) => !['deliveryToStorageLocation']?.includes(e.fieldName));
               fieldsDataForCreate?.forEach((element) => {
@@ -719,7 +718,7 @@ const ManageDeliveryTicket = ({
                                         isTooltip={field?.isTooltip || false}
                                         tooltipMessage={field?.tooltipMessage}
                                         size="small"
-                                        minDate={createDateMin}
+                                        {...(assets?.length ? { minDate: createDateMin } : {})}
                                       />
                                     ) : field.fieldName === 'deliveryDate' ? (
                                       <FormTypes
