@@ -77,7 +77,7 @@ export const SectionProperties = ({ handleClose, section, setSections, sections 
                 ...(item?.sectionProperties || {}),
                 visibilityCondition: values.visibilityCondition
               }
-            };            
+            };
           })
       })
     );
