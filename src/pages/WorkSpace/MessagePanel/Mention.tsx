@@ -88,7 +88,7 @@ const Mention = forwardRef(
           getBoundingClientRect: mentionInitialPosition.getBoundingClientRect
         }}
       >
-        <div className="max-h-[250px] rounded-md bg-[var(--dark-primary,white)] shadow-md">
+        <div className="max-h-[250px] overflow-auto rounded-md bg-[var(--dark-primary,white)] shadow-md">
           {filteredUser.map((d, index) => {
             return (
               <MenuItem selected={index === newSelectedIndex} button onClick={() => handleInsert(d)} key={d.optionValue}>
