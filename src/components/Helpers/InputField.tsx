@@ -51,12 +51,10 @@ const InputField = (props) => {
             show = false;
           }
         }
-
         if (!show) {
           visible = false;
           return;
         }
-
         if (i === fieldData?.sectionProperties?.visibilityCondition?.length - 1) {
           visible = show;
         }

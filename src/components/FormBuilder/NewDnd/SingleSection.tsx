@@ -44,6 +44,7 @@ const SingleSection = ({
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   const onChangeSectionName = (sectionId, value) => {
     setSections(
       update(sections, {
@@ -58,6 +59,7 @@ const SingleSection = ({
       })
     );
   };
+
   const deleteSection = (sectionId) => {
     if (onAddRemoveField) onAddRemoveField();
     setSections(sections.filter((i) => i.sectionId.toString() !== sectionId.toString()));
@@ -108,8 +110,7 @@ const SingleSection = ({
       <div
         ref={setNodeRef}
         style={style}
-        className={`p-2 ${
-          isDragging
+        className={`p-2 ${isDragging
           ? "bg-[var(--dark-secondary,theme('colors.cyan.100'))] [border:1px_dashed_var(--common-border-color)]"
           : 'border border-[var(--common-border-color)] bg-[var(--dark-primary,white)]'
           }   transition-all duration-300`}
@@ -135,16 +136,18 @@ const SingleSection = ({
               <Settings fontSize="small" />
             </IconButton>
             <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleClose}>
-              <MenuItem onClick={() => setOpenProperties(true)}>Edit Properties</MenuItem>
-              <MenuItem
+              <MenuItem onClick={() => {
+                setOpenProperties(true)
+                handleClose()
+              }}>Edit Properties</MenuItem>
+              {/* <MenuItem
                 onClick={() => deleteSection(section.sectionId)}
                 disabled={section.field.filter((_field) => _field.editAble === false).length > 0 ? true : true}
               >
                 Delete
-              </MenuItem>
+              </MenuItem> */}
             </Menu>
           </div>
-
           {section.field.length === 0 ? (
             <div className="text-center">
               {isDropPreviewVisible ? (
