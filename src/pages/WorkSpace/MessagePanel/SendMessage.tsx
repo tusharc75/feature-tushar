@@ -46,6 +46,8 @@ const SendMessage = ({
     clientHeight: number;
     getBoundingClientRect: () => DOMRect;
   } | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const applySelectedRef = useRef(null);
 
   useEffect(() => {
     numberOfMentions.current = 0;
@@ -102,16 +104,13 @@ const SendMessage = ({
 
   const handleKeyDown = (e: KeyboardEvent) => {
     const key = e.key;
-    if (key === 'Enter' && !e.ctrlKey) {
-      e.preventDefault();
-      postMessage();
-    }
+
     if (key === '@') {
       e.preventDefault();
       e.stopPropagation();
       numberOfMentions.current += 1;
       if (!editorRef.current) return;
-
+      setSelectedIndex(0);
       const elementRect = editorRef.current?.selection.getRng().getBoundingClientRect();
       const frameRect = editorRef.current?.iframeElement?.getBoundingClientRect();
       const range = editorRef.current?.selection.getRng();
@@ -137,6 +136,29 @@ const SendMessage = ({
           toJSON: () => {}
         })
       });
+    }
+    if (mentionInitialPosition) {
+      if (key === 'ArrowUp') {
+        setSelectedIndex((prev) => (prev !== 0 ? prev - 1 : 0));
+      }
+      if (key === 'ArrowDown') {
+        setSelectedIndex((prev) => prev + 1);
+      }
+      if (key === 'Enter') {
+        e.preventDefault();
+        e.stopPropagation();
+        applySelectedRef.current?.applySelected();
+        return;
+      }
+      if (key === 'Enter' || key === 'ArrowUp' || key === 'ArrowDown') {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+    }
+    if (key === 'Enter' && !e.ctrlKey) {
+      e.preventDefault();
+      postMessage();
     }
   };
 
@@ -285,6 +307,9 @@ const SendMessage = ({
           setMentionInitialPosition={setMentionInitialPosition}
           channelData={channelData}
           numberOfMentions={numberOfMentions.current}
+          setSelectedIndex={setSelectedIndex}
+          selectedIndex={selectedIndex}
+          ref={applySelectedRef}
         />
       )}
     </div>
