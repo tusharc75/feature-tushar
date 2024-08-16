@@ -226,21 +226,6 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
     dispatch({ type: 'loading', loading: false });
   };
 
-  const handleReceived = (value) => {
-    setIsSubmitting(true);
-    axiosInstance()
-      .put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/received`, { cost: value, _id: costDialog?._id })
-      .then((res) => {
-        fetchData();
-        fetchParentData();
-        setIsSubmitting(false);
-        setCostDialog({ open: false, _id: null });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
-      });
-  };
 
   const handelReject = () => {
     setIsSubmitting(true);
@@ -293,12 +278,13 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
           onClose={() => {
             setCostDialog({ open: false, _id: null });
           }}
-          onSuccess={(val) => {
-            handleReceived(val);
+          onSuccess={() => {
+            fetchData();
+            fetchParentData();
+            setCostDialog({ open: false, _id: null });
           }}
           _id={costDialog._id}
           subcontractAssemblyData={subcontractAssemblyData}
-          isSubmitting={isSubmitting}
         />
       )}
       {historyDialog.open && (
