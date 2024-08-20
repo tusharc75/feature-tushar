@@ -6,8 +6,6 @@ import { useData } from '../../StateProvider/Provider';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
-import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import Visibility from '@material-ui/icons/Visibility';
@@ -26,8 +24,6 @@ import FacialLogin from 'src/components/FacialLogin';
 import styles from './index.module.scss';
 
 const Login = () => {
-  const notification = useContext(CustomNotificationCountContext);
-  const chatNotification = useContext(CustomChatNotificationCountContext);
 
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
@@ -82,57 +78,14 @@ const Login = () => {
       email: values.email,
       password: values.password
     };
-    axiosInstance()
-      .post('/user/login', data)
-      .then(async ({ data: response }) => {
-        setSubmitting(false);
-        const { data } = response;
-        localStorage.setItem('token', data.token);
-
-        if (data?.hasExistingSession) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.existingSessionMessage
-          });
-        }
-
-        dispatch({ type: SET_USER, payload: data });
-        if (data?.role?.selectedEntity?._id) {
-          dispatch({
-            type: SET_SELECTED_ENTITY,
-            payload: data.role.selectedEntity._id
-          });
-        }
-
-        if (data?.user?.defaultResource) {
-          if (routes[camelCase(data?.user?.defaultResource)]?.path) {
-            history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
-          }
-        }
-
-        axiosInstance()
-          .get(`/user/notification/unseen`)
-          .then(({ data: { count } }) => {
-            notification.setCount(count);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-
-        axiosInstance()
-          .get(`/user/user-notification/unseen`)
-          .then(({ data: { count } }) => {
-            chatNotification.setCount(count);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().post('/user/login', data).then(async ({ data: response }) => {
+      const { data } = response;
+      setSubmitting(false);
+      history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
+    }).catch((error) => {
+      setSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const validateForm = (values) => {
