@@ -46,16 +46,16 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
             <p>{row.original?.detail}</p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  row.original.type === 'asset'
-                    ? window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`)
-                    : window.open(`${routes.truckMaster.path}/${row.original.materialId}`);
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
+            <IconButton
+              size="small"
+              onClick={() => {
+                row.original.type === 'asset'
+                  ? window.open(`${routes.serializedAssetDetail.path}/${row.original.materialId}`)
+                  : window.open(`${routes.truckMaster.path}/${row.original.materialId}`);
+              }}
+            >
+              <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+            </IconButton>
           </div>
         )
       },
@@ -107,7 +107,6 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
   };
 
   const fetchJobData = async () => {
-
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
@@ -148,36 +147,63 @@ const Dispatch = ({ jobData, renderedFrom, setNextStep }) => {
     return subRows;
   };
 
+  // const handleViewPdf = (type, PDFType) => {
+  //   setPdfLoading(type);
+  //   axiosInstance()
+  //     .get(`/pdf/${jobData._id}?resource=Job`)
+  //     .then(({ data }) => {
+  //       axiosInstance()
+  //         .get(`user/download?fileName=${data.data.fileName}`, {
+  //           responseType: 'blob'
+  //         })
+  //         .then(({ data }) => {
+  //           setPdfLoading(null);
+  //           if (type === 'Download') {
+  //             const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+  //             const link = document.createElement('a');
+  //             link.href = url;
+  //             link.setAttribute('download', `Quotation-${jobData.name}.pdf`);
+  //             document.body.appendChild(link);
+  //             link.click();
+  //           } else {
+  //             const file = new Blob([data], { type: 'application/pdf' });
+  //             const fileURL = URL.createObjectURL(file);
+  //             const pdfWindow = window.open();
+  //             pdfWindow.location.href = fileURL;
+  //             toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+  //           }
+  //         })
+  //         .catch((err) => {
+  //           setPdfLoading(null);
+  //           toastConfig.setToastConfig(err);
+  //         });
+  //     })
+  //     .catch((err) => {
+  //       setPdfLoading(null);
+  //       toastConfig.setToastConfig(err);
+  //     });
+  // };
+
   const handleViewPdf = (type, PDFType) => {
     setPdfLoading(type);
     axiosInstance()
-      .get(`/pdf/${jobData._id}?resource=Job`)
+      .get(`/pdf/${jobData._id}?resource=Job`, { responseType: 'blob' })
       .then(({ data }) => {
-        axiosInstance()
-          .get(`user/download?fileName=${data.data.fileName}`, {
-            responseType: 'blob'
-          })
-          .then(({ data }) => {
-            setPdfLoading(null);
-            if (type === 'Download') {
-              const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
-              const link = document.createElement('a');
-              link.href = url;
-              link.setAttribute('download', `Quotation-${jobData.name}.pdf`);
-              document.body.appendChild(link);
-              link.click();
-            } else {
-              const file = new Blob([data], { type: 'application/pdf' });
-              const fileURL = URL.createObjectURL(file);
-              const pdfWindow = window.open();
-              pdfWindow.location.href = fileURL;
-              toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
-            }
-          })
-          .catch((err) => {
-            setPdfLoading(null);
-            toastConfig.setToastConfig(err);
-          });
+        setPdfLoading(null);
+        if (type === 'download') {
+          const url = window.URL.createObjectURL(new Blob([data], { type: 'application/pdf' }));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `Quotation-${jobData.name}.pdf`);
+          document.body.appendChild(link);
+          link.click();
+        } else {
+          const file = new Blob([data], { type: 'application/pdf' });
+          const fileURL = URL.createObjectURL(file);
+          const pdfWindow = window.open();
+          pdfWindow.location.href = fileURL;
+          toastConfig.setToastConfig({ open: true, type: 'success', message: 'Preview file downloaded successfully.' });
+        }
       })
       .catch((err) => {
         setPdfLoading(null);
