@@ -14,7 +14,7 @@ import moment from 'moment';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const ReceiveDateDialog = ({ handleClose, handleSucess, loading }) => {
+const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData }) => {
   const [lockDate, setLockDate] = useState(null);
 
   useEffect(() => {
@@ -24,7 +24,7 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading }) => {
   const fetchSettingsData = async () => {
     const {
       data: { data }
-    } = await axiosInstance().get(`${productInventory.api}/setting?warehouse=${'630dc1899ec418610523559c'}`);
+    } = await axiosInstance().get(`${productInventory.api}/setting?warehouse=${refrenceData?.warehouse?.optionValue}`);
     setLockDate(data?.lockDate);
   };
 

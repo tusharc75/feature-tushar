@@ -446,6 +446,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
               handelDeliverTickets(receiveDate);
             }}
             loading={loading}
+            refrenceData={subcontractAssemblyData}
           />
         )}
       </>
