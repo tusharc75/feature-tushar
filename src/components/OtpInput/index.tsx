@@ -3,6 +3,7 @@ import React from 'react';
 import { getFilledArray, joinArrayStrings, KEYBOARD_KEY, mergeArrayStringFromIndex, split, updateIndex } from 'src/components/OtpInput/helper';
 import { useEvent } from 'src/components/OtpInput/hooks';
 import { OtpInputProps } from 'src/components/OtpInput/types';
+import { cn } from 'src/constants/helpers';
 
 export type { OtpInputProps };
 
@@ -228,7 +229,7 @@ const OtpInput = React.forwardRef((props: OtpInputProps, propRef: OtpInputProps[
   };
 
   return (
-    <div ref={propRef} className={`flex items-center gap-[20px] ${className || ''}`} {...restBoxProps}>
+    <div ref={propRef} className={cn(`flex items-center gap-4`, className)} {...restBoxProps}>
       {valueSplitted.map(({ character, inputRef }, index) => {
         const {
           onPaste,
