@@ -46,7 +46,7 @@ const LoginMFA = () => {
               label="Age"
               onChange={(e) => setSelectedMethod(e.target.value as AuthenticationMethods)}
             >
-              <MenuItem value={'authenticatorApp'}>Authentication App</MenuItem>
+              <MenuItem value={'authenticatorApp'}>Authenticator App</MenuItem>
               <MenuItem value={'emailCode'}>Email Code</MenuItem>
             </Select>
           </FormControl>
