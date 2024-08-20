@@ -1,16 +1,85 @@
 import { Button, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
-import { useState } from 'react';
-import { CiLock, CiUnlock } from 'react-icons/ci';
+import { useContext, useState } from 'react';
 import { SVG } from 'src/assets';
+import axiosInstance from 'src/axios/axiosInstance';
 import OtpInput from 'src/components/OtpInput';
-import { cn } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import queryString from 'query-string';
+import { useHistory } from 'react-router-dom';
+import { useData } from 'src/StateProvider/Provider';
+import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
+import routes from 'src/components/Helpers/Routes';
+import { camelCase } from 'lodash';
+import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
+import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 
-type AuthenticationMethods = 'authenticatorApp' | 'emailCode';
+type AuthenticationMethods = 'authenticatorApp' | 'emailOtp';
 
 const LoginMFA = () => {
-  const [selectedMethod, setSelectedMethod] = useState<AuthenticationMethods>('authenticatorApp');
-  const [isCodeValid, setIsCodeValid] = useState(false);
+
+  const notification = useContext(CustomNotificationCountContext);
+  const chatNotification = useContext(CustomChatNotificationCountContext);
+
+  const [selectedMethod, setSelectedMethod] = useState<AuthenticationMethods>('emailOtp');
   const [otp, setOtp] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const toastConfig = useContext(CustomToastContext);
+  const { dispatch }: any = useData();
+
+  const history = useHistory();
+  let { token }: any = queryString.parse(history.location.search);
+
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    axiosInstance().post('/user/mfa-auth/verify-otp', {
+      otp: otp,
+      token: token
+    }).then(async ({ data: { data } }) => {
+      localStorage.setItem('token', data.token);
+      if (data?.hasExistingSession) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.existingSessionMessage
+        });
+      }
+      dispatch({ type: SET_USER, payload: data });
+      if (data?.role?.selectedEntity?._id) {
+        dispatch({
+          type: SET_SELECTED_ENTITY,
+          payload: data.role.selectedEntity._id
+        });
+      }
+      if (data?.user?.defaultResource) {
+        if (routes[camelCase(data?.user?.defaultResource)]?.path) {
+          history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
+        }
+      }
+      axiosInstance()
+        .get(`/user/notification/unseen`)
+        .then(({ data: { count } }) => {
+          notification.setCount(count);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+
+      axiosInstance()
+        .get(`/user/user-notification/unseen`)
+        .then(({ data: { count } }) => {
+          chatNotification.setCount(count);
+        })
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
+      setIsSubmitting(false);
+
+    })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
 
   return (
     <>
@@ -20,22 +89,7 @@ const LoginMFA = () => {
           <div className="logo-container mx-auto mb-2 max-w-[150px]">
             <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
           </div>
-
-          <div
-            className={cn(
-              'lock relative mx-auto mb-3 flex h-[70px] w-[70px] items-center justify-center rounded-full transition-colors duration-300',
-              isCodeValid ? 'bg-green-500/30 dark:bg-green-500/70' : 'bg-red-500/30 dark:bg-red-600/50'
-            )}
-          >
-            {isCodeValid ? (
-              <CiUnlock size={35} className="text-black/60 dark:text-white/70" />
-            ) : (
-              <CiLock size={35} className="text-black/60 dark:text-white/70" />
-            )}
-          </div>
-
           <h4 className="mb-3 text-2xl font-semibold">Verify Your Identity</h4>
-
           <p className="mb-2 font-semibold text-gray-500">Authentication Method</p>
           <FormControl style={{ minWidth: 'min(100%, 300px)' }} size="small" className="mb-3">
             <Select
@@ -47,10 +101,9 @@ const LoginMFA = () => {
               onChange={(e) => setSelectedMethod(e.target.value as AuthenticationMethods)}
             >
               <MenuItem value={'authenticatorApp'}>Authenticator App</MenuItem>
-              <MenuItem value={'emailCode'}>Email Code</MenuItem>
+              <MenuItem value={'emailOtp'}>Email Code</MenuItem>
             </Select>
           </FormControl>
-
           <p className="info mx-auto mb-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
             An authentication code has been sent to your {selectedMethod === 'authenticatorApp' ? 'device' : 'email'}. Enter the code to continue and
             be redirected.
@@ -69,9 +122,10 @@ const LoginMFA = () => {
             color="primary"
             fullWidth
             style={{ paddingBlock: 10, borderRadius: 9 }}
-            disabled={otp.length < 6 || !isCodeValid}
+            disabled={otp.length < 6 || isSubmitting}
+            onClick={handleSubmit}
           >
-            {otp.length < 6 ? `${6 - otp.length} digits left` : isCodeValid ? "Let's go!" : 'Wrong code'}
+            Submit
           </Button>
         </div>
       </div>
