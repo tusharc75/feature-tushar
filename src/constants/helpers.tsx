@@ -539,7 +539,8 @@ export const RESOURCE_LABEL = {
   equiptAi: 'Equipt Ai',
   trainAiModel: 'Train Ai Model',
   workSpace: 'Work Space',
-  workFlow: 'Work Flow'
+  workFlow: 'Work Flow',
+  workflowReport: 'Workflow Report'
 };
 
 export const CHILD_RESOURCE = {
@@ -2928,6 +2929,12 @@ export const SUBCONTRACT_ASSEMBLY_STATUS = {
   inProgress: 'In-Progress',
   closed: 'Closed'
 };
+
+export const WORK_FLOW_STATUS = {
+  open: 'Open',
+  inProgress: 'In-Progress',
+  completed: 'Completed'
+}
 
 export const INVOICE_STATUS = {
   new: 'New',

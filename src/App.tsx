@@ -261,6 +261,8 @@ import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 import Oauth from './pages/Auth/Oauth';
 import WorkFlow from 'src/pages/WorkFlow';
 import CreateWorkFlow from 'src/pages/WorkFlow/CreateWorkFlow';
+import WorkFlowReport from 'src/pages/workFlowReport';
+import WorkFlowReportDetail from 'src/pages/workFlowReport/workFlowReportDetails';
 
 var notificationInterval: any = null;
 
@@ -1158,6 +1160,12 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.workFlow.path}/:id`}>
               <CreateWorkFlow />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workflowReport.path}`}>
+              <WorkFlowReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workflowReportDetail.path}/:id`}>
+              <WorkFlowReportDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />
