@@ -7,6 +7,7 @@ import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } f
 import { isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import LogIn from '../../components/Azure/LogIn';
+import { useHistory } from 'react-router-dom';
 
 const AzureLogin = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -15,6 +16,8 @@ const AzureLogin = () => {
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
+  const history = useHistory();
+
   useEffect(() => {
     if (!isEmpty(account)) {
       (async () => {
@@ -24,17 +27,7 @@ const AzureLogin = () => {
             'graph-token': graphToken
           });
           const { data } = res.data;
-
-          dispatch({ type: SET_USER, payload: data });
-
-          if (data?.role?.selectedEntity?._id) {
-            dispatch({
-              type: SET_SELECTED_ENTITY,
-              payload: data.role.selectedEntity._id
-            });
-          }
-
-          localStorage.setItem('token', data.token);
+          history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
         } catch (e) {
           setCounter(10);
           setInvalidAzureLogin(true);
@@ -43,6 +36,7 @@ const AzureLogin = () => {
       })();
     }
   }, [account]);
+
   useEffect(() => {
     if (invalidAzureLogin) {
       if (invalidAzureLogin && counter) {

@@ -44,14 +44,8 @@ const Login = () => {
             'graph-token': graphToken
           });
           const { data } = res.data;
-          localStorage.setItem('token', data.token);
-          dispatch({ type: SET_USER, payload: data });
-          if (data?.role?.selectedEntity?._id) {
-            dispatch({
-              type: SET_SELECTED_ENTITY,
-              payload: data.role.selectedEntity._id
-            });
-          }
+          setSubmitting(false);
+          history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
         } catch (e) {
           setCounter(18);
           setInvalidAzureLogin(true);
