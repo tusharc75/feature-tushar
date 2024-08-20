@@ -1,6 +1,6 @@
 import { useState, useContext, useEffect } from 'react';
 import { useData } from '../../StateProvider/Provider';
-import { SET_USER, SET_SELECTED_ENTITY, SET_GRID_METADATA } from '../../StateProvider/actionTypes';
+import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';

@@ -20,24 +20,6 @@ export const subForms = [
   CHILD_RESOURCE.subleaseProduct
 ];
 
-// const useStyles = makeStyles(() => ({
-//   root: {
-//     flexGrow: 1,
-//     margin: 10
-//   },
-//   screenHeightAutoFormBuilder: {
-//     height: 'calc(100vh - 200px)',
-//     overflow: 'auto'
-//   },
-//   screenHeightAutoFormTemplate: {
-//     height: 'calc(100vh - 300px)',
-//     overflow: 'auto'
-//   },
-//   screenHeight: {
-//     overflow: 'auto'
-//   }
-// }));
-
 export const FormBuilder = ({
   section,
   setSection,
@@ -73,23 +55,16 @@ export const FormBuilder = ({
   };
 
   const addDeleteField = (_id) => {
-    let data = [...deleteField];
-    data.push({ _id: _id });
-    setDeleteField(data);
+    if (isNaN(_id)) {
+      let data = [...deleteField];
+      data.push({ _id: _id });
+      setDeleteField(data);
+    }
   };
-
-  // const removeExtraField = () => {
-  //   let data = [...section];
-  //   data.forEach((row) => {
-  //     row.field = row.field.filter((i) => i._id);
-  //   });
-  //   setSection(data);
-  // };
 
   var filterFieldType = [];
   var isCalculativeField = true;
   if (module === 'form-builder') {
-    //filterFieldType = ['DECIMAL', 'CURRENCYAMOUNT', 'FORMULA', 'VLOOKUPDROPDOWN', 'CONVERTER'];
     isCalculativeField = true;
   }
   if (subForms.includes(resource)) {
