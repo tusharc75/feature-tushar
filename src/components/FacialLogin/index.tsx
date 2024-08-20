@@ -3,7 +3,7 @@ import { Box, Button } from '@material-ui/core';
 import FaceLiveNess from './FaceLiveNess';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
+import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
 import routes from '../Helpers/Routes';
 import { camelCase } from 'lodash';
 import { useHistory } from 'react-router-dom';

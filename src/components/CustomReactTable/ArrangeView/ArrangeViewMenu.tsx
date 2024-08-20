@@ -5,7 +5,7 @@ import { FaStar } from 'react-icons/fa6';
 import { ImSpinner2 } from 'react-icons/im';
 import axiosInstance from 'src/axios/axiosInstance';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
-import EditCreateViewDialog from 'src/components/CustomReactTable/ArrangeView/EditCreateViewDialog';
+import ArrangeViewDialog from 'src/components/CustomReactTable/ArrangeView/ArrangeViewDialog';
 import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
 import { TActios, TInitialState } from 'src/components/CustomReactTable/hooks/useTableReducer';
 import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';
@@ -277,9 +277,8 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           </div>
         </div>
       </Menu>
-
       {editCreateDialogData.open && (
-        <EditCreateViewDialog
+        <ArrangeViewDialog
           onClose={closeEditCreateModal}
           renderedFrom={renderedFrom}
           data={editCreateDialogData.data}
@@ -289,7 +288,6 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
           expander={expander}
         />
       )}
-
       {confirmationDialog.open && (
         <ConfirmationDialog
           open={true}
