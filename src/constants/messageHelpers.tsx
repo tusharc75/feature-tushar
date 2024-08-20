@@ -80,7 +80,7 @@ export const rentalManagementMessage = {
   rentalProductConsumed: 'Product already consumed',
   rentalStatusCompleteCancelReceiving: 'Receiving Ticket can only be canceled for assets/consumables that have Complete/Return Rental Asset Status',
   repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
-  repairSameWarehouse: `Selected records must be at same ${routes.warehouse.title} to perform this action.`,
+  repairSameWarehouse: `Selected records must be at same ${routes.warehouse.title} to perform this action`,
   transferRentalForAsset: 'Only In-Use, Available and Under Review assets can be transfered',
   transferRentalForAssetSame: 'Only all In-Use or Available/Under Review assets can be transfered at a time',
   onlySwapAssets: 'Only Assets can be swapped',
@@ -95,63 +95,63 @@ export const rentalManagementMessage = {
 };
 
 export const subleaseActions = {
-    createLoadingTicket: 'Create Loading Ticket',
-    deliveredToWarehouse: 'Delivered to Warehouse',
-    createReceivingTicket: 'Create Receiving Ticket',
-    receivedToWarehouse: 'Received at Warehouse',
+  createLoadingTicket: 'Create Loading Ticket',
+  deliveredToWarehouse: 'Delivered to Warehouse',
+  createReceivingTicket: 'Create Receiving Ticket',
+  receivedToWarehouse: 'Received at Warehouse'
 };
 
 export const subleaseMessage = {
-    addProductPackage: 'Add Products or Packages to proceed',
-    startSublease: 'Start Sublease to proceed',
-    assignAssets: 'Assign Assets to proceed',
-    deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
-    deliverReceivingTicketStep: 'Create & Receive Receiving Ticket to proceed',
+  addProductPackage: 'Add Products or Packages to proceed',
+  startSublease: 'Start Sublease to proceed',
+  assignAssets: 'Assign Assets to proceed',
+  deliverLoadingTicketStep: 'Create & Deliver Loading Ticket to proceed',
+  deliverReceivingTicketStep: 'Create & Receive Receiving Ticket to proceed',
 
-    loadingNotCreated: 'Loading Ticket is not created',
-    loadingAlreadyDelivered: 'Loading Ticket is already delivered',
-    loadingNotDelivered: 'Loading Ticket is not delivered',
-    loadingAlreadyCreated: 'Loading Ticket Already Created',
+  loadingNotCreated: 'Loading Ticket is not created',
+  loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+  loadingNotDelivered: 'Loading Ticket is not delivered',
+  loadingAlreadyCreated: 'Loading Ticket Already Created',
 
-    receivingNotCreated: 'Receiving Ticket is not created',
-    receivingAlreadyDelivered: 'Receiving Ticket is already delivered',
-    receivingNotDeliverd: 'Receiving Ticket is not delivered',
-    receivingAlreadyCreated: 'Receiving Ticket Already Created',
-    receivingStatus: 'Receiving Ticket is Only create for New,Available and Under Review assets',
+  receivingNotCreated: 'Receiving Ticket is not created',
+  receivingAlreadyDelivered: 'Receiving Ticket is already delivered',
+  receivingNotDeliverd: 'Receiving Ticket is not delivered',
+  receivingAlreadyCreated: 'Receiving Ticket Already Created',
+  receivingStatus: 'Receiving Ticket is Only create for New,Available and Under Review assets',
 
-    assetStatusSendSupplier: 'Only New,Available and Under Review asset status can send to supplier',
-    assetsIsWithCustomer: 'Assets are at customer location',
-    assetsAlradyReturned: 'Assets are already returned to supplier',
-    receiveAssets: 'Reveive Assets to proceed',
+  assetStatusSendSupplier: 'Only New,Available and Under Review asset status can send to supplier',
+  assetsIsWithCustomer: 'Assets are at customer location',
+  assetsAlradyReturned: 'Assets are already returned to supplier',
+  receiveAssets: 'Reveive Assets to proceed',
 
-    sameWarehouse: `Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
-    pickupDeliveryDifferent: 'Pickup and Delivery must be different',
+  sameWarehouse: `Selected Assets must be in same ${routes.warehouse.title} to perform this action`,
+  pickupDeliveryDifferent: 'Pickup and Delivery must be different'
 };
 
 export const transferInventoryMessage = {
-    assignSerialNumbers: 'Assign Serial Numbers to proceed',
-}
+  assignSerialNumbers: 'Assign Serial Numbers to proceed'
+};
 
 export const salesOrderActions = {
-    createLoadingTicket: 'Create Loading Ticket',
-    deliveredLoadingTicket: 'Delivered Loading Ticket',
-}
+  createLoadingTicket: 'Create Loading Ticket',
+  deliveredLoadingTicket: 'Delivered Loading Ticket'
+};
 
 export const salesOrderMessage = {
-    loadingAlreadyCreated: 'Loading Ticket is already created',
-    loadingNotCreated: 'Loading Ticket is not created',
-    loadingAlreadyDelivered: 'Loading Ticket is already delivered',
-}
+  loadingAlreadyCreated: 'Loading Ticket is already created',
+  loadingNotCreated: 'Loading Ticket is not created',
+  loadingAlreadyDelivered: 'Loading Ticket is already delivered'
+};
 
 export const subcontractAssemblyActions = {
-    createLoadingTicket: 'Create Loading Ticket',
-    deliveredLoadingTicket: 'Delivered Loading Ticket',
-    cancelLoadingTicket: 'Cancel Loading Ticket',
-}
+  createLoadingTicket: 'Create Loading Ticket',
+  deliveredLoadingTicket: 'Delivered Loading Ticket',
+  cancelLoadingTicket: 'Cancel Loading Ticket'
+};
 
 export const subcontractAssemblyMessage = {
-    loadingAlreadyCreated: 'Loading Ticket is already created',
-    loadingNotCreated: 'Loading Ticket is not created',
-    loadingAlreadyDelivered: 'Loading Ticket is already delivered',
-    assemblyProductAlreadyReceived: 'Assembly product already received',
-}
+  loadingAlreadyCreated: 'Loading Ticket is already created',
+  loadingNotCreated: 'Loading Ticket is not created',
+  loadingAlreadyDelivered: 'Loading Ticket is already delivered',
+  assemblyProductAlreadyReceived: 'Assembly product already received'
+};
