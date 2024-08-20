@@ -92,9 +92,13 @@ const FleetDispatch = () => {
         {fleets && jobs ? (
           <>
             <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-              <ul className="grid grid-cols-1 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-3">
-                <DispatchList activity={fleets} cardType="fleet" />
-                <DispatchList activity={jobs} cardType="job" />
+              <ul className="grid grid-cols-2 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-2">
+                <div>
+                  <DispatchList activity={fleets} cardType="fleet" />
+                </div>
+                <div>
+                  <DispatchList activity={jobs} cardType="job" />
+                </div>
               </ul>
               <DragOverlay dropAnimation={null}>{activeItem && <FleetDispatchBox {...activeItem} />}</DragOverlay>
             </DndContext>
