@@ -17,7 +17,6 @@ import { camelCase, isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
-import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import { entity } from '../../constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { Logo, LoginImage } from 'src/assets/authenticationAssets';
@@ -39,8 +38,6 @@ const Login = () => {
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const history = useHistory();
-
-  const { entityApi } = entity;
 
   useEffect(() => {
     if (!isEmpty(account)) {

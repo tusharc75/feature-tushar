@@ -5,5 +5,4 @@ export const SET_SELECTED_ENTITY = 'SET_SELECTED_ENTITY';
 export const SET_CHATTER = 'SET_CHATTER';
 export const SET_CART = 'SET_CART';
 export const SET_START_TOUR = 'SET_START_TOUR';
-export const SET_GRID_METADATA = 'SET_GRID_METADATA';
 export const SET_SEARCH = 'SET_SEARCH';
