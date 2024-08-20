@@ -549,7 +549,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
-                      <Visibility values={values} setFieldValue={setFieldValue} fields={fields} fieldData={fieldData} />
+                      <Visibility values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={[fieldData?.fieldName]} />
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
                       <Setting
