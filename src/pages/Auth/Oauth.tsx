@@ -1,86 +1,27 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { useHistory, Link } from 'react-router-dom';
-import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
+import React, { useState, useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink } from '@material-ui/core';
 import { Formik, Form } from 'formik';
-import { useData } from '../../StateProvider/Provider';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
-import { AzureLogin } from '../../components/Azure/Azure';
-import { SiMicrosoftoffice } from 'react-icons/si';
-// import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
-import { entity } from '../../constants/helpers';
-// import routes from 'src/components/Helpers/Routes';
-import { Logo, LoginImage } from 'src/assets/authenticationAssets';
+import { Logo } from 'src/assets/authenticationAssets';
 import AuthSlider from './AuthSlider';
-// import FacialLogin from 'src/components/FacialLogin';
 
 import styles from './index.module.scss';
 export const userManual = {
-    description: 'View our user manual in just a click.',
-    link: 'https://docs.equip-t.com/auth/login'
-  };
+  description: 'View our user manual in just a click.',
+  link: 'https://docs.equip-t.com/auth/login'
+};
 
 const Oauth = () => {
 
   const toastConfig = useContext(CustomToastContext);
-  const { dispatch }: any = useData();
   const [isSubmitting, setSubmitting] = useState(false);
-  const { instance, accounts } = useMsal();
-  const account = useAccount(accounts[0] || {});
-  const [counter, setCounter] = useState(0);
-  const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const history = useHistory();
-
-  const { entityApi } = entity;
-
-//   useEffect(() => {
-//     if (!isEmpty(account)) {
-//       (async () => {
-//         try {
-//           const graphToken = await getAzureAcessToken(instance);
-//           const res = await axiosInstance().post('/user/login/azure', {
-//             'graph-token': graphToken
-//           });
-//           const { data } = res.data;
-//         //   localStorage.setItem('token', data.token);
-//           const gridRequest = await axiosInstance().get(`user/meta-grid/${data.user?._id}`);
-
-//           let tempMetaData = JSON.stringify(gridRequest.data.data?.gridMetaData);
-//           localStorage.setItem('gridMetaData', tempMetaData);
-//           dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
-
-//           dispatch({ type: SET_USER, payload: data });
-//           if (data?.role?.selectedEntity?._id) {
-//             dispatch({
-//               type: SET_SELECTED_ENTITY,
-//               payload: data.role.selectedEntity._id
-//             });
-//           }
-//         } catch (e) {
-//           setCounter(18);
-//           setInvalidAzureLogin(true);
-//           toastConfig.setToastConfig(e);
-//         }
-//       })();
-//     }
-//   }, [account]);
-
-//   useEffect(() => {
-//     if (invalidAzureLogin) {
-//       if (invalidAzureLogin && counter) {
-//         setTimeout(() => setCounter(counter - 1), 1000);
-//       } else {
-//         instance.logout();
-//         setInvalidAzureLogin(false);
-//       }
-//     }
-//   }, [invalidAzureLogin, counter]);
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
@@ -88,14 +29,11 @@ const Oauth = () => {
       email: values.email,
       password: values.password
     };
-    axiosInstance()
-      .post('/user/login', data)
+    axiosInstance().post('/user/login', data)
       .then(async ({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
-        // window.open(`${userManual.link}/?token=${encodeURIComponent(data.token)}`);
         window.location.href = `${userManual.link}/?token=${encodeURIComponent(data.token)}`;
- 
       })
       .catch((error) => {
         setSubmitting(false);
@@ -134,9 +72,6 @@ const Oauth = () => {
               >
                 {({ submitForm, values, errors, touched, setFieldValue }) => (
                   <Form>
-                    {/* <Box className={styles.or}>
-                      <Typography>or sign in with</Typography>
-                    </Box> */}
                     <div className={styles.fields}>
                       <div className={styles.input}>
                         <TextField
