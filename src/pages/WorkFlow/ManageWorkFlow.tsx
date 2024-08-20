@@ -9,7 +9,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../constants/helpers';
+import { CustomDialogTransition, WORK_FLOW_STATUS } from '../../constants/helpers';
 import { Box, CircularProgress, TextField } from '@material-ui/core';
 import { useHistory } from 'react-router-dom';
 import { isEqual } from 'lodash';
@@ -24,7 +24,7 @@ const workFlowSchema = object().shape({
   workFlowResource: string().required('Please enter Work Flow Resource')
 });
 
-const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false }) => {
+const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, data= null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -35,10 +35,17 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false }) 
   const [resourceOption, setResourceOption] = useState(null);
 
   useEffect(() => {
-    setInitialValues({
-      workFlowName: '',
-      workFlowResource: ''
-    });
+    if(data){
+      setInitialValues({
+        workFlowName: data?.workFlowName,
+        workFlowResource: data?.workFlowResource
+      });
+    }else{
+      setInitialValues({
+        workFlowName: '',
+        workFlowResource: ''
+      });
+    }
     getResourceList();
   }, []);
 
@@ -49,8 +56,25 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false }) 
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-    axiosInstance()
-      .post(`${routes.workFlow.path}`, values)
+    if(data?._id){
+      axiosInstance()
+      .put(`${routes?.workFlow?.path}`, {...values, _id: data?._id})
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setSubmitting(false);
+        onSuccess();
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+    }else{
+      axiosInstance()
+      .post(`${routes.workFlow.path}`, {...values, status: WORK_FLOW_STATUS.open})
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -64,6 +88,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false }) 
         setSubmitting(false);
         toastConfig.setToastConfig(error);
       });
+    }
   };
 
   return (
@@ -89,7 +114,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false }) 
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={'Add New Work Flow'}
+                title={`${data ? 'Edit' : 'Add'} Work Flow`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -118,6 +143,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false }) 
                     <Autocomplete
                       id="linkResourceName"
                       options={resourceOption}
+                      disabled={data}
                       getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                       getOptionSelected={(option: any, val) => option.optionValue === val}
                       value={
