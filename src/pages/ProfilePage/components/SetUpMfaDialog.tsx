@@ -55,7 +55,7 @@ function SetUpMfaDialog({ onClose }) {
         maxWidth={"sm"}
         onClose={onClose}
         fullWidth>
-        <CustomDialogHeader title="MFA Data" showRequiredLabel={false} onClose={onClose} />
+        <CustomDialogHeader title="MFA Setup" showRequiredLabel={false} onClose={onClose} />
         <CustomDialogContent>
             {loading ?
                 <Box p={2} height={300}>
@@ -65,14 +65,12 @@ function SetUpMfaDialog({ onClose }) {
                     <Typography variant="h6" align="center">
                         Scan the QR code below to configure your MFA app
                     </Typography>
-                    <Box style={{ padding: 5, border: '1px solid #ccc' }}>
+                    <Box p={3} pb={1}>
                         <img src={data?.qrCode} alt={data?.secret} />
                     </Box>
-                    <Box pt={3}>
-                        <Typography variant="body1" align="center">
-                            Secret Key: {data?.secret}
-                        </Typography>
-                    </Box>
+                    <Typography variant="body2" align="center">
+                        Secret Key: {data?.secret}
+                    </Typography>
                     <Box mt={3} />
                     <Box m={2}>
                         <Grid container spacing={2}>
@@ -84,7 +82,7 @@ function SetUpMfaDialog({ onClose }) {
                                     variant="outlined"
                                     size="small"
                                     value={token}
-                                    onChange={(e) => { 
+                                    onChange={(e) => {
                                         setToken(e.target.value)
                                     }}
                                 />
