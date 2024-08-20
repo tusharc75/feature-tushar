@@ -33,7 +33,8 @@ const LoginMFA = () => {
     setIsSubmitting(true);
     axiosInstance().post('/user/mfa-auth/verify-otp', {
       otp: otp,
-      token: token
+      token: token,
+      method: selectedMethod
     }).then(async ({ data: { data } }) => {
       localStorage.setItem('token', data.token);
       if (data?.hasExistingSession) {
@@ -43,8 +44,11 @@ const LoginMFA = () => {
           message: data.existingSessionMessage
         });
       }
-      dispatch({ type: SET_USER, payload: data });
-      if (data?.role?.selectedEntity?._id) {
+      const res = await axiosInstance().get(`/user/me`)
+      const { data: { data: meData } } = res;
+
+      dispatch({ type: SET_USER, payload: meData });
+      if (meData?.role?.selectedEntity?._id) {
         dispatch({
           type: SET_SELECTED_ENTITY,
           payload: data.role.selectedEntity._id
