@@ -49,28 +49,14 @@ const FleetDispatch = () => {
     setActiveItem(null);
     if (!event.over) return;
     const { active, over } = event;
-    const activeType = active.data.current.type;
-    const overType = active.data.current.type;
-    if (activeType !== overType) return;
-    const dragIndex = active.data.current.index;
-    const dropIndex = over.data.current.index;
-    function updateList(list, setList) {
-      const dragCard = list[dragIndex];
-      setList(
-        update(list, {
-          $splice: [
-            [dragIndex, 1],
-            [dropIndex, 0, dragCard]
-          ]
-        })
-      );
-    }
-    if (activeType === 'fleet') {
-      updateList(fleets, setFleets);
-    }
-    if (activeType === 'job') {
-      updateList(jobs, setJobs);
-    }
+    const activeProps = active.data.current.props;
+    const overProps = over.data.current.props;
+
+    const activeType = activeProps.cardType;
+    const overType = overProps.cardType;
+    if (activeType === overType) return;
+    const data = { [activeType]: activeProps.data, [overType]: overProps.data };
+    handleDispatch(data['fleet'], data['job']);
   };
 
   const sensors = useDndSensors();
@@ -106,11 +92,15 @@ const FleetDispatch = () => {
         {fleets && jobs ? (
           <>
             <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
-              <ul className="grid grid-cols-1 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-3">
-                <DispatchList activity={fleets} cardType="fleet" handleDispatch={handleDispatch} />
-                <DispatchList activity={jobs} cardType="job" handleDispatch={handleDispatch} />
+              <ul className="grid grid-cols-2 min-[725px]:grid-cols-2 min-[1195px]:md:grid-cols-2">
+                <div>
+                  <DispatchList activity={fleets} cardType="fleet" />
+                </div>
+                <div>
+                  <DispatchList activity={jobs} cardType="job" />
+                </div>
               </ul>
-              <DragOverlay>{activeItem && <FleetDispatchBox {...activeItem} />}</DragOverlay>
+              <DragOverlay dropAnimation={null}>{activeItem && <FleetDispatchBox {...activeItem} />}</DragOverlay>
             </DndContext>
           </>
         ) : (

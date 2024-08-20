@@ -4,6 +4,7 @@ import { Box, Typography, makeStyles } from '@material-ui/core';
 import WorkIcon from '@material-ui/icons/Work';
 
 import MetricsWithIcon from 'src/components/MetricsWithIcon';
+import { cn } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   fleetBox: {
@@ -96,15 +97,15 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
+const FleetDispatchBox = ({ data, id, index, cardType }) => {
   const classes = useStyles();
 
-  const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
+  const { setNodeRef, attributes, listeners, transform, transition, isDragging, active, over } = useSortable({
     id,
     data: {
       type: cardType,
       index,
-      props: { data, id, index, cardType, handleDispatch }
+      props: { data, id, index, cardType }
     }
   });
 
@@ -113,12 +114,19 @@ const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
     transition
   };
 
+  const activeProps = active?.data?.current?.props;
+  const overProps = over?.data?.current?.props;
+
+  const activeType = activeProps?.cardType;
+  const overType = overProps?.cardType;
+  const shouldChangeBg = Boolean(overProps?.id === id && activeType !== overType);
+
   return (
-    <li className={`list-none `} key={id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
+    <li className={cn(`list-none`)} key={id} style={style} ref={setNodeRef} {...attributes} {...listeners}>
       {cardType === 'fleet' ? (
         <Box
           className={`${classes.fleetBox} p-[15px]  min-[1201px]:p-[18px_14px_24px_18px] ${
-            isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'
+            shouldChangeBg ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'
           }`}
         >
           <div>
@@ -136,7 +144,7 @@ const FleetDispatchBox = ({ data, id, index, cardType, handleDispatch }) => {
           </div>
         </Box>
       ) : (
-        <Box className={classes.jobBox}>
+        <Box className={`${classes.jobBox}  ${shouldChangeBg ? '!bg-[var(--dark-primary,theme("colors.blue.200"))]' : ''}`}>
           <Box mr="10px" className={classes.contentContainer}>
             <Box>
               <WorkIcon className={classes.icon} />
