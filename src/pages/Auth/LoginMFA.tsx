@@ -24,7 +24,7 @@ const LoginMFA = () => {
           <div
             className={cn(
               'lock relative mx-auto mb-3 flex h-[70px] w-[70px] items-center justify-center rounded-full transition-colors duration-300',
-              isCodeValid ? 'bg-green-500/30 dark:bg-green-500/45' : 'bg-red-500/30 dark:bg-red-500/45'
+              isCodeValid ? 'bg-green-500/30 dark:bg-green-500/70' : 'bg-red-500/30 dark:bg-red-600/50'
             )}
           >
             {isCodeValid ? (
@@ -46,16 +46,16 @@ const LoginMFA = () => {
               label="Age"
               onChange={(e) => setSelectedMethod(e.target.value as AuthenticationMethods)}
             >
-              <MenuItem value={'authenticatorApp'}>Authentication App</MenuItem>
+              <MenuItem value={'authenticatorApp'}>Authenticator App</MenuItem>
               <MenuItem value={'emailCode'}>Email Code</MenuItem>
             </Select>
           </FormControl>
 
-          <p className="info mx-auto mb-3 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
+          <p className="info mx-auto mb-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
             An authentication code has been sent to your {selectedMethod === 'authenticatorApp' ? 'device' : 'email'}. Enter the code to continue and
             be redirected.
           </p>
-          <div className="mb-4">
+          <div className="mb-6 px-5">
             <OtpInput
               validateChar={(character, index) => /^[0-9]$/.test(character)}
               value={otp}
@@ -69,7 +69,7 @@ const LoginMFA = () => {
             color="primary"
             fullWidth
             style={{ paddingBlock: 10, borderRadius: 9 }}
-            disabled={otp.length < 6}
+            disabled={otp.length < 6 || !isCodeValid}
           >
             {otp.length < 6 ? `${6 - otp.length} digits left` : isCodeValid ? "Let's go!" : 'Wrong code'}
           </Button>
