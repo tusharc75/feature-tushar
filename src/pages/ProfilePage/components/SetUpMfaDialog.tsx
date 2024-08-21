@@ -25,7 +25,7 @@ function SetUpMfaDialog({ onClose }) {
   const generate = async () => {
     setLoading(true);
     axiosInstance()
-      .get('/user/mfa/generate')
+      .get('/user/mfa-setup/generate')
       .then(({ data: { data } }) => {
         setData({
           secret: data?.secret,
@@ -41,7 +41,7 @@ function SetUpMfaDialog({ onClose }) {
 
   const validate = async (secretKey, token) => {
     axiosInstance()
-      .put('/user/mfa/verify', { secretKey, token })
+      .put('/user/mfa-setup/verify', { secretKey, token })
       .then(({ data: { data } }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -89,7 +89,7 @@ function SetUpMfaDialog({ onClose }) {
                 <Grid item xs={12}>
                   <div className="mx-auto max-w-[400px] text-center">
                     <Typography variant="body2" className="mb-2">
-                      Enter OTP:
+                      Enter Code
                     </Typography>
                     <OtpInput
                       validateChar={(character, index) => /^[0-9]$/.test(character)}
