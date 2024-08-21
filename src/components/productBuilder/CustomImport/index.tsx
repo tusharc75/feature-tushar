@@ -200,7 +200,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             let j;
             header.forEach((h, i) => {
               if (i >= fromCol && i <= toCol) {
-                let name = headers2[i] ? h + '_' + headers2[i] : h;
+                let name = headers2[i] ? h + ' ' + headers2[i] : h;
                 let index = i;
 
                 const diff = i - j;
@@ -208,7 +208,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   for (let k = j + 1; k < i; k++) {
                     if (headers2[k]) {
                       newHeaders.push({
-                        header: header[j] + '_' + headers2[k],
+                        header: header[j] + ' ' + headers2[k],
                         column: k
                       });
                     }
@@ -237,7 +237,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
           const obj: any = {};
           newData?.forEach((_data) => {
             _data?.header.forEach((_header) => {
-              obj[_header.header] = _data?.data[_data?.fromRow][_header?.column] || '';
+              obj[_header.header.toUpperCase()] = _data?.data[_data?.fromRow][_header?.column] || '';
             });
             _data.fromRow = _data.fromRow + 1;
           });
