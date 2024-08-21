@@ -242,7 +242,7 @@ export default function ManageProfile(props) {
   const handleRemoveMFA = () => {
     setRemovingFace(true);
     axiosInstance()
-      .delete('/user/mfa/remove')
+      .delete('/user/mfa-setup/remove')
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -384,6 +384,16 @@ export default function ManageProfile(props) {
             <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setShowAddProxyDialog(true)}>
               Add DOA Proxy
             </Button>
+            <Divider />
+            {userData?.isMFASetup ? (
+              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveMFAConfirmBox(true)}>
+                Remove MFA
+              </Button>
+            ) : (
+              <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
+                Setup MFA
+              </Button>
+            )}
             {permissions?.payrollPolicy && (
               <>
                 <Divider />
@@ -394,16 +404,6 @@ export default function ManageProfile(props) {
                 ) : (
                   <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setAddFaceDialog(true)}>
                     Add Face
-                  </Button>
-                )}
-                <Divider />
-                {userData?.isMFASetup ? (
-                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setRemoveMFAConfirmBox(true)}>
-                    Remove MFA
-                  </Button>
-                ) : (
-                  <Button color="primary" fullWidth variant="outlined" size="small" onClick={() => setSetUpMfaDialog(true)}>
-                    Setup MFA
                   </Button>
                 )}
               </>
