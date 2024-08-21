@@ -817,7 +817,8 @@ const ActionMenuItems = ({
             }}
             disabled={
               selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
-              ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              ASSET_STATUS.inRepair, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
+              ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -829,7 +830,8 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
+              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
+              ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.inRepair,
               ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
                 ? false
                 : true
@@ -842,7 +844,8 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.scrap);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
+              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
+              ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.inRepair,
               ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
                 ? false
                 : true
@@ -854,7 +857,7 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.lost);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
+            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse, ASSET_STATUS.inRepair,
             ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
           >
             {`Status Change - ${ASSET_STATUS.lost}`}
