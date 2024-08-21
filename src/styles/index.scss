@@ -4708,6 +4708,7 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
 
 td.google-visualization-orgchart-node {
   .card {
+    max-width: fit-content;
     border: 1px solid var(--common-border-color) !important;
   }
 }
