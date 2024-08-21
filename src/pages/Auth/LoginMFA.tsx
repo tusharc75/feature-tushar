@@ -1,4 +1,4 @@
-import { Box, Button, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
+import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -147,9 +147,9 @@ const LoginMFA = () => {
 
   return (
     <>
+      <CssBaseline />
       {tokenData ?
         <>
-          <CssBaseline />
           <div className="flex min-h-screen items-center justify-center bg-[var(--dark-secondary,white)] px-3 py-3">
             <div className="w-full max-w-[500px] rounded-2xl bg-[var(--dark-primary,white)] p-5 text-center shadow-lg [border:1px_solid_var(--common-border-color)]">
               <div className="logo-container mx-auto mb-3 max-w-[150px]">
@@ -217,6 +217,7 @@ const LoginMFA = () => {
                     style={{ paddingBlock: 10, borderRadius: 9 }}
                     disabled={otp.length < 6 || isSubmitting}
                     onClick={handleSubmit}
+                    startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
                   >
                     Submit
                   </Button>
