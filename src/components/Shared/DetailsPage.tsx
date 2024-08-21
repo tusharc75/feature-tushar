@@ -395,7 +395,7 @@ const Details = (props: DetailProps) => {
         );
       }
       return (
-        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={cn(classes.fieldText)} variant="body2">
+        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={cn(classes.fieldText, "flex items-center")} variant="body2">
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
               <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank" rel="noopener noreferrer">
