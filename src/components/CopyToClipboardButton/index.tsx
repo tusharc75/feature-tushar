@@ -1,16 +1,20 @@
-import { IconButton, IconButtonProps } from '@material-ui/core';
+import { IconButton, IconButtonProps, SvgIconTypeMap } from '@material-ui/core';
+import { OverridableComponent } from '@material-ui/core/OverridableComponent';
 import { DoneAllOutlined, FileCopyOutlined } from '@material-ui/icons';
 import React, { useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { copyTextToClipboard } from 'src/constants/helpers';
+import { cn, copyTextToClipboard } from 'src/constants/helpers';
 
 type CopyToClipboardButtonProps = {
   text: string;
+  // prettier-ignore
   containerProps?: React.HTMLAttributes<HTMLSpanElement>;
+  smallIcon?: boolean;
 } & IconButtonProps;
 
-const CopyToClipboardButton = ({ text, ...props }: CopyToClipboardButtonProps) => {
+const CopyToClipboardButton = ({ text, smallIcon = false, ...props }: CopyToClipboardButtonProps) => {
   const [isCopied, setIsCopied] = useState(false);
+  const { className, ...buttonProps } = props || {};
 
   const handleCopy = (text: string) => {
     setIsCopied(true);
@@ -21,9 +25,18 @@ const CopyToClipboardButton = ({ text, ...props }: CopyToClipboardButtonProps) =
   };
 
   return (
-    <HtmlTooltip title={isCopied ? 'Copied' : 'Copy'}>
-      <IconButton size="small" {...props} onClick={() => handleCopy(text)}>
-        {isCopied ? <DoneAllOutlined fontSize="small" className="!text-green-500" /> : <FileCopyOutlined fontSize="small" />}
+    <HtmlTooltip title={isCopied ? 'Copied' : 'Copy'} className="p-0">
+      <IconButton
+        size="small"
+        {...buttonProps}
+        className={cn(className, smallIcon ? '[&_.MuiIconButton-label]:!p-[3px]' : '')}
+        onClick={() => handleCopy(text)}
+      >
+        {isCopied ? (
+          <DoneAllOutlined fontSize="small" className={cn('!text-green-500', smallIcon ? '!text-[16px]' : '')} />
+        ) : (
+          <FileCopyOutlined className={cn(smallIcon ? '!text-[16px]' : '')} fontSize="small" />
+        )}
       </IconButton>
     </HtmlTooltip>
   );
