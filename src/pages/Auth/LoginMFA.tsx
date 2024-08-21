@@ -13,17 +13,17 @@ import { camelCase } from 'lodash';
 import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { MFA_METHOD } from 'src/constants/helpers';
 
-type AuthenticationMethods = 'totp' | 'emailOtp';
 
 const LoginMFA = () => {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
 
-  const [selectedMethod, setSelectedMethod] = useState<AuthenticationMethods>('emailOtp');
+  const [selectedMethod, setSelectedMethod] = useState<any>(MFA_METHOD.emailOtp);
   const [otp, setOtp] = useState('');
 
-  const [isValidToken, setIsValidToken] = useState(false);
+  const [tokenData, settokenData] = useState(null);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
@@ -35,7 +35,7 @@ const LoginMFA = () => {
   let { token }: any = queryString.parse(history.location.search);
 
   useEffect(() => {
-    if (token && token !== undefined) {
+    if (token) {
       verifyToken();
     }
   }, [token]);
@@ -65,7 +65,7 @@ const LoginMFA = () => {
       toastConfig.setToastConfig({
         open: true,
         type: 'success',
-        message: 'Resend Successfully'
+        message: 'Sent Successfully'
       });
     }).catch((error) => {
       setTimeLeft(0);
@@ -76,11 +76,12 @@ const LoginMFA = () => {
 
   const verifyToken = () => {
     axiosInstance().post('/user/mfa-auth/verify-token', { token: token })
-      .then(({ data }) => {
-        setIsValidToken(true)
+      .then(({ data: { data } }) => {
+        settokenData(data)
+        setSelectedMethod(data?.authenticationMethod)
       })
       .catch((error) => {
-        setIsValidToken(false)
+        settokenData(null)
         history.push({ pathname: '/login' });
       });
   };
@@ -146,7 +147,7 @@ const LoginMFA = () => {
 
   return (
     <>
-      {isValidToken ?
+      {tokenData ?
         <>
           <CssBaseline />
           <div className="flex min-h-screen items-center justify-center bg-[var(--dark-secondary,white)] px-3 py-3">
@@ -162,51 +163,65 @@ const LoginMFA = () => {
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
                   value={selectedMethod}
-                  label="Age"
-                  onChange={(e) => setSelectedMethod(e.target.value as AuthenticationMethods)}
+                  onChange={(e) => setSelectedMethod(e.target.value)}
                 >
-                  <MenuItem value={'emailOtp'}>Email Code</MenuItem>
-                  <MenuItem value={'totp'}>Authenticator App</MenuItem>
+                  <MenuItem value={MFA_METHOD.emailOtp}>Email Code</MenuItem>
+                  {tokenData?.isMFASetup && <MenuItem value={MFA_METHOD.totp}>Authenticator App</MenuItem>}
                 </Select>
               </FormControl>
-              <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
-                An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and
-                be redirected.
-              </p>
-              <div className="mb-6 px-5">
-                <OtpInput
-                  validateChar={(character, index) => /^[0-9]$/.test(character)}
-                  value={otp}
-                  onChange={(value) => setOtp(value)}
-                  TextFieldsProps={{ size: 'small' }}
-                />
-              </div>
-              {selectedMethod === 'emailOtp' && (
-                <div className="mb-2 flex justify-end px-3 text-[13px] font-normal text-gray-500">
-                  <span
-                    className={`mr-2 ${timeLeft === 0 && !isCodeSending ? 'cursor-pointer font-semibold' : ''}`}
-                    onClick={() => {
-                      if (timeLeft === 0) {
-                        handleResendCode();
-                      }
-                    }}
+              {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ?
+                <Box mt={2} mb={2}>
+                  <Button
+                    disableElevation
+                    variant="contained"
+                    color="primary"
+                    onClick={handleResendCode}
                   >
-                    Resend Code
-                  </span>
-                  {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
-                </div>
-              )}
-              <Button
-                disableElevation
-                variant="contained"
-                color="primary"
-                fullWidth
-                style={{ paddingBlock: 10, borderRadius: 9 }}
-                disabled={otp.length < 6 || isSubmitting}
-                onClick={handleSubmit}
-              >
-                Submit
-              </Button>
+                    Send Code
+                  </Button>
+                </Box>
+                :
+                <>
+                  <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
+                    An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and
+                    be redirected.
+                  </p>
+                  <div className="mb-6 px-5">
+                    <OtpInput
+                      validateChar={(character, index) => /^[0-9]$/.test(character)}
+                      value={otp}
+                      onChange={(value) => setOtp(value)}
+                      TextFieldsProps={{ size: 'small' }}
+                    />
+                  </div>
+                  {selectedMethod === 'emailOtp' && (
+                    <div className="mb-2 flex justify-end px-3 text-[13px] font-normal text-gray-500">
+                      <span
+                        className={`mr-2 ${timeLeft === 0 && !isCodeSending ? 'cursor-pointer font-semibold' : ''}`}
+                        onClick={() => {
+                          if (timeLeft === 0) {
+                            handleResendCode();
+                          }
+                        }}
+                      >
+                        Resend Code
+                      </span>
+                      {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
+                    </div>
+                  )}
+                  <Button
+                    disableElevation
+                    variant="contained"
+                    color="primary"
+                    fullWidth
+                    style={{ paddingBlock: 10, borderRadius: 9 }}
+                    disabled={otp.length < 6 || isSubmitting}
+                    onClick={handleSubmit}
+                  >
+                    Submit
+                  </Button>
+                </>
+              }
             </div>
           </div>
         </>
