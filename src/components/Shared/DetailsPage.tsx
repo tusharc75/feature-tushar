@@ -31,6 +31,7 @@ import moment from 'moment';
 import { FaUserPlus } from 'react-icons/fa6';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
+import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -388,23 +389,32 @@ const Details = (props: DetailProps) => {
             {value}
             {value !== '-' ? (
               <span className="!p-0 [&_span.html-custom-tooltip]:!p-0">
-                <CopyToClipboard textToCopy={value} className="ml-0 !p-2" />
+                <CopyToClipboardButton text={value} style={{ padding: '1px' }} smallIcon />
               </span>
             ) : null}
           </span>
         );
       }
       return (
-        <Typography title={value === '-' || Array.isArray(value) ? '' : value} className={cn(classes.fieldText)} variant="body2">
+        <Typography
+          title={value === '-' || Array.isArray(value) ? '' : value}
+          className={cn(classes.fieldText, ' flex items-center')}
+          variant="body2"
+        >
           {fieldData.type === 'url' || fieldData.type === 'email' ? (
             <>
-              <MuiLink href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`} target="_blank" rel="noopener noreferrer">
+              <MuiLink
+                href={fieldData.type === 'email' ? `mailto:${value}` : `https://${value}`}
+                target="_blank"
+                className="line-clamp-1"
+                rel="noopener noreferrer"
+              >
                 <span className={`text-truncate block`}> {value} </span>
               </MuiLink>
-              {fieldData.type === 'email' && value !== '-' ? <CopyToClipboard textToCopy={value} /> : null}
+              {fieldData.type === 'email' && value !== '-' ? <CopyToClipboardButton text={value} style={{ padding: '3px' }} smallIcon /> : null}
             </>
           ) : (
-            <span className={`text-truncate block`}>{value}</span>
+            <span className={`text-truncate line-clamp-1 block`}>{value}</span>
           )}
         </Typography>
       );
