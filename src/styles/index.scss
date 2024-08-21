@@ -4705,3 +4705,9 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
     border-color: var(--dark-primary, white) transparent transparent transparent;
   }
 }
+
+td.google-visualization-orgchart-node {
+  .card {
+    border: 1px solid var(--common-border-color) !important;
+  }
+}
