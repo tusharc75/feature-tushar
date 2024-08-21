@@ -3533,3 +3533,9 @@ export function debounceCallBack<T extends (...args: any[]) => void>(func: T, ti
   return [debouncedFunc, teardown];
 }
 export type DebounceCallBack = ReturnType<typeof debounceCallBack>;
+
+
+export const MFA_METHOD = {
+  emailOtp: "emailOtp",
+  totp: "totp"
+}

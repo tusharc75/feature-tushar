@@ -242,7 +242,7 @@ export default function ManageProfile(props) {
   const handleRemoveMFA = () => {
     setRemovingFace(true);
     axiosInstance()
-      .delete('/user/mfa/remove')
+      .delete('/user/mfa-setup/remove')
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
