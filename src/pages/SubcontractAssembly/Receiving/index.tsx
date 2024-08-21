@@ -118,7 +118,6 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
         disableSortBy: true,
         canDrag: false,
         Cell: ({ row }) => {
-          console.log(row.original.productName);
           return (
             <div className="flex items-center gap-2">
               {row?.original?.receivedQty <= 0 && (
