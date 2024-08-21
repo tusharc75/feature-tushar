@@ -30,6 +30,7 @@ import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
+import { LOGIC } from 'src/components/FormBuilder/helper';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -1127,26 +1128,52 @@ export const removeEmptyKeys = (obj: object) => {
 export const yupSchema = (fields: any[], validEmail = true) => {
   const schema = {};
   fields.forEach((input) => {
+    let message = `${input.fieldLabel} is required`;
+    const fields: any = [];
+    let logic = LOGIC[0];
+    if (input?.visibilityCondition?.length > 0) {
+      input?.visibilityCondition?.forEach((condition) => {
+        logic = condition?.logic;
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            fields.push(field);
+          }
+        });
+      });
+    }
     if (input.type === 'singleLine') {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      schema[input.fieldName] = input.required
+        ? fields?.length
+          ? string().when(
+              fields?.map((f) => f?.fieldName),
+              {
+                is: (...args) =>
+                  logic === LOGIC[0] ? fields?.every?.((f, i) => args[i] === f?.value) : fields?.some?.((f, i) => args[i] === f?.value),
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
+          : string().required(message)
+        : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1203,7 +1230,20 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'groupSignature') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      schema[input.fieldName] = input.required
+        ? fields?.length
+          ? string().when(
+              fields?.map((f) => f?.fieldName),
+              {
+                is: (...args) =>
+                  logic === LOGIC[0] ? fields?.every?.((f, i) => args[i] === f?.value) : fields?.some?.((f, i) => args[i] === f?.value),
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
+          : string().required(message)
+        : string();
     }
   });
 
@@ -1329,8 +1369,6 @@ export const convertDateTimToDate = (date) => {
   return newDate;
 };
 
-
-
 interface IPermission {
   [key: string]: {
     isCreate: boolean;
@@ -1401,12 +1439,10 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
         });
       }
 
-
       localStorage.setItem('routes', JSON.stringify(routesAndTitle));
       return permissions;
-    }
-    catch (e) {
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
   }
 };
@@ -2931,7 +2967,7 @@ export const WORK_FLOW_STATUS = {
   open: 'Open',
   inProgress: 'In-Progress',
   completed: 'Completed'
-}
+};
 
 export const INVOICE_STATUS = {
   new: 'New',
@@ -3417,7 +3453,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) { }
+  } catch (error) {}
 };
 
 export const columnSize = (type) => {
@@ -3467,8 +3503,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
