@@ -77,7 +77,7 @@ const Users = ({ warehouse }) => {
   };
 
   const getQueryString = () => {
-    let deepFilter = `?page=${page}&limit=${limit}&withoutRoleLookup=true`;
+    let deepFilter = `?page=${page}&limit=${limit}`;
 
     const { filterByIds, deepFilters } = gridFilterParser(filters);
 
