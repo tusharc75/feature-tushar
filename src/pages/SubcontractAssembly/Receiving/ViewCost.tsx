@@ -7,10 +7,9 @@ import { CHILD_RESOURCE, CustomDialogTransition } from "src/constants/helpers";
 import DetailsPage from '../../../components/Shared/DetailsPage';
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
 
-const ViewCost = ({ data, onClose, subcontractAssemblyData }) => {
+const ViewCost = ({ data, title, onClose, subcontractAssemblyData }) => {
 	const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 	const [fields, setFields] = useState(null);
-
 	const fetchData = async () => {
 		var fields = await fetch_child_resource_fields(CHILD_RESOURCE.subcontractAssemblyCost, subcontractAssemblyData?.currency, false, false);
 		setFields(fields?.map(f => ({ fieldData: f })));
@@ -37,7 +36,7 @@ const ViewCost = ({ data, onClose, subcontractAssemblyData }) => {
 				<Box>
 					<CustomDialogHeader
 						onClose={onClose}
-						title={`View Cost`}
+						title={`View Cost (${title})`}
 						isMinimized={!fullScreen}
 						onMinimizeMaximize={() => {
 							setFullScreen((prevState) => !prevState);
