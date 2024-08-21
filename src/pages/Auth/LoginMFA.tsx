@@ -1,5 +1,5 @@
 import { Button, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
-import { useContext, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
 import OtpInput from 'src/components/OtpInput';
@@ -16,69 +16,119 @@ import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChat
 type AuthenticationMethods = 'authenticatorApp' | 'emailOtp';
 
 const LoginMFA = () => {
-
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
 
   const [selectedMethod, setSelectedMethod] = useState<AuthenticationMethods>('emailOtp');
   const [otp, setOtp] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(60);
+  const [isCodeSending, setIsCodeSending] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
 
   const history = useHistory();
   let { token }: any = queryString.parse(history.location.search);
 
+  useEffect(() => {
+    verifyToken();
+  }, []);
+
+  useEffect(() => {
+    if (timeLeft === 0) return;
+
+    const timerId = setInterval(() => {
+      setTimeLeft((timeLeft) => timeLeft - 1);
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [timeLeft]);
+
+  const formatTime = (time) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  };
+
+  const handleResendCode = () => {
+    setIsCodeSending(true);
+    axiosInstance()
+      .post('/user/mfa-auth/resend-otp', { token: token })
+      .then(() => {
+        setIsCodeSending(false);
+        setTimeLeft(60);
+      })
+      .catch((error) => {
+        setTimeLeft(0);
+        setIsCodeSending(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
+  const verifyToken = () => {
+    axiosInstance()
+      .post('/user/mfa-auth/verify-token', { token: token })
+      .then(({ data: { data } }) => {
+        if (!data?.active) {
+          history.push({ pathname: '/login' });
+        }
+      })
+      .catch((error) => {});
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true);
-    axiosInstance().post('/user/mfa-auth/verify-otp', {
-      otp: otp,
-      token: token,
-      method: selectedMethod
-    }).then(async ({ data: { data } }) => {
-      localStorage.setItem('token', data.token);
-      if (data?.hasExistingSession) {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.existingSessionMessage
-        });
-      }
-      const res = await axiosInstance().get(`/user/me`)
-      const { data: { data: meData } } = res;
-
-      dispatch({ type: SET_USER, payload: meData });
-      if (meData?.role?.selectedEntity?._id) {
-        dispatch({
-          type: SET_SELECTED_ENTITY,
-          payload: data.role.selectedEntity._id
-        });
-      }
-      if (data?.user?.defaultResource) {
-        if (routes[camelCase(data?.user?.defaultResource)]?.path) {
-          history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
+    axiosInstance()
+      .post('/user/mfa-auth/verify-otp', {
+        otp: otp,
+        token: token,
+        method: selectedMethod
+      })
+      .then(async ({ data: { data } }) => {
+        localStorage.setItem('token', data.token);
+        if (data?.hasExistingSession) {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.existingSessionMessage
+          });
         }
-      }
-      axiosInstance()
-        .get(`/user/notification/unseen`)
-        .then(({ data: { count } }) => {
-          notification.setCount(count);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
+        const res = await axiosInstance().get(`/user/me`);
+        const {
+          data: { data: meData }
+        } = res;
 
-      axiosInstance()
-        .get(`/user/user-notification/unseen`)
-        .then(({ data: { count } }) => {
-          chatNotification.setCount(count);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-      setIsSubmitting(false);
+        dispatch({ type: SET_USER, payload: meData });
+        if (meData?.role?.selectedEntity?._id) {
+          dispatch({
+            type: SET_SELECTED_ENTITY,
+            payload: data.role.selectedEntity._id
+          });
+        }
+        if (data?.user?.defaultResource) {
+          if (routes[camelCase(data?.user?.defaultResource)]?.path) {
+            history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
+          }
+        }
+        axiosInstance()
+          .get(`/user/notification/unseen`)
+          .then(({ data: { count } }) => {
+            notification.setCount(count);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
 
-    })
+        axiosInstance()
+          .get(`/user/user-notification/unseen`)
+          .then(({ data: { count } }) => {
+            chatNotification.setCount(count);
+          })
+          .catch((error) => {
+            toastConfig.setToastConfig(error);
+          });
+        setIsSubmitting(false);
+      })
       .catch((error) => {
         setIsSubmitting(false);
         toastConfig.setToastConfig(error);
@@ -120,6 +170,21 @@ const LoginMFA = () => {
               TextFieldsProps={{ size: 'small' }}
             />
           </div>
+          {selectedMethod === 'emailOtp' && (
+            <div className="mb-2 flex justify-end px-3 text-[13px] font-normal text-gray-500">
+              <span
+                className={`mr-2 ${timeLeft === 0 && !isCodeSending ? 'cursor-pointer font-semibold' : ''}`}
+                onClick={() => {
+                  if (timeLeft === 0) {
+                    handleResendCode();
+                  }
+                }}
+              >
+                Resend Code
+              </span>
+              <span>{formatTime(timeLeft)}</span>
+            </div>
+          )}
           <Button
             disableElevation
             variant="contained"
