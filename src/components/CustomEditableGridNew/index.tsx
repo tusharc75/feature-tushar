@@ -46,13 +46,6 @@ const CustomEditableGrid = ({
   const [isAddField, setIsAddField] = useState(false);
   const [addedField, setAddedField] = useState([]);
   const [scrollToHeader, setScrollToHeader] = useState('');
-  const {
-    isLeftDisabled,
-    isRightDisabled,
-    scrollLeft,
-    scrollRight,
-    setRef: scrollContainerRef
-  } = useScrollController({ scrollDistance: Math.floor(window.innerWidth / 2) });
 
   useEffect(() => {
     if (referenceId) {
@@ -209,48 +202,18 @@ const CustomEditableGrid = ({
                   rightSideContents={rightSideContents()}
                   hasXpadding={false}
                 />
-                <div
-                  style={{
-                    display: 'block',
-                    overflow: 'auto',
-                    height: 'calc(100vh - 230px)',
-                    marginTop: '10px'
-                  }}
-                  ref={scrollContainerRef}
-                  className="custom-react-table editable-table-v1 border"
-                >
-                  <CustomTable
-                    columns={columns}
-                    flatRows={flatRows}
-                    setFlatRows={setFlatRows}
-                    constColummns={constColummns}
-                    fields={allFields}
-                    extraDisabledFields={extraDisabledFields}
-                    error={error}
-                    updateData={updateData}
-                    scrollToHeader={scrollToHeader}
-                  />
-                </div>
-                <div className="sr-only mt-1 flex justify-end gap-3 lg:not-sr-only">
-                  <HtmlTooltip title="Scroll left">
-                    <IconButton
-                      style={{ borderRadius: 999, padding: 4, background: 'var(--new-theme-color)', opacity: isLeftDisabled ? '50%' : '100%' }}
-                      disabled={isLeftDisabled}
-                      onClick={scrollLeft}
-                    >
-                      <ChevronLeft className="text-white" />
-                    </IconButton>
-                  </HtmlTooltip>
-                  <HtmlTooltip title="Scroll right">
-                    <IconButton
-                      style={{ borderRadius: 999, padding: 4, background: 'var(--new-theme-color)', opacity: isRightDisabled ? '50%' : '100%' }}
-                      disabled={isRightDisabled}
-                      onClick={scrollRight}
-                    >
-                      <ChevronRight className="text-white" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </div>
+
+                <CustomTable
+                  columns={columns}
+                  flatRows={flatRows}
+                  setFlatRows={setFlatRows}
+                  constColummns={constColummns}
+                  fields={allFields}
+                  extraDisabledFields={extraDisabledFields}
+                  error={error}
+                  updateData={updateData}
+                  scrollToHeader={scrollToHeader}
+                />
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>

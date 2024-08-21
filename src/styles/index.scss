@@ -4705,3 +4705,8 @@ span.MuiStepLabel-root.MuiStepLabel-horizontal.Mui-disabled.MuiStepLabel-alterna
     border-color: var(--dark-primary, white) transparent transparent transparent;
   }
 }
+.editable-table-cell {
+  &[data-sticky-td='true'] {
+    background-color: var(--dark-primary, white);
+  }
+}
