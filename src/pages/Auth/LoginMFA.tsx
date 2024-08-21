@@ -1,4 +1,4 @@
-import { Button, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
+import { Box, Button, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { SVG } from 'src/assets';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -12,8 +12,9 @@ import routes from 'src/components/Helpers/Routes';
 import { camelCase } from 'lodash';
 import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-type AuthenticationMethods = 'authenticatorApp' | 'emailOtp';
+type AuthenticationMethods = 'totp' | 'emailOtp';
 
 const LoginMFA = () => {
   const notification = useContext(CustomNotificationCountContext);
@@ -21,6 +22,9 @@ const LoginMFA = () => {
 
   const [selectedMethod, setSelectedMethod] = useState<AuthenticationMethods>('emailOtp');
   const [otp, setOtp] = useState('');
+
+  const [isValidToken, setIsValidToken] = useState(false);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [timeLeft, setTimeLeft] = useState(60);
   const [isCodeSending, setIsCodeSending] = useState(false);
@@ -31,8 +35,10 @@ const LoginMFA = () => {
   let { token }: any = queryString.parse(history.location.search);
 
   useEffect(() => {
-    verifyToken();
-  }, []);
+    if (token && token !== undefined) {
+      verifyToken();
+    }
+  }, [token]);
 
   useEffect(() => {
     if (timeLeft === 0) return;
@@ -52,28 +58,31 @@ const LoginMFA = () => {
 
   const handleResendCode = () => {
     setIsCodeSending(true);
-    axiosInstance()
-      .post('/user/mfa-auth/resend-otp', { token: token })
-      .then(() => {
-        setIsCodeSending(false);
-        setTimeLeft(60);
-      })
-      .catch((error) => {
-        setTimeLeft(0);
-        setIsCodeSending(false);
-        toastConfig.setToastConfig(error);
+    axiosInstance().post('/user/mfa-auth/resend-otp', { token: token }).then(({ data: { data } }) => {
+      setIsCodeSending(false);
+      setTimeLeft(60);
+      history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: 'Resend Successfully'
       });
+    }).catch((error) => {
+      setTimeLeft(0);
+      setIsCodeSending(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const verifyToken = () => {
-    axiosInstance()
-      .post('/user/mfa-auth/verify-token', { token: token })
-      .then(({ data: { data } }) => {
-        if (!data?.active) {
-          history.push({ pathname: '/login' });
-        }
+    axiosInstance().post('/user/mfa-auth/verify-token', { token: token })
+      .then(({ data }) => {
+        setIsValidToken(true)
       })
-      .catch((error) => {});
+      .catch((error) => {
+        setIsValidToken(false)
+        history.push({ pathname: '/login' });
+      });
   };
 
   const handleSubmit = async () => {
@@ -137,67 +146,74 @@ const LoginMFA = () => {
 
   return (
     <>
-      <CssBaseline />
-      <div className="flex min-h-screen items-center justify-center bg-[var(--dark-secondary,white)] px-3 py-3">
-        <div className="w-full max-w-[500px] rounded-2xl bg-[var(--dark-primary,white)] p-5 text-center shadow-lg [border:1px_solid_var(--common-border-color)]">
-          <div className="logo-container mx-auto mb-2 max-w-[150px]">
-            <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
-          </div>
-          <h4 className="mb-3 text-2xl font-semibold">Verify Your Identity</h4>
-          <p className="mb-2 font-semibold text-gray-500">Authentication Method</p>
-          <FormControl style={{ minWidth: 'min(100%, 300px)' }} size="small" className="mb-3">
-            <Select
-              variant="outlined"
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={selectedMethod}
-              label="Age"
-              onChange={(e) => setSelectedMethod(e.target.value as AuthenticationMethods)}
-            >
-              <MenuItem value={'authenticatorApp'}>Authenticator App</MenuItem>
-              <MenuItem value={'emailOtp'}>Email Code</MenuItem>
-            </Select>
-          </FormControl>
-          <p className="info mx-auto mb-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
-            An authentication code has been sent to your {selectedMethod === 'authenticatorApp' ? 'device' : 'email'}. Enter the code to continue and
-            be redirected.
-          </p>
-          <div className="mb-6 px-5">
-            <OtpInput
-              validateChar={(character, index) => /^[0-9]$/.test(character)}
-              value={otp}
-              onChange={(value) => setOtp(value)}
-              TextFieldsProps={{ size: 'small' }}
-            />
-          </div>
-          {selectedMethod === 'emailOtp' && (
-            <div className="mb-2 flex justify-end px-3 text-[13px] font-normal text-gray-500">
-              <span
-                className={`mr-2 ${timeLeft === 0 && !isCodeSending ? 'cursor-pointer font-semibold' : ''}`}
-                onClick={() => {
-                  if (timeLeft === 0) {
-                    handleResendCode();
-                  }
-                }}
+      {isValidToken ?
+        <>
+          <CssBaseline />
+          <div className="flex min-h-screen items-center justify-center bg-[var(--dark-secondary,white)] px-3 py-3">
+            <div className="w-full max-w-[500px] rounded-2xl bg-[var(--dark-primary,white)] p-5 text-center shadow-lg [border:1px_solid_var(--common-border-color)]">
+              <div className="logo-container mx-auto mb-3 max-w-[150px]">
+                <img src={SVG('LogoNew')} alt="equipt logo" className="max-w-full" />
+              </div>
+              <h4 className="mb-3 mt-3 text-2xl font-semibold">Verify Your Identity</h4>
+              <p className="mb-3 mt-7  font-semibold text-gray-500">Authentication Method</p>
+              <FormControl style={{ minWidth: 'min(100%, 300px)' }} size="small" className="mb-3">
+                <Select
+                  variant="outlined"
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  value={selectedMethod}
+                  label="Age"
+                  onChange={(e) => setSelectedMethod(e.target.value as AuthenticationMethods)}
+                >
+                  <MenuItem value={'emailOtp'}>Email Code</MenuItem>
+                  <MenuItem value={'totp'}>Authenticator App</MenuItem>
+                </Select>
+              </FormControl>
+              <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
+                An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and
+                be redirected.
+              </p>
+              <div className="mb-6 px-5">
+                <OtpInput
+                  validateChar={(character, index) => /^[0-9]$/.test(character)}
+                  value={otp}
+                  onChange={(value) => setOtp(value)}
+                  TextFieldsProps={{ size: 'small' }}
+                />
+              </div>
+              {selectedMethod === 'emailOtp' && (
+                <div className="mb-2 flex justify-end px-3 text-[13px] font-normal text-gray-500">
+                  <span
+                    className={`mr-2 ${timeLeft === 0 && !isCodeSending ? 'cursor-pointer font-semibold' : ''}`}
+                    onClick={() => {
+                      if (timeLeft === 0) {
+                        handleResendCode();
+                      }
+                    }}
+                  >
+                    Resend Code
+                  </span>
+                  {timeLeft ? <span>{formatTime(timeLeft)}</span> : null}
+                </div>
+              )}
+              <Button
+                disableElevation
+                variant="contained"
+                color="primary"
+                fullWidth
+                style={{ paddingBlock: 10, borderRadius: 9 }}
+                disabled={otp.length < 6 || isSubmitting}
+                onClick={handleSubmit}
               >
-                Resend Code
-              </span>
-              <span>{formatTime(timeLeft)}</span>
+                Submit
+              </Button>
             </div>
-          )}
-          <Button
-            disableElevation
-            variant="contained"
-            color="primary"
-            fullWidth
-            style={{ paddingBlock: 10, borderRadius: 9 }}
-            disabled={otp.length < 6 || isSubmitting}
-            onClick={handleSubmit}
-          >
-            Submit
-          </Button>
-        </div>
-      </div>
+          </div>
+        </>
+        : <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      }
     </>
   );
 };
