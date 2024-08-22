@@ -57,62 +57,60 @@ const AddSerialNumber = ({ handleClose, handleSucess, product, warehouse, serial
       }}
     >
       <Formik initialValues={{ serialNumber: [] }} onSubmit={handleSubmit} validateOnMount validate={validate}>
-        {({ submitForm, touched, errors, setFieldValue, values }) => (
-          <>
-            <Fragment>
-              <CustomDialogHeader
-                title={'Add Serial Numbers'}
-                onClose={(e, reason) => {
-                  if (reason !== 'backdropClick') {
-                    handleClose();
-                  }
-                }}
-                showRequiredLabel={false}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                  setFullScreen((prevState) => !prevState);
-                }}
-                showManimizeMaximize={true}
-              ></CustomDialogHeader>
-              <CustomDialogContent isFooterPresent={true}>
-                <Box pt={1} pb={1}>
-                  <Typography>{`Inventory without Serial Number - ${serialNumberCount}`}</Typography>
-                  <Box pt={2} pb={2}>
-                    <Divider />
-                  </Box>
-                  <Autocomplete
-                    size="small"
-                    options={[]}
-                    freeSolo={true}
-                    multiple={true}
-                    disableCloseOnSelect
-                    value={values['serialNumber']}
-                    onChange={(_, val) => {
-                      setFieldValue('serialNumber', val);
-                    }}
-                    getOptionSelected={(item, current) => item === current}
-                    getOptionLabel={(option) => option}
-                    renderInput={(props) => (
-                      <TextField
-                        {...props}
-                        placeholder={'Enter serial number and press enter'}
-                        variant="outlined"
-                        name="serialNumber"
-                        label={'Serial Number'}
-                        error={touched['serialNumber'] && Boolean(errors['serialNumber'])}
-                        helperText={touched['serialNumber'] && errors['serialNumber']}
-                      />
-                    )}
-                  />
+        {({ touched, errors, setFieldValue, values, submitForm }) => (
+          <Form autoComplete="off" autoCorrect="off" noValidate className="flex flex-col min-h-full">
+            <CustomDialogHeader
+              title={'Add Serial Numbers'}
+              onClose={(e, reason) => {
+                if (reason !== 'backdropClick') {
+                  handleClose();
+                }
+              }}
+              showRequiredLabel={false}
+              isMinimized={!fullScreen}
+              onMinimizeMaximize={() => {
+                setFullScreen((prevState) => !prevState);
+              }}
+              showManimizeMaximize={true}
+            ></CustomDialogHeader>
+            <CustomDialogContent isFooterPresent={true}>
+              <Box pt={1} pb={1}>
+                <Typography>{`Inventory without Serial Number - ${serialNumberCount}`}</Typography>
+                <Box pt={2} pb={2}>
+                  <Divider />
                 </Box>
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="button" onClick={submitForm}>
-                  Add
-                </CustomButton>
-              </CustomDialogFooter>
-            </Fragment>
-          </>
+                <Autocomplete
+                  size="small"
+                  options={[]}
+                  freeSolo={true}
+                  multiple={true}
+                  disableCloseOnSelect
+                  value={values['serialNumber']}
+                  onChange={(_, val) => {
+                    setFieldValue('serialNumber', val);
+                  }}
+                  getOptionSelected={(item, current) => item === current}
+                  getOptionLabel={(option) => option}
+                  renderInput={(props) => (
+                    <TextField
+                      {...props}
+                      placeholder={'Enter serial number and press enter'}
+                      variant="outlined"
+                      name="serialNumber"
+                      label={'Serial Number'}
+                      error={touched['serialNumber'] && Boolean(errors['serialNumber'])}
+                      helperText={touched['serialNumber'] && errors['serialNumber']}
+                    />
+                  )}
+                />
+              </Box>
+            </CustomDialogContent>
+            <CustomDialogFooter>
+              <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="button" onClick={submitForm}>
+                Add
+              </CustomButton>
+            </CustomDialogFooter>
+          </Form>
         )}
       </Formik>
     </Dialog>
