@@ -246,7 +246,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                   style={{
                     display: 'flex',
                     position: 'absolute',
-                    transform: `translateY(${virtualRow.start}px)`, //this should always be a `style` as it changes on scroll
+                    transform: `translateY(${virtualRow.start}px)`,
                     width: '100%'
                   }}
                 >
@@ -264,9 +264,9 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                           width: cell.column.width,
                           minWidth: cell.column.minWidth
                         }}
-                        {...cell.getCellProps()}
                         className={`td editable-table-cell ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} snap-center `}
                         key={cell.id}
+                        {...cell.getCellProps()}
                       >
                         {['index']?.includes(cell.column.id) ? (
                           <div className="full-height-cell">{cell.render('Cell')}</div>
