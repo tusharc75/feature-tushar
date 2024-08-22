@@ -4712,6 +4712,12 @@ td.google-visualization-orgchart-node {
   }
 }
 
+.editable-table-cell {
+  &[data-sticky-td='true'] {
+    background-color: var(--dark-primary, white);
+  }
+}
+
 .funnel-pipeline-chart .funnel-pipeline-chart-row .funnel-pipeline-chart-title {
   font-size: 0.7rem;
   padding-bottom: 5px;

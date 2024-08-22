@@ -8,22 +8,13 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { camelCase, map, sortBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomEditableGrid, { useTableReducer as useEditableTableReducer } from 'src/components/CustomEditableGridNew';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import routes from '../../components/Helpers/Routes';
 import { extractFields, handleAutoCalculation } from '../../constants/formulaUtility';
-import {
-  QUOTE_PROCESS_STATUS,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  priceTemplate,
-  productCategory,
-  productTemplate,
-  sidebarResource,
-  supplierContact
-} from '../../constants/helpers';
+import { QUOTE_PROCESS_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierContact } from '../../constants/helpers';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { AddField } from '../FormBuilder/AddField';
@@ -39,11 +30,6 @@ import BulkEditDialog from './BulkEditDialog';
 import ProductDialog from './ProductDialog';
 import SupplierAskPrice from './SupplierAskPrice';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
-import NoDataCell from '../Helpers/NoDataCell';
-import { Link } from 'react-router-dom';
-import CustomEditableGrid from 'src/components/CustomEditableGridNew';
-import { AiOutlineImport } from 'react-icons/ai';
-import { CustomImport } from 'src/components/productBuilder/CustomImport';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -103,6 +89,8 @@ const ProductBuilder = (props) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
+  const { state: editableState, dispatch: editableDispatch } = useEditableTableReducer();
+
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [columns, setColumns] = useState(null);
 
@@ -129,18 +117,22 @@ const ProductBuilder = (props) => {
             show: true,
             disabled: true,
             Cell: ({ row }) => {
-              return <div>{!Editable ? (
-                <p className="text-truncate">{row.original.index}</p>
-              ) : (
-                <p
-                  onClick={() => {
-                    openProductModel(row.original?._id);
-                  }}
-                  className="link text-truncate"
-                >
-                  {row.original.index}
-                </p>
-              )}</div>
+              return (
+                <div>
+                  {!Editable ? (
+                    <p className="text-truncate">{row.original.index}</p>
+                  ) : (
+                    <p
+                      onClick={() => {
+                        openProductModel(row.original?._id);
+                      }}
+                      className="link text-truncate"
+                    >
+                      {row.original.index}
+                    </p>
+                  )}
+                </div>
+              );
             }
           }
         ];
@@ -756,6 +748,8 @@ const ProductBuilder = (props) => {
       )}
       {inlineBulkEdit && fromQuote && (
         <CustomEditableGrid
+          state={editableState}
+          dispatch={editableDispatch}
           onClose={() => {
             setInlineBulkEdit(false);
           }}
