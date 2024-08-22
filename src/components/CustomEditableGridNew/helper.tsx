@@ -1,4 +1,5 @@
 import { VirtualItem } from '@tanstack/react-virtual';
+import { uniqBy } from 'lodash';
 
 export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
   const schema = {};
@@ -100,7 +101,7 @@ export const generateColumn = (fields, columnOrder: string[] = [], hiddenColumns
     }
   });
 
-  let updatedColumns = newColumns.filter((d) => !hiddenColumns.includes(d.accessor));
+  let updatedColumns = hiddenColumns.length > 0 ? newColumns.filter((d) => !hiddenColumns.includes(d.accessor)) : newColumns;
   if (columnOrder.length > 0) {
     updatedColumns = [...updatedColumns].sort((a, b) => columnOrder.indexOf(a.accessor) - columnOrder.indexOf(b.accessor));
   }
@@ -191,53 +192,30 @@ export const generateRows = (data, fields) => {
 };
 
 export const getColumnData = (columns: { width: number; sticky?: 'left' | 'right' }[]) => {
-  const data: { widths: number[]; stickyIndexes: number[] } = { widths: [], stickyIndexes: [] };
+  const data: { widths: number[]; stickyIndexes: number[]; left: number[]; right: number[] } = { widths: [], stickyIndexes: [], left: [], right: [] };
   for (let i = 0; i < columns.length; i++) {
     const column = columns[i];
     data.widths.push(column.width);
     if (column.sticky) {
       data.stickyIndexes.push(i);
     }
+    if (column.sticky === 'left') {
+      data.left.push(i);
+    }
+    if (column.sticky === 'right') {
+      data.right.push(i);
+    }
   }
   return data;
 };
 
-export const addStickyIndexesInVirtualColumn = (columns: { width: number; sticky?: 'left' | 'right' }[], virtualColumns: VirtualItem[]) => {
-  const { stickyIndexes, widths } = getColumnData(columns);
-  return updateItems(stickyIndexes, virtualColumns, widths);
+export const lerp = (a: number, b: number, t: number) => {
+  return a + (b - a) * t;
 };
 
-const getLeft = (index: number, widths: number[]) => {
-  return widths.slice(0, index).reduce((a, b) => a + b, 0);
-};
-
-function updateItems(indices: number[], items: VirtualItem[], widths: number[]): VirtualItem[] {
-  if (!indices.length) return items;
-  if (!items.length) return [];
-
-  const updatedItems = [...items];
-
-  indices.forEach((index) => {
-    const existingItem = updatedItems.find((item) => item.index === index);
-    if (!existingItem) {
-      const newItem: VirtualItem = {
-        index,
-        start: getLeft(index, widths),
-        size: widths[index],
-        end: getLeft(index, widths) + widths[index],
-        key: index,
-        lane: 0
-      };
-
-      // Insert the new item in the correct position based on the index
-      const insertPosition = updatedItems.findIndex((item) => item.index > index);
-      if (insertPosition === -1) {
-        updatedItems.push(newItem);
-      } else {
-        updatedItems.splice(insertPosition, 0, newItem);
-      }
-    }
-  });
-
-  return updatedItems;
+export function easeInOutQuint(t: number) {
+  return t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t;
+}
+export function easeInOutQuad(t: number): number {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }

@@ -1,28 +1,48 @@
-import { Box, Button, Dialog, IconButton, MenuItem } from '@material-ui/core';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition } from 'src/constants/helpers';
-import { RefObject, useContext, useEffect, useRef, useState } from 'react';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
+import { Box, Button, Dialog, MenuItem } from '@material-ui/core';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
-import { generateColumn, generateRows, yupSchemaForBulkEdit } from 'src/components/CustomEditableGridNew/helper';
-import CustomTable from 'src/components/CustomEditableGridNew/CustomTable';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import ArrangeView from 'src/components/CustomEditableGridNew/ArrangeView';
+import CustomTable from 'src/components/CustomEditableGridNew/CustomTable';
+import { generateColumn, generateRows, yupSchemaForBulkEdit } from 'src/components/CustomEditableGridNew/helper';
+import { TActios, TInitialState } from 'src/components/CustomEditableGridNew/hooks/tableReducer';
+import { getStickyColumnNames, useGridMetaData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
 import { AddField } from 'src/components/FormBuilder/AddField';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { useGridMetaData } from 'src/components/CustomReactTable';
-import { useScrollController } from 'src/hooks';
-import { ChevronLeft, ChevronRight } from '@material-ui/icons';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+
+export * from 'src/components/CustomEditableGridNew/hooks/tableReducer';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
+export type ApplyViewRef = { applyViewInTable: (order: string[], hide: string[]) => void };
+
+type CustomEditableGridProps = {
+  state: TInitialState;
+  dispatch: React.Dispatch<TActios>;
+  onClose: () => void;
+  fields?: any[];
+  data: any[];
+  extraDisabledFields: any;
+  handleSave: (data: any[]) => void;
+  isSubmitting: boolean;
+  referenceId: string | null;
+  restData: any[];
+  renderedFrom;
+};
+
 const CustomEditableGrid = ({
+  state,
+  dispatch,
   onClose,
   fields = [],
   data,
@@ -32,12 +52,15 @@ const CustomEditableGrid = ({
   referenceId = null,
   restData = [],
   renderedFrom = ''
-}) => {
+}: CustomEditableGridProps) => {
+  const { columnOrder, loading, visibleColumns } = state;
+  const applyViewRef = useRef<ApplyViewRef>(null);
+
   const toastConfig = useContext(CustomToastContext);
   const { gridMetaData } = useGridMetaData();
   const tableData = gridMetaData[renderedFrom] || { order: [], hide: [] };
 
-  const [columns, setColumns] = useState(null);
+  const [columns, setColumns] = useState<any[]>(null);
   const [allFields, setAllFields] = useState([]);
   const [flatRows, setFlatRows] = useState(null);
   const [constColummns, setConstColummns] = useState([]);
@@ -52,7 +75,7 @@ const CustomEditableGrid = ({
       fetchColumns();
     } else {
       setAllFields(JSON.parse(JSON.stringify(fields)));
-      const { newColumns, constColumns } = generateColumn(fields, tableData.order, tableData.hide);
+      const { newColumns, constColumns } = generateColumn(fields);
       setColumns(newColumns);
       setConstColummns(constColumns);
     }
@@ -70,7 +93,7 @@ const CustomEditableGrid = ({
           return levalOrderBy.indexOf(item.leval);
         });
         setAllFields(JSON.parse(JSON.stringify(_fields)));
-        const { newColumns, constColumns } = generateColumn(_fields, tableData.order, tableData.hide);
+        const { newColumns, constColumns } = generateColumn(_fields);
         setColumns(newColumns);
         setConstColummns(constColumns);
       })
@@ -129,18 +152,36 @@ const CustomEditableGrid = ({
     setFlatRows([...flatRows, ...rows?.map((r, i) => ({ ...r, index: flatRows?.length + i + 1, id: r?._id }))]);
   };
 
+  const finalColumns = useMemo(() => {
+    return columns
+      ?.filter((c) => visibleColumns[c.id])
+      .sort((a, b) => columnOrder.findIndex((c) => c === a.id) - columnOrder.findIndex((c) => c === b.id));
+  }, [columnOrder, columns, visibleColumns]);
+
   const rightSideContents = () => {
     return (
-      <Button
-        size="small"
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          setIsAddField(true);
-        }}
-      >
-        Add Field
-      </Button>
+      <>
+        <ArrangeView
+          ref={applyViewRef}
+          columns={columns}
+          hideSelection={true}
+          renderedFrom={renderedFrom}
+          dispatchTable={dispatch}
+          state={state}
+          expander={false}
+          appliedView={tableData}
+        />
+        <Button
+          size="small"
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setIsAddField(true);
+          }}
+        >
+          Add Field
+        </Button>
+      </>
     );
   };
 
@@ -154,7 +195,7 @@ const CustomEditableGrid = ({
 
     setAddedField([...addedField, { ..._field }]);
     setAllFields(JSON.parse(JSON.stringify([...allFields, { ..._field }])));
-    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }], tableData.order, tableData.hide);
+    const { newColumns, constColumns } = generateColumn([...allFields, { ..._field }]);
     setColumns(newColumns);
     setConstColummns(constColumns);
 
@@ -204,7 +245,7 @@ const CustomEditableGrid = ({
                 />
 
                 <CustomTable
-                  columns={columns}
+                  columns={finalColumns}
                   flatRows={flatRows}
                   setFlatRows={setFlatRows}
                   constColummns={constColummns}
