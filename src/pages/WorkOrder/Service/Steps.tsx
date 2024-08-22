@@ -477,7 +477,7 @@ const Steps = ({
     for (const field of fields) {
       if (field.required === true) {
         canSkip = false;
-        break; 
+        break;
       }
     }
 
@@ -514,7 +514,9 @@ const Steps = ({
         });
         if (step?.isPassFail) {
           const type = automatePassFail(values, step);
-          handlePassFail(type, step);
+          if (type !== '') {
+            handlePassFail(type, step);
+          }
         }
         if (autoComplete && !nextStep) {
           handlePassFail(WORKORDER_SERVICE_STEP_STATUS.completed, step);
@@ -548,11 +550,14 @@ const Steps = ({
 
   const automatePassFail = (values: any, step: any): string => {
     const fields = getFields(step).fieldData?.fields.filter((field) => field.type === 'decimal');
+    if (!fields?.find((e) => e?.isMinMaxValue)) {
+      return ''
+    }
     let invalidValues: any = {};
     const keys = Object.keys(values);
     keys.forEach((k) => {
       const field = fields.find((f: any) => f?.fieldName === k);
-      if (field && field.fieldName === k) {
+      if (field && field.fieldName === k && field?.isMinMaxValue) {
         if (parseFloat(values[k]) > field?.maxValue || parseFloat(values[k]) < field?.minValue) {
           invalidValues[k] = 'Invalid value';
         } else if (invalidValues[k]) {
