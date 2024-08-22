@@ -76,7 +76,7 @@ export const rentalManagementMessage = {
   cancelInTransitLineItems: 'Only In-Transit tickets can be cancelled',
   statusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
   rentalStatusInUseCancelLoading: 'Receiving Ticket must be cancelled first',
-  statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review assets',
+  statusURForCancelReceiving: 'Receiving Ticket can be cancelled only for Under Review/Available assets',
   rentalProductConsumed: 'Product already consumed',
   rentalStatusCompleteCancelReceiving: 'Receiving Ticket can only be canceled for assets/consumables that have Complete/Return Rental Asset Status',
   repairCanForThisAsset: 'Only Under Review, Need Repair, Need Recert and Scrap assets can be repaired',
