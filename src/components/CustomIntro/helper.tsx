@@ -73,35 +73,37 @@ export const injectFormFields = (data, fields) => {
 };
 
 export function generateFormFieldSteps(fields: any[], ignoreField?: string[]) {
-  let fieldsStpes: StepDefination[] = [];
+  let fieldsSteps: StepDefination[] = [];
   fields?.forEach((e) => {
     if (e?.fieldData?.required && !ignoreField?.includes(e?.fieldData?.fieldName) && !e?.fieldData?.isDefaultValue && !e?.fieldData?.isUneditable) {
-      fieldsStpes.push({
+      fieldsSteps.push({
         title: `Select ${e?.fieldData?.fieldLabel}`,
         target: `#field-${e?.fieldData?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
         content: '',
         nextOnValueChange: true,
-        skipIfValueExist: true
+        skipIfValueExist: true,
+        fieldType: e?.fieldData?.type
       });
     }
   });
-  return fieldsStpes;
+  return fieldsSteps;
 }
 
 export function generateStepsFormfieldData(fields: any[], ignoreField?: string[]) {
-  let fieldsStpes: StepDefination[] = [];
+  let fieldsSteps: StepDefination[] = [];
   fields?.forEach((e) => {
     if (e?.required && !ignoreField?.includes(e?.fieldName) && !e?.isDefaultValue && !e?.isUneditable) {
-      fieldsStpes.push({
+      fieldsSteps.push({
         title: `Select ${e?.fieldLabel}`,
         target: `#field-${e?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
         content: '',
         nextOnValueChange: true,
-        skipIfValueExist: true
+        skipIfValueExist: true,
+        fieldType: e?.type
       });
     }
   });
-  return fieldsStpes;
+  return fieldsSteps;
 }
 
 export function createAddItemStepdata(route: { title: string; path: string }, fields: any[]) {

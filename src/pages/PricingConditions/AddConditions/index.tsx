@@ -8,6 +8,7 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { pricingCondition, gridLoadingTimeout, PRICING_TYPE, sidebarResource, MATERIAL_TYPE } from '../../../constants/helpers';
 import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility';
 import DeleteIcon from '@material-ui/icons/Delete';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from '../../../components/CustomTooltipTitle';
@@ -20,7 +21,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import AssignDynamicDialog from 'src/components/AssignRolesDialog/AssignDynamicDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { deleteDisable } from 'src/constants/messageHelpers';
+import { addDisable, deleteDisable, editDisable, updateDisable } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
 
 const AddConditions = ({ pricingConditionId, detailData }) => {
@@ -57,14 +58,15 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       .then(({ data: { data, count } }) => {
         setCondition(JSON.parse(JSON.stringify(data)));
         data.forEach((element) => {
-          element.detail = `${element.materialType === MATERIAL_TYPE.product
-            ? element.productDetail?.productName
-            : element.materialType === MATERIAL_TYPE.service
-              ? element.serviceDetail?.serviceName
-              : element.materialType === MATERIAL_TYPE.package
-                ? element.packageDetail?.packageName
-                : element.competencyDetail.competencyName
-            }`;
+          element.detail = `${
+            element.materialType === MATERIAL_TYPE.product
+              ? element.productDetail?.productName
+              : element.materialType === MATERIAL_TYPE.service
+                ? element.serviceDetail?.serviceName
+                : element.materialType === MATERIAL_TYPE.package
+                  ? element.packageDetail?.packageName
+                  : element.competencyDetail.competencyName
+          }`;
           element.materialType = startCase(element.materialType);
           element.conditionType = PRICING_TYPE?.filter((e) => element.conditionType?.includes(e.optionValue))
             ?.map((e) => e.optionLabel)
@@ -189,13 +191,14 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               size="small"
               onClick={() => {
                 window.open(
-                  `${row?.original?.materialType === 'Product'
-                    ? routes.productDetail.path
-                    : row?.original?.materialType === 'Service'
-                      ? routes.serviceMasterDetail.path
-                      : row?.original?.materialType === 'Package'
-                        ? routes.packagesDetail.path
-                        : routes?.competenciesDetail.path
+                  `${
+                    row?.original?.materialType === 'Product'
+                      ? routes.productDetail.path
+                      : row?.original?.materialType === 'Service'
+                        ? routes.serviceMasterDetail.path
+                        : row?.original?.materialType === 'Package'
+                          ? routes.packagesDetail.path
+                          : routes?.competenciesDetail.path
                   }/${row?.original?.materialId}`
                 );
               }}
@@ -242,8 +245,8 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          <HtmlTooltip title="Edit">
-            <span>
+          {permissions?.pricingCondition?.isUpdate ? (
+            <HtmlTooltip title="Edit">
               <IconButton
                 size="small"
                 aria-label="Edit"
@@ -253,9 +256,20 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               >
                 <EditIcon fontSize="small" color="primary" />
               </IconButton>
-            </span>
-          </HtmlTooltip>
-
+            </HtmlTooltip>
+          ) : (
+            <HtmlTooltip title="View">
+              <IconButton
+                size="small"
+                aria-label="View"
+                onClick={() => {
+                  handleOpen(row?.original?._id);
+                }}
+              >
+                <VisibilityIcon fontSize="small" color="primary" />
+              </IconButton>
+            </HtmlTooltip>
+          )}
           <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
@@ -288,10 +302,22 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
     <Fragment>
       <Box display="flex" justifyContent="space-between" m={1} mt={2}>
         <Box display="flex" gridGap={'8px'} flexWrap={'wrap'}>
-          <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={openAddActions} aria-controls="add-menu">
-            {'Add'}
-            <ExpandMore fontSize="small" />
-          </Button>
+          <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? 'Add' : addDisable}>
+            <span>
+              <Button
+                variant={'outlined'}
+                color="primary"
+                size="small"
+                startIcon={<Add />}
+                onClick={openAddActions}
+                disabled={!permissions?.pricingCondition?.isUpdate}
+                aria-controls="add-menu"
+              >
+                {'Add'}
+                <ExpandMore fontSize="small" />
+              </Button>
+            </span>
+          </HtmlTooltip>
           <Menu
             anchorEl={addAnchorEl}
             keepMounted
@@ -304,30 +330,36 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             open={Boolean(addAnchorEl)}
             onClose={closeAddActions}
           >
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.product });
-              }}
-            >
-              Add Existing Products
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.package });
-              }}
-            >
-              Add Existing Packages
-            </MenuItem>
-            <MenuItem
-              onClick={() => {
-                closeAddActions();
-                setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.service });
-              }}
-            >
-              Add Existing Services
-            </MenuItem>
+            {permissions?.product?.isRead && (
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.product });
+                }}
+              >
+                Add Existing Products
+              </MenuItem>
+            )}
+            {permissions?.packages?.isRead && (
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.package });
+                }}
+              >
+                Add Existing Packages
+              </MenuItem>
+            )}
+            {permissions?.serviceMaster?.isRead && (
+              <MenuItem
+                onClick={() => {
+                  closeAddActions();
+                  setAddMaterialDialog({ open: true, materialType: MATERIAL_TYPE.service });
+                }}
+              >
+                Add Existing Services
+              </MenuItem>
+            )}
             {permissions?.competencies?.isRead && (
               <MenuItem
                 onClick={() => {
@@ -407,18 +439,22 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
             />
           </Box>
           <Box ml={2}>
-            <Button
-              variant={isMobile && !isTablet ? 'text' : 'outlined'}
-              color="default"
-              size="small"
-              className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
-              onClick={openActions}
-              aria-controls="action-menu"
-              disabled={selectedRecords.length ? false : true}
-              endIcon={<ExpandMore />}
-            >
-              {isMobile && !isTablet ? '' : 'Actions'}
-            </Button>
+            <HtmlTooltip title={permissions?.pricingCondition?.isUpdate ? '' : updateDisable}>
+              <span>
+                <Button
+                  variant={isMobile && !isTablet ? 'text' : 'outlined'}
+                  color="default"
+                  size="small"
+                  className={`${isMobile && !isTablet ? 'mobile_button' : styles.action_submit_btn} new-dropdown-v1`}
+                  onClick={openActions}
+                  aria-controls="action-menu"
+                  disabled={selectedRecords.length && permissions?.pricingCondition?.isUpdate ? false : true}
+                  endIcon={<ExpandMore />}
+                >
+                  {isMobile && !isTablet ? '' : 'Actions'}
+                </Button>
+              </span>
+            </HtmlTooltip>
             <Menu
               anchorEl={anchorEl}
               keepMounted
@@ -431,23 +467,25 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
               open={Boolean(anchorEl)}
               onClose={closeActions}
             >
-              <MenuItem
-                disabled={!Boolean(selectedRecords && selectedRecords?.length > 1 && dataRows?.length > 1)}
-                onClick={() => {
-                  setShowDialog({ open: true, isBulkedit: true });
-                  setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)));
-                }}
-              >
-                Bulk Edit
-              </MenuItem>
-              <MenuItem
-                disabled={!Boolean(selectedRecords && selectedRecords.length && dataRows?.length)}
-                onClick={() => {
-                  setShowDeleteConfirmBox(true);
-                }}
-              >
-                Delete
-              </MenuItem>
+              <span onClick={closeActions}>
+                <MenuItem
+                  disabled={!Boolean(selectedRecords && selectedRecords?.length > 1 && dataRows?.length > 1)}
+                  onClick={() => {
+                    setShowDialog({ open: true, isBulkedit: true });
+                    setConditionData(condition.filter((data) => selectedRecords.some((rec) => rec._id === data._id)));
+                  }}
+                >
+                  Bulk Edit
+                </MenuItem>
+                <MenuItem
+                  disabled={!Boolean(selectedRecords && selectedRecords.length && dataRows?.length)}
+                  onClick={() => {
+                    setShowDeleteConfirmBox(true);
+                  }}
+                >
+                  Delete
+                </MenuItem>
+              </span>
             </Menu>
           </Box>
         </Box>
@@ -490,7 +528,6 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           handleClose={() => {
             setAddMaterialDialog({ open: false, materialType: '' });
           }}
-
           ids={condition?.filter((c) => c?.materialType === addMaterialDialog.materialType)?.map((e) => e.materialId)}
           isSubmitting={isSubmitting}
         />
@@ -527,6 +564,7 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
           detailData={detailData}
           isBulkedit={showDialog.isBulkedit}
           pricingConditionId={pricingConditionId}
+          allowedToEdit={permissions?.pricingCondition?.isUpdate}
           handleClose={() => {
             setShowDialog({ open: false, isBulkedit: false });
           }}
@@ -539,8 +577,9 @@ const AddConditions = ({ pricingConditionId, detailData }) => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete pricing setup condition  ${deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
-            } ?`}
+          message={`Are you sure you want to delete pricing setup condition  ${
+            deleteRecord?.productDetail?.productName || deleteRecord?.packageDetail?.packageName || ''
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -7,7 +7,6 @@ import {
   SET_CHATTER,
   SET_CART,
   SET_START_TOUR,
-  SET_GRID_METADATA,
   SET_SEARCH
 } from './actionTypes';
 
@@ -25,7 +24,7 @@ export const initialState = {
     start: false,
     stepIndex: 0
   },
-  gridMetaData: {},
+  gridMetaData: {}
 };
 
 const reducer = (state = initialState, action) => {
@@ -59,12 +58,6 @@ const reducer = (state = initialState, action) => {
         selectedEntity: action.payload,
         permissions: getPermissions(state.user, action.payload)
       };
-    case SET_GRID_METADATA:
-      return {
-        ...state,
-        gridMetaData: action.payload
-      };
-
     default:
       return state;
   }

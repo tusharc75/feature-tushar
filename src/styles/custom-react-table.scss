@@ -485,6 +485,13 @@ $isAppliedBillDark: #234623;
     border-bottom: 0px !important;
   }
 
+  & td {
+    .html-custom-tooltip,
+    .MuiIconButton-root {
+      flex-shrink: 0;
+    }
+  }
+
   .sticky-cell-left:nth-last-child(1 of .sticky-cell-left) {
     &::after {
       content: '';

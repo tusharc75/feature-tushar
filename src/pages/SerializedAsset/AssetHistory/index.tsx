@@ -21,8 +21,8 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
   const { generateColumns } = useColumns();
   const { state, dispatch } = useTableReducer();
   const [duration, setDuration] = useState({
-    from: new Date(moment().subtract('1', 'year').calendar()),
-    to: new Date()
+    from: new Date(moment().startOf('year').calendar()),
+    to: new Date(moment().endOf('year').calendar())
   });
   const [column, setColumn] = useState([]);
 
@@ -43,9 +43,9 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
         <div>
           {row.original.reference ? (
             row.original.type === 'Loading Ticket' ||
-            row.original.type === 'Receiving Ticket' ||
-            row.original.type === 'Return Ticket' ||
-            row.original.type === 'Delivery Ticket' ? (
+              row.original.type === 'Receiving Ticket' ||
+              row.original.type === 'Return Ticket' ||
+              row.original.type === 'Delivery Ticket' ? (
               <Link
                 className="link"
                 title={row.original.reference}
@@ -310,7 +310,7 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
       true
     );
     setColumn([...columns, ...extraColumns]);
-  }, []);
+  }, [fields]);
 
   useEffect(() => {
     if (id) {
@@ -369,14 +369,14 @@ const AssetHistory = ({ id, status, resourceData, fields }) => {
     <Box>
       <Box className="flex flex-wrap items-center justify-between gap-3">
         <Box className="max-w-[800px]">
-          <DurationFilter label={''} defaultTimeFrame="1-year" duration={duration} setDuration={setDuration} />
+          <DurationFilter label={''} defaultTimeFrame="current-year" duration={duration} setDuration={setDuration} />
         </Box>
         <ImportExportLinks
           permissions={permissions?.history}
           module={'Asset History'}
           api={`/history/inventory/${id}`}
-          afterImportCompleted={() => {}}
-          onExportToExcelSuccess={() => {}}
+          afterImportCompleted={() => { }}
+          onExportToExcelSuccess={() => { }}
           additionalParams={getQueryString()}
           onlyExport={true}
         />

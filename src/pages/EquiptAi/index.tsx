@@ -1,6 +1,6 @@
 import { IconButton, List, ListItem, ListItemText, Menu, MenuItem, useMediaQuery } from '@material-ui/core';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { BsStars } from 'react-icons/bs';
 import { FaArrowUp } from 'react-icons/fa6';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -9,7 +9,7 @@ import CustomContainer from 'src/components/CustomContainer';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-import { Delete } from '@material-ui/icons';
+import { Chat, Delete } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { BiDislike } from 'react-icons/bi';
 import { FiEdit, FiSidebar } from 'react-icons/fi';
@@ -22,6 +22,9 @@ import { CgSpinner } from 'react-icons/cg';
 import AiChatFeedback from 'src/pages/EquiptAi/AiChatFeedback';
 import { DownloadIcon } from 'src/assets/svg/svgIcons';
 import xlsx from 'xlsx-js-style';
+import moment from 'moment';
+import { groupBy, indexOf, orderBy } from 'lodash';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
 
 const EquiptAi = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -63,22 +66,25 @@ const EquiptAi = () => {
   };
 
   const askQuestion = () => {
-    const tempChat = [...chats]
+    const tempChat = [...chats];
     setChats([...chats, { message: question, content: null }]);
     const body: any = { question: question };
     setQuestion('');
     if (chatId) {
       body._id = chatId;
     }
-    axiosInstance().post('/generative-ai/chat/ask', body).then(({ data: { data } }) => {
-      if (data) {
-        setChatId(data?._id);
-        const message = data?.history;
-        setChats([...tempChat, message]);
-      }
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+    axiosInstance()
+      .post('/generative-ai/chat/ask', body)
+      .then(({ data: { data } }) => {
+        if (data) {
+          setChatId(data?._id);
+          const message = data?.history;
+          setChats([...tempChat, message]);
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleDelete = (id: string) => {
@@ -144,8 +150,8 @@ const EquiptAi = () => {
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.equiptAi.title }]} />
       </div>
-      <CustomContainer className="!p-0">
-        <div className="relative flex h-[calc(100vh-99px)] min-h-[600px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:250px]">
+      <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
+        <div className="relative flex h-[var(--container-height)] min-h-[400px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:280px]">
           <HistorySidebar
             chatHistory={chatHistory}
             hadleNewChat={hadleNewChat}
@@ -154,6 +160,7 @@ const EquiptAi = () => {
             chatId={chatId}
             getOneChatHistory={getOneChatHistory}
             handleDelete={handleDelete}
+            isMobile={isMobile}
           />
           <div
             className={cn(
@@ -169,11 +176,18 @@ const EquiptAi = () => {
                       <FiSidebar />
                     </IconButton>
                   </HtmlTooltip>
-                  <HtmlTooltip title={'New Chat'}>
-                    <IconButton size="small" onClick={() => hadleNewChat()} style={{ padding: 8 }}>
-                      <FiEdit />
-                    </IconButton>
-                  </HtmlTooltip>
+                  <ThemeButton
+                    mobileTooltip="New Chat"
+                    iconForMobile={<Chat fontSize={'small'} />}
+                    color="primary"
+                    borderColor="none"
+                    startIcon={<Chat fontSize={'small'} />}
+                    size="small"
+                    onClick={() => hadleNewChat()}
+                    style={{ padding: 8 }}
+                  >
+                    New Chat
+                  </ThemeButton>
                 </div>
               )}
               <div className="ml-auto">
@@ -188,7 +202,7 @@ const EquiptAi = () => {
             </div>
             <DisplayMessages chats={chats} chatId={chatId} />
             <div className="absolute bottom-0 left-0 right-0 bg-[var(--dark-primary,white)] p-2">
-              <div className="flex rounded-full p-2 bg-[#f2f2f2] [border:1px_solid_var(--common-border-color)]">
+              <div className="flex rounded-full bg-[#f2f2f2] p-2 [border:1px_solid_var(--common-border-color)]">
                 <input
                   type="text"
                   name="question"
@@ -233,11 +247,13 @@ type HistorySidebarProps = {
   getOneChatHistory: (id: string) => void;
   handleDelete: (id: string) => void;
   chatId: string | null;
+  isMobile: boolean;
 };
 
 type ChatHistory = {
   _id: string;
   title: string;
+  createdAt: Date;
 };
 
 const HistorySidebar = ({
@@ -247,10 +263,12 @@ const HistorySidebar = ({
   chatHistory,
   getOneChatHistory,
   handleDelete,
-  chatId
+  chatId,
+  isMobile
 }: HistorySidebarProps) => {
   const [selectedChatHistory, setSelectedChatHistory] = useState<string>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [groupedHistory, setGroupedHistory] = useState<Record<string, ChatHistory[]>>(null);
 
   const handleOpenMenu = (event: React.MouseEvent<HTMLElement>, id: string) => {
     setSelectedChatHistory(id);
@@ -267,10 +285,59 @@ const HistorySidebar = ({
     if (selectedChatHistory) handleDelete(selectedChatHistory);
   };
 
+  const groupHistory = useCallback((history: ChatHistory[]) => {
+    if (!history || !history?.length) return;
+    const formatter = (date: Date) => {
+      const momentDate = moment(date);
+      const currentYear = moment().year();
+      const currentMonth = moment().month();
+      let format = '';
+
+      if (momentDate.year() < currentYear) {
+        format = momentDate.format('YYYY');
+      } else if (momentDate.month() === currentMonth) {
+        format = `Previous 30 days`;
+      } else {
+        // Current year (other than current month)
+        format = momentDate.format('MMM');
+      }
+      return format;
+    };
+
+    const grouped = groupBy(history, (item) => formatter(item.createdAt));
+    setGroupedHistory(grouped);
+  }, []);
+
+  function customSort(items) {
+    // Separate items into three arrays: Previous 30 days, months, and years
+    const months = [];
+    const years = [];
+    const monthArray = ['Dec', 'Nov', 'Oct', 'Sep', 'Aug', 'Jul', 'Jun', 'May', 'Apr', 'Mar', 'Feb', 'Jan'];
+
+    for (const item of items) {
+      if (item === 'Previous 30 days') {
+      } else if (monthArray.includes(item)) {
+        months.push(item);
+      } else {
+        years.push(item);
+      }
+    }
+    // Sort months in reverse order
+    months.sort((a, b) => monthArray.findIndex((d) => d === a) - monthArray.findIndex((d) => d === b));
+    // Sort years in reverse order
+    years.sort((a, b) => b.localeCompare(a));
+    // Combine the arrays in the desired order
+    return ['Previous 30 days', ...months, ...years];
+  }
+
+  useEffect(() => {
+    groupHistory(chatHistory);
+  }, [chatHistory, groupHistory]);
+
   return (
     <aside
       className={cn(
-        'z-10 min-h-full w-[var(--sidebar-w)] flex-shrink-0  bg-[#f2f2f2] px-3 transition-transform duration-300 dark:bg-[#070712]',
+        'z-10 min-h-full w-[var(--sidebar-w)] flex-shrink-0 bg-[white] px-3 transition-transform duration-300 [border-right:1px_solid_var(--common-border-color)] dark:bg-[#070712]',
         isSidebarOpen ? '[transform:translateX(0)]' : '[transform:translateX(calc(var(--sidebar-w)_*_-1))]'
       )}
     >
@@ -280,20 +347,79 @@ const HistorySidebar = ({
             <FiSidebar />
           </IconButton>
         </HtmlTooltip>
-        <HtmlTooltip title={'New chat'}>
-          <IconButton size="small" onClick={() => hadleNewChat()} style={{ padding: 8 }}>
-            <FiEdit />
-          </IconButton>
-        </HtmlTooltip>
+        <ThemeButton
+          mobileTooltip="New Chat"
+          iconForMobile={<Chat fontSize={'small'} />}
+          color="primary"
+          borderColor="none"
+          startIcon={<Chat fontSize={'small'} />}
+          size="small"
+          onClick={() => hadleNewChat()}
+          style={{ padding: 8 }}
+        >
+          New Chat
+        </ThemeButton>
       </div>
       <div className="body max-h-[calc(100%_-_var(--head-h))] overflow-y-auto">
-        <List dense>
+        {groupedHistory ? (
+          <>
+            {customSort(Object.keys(groupedHistory)).map((date) => (
+              <div key={date} className="mt-5">
+                <h3 className="px-2 text-[12px] font-semibold text-gray-400 dark:text-gray-600">{date}</h3>
+                <List dense>
+                  {groupedHistory[date]?.map((history) => (
+                    <ListItem
+                      button
+                      onClick={() => {
+                        if (isMobile) setIsSidebarOpen(false);
+                        getOneChatHistory(history._id);
+                      }}
+                      key={history._id}
+                      className="group"
+                      style={{ borderRadius: 8, padding: '4px 8px' }}
+                      selected={chatId === history._id}
+                    >
+                      <ListItemText primary={<span className="line-clamp-1 text-[14px]">{history.title}</span>} />
+                      <div
+                        className={cn(
+                          'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
+                          chatId === history._id
+                            ? '[background-image:linear-gradient(270deg,_#ebebeb_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#2f2f38_60%,_transparent_100%)]'
+                            : '[background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#1a1a25_60%,_transparent_100%)]'
+                        )}
+                      >
+                        <IconButton edge="end" aria-label="delete" size="small" onClick={(event) => handleOpenMenu(event, history._id)}>
+                          <MoreHorizIcon />
+                        </IconButton>
+                      </div>
+                    </ListItem>
+                  ))}
+                </List>
+              </div>
+            ))}
+          </>
+        ) : (
+          Array.from(Array(3).keys()).map((i) => (
+            <ListItem button key={i} className="group" style={{ borderRadius: 8 }}>
+              <ListItemText primary={<span className="line-clamp-1">{<Skeleton width={Math.random() * (200 - 100) + 100} height={20} />}</span>} />
+              <div className="absolute right-2 pl-6 opacity-0 [background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] group-hover:opacity-100 dark:[background-image:linear-gradient(270deg,_#212134_60%,_transparent_100%)] ">
+                <IconButton edge="end" aria-label="delete" size="small">
+                  <MoreHorizIcon />
+                </IconButton>
+              </div>
+            </ListItem>
+          ))
+        )}
+        {/* <List dense>
           {chatHistory ? (
             <>
               {chatHistory?.map((history) => (
                 <ListItem
                   button
-                  onClick={() => getOneChatHistory(history._id)}
+                  onClick={() => {
+                    if (isMobile) setIsSidebarOpen(false);
+                    getOneChatHistory(history._id);
+                  }}
                   key={history._id}
                   className="group"
                   style={{ borderRadius: 8, padding: '4px 8px' }}
@@ -304,8 +430,8 @@ const HistorySidebar = ({
                     className={cn(
                       'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
                       chatId === history._id
-                        ? '[background-image:linear-gradient(270deg,_#dfdfdf_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#2f2f38_60%,_transparent_100%)]'
-                        : '[background-image:linear-gradient(270deg,_#e8e8e8_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#1a1a25_60%,_transparent_100%)]'
+                        ? '[background-image:linear-gradient(270deg,_#ebebeb_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#2f2f38_60%,_transparent_100%)]'
+                        : '[background-image:linear-gradient(270deg,_#f5f5f5_66%,_transparent_100%)] dark:[background-image:linear-gradient(270deg,_#1a1a25_60%,_transparent_100%)]'
                     )}
                   >
                     <IconButton edge="end" aria-label="delete" size="small" onClick={(event) => handleOpenMenu(event, history._id)}>
@@ -331,7 +457,7 @@ const HistorySidebar = ({
               ))}
             </>
           )}
-        </List>
+        </List> */}
       </div>
       <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
         <MenuItem onClick={handleDeleteWrapper}>
@@ -381,10 +507,10 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
 
   if (!chatId && !chats?.length) {
     return (
-      <div className="w-full h-[calc(100%_-_var(--head-h)_-_100px)] flex justify-center items-center">
-        <BsStars className="text-[var(--new-theme-color)]" size={40} />
+      <div className="flex h-[calc(100%_-_var(--head-h)_-_100px)] w-full items-center justify-center">
+        <BsStars className="text-[var(--new-theme-color)]" size={50} />
       </div>
-    )
+    );
   }
   return (
     <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto scroll-smooth" ref={containerRef}>
@@ -399,7 +525,7 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
                 </div>
                 <div className="group m-[18px_20px]  flex max-w-[75%] items-start gap-2 rounded-md p-[10px_20px]">
                   <BsStars className="flex-shrink-0 text-[var(--new-theme-color)]" size={25} />
-                  {chat?.content ?
+                  {chat?.content ? (
                     <div>
                       {chat?.content}
                       <div
@@ -455,14 +581,16 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
                         </HtmlTooltip>
                       </div>
                     </div>
-                    : <div>
+                  ) : (
+                    <div>
                       <div className="m-[10px_10px] rounded-md bg-[#f4f4f4] p-[10px_10px] text-right dark:bg-[var(--dark-secondary)]">
                         <Skeleton width={300} height={15} />
                       </div>
                       <div className="m-[10px_10px] rounded-md bg-[#f4f4f4] p-[10px_10px] text-right dark:bg-[var(--dark-secondary)]">
                         <Skeleton width={300} height={15} />
                       </div>
-                    </div>}
+                    </div>
+                  )}
                 </div>
               </div>
             );
@@ -484,10 +612,7 @@ const DisplayMessages = ({ chats, chatId }: DisplayMessagesProps) => {
         </>
       )}
       {openFeedbackDialog.open && (
-        <AiChatFeedback
-          handleClose={() => setOpenFeedbackDialog({ open: false, data: null })}
-          chatData={openFeedbackDialog.data}
-          chatId={chatId} />
+        <AiChatFeedback handleClose={() => setOpenFeedbackDialog({ open: false, data: null })} chatData={openFeedbackDialog.data} chatId={chatId} />
       )}
     </div>
   );

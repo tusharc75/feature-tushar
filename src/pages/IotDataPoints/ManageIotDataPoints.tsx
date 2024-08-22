@@ -299,7 +299,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                             value.map((option: string, index: number) => (
                               <Chip
                                 variant="outlined"
-                                label={iotDataPoints?.find((d) => d?.optionValue === option)?.optionLabel || ''}
+                                label={iotDataPoints?.find((d) => d?.optionValue === option)?.optionLabel || option || ''}
                                 {...getTagProps({ index })}
                               />
                             ))
@@ -325,7 +325,7 @@ const ManageIotDataPoints = ({ onClose, onSuccess, isClone = false, id = null, r
                               <Chip
                                 className="mb-1 ml-1 cursor-pointer"
                                 key={_dataPoint}
-                                label={`${iotDataPoints?.find((d) => d?.optionValue === _dataPoint)?.optionLabel || ''}`}
+                                label={`${iotDataPoints?.find((d) => d?.optionValue === _dataPoint)?.optionLabel || _dataPoint || ''}`}
                                 onClick={() => handleAddDataPoint(_dataPoint, values, setFieldValue)}
                               />
                             ))}

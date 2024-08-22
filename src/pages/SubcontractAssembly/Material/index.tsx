@@ -19,7 +19,12 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { CHILD_RESOURCE, MATERIAL_TYPE, SUBCONTRACT_ASSEMBLY_STATUS } from 'src/constants/helpers';
 import Consumables from 'src/pages/SubcontractAssembly/Material/Consumables';
 import MaterialDialog from 'src/pages/SubcontractAssembly/Material/MaterialDialog';
-import { addProductConsumable, addStepAddExistingProduct, deleteExistingProductViaAction } from 'src/pages/SubcontractAssembly/walkmeSteps';
+import {
+  addProductConsumable,
+  addStepAddExistingProduct,
+  deleteExistingProductViaAction,
+  editSubcontract
+} from 'src/pages/SubcontractAssembly/walkmeSteps';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 
 const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, fetchParentData }) => {
@@ -146,6 +151,7 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
               <HtmlTooltip title={'Edit'}>
                 <IconButton
                   size="small"
+                  id={`edit-subcontract-${row.index || 0}`}
                   aria-label="Edit"
                   onClick={() => {
                     setOpenMaterialDialog({ open: true, data: row?.original });
@@ -208,6 +214,9 @@ const Material = ({ subcontractAssemblyData, stepFullScreen, allowedToEdit, setN
       walkmeData = [addStepAddExistingProduct, deleteExistingProductViaAction, addProductConsumable];
     } else if (!rows[0].canDelete) {
       walkmeData = [addStepAddExistingProduct, addProductConsumable];
+    }
+    if (rows.length) {
+      walkmeData.push(editSubcontract);
     }
     setWalkmeData(walkmeData);
   };

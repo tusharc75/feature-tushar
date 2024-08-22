@@ -17,7 +17,7 @@ const useStyles = makeStyles({
 });
 
 
-const Visibility = ({ values, setFieldValue, fields, fieldData }) => {
+const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {  
   const classes = useStyles();
   const [open, setOpen] = useState({ open: false, group: null, data: null });
   const [anchorEl, setAnchorEl] = useState({});
@@ -259,7 +259,7 @@ const Visibility = ({ values, setFieldValue, fields, fieldData }) => {
           fieldValue={values}
           setValue={setFieldValue}
           fields={fields}
-          fieldData={fieldData}
+          fieldsToExclude={fieldsToExclude}
         />
       )}
     </Box>

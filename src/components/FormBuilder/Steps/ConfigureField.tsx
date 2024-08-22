@@ -9,8 +9,9 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { FormBuilder } from '../../../components/FormBuilder';
 import { map, uniq } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import { checkFormulaLoop } from 'src/constants/formulaUtility';
 
-const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) => {
+const ConfigureField = ({ step = null, handleClose, handleSucess }) => {
 
   const { state: { user } }: any = useData();
 
@@ -59,42 +60,16 @@ const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) 
         data.push(_field_data);
       });
     });
-    const errorFields = [];
-    const fieldNameMap: any = [];
-    data?.forEach((e) => {
-      if (fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)) {
-        errorFields.push(fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)?.fieldLabel);
-      } else {
-        fieldNameMap.push({ fieldName: e.fieldName, fieldLabel: e.fieldLabel });
-      }
-    });
-    if (errorFields?.length) {
+    const result = checkFormulaLoop(data);
+    if (result.error) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: `Field ${errorFields?.toString()} duplicate`
+        message: result.message
       });
       return false;
     }
-
-    if (step?._id) {
-      setSubmitting(true);
-      axiosInstance()
-        .put(`/sa-formbuilder/steps/fields/${resourceId}`, { stepId: step?._id, fields: data })
-        .then(({ data }) => {
-          setSubmitting(false);
-          handleSucess();
-          toastConfig.setToastConfig({
-            open: true,
-            message: data.message,
-            severity: 'success'
-          });
-        })
-        .catch((err) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(err);
-        });
-    }
+    handleSucess(data);
   };
 
 
@@ -120,7 +95,7 @@ const ConfigureField = ({ resourceId, step = null, handleClose, handleSucess }) 
 
   return (
     <Dialog open aria-labelledby="customized-dialog-title" onClose={handleClose} TransitionComponent={CustomDialogTransition} fullWidth fullScreen>
-      <CustomDialogHeader showRequiredLabel={false} title={`Fields Configuration ${step?.stepName}`} onClose={handleClose} />
+      <CustomDialogHeader showRequiredLabel={false} title={`Fields Configuration`} onClose={handleClose} />
       <CustomDialogContent>
         <Box display="flex" justifyContent="flex-end">
           <Box pb={1}>

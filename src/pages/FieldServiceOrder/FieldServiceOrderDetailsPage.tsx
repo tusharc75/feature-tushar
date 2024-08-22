@@ -39,8 +39,11 @@ import Invoices from '../GenerateInvoice/InvoiceDialog/Invoices';
 import FieldTicket from './FieldTicket';
 import ManageServiceOrderDialog from './ManageServiceOrder';
 import ServiceOrderViews from './RoadMapViews';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
 
 const ServiceOrderDetailsPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
 
@@ -121,6 +124,11 @@ const ServiceOrderDetailsPage = () => {
       fetchServiceOrderData();
       fetchPolicy();
     }
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(generateAddFieldTicket(true).steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
+    }
   }, [id]);
 
   const fetchServiceOrderData = async () => {
@@ -134,16 +142,20 @@ const ServiceOrderDetailsPage = () => {
       }
       setLoadingDetails(false);
 
-      setAllowedToEdit(permissions?.fieldServiceOrder?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) && ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status));
+      setAllowedToEdit(
+        permissions?.fieldServiceOrder?.isUpdate &&
+          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+      );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-        data.canDelete &&
-        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+          data.canDelete &&
+          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setServiceOrderData(data);
-      let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !=='Field Ticket Invoice');
-      setSteps(fieldServiceSteps)
+      let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !== 'Field Ticket Invoice');
+      setSteps(fieldServiceSteps);
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
         setCurrentStep(steps?.length - 1);
       } else {
@@ -177,7 +189,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => { });
+      .catch((error) => {});
   };
 
   const getServiceOrderFields = async () => {
@@ -243,7 +255,7 @@ const ServiceOrderDetailsPage = () => {
           <CustomBreadCrumbs routes={[routes.fieldServiceOrder, { title: `${serviceOrderData ? serviceOrderData?.fieldServiceOrderNumber : ''}` }]} />
         </Box>
         <Box className="controls-v1">
-          {!isOffline &&
+          {!isOffline && (
             <Box className="control-buttons-v1">
               {allowedToEdit && serviceOrderData?.canComplete && SERVICE_ORDER_STATUS.closed !== serviceOrderData.status && (
                 <ButtonWithPulse
@@ -270,7 +282,7 @@ const ServiceOrderDetailsPage = () => {
                 resourceLabel={serviceOrderData?.fieldServiceOrderNumber}
               />
             </Box>
-          }
+          )}
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
@@ -319,6 +331,7 @@ const ServiceOrderDetailsPage = () => {
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (
               <FieldTicket
                 serviceOrderData={serviceOrderData}
+                serviceOrderFields={serviceOrderFields}
                 setNextStep={setNextStep}
                 allowedToEdit={allowedToEdit}
                 handleChangeStatus={handleChangeStatus}

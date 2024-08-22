@@ -6,36 +6,40 @@ export class TextInputObserver extends Observer {
   target: HTMLElement;
   next: () => void;
   observer: MutationObserver;
-  valiDator: (value: string) => boolean;
+  validator: (value: string) => boolean;
   stepIndex: number;
   debouncedTracker: null | (() => void);
   cancelDebounceTracker: null | (() => void);
-  constructor(handleSteps: HandleSteps, element: HTMLElement, valiDator: (value: string) => boolean = (value) => value.length > 0) {
-    super(handleSteps, element);
+  constructor(handleSteps: HandleSteps, element: HTMLElement, validator: (value: string) => boolean = (value) => value.length > 0) {
+    super(handleSteps, element, validator);
     this.options = {
       attributes: true
     };
-    this.valiDator = valiDator;
     this.observe();
     this.debouncedTracker = null;
     this.cancelDebounceTracker = null;
   }
 
   detectValueChange() {
-    if (this.attributeTracker['value'] && this.valiDator(this.attributeTracker['value'])) {
+    const target = this.target as HTMLInputElement | HTMLTextAreaElement;
+    if (target?.value && this.validator(target?.value)) {
       // Creating only one instance of debounce
       if (!this.debouncedTracker) {
         const [debouncedTracker, teardown] = debounce(() => {
           this.handleSteps.next();
-          this.disconnect();
+          this.success = true;
         }, 1500);
         this.debouncedTracker = debouncedTracker;
         this.cancelDebounceTracker = teardown;
-        this.debouncedTracker();
       }
-
       this.debouncedTracker();
+    } else if (this.target) {
+      this.success = false;
     }
+  }
+
+  childCleanup(): void {
+    this.cancelDebounceTracker?.();
   }
 
   callBack(mutations: MutationRecord[]) {
@@ -45,7 +49,6 @@ export class TextInputObserver extends Observer {
         this.attributeTracker[mutation.attributeName] = target.getAttribute(mutation.attributeName);
       }
     }
-
     this.detectValueChange();
   }
 }

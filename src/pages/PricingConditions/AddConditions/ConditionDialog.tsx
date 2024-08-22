@@ -22,15 +22,14 @@ import MultipleEntry from './MultipleEntry';
 import { useData } from '../../../StateProvider/Provider';
 import _ from 'lodash';
 
-const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit }) => {
+const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handleSuccess, detailData, isBulkedit, allowedToEdit }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [headerLabel, setHeaderLabel] = useState('');
-  const {
-    state: { permissions }
-  }: any = useData();
+
 
   const [currency, setCurrency] = useState([detailData.currency]);
   const [unit, setUnits] = useState([]);
@@ -80,7 +79,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
         details = conditionData?.serviceDetail;
       } else if (conditionData?.materialType === MATERIAL_TYPE.package) {
         details = conditionData?.packageDetail;
-      }else{
+      } else {
         details = conditionData?.competencyDetail
       }
       if (details?.unit) {
@@ -99,10 +98,10 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             : conditionData?.materialType === 'package'
               ? details?.packageName
               : details?.competencyName
-            )
+        )
       );
       currency.forEach((_currency) => {
-        if(conditionData.materialType==='competency'){
+        if (conditionData.materialType === 'competency') {
           if (conditionData['mrp' + '_' + _currency.toLowerCase()] === undefined)
             conditionData['mrp' + '_' + _currency.toLowerCase()] = 0;
           details?.pricingMethod?.map((_pricingMethod) => {
@@ -113,22 +112,22 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
               conditionData[
                 'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] = 0;
           });
-        }else{
+        } else {
           details?.unit?.map((_unit) => {
             if (conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] === undefined)
               conditionData['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())] = 0;
             details?.pricingMethod?.map((_pricingMethod) => {
               if (
                 conditionData[
-                'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase()) 
+                'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
                 ] == undefined
               )
                 conditionData[
-                  'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase()) 
+                  'rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())
                 ] = 0;
             });
           });
-        }  
+        }
       });
       setInitialData(conditionData);
     }
@@ -138,13 +137,13 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
     setLoading(true);
     const updatedData = {};
     currency.forEach((_currency) => {
-      if(conditionData.materialType==='competency'){
+      if (conditionData.materialType === 'competency') {
         v.conditionType?.includes('Rent') &&
-        v['pricingMethod']?.map((_pricingMethod) => {
-          updatedData['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] =
-            v['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()];
-        });
-      }else{
+          v['pricingMethod']?.map((_pricingMethod) => {
+            updatedData['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] =
+              v['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()];
+          });
+      } else {
         v['unit']?.map((_unit) => {
           if (v.conditionType?.includes('Price')) {
             const data = v['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())];
@@ -158,9 +157,9 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
             });
         });
       }
-     
+
     });
- 
+
     Object.keys(v).forEach((key) => {
       if (!(key.indexOf('_') !== -1 && key !== '_id' && key?.split('_')?.length)) {
         updatedData[key] = v[key];
@@ -232,32 +231,32 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
   const valueTouch = {};
   const validate = (values) => {
     const errors: any = {};
-    if(!Array.isArray(values?.conditionType) || values.conditionType.length===0){
+    if (!Array.isArray(values?.conditionType) || values.conditionType.length === 0) {
       errors['conditionType'] = 'Pricing type is required'
     }
-    if(conditionData.materialType!=='competency' && (!Array.isArray(values.unit) || values.unit.length===0) ){
+    if (conditionData.materialType !== 'competency' && (!Array.isArray(values.unit) || values.unit.length === 0)) {
       errors['unit'] = 'Unit is required'
     }
     currency.forEach((_currency) => {
-      if(conditionData?.materialType==='competency'){
+      if (conditionData?.materialType === 'competency') {
         values.conditionType?.includes('Rent') &&
-        values['pricingMethod']?.map((_pricingMethod) => {
-          const data =
-            values['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()];
-          if (isNaN(data)) {
-            errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] =
-              'Price is required';
-          }
-          if (data === undefined) {
-            errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] =
-              'Enter valid price';
-          }
-          if (parseFloat(data) <= 0) {
-            errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] =
-              'Enter valid price';
-          }
-        });
-      }else{
+          values['pricingMethod']?.map((_pricingMethod) => {
+            const data =
+              values['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()];
+            if (isNaN(data)) {
+              errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] =
+                'Price is required';
+            }
+            if (data === undefined) {
+              errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] =
+                'Enter valid price';
+            }
+            if (parseFloat(data) <= 0) {
+              errors['rent_' + camelCase(_pricingMethod.toLowerCase()) + '_' + _currency.toLowerCase()] =
+                'Enter valid price';
+            }
+          });
+      } else {
         values['unit']?.map((_unit) => {
           if (values.conditionType?.includes('Price')) {
             const data = values['mrp' + '_' + _currency.toLowerCase() + '_' + camelCase(_unit.toLowerCase())];
@@ -290,7 +289,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
               }
             });
         });
-      }  
+      }
     });
     return errors;
   };
@@ -342,13 +341,14 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                           <Autocomplete
                             multiple
                             id="conditionType"
-                            options={conditionData?.materialType==='competency' ? PRICING_TYPE.filter((ele)=>ele.optionValue==='Rent') : PRICING_TYPE}
+                            options={conditionData?.materialType === 'competency' ? PRICING_TYPE.filter((ele) => ele.optionValue === 'Rent') : PRICING_TYPE}
                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                             getOptionSelected={(option: any, val) => option.optionValue === val}
                             value={PRICING_TYPE.filter((data) => values['conditionType']?.includes(data.optionValue))}
                             onChange={(e, val) => {
                               setFieldValue('conditionType', val?.map((e) => e.optionValue));
                             }}
+                            disabled={!allowedToEdit}
                             renderInput={(params) => (
                               <TextField
                                 {...params}
@@ -362,35 +362,36 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               />
                             )} />
                         </Grid>
-                    { conditionData?.materialType!=='competency' && ( 
-                       <Grid item xs={12} sm={6} md={6}>
-                          <Autocomplete
-                            multiple
-                            disableCloseOnSelect={true}
-                            id="autocompleteunits"
-                            options={unit}
-                            value={values['unit'] ? values['unit'] : []}
-                            renderTags={(value: string[], getTagProps) =>
-                              value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
-                            }
-                            onChange={(e, value) => {
-                              setFieldValue('unit', value);
-                            }}
-                            renderInput={(params) => (
-                              <TextField
-                                {...params}
-                                margin="dense"
-                                name="unit"
-                                variant="outlined"
-                                label="Unit"
-                                required
-                                error={touched['unit'] && Boolean(errors['unit'])}
-                                helperText={touched['unit'] && errors['unit']}
-                              />
-                            )}
-                          />
-                        </Grid>
-                      )}
+                        {conditionData?.materialType !== 'competency' && (
+                          <Grid item xs={12} sm={6} md={6}>
+                            <Autocomplete
+                              multiple
+                              disableCloseOnSelect={true}
+                              id="autocompleteunits"
+                              options={unit}
+                              value={values['unit'] ? values['unit'] : []}
+                              renderTags={(value: string[], getTagProps) =>
+                                value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
+                              }
+                              onChange={(e, value) => {
+                                setFieldValue('unit', value);
+                              }}
+                              disabled={!allowedToEdit}
+                              renderInput={(params) => (
+                                <TextField
+                                  {...params}
+                                  margin="dense"
+                                  name="unit"
+                                  variant="outlined"
+                                  label="Unit"
+                                  required
+                                  error={touched['unit'] && Boolean(errors['unit'])}
+                                  helperText={touched['unit'] && errors['unit']}
+                                />
+                              )}
+                            />
+                          </Grid>
+                        )}
                       </Grid>
                     </Box>
                   </Fragment>
@@ -415,6 +416,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       variant="outlined"
                                       margin="dense"
                                       fullWidth
+                                      disabled={!allowedToEdit}
                                       label={'Rate ' + _unit + ' ' + _currency}
                                       type="number"
                                       onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
@@ -473,6 +475,7 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                               renderTags={(value: string[], getTagProps) =>
                                 value.map((option: string, index: number) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
                               }
+                              disabled={!allowedToEdit}
                               value={values['pricingMethod']}
                               onChange={(e, value) => {
                                 setFieldValue('pricingMethod', value);
@@ -511,67 +514,87 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                       currency.map(
                                         (_currency, j) =>
                                           values['unit'] ?
-                                          values['unit'].map((_unit, k) => (
-                                            <td key={j + k}>
-                                              <TextField
-                                                name={
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
-                                                }
-                                                variant="outlined"
-                                                margin="dense"
-                                                fullWidth
-                                                type="number"
-                                                onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                                style={{ margin: 0 }}
-                                                value={
-                                                  values[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
-                                                  ]
-                                                }
-                                                onChange={(e) => {
-                                                  setFieldValue(
+                                            values['unit'].map((_unit, k) => (
+                                              <td key={j + k}>
+                                                <TextField
+                                                  name={
                                                     'rent_' +
                                                     camelCase(_pricingMethod.toLowerCase()) +
                                                     '_' +
                                                     _currency.toLowerCase() +
                                                     '_' +
-                                                    camelCase(_unit.toLowerCase()),
-                                                    parseFloat(e.target.value)
-                                                  );
-                                                }}
-                                                InputProps={{
-                                                  startAdornment: (
-                                                    <InputAdornment position="start">
-                                                      {result(
-                                                        find(getUniqueCurrencies(), function (obj) {
-                                                          return obj.currencyCode === _currency;
-                                                        }),
-                                                        'symbolNative'
-                                                      )}
-                                                    </InputAdornment>
-                                                  ),
-                                                  inputProps: { min: 0, max: 9999999999 }
-                                                }}
-                                                error={
-                                                  touched[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
-                                                  ] &&
-                                                  Boolean(
+                                                    camelCase(_unit.toLowerCase())
+                                                  }
+                                                  disabled={!allowedToEdit}
+                                                  variant="outlined"
+                                                  margin="dense"
+                                                  fullWidth
+                                                  type="number"
+                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                                  style={{ margin: 0 }}
+                                                  value={
+                                                    values[
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase() +
+                                                    '_' +
+                                                    camelCase(_unit.toLowerCase())
+                                                    ]
+                                                  }
+                                                  onChange={(e) => {
+                                                    setFieldValue(
+                                                      'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase()),
+                                                      parseFloat(e.target.value)
+                                                    );
+                                                  }}
+                                                  InputProps={{
+                                                    startAdornment: (
+                                                      <InputAdornment position="start">
+                                                        {result(
+                                                          find(getUniqueCurrencies(), function (obj) {
+                                                            return obj.currencyCode === _currency;
+                                                          }),
+                                                          'symbolNative'
+                                                        )}
+                                                      </InputAdornment>
+                                                    ),
+                                                    inputProps: { min: 0, max: 9999999999 }
+                                                  }}
+                                                  error={
+                                                    touched[
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase() +
+                                                    '_' +
+                                                    camelCase(_unit.toLowerCase())
+                                                    ] &&
+                                                    Boolean(
+                                                      errors[
+                                                      'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase() +
+                                                      '_' +
+                                                      camelCase(_unit.toLowerCase())
+                                                      ]
+                                                    )
+                                                  }
+                                                  helperText={
+                                                    touched[
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase() +
+                                                    '_' +
+                                                    camelCase(_unit.toLowerCase())
+                                                    ] &&
                                                     errors[
                                                     'rent_' +
                                                     camelCase(_pricingMethod.toLowerCase()) +
@@ -580,108 +603,90 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                                                     '_' +
                                                     camelCase(_unit.toLowerCase())
                                                     ]
-                                                  )
-                                                }
-                                                helperText={
-                                                  touched[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
-                                                  ] &&
-                                                  errors[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase() +
-                                                  '_' +
-                                                  camelCase(_unit.toLowerCase())
-                                                  ]
-                                                }
-                                              />
-                                            </td>
-                                          ))
-                                          : conditionData.materialType==='competency'
-                                            ? 
-                                            <td key={j}>
-                                            <TextField
-                                              name={
-                                                'rent_' +
-                                                camelCase(_pricingMethod.toLowerCase()) +
-                                                '_' +
-                                                _currency.toLowerCase()
-                                              }
-                                              variant="outlined"
-                                              margin="dense"
-                                              fullWidth
-                                              type="number"
-                                              onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                              style={{ margin: 0 }}
-                                              value={
-                                                values[
-                                                'rent_' +
-                                                camelCase(_pricingMethod.toLowerCase()) +
-                                                '_' +
-                                                _currency.toLowerCase()
-                                                ]
-                                              }
-                                              onChange={(e) => {
-                                                setFieldValue(
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase(),
-                                                  parseFloat(e.target.value)
-                                                );
-                                              }}
-                                              InputProps={{
-                                                startAdornment: (
-                                                  <InputAdornment position="start">
-                                                    {result(
-                                                      find(getUniqueCurrencies(), function (obj) {
-                                                        return obj.currencyCode === _currency;
-                                                      }),
-                                                      'symbolNative'
-                                                    )}
-                                                  </InputAdornment>
-                                                ),
-                                                inputProps: { min: 0, max: 9999999999 }
-                                              }}
-                                              error={
-                                                touched[
-                                                'rent_' +
-                                                camelCase(_pricingMethod.toLowerCase()) +
-                                                '_' +
-                                                _currency.toLowerCase()
-                                                ] &&
-                                                Boolean(
-                                                  errors[
-                                                  'rent_' +
-                                                  camelCase(_pricingMethod.toLowerCase()) +
-                                                  '_' +
-                                                  _currency.toLowerCase()
-                                                  ]
-                                                )
-                                              }
-                                              helperText={
-                                                touched[
-                                                'rent_' +
-                                                camelCase(_pricingMethod.toLowerCase()) +
-                                                '_' +
-                                                _currency.toLowerCase()
-                                                ] &&
-                                                errors[
-                                                'rent_' +
-                                                camelCase(_pricingMethod.toLowerCase()) +
-                                                '_' +
-                                                _currency.toLowerCase()
-                                                ]
-                                              }
-                                            />
-                                          </td>
-                                            : null
+                                                  }
+                                                />
+                                              </td>
+                                            ))
+                                            : conditionData.materialType === 'competency'
+                                              ?
+                                              <td key={j}>
+                                                <TextField
+                                                  name={
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase()
+                                                  }
+                                                  variant="outlined"
+                                                  margin="dense"
+                                                  fullWidth
+                                                  disabled={!allowedToEdit}
+                                                  type="number"
+                                                  onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                                  style={{ margin: 0 }}
+                                                  value={
+                                                    values[
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase()
+                                                    ]
+                                                  }
+                                                  onChange={(e) => {
+                                                    setFieldValue(
+                                                      'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase(),
+                                                      parseFloat(e.target.value)
+                                                    );
+                                                  }}
+                                                  InputProps={{
+                                                    startAdornment: (
+                                                      <InputAdornment position="start">
+                                                        {result(
+                                                          find(getUniqueCurrencies(), function (obj) {
+                                                            return obj.currencyCode === _currency;
+                                                          }),
+                                                          'symbolNative'
+                                                        )}
+                                                      </InputAdornment>
+                                                    ),
+                                                    inputProps: { min: 0, max: 9999999999 }
+                                                  }}
+                                                  error={
+                                                    touched[
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase()
+                                                    ] &&
+                                                    Boolean(
+                                                      errors[
+                                                      'rent_' +
+                                                      camelCase(_pricingMethod.toLowerCase()) +
+                                                      '_' +
+                                                      _currency.toLowerCase()
+                                                      ]
+                                                    )
+                                                  }
+                                                  helperText={
+                                                    touched[
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase()
+                                                    ] &&
+                                                    errors[
+                                                    'rent_' +
+                                                    camelCase(_pricingMethod.toLowerCase()) +
+                                                    '_' +
+                                                    _currency.toLowerCase()
+                                                    ]
+                                                  }
+                                                />
+                                              </td>
+                                              : null
                                       )}
                                   </tr>
                                 ))}
@@ -1032,10 +1037,17 @@ const ConditionDialog = ({ pricingConditionId, conditionData, handleClose, handl
                 >
                   {'Close'}
                 </Button>
-                <CustomButton loading={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
-                  {' '}
-                  Save
-                </CustomButton>
+                {allowedToEdit &&
+                  <CustomButton
+                    loading={loading}
+                    variant="contained"
+                    color="primary"
+                    type="submit"
+                    onClick={submitForm}>
+                    {' '}
+                    Save
+                  </CustomButton>
+                }
               </CustomDialogFooter>
               {showConfirmDialog ? (
                 <ConfirmCancelDialog

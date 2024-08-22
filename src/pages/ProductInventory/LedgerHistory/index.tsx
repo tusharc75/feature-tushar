@@ -76,8 +76,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                       ? 'hsl(1 100% 65% / 1)'
                       : '#FFCCCB'
                     : isDarkTheme
-                    ? 'hsl(120 73% 40% / 1)'
-                    : '#90ee90'
+                      ? 'hsl(120 73% 40% / 1)'
+                      : '#90ee90'
               }}
             >
               {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}
@@ -110,8 +110,8 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
                       ? 'hsl(1 100% 65% / 1)'
                       : '#FFCCCB'
                     : isDarkTheme
-                    ? 'hsl(120 73% 40% / 1)'
-                    : '#90ee90'
+                      ? 'hsl(120 73% 40% / 1)'
+                      : '#90ee90'
               }}
             >
               {row?.original?.type === 'Debit' ? `-${row?.original?.totalPrice}` : row?.original?.totalPrice}{' '}
@@ -138,25 +138,25 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-            {
-              accessor: 'storageLocation',
-              Header: 'Storage Location',
-              width: 200,
-              Cell: ({ row }) => {
-                return row?.original?.storageLocation ? (
-                  <Link
-                    className="link"
-                    title={row?.original?.storageLocation}
-                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
-                  >
-                    {row?.original?.storageLocation}
-                  </Link>
-                ) : (
-                  <NoDataCell />
-                );
-              }
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            width: 200,
+            Cell: ({ row }) => {
+              return row?.original?.storageLocation ? (
+                <Link
+                  className="link"
+                  title={row?.original?.storageLocation}
+                  to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                >
+                  {row?.original?.storageLocation}
+                </Link>
+              ) : (
+                <NoDataCell />
+              );
             }
-          ]
+          }
+        ]
         : []),
       {
         accessor: 'supplierPartNumber',
@@ -165,6 +165,23 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         Cell: ({ row }) => {
           return row.original?.supplierPartNumber ? <p className="text-truncate">{row.original.supplierPartNumber}</p> : <NoDataCell />;
         }
+      },
+      {
+        accessor: 'serialNumber',
+        Header: 'Serial Number',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original?.serialNumber ? (
+              <h5 className="text-truncate" title={row?.original?.serialNumber}>
+                {row?.original?.serialNumber}
+              </h5>
+            ) : (
+              <NoDataCell />
+            )}
+          </div>
+        )
       },
       {
         accessor: 'comment',
@@ -214,6 +231,7 @@ const LedgerHistory = ({ handleClose, product, productName, referenceId, uniqueI
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject.type = capitalize(u.type);
+          finalObject.serialNumber = u?.serialNumber?.map((e) => e.serialNumber)?.toString();
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: rows?.length });

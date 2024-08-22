@@ -31,7 +31,7 @@ export const periodOption = [
 
 export const GRAPH_TYPES = ['Chart', 'Table', 'Map', 'Custom'];
 
-export const CHART_TYPES = ['Line', 'Bar', 'Pie', 'Doughnut'];
+export const CHART_TYPES = ['Line', 'Bar', 'Pie', 'Doughnut', 'Funnel'];
 
 export const FILTERS_OPTIONS = [
   { title: 'Customer Account', key: 'customerAccount' },

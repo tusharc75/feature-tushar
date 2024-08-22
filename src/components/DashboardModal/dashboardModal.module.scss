@@ -1,29 +1,32 @@
 .dialogContainer {
   // width: 100%;
   --top-space: 28px;
-  .dialogContentContainer {
-    padding: 24px 32px 40px;
-    // max-width: 468px;
-  }
+  --gx: 24px;
   .modalHead {
-    padding: 0 0 10px;
+    gap: 5px;
     background-color: #fff !important;
     position: relative;
     border-radius: 8.17814px 8.17814px 0 0;
+    padding: 0;
+    padding-inline: var(--gx);
+    padding-top: 15px;
+    padding-bottom: 15px;
 
     border-bottom: 1px solid var(--common-border-color);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    max-width: 100%;
     [data-mode='dark'] & {
       background-color: var(--dark-primary) !important;
     }
 
     button {
-      flex-basis: 48px;
-      max-width: 48px;
+      display: block;
+      flex-basis: 40px;
+      max-width: 40px;
+      height: 40px;
       border-radius: 50% !important;
+      padding: 6px;
       svg {
         color: #000 !important;
         [data-mode='dark'] & {
@@ -33,8 +36,7 @@
     }
     .modalIconAndName {
       display: flex;
-      flex-basis: calc(100% - 48px);
-      max-width: calc(100% - 48px);
+      flex-grow: 1;
       align-items: center;
       gap: 24px;
       .modalIcon {
@@ -57,8 +59,6 @@
         font-weight: 700;
         font-size: 17px;
         line-height: 157%;
-        flex-basis: calc(100% - 32px);
-        max-width: calc(100% - 32px);
         [data-mode='dark'] & {
           color: #fff;
         }
@@ -67,11 +67,16 @@
     .modalHeadActions {
       display: flex;
       align-items: center;
+      justify-content: flex-end;
       gap: 5px;
     }
   }
+
+  .footer {
+    padding: 19.5px var(--gx);
+  }
   .dialogContent {
-    margin: 10px 0 0;
+    margin: 10px var(--gx) var(--gx);
 
     min-height: 250px;
     padding-left: 7px;

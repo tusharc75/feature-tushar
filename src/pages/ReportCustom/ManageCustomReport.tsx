@@ -41,7 +41,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const {
-    state: { user, selectedEntity, permissions }
+    state: { permissions }
   }: any = useData();
   const [resourceOption, setResourceOption] = useState(null);
 
@@ -137,7 +137,6 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
 
     const initializeData = () => {
       let newData: any = { ...scheduleData };
-
       if (newData?.filters.length > 0) {
         const filters = filterOptions.filter((filter) => newData.filters.findIndex((item) => item.term === filter.fieldName) > -1);
 

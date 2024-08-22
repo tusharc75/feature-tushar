@@ -27,6 +27,7 @@ import { subcontractAssemblyActions, subcontractAssemblyMessage } from 'src/cons
 import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
+import ReceiveDateDialog from 'src/pages/SubcontractAssembly/LoadingTicket/ReceiveDateDialog';
 
 const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -37,7 +38,9 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
   const [showConformationCancleTicket, setShowConformationCancleTicket] = useState(false);
+  const [showConformationDeliverTicket, setShowConformationDeliverTicket] = useState(false);
   const [okBtnLoading, setOkBtnLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -264,7 +267,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
     }
   };
 
-  const handelDeliverTickets = () => {
+  const handelDeliverTickets = (receiveDate) => {
     let data = {};
     const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
@@ -272,7 +275,8 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
       data['signatures'] = [];
       data['warehouse'] = subcontractAssemblyData?.warehouse?.optionValue;
-      data['receiveDate'] = new Date();
+      data['receiveDate'] = receiveDate;
+      setLoading(true);
       axiosInstance()
         .post(`${deliveryTicket.api}/updatebulk`, data)
         .then(({ data: { data } }) => {
@@ -281,10 +285,13 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
             type: 'success',
             message: `Delivered Successfully`
           });
+          setLoading(false);
+          setShowConformationDeliverTicket(false);
           fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
+          setLoading(false);
         });
     }
   };
@@ -342,7 +349,7 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
         <MenuItem
           onClick={() => {
             if (!validateAction(subcontractAssemblyActions.deliveredLoadingTicket)) {
-              handelDeliverTickets();
+              setShowConformationDeliverTicket(true);
             }
           }}
           disabled={selectedRecords.length === 0}
@@ -427,6 +434,19 @@ const LoadingTicket = ({ subcontractAssemblyData, setNextStep, stepFullScreen, a
               handelCancleTickets();
             }}
             okBtnLoading={okBtnLoading}
+          />
+        )}
+
+        {showConformationDeliverTicket && (
+          <ReceiveDateDialog
+            handleClose={() => {
+              setShowConformationDeliverTicket(false);
+            }}
+            handleSucess={(receiveDate) => {
+              handelDeliverTickets(receiveDate);
+            }}
+            loading={loading}
+            refrenceData={subcontractAssemblyData}
           />
         )}
       </>

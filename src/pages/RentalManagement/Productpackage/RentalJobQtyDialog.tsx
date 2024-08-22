@@ -6,7 +6,7 @@ import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHea
 import axiosInstance from '../../../axios/axiosInstance';
 import { isArray, unionBy, uniqBy } from 'lodash';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, fieldLabelToFieldName } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition, arrayToDropwdownOption } from '..//../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -28,6 +28,7 @@ import {
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -80,19 +81,24 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
   const [priceConditionList, setPriceConditionList] = useState([]);
   const [priceMethodList, setPriceMethodList] = useState([]);
 
+  const {
+    state: { user }
+  }: any = useData();
+
   useEffect(() => {
     fetchData();
   }, [rowData]);
 
-  const fetchTaxRate = async (billingAddress: any) => {
-    const zipCode = billingAddress?.zipCode;
-    const state = billingAddress?.state;
+  const fetchTaxRate = async (address: any) => {
+    const zipCode = address?.zipCode;
+    const state = address?.state;
+    const county = address?.county;
     let materialType;
     if (isBulkedit) materialType = rowData[0]?.type;
     else materialType = rowData?.type;
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}`
       );
       return response?.data?.data || [];
     } catch (e) {
@@ -215,11 +221,13 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       fields = fields.filter((d) => d.fieldName !== 'pricingCondition' && d.fieldName !== 'pricingMethod');
     }
 
-    if (
-      rentalManagementData?.customerAccount?.taxApplicable &&
-      (rentalManagementData?.billingAddress?.zipCode || rentalManagementData?.billingAddress?.state)
+    const taxApplicableField = user?.user?.brandPolicy?.rentalTaxAppliedOn && user?.user?.brandPolicy?.rentalTaxAppliedOn !== '' ?
+      fieldLabelToFieldName(user?.user?.brandPolicy?.rentalTaxAppliedOn) : 'billingAddress'
+
+    if (rentalManagementData?.customerAccount?.taxApplicable &&
+      (rentalManagementData?.[taxApplicableField]?.zipCode || rentalManagementData?.[taxApplicableField]?.state || rentalManagementData?.[taxApplicableField]?.county)
     ) {
-      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.billingAddress);
+      const taxCodeOptions = await fetchTaxRate(rentalManagementData?.[taxApplicableField]);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
           e.option = taxCodeOptions;
@@ -266,7 +274,7 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
       }
       let rows: any = [];
       let priceData: any = [];
-      const priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
+      const priceFieldName = `price_${currency}`;
       const fieldAll: any = allFields.filter((e) => !['actualStartDate', 'actualEndDate', 'actualJobDuration'].includes(e.fieldName));
 
       if ((values['unit'] || values['pricingMethod']) && !values[priceFieldName]) {
@@ -406,6 +414,14 @@ const RentalJobQtyDialog: FC<EditDialogProps> = ({
     let estimateStartDate = moment(values?.estimateStartDate);
     let estimateEndDate = moment(values?.estimateEndDate);
     if (estimateEndDate.diff(estimateStartDate, 'days') < 0) {
+      errors['estimateEndDate'] = 'Please enter valid estimate end date';
+    }
+    let rentalManagementEstimateStartDate = moment(rentalManagementData?.estimateStartDate);
+    let rentalManagementEstimateEndDate = moment(rentalManagementData?.estimateEndDate);
+    if (estimateStartDate.diff(rentalManagementEstimateStartDate, 'days') < 0) {
+      errors['estimateStartDate'] = 'Please enter valid estimate start date';
+    }
+    if (estimateEndDate.diff(rentalManagementEstimateEndDate, 'days') > 0) {
       errors['estimateEndDate'] = 'Please enter valid estimate end date';
     }
     if (rowData && rowData.hideSelection) {

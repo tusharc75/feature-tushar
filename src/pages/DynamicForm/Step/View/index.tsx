@@ -23,10 +23,13 @@ import routes from 'src/components/Helpers/Routes';
 import { flattenArray } from 'src/constants/columns';
 import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false, referenceData }) => {
+
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(resource)}`;
+
+  const renderedFrom = `${camelCase(resource)}_${camelCase(step?.stepName)}`;
 
   const [open, setOpen] = useState({ open: false, id: null });
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -37,8 +40,19 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+  const [columns, setColumns] = useState(null);
 
-  const getColumns = () => {
+  useEffect(() => {
+    fetchColumns()
+  }, [step]);
+
+  useEffect(() => {
+    if (step && (step?.fields?.length || step?.linkWithMaterial)) {
+      fetchData();
+    }
+  }, [step]);
+
+  const fetchColumns = () => {
     const newColumns = generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
     const column: any = [
       {
@@ -101,7 +115,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         ]
         : [])
     ];
-    return [
+    setColumns([
       ...column,
       ...newColumns,
       {
@@ -115,21 +129,22 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-              <span>
-                <IconButton
-                  size="small"
-                  aria-label="Edit"
-                  disabled={allowedToEdit ? false : true}
-                  onClick={() => {
-                    setOpen({ open: true, id: row?.original?._id });
-                  }}
-                >
-                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                </IconButton>
-              </span>
-            </HtmlTooltip>
-
+            {step?.fields?.length > 0 &&
+              <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                <span>
+                  <IconButton
+                    size="small"
+                    aria-label="Edit"
+                    disabled={allowedToEdit ? false : true}
+                    onClick={() => {
+                      setOpen({ open: true, id: row?.original?._id });
+                    }}
+                  >
+                    <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            }
             <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
               <span>
                 <IconButton
@@ -148,12 +163,11 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
           </>
         )
       }
-    ];
+    ])
   };
 
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
-
     axiosInstance()
       .get(`/dynamic-form/step/${resourceId}/${step?._id}`, {
         headers: {
@@ -230,12 +244,6 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
 
     return subRows;
   };
-
-  useEffect(() => {
-    if (step && (step?.fields?.length || step?.linkWithMaterial)) {
-      fetchData();
-    }
-  }, [step]);
 
   const handleAdd = (rows) => {
     const values = rows?.map((r) => ({ type: openMaterial?.type, materialId: r?._id, parentId: null, qty: r?.qty, stepId: step?._id }));
@@ -364,17 +372,23 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
                   />
                 )}
                 <Box zIndex={5} width={'100%'}>
-                  <CustomReactTable
-                    height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
-                    columns={getColumns()}
-                    state={state}
-                    dispatch={dispatch}
-                    renderedFrom={`${renderedFrom}_${step?.stepName}`}
-                    isClientSideGrid={true}
-                    onSaveEdit={onSaveInlineEdit}
-                    refreshGrid={fetchData}
-                    expander={true}
-                  />
+                  {columns ? (
+                    <CustomReactTable
+                      height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+                      columns={columns}
+                      state={state}
+                      dispatch={dispatch}
+                      renderedFrom={renderedFrom}
+                      isClientSideGrid={true}
+                      onSaveEdit={onSaveInlineEdit}
+                      refreshGrid={fetchData}
+                      expander={true}
+                    />
+                  ) : (
+                    <Box p={2} height={500}>
+                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                    </Box>
+                  )}
                 </Box>
               </>
             ) : (

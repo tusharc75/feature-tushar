@@ -35,9 +35,6 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
     if (!moment(values['date']).isSameOrAfter(moment(minDate))) {
       errors['date'] = `Please select valid date`;
     }
-    if (moment(values['date']).isAfter(moment())) {
-      errors['date'] = `Please select valid date`;
-    }
     return errors;
   }
 
@@ -78,7 +75,6 @@ const DateDialog = ({ title, type, status, onClose, handleSubmit, loading, asset
                       placeholder={`${type === 'changeStatus' ? status : ''} Date`}
                       label={`${type === 'changeStatus' ? status : ''} Date`}
                       format={dateFormatForInputControl}
-                      maxDate={new Date()}
                       minDate={minDate}
                       error={touched['date'] && Boolean(errors['date'])}
                       helperText={touched['date'] && errors['date']}

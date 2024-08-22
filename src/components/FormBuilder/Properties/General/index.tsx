@@ -147,44 +147,44 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
         values['type'] === 'converter' ||
         values['type'] === 'percent' ||
         values['type'] === 'currencyAmount') && (
-        <Grid spacing={3} container>
-          {values['type'] === 'formula' && (
-            <Grid item xs={12} sm={6} md={6}>
-              <FormControl fullWidth margin="dense" variant="outlined">
-                <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
-                <Select
-                  labelId="demo-simple-select-outlined-label"
-                  id="demo-simple-select-outlined"
-                  value={values['returnType']}
-                  onChange={(e) => {
-                    setFieldValue('returnType', e.target.value);
-                  }}
-                  label="Return Type"
-                  name="returnType"
-                >
-                  <MenuItem value="decimal">Decimal</MenuItem>
-                  <MenuItem value="string">String</MenuItem>
-                  <MenuItem value="boolean">Boolean</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
-          )}
-          {(values['type'] === 'decimal' ||
-            values['type'] === 'converter' ||
-            values['type'] === 'percent' ||
-            values['type'] === 'currencyAmount' ||
-            values['returnType'] === 'decimal') && (
-            <Grid item xs={12} sm={6} md={6}>
-              <DecimalPlaces
-                values={values}
-                setFieldValue={(name, value) => {
-                  setFieldValue(name, value);
-                }}
-              />
-            </Grid>
-          )}
-        </Grid>
-      )}
+          <Grid spacing={3} container>
+            {values['type'] === 'formula' && (
+              <Grid item xs={12} sm={6} md={6}>
+                <FormControl fullWidth margin="dense" variant="outlined">
+                  <InputLabel id="demo-simple-select-outlined-label">Return Type</InputLabel>
+                  <Select
+                    labelId="demo-simple-select-outlined-label"
+                    id="demo-simple-select-outlined"
+                    value={values['returnType']}
+                    onChange={(e) => {
+                      setFieldValue('returnType', e.target.value);
+                    }}
+                    label="Return Type"
+                    name="returnType"
+                  >
+                    <MenuItem value="decimal">Decimal</MenuItem>
+                    <MenuItem value="string">String</MenuItem>
+                    <MenuItem value="boolean">Boolean</MenuItem>
+                  </Select>
+                </FormControl>
+              </Grid>
+            )}
+            {(values['type'] === 'decimal' ||
+              values['type'] === 'converter' ||
+              values['type'] === 'percent' ||
+              values['type'] === 'currencyAmount' ||
+              values['returnType'] === 'decimal') && (
+                <Grid item xs={12} sm={6} md={6}>
+                  <DecimalPlaces
+                    values={values}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                    }}
+                  />
+                </Grid>
+              )}
+          </Grid>
+        )}
       {(values['type'] === 'dropDown' || values['type'] === 'multiSelect') && !values['dataList'] && (
         <Box>
           <FormControlLabel
@@ -509,14 +509,14 @@ const General = ({ values, setFieldValue, fields, fieldData, touched, errors, mo
       {fieldData.type === 'counter' && (
         <Box mt={1}>
           <Button
-            variant="outlined"
+            variant="contained"
             size="small"
             color="primary"
             onClick={() => {
               setSubFieldOpen(true);
             }}
           >
-            Sub Fields
+            Counter Sub Fields
           </Button>
         </Box>
       )}

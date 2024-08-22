@@ -258,6 +258,12 @@ import Integration from 'src/pages/Integration';
 import EquiptAi from 'src/pages/EquiptAi';
 import WorkSpace from 'src/pages/WorkSpace';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
+import Oauth from './pages/Auth/Oauth';
+import WorkFlow from 'src/pages/WorkFlow';
+import CreateWorkFlow from 'src/pages/WorkFlow/CreateWorkFlow';
+import WorkFlowReport from 'src/pages/workFlowReport';
+import WorkFlowReportDetail from 'src/pages/workFlowReport/workFlowReportDetails';
+import LoginMFA from 'src/pages/Auth/LoginMFA';
 
 var notificationInterval: any = null;
 
@@ -312,7 +318,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
   }, [isOffline]);
 
   const getNotification = async () => {
@@ -402,10 +408,16 @@ function App() {
       <AnimatePresence initial={false} exitBeforeEnter>
         <ErrorBoundaryComponent>
           <Switch>
+            <Route exact path="/login/mfa" render={({ location }) => conditionalRedirect(LoginMFA, location)} />
             <Route
               // exact
               path="/login"
               render={({ location }) => conditionalRedirect(Login, location)}
+            />
+            <Route
+              // exact
+              path="/auth/login"
+              render={({ location }) => conditionalRedirect(Oauth, location)}
             />
             <Route
               // exact
@@ -425,6 +437,7 @@ function App() {
             <Route exact path="/create-password" render={({ location }) => conditionalRedirect(PasswordSetup, location)} />
             <Route exact path="/forget-password" render={({ location }) => conditionalRedirect(ForgetPassword, location)} />
             <Route exact path="/reset-password" render={({ location }) => conditionalRedirect(ResetPassword, location)} />
+
             <PrivateRoute exact path="/">
               <Home />
             </PrivateRoute>
@@ -1144,6 +1157,18 @@ function App() {
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.workSpace.path}`}>
               <WorkSpace />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workFlow.path}`}>
+              <WorkFlow />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workFlow.path}/:id`}>
+              <CreateWorkFlow />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workflowReport.path}`}>
+              <WorkFlowReport />
+            </PrivateRoute>
+            <PrivateRoute exact path={`${routes.workflowReportDetail.path}/:id`}>
+              <WorkFlowReportDetail />
             </PrivateRoute>
             <Route exact path={'/public/:id'}>
               <PublicRoutePage />

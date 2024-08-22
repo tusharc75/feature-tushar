@@ -17,8 +17,12 @@ import { MATERIAL_TYPE, RENTAL_STATUS, rentalManagement, sidebarResource } from 
 import { findOne, objectStore } from '../../../constants/indexdbhelper';
 import AdditionalCostDialog from '../Productpackage/AdditionalCostDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import { createCloseStep, createSendEmailStep } from 'src/pages/RentalManagement/walkmeSteps';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 
 const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFullScreen, allowedToEdit, renderedFrom }) => {
+  const walkmeInstance = useGetWalkmeInstance();
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -44,7 +48,30 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
 
   useEffect(() => {
     fetchFields();
+    if (!isOffline) {
+      addWalkmeData();
+    }
   }, [isOffline]);
+
+  const addWalkmeData = () => {
+    const sendEmailSteps = createSendEmailStep();
+    const closeSteps = createCloseStep(routes.rentalManagement.title);
+    const stepData = [sendEmailSteps];
+
+    if (
+      permissions?.rentalManagement?.isUpdate &&
+      !isOffline &&
+      [RENTAL_STATUS.readyToInvoice, RENTAL_STATUS.invoiced].includes(rentalManagementData?.status) &&
+      allowedToEdit
+    ) {
+      stepData.push(closeSteps);
+    }
+    setWalkmeData(stepData);
+    if (walkmeInstance) {
+      walkmeInstance?.instance.push(stepData.map((d) => d.steps).flat());
+      walkmeInstance?.handleNext();
+    }
+  };
 
   const fetchFields = async () => {
     try {

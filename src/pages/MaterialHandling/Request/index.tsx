@@ -3,7 +3,7 @@ import { useState, useEffect, useContext, Fragment } from 'react';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Button, Typography } from '@material-ui/core';
-import { MATERIAL_REQUEST_STATUS, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
+import { MATERIAL_REQUEST_STATUS, PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat, sidebarResource } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
@@ -24,7 +24,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [anchorEl, setAnchorEl] = useState(null);
   const [qtyDialog, setQtyDialog] = useState({ open: false, status: null, data: null });
-  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '', product: '', data: null });
+  const [openProcessLogs, setOpenProcessLogs] = useState({ open: false, logs: [], productName: '', product: '', data: null, serialNumber: [] });
   const [accessor, setAccessor] = useState<CardInterface | null>(null);
 
   const {
@@ -192,7 +192,8 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
                               logs: row['processesLogs'],
                               productName: row?.productName,
                               product: row?.product?.optionValue,
-                              data: row
+                              data: row,
+                              serialNumber: row?.serialNumber
                             });
                           }}
                         >
@@ -342,9 +343,15 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
           data={qtyDialog.data}
           onSuccess={(data) => {
             if (qtyDialog?.data) {
+              let serialNumbers = [];
+              if (qtyDialog.status === MATERIAL_REQUEST_STATUS.closed) {
+                serialNumbers = qtyDialog.data?.serialNumber?.map((s: any) => s.optionValue) || [];
+              } else {
+                serialNumbers = data?.serialNumber || [];
+              }
               handleUpdateStatus(
                 qtyDialog.status,
-                [{ _id: qtyDialog.data?._id, uniqueId: qtyDialog.data?.uniqueId, qty: parseInt(data?.qty) }],
+                [{ _id: qtyDialog.data?._id, uniqueId: qtyDialog.data?.uniqueId, qty: parseInt(data?.qty), serialNumber: serialNumbers }],
                 data.comment || ''
               );
             } else if (selectedRecords?.length) {
@@ -352,7 +359,12 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
                 return {
                   _id: item?._id,
                   uniqueId: item?.uniqueId,
-                  qty: item?.qty - (item?.processedQty || 0)
+                  qty: item?.qty - (item?.processedQty || 0),
+                  serialNumber: item?.serialNumber?.map((s: any) => {
+                    if(s.status === PRODUCT_SERIAL_NUMBER_STATUS.available) {
+                      return s.optionValue;
+                    }
+                  }) || []
                 };
               });
               handleUpdateStatus(qtyDialog.status, rows, data.comment || '');
@@ -363,7 +375,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster }) => {
       {openProcessLogs.open && (
         <ProcessLogs
           onClose={() => {
-            setOpenProcessLogs({ open: false, logs: [], productName: '', product: '', data: null });
+            setOpenProcessLogs({ open: false, logs: [], productName: '', product: '', data: null, serialNumber: [] });
             fetchData();
           }}
           logsData={openProcessLogs.logs}

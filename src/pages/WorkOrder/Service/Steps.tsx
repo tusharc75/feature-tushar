@@ -22,7 +22,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { isEmpty, isEqual } from 'lodash';
+import { isArray, isEmpty, isEqual } from 'lodash';
 import StepFieldsDialog from './StepFieldsDialog';
 import CompleteDialog from './CompleteDialog';
 import { useData } from 'src/StateProvider/Provider';
@@ -471,7 +471,17 @@ const Steps = ({
       isStepValid = false;
     }
 
-    return { fieldData, stepData, isStepValid };
+    const fields = fieldData.fields;
+    let canSkip = true;
+
+    for (const field of fields) {
+      if (field.required === true) {
+        canSkip = false;
+        break; 
+      }
+    }
+
+    return { fieldData, stepData, isStepValid, canSkip };
   };
 
   const getNextStep = (currentStep: any): any | null => {
@@ -822,7 +832,8 @@ const Steps = ({
   let isStepsAllowToPerform = false;
   if (selectedService?.assignedUsers?.length) {
     isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false;
-  } else if (selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length) {
+  } else if (isArray(selectedService?.competencies) && isArray(user?.competencies) &&
+    selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length) {
     isStepsAllowToPerform = true;
   } else if (allowedToEdit) {
     isStepsAllowToPerform = true;
@@ -1447,6 +1458,7 @@ const Steps = ({
                   </Box>
                 );
               })}
+
               {anchorEl && (
                 <Menu id="simple-menu" anchorEl={anchorEl} keepMounted open={Boolean(anchorEl)} onClose={handleCloseMenu}>
                   <MenuItem
@@ -1522,7 +1534,8 @@ const Steps = ({
                       setAnchorEl(null);
                     }}
                     disabled={
-                      isStepsAllowToPerform &&
+                      getFields(selectedStep).canSkip &&
+                        isStepsAllowToPerform &&
                         ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
                           selectedService?.status
                         ) &&

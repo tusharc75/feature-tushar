@@ -20,7 +20,7 @@ import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/h
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from '../../../axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { fetch_child_resource_fields ,fetch_child_resource_fields_perm} from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields, fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -197,12 +197,13 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
     const zipCode = billingAddress?.zipCode;
     const state = billingAddress?.state;
+    const county = billingAddress?.county;
     let materialType;
     if (isBulkedit) materialType = rowData[0]?.type;
     else materialType = rowData?.type;
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
       );
       return response?.data?.data || [];
     } catch (e) {

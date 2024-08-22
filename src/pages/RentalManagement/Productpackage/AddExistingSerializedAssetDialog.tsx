@@ -24,12 +24,14 @@ import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
 import axios, { CancelTokenSource } from 'axios';
 import { Autocomplete } from '@material-ui/lab';
 import { isMobile, isTablet } from 'react-device-detect';
-import { map, uniq } from 'lodash';
+import { camelCase, map, uniq } from 'lodash';
 import ManageTransferAsset from 'src/pages/TransferAssets/ManageTransferAsset';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
+import { Link } from 'react-router-dom';
 
-const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuccessInUseAsset, isAssigning, referenceData = null }) => {
-  const renderedFrom = `${routes.serializedAsset.title}_rentalJob_selected`;
+const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, referenceData = null }) => {
+
+  const renderedFrom = `${camelCase(routes.serializedAsset.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
@@ -48,11 +50,12 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
   const [selectedWarehouse, setSelectedWarehouse] = useState(
     referenceData && referenceData?.warehouse ? referenceData?.warehouse?.optionValue : null
   );
-  const [showTransferAssetDialog, setShowTransferAssetDialog] = useState(false);
+  const [showTransferAssetDialog, setShowTransferAssetDialog] = useState({ open: false, data: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [inuseAssetConfirmBox, setInuseAssetConfirmBox] = useState(false);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, type: '' });
+  const [underReviewAssetData, setUnderReviewAssetData] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -65,7 +68,24 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
       .then(({ data: { data } }) => {
         setCheckMTRValidation(data?.some((e) => e?.fieldData?.fieldName === 'mtrAttached'));
         let newColumns = generateColumns(renderedFrom, data, routes.serializedAssetDetail.path);
-        setColumns([...newColumns, ...getStaticFields()]);
+        const inUseColoumns: any = [
+          {
+            accessor: 'rentalJob',
+            Header: 'Rental Job',
+            minWidth: 180,
+            width: 180,
+            Cell: ({ row }) => (
+              <Link
+                className="link text-truncate"
+                target="_blank"
+                to={`${routes.rentalManagementDetail.path}/${row?.original?.rentalJob?.optionValue}`}
+              >
+                {row?.original?.rentalJob?.optionLabel}
+              </Link>
+            )
+          }
+        ];
+        setColumns([...inUseColoumns, ...newColumns, ...getStaticFields()]);
       });
   };
 
@@ -187,10 +207,6 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
     }
   };
 
-  const handleAdd = () => {
-    handleSucess(selectedRecords);
-  };
-
   const checkUniqWarehouse = () => {
     if (selectedRecords?.length === 0) {
       return true;
@@ -207,6 +223,32 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
     }
   };
 
+  const handleAddAsset = async (assetsData: any = null) => {
+    setIsSubmitting(true);
+    const assetsAdd: any = [];
+    selectedRecords?.forEach((item) => {
+      const obj: any = {};
+      obj.asset = item?._id;
+      if (assetsData) {
+        const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+        if (matchedAsset) {
+          const { _id, ...assetData } = matchedAsset;
+          obj.assetData = assetData;
+        }
+      }
+      assetsAdd.push(obj)
+    })
+    axiosInstance().post(`${rentalManagement.api}/productpackage/${referenceData?.rentalJob}/assets`, { assets: assetsAdd })
+      .then(() => {
+        handleSucess()
+        setIsSubmitting(false);
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   const handleAddAssetToTransferAsset = (transferAssetId) => {
     setIsSubmitting(true);
     axiosInstance()
@@ -219,8 +261,9 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
         })
       })
       .then(({ data }) => {
+        handleAddAsset(showTransferAssetDialog.data);
+        setShowTransferAssetDialog({ open: false, data: null });
         setIsSubmitting(false);
-        handleAdd();
       })
       .catch((error) => {
         setIsSubmitting(false);
@@ -228,7 +271,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
       });
   };
 
-  const handleAutoTransferAssets = (assetsData = null) => {
+  const handleAutoTransferAssets = (underReviewAssetsData = null, reserveAssetsData = null) => {
     const assetsAdd: any = [];
     selectedRecords?.forEach((item) => {
       const obj: any = {};
@@ -240,11 +283,18 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
       if (rentalAsset) {
         obj.uniqueId = rentalAsset?.uniqueId;
       }
-      if (assetsData) {
-        const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+      if (underReviewAssetsData) {
+        const matchedAsset = underReviewAssetsData?.find((asset) => asset._id === obj.asset);
         if (matchedAsset) {
           const { _id, ...assetData } = matchedAsset;
-          obj.assetData = assetData;
+          obj.underReviewAssetsData = assetData;
+        }
+      }
+      if (reserveAssetsData) {
+        const matchedAsset = reserveAssetsData?.find((asset) => asset._id === obj.asset);
+        if (matchedAsset) {
+          const { _id, ...assetData } = matchedAsset;
+          obj.reserveAssetsData = assetData;
         }
       }
       assetsAdd.push(obj);
@@ -257,7 +307,7 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
       })
       .then(({ data }) => {
         setIsSubmitting(false);
-        handleSuccessInUseAsset();
+        handleSucess();
         setInuseAssetConfirmBox(false);
       })
       .catch((error) => {
@@ -310,10 +360,19 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
                 size="small"
                 color="primary"
                 onClick={() => {
-                  setShowTransferAssetDialog(true);
+                  if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                    setOpenAssetDataDialog({
+                      open: true,
+                      statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                      type: 'transfer'
+                    });
+                  }
+                  else {
+                    setShowTransferAssetDialog({ open: true, data: null });
+                  }
                 }}
                 variant={isMobile && !isTablet ? 'text' : 'contained'}
-                disabled={isSubmitting || isAssigning}
+                disabled={isSubmitting}
                 className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
                 endIcon={isSubmitting && <CircularProgress size={20} />}
               >
@@ -325,19 +384,26 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
               variant="contained"
               color="primary"
               size="small"
-              disabled={isAssigning || isSubmitting || selectedRecords?.length === 0}
+              disabled={isSubmitting || selectedRecords?.length === 0}
               onClick={() => {
-                if (checkMTRValidation) {
+                if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                  setOpenAssetDataDialog({
+                    open: true,
+                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                    type: 'add'
+                  });
+                }
+                else if (checkMTRValidation) {
                   if (selectedRecords?.some((e) => e.mtrAttached !== true)) {
                     setMtrConfirmBox(true);
                   } else {
-                    handleAdd();
+                    handleAddAsset();
                   }
                 } else {
-                  handleAdd();
+                  handleAddAsset();
                 }
               }}
-              endIcon={isAssigning && <CircularProgress size={20} />}
+              endIcon={isSubmitting && <CircularProgress size={20} />}
             >
               Add {selectedRecords?.length > 0 ? `(${selectedRecords?.length})` : ''}
             </Button>
@@ -380,7 +446,6 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
           isAddButtonVisible={false}
           setQueryString={false}
         />
-
         <Box pt={1}>
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0} label={'Assets'} />
@@ -388,12 +453,11 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
             <CustomTab value={2} label={'In Use Assets'} />
           </CustomTabs>
         </Box>
-
         {columns ? (
           <CustomReactTable
             height={'calc(100vh - 200px)'}
-            columns={columns}
             state={state}
+            columns={Number(tabValue) === 2 ? columns : columns?.filter((e: any) => e.accessor !== 'rentalJob')}
             dispatch={dispatch}
             renderedFrom={renderedFrom}
             refreshGrid={fetchData}
@@ -416,19 +480,17 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
             setMtrConfirmBox(false);
           }}
           onOk={() => {
-            handleAdd();
+            handleAddAsset();
             setMtrConfirmBox(false);
           }}
         />
       )}
-
-      {showTransferAssetDialog && (
+      {showTransferAssetDialog.open && (
         <ManageTransferAsset
           isClone={false}
           transferAssetId={null}
-          onClose={() => setShowTransferAssetDialog(false)}
+          onClose={() => setShowTransferAssetDialog({ open: false, data: null })}
           onSuccess={(data) => {
-            setShowTransferAssetDialog(false);
             handleAddAssetToTransferAsset(data?._id);
           }}
           referenceId={referenceData?.rentalJob}
@@ -455,7 +517,15 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
             if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
               setOpenAssetDataDialog({
                 open: true,
-                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)
+                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
+                type: 'underReview'
+              });
+            }
+            else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+              setOpenAssetDataDialog({
+                open: true,
+                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                type: 'reserved'
               });
             } else {
               handleAutoTransferAssets();
@@ -467,11 +537,38 @@ const AddExistingSerializedAssetDialog = ({ handleClose, handleSucess, handleSuc
         <AssetDetailsChangeDialog
           ids={selectedRecords?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+          setAssetsData={() => { }}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' })}
           onSuccess={(data) => {
-            handleAutoTransferAssets(data);
-            setOpenAssetDataDialog({ open: false, statusPolicy: null });
+            if (Number(tabValue) === 2) {
+              if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                if (openAssetDataDialog.type === 'underReview') {
+                  setUnderReviewAssetData(data)
+                  setOpenAssetDataDialog({
+                    open: true,
+                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                    type: 'reserved'
+                  });
+                }
+                else {
+                  handleAutoTransferAssets(underReviewAssetData, data);
+                  setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+                }
+              }
+              else {
+                handleAutoTransferAssets(data);
+                setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+              }
+            } else {
+              if (openAssetDataDialog.type === 'add') {
+                handleAddAsset(data);
+                setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+              }
+              else {
+                setShowTransferAssetDialog({ open: true, data: data });
+                setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+              }
+            }
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
         />

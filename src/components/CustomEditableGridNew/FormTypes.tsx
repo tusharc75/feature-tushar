@@ -96,8 +96,8 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e, val) => {
-              handleChange(name, val?.optionValue);
-            }
+            handleChange(name, val?.optionValue);
+          }
       }
       renderInput={(params) => (
         <TextField
@@ -129,8 +129,8 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e, val) => {
-              handleChange(name, val ? val : []);
-            }
+            handleChange(name, val ? val : []);
+          }
       }
       renderInput={(params) => (
         <TextField
@@ -148,7 +148,6 @@ const FormTypes = (props) => {
       {...rest}
       variant="outlined"
       margin="dense"
-      //type="number"
       name={name}
       required={required}
       disabled={disabled}
@@ -159,39 +158,44 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                if (fieldData?.isConverter) {
-                  handleCurrencyChangeWithConverterChange(
-                    name,
-                    currency,
-                    unit,
-                    e.target.value === ''
-                      ? 0
-                      : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                        ? e.target.value.replace(/,/g, '')
-                        : parseFloat(e.target.value.replace(/,/g, ''))
-                  );
-                } else if (fieldData.displayCurrency.length > 1) {
-                  handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                } else {
-                  handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-                }
+            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+              if (fieldData?.isConverter) {
+                handleCurrencyChangeWithConverterChange(
+                  name,
+                  currency,
+                  unit,
+                  e.target.value === ''
+                    ? 0
+                    : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                      ? e.target.value.replace(/,/g, '')
+                      : parseFloat(e.target.value.replace(/,/g, ''))
+                );
+              } else if (fieldData.displayCurrency.length > 1) {
+                handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+              } else {
+                handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
               }
             }
+          }
       }
+      autoComplete='off'
       onBlur={(e) => {
         if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-          if (fieldData.displayCurrency.length > 1) {
-            handleCurrencyChange(
+          if (fieldData?.isConverter) {
+            handleCurrencyChangeWithConverterChange(
               name,
               currency,
-              e.target.value === '' ? 0 : parseFloat(parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces))
+              unit,
+              e.target.value === ''
+                ? 0
+                : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                  ? e.target.value.replace(/,/g, '')
+                  : parseFloat(e.target.value.replace(/,/g, ''))
             );
+          } else if (fieldData.displayCurrency.length > 1) {
+            handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
           } else {
-            handleChange(
-              name,
-              e.target.value === '' ? 0 : parseFloat(parseFloat(e.target.value.replace(/,/g, ''))?.toFixed(fieldData?.decimalPlaces))
-            );
+            handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
           }
         }
       }}
@@ -234,45 +238,30 @@ const FormTypes = (props) => {
       }}
     />
   ) : fieldData?.type === 'decimal' ? (
-    <>
-      <TextField
-        {...rest}
-        variant="outlined"
-        margin="dense"
-        type="number"
-        disabled={disabled}
-        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-        required={required}
-        name={name}
-        value={values[name]}
-        error={Boolean(errors[`${values._id}_${name}`])}
-        helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
-        onChange={
-          onChange
-            ? onChange
-            : (e) => {
-                handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
-              }
-        }
-        InputProps={{
-          inputProps: { min: 0 },
-          readOnly: fieldData && fieldData.isUneditable ? true : false
-        }}
-      />
-      {rest?.isMinMaxValue && (
-        <Typography
-          variant="caption"
-          style={{
-            marginLeft: '4px'
-          }}
-          color={values[name] > rest?.maxValue || values[name] < rest?.minValue ? 'error' : 'secondary'}
-        >
-          {values[name] > rest?.maxValue || values[name] < rest?.minValue
-            ? `Step is considered successful if the value is between ${rest?.minValue} and ${rest?.maxValue}`
-            : `Valid value`}
-        </Typography>
-      )}
-    </>
+    <TextField
+      {...rest}
+      variant="outlined"
+      margin="dense"
+      type="number"
+      disabled={disabled}
+      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+      required={required}
+      name={name}
+      value={values[name]}
+      error={Boolean(errors[`${values._id}_${name}`])}
+      helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+      onChange={
+        onChange
+          ? onChange
+          : (e) => {
+            handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
+          }
+      }
+      InputProps={{
+        inputProps: { min: 0 },
+        readOnly: fieldData && fieldData.isUneditable ? true : false
+      }}
+    />
   ) : fieldData?.type === 'percent' ? (
     <TextField
       {...rest}
@@ -296,13 +285,13 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              handleChange(
-                name,
-                e.target.value === ''
-                  ? 0
-                  : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
-              );
-            }
+            handleChange(
+              name,
+              e.target.value === ''
+                ? 0
+                : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
+            );
+          }
       }
     />
   ) : fieldData?.type === 'vlookupDropdown' ? (
@@ -337,12 +326,12 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-              if (fieldData?.returnType === 'decimal') {
-                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-              } else {
-                handleChange(name, e.target.value);
-              }
+            if (fieldData?.returnType === 'decimal') {
+              handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+            } else {
+              handleChange(name, e.target.value);
             }
+          }
       }
       InputProps={{
         inputProps: { min: 0 },

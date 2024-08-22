@@ -538,7 +538,9 @@ export const RESOURCE_LABEL = {
   integration: 'Integration',
   equiptAi: 'Equipt Ai',
   trainAiModel: 'Train Ai Model',
-  workSpace: 'Work Space'
+  workSpace: 'Work Space',
+  workFlow: 'Work Flow',
+  workflowReport: 'Workflow Report'
 };
 
 export const CHILD_RESOURCE = {
@@ -1000,6 +1002,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'counter' || key.type === 'multiFileUpload' || key.type === 'multiImageUpload') {
       obj[key.fieldName] = [];
     } else if (key.type === 'description') {
+    } else if (key.type === 'groupSignature') {
+      obj[key.fieldName] = [];
     } else {
       obj[key.fieldName] = value;
     }
@@ -1128,21 +1132,21 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1296,6 +1300,26 @@ export const convertDateInDateTime = (date) => {
   return newDate;
 };
 
+export const materialTableIcons: any = {
+  // Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
+  // Check: forwardRef((props: any, ref: any) => <Check {...props} ref={ref} />),
+  // Clear: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
+  // Delete: forwardRef((props: any, ref: any) => <DeleteOutline {...props} ref={ref} />),
+  // DetailPanel: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
+  // Edit: forwardRef((props: any, ref: any) => <Edit {...props} ref={ref} />),
+  // Export: forwardRef((props: any, ref: any) => <SaveAlt {...props} ref={ref} />),
+  // Filter: forwardRef((props: any, ref: any) => <FilterList {...props} ref={ref} />),
+  // FirstPage: forwardRef((props: any, ref: any) => <FirstPage {...props} ref={ref} />),
+  // LastPage: forwardRef((props: any, ref: any) => <LastPage {...props} ref={ref} />),
+  // NextPage: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
+  // PreviousPage: forwardRef((props: any, ref: any) => <ChevronLeft {...props} ref={ref} />),
+  // ResetSearch: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
+  // Search: forwardRef((props: any, ref: any) => <Search {...props} ref={ref} />),
+  // SortArrow: forwardRef((props: any, ref: any) => <ArrowDownward {...props} ref={ref} />),
+  // ThirdStateCheck: forwardRef((props: any, ref: any) => <Remove {...props} ref={ref} />),
+  // ViewColumn: forwardRef((props: any, ref: any) => <ViewColumn {...props} ref={ref} />)
+};
+
 export const convertDateTimToDate = (date) => {
   if (!date) {
     return date;
@@ -1305,25 +1329,7 @@ export const convertDateTimToDate = (date) => {
   return newDate;
 };
 
-export const materialTableIcons: any = {
-  Add: forwardRef((props: any, ref: any) => <AddBox {...props} ref={ref} />),
-  Check: forwardRef((props: any, ref: any) => <Check {...props} ref={ref} />),
-  Clear: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
-  Delete: forwardRef((props: any, ref: any) => <DeleteOutline {...props} ref={ref} />),
-  DetailPanel: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
-  Edit: forwardRef((props: any, ref: any) => <Edit {...props} ref={ref} />),
-  Export: forwardRef((props: any, ref: any) => <SaveAlt {...props} ref={ref} />),
-  Filter: forwardRef((props: any, ref: any) => <FilterList {...props} ref={ref} />),
-  FirstPage: forwardRef((props: any, ref: any) => <FirstPage {...props} ref={ref} />),
-  LastPage: forwardRef((props: any, ref: any) => <LastPage {...props} ref={ref} />),
-  NextPage: forwardRef((props: any, ref: any) => <ChevronRight {...props} ref={ref} />),
-  PreviousPage: forwardRef((props: any, ref: any) => <ChevronLeft {...props} ref={ref} />),
-  ResetSearch: forwardRef((props: any, ref: any) => <Clear {...props} ref={ref} />),
-  Search: forwardRef((props: any, ref: any) => <Search {...props} ref={ref} />),
-  SortArrow: forwardRef((props: any, ref: any) => <ArrowDownward {...props} ref={ref} />),
-  ThirdStateCheck: forwardRef((props: any, ref: any) => <Remove {...props} ref={ref} />),
-  ViewColumn: forwardRef((props: any, ref: any) => <ViewColumn {...props} ref={ref} />)
-};
+
 
 interface IPermission {
   [key: string]: {
@@ -1337,76 +1343,71 @@ interface IPermission {
 
 export const getPermissions = (user, selectedEntity = undefined): IPermission | null => {
   if (user) {
-    let permissions = {};
-    let routesAndTitle = {};
+    try {
+      let permissions = {};
+      let routesAndTitle = {};
 
-    let data = [...user?.role?.sideBar];
+      let data = [...user?.role?.sideBar];
 
-    if (selectedEntity) {
-      if (user?.entity && user?.entity.length && selectedEntity) {
-        data = [...data, ...user?.entity.find((entityObj) => entityObj._id === selectedEntity)?.resource];
-      }
-    } else {
-      if (user?.role?.selectedEntity) {
-        data = [...data, ...user?.role?.selectedEntity?.resource];
-      }
-    }
-
-    const sidebarFieldsKeys = Object.keys(sidebarResource);
-    const sidebarFieldsValues = Object.values(sidebarResource);
-
-    if (data) {
-      const hasApproveAccountPermission = user?.role?.selectedEntity?.policy?.isApproveAccount ?? false;
-      const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
-
-      data.forEach((d) => {
-        const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
-        if (indexOfPermission > -1) {
-          let permission = {
-            isCreate: d.isCreate,
-            isRead: d.isRead,
-            isUpdate: d.isUpdate,
-            isDelete: d.isDelete
-          };
-          if (accounts.some((acountType) => acountType === d.name)) {
-            permission['approveAccount'] = hasApproveAccountPermission;
-          }
-          permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
-          routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
-            title: d.resourceLabel || d.name
-          };
-        } else {
-          let permission = {
-            isCreate: d.isCreate,
-            isRead: d.isRead,
-            isUpdate: d.isUpdate,
-            isDelete: d.isDelete
-          };
-          if (accounts.some((acountType) => acountType === d.name)) {
-            permission['approveAccount'] = hasApproveAccountPermission;
-          }
-          const k = lowerFirst(d.name.replace(/ /g, ''));
-          permissions[k] = permission;
-          routesAndTitle[k] = {
-            title: d.resourceLabel || d.name
-          };
+      if (selectedEntity) {
+        if (user?.entity && user?.entity.length && selectedEntity) {
+          data = [...data, ...user?.entity.find((entityObj) => entityObj._id === selectedEntity)?.resource];
         }
-      });
+      } else {
+        if (user?.role?.selectedEntity) {
+          data = [...data, ...user?.role?.selectedEntity?.resource];
+        }
+      }
+
+      const sidebarFieldsKeys = Object.keys(sidebarResource);
+      const sidebarFieldsValues = Object.values(sidebarResource);
+
+      if (data) {
+        const hasApproveAccountPermission = user?.role?.selectedEntity?.policy?.isApproveAccount ?? false;
+        const accounts = [sidebarResource.customerAccount, sidebarResource.supplierAccount];
+
+        data.forEach((d) => {
+          const indexOfPermission = sidebarFieldsValues.indexOf(d.name);
+          if (indexOfPermission > -1) {
+            let permission = {
+              isCreate: d.isCreate,
+              isRead: d.isRead,
+              isUpdate: d.isUpdate,
+              isDelete: d.isDelete
+            };
+            if (accounts.some((acountType) => acountType === d.name)) {
+              permission['approveAccount'] = hasApproveAccountPermission;
+            }
+            permissions[sidebarFieldsKeys[indexOfPermission]] = permission;
+            routesAndTitle[sidebarFieldsKeys[indexOfPermission]] = {
+              title: d.resourceLabel || d.name
+            };
+          } else {
+            let permission = {
+              isCreate: d.isCreate,
+              isRead: d.isRead,
+              isUpdate: d.isUpdate,
+              isDelete: d.isDelete
+            };
+            if (accounts.some((acountType) => acountType === d.name)) {
+              permission['approveAccount'] = hasApproveAccountPermission;
+            }
+            const k = lowerFirst(d.name.replace(/ /g, ''));
+            permissions[k] = permission;
+            routesAndTitle[k] = {
+              title: d.resourceLabel || d.name
+            };
+          }
+        });
+      }
+
+
+      localStorage.setItem('routes', JSON.stringify(routesAndTitle));
+      return permissions;
     }
-
-    // sidebarFieldsKeys.forEach((d) => {
-    //   if (!permissions.hasOwnProperty(d)) {
-    //     permissions[d] = {
-    //       isCreate: false,
-    //       isRead: false,
-    //       isUpdate: false,
-    //       isDelete: false
-    //     };
-    //   }
-    // });
-
-    localStorage.setItem('routes', JSON.stringify(routesAndTitle));
-    return permissions;
+    catch (e) {
+      console.log(e)
+    }
   }
 };
 
@@ -1566,6 +1567,14 @@ export const formatAmountWithCurrency = (currencyCode, amount) => {
     }).format(amount),
     amountWithouCurrencyCode: new Intl.NumberFormat(`${language}-${currencyData.countryCode}`, { maximumFractionDigits: 4 }).format(amount)
   };
+};
+
+export const formatTotalforTableFooter = (num: number): number => {
+  if (Number.isInteger(num)) {
+    return num;
+  } else {
+    return parseFloat(num.toFixed(2));
+  }
 };
 
 /**
@@ -2489,13 +2498,13 @@ export const REPORT_LIST = [
   },
   {
     title: 'Inventory Evaluation',
-    permission: 'purchaseOrder',
+    permission: 'productInventory',
     key: 'standardReport',
     type: 'inventoryEvaluation'
   },
   {
     title: 'Inventory History',
-    permission: 'purchaseOrder',
+    permission: 'productInventory',
     key: 'standardReport',
     type: 'inventoryHistory'
   },
@@ -2764,6 +2773,11 @@ export const WORKORDER_SERVICE_STEP_STATUS = {
   needReperform: 'Need Reperform'
 };
 
+export const PRODUCT_SERIAL_NUMBER_STATUS = {
+  available: 'Available',
+  unAvailable: 'Unavailable'
+};
+
 type ChipStatus =
   | 'Pending'
   | 'Backlog'
@@ -2912,6 +2926,12 @@ export const SUBCONTRACT_ASSEMBLY_STATUS = {
   inProgress: 'In-Progress',
   closed: 'Closed'
 };
+
+export const WORK_FLOW_STATUS = {
+  open: 'Open',
+  inProgress: 'In-Progress',
+  completed: 'Completed'
+}
 
 export const INVOICE_STATUS = {
   new: 'New',
@@ -3397,7 +3417,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const columnSize = (type) => {
@@ -3447,8 +3467,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -3464,3 +3484,22 @@ export function copyTextToClipboard(text: string, callBack: (text: string) => vo
 }
 
 export const HIDDEN_FIELD_TYPE = ['description'];
+
+export function debounceCallBack<T extends (...args: any[]) => void>(func: T, timeout = 300): [(...args: Parameters<T>) => void, () => void] {
+  let timer: NodeJS.Timeout;
+  const debouncedFunc = (...args: Parameters<T>) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      func.apply(this, args);
+    }, timeout);
+  };
+  const teardown = () => clearTimeout(timer);
+  return [debouncedFunc, teardown];
+}
+export type DebounceCallBack = ReturnType<typeof debounceCallBack>;
+
+
+export const MFA_METHOD = {
+  emailOtp: "emailOtp",
+  totp: "totp"
+}

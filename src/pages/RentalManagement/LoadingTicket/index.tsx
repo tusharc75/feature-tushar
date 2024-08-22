@@ -7,15 +7,14 @@ import Edit from '@material-ui/icons/Edit';
 import HelpIcon from '@material-ui/icons/HelpOutline';
 import InfoIcon from '@material-ui/icons/Info';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
-import VisibilityIcon from '@material-ui/icons/Visibility';
-import { groupBy, isArray, isEmpty, isEqual, isObject, map, uniq } from 'lodash';
+import { groupBy, isArray, isEmpty, isEqual, isObject, map, uniq, uniqueId } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { IoRemoveCircleOutline } from 'react-icons/io5';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
+import { actionDisable, rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import axiosInstance from '../../../axios/axiosInstance';
@@ -57,6 +56,7 @@ import { getParentWellNumber, getUniqueWellNumber } from 'src/components/RentalM
 import PreviewDownloadMultiple from '../../../components/DeliveryTicket/PreviewDownloadMultiple';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateDeliveredToCustomer, generateLoadingStepCreateTicketSteps, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
+import AssetDataDialog from 'src/pages/RentalManagement/LoadingTicket/AssetDataDialog';
 
 const stepGlobalDataAdded = {
   createTicket: false,
@@ -122,11 +122,27 @@ const LoadingTicket = ({
   const [mtrConfirmBox, setMtrConfirmBox] = useState(false);
   const [openDateDialog, setOpenDateDialog] = useState({ open: false, type: null, status: null, prevStatus: null, assets: [], loading: false });
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
+  const [assetPolicyData, setAssetPolicyData] = useState(null);
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState(false);
 
   useEffect(() => {
     fetchRecords();
     getColumn();
+    fetchPolicy();
   }, []);
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serializedAsset}`);
+      if (data) {
+        setAssetPolicyData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchRecords = async () => {
     setNextStep(false);
@@ -519,7 +535,7 @@ const LoadingTicket = ({
         if (walkmeInstance && walkmeInstance.type === 'flow' && !stepGlobalDataAdded.deliverToCustomer) {
           stepGlobalDataAdded.deliverToCustomer = true;
           const steps = generateDeliveredToCustomer(i).steps;
-          steps.push({ ...nextButtonStep, waitForStepInsertion: false });
+          steps.push({ ...nextButtonStep, waitForStepInsertion: true });
           walkmeInstance.instance.push(steps);
           walkmeInstance.handleNext();
         }
@@ -539,7 +555,7 @@ const LoadingTicket = ({
         },
         {
           resource: sidebarResource.serializedAsset,
-          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached', 'warehouse']
+          fieldNames: ['serialNumber', 'position', 'wellNumber', 'mtrAttached', 'warehouse', 'jobCount']
         }
       ]
     });
@@ -568,8 +584,8 @@ const LoadingTicket = ({
           style={{
             backgroundColor:
               row?.original?.warehouseId &&
-              row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
-              !row?.original?.loadingTicketId
+                row?.original?.warehouseId !== rentalManagementData?.warehouse?.optionValue &&
+                !row?.original?.loadingTicketId
                 ? COLOUR_MASTER.transferAsset.background
                 : [ASSET_STATUS.lost, ASSET_STATUS.scrap, ASSET_STATUS.needRepair, ASSET_STATUS.needRecert]?.includes(row?.original?.status)
                   ? COLOUR_MASTER.lostAssets.background
@@ -624,26 +640,26 @@ const LoadingTicket = ({
           </IconButton>
           {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
             (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-            <Box>
-              <HtmlTooltip title={`Serial Numbers`}>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    setShowInfo({
-                      open: true,
-                      data: {
-                        productName: row?.original?.productName,
-                        data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
-                      },
-                      type: `Serial Numbers`
-                    });
-                  }}
-                >
-                  <InfoIcon fontSize="small" color={'primary'} />
-                </IconButton>
-              </HtmlTooltip>
-            </Box>
-          )}
+              <Box>
+                <HtmlTooltip title={`Serial Numbers`}>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      setShowInfo({
+                        open: true,
+                        data: {
+                          productName: row?.original?.productName,
+                          data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                        },
+                        type: `Serial Numbers`
+                      });
+                    }}
+                  >
+                    <InfoIcon fontSize="small" color={'primary'} />
+                  </IconButton>
+                </HtmlTooltip>
+              </Box>
+            )}
         </div>
       )
     },
@@ -687,21 +703,30 @@ const LoadingTicket = ({
     },
     ...(findHeader(columnHeader?.assetFields, 'serialNumber')
       ? [
-          {
-            accessor: 'serialNumber',
-            Header: findHeader(columnHeader?.assetFields, 'serialNumber'),
-            Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-          }
-        ]
+        {
+          accessor: 'serialNumber',
+          Header: findHeader(columnHeader?.assetFields, 'serialNumber'),
+          Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+        }
+      ]
       : []),
     ...(findHeader(columnHeader?.assetFields, 'position')
       ? [
-          {
-            accessor: 'position',
-            Header: findHeader(columnHeader?.assetFields, 'position'),
-            Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
-          }
-        ]
+        {
+          accessor: 'position',
+          Header: findHeader(columnHeader?.assetFields, 'position'),
+          Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+        }
+      ]
+      : []),
+    ...(findHeader(columnHeader?.assetFields, 'jobCount')
+      ? [
+        {
+          accessor: 'jobCount',
+          Header: findHeader(columnHeader?.assetFields, 'jobCount'),
+          Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
+        }
+      ]
       : []),
     {
       accessor: 'productName',
@@ -760,29 +785,29 @@ const LoadingTicket = ({
     },
     ...(findHeader(columnHeader?.assetFields, 'wellNumber')
       ? [
-          {
-            accessor: 'wellNumber',
-            Header: findHeader(columnHeader?.assetFields, 'wellNumber'),
-            accessorFn: (original) => {
-              return isArray(original?.wellNumber)
-                ? original?.wellNumber[0]?.optionLabel
-                : isObject(original?.wellNumber)
-                  ? original?.wellNumber?.optionLabel
-                  : original?.wellNumber;
-            },
-            Cell: ({ row }) => (
-              <DropdownCell
-                permissions={permissions}
-                permissionForLinks={{}}
-                field={{
-                  fieldName: 'wellNumber',
-                  lookupResource: sidebarResource.wellNumber
-                }}
-                original={row?.original}
-              />
-            )
-          }
-        ]
+        {
+          accessor: 'wellNumber',
+          Header: findHeader(columnHeader?.assetFields, 'wellNumber'),
+          accessorFn: (original) => {
+            return isArray(original?.wellNumber)
+              ? original?.wellNumber[0]?.optionLabel
+              : isObject(original?.wellNumber)
+                ? original?.wellNumber?.optionLabel
+                : original?.wellNumber;
+          },
+          Cell: ({ row }) => (
+            <DropdownCell
+              permissions={permissions}
+              permissionForLinks={{}}
+              field={{
+                fieldName: 'wellNumber',
+                lookupResource: sidebarResource.wellNumber
+              }}
+              original={row?.original}
+            />
+          )
+        }
+      ]
       : [])
   ];
 
@@ -805,10 +830,10 @@ const LoadingTicket = ({
     canDrag: false,
     Cell: ({ row }) =>
       user?.user?.brandPolicy?.assetDeliveredStatus &&
-      [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
-        row?.original?.rentalAssetStatus
-      ) &&
-      row?.original?.type === 'Asset' ? (
+        [RENTAL_INTERNAL_ASSET_STATUS.inUse, RENTAL_INTERNAL_ASSET_STATUS.standBy, RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable]?.includes(
+          row?.original?.rentalAssetStatus
+        ) &&
+        row?.original?.type === 'Asset' ? (
         <HtmlTooltip title={`Change ${routes.serializedAsset.title} Last Status Date`}>
           <IconButton
             size="small"
@@ -1033,7 +1058,11 @@ const LoadingTicket = ({
 
   const handleChangeStatusInUse = (status, prevStatus, date) => {
     setOpenDateDialog((prev) => ({ ...prev, loading: true }));
-    const assets = selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id);
+    const assets = selectedRecords
+      ?.filter((e: any) => e.type === 'Asset')
+      ?.map((e) => {
+        return { asset: e._id, uniqueId: e.uniqueId };
+      });
     if (assets?.length) {
       axiosInstance()
         .put(`${rentalManagement.api}/${rentalManagementData._id}/assets-inuse-standby`, {
@@ -1219,7 +1248,7 @@ const LoadingTicket = ({
         {(allowedToEdit || isProcessor) && (
           <>
             {selectedRecords.length &&
-            selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicketId') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
               selectedRecords?.length ? (
               <HtmlTooltip title="Remove Assets From Loading Ticket(s)">
                 <Button
@@ -1256,6 +1285,37 @@ const LoadingTicket = ({
     );
   };
 
+  const handleAssetData = (assetsData) => {
+    const assetsAdd: any = [];
+    selectedRecords.forEach((r) => {
+      const obj: any = {};
+      obj._id = r?.uniqueId;
+      obj.asset = r?._id;
+      const matchedAsset = assetsData?.find((asset) => asset._id === obj.asset);
+      if (matchedAsset) {
+        const { _id, ...assetData } = matchedAsset;
+        obj.assetData = assetData;
+      }
+      assetsAdd.push(obj);
+    });
+    setReplaceLoading(true)
+    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/change-asset-data`, assetsAdd)
+      .then(({ data }) => {
+        fetchRecords();
+        setReplaceLoading(false)
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setOpenAssetDataDialog(false)
+      })
+      .catch((error) => {
+        setReplaceLoading(false)
+        toastConfig.setToastConfig(error);
+      });
+  };
+
   return (
     <>
       <DetailsPageHeader
@@ -1275,7 +1335,10 @@ const LoadingTicket = ({
               setAddSerializedAssetDialog,
               setShowConformationRevertTicket,
               setShowConformationCancleTicket,
-              hideDeliveryTicketDelivered
+              hideDeliveryTicketDelivered,
+              permissions,
+              assetPolicyData,
+              setOpenAssetDataDialog
             }}
           />
         }
@@ -1587,6 +1650,22 @@ const LoadingTicket = ({
           assets={openDateDialog.assets}
         />
       )}
+      {openAssetDataDialog && (
+        <AssetDataDialog
+          onClose={() => {
+            setOpenAssetDataDialog(false);
+          }}
+          statusPolicy={assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)}
+          staticLookUpFilters={{
+            wellNumber: rentalManagementData?.wellNumber
+              ? rentalManagementData?.wellNumber?.optionValue || rentalManagementData?.wellNumber?.map((e) => e?.optionValue)
+              : null
+          }}
+          ids={selectedRecords?.map((r) => r?._id)}
+          onSuccess={handleAssetData}
+          loading={replaceLoading}
+        />
+      )}
     </>
   );
 };
@@ -1605,7 +1684,10 @@ const ActionButtonMenuItems = ({
   setAddSerializedAssetDialog,
   setShowConformationRevertTicket,
   setShowConformationCancleTicket,
-  hideDeliveryTicketDelivered
+  hideDeliveryTicketDelivered,
+  permissions,
+  assetPolicyData,
+  setOpenAssetDataDialog
 }) => {
   const checkUniqStatus = () => {
     if (selectedRecords.length === 0) {
@@ -1626,43 +1708,49 @@ const ActionButtonMenuItems = ({
 
   return (
     <>
-      <MenuItem
-        onClick={() => {
-          if (!validateAction(rentalManagementActions.createLoadingTicket)) {
-            if (checkMTRValidation && selectedRecords?.some((e) => e.type === 'Asset' && e.mtrAttached !== true)) {
-              setMtrConfirmBox(true);
-            } else {
-              handleDeliveryTicketDialog();
-            }
-          }
-        }}
-        id={'create-loding-ticket-menu-item'}
-        disabled={selectedRecords.length === 0}
-      >
-        Create Loading Ticket
-      </MenuItem>
-      {user?.user?.brandPolicy?.rentalOnFieldStep || hideDeliveryTicketDelivered ? null : (
+      <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
         <MenuItem
           onClick={() => {
-            if (!validateAction(rentalManagementActions.deliveredToCustomer)) {
-              if (user?.user?.brandPolicy?.assetDeliveredStatus) {
-                setOpenDateDialog({
-                  open: true,
-                  type: 'changeStatus',
-                  status: ASSET_STATUS.delivered,
-                  prevStatus: ASSET_STATUS.delivered,
-                  assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
-                  loading: false
-                });
+            if (!validateAction(rentalManagementActions.createLoadingTicket)) {
+              if (checkMTRValidation && selectedRecords?.some((e) => e.type === 'Asset' && e.mtrAttached !== true)) {
+                setMtrConfirmBox(true);
               } else {
-                handelProcessTickets();
+                handleDeliveryTicketDialog();
               }
             }
           }}
-          id={'delivered-to-customer-menu-item'}
+          id={'create-loding-ticket-menu-item'}
+          disabled={!permissions?.deliveryTicket?.isCreate || selectedRecords.length === 0}
         >
-          Delivered to Customer
+          Create Loading Ticket
         </MenuItem>
+      </HtmlTooltip>
+
+      {user?.user?.brandPolicy?.rentalOnFieldStep || hideDeliveryTicketDelivered ? null : (
+        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(rentalManagementActions.deliveredToCustomer)) {
+                if (user?.user?.brandPolicy?.assetDeliveredStatus) {
+                  setOpenDateDialog({
+                    open: true,
+                    type: 'changeStatus',
+                    status: ASSET_STATUS.delivered,
+                    prevStatus: ASSET_STATUS.delivered,
+                    assets: selectedRecords?.filter((e: any) => e.type === 'Asset')?.map((e) => e._id),
+                    loading: false
+                  });
+                } else {
+                  handelProcessTickets();
+                }
+              }
+            }}
+            id={'delivered-to-customer-menu-item'}
+            disabled={!permissions?.deliveryTicket?.isUpdate}
+          >
+            Delivered to Customer
+          </MenuItem>
+        </HtmlTooltip>
       )}
       {user?.user?.brandPolicy?.assetDeliveredStatus &&
         (user?.user?.brandPolicy?.rentalOnFieldStep ? null : (
@@ -1805,27 +1893,51 @@ const ActionButtonMenuItems = ({
         </MenuItem>
       )}
       {!hideDeliveryTicketDelivered && (
+        <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
+          <MenuItem
+            onClick={() => {
+              if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
+                setShowConformationRevertTicket(true);
+              }
+            }}
+            id={'cancel-specific-line-item-menu-item'}
+            disabled={!permissions?.deliveryTicket?.isUpdate}
+          >
+            Cancel Specific Line Items
+          </MenuItem>
+        </HtmlTooltip>
+      )}
+      <HtmlTooltip title={!permissions?.deliveryTicket?.isDelete ? actionDisable : ''}>
         <MenuItem
           onClick={() => {
-            if (!validateAction(rentalManagementActions.cancelInTransitLoadingTicket)) {
-              setShowConformationRevertTicket(true);
+            if (!validateAction(rentalManagementActions.cancelLoadingTicket)) {
+              setShowConformationCancleTicket({ open: true });
             }
           }}
-          id={'cancel-specific-line-item-menu-item'}
+          id={'cancel-loading-ticket-menu-item'}
+          disabled={!permissions?.deliveryTicket?.isDelete}
         >
-          Cancel Specific Line Items
+          Cancel Loading Ticket(s)
         </MenuItem>
-      )}
-      <MenuItem
-        onClick={() => {
-          if (!validateAction(rentalManagementActions.cancelLoadingTicket)) {
-            setShowConformationCancleTicket({ open: true });
-          }
-        }}
-        id={'cancel-loading-ticket-menu-item'}
-      >
-        Cancel Loading Ticket(s)
-      </MenuItem>
+      </HtmlTooltip>
+      {assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved) &&
+        selectedRecords?.length > 0 && selectedRecords?.every((r) => r?.type === 'Asset' &&
+          [
+            RENTAL_INTERNAL_ASSET_STATUS.reserved,
+            RENTAL_INTERNAL_ASSET_STATUS.inUse,
+            RENTAL_INTERNAL_ASSET_STATUS.standBy,
+            RENTAL_INTERNAL_ASSET_STATUS.standByNotChargeable
+          ]?.includes(r?.rentalAssetStatus)
+        ) && (
+          <MenuItem
+            onClick={() => {
+              setOpenAssetDataDialog(true);
+            }}
+            id={'change-asset-data-menu-item'}
+          >
+            Change Assets Data
+          </MenuItem>
+        )}
     </>
   );
 };

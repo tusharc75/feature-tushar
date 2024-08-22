@@ -5,15 +5,18 @@ export class AutocompleteObserver extends Observer {
   target: HTMLElement;
   next: () => void;
   observer: MutationObserver;
-  valiDator: (value: string) => boolean;
-  constructor(handleSteps: HandleSteps, element: HTMLElement, valiDator: (value: string) => boolean = (value) => value.length > 0) {
-    super(handleSteps, element);
+  validator: (value: string) => boolean;
+  parent: HTMLElement;
+
+  constructor(handleSteps: HandleSteps, element: HTMLElement, validator: (value: string) => boolean = (value) => value.length > 0) {
+    super(handleSteps, element, validator);
     this.options = {
       attributes: true
     };
-    this.valiDator = valiDator;
+    this.parent = this.target.parentElement;
     this.observe();
   }
+
   callBack(mutations: MutationRecord[]) {
     for (const mutation of mutations) {
       if (mutation.type === 'attributes') {
@@ -21,9 +24,11 @@ export class AutocompleteObserver extends Observer {
         this.attributeTracker[mutation.attributeName] = target.getAttribute(mutation.attributeName);
       }
     }
-    if (!this.attributeTracker['aria-controls'] && this.attributeTracker['value'] && this.valiDator(this.attributeTracker['value'])) {
+    if (!this.attributeTracker['aria-controls'] && this.attributeTracker['value'] && this.validator(this.attributeTracker['value'])) {
       this.handleSteps.next();
-      this.disconnect();
+      this.success = true;
+    } else if (this.target) {
+      this.success = false;
     }
   }
 }

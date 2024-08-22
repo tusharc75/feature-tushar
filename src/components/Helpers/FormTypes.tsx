@@ -247,9 +247,46 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
   );
 };
 
+export const checkCondition = (fields, fieldName, value, values) => {
+  const _field = fields?.filter((f) => f?.fieldName === fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === fieldName)[0] : null;
+  if (_field) {
+    if (_field?.type === 'checkBox') {
+      if (value === 'yes') {
+        return values[fieldName];
+      } else {
+        return !values[fieldName];
+      }
+    } else if (_field?.type === 'dropDown') {
+      if (value?.split(',')?.includes(values[fieldName])) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (_field?.type === 'multiSelect') {
+      if (value?.split(',').some((v) => values[fieldName]?.includes(v))) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (values[fieldName] === value) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+};
+
 const FormTypes = (props) => {
   const theme = useTheme();
-  const tempProps = { ...props, id: props.id ? props.id : props.label ? `field-${props.label.toLowerCase().split(' ').join('-')}` : 'custom-field' };
+  const tempProps = {
+    ...props,
+    id: props.id ? props.id : props.label ? `field-${props.label.toLowerCase().split(' ').join('-')}` : 'custom-field',
+    dataType: props.type
+  };
   const {
     addAdditionalOption,
     productTemplateId,
@@ -606,7 +643,7 @@ const FormTypes = (props) => {
       }
     }
     const data = {
-      _id: productTemplateId || priceTemplateId ? fieldData._id : fieldData ? fieldData._id : fieldId,
+      _id: productTemplateId || priceTemplateId ? fieldData?._id : fieldData ? fieldData?._id : fieldId,
       option: Array.isArray(optionData) ? optionData : [optionData]
     };
     if (productTemplateId && priceTemplateId) {
@@ -790,48 +827,15 @@ const FormTypes = (props) => {
     return label;
   };
 
-  const checkCondition = (fieldName, value, values) => {
-    const _field = fields?.filter((f) => f?.fieldName === fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === fieldName)[0] : null;
-    if (_field) {
-      if (_field?.type === 'checkBox') {
-        if (value === 'yes') {
-          return values[fieldName];
-        } else {
-          return !values[fieldName];
-        }
-      } else if (_field?.type === 'dropDown') {
-        if (value?.split(',')?.includes(values[fieldName])) {
-          return true;
-        } else {
-          return false;
-        }
-      } else if (_field?.type === 'multiSelect') {
-        if (value?.split(',').some((v) => values[fieldName]?.includes(v))) {
-          return true;
-        } else {
-          return false;
-        }
-      } else {
-        if (values[fieldName] === value) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-    } else {
-      return false;
-    }
-  };
-
   const isVisible = () => {
     if (fieldData?.visibilityCondition?.length > 0) {
       let visible = false;
       let show = true;
-      fieldData?.visibilityCondition.forEach((condition, i) => {
+      fieldData?.visibilityCondition?.forEach((condition, i) => {
         if (condition?.logic === LOGIC[0]) {
           condition?.fields?.forEach((field) => {
             if (field?.fieldName && field?.value) {
-              if (!checkCondition(field?.fieldName, field?.value, values)) {
+              if (!checkCondition(fields, field?.fieldName, field?.value, values)) {
                 show = false;
                 return;
               }
@@ -841,7 +845,7 @@ const FormTypes = (props) => {
           let count = 0;
           condition?.fields?.forEach((field) => {
             if (field?.fieldName && field?.value) {
-              if (checkCondition(field?.fieldName, field?.value, values)) {
+              if (checkCondition(fields, field?.fieldName, field?.value, values)) {
                 return;
               } else {
                 count = count + 1;
@@ -1049,7 +1053,7 @@ const FormTypes = (props) => {
           InputProps={{
             endAdornment: '%',
             inputProps: { min: 0 },
-            readOnly: fieldData && fieldData.isUneditable ? true : false
+            readOnly: fieldData && fieldData?.isUneditable ? true : false
           }}
           ref={inputNumberRef}
           onChange={
@@ -1135,7 +1139,9 @@ const FormTypes = (props) => {
             onChange
               ? onChange
               : (val) => {
-                  if (val === '+') {
+                  // check to see if the value has only country code
+                  // 5 is choosen here because some country code has 4 digit and "+"
+                  if (val?.length < 5) {
                     setFieldValue(name, '');
                   } else {
                     setFieldValue(name, val);
@@ -1247,8 +1253,8 @@ const FormTypes = (props) => {
       </>
     ) : type === 'dropDown' ||
       type === 'lookup' ||
-      (type === 'vlookupDropdown' && fieldData && fieldData.isvlookupReverse) ||
-      (type === 'formula' && fieldData && fieldData.isDropdown) ? (
+      (type === 'vlookupDropdown' && fieldData && fieldData?.isvlookupReverse) ||
+      (type === 'formula' && fieldData && fieldData?.isDropdown) ? (
       <>
         <InfoLabel
           info={tooltipMessage}
@@ -1380,7 +1386,7 @@ const FormTypes = (props) => {
 
             {!lookup && (addAdditionalOption || fieldData?.addAdditionalOption) && (
               <div style={{ marginTop: '7px' }}>
-                <HtmlTooltip title={`Add ${fieldData.fieldLabel}`}>
+                <HtmlTooltip title={`Add ${fieldData?.fieldLabel}`}>
                   <IconButton onClick={() => setOptionSaveDialog(true)} size="small" color="primary">
                     <AddCircleIcon />
                   </IconButton>
@@ -1403,7 +1409,7 @@ const FormTypes = (props) => {
           </Grid>
         </InfoLabel>
       </>
-    ) : type === 'vlookupDropdown' && fieldData && !fieldData.isvlookupReverse ? (
+    ) : type === 'vlookupDropdown' && fieldData && !fieldData?.isvlookupReverse ? (
       <InfoLabel
         info={tooltipMessage}
         isTooltip={isTooltip}
@@ -1423,10 +1429,10 @@ const FormTypes = (props) => {
           onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
         />
       </InfoLabel>
-    ) : type === 'converter' || (type === 'decimal' && fieldData && fieldData.isConverter) ? (
-      fieldData.displayUnits &&
-      Array.isArray(fieldData.displayUnits) &&
-      fieldData.displayUnits.map((_unit, i) => (
+    ) : type === 'converter' || (type === 'decimal' && fieldData && fieldData?.isConverter) ? (
+      fieldData?.displayUnits &&
+      Array.isArray(fieldData?.displayUnits) &&
+      fieldData?.displayUnits.map((_unit, i) => (
         <Grid key={_unit} item xs={12} sm={6} md={6}>
           <Box display="flex">
             <Box flexGrow={1}>
@@ -1436,36 +1442,36 @@ const FormTypes = (props) => {
                 warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
                 warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
               >
-                {fieldData.isDropdown ? (
+                {fieldData?.isDropdown ? (
                   <Autocomplete
                     {...rest}
                     limitTags={2}
                     options={optionConverter(
                       option,
-                      fieldData.units,
-                      fieldData.unitoption,
-                      fieldData.dropdownOnConverter,
+                      fieldData?.units,
+                      fieldData?.unitoption,
+                      fieldData?.dropdownOnConverter,
                       _unit,
-                      fieldData.decimalPlaces
+                      fieldData?.decimalPlaces
                     )}
                     getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
                     getOptionSelected={(option: any, val) => option.optionValue === val}
                     value={
                       optionConverter(
                         option,
-                        fieldData.units,
-                        fieldData.unitoption,
-                        fieldData.dropdownOnConverter,
+                        fieldData?.units,
+                        fieldData?.unitoption,
+                        fieldData?.dropdownOnConverter,
                         _unit,
                         fieldData.decimalPlaces
                       ).filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString()).length
                         ? optionConverter(
                             option,
-                            fieldData.units,
-                            fieldData.unitoption,
-                            fieldData.dropdownOnConverter,
+                            fieldData?.units,
+                            fieldData?.unitoption,
+                            fieldData?.dropdownOnConverter,
                             _unit,
-                            fieldData.decimalPlaces
+                            fieldData?.decimalPlaces
                           ).filter((data) => data.optionValue.toString() === values[name + '_' + _unit.toLowerCase()]?.toString())[0]
                         : ''
                     }
@@ -1501,13 +1507,13 @@ const FormTypes = (props) => {
                     }
                     InputProps={{
                       inputProps: { min: 0 },
-                      readOnly: fieldData && fieldData.isUneditable ? true : false
+                      readOnly: fieldData && fieldData?.isUneditable ? true : false
                     }}
                   />
                 )}
               </InfoLabel>
             </Box>
-            {i === 0 && fieldData.displayUnits.length !== fieldData.units.length && (
+            {i === 0 && fieldData?.displayUnits?.length !== fieldData?.units?.length && (
               <Box>
                 <HtmlTooltip title="Add Converter" className="formActionButton">
                   <IconButton
@@ -1520,9 +1526,9 @@ const FormTypes = (props) => {
                     <SwapHorizIcon />
                   </IconButton>
                 </HtmlTooltip>
-                {(fieldData.leval === 'product-custom' ||
-                  fieldData.leval === 'product-builder-custom' ||
-                  fieldData.leval === 'price-builder-custom') && (
+                {(fieldData?.leval === 'product-custom' ||
+                  fieldData?.leval === 'product-builder-custom' ||
+                  fieldData?.leval === 'price-builder-custom') && (
                   <HtmlTooltip title="Remove">
                     <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                       <HighlightOffIcon color="error" />
@@ -1539,7 +1545,7 @@ const FormTypes = (props) => {
                 )}
               </Box>
             )}
-            {fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
+            {fieldData?.fieldChanges && fieldData?.fieldChanges?.displayUnits && fieldData?.fieldChanges?.displayUnits?.includes(_unit) && (
               <Box>
                 <HtmlTooltip title="Remove" className="formActionButton">
                   <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
@@ -1552,11 +1558,11 @@ const FormTypes = (props) => {
         </Grid>
       ))
     ) : type === 'currencyAmount' ? (
-      fieldData.displayCurrency &&
-      Array.isArray(fieldData.displayCurrency) &&
-      fieldData.displayCurrency.map((_currency, i) =>
-        fieldData.isConverter && fieldData.displayUnits.length ? (
-          fieldData.displayUnits.map((_unit, j) => (
+      fieldData?.displayCurrency &&
+      Array.isArray(fieldData?.displayCurrency) &&
+      fieldData?.displayCurrency?.map((_currency, i) =>
+        fieldData?.isConverter && fieldData?.displayUnits?.length ? (
+          fieldData?.displayUnits?.map((_unit, j) => (
             <Grid key={_unit} item xs={12} sm={6} md={6}>
               <Box display="flex">
                 <Box flexGrow={1}>
@@ -1620,7 +1626,7 @@ const FormTypes = (props) => {
                           </InputAdornment>
                         ),
                         inputProps: { min: 0, max: 9999999999 },
-                        readOnly: fieldData && fieldData.isUneditable ? true : false
+                        readOnly: fieldData && fieldData?.isUneditable ? true : false
                       }}
                     />
                   </InfoLabel>
@@ -1639,16 +1645,16 @@ const FormTypes = (props) => {
                         <CreditCardIcon />
                       </IconButton>
                     </HtmlTooltip>
-                    {(fieldData.leval === 'product-custom' ||
-                      fieldData.leval === 'product-builder-custom' ||
-                      fieldData.leval === 'price-builder-custom') && (
+                    {(fieldData?.leval === 'product-custom' ||
+                      fieldData?.leval === 'product-builder-custom' ||
+                      fieldData?.leval === 'price-builder-custom') && (
                       <HtmlTooltip title="Remove">
                         <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                           <HighlightOffIcon color="error" />
                         </IconButton>
                       </HtmlTooltip>
                     )}
-                    {fieldData.displayUnits.length !== fieldData.units.length && (
+                    {fieldData?.displayUnits?.length !== fieldData?.units?.length && (
                       <HtmlTooltip title="Add Converter" className="formActionButton">
                         <IconButton
                           onClick={() => {
@@ -1675,19 +1681,22 @@ const FormTypes = (props) => {
                     )}
                   </Box>
                 )}
-                {i === 0 && fieldData.fieldChanges && fieldData.fieldChanges.displayUnits && fieldData.fieldChanges.displayUnits.includes(_unit) && (
-                  <Box>
-                    <HtmlTooltip title="Remove" className="formActionButton">
-                      <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
-                        <HighlightOffIcon color="error" />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </Box>
-                )}
+                {i === 0 &&
+                  fieldData?.fieldChanges &&
+                  fieldData?.fieldChanges?.displayUnits &&
+                  fieldData?.fieldChanges?.displayUnits?.includes(_unit) && (
+                    <Box>
+                      <HtmlTooltip title="Remove" className="formActionButton">
+                        <IconButton onClick={() => handleRemoveDisplayType('converter', fieldData, _unit)} color="primary" size="small">
+                          <HighlightOffIcon color="error" />
+                        </IconButton>
+                      </HtmlTooltip>
+                    </Box>
+                  )}
                 {j === 0 &&
-                  fieldData.fieldChanges &&
-                  fieldData.fieldChanges.displayCurrency &&
-                  fieldData.fieldChanges.displayCurrency.includes(_currency) && (
+                  fieldData?.fieldChanges &&
+                  fieldData?.fieldChanges?.displayCurrency &&
+                  fieldData?.fieldChanges?.displayCurrency?.includes(_currency) && (
                     <Box>
                       <HtmlTooltip title="Remove" className="formActionButton">
                         <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
@@ -1730,7 +1739,7 @@ const FormTypes = (props) => {
                         ? onChange
                         : (e) => {
                             if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                              if (fieldData.displayCurrency.length > 1) {
+                              if (fieldData?.displayCurrency?.length > 1) {
                                 handleCurrencyChange(name, _currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
                               } else {
                                 handleChange(name + '_' + _currency.toLowerCase(), e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
@@ -1740,7 +1749,7 @@ const FormTypes = (props) => {
                     }
                     onBlur={(e) => {
                       if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-                        if (fieldData.displayCurrency.length > 1) {
+                        if (fieldData?.displayCurrency?.length > 1) {
                           handleCurrencyChange(
                             name,
                             _currency,
@@ -1766,14 +1775,14 @@ const FormTypes = (props) => {
                         </InputAdornment>
                       ),
                       inputProps: { min: 0 },
-                      readOnly: fieldData && fieldData.isUneditable ? true : false
+                      readOnly: fieldData && fieldData?.isUneditable ? true : false
                     }}
                   />
                 </InfoLabel>
               </Box>
               {i === 0 && (
                 <Box>
-                  {fieldData.hideConverter ? null : (
+                  {fieldData?.hideConverter ? null : (
                     <HtmlTooltip title="Add Currency" className="formActionButton">
                       <IconButton
                         onClick={() => {
@@ -1786,9 +1795,9 @@ const FormTypes = (props) => {
                       </IconButton>
                     </HtmlTooltip>
                   )}
-                  {(fieldData.leval === 'product-custom' ||
-                    fieldData.leval === 'product-builder-custom' ||
-                    fieldData.leval === 'price-builder-custom') && (
+                  {(fieldData?.leval === 'product-custom' ||
+                    fieldData?.leval === 'product-builder-custom' ||
+                    fieldData?.leval === 'price-builder-custom') && (
                     <HtmlTooltip title="Remove">
                       <IconButton onClick={() => handleRemoveField(fieldData)} color="primary" size="small">
                         <HighlightOffIcon color="error" />
@@ -1805,15 +1814,17 @@ const FormTypes = (props) => {
                   )}
                 </Box>
               )}
-              {fieldData.fieldChanges && fieldData.fieldChanges.displayCurrency && fieldData.fieldChanges.displayCurrency.includes(_currency) && (
-                <Box>
-                  <HtmlTooltip title="Remove" className="formActionButton">
-                    <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
-                      <HighlightOffIcon color="error" />
-                    </IconButton>
-                  </HtmlTooltip>
-                </Box>
-              )}
+              {fieldData?.fieldChanges &&
+                fieldData?.fieldChanges?.displayCurrency &&
+                fieldData?.fieldChanges?.displayCurrency?.includes(_currency) && (
+                  <Box>
+                    <HtmlTooltip title="Remove" className="formActionButton">
+                      <IconButton onClick={() => handleRemoveDisplayType('currency', fieldData, _currency)} color="primary" size="small">
+                        <HighlightOffIcon color="error" />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                )}
             </Box>
           </Grid>
         )
@@ -1846,7 +1857,7 @@ const FormTypes = (props) => {
           }
           InputProps={{
             inputProps: { min: 0 },
-            readOnly: fieldData && fieldData.isUneditable ? true : false
+            readOnly: fieldData && fieldData?.isUneditable ? true : false
           }}
         />
         {rest?.isMinMaxValue && (
@@ -1894,7 +1905,7 @@ const FormTypes = (props) => {
           }
           InputProps={{
             inputProps: { min: 0 },
-            readOnly: fieldData && fieldData.isUneditable ? true : false
+            readOnly: fieldData && fieldData?.isUneditable ? true : false
           }}
         />
       </InfoLabel>
@@ -2733,25 +2744,14 @@ const FormTypes = (props) => {
             }
           }}
         >
-          <CustomDialogHeader
-            showRequiredLabel={false}
-            onClose={() => {
-              if (!isImgUploading) {
-                setImage('');
-              }
-            }}
-            title="Edit Image"
+          <ImageCropTool
+            image={image}
+            setImage={setImage}
+            getImageUrl={getImageUrl}
+            isImgUploading={isImgUploading}
+            imageUploadProgress={imageUploadProgress}
+            imageFileName={imageFileName}
           />
-          <CustomDialogContent isFooterPresent={false}>
-            <ImageCropTool
-              image={image}
-              setImage={setImage}
-              getImageUrl={getImageUrl}
-              isImgUploading={isImgUploading}
-              imageUploadProgress={imageUploadProgress}
-              imageFileName={imageFileName}
-            />
-          </CustomDialogContent>
         </Dialog>
       </InfoLabel>
     ) : type === 'richTextEditor' ? (

@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
-import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset, getObjKeys } from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, yupSchema, sidebarResource, serializedAsset, getObjKeys, DELIVERY_TICKET_TYPE } from '../../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -25,7 +25,8 @@ export default function AssetDetailsChangeDialog({
   ids,
   setAssetsData,
   staticLookUpFilters = {},
-  productsDefaultData = []
+  productsDefaultData = [],
+  ticketType = null,
 }) {
   const [submitting, setSubmitting] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
@@ -35,9 +36,12 @@ export default function AssetDetailsChangeDialog({
   const [decimalFields, setDecimalFields] = useState([]);
   const [allFields, setAllFields] = useState([]);
 
+  const [assetHeaders, setAssetHeaders] = useState({ assetNumber: '', product: '' });
+
+
   useEffect(() => {
     fetchFields();
-  }, []);
+  }, [statusPolicy]);
 
   const fetchFields = async () => {
     const data = await axiosInstance().get(`${serializedAsset.api}?getById=${JSON.stringify(ids)}`);
@@ -45,6 +49,11 @@ export default function AssetDetailsChangeDialog({
 
     const fields = await axiosInstance().get(`/field?resource=${sidebarResource.serializedAsset}`);
     let fieldsData = fields?.data?.data;
+
+    setAssetHeaders({
+      assetNumber: fieldsData?.find((e) => e.fieldData?.fieldName === 'assetNumber')?.fieldData?.fieldLabel || 'Asset',
+      product: fieldsData?.find((e) => e.fieldData?.fieldName === 'product')?.fieldData?.fieldLabel || 'Product'
+    })
     setAllFields(JSON.parse(JSON.stringify(fieldsData)));
     fieldsData = fieldsData.filter((d) => statusPolicy?.fields?.includes(d.fieldData.fieldName));
     let fieldsDataForUpdate = fieldsData?.map((d: any) => d.fieldData);
@@ -71,12 +80,16 @@ export default function AssetDetailsChangeDialog({
             initialValues[`${e.fieldName}_orignal`] = initialValues[e.fieldName];
             initialValues[e.fieldName] = 0;
           } else if (e?.type === 'decimal' && statusPolicy?.autoIncrementDecimalField) {
-            initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
+            if (!ticketType || ticketType && ticketType !== DELIVERY_TICKET_TYPE.return) {
+              initialValues[e.fieldName] = (initialValues[e.fieldName] || 0) + 1;
+            }
           }
         });
       }
       initialValues['_id'] = data?._id;
       initialValues['assetNumber'] = data?.assetNumber;
+      initialValues['productName'] = data?.product?.optionLabel;
+
 
       const assetDefaultData = productsDefaultData?.find((e) => e.materialId === data?.product?.optionValue)?.assetDefaultData;
       if (!index) {
@@ -142,7 +155,9 @@ export default function AssetDetailsChangeDialog({
       }
       data.push({ ...obj, ...resetValues });
     });
-    setAssetsData(data);
+    if (setAssetsData) {
+      setAssetsData(data);
+    }
     onSuccess(data);
     setSubmitting(false);
   };
@@ -191,7 +206,8 @@ export default function AssetDetailsChangeDialog({
       }, {});
 
       return {
-        'Asset Number': _data?.assetNumber || '',
+        [assetHeaders.assetNumber]: _data?.assetNumber || '',
+        [assetHeaders.product]: _data?.productName || '',
         ...dynamicFields
       };
     });
@@ -215,7 +231,7 @@ export default function AssetDetailsChangeDialog({
       json_data_value.push(mergedObject);
     }
 
-    const header1 = ['Asset Number', ...initialData?.fields?.map((f) => f?.fieldLabel)];
+    const header1 = [assetHeaders.assetNumber, assetHeaders.product, ...initialData?.fields?.map((f) => f?.fieldLabel)];
 
     const header2 = initialData?.fields?.filter((f) => f?.type === 'dropDown' || f?.type === 'multiSelect')?.map((f) => f?.fieldLabel);
 
@@ -234,8 +250,8 @@ export default function AssetDetailsChangeDialog({
     writeFile(wb, `${routes.serializedAsset.title} Data.xlsx`);
   };
 
-  const getValueInImport = (data: any, asset: string, fieldLabel: string, assetData: any[]) => {
-    const index = assetData?.findIndex((a) => a?.assetNumber === asset);
+  const getValueInImport = (data: any, asset: string, product: string, fieldLabel: string, assetData: any[]) => {
+    const index = assetData?.findIndex((a) => a?.assetNumber === asset && a?.productName === product);
     const field = initialData?.fields?.find((f) => f?.fieldLabel === fieldLabel);
     if (index > -1 && field) {
       if (field?.type === 'multiSelect') {
@@ -280,8 +296,8 @@ export default function AssetDetailsChangeDialog({
         let row = parsedData.slice(1, parsedData.length);
         row.forEach((item: any[]) => {
           item?.forEach((_d, i) => {
-            if (i != 0) {
-              const { index, fieldName, value } = getValueInImport(_d, item[0], header[i], values?.assetData);
+            if (i != 0 && i != 1) {
+              const { index, fieldName, value } = getValueInImport(_d, item[0], item[1], header[i], values?.assetData);
               setFieldValue(`assetData.${index}.${fieldName}`, value);
             }
           });
@@ -357,7 +373,7 @@ export default function AssetDetailsChangeDialog({
                               key={index}
                             >
                               <div>
-                                <span className="font-semibold text-[var(--primary-text)]">{data.assetNumber}</span>
+                                <span className="font-semibold text-[var(--primary-text)]">{`${data?.assetNumber} (${data?.productName})`}</span>
                               </div>
                               <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
                                 {initialData?.fields.map((field) => (

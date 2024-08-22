@@ -23,7 +23,8 @@ const ManageDynamicForm = ({
   redirected = true,
   isClone = false,
   id = null,
-  referenceData = null
+  referenceData = null,
+  collaborateTools = false
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -104,42 +105,47 @@ const ManageDynamicForm = ({
     setSubmitting(true);
     if (id && !isClone) {
       values._id = id;
-      axiosInstance().put(`/dynamic-form`, values, {
-        headers: {
-          Resource: resource
-        }
-      }).then(({ data }) => {
-        setSubmitting(false);
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+      axiosInstance()
+        .put(`/dynamic-form`, values, {
+          headers: {
+            Resource: resource
+          }
+        })
+        .then(({ data }) => {
+          setSubmitting(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     } else {
-      axiosInstance().post(`/dynamic-form`, values, {
-        headers: {
-          Resource: resource
-        }
-      }).then(({ data: { data, message } }) => {
-        setLoading(false);
-        if (redirected) {
-          history.push(`${resourcePath}/detail/${data._id}`);
-          onSuccess(data.data);
-        } else {
-          onSuccess(data, primaryField);
-        }
-        setSubmitting(true);
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: message
-        });
-      })
+      axiosInstance()
+        .post(`/dynamic-form`, values, {
+          headers: {
+            Resource: resource
+          }
+        })
+        .then(({ data: { data, message } }) => {
+          setLoading(false);
+          if (redirected) {
+            history.push(`${resourcePath}/detail/${data._id}`);
+            onSuccess(data.data);
+          } else {
+            onSuccess(data, primaryField);
+          }
+          setSubmitting(true);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+        })
         .catch((error) => {
           setLoading(false);
           setSubmitting(false);
@@ -180,13 +186,15 @@ const ManageDynamicForm = ({
     if (name === 'rentalJob' && resource === 'Daily Inspection Report' && initialData?.fields?.find((e) => e.fieldName === 'assets')) {
       const response: any = await axiosInstance().get(`${rentalManagement.api}/${value}`);
       if (response?.data?.data?.productInventory?.length) {
-        setFieldValue('assets', response?.data?.data?.productInventory?.map((e) => e.inventory))
-      }
-      else {
-        setFieldValue('assets', [])
+        setFieldValue(
+          'assets',
+          response?.data?.data?.productInventory?.map((e) => e.inventory)
+        );
+      } else {
+        setFieldValue('assets', []);
       }
     }
-  }
+  };
 
   return (
     <Dialog
@@ -225,7 +233,7 @@ const ManageDynamicForm = ({
                     values={values}
                     setFieldValue={(name, value) => {
                       setFieldValue(name, value);
-                      handleFixedBrandWiseLogic(name, value, setFieldValue)
+                      handleFixedBrandWiseLogic(name, value, setFieldValue);
                     }}
                     touched={touched}
                     fieldsData={initialData.fields}
@@ -234,6 +242,9 @@ const ManageDynamicForm = ({
                     onImageUploadCompletePercentage={(completePercentage) => {
                       setUploadingImageOrFileProgress(completePercentage);
                     }}
+                    resource={resource}
+                    referenceId={id || null}
+                    collaborateTools={collaborateTools}
                   />
                 </Form>
               </CustomDialogContent>

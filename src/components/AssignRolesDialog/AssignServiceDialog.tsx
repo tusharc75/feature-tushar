@@ -26,7 +26,7 @@ const AssignServiceDialog = ({
   extraFilterById = null,
   pricingCondition = null
 }) => {
-  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}_Assign`;
+  const renderedFrom = `${camelCase(routes.serviceMaster?.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
   const { state, dispatch } = useTableReducer();
@@ -50,6 +50,7 @@ const AssignServiceDialog = ({
       editable: true,
       disableFilters: true,
       disableSortBy: true,
+      disabled:true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
     }
   ];

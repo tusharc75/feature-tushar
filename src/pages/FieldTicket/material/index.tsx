@@ -2,7 +2,7 @@ import { Box, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
 import { camelCase } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -31,10 +31,14 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import { ownerAndColaborator } from 'src/constants/messageHelpers';
 import Add from '@material-ui/icons/Add';
 import { FiExternalLink } from 'react-icons/fi';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddExistingService, generateAddManualEntry, generateAddNewService, generateAddProductConsumable, generateAddTechnician, generateEditManualEntry, generateEditService } from '../walkmeSteps';
+import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
 const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
-
+  const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
@@ -50,10 +54,8 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   const [costFields, setCostFields] = useState([]);
   const [assignRentalDataDialog, setAssignRentalDataDialog] = useState({ open: false, type: '' });
 
-  const {
-    state: { user, permissions }
-  }: any = useData();
-
+  const { state: { user, permissions } }: any = useData();
+  const isStepDataSet = useRef(false);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
   const { isOffline } = useContext(CustomOfflineContext);
@@ -68,6 +70,33 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       fetchMaterial();
     }
   }, [columns]);
+
+  useEffect(() => {
+    let stepData = [generateAddExistingService(), generateAddManualEntry(), generateAddNewService(), generateAddProductConsumable(), generateAddTechnician()];
+    if (dataRows?.length) {
+      const serviceIndex = dataRows.findIndex((d) => d.type === MATERIAL_TYPE.service);
+      const manualEntryIndex = dataRows.findIndex((d) => d.type === MATERIAL_TYPE.manualEntry);
+      if (serviceIndex !== -1) {
+        stepData.push(generateEditService(false, serviceIndex));
+      }
+      if (manualEntryIndex !== -1) {
+        stepData.push(generateEditManualEntry(false, manualEntryIndex));
+      }
+      if (walkmeInstance && walkmeInstance.type === 'flow' &&  !isStepDataSet.current) {
+        isStepDataSet.current = true;
+        let steps = [];
+        if (serviceIndex !== -1 && !dataRows[serviceIndex]?.isValid) {
+          steps = generateEditService(false, serviceIndex).steps;
+        } else if (manualEntryIndex !== -1 && !dataRows[serviceIndex]?.isValid) {
+          steps = generateEditManualEntry(false, manualEntryIndex).steps;
+        }
+        steps.push({ ...nextButtonStep, waitForStepInsertion: true });
+        walkmeInstance.instance.push(steps);
+        walkmeInstance.handleNext();
+      }
+    }
+    setWalkmeData(stepData);
+  }, [dataRows]);
 
   const fetchFields = async () => {
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
@@ -192,11 +221,12 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             <HtmlTooltip title={allowedToEdit ? 'Edit' : ownerAndColaborator}>
               <IconButton
                 size="small"
-                aria-label="Delete"
+                aria-label="Edit"
                 disabled={!allowedToEdit}
                 onClick={() => {
                   openMaterial(row, table.getRowModel().rows);
                 }}
+                id={`edit-${row?.original?.type}-button-${row.index || 0}`}
               >
                 <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
               </IconButton>
@@ -672,6 +702,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           onClick={() => {
             setMaterialDialog({ open: true, type: MATERIAL_TYPE.service, parentId: null });
           }}
+          id={'add-existing-service-menu-item'}
         >
           Add Existing Service
         </MenuItem>
@@ -680,6 +711,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             onClick={() => {
               setMaterialDialog({ open: true, type: 'newService', parentId: null });
             }}
+            id={'add-new-service-menu-item'}
           >
             Add New Service
           </MenuItem>
@@ -689,6 +721,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             onClick={() => {
               setMaterialDialog({ open: true, type: MATERIAL_TYPE.package, parentId: null });
             }}
+            id={'add-existing-package-menu-item'}
           >
             Add Existing Package
           </MenuItem>
@@ -698,6 +731,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
             onClick={() => {
               setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
             }}
+            id={'add-manual-entry-menu-item'}
           >
             Add Manual Entry
           </MenuItem>

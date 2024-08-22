@@ -4,7 +4,7 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -77,7 +77,7 @@ const RepairJob = () => {
   const [columns, setColumns] = useState(null);
   const pageTitle = camelCase(`${routes.repairJob.title}`);
 
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -251,7 +251,8 @@ const RepairJob = () => {
       let rows = data.map((u) => {
         let finalObject: any = prepareDataForGrid(u, user);
         finalObject['isChecked'] = false;
-        finalObject['canDelete'] = permissions?.repairJob?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairJob, finalObject?.ownerId) && u?.canDelete;
+        finalObject['canDelete'] =
+          permissions?.repairJob?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairJob, finalObject?.ownerId) && u?.canDelete;
         return finalObject;
       });
       dispatch({ type: 'initialize', data: rows, count: count });
@@ -407,8 +408,9 @@ const RepairJob = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${deleteRecord.repairJobName || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairJobName ? 'Repair Job' : 'Repair Jobs'}   ${
+              deleteRecord.repairJobName || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

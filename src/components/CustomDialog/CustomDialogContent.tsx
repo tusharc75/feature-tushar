@@ -20,13 +20,14 @@ const useViewportDynamicHeight = () => {
       if (window.visualViewport) {
         const vh = window.visualViewport.height;
         setHeight(vh);
-        document.body.style.height = `${vh}px`;
+        document.body.style.setProperty('--vh', `${vh}px`);
         document.body.style.overflow = 'hidden';
       }
     };
     setHeightFunc();
     window?.visualViewport?.addEventListener('resize', setHeightFunc);
     return () => {
+      document.body.style.removeProperty('--vh');
       document?.body?.removeAttribute?.('style');
       window?.visualViewport?.removeEventListener('resize', setHeightFunc);
     };

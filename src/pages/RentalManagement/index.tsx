@@ -13,7 +13,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
 import { createAddItemStepdata, useSetWalkmeData } from 'src/components/CustomIntro';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
@@ -61,7 +61,7 @@ const RentalManagement = () => {
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
 
   const [renderCount, setRenderCount] = useState(0);
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.rentalManagement));

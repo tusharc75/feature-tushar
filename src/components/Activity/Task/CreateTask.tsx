@@ -3,6 +3,7 @@ import {
   Box,
   Breadcrumbs,
   Button,
+  Chip,
   CircularProgress,
   Divider,
   FormControl,
@@ -255,6 +256,11 @@ export const CreateTask = ({
                           {id && (
                             <Box mt={2}>
                               <RelatedToDispay relatedTo={initialValues.relatedTo} />
+                              {initialValues?.formRelatedTo?.fields?.length > 0 && (
+                                <Box mt={1}>
+                                  <Chip key={0} label={initialValues?.formRelatedTo?.fields?.map((f) => f?.fieldLabel)?.join(', ')} size="medium" />
+                                </Box>
+                              )}
                             </Box>
                           )}
                           {id && (

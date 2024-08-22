@@ -1272,7 +1272,27 @@ const routes = {
     title: storedRoutes && storedRoutes.workSpace && storedRoutes.workSpace?.title ? storedRoutes.workSpace?.title
       : RESOURCE_LABEL.workSpace,
     path: '/work-space'
-  }
+  },
+  workFlow: {
+    title: storedRoutes && storedRoutes.workFlow && storedRoutes.workFlow?.title ? storedRoutes.workFlow?.title
+      : RESOURCE_LABEL.workFlow,
+    path: '/work-flow'
+  },
+  workFlowDetail: {
+    title: storedRoutes && storedRoutes.workFlow && storedRoutes.workFlow?.title ? storedRoutes.workFlow?.title
+      : RESOURCE_LABEL.workFlow,
+    path: '/work-flow/:id'
+  },
+  workflowReport: {
+    title: storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title ? storedRoutes.workflowReport?.title
+      : RESOURCE_LABEL.workflowReport,
+    path: '/workflow-report'
+  },
+  workflowReportDetail: {
+    title: storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title ? storedRoutes.workflowReport?.title
+      : RESOURCE_LABEL.workflowReport,
+    path: '/workflow-report/detail'
+  },
 };
 
 export default routes;

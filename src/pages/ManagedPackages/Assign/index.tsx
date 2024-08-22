@@ -12,14 +12,12 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { flattenArray } from 'src/constants/columns';
 import { MATERIAL_TYPE } from 'src/constants/helpers';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { Delete } from '@material-ui/icons';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const Assign = ({ managedPackagesData }) => {
-
   const renderedFrom = `${camelCase(routes?.managedPackages.title)}_${managedPackagesData?.package?.optionLabel}`;
   const { setToastConfig } = useContext(CustomToastContext);
 
@@ -35,12 +33,169 @@ const Assign = ({ managedPackagesData }) => {
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
 
   useEffect(() => {
     fetchColumns();
     fetchData();
   }, []);
+
+  const fetchColumns = async () => {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/field/find-field-labels`, {
+      fields: [
+        {
+          resource: 'Product',
+          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct', 'position']
+        }
+      ]
+    });
+
+    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
+
+    let coloum: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        sticky: isMobile ? 'none' : 'left',
+        width: 200,
+        Cell: ({ row }) =>
+          row.original['type'] ? (
+            <p>
+              {`${startCase(row.original?.type)} `}
+              {row.original['type'] === MATERIAL_TYPE.product && (row.original?.serializedProduct ? '(Serialized)' : '(Non-Serialized)')}
+            </p>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'detail',
+        Header: 'Details',
+        width: 200,
+        sticky: isMobile ? 'none' : 'left',
+        Cell: ({ row }) =>
+          row?.original?.type ? (
+            <div className="flex items-center gap-2">
+              <p className="text-truncate">{row.original.detail}</p>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row?.original?.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.productId}`);
+                  } else if (row?.original?.type === MATERIAL_TYPE.package) {
+                    window.open(`${routes.packagesDetail.path}/${row.original._id}`);
+                  } else {
+                    window.open(`${routes.serializedAssetDetail.path}/${row.original.asset}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
+      },
+      {
+        accessor: 'description',
+        Header: 'Description',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['description'] ? (
+            <div>
+              <p className="text-truncate">{row.original.description}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
+        }
+      },
+      {
+        accessor: 'productNumber',
+        Header: productFields?.find((e) => e.fieldName === 'productNumber')?.fieldLabel || 'Product Number',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
+        }
+      },
+      {
+        accessor: 'productCategory',
+        Header: 'Product Category',
+        width: 200,
+        Cell: ({ row }) => {
+          return row.original['productCategory'] ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
+        }
+      },
+      ...(productFields?.find((e) => e.fieldName === 'position')
+        ? [
+            {
+              accessor: 'position',
+              Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
+              width: 200,
+              Cell: ({ row }) => {
+                return row.original['position'] ? (
+                  <div>
+                    <p className="text-truncate">{row.original.position}</p>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                );
+              }
+            }
+          ]
+        : []),
+      {
+        accessor: 'qty',
+        Header: 'Qty',
+        width: 150,
+        Cell: ({ row }) => {
+          return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
+        }
+      }
+    ];
+    setColumns([...coloum, ActionsRenderer]);
+  };
+
+  const ActionsRenderer = {
+    accessor: 'action',
+    Header: 'Actions',
+    minWidth: 100,
+    width: 100,
+    sticky: 'right',
+    disableFilters: true,
+    disableSortBy: true,
+    canDrag: false,
+    Cell: ({ row }) => (
+      <>
+        {permissions?.managedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
+          <HtmlTooltip title="Delete">
+            <IconButton
+              size="small"
+              aria-label="Delete"
+              onClick={() => {
+                setDeleteRecord(row.original);
+                setShowDeleteConfirmBox(true);
+              }}
+            >
+              <Delete color="error" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
+      </>
+    )
+  };
 
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
@@ -79,13 +234,14 @@ const Assign = ({ managedPackagesData }) => {
             row.productNumber = parent?.productNumber;
             row.productCategory = parent?.productCategory?.optionLabel;
             row.qty = parent?.qty;
-            row.assetQty = assets?.filter((i: any) => {
-              if (i?.package) {
-                return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
-              } else {
-                return i.product.optionValue === row.productId && !row?.package;
-              }
-            })?.length || 0;
+            row.assetQty =
+              assets?.filter((i: any) => {
+                if (i?.package) {
+                  return i.product.optionValue === row.productId && i.package === row?.package?.optionValue;
+                } else {
+                  return i.product.optionValue === row.productId && !row?.package;
+                }
+              })?.length || 0;
             row.subRows = generateNestedData([], assets, row);
             row.parentId = null;
             rows.push(row);
@@ -115,19 +271,20 @@ const Assign = ({ managedPackagesData }) => {
         _subRow.productCategory = _subRow?.productCategory?.optionLabel;
         _subRow.qty = parent.qty * _subRow.qty;
         _subRow.parentId = parent?._id;
-        _subRow.assetQty = assets?.filter((i: any) => {
-          if (i?.package) {
-            return i.product.optionValue === _subRow.productId && i.package === _subRow?.package?.optionValue;
-          } else {
-            return i.product.optionValue === _subRow.productId && !_subRow?.package;
-          }
-        })?.length || 0;
+        _subRow.assetQty =
+          assets?.filter((i: any) => {
+            if (i?.package) {
+              return i.product.optionValue === _subRow.productId && i.package === _subRow?.package?.optionValue;
+            } else {
+              return i.product.optionValue === _subRow.productId && !_subRow?.package;
+            }
+          })?.length || 0;
         _subRow.subRows = generateNestedData([], assets, _subRow);
       });
     } else {
       subRows = assets.filter((e) => {
         if (e?.package) {
-          return e.product.optionValue === parent.productId && e?.package === parent?.package?.optionValue
+          return e.product.optionValue === parent.productId && e?.package?.optionValue === parent?.package?.optionValue;
         } else {
           return e.product.optionValue === parent.productId && !parent?.package;
         }
@@ -146,150 +303,13 @@ const Assign = ({ managedPackagesData }) => {
     return subRows;
   };
 
-  const fetchColumns = async () => {
-    const {
-      data: { data }
-    } = await axiosInstance().put(`/field/find-field-labels`, {
-      fields: [
-        {
-          resource: 'Product',
-          fieldNames: ['productName', 'productNumber', 'productDescription', 'serializedProduct', 'position']
-        }
-      ]
-    });
-
-    const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
-
-    let coloum: any = [
-      {
-        accessor: 'index',
-        Header: 'Index',
-        width: 70,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-        Footer: () => {
-          return <>Total</>;
-        }
-      },
-      {
-        accessor: 'type',
-        Header: 'Type',
-        sticky: isMobile ? 'none' : 'left',
-        width: 100,
-        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-      },
-      {
-        accessor: 'detail',
-        Header: 'Details',
-        width: 200,
-        sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) =>
-          row?.original?.type ? (
-            <div className="flex items-center gap-2">
-              <p className="text-truncate">{row.original.detail}</p>
-              <IconButton
-                size="small"
-                onClick={() => {
-                  if (row?.original?.type === MATERIAL_TYPE.product) {
-                    window.open(`${routes.productDetail.path}/${row.original.productId}`);
-                  } else if (row?.original?.type === MATERIAL_TYPE.package) {
-                    window.open(`${routes.packagesDetail.path}/${row.original._id}`);
-                  } else {
-                    window.open(`${routes.serializedAssetDetail.path}/${row.original.asset}`);
-                  }
-                }}
-              >
-                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-              </IconButton>
-            </div>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
-        accessor: 'description',
-        Header: 'Description',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['description'] ? <div>
-            <p className="text-truncate">{row.original.description}</p>
-          </div> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'productNumber',
-        Header: productFields?.find((e) => e.fieldName === 'productNumber')?.fieldLabel || 'Product Number',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['productNumber'] ? <p className="text-truncate">{row.original.productNumber}</p> : <NoDataCell />;
-        }
-      },
-      {
-        accessor: 'productCategory',
-        Header: 'Product Category',
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['productCategory'] ? <p className="text-truncate">{row.original.productCategory}</p> : <NoDataCell />;
-        }
-      },
-      ...(productFields?.find((e) => e.fieldName === 'position') ? [{
-        accessor: 'position',
-        Header: productFields?.find((e) => e.fieldName === 'position')?.fieldLabel,
-        width: 200,
-        Cell: ({ row }) => {
-          return row.original['position'] ? <div>
-            <p className="text-truncate">{row.original.position}</p>
-          </div> : <NoDataCell />;
-        }
-      }] : []),
-      {
-        accessor: 'qty',
-        Header: 'Qty',
-        width: 150,
-        Cell: ({ row }) => {
-          return row.original['qty'] ? <p className="text-truncate">{row.original.qty}</p> : <NoDataCell />;
-        }
-      },
-    ];
-    setColumns([...coloum, ActionsRenderer]);
-  };
-
-  const ActionsRenderer = {
-    accessor: 'action',
-    Header: 'Actions',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (
-      <>
-        {permissions?.managedPackages?.isUpdate && row?.original?.type === MATERIAL_TYPE.serializedAsset && (
-          <HtmlTooltip title="Delete">
-            <IconButton
-              size="small"
-              aria-label="Delete"
-              onClick={() => {
-                setDeleteRecord(row.original);
-                setShowDeleteConfirmBox(true);
-              }}
-            >
-              <Delete color="error" />
-            </IconButton>
-          </HtmlTooltip>
-        )}
-      </>
-    )
-  };
-
   const handleDelete = () => {
     setIsSubmitting(true);
     let ids = [];
     if (deleteRecord) {
       ids.push(deleteRecord._id);
     } else {
-      ids = selectedRecords?.map((d) => d._id);
+      ids = selectedRecords?.filter((r) => r?.type === MATERIAL_TYPE.serializedAsset)?.map((d) => d._id);
     }
     axiosInstance()
       .put(`/managed-packages/${managedPackagesData?._id}/assets`, { ids: ids })
@@ -327,11 +347,10 @@ const Assign = ({ managedPackagesData }) => {
     return flatArray.length === 0;
   };
 
-
   const actionButtonMenuItems = () => {
     return (
       <>
-        {permissions?.managedPackages?.isUpdate &&
+        {permissions?.managedPackages?.isUpdate && (
           <MenuItem
             disabled={disableAssignSerializedAssets()}
             onClick={() => {
@@ -345,7 +364,7 @@ const Assign = ({ managedPackagesData }) => {
                       const existingProduct = productsMap.get(e.productId);
                       existingProduct.qty += diff;
                       if (e?.package?.optionValue) {
-                        existingProduct.packages = [...existingProduct.packages, e.package.optionValue]
+                        existingProduct.packages = [...existingProduct.packages, e.package.optionValue];
                       }
                     } else {
                       const productDetail = {
@@ -353,7 +372,7 @@ const Assign = ({ managedPackagesData }) => {
                         qty: diff,
                         productName: e?.detail,
                         packages: e?.package?.optionValue ? [e?.package?.optionValue] : []
-                      }
+                      };
                       productsMap.set(e.productId, productDetail);
                     }
                   }
@@ -364,15 +383,17 @@ const Assign = ({ managedPackagesData }) => {
           >
             {`Assign ${routes.serializedAsset.title}`}
           </MenuItem>
-        }
-        {permissions?.managedPackages?.isUpdate &&
+        )}
+        {permissions?.managedPackages?.isUpdate && (
           <MenuItem
-            disabled={selectedRecords?.some((e) => e.type !== MATERIAL_TYPE.serializedAsset)}
-            onClick={() => { setShowDeleteConfirmBox(true) }}
+            disabled={!selectedRecords?.some((e) => e.type === MATERIAL_TYPE.serializedAsset)}
+            onClick={() => {
+              setShowDeleteConfirmBox(true);
+            }}
           >
-            {`Delete (${selectedRecords?.length})`}
+            Delete
           </MenuItem>
-        }
+        )}
       </>
     );
   };
@@ -405,11 +426,12 @@ const Assign = ({ managedPackagesData }) => {
       {assignAssetDialog.open && (
         <AssignSerializedAssetDialog
           reference={'managedPackages'}
-          ids={flattenArray(dataRows)?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => e._id)}
+          ids={[]}
           handleClose={() => setAssignAssetDialog({ open: false, products: [] })}
           handleSucess={handleAssignAssets}
           isAssigning={isAssetAdding}
           selectedProducts={assignAssetDialog.products}
+          referenceData={{ warehouse: managedPackagesData?.warehouse?.optionValue }}
         />
       )}
       {showDeleteConfirmBox && (

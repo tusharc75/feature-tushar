@@ -1,7 +1,7 @@
 import { Box, Button, Grid, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { getStaticFields, useColumns, useTableReducer, checkStaticField, gridFilterParser } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer, gridFilterParser } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
 import { Link } from 'react-router-dom';
 import { gridLoadingTimeout, invoice, isObjectEmpty, prepareDataForGrid } from 'src/constants/helpers';
@@ -19,15 +19,16 @@ import { deleteDisable } from 'src/constants/messageHelpers';
 
 const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice }) => {
   const renderedFrom = camelCase(routes?.invoice?.title);
+
   const toastConfig = useContext(CustomToastContext);
   const [createBillDialog, setCreateBillDialog] = useState({ open: false });
   const [viewBillDialog, setViewBillDialog] = useState({ open: false, invoiceData: null });
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user, permissions }
   }: any = useData();
   const { state, dispatch } = useTableReducer();
-  const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const { generateColumns } = useColumns();
+  const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { generateColumns, checkStaticField } = useColumns();
   const [columns, setColumns] = useState(null);
   const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [isConfirmDialogVisible, setIsConformDialogVisible] = useState(false);
@@ -141,13 +142,11 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
       .then(({ data: { data, count } }) => {
         let rows = data.map((u, idx) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject.orignalData = u;
           finalObject['isLatestInvoice'] = idx === 0 ? true : false;
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete;
+          finalObject['canDelete'] = permissions?.invoice?.isDelete && u?.canDelete && allowCreateInvoice;
           return finalObject;
         });
-
         dispatch({ type: 'initialize', data: rows, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -235,14 +234,17 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
       {viewBillDialog.open && (
         <ViewBillingDialog
           rentalManagementData={rentalManagementData}
-          invoiceData={viewBillDialog?.invoiceData}
+          invoiceId={viewBillDialog?.invoiceData?._id}
           onClose={() => {
+            fetchData();
             setViewBillDialog({ open: false, invoiceData: null });
           }}
           onSuccess={() => {
-            setViewBillDialog({ open: false, invoiceData: null });
             fetchData();
+            setViewBillDialog({ open: false, invoiceData: null });
           }}
+          allowCreateInvoice={allowCreateInvoice}
+          isLatestInvoice={viewBillDialog?.invoiceData?.isLatestInvoice}
         />
       )}
       {isConfirmDialogVisible ? (

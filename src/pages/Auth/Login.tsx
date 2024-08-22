@@ -6,8 +6,6 @@ import { useData } from '../../StateProvider/Provider';
 import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
-import { CustomChatNotificationCountContext } from '../../StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import IconButton from '@material-ui/core/IconButton';
 import Visibility from '@material-ui/icons/Visibility';
@@ -17,7 +15,6 @@ import { camelCase, isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
-import { SET_GRID_METADATA } from '../../StateProvider/actionTypes';
 import { entity } from '../../constants/helpers';
 import routes from 'src/components/Helpers/Routes';
 import { Logo, LoginImage } from 'src/assets/authenticationAssets';
@@ -27,8 +24,6 @@ import FacialLogin from 'src/components/FacialLogin';
 import styles from './index.module.scss';
 
 const Login = () => {
-  const notification = useContext(CustomNotificationCountContext);
-  const chatNotification = useContext(CustomChatNotificationCountContext);
 
   const toastConfig = useContext(CustomToastContext);
   const { dispatch }: any = useData();
@@ -40,8 +35,6 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const history = useHistory();
 
-  const { entityApi } = entity;
-
   useEffect(() => {
     if (!isEmpty(account)) {
       (async () => {
@@ -51,20 +44,8 @@ const Login = () => {
             'graph-token': graphToken
           });
           const { data } = res.data;
-          localStorage.setItem('token', data.token);
-          const gridRequest = await axiosInstance().get(`user/meta-grid/${data.user?._id}`);
-
-          let tempMetaData = JSON.stringify(gridRequest.data.data?.gridMetaData);
-          localStorage.setItem('gridMetaData', tempMetaData);
-          dispatch({ type: SET_GRID_METADATA, payload: gridRequest.data.data?.gridMetaData });
-
-          dispatch({ type: SET_USER, payload: data });
-          if (data?.role?.selectedEntity?._id) {
-            dispatch({
-              type: SET_SELECTED_ENTITY,
-              payload: data.role.selectedEntity._id
-            });
-          }
+          setSubmitting(false);
+          history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
         } catch (e) {
           setCounter(18);
           setInvalidAzureLogin(true);
@@ -91,65 +72,14 @@ const Login = () => {
       email: values.email,
       password: values.password
     };
-    axiosInstance()
-      .post('/user/login', data)
-      .then(async ({ data: response }) => {
-        setSubmitting(false);
-        const { data } = response;
-        localStorage.setItem('token', data.token);
-
-        if (data?.hasExistingSession) {
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.existingSessionMessage
-          });
-        }
-
-        dispatch({ type: SET_USER, payload: data });
-        if (data?.role?.selectedEntity?._id) {
-          dispatch({
-            type: SET_SELECTED_ENTITY,
-            payload: data.role.selectedEntity._id
-          });
-        }
-
-        if (data?.user?.defaultResource) {
-          if (routes[camelCase(data?.user?.defaultResource)]?.path) {
-            history.push({ pathname: routes[camelCase(data?.user?.defaultResource)]?.path });
-          }
-        }
-
-        axiosInstance()
-          .get(`/user/notification/unseen`)
-          .then(({ data: { count } }) => {
-            notification.setCount(count);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-
-        axiosInstance()
-          .get(`/user/user-notification/unseen`)
-          .then(({ data: { count } }) => {
-            chatNotification.setCount(count);
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
-
-        axiosInstance()
-          .get(`user/meta-grid/${data?.user?._id}`)
-          .then(({ data: { data } }) => {
-            let tempMetaData = JSON.stringify(data?.gridMetaData);
-            localStorage.setItem('gridMetaData', tempMetaData);
-            dispatch({ type: SET_GRID_METADATA, payload: data?.gridMetaData });
-          });
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
+    axiosInstance().post('/user/login', data).then(async ({ data: response }) => {
+      const { data } = response;
+      setSubmitting(false);
+      history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
+    }).catch((error) => {
+      setSubmitting(false);
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const validateForm = (values) => {

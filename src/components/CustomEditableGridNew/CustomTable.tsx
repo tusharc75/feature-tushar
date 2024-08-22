@@ -2,7 +2,7 @@ import { IconButton, TableBody, TableCell, TableHead, TableRow } from '@material
 import MaUTable from '@material-ui/core/Table';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   useTable,
   useExpanded,
@@ -19,8 +19,10 @@ import FormTypes from 'src/components/CustomEditableGridNew/FormTypes';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { getObjKeysWithValues } from 'src/constants/helpers';
 
-const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, extraDisabledFields, error, updateData }) => {
+const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, extraDisabledFields, error, updateData, scrollToHeader }) => {
   const [displayRows, setDisplayRows] = useState([]);
+
+  const columnRefs = useRef([]);
 
   useEffect(() => {
     if (flatRows) {
@@ -46,6 +48,23 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
   const handleDelete = (row) => {
     setFlatRows([...flatRows?.filter((r) => r?._id != row?._id)]);
   };
+
+  useEffect(() => {
+    const header = constColummns?.find((c) => c?.fieldName === scrollToHeader?.split('_').slice(1).join('_'))?.fieldLabel;
+    const index = columns.findIndex((column) => column.Header === header);
+
+    if (index !== -1 && columnRefs.current[index - 1]) {
+      columnRefs.current[index - 1].scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'start'
+      });
+    }
+  }, [scrollToHeader]);
+
+  const setColumnRef = useCallback((index, ref) => {
+    columnRefs.current[index] = ref;
+  }, []);
 
   const { getTableProps, rows, headerGroups, footerGroups, prepareRow, toggleRowExpanded, toggleAllRowsExpanded } = useTable(
     {
@@ -75,7 +94,12 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
           <>
             <TableRow {...headerGroup.getHeaderGroupProps()} key={index} className="tr">
               {headerGroup.headers.map((column, index) => (
-                <TableCell key={`${index}-${column?.Header}`} {...column.getHeaderProps()} className="th text-truncate table-header overflow-initial">
+                <TableCell
+                  key={`${index}-${column?.Header}`}
+                  {...column.getHeaderProps()}
+                  className="th text-truncate table-header overflow-initial"
+                  ref={(ref) => setColumnRef(index, ref)}
+                >
                   <div className="d-flex align-items-center justify-content-space-between pos-rel">
                     <div className="d-flex align-items-center gap-2" {...column.getSortByToggleProps({ title: undefined })}>
                       <span
@@ -85,6 +109,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                       >
                         {column.render('Header')}
                       </span>
+                      {column?.required && <span style={{ color: '#dc3545', fontSize: '20px' }}>*</span>}
                     </div>
                   </div>
                   <div {...column.getResizerProps()} className="resizer" />
@@ -111,7 +136,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                   return (
                     <TableCell
                       {...cell.getCellProps()}
-                      className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''}`}
+                      className={`td ${cell.column.setCellClassNames ? cell.column.setCellClassNames(row.original) : ''} snap-center `}
                     >
                       {['index']?.includes(cell.column.id) ? (
                         <div className="full-height-cell">{cell.render('Cell')}</div>

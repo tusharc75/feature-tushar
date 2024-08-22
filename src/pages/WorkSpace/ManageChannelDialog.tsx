@@ -85,8 +85,9 @@ const ManageChannel = ({ onClose, onSuccess }) => {
             open={true}
             dialogProps={{
               fullScreen: fullScreen || isMobile || isTablet,
-              maxWidth: 'sm',
-              TransitionComponent: CustomDialogTransition
+              fullWidth: false,
+              TransitionComponent: CustomDialogTransition,
+              maxWidth: 'sm'
             }}
             modalHead={{
               title: `Create Channel`,
@@ -129,9 +130,9 @@ const ManageChannel = ({ onClose, onSuccess }) => {
           >
             <Fragment>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <Box padding={1}>
-                  <Grid container spacing={3}>
-                    <Grid item xs={12} md={6} sm={6}>
+                <Box>
+                  <Grid container spacing={1}>
+                    <Grid item xs={12}>
                       <TextField
                         variant="outlined"
                         type="text"
@@ -148,7 +149,7 @@ const ManageChannel = ({ onClose, onSuccess }) => {
                         }}
                       />
                     </Grid>
-                    <Grid item xs={12} md={6} sm={6}>
+                    <Grid item xs={12}>
                       <TextField
                         variant="outlined"
                         type="text"

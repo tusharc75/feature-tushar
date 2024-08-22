@@ -19,27 +19,28 @@ const ACCESS_OPTIONS = {
   everyone: "everyone"
 }
 
-export const ViewDialog = ({ columns, resource, handleSucess, viewData, handleClose }) => {
+export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewData, sortBy= null, orderBy= null }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValue] = useState({
     name: viewData?.name || '',
     access: viewData?.access || ACCESS_OPTIONS.private
   });
- 
+
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = (values) => {
     const data = {
       name: values?.name,
       access: values?.access,
-      columns: columns?.toString()
+      columns: columns?.toString(),
+      ...(sortBy && orderBy ? { sortBy: sortBy?.fieldName, orderBy } : { sortBy: '', orderBy: '' }),
     };
-   
+
     setLoading(true);
     if (viewData?._id) {
       axiosInstance()
-        .put(`/pdf/view?resource=${resource}`, {...data, _id: viewData?._id})
+        .put(`/pdf/view?resource=${resource}`, { ...data, _id: viewData?._id })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -55,7 +56,7 @@ export const ViewDialog = ({ columns, resource, handleSucess, viewData, handleCl
         });
     } else {
       axiosInstance()
-        .post(`/pdf/view?resource=${resource}`, {...data})
+        .post(`/pdf/view?resource=${resource}`, { ...data })
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,

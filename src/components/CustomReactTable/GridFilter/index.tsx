@@ -373,6 +373,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
                               fullWidth
                               size="small"
                               fromFilter={true}
+                              fieldData={{ decimalPlaces: field?.decimalPlaces }}
                             />
                           )}
                         </Grid>

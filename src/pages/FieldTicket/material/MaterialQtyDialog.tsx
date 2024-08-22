@@ -23,6 +23,7 @@ import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 interface EditDialogProps {
   onClose: VoidFunction | any;
@@ -69,6 +70,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [fetchingData, setFetchingData] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchData();
@@ -77,6 +80,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
     const zipCode = billingAddress?.zipCode;
     const state = billingAddress?.state;
+    const county = billingAddress?.county;
+
     let materialType;
     if (isBulkedit) {
       materialType = rowData[0]?.type;
@@ -85,7 +90,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
     }
     try {
       const response = await axiosInstance().get(
-        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
       );
       return response?.data?.data || [];
     } catch (e) {
@@ -211,6 +216,14 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
   };
 
   useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
+
+  useEffect(() => {
     if (ref.current && Object.keys(initialData).length > 0 && isInlineEdit) {
       const { setErrors, setTouched } = ref.current;
       let errors: any = {};
@@ -237,7 +250,8 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
       return { name, sectionFields };
     });
 
-    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress && (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state))) && !isOffline) {
+    if ((fieldTicketData?.taxCode || (fieldTicketData?.billingAddress &&
+      (fieldTicketData?.billingAddress?.zipCode || fieldTicketData?.billingAddress?.state || fieldTicketData?.billingAddress?.county))) && !isOffline) {
       const taxCodeOptions = await fetchTaxRate(fieldTicketData?.billingAddress, fieldTicketData?.taxCode?.optionValue || null);
       fields?.forEach((e: any) => {
         if (e?.fieldName === 'taxCode') {
@@ -666,6 +680,7 @@ const MaterialQtyDialog: FC<EditDialogProps> = ({
                   </CustomButton>
                 )}
                 <CustomButton
+                  id="dialog-save-button"
                   loading={loading}
                   disabled={loading || isEqual(ref?.current?.values, initialData.values)}
                   variant="contained"

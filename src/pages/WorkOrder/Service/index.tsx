@@ -272,13 +272,13 @@ const Service = ({
       });
   };
 
-  const handleCompleteService = (serviceId, uniqueId) => {
+  const handleUpdateService = (serviceId, uniqueId, status) => {
     const data = [
       {
         workOrder: workOrderId,
         service: serviceId,
         uniqueId: uniqueId,
-        status: WORKORDER_SERVICE_STATUS.completed
+        status: status
       }
     ];
     axiosInstance()
@@ -791,7 +791,7 @@ const Service = ({
                     : true
                 }
                 onClick={() => {
-                  handleCompleteService(selectedService?._id, selectedService?.uniqueId);
+                  handleUpdateService(selectedService?._id, selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.completed);
                   setAnchorEl(null);
                 }}
               >
@@ -806,7 +806,7 @@ const Service = ({
                     : true
                 }
                 onClick={() => {
-                  updateServiceStatus(selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
+                  handleUpdateService(selectedService?._id, selectedService?.uniqueId, WORKORDER_SERVICE_STATUS.skipped);
                   setAnchorEl(null);
                 }}
               >

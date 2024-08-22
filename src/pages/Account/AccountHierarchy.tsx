@@ -3,7 +3,6 @@ import Chip from '@material-ui/core/Chip';
 import IconButton from '@material-ui/core/IconButton';
 import AddOutlined from '@material-ui/icons/AddOutlined';
 import DeleteIcon from '@material-ui/icons/Delete';
-import EditOutlined from '@material-ui/icons/EditOutlined';
 import { useEffect, useState } from 'react';
 import { Link, useHistory } from 'react-router-dom';
 import { useData } from 'src/StateProvider/Provider';
@@ -16,6 +15,7 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
+import EditIcon from '@material-ui/icons/Edit';
 
 export default function AccountHierarchy({
   data,
@@ -115,7 +115,7 @@ export default function AccountHierarchy({
                   disabled={!canUpdate || !row.original?.canEdit}
                   onClick={() => handleUpdate(row.original)}
                 >
-                  <EditOutlined fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
+                    <EditIcon fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'}  />
                 </IconButton>
               </HtmlTooltip>
               <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>

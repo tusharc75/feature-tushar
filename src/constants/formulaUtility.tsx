@@ -1,4 +1,4 @@
-import { uniq } from "lodash";
+import { isArray, uniq } from "lodash";
 import { camelCase } from "lodash";
 import { fieldLabelToFieldName } from "./helpers";
 
@@ -660,6 +660,22 @@ export const checkFormulaLoop = (fields) => {
             return { error: true, message: "Field " + error_field + " formula is go into circuler loop" }
         }
 
+        let is_Valid = true;
+        let invalidField = true;
+
+        fields.forEach((e) => {
+            if (e?.type === 'counter') {
+                if (!e?.subFields || !isArray(e?.subFields) || e?.subFields?.length === 0) {
+                    is_Valid = false;
+                    invalidField = e?.fieldLabel;
+                    return
+                }
+            }
+        })
+        if (!is_Valid) {
+            return { error: true, message: `Please add Counter Sub Fields in ${invalidField}` }
+        }
+
         return { error: false, message: "sucess" }
     }
     catch (e) {
@@ -973,3 +989,8 @@ export const CURReplaceByCurrencySingle = (fields: any, currency: any) => {
 //     }
 //     return value
 // }
+
+export const validateFields = (fields) => {
+
+
+}

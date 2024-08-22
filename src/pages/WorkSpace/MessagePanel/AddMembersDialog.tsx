@@ -1,15 +1,12 @@
-import { useState, useContext, useCallback } from 'react';
-import { Dialog, TextField, CircularProgress, DialogContent } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { CircularProgress, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { debounce } from 'lodash';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
-import DashboardModal from 'src/components/DashboardModal';
+import { useContext, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import axiosInstance from 'src/axios/axiosInstance';
+import DashboardModal from 'src/components/DashboardModal';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
   const [selectedUsers, setSelectedUsers] = useState([]);
@@ -71,56 +68,7 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         title: `Add Members`,
         fullScreenOption: true
       }}
-    >
-      <div className="flex items-center gap-2">
-        <Autocomplete
-          multiple={true}
-          fullWidth
-          onOpen={() => {
-            fetchOptions('', 0);
-          }}
-          onInputChange={(event, value, reason) => {
-            if (reason === 'input') {
-              fetchOptions(value);
-            }
-          }}
-          loading={loading}
-          options={options}
-          autoHighlight
-          value={selectedUsers?.map((userId) => options.find((option) => option.optionValue === userId) || { optionLabel: '', optionValue: userId })}
-          getOptionLabel={(option) => option.optionLabel || ''}
-          getOptionSelected={(option, val) => option.optionValue === val.optionValue}
-          onChange={(event, newValue) => {
-            setSelectedUsers(newValue.map((user) => user.optionValue));
-          }}
-          renderInput={(params) => (
-            <TextField
-              {...params}
-              label={'Select Members'}
-              name={'members'}
-              required={true}
-              InputProps={{
-                ...params.InputProps,
-                endAdornment: (
-                  <>
-                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                    {params.InputProps.endAdornment}
-                  </>
-                )
-              }}
-              margin="none"
-              size={'small'}
-              variant="outlined"
-            />
-          )}
-          ListboxProps={{
-            onScroll: (e: any) => {
-              if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
-                fetchOptions('', currentPage + 1);
-              }
-            }
-          }}
-        />
+      footer={
         <CustomButton
           variant="contained"
           color="primary"
@@ -133,7 +81,56 @@ const AddMemberDialog = ({ onClose, channelId, onSuccess, ignoreIds }) => {
         >
           Add
         </CustomButton>
-      </div>
+      }
+    >
+      <Autocomplete
+        multiple={true}
+        fullWidth
+        onOpen={() => {
+          fetchOptions('', 0);
+        }}
+        onInputChange={(event, value, reason) => {
+          if (reason === 'input') {
+            fetchOptions(value);
+          }
+        }}
+        loading={loading}
+        options={options}
+        autoHighlight
+        value={selectedUsers?.map((userId) => options.find((option) => option.optionValue === userId) || { optionLabel: '', optionValue: userId })}
+        getOptionLabel={(option) => option.optionLabel || ''}
+        getOptionSelected={(option, val) => option.optionValue === val.optionValue}
+        onChange={(event, newValue) => {
+          setSelectedUsers(newValue.map((user) => user.optionValue));
+        }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label={'Select Members'}
+            name={'members'}
+            required={true}
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              )
+            }}
+            margin="none"
+            size={'small'}
+            variant="outlined"
+          />
+        )}
+        ListboxProps={{
+          onScroll: (e: any) => {
+            if (e.target.scrollTop + e.target.clientHeight >= e.target.scrollHeight - 1) {
+              fetchOptions('', currentPage + 1);
+            }
+          }
+        }}
+      />
     </DashboardModal>
   );
 };

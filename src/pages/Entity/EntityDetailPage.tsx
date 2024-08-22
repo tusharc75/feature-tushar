@@ -487,7 +487,7 @@ const EntityDetailsPage = () => {
         />
       )}
       {showAssignUserDialog && (
-        <Dialog fullWidth maxWidth="sm" open={showAssignUserDialog} onClose={userDialogClose} aria-labelledby="assign-roles-dialog">
+        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="sm" open={showAssignUserDialog} onClose={userDialogClose} aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
             entitiesDialogOpen={showAssignUserDialog}
             handleCloseDialog={userDialogClose}

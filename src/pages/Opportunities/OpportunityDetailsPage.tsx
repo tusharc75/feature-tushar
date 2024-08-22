@@ -19,6 +19,7 @@ import ProjectInAccordion from '../../components/ProjectInAccordion/ProjectInAcc
 import QuotesInAccordion from '../../components/QuotesInAccordion/QuotesInAccordion';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import {
+  checkIsAllowedToDelete,
   checkIsAllowedToEdit,
   customerContact,
   formatAmountWithCurrency,
@@ -43,6 +44,7 @@ import { stepIconInterface, StepIconType } from 'src/components/Steps/icons';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import Step from '../DynamicForm/Step';
 import QuotationInAccordion from 'src/components/QuotationInAccordion/QuotationInAccordion';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 interface StepInterface extends stepIconInterface {
   text: string;
@@ -56,23 +58,22 @@ const recordsPerLine = 3;
 function OpportunityDetailsPage() {
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
+  let { id } = useParams();
+
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const [headingLbl, setHeadingLbl] = useState('');
+
   const [loading, setLoading] = useState(true);
   const [opportunityData, setOpportunityData] = useState(null);
   const [copyOfOpportunityData, setCopyOfOpportunityData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
   const [opportunityFields, setOpportunityFields] = useState([]);
-  const [mainPoints, setMainPoints] = useState(null);
   const [allowedToEdit, setAllowedToEdit] = useState(false);
-  const [customizedRoutes, setCustomizedRoutes] = useState([]);
-
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [steps, setSteps] = useState([]);
   const [activeStep, setActiveStep] = useState(0);
-
   const [supplierContacts, setSupplierContacts] = useState([]);
   const [customerContacts, setCustomerContacts] = useState([]);
   const [quotes, setQuotes] = useState([]);
@@ -82,7 +83,6 @@ function OpportunityDetailsPage() {
   const [parentLead, setParentLead] = useState({ leadName: '', leadId: '' });
   const [resourceData, setResourceData] = useState(null);
   const [currentTabIndex, setCurrentTabIndex] = useState<any>(0);
-  const parsed = queryString.parse(history.location.search);
 
   const [messageDialog, setMessageDialog] = useState({
     open: false,
@@ -100,8 +100,6 @@ function OpportunityDetailsPage() {
   const [showAdditionalField, setShowAdditionalField] = useState(false);
   const [sectionFields, setSectionFields] = useState([]);
   const [openAdditionalDialog, setOpenAdditionalDialog] = useState(false);
-  const [, setShowAtLast] = useState(false);
-  const [, setAdditionalFieldName] = useState('');
 
   const getIcon = (name: string): StepIconType => {
     switch (true) {
@@ -126,35 +124,13 @@ function OpportunityDetailsPage() {
     }
   };
 
-  const handleOpenUpdateDialog = () => {
-    if (activeStep === steps.length - 1) {
-      setShowAtLast(true);
-    }
-    setOpenUpdateDialog(true);
-  };
-
-  let { id } = useParams();
-
-  const [opportunityPermissions, setOpportunityPermissions] = useState({
-    isCreate: false,
-    isUpdate: false,
-    isRead: false,
-    isDelete: false
-  });
-
   const { opportunityResource, opportunityApi } = opportunity;
   const [projectSales, setProjectSales] = useState([]);
   const [typeCreateProjectSalesDialog, setTypeCreateProjectSalesDialog] = useState([{ id: id, type: opportunity.opportunityResource }]);
 
   useEffect(() => {
-    if (permissions) {
-      setOpportunityPermissions(permissions[opportunityResource]);
-    }
-  }, [permissions]);
-
-  useEffect(() => {
     if (id) {
-      fetchOpportunityData();
+      fetchData();
       fetchRelatedData();
       fetchPolicy();
     }
@@ -178,68 +154,63 @@ function OpportunityDetailsPage() {
       fetchSupplierContactData(false);
   }, [opportunityData]);
 
-  const fetchOpportunityData = () => {
-    if (selectedEntity) {
-      setLoading(true);
-      axiosInstance()
-        .get(`${opportunityApi}/${id}?entity=${selectedEntity}`)
-        .then(({ data: { data } }) => {
-          let modifiedData = {};
-          Object.assign(modifiedData, data);
-          modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
-          setCopyOfOpportunityData(modifiedData);
+  const fetchData = () => {
+    setLoading(true);
+    axiosInstance()
+      .get(`${opportunityApi}/${id}?entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        let modifiedData = {};
+        Object.assign(modifiedData, data);
+        modifiedData['estimatedAmount'] = formatAmountWithCurrency(modifiedData['currency'], modifiedData['estimatedAmount']).fullFormatAmount;
+        setCopyOfOpportunityData(modifiedData);
 
-          setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.opportunity, data));
-          handleMainPoints(data);
-          setHeadingLbl(data.opportunityName);
+        if (data?.customerAccountName?.optionValue) {
+          setTypeCreateProjectSalesDialog((prevState) => [
+            ...prevState,
+            {
+              id: data?.customerAccountName?.optionValue,
+              type: 'customerAccount'
+            }
+          ]);
+        }
+        if (data?.supplierAccountName?.optionValue) {
+          setTypeCreateProjectSalesDialog((prevState) => [
+            ...prevState,
+            {
+              id: data?.supplierAccountName?.optionValue,
+              type: 'supplierAccount'
+            }
+          ]);
+        }
 
-          if (data?.customerAccountName?.optionValue) {
-            setTypeCreateProjectSalesDialog((prevState) => [
-              ...prevState,
-              {
-                id: data?.customerAccountName?.optionValue,
-                type: 'customerAccount'
-              }
-            ]);
-          }
-          if (data?.supplierAccountName?.optionValue) {
-            setTypeCreateProjectSalesDialog((prevState) => [
-              ...prevState,
-              {
-                id: data?.supplierAccountName?.optionValue,
-                type: 'supplierAccount'
-              }
-            ]);
-          }
-          setAllowedToEdit([...(data.collaborator ?? []), data.owner].some((d) => d?.optionValue === user?.user?._id));
+        setAllowedToEdit(permissions?.opportunity?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.opportunity, data));
+        setAllowedToDelete(permissions?.opportunity?.isDelete && checkIsAllowedToDelete(user, sidebarResource.opportunity, data.owner.optionValue));
+        setOpportunityData(data);
+        handleContactsEmails(data);
 
-          setOpportunityData(data);
-          handleContactsEmails(data);
+        if (data?.staticData?.notToBeRemoved && typeof data.staticData.notToBeRemoved === 'object') {
+          let ids = [];
+          Object.keys(data?.staticData?.notToBeRemoved).map((k) => (ids = [...ids, ...data.staticData.notToBeRemoved[k]]));
+          setNotToBeRemovedContacts(ids);
+        }
 
-          if (data?.staticData?.notToBeRemoved && typeof data.staticData.notToBeRemoved === 'object') {
-            let ids = [];
-            Object.keys(data?.staticData?.notToBeRemoved).map((k) => (ids = [...ids, ...data.staticData.notToBeRemoved[k]]));
-            setNotToBeRemovedContacts(ids);
-          }
-
-          let tempExpanded = {
-            supplierContacts: true,
-            customerContacts: true
-          };
-          if (data?.staticData?.supplierContact && data.staticData.supplierContact.length === 0) {
-            tempExpanded.supplierContacts = false;
-          }
-          if (data?.staticData?.customerContact && data.staticData.customerContact.length === 0) {
-            tempExpanded.customerContacts = false;
-          }
-          setExpanded(tempExpanded);
-          getOpportunityFields(data);
-          setCustomizedRoutes([routes.opportunity, { title: `${data.opportunityName}` }]);
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
+        let tempExpanded = {
+          supplierContacts: true,
+          customerContacts: true
+        };
+        if (data?.staticData?.supplierContact && data.staticData.supplierContact.length === 0) {
+          tempExpanded.supplierContacts = false;
+        }
+        if (data?.staticData?.customerContact && data.staticData.customerContact.length === 0) {
+          tempExpanded.customerContacts = false;
+        }
+        setExpanded(tempExpanded);
+        setLoading(false);
+        fetchFields(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const fetchPolicy = async () => {
@@ -278,11 +249,10 @@ function OpportunityDetailsPage() {
             : []
         );
         setQuotations(
-          data[sidebarResource.quotation] &&
-            data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
+          data[sidebarResource.quotation] && data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
             ? data[sidebarResource.quotation][sidebarResource[opportunity.opportunityResource].replaceAll(' ', '_')]
             : []
-        )
+        );
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -319,12 +289,14 @@ function OpportunityDetailsPage() {
       setShowAddSupplierContactsDialog(showDialog);
     }
   };
+
   const getContactEmails = (contacts) => {
     return contacts.reduce((emails, contact) => {
       if (contact?.email) emails.push(contact.email);
       return emails;
     }, []);
   };
+
   const handleContactsEmails = (opportunityData) => {
     let data = [];
     if (opportunityData && opportunityData?.staticData) {
@@ -366,93 +338,72 @@ function OpportunityDetailsPage() {
       });
   };
 
-  const handleMainPoints = (data) => {
-    let mainPoint = {};
-    mainPoint['Account Name'] = data?.accountName?.optionLabel || '';
-    mainPoint['Close Date'] = yyyyMMDD(data.closeDate);
-    mainPoint['Estimated Amount'] = data?.estimatedAmount ? formatAmountWithCurrency(data?.currency, data?.estimatedAmount).fullFormatAmount : '';
-    mainPoint['Opportunity Owner'] = data?.owner?.optionLabel || '';
-    setMainPoints(mainPoint);
-  };
-  const getOpportunityFields = (passedOpportunityData) => {
-    if (selectedEntity) {
-      axiosInstance()
-        .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
-        .then(({ data: { data } }) => {
-          const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccount');
+  const fetchFields = (passedOpportunityData) => {
+    axiosInstance()
+      .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
+      .then(({ data: { data } }) => {
+        const filteredFields = data.filter((currentField) => currentField.fieldData?.fieldName !== 'supplierAccount');
 
-          const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+        const processSteps = data.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
 
-          if (data && data.length) {
-            let fieldData = data.find((currentField) => currentField?.fieldData?.fieldName === 'supplierAccount')?.fieldData;
-            if (fieldData?.option && fieldData.option.length) {
-              setSupplierAccountOptions(
-                fieldData.option.map((option) => ({
-                  ...option,
-                  isSelected: false
-                }))
-              );
-            }
+        if (data && data.length) {
+          let fieldData = data.find((currentField) => currentField?.fieldData?.fieldName === 'supplierAccount')?.fieldData;
+          if (fieldData?.option && fieldData.option.length) {
+            setSupplierAccountOptions(
+              fieldData.option.map((option) => ({
+                ...option,
+                isSelected: false
+              }))
+            );
           }
+        }
 
-          if (processSteps && processSteps.isRead) {
-            data.map((d) => {
-              if (d.fieldData.sectionName == processSteps.fieldData.additionalInfoSection && sectionFields.length == 0) {
-                setSectionFields((prevItems) => {
-                  return [...prevItems, d];
-                });
-              }
-            });
+        if (processSteps && processSteps.isRead) {
+          data.map((d) => {
+            if (d.fieldData.sectionName == processSteps.fieldData.additionalInfoSection && sectionFields.length == 0) {
+              setSectionFields((prevItems) => {
+                return [...prevItems, d];
+              });
+            }
+          });
 
-            setAdditionalFieldName(processSteps.fieldData.additionalInfoSection);
+          const allProcessSteps: StepInterface[] = processSteps.fieldData.option.map((m) => {
+            return {
+              text: m.optionLabel,
+              canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase()),
+              name: m.optionLabel,
+              title: m.optionLabel,
+              icon: getIcon(m.optionLabel)
+            };
+          });
 
-            const allProcessSteps: StepInterface[] = processSteps.fieldData.option.map((m) => {
-              return {
-                text: m.optionLabel,
-                canCompleteManually: !stepsToIgnoreManualCompleteForOpportunity.some((s) => s === m.optionValue.toLowerCase()),
-                name: m.optionLabel,
-                title: m.optionLabel,
-                icon: getIcon(m.optionLabel)
-              };
-            });
+          setSteps(allProcessSteps);
 
-            setSteps(allProcessSteps);
-
-            if (allProcessSteps.length > 0) {
-              const currentProcessSteps = filteredFields.find(
-                (d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase()
+          if (allProcessSteps.length > 0) {
+            const currentProcessSteps = filteredFields.find(
+              (d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase()
+            );
+            if (currentProcessSteps && currentProcessSteps.isRead && passedOpportunityData) {
+              const currentStepToShow = currentProcessSteps.fieldData.option.findIndex(
+                (d) => d.optionLabel === passedOpportunityData[processFieldName]
               );
-              if (currentProcessSteps && currentProcessSteps.isRead && passedOpportunityData) {
-                setAdditionalFieldName(currentProcessSteps.fieldData.additionalInfoSection);
-                const currentStepToShow = currentProcessSteps.fieldData.option.findIndex(
-                  (d) => d.optionLabel === passedOpportunityData[processFieldName]
-                );
-                setActiveStep(currentStepToShow);
-                if (currentStepToShow === allProcessSteps.length - 1) {
-                  setShowAtLast(true);
-                } else {
-                  setShowAtLast(false);
-                }
+              setActiveStep(currentStepToShow);
 
-                if (currentStepToShow === allProcessSteps.length - 1) {
-                  setOpportunityFields(filteredFields);
-                } else {
-                  setOpportunityFields(filteredFields.filter((item) => item.fieldData.sectionName !== processSteps.fieldData.additionalInfoSection));
-                }
+              if (currentStepToShow === allProcessSteps.length - 1) {
+                setOpportunityFields(filteredFields);
+              } else {
+                setOpportunityFields(filteredFields.filter((item) => item.fieldData.sectionName !== processSteps.fieldData.additionalInfoSection));
               }
             }
-            setLoading(false);
-            setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
-          } else {
-            setOpportunityFields(filteredFields);
-            setLoading(false);
           }
-        })
-
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
+          setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
+        } else {
+          setOpportunityFields(filteredFields);
+        }
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const handleDeleteOpportunity = () => {
@@ -498,7 +449,7 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .put(`${opportunity.opportunityApi}?entity=${selectedEntity}`, values)
       .then(({ data }) => {
-        fetchOpportunityData();
+        fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -528,7 +479,7 @@ function OpportunityDetailsPage() {
           open: true
         });
 
-        fetchOpportunityData();
+        fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -536,7 +487,6 @@ function OpportunityDetailsPage() {
   };
 
   const handleSave = (data) => {
-    setShowAtLast(true);
     setOpenAdditionalDialog(false);
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
 
@@ -562,7 +512,7 @@ function OpportunityDetailsPage() {
     axiosInstance()
       .put(`/opportunity?entity=${selectedEntity}`, updatedData)
       .then(() => {
-        fetchOpportunityData();
+        fetchData();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -589,8 +539,7 @@ function OpportunityDetailsPage() {
       axiosInstance()
         .put(`/opportunity?entity=${selectedEntity}`, updatedData)
         .then(() => {
-          fetchOpportunityData();
-          setShowAtLast(false);
+          fetchData();
         })
         .catch((error) => {
           toastConfig.setToastConfig(error);
@@ -608,7 +557,7 @@ function OpportunityDetailsPage() {
       <Box className="main-container-v1">
         <Box className="headerbox-v1">
           <Box className="nav-v1">
-            <CustomBreadCrumbs routes={customizedRoutes} />
+            <CustomBreadCrumbs routes={[routes.opportunity, { title: opportunityData?.opportunityName }]} />
           </Box>
           <Box className="controls-v1">
             <Box className="control-buttons-v1">
@@ -618,18 +567,19 @@ function OpportunityDetailsPage() {
                     <Button
                       variant={isMobile && !isTablet ? 'text' : 'contained'}
                       size="small"
-                      onClick={handleOpenUpdateDialog}
+                      onClick={() => {
+                        setOpenUpdateDialog(true);
+                      }}
                       className={'btn-outline-v1'}
                     >
                       {isMobile && !isTablet ? <Edit /> : 'Edit'}
                     </Button>
                   ) : null}
-                  {opportunityPermissions.isDelete &&
-                    opportunityData?.owner.optionValue &&
-                    user?.user?._id &&
-                    opportunityData.owner.optionValue === user.user._id ? (
+
+                  {allowedToDelete ? (
                     <DeleteButton text={isMobile && !isTablet ? <MdDelete size={20} /> : 'Delete'} onClick={() => setShowConfirmBox(true)} />
                   ) : null}
+
                   <ActivityButton
                     referenceId={opportunityData?._id}
                     resource={opportunityResource}
@@ -659,20 +609,10 @@ function OpportunityDetailsPage() {
               activeStep={activeStep}
               handleMarkAsCompleted={handleMarkAsCompleted}
             />
-            {loading ? (
-              <Grid container spacing={2}>
-                {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((i, index) => (
-                  <Grid key={index} item sm={6} md={6}>
-                    <Skeleton variant="text" width="100px" height="16px" />
-                    <Box marginY={1} />
-                    <Skeleton width="100%" height="50px" />
-                  </Grid>
-                ))}
+            {loading || !opportunityFields.length ? (
+              <Grid container spacing={2} style={{ padding: '8px' }}>
+                <CommonSkeleton lenArray={[...Array(7).keys()]} />
               </Grid>
-            ) : !opportunityFields.length ? (
-              <Box height="100%" display="flex" flexDirection="column" justifyContent="center" alignItems="center">
-                <img src={SVG('Opportunity Placeholder')} alt="No Data" />
-              </Box>
             ) : (
               <DetailsPage data={copyOfOpportunityData} fields={opportunityFields} />
             )}
@@ -778,6 +718,7 @@ function OpportunityDetailsPage() {
             />
           </TabPanel>
         </Box>
+
         {showConfirmBox ? (
           <ConfirmationDialog
             open={showConfirmBox}
@@ -792,14 +733,14 @@ function OpportunityDetailsPage() {
             open={openUpdateDialog}
             onSuccess={() => {
               setOpenUpdateDialog(false);
-              fetchOpportunityData();
+              fetchData();
             }}
             onClose={() => {
               setOpenUpdateDialog(false);
             }}
             isNew={false}
             dataToUpdate={opportunityData}
-            resource={null}
+            resource={sidebarResource.opportunity}
             isRedirectTodetailPage={false}
             opportunityId={opportunityData?._id}
           />
@@ -811,7 +752,7 @@ function OpportunityDetailsPage() {
             open={showAddSupplierContactsDialog}
             title="Assign Supplier Contacts"
             onSuccess={() => {
-              fetchOpportunityData();
+              fetchData();
               setShowAddSupplierContactsDialog(false);
             }}
             handleCloseDialog={() => {
@@ -841,7 +782,7 @@ function OpportunityDetailsPage() {
             open={showAddCustomerContactsDialog}
             title="Assign Customer Contacts"
             onSuccess={() => {
-              fetchOpportunityData();
+              fetchData();
               setShowAddCustomerContactsDialog(false);
             }}
             handleCloseDialog={() => {
@@ -867,6 +808,7 @@ function OpportunityDetailsPage() {
             message={messageDialog.message}
           />
         )}
+
         {openAdditionalDialog && (
           <>
             <AdditionalDialogPopUp

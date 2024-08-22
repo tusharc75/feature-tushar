@@ -1,6 +1,6 @@
 import Box from '@material-ui/core/Box/Box';
 import { useState, useEffect, useContext } from 'react';
-import CustomReactTable, { checkStaticField, getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import Grid from '@material-ui/core/Grid/Grid';
 import { Button, Dialog } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
@@ -44,7 +44,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
@@ -95,8 +95,6 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       dispatch({ type: 'loading', loading: false });
     }
   };
-
-  console.log(productInventory)
 
   const calculateNestedQty = (material, parent) => {
     const childProduct: any = material.filter((e) => e.parentId === parent._id);
@@ -393,7 +391,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         <AssetDetailsChangeDialog
           ids={productInventory?.map((e) => e._id)}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => {}}
+          setAssetsData={() => { }}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, data: null })}
           onSuccess={(_assetData) => {
             handleCreateReceivingTicket(openAssetDataDialog.data, false, _assetData);

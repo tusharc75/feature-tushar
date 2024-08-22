@@ -62,7 +62,6 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpda
                         size="small"
                         fullWidth
                         values={values}
-                        maxDate={values.manualEndDate || new Date()}
                         errors={errors}
                         touched={touched}
                         type="date"
@@ -71,6 +70,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpda
                         onChange={(date) => {
                           setFieldValue('manualStartDate', date);
                         }}
+                        {...(values.manualEndDate ? { maxDate: values.manualEndDate } : {})}
                       />
                     </Grid>}
                   {data?.isAllowedEndDate &&

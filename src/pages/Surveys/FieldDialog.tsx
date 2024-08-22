@@ -6,6 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter'
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader'
 import { FormBuilder } from 'src/components/FormBuilder'
+import { checkFormulaLoop } from 'src/constants/formulaUtility'
 import { CustomDialogTransition, fieldLabelToFieldName } from 'src/constants/helpers'
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext'
 
@@ -76,6 +77,15 @@ const FieldDialog = ({ handleClose, handleSuccess, surveyId, notEditable = false
         data.push(_field_data);
       });
     });
+    const result = checkFormulaLoop(data);
+    if (result.error) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'error',
+        message: result.message
+      });
+      return false;
+    }
     axiosInstance()
       .post(`surveys/fields/${surveyId}`, { fields: data })
       .then(({ data }) => {

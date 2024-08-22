@@ -21,6 +21,7 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageEntity from './ManageEntity';
 import axios, { CancelTokenSource } from 'axios';
+import { isMobile, isTablet } from "react-device-detect";
 
 const Entity: FC = () => {
   const renderedFrom = camelCase(routes?.entity.title);
@@ -150,19 +151,13 @@ const Entity: FC = () => {
         </HtmlTooltip>
 
         <HtmlTooltip
-          title={
-            !permissions[entityResource]?.isDelete
-              ? `You do not have permission to delete entity`
-              : row?.original?.createdById === user?.user?._id
-                ? 'Delete'
-                : `You must be the owner of this entity to get the delete functionality`
-          }
+          title={!permissions[entityResource]?.isDelete ? `You do not have permission to delete entity` : 'Delete'}
         >
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={!(permissions[entityResource]?.isDelete && row?.original?.createdById === user?.user?._id)}
+              disabled={!(permissions[entityResource]?.isDelete)}
               onClick={() => {
                 setDeleteEntity(row?.original);
                 setShowDeleteDialog(true);
@@ -170,7 +165,7 @@ const Entity: FC = () => {
             >
               <DeleteIcon
                 fontSize="small"
-                color={permissions[entityResource]?.isDelete && row?.original?.createdById === user?.user?._id ? 'error' : 'disabled'}
+                color={permissions[entityResource]?.isDelete ? 'error' : 'disabled'}
               />
             </IconButton>
           </span>
@@ -193,23 +188,33 @@ const Entity: FC = () => {
       });
   };
 
-  const getQueryString = () => {
+  const getQueryString = (isExport = false) => {
     let deepFilter = `?page=${page}&limit=${limit}`;
 
-    const { deepFilters } = gridFilterParser(filters);
+    if (isExport) {
+      deepFilter = `?`;
+    }
+
+    const { filterByIds, deepFilters } = gridFilterParser(filters);
+
+    if (filterByIds?.length) {
+      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
+    }
     if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}&filterType=and`;
+      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
+    }
+    if (filterByIds?.length || deepFilters?.length) {
+      deepFilter = `${deepFilter}&filterType=and`;
     }
 
     if (sorting.length > 0) {
       deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
     }
-
     if (search) {
       deepFilter = `${deepFilter}&search=${encodeURIComponent(search)}`;
     }
     if (showFilteredRecordsOnly) {
-      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || []).map((m) => m._id))}`;
+      deepFilter = `${deepFilter}&getById=${JSON.stringify((selectedRecords || [])?.map((m) => m._id))}`;
     }
     return deepFilter;
   };
@@ -252,13 +257,7 @@ const Entity: FC = () => {
     return (
       <>
         <MenuItem
-          disabled={
-            permissions[entityResource]?.isDelete && selectedRecords.length > 1
-              ? true
-              : Boolean(!(selectedRecords[0] && selectedRecords[0].createdById === user?.user?._id))
-                ? true
-                : false
-          }
+          disabled={permissions[entityResource]?.isDelete && selectedRecords.length ? true : false}
           onClick={() => {
             if (selectedRecords[0] && selectedRecords[0]?._id) {
               setDeleteEntity(selectedRecords[0]);
@@ -298,9 +297,9 @@ const Entity: FC = () => {
           onExportToExcelSuccess={() => {
             fetchEntity();
           }}
+          additionalParams={getQueryString(true)}
         />
       </div>
-
       <CustomContainer>
         <ListingPageHeader
           searchValue={search}
@@ -339,7 +338,7 @@ const Entity: FC = () => {
       )}
 
       {usersDialogOpen && !usersDialogLoding && (
-        <Dialog fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
             entitiesDialogOpen={usersDialogOpen}
             handleCloseDialog={handleCloseDialog}
