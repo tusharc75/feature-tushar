@@ -1,3 +1,6 @@
+import { VirtualItem } from '@tanstack/react-virtual';
+import { uniqBy } from 'lodash';
+
 export const yupSchemaForBulkEdit = (fields: any[], values: any[]) => {
   const schema = {};
   values.forEach((element) => {
@@ -98,7 +101,7 @@ export const generateColumn = (fields, columnOrder: string[] = [], hiddenColumns
     }
   });
 
-  let updatedColumns = newColumns.filter((d) => !hiddenColumns.includes(d.accessor));
+  let updatedColumns = hiddenColumns.length > 0 ? newColumns.filter((d) => !hiddenColumns.includes(d.accessor)) : newColumns;
   if (columnOrder.length > 0) {
     updatedColumns = [...updatedColumns].sort((a, b) => columnOrder.indexOf(a.accessor) - columnOrder.indexOf(b.accessor));
   }
@@ -187,3 +190,32 @@ export const generateRows = (data, fields) => {
 
   return arr;
 };
+
+export const getColumnData = (columns: { width: number; sticky?: 'left' | 'right' }[]) => {
+  const data: { widths: number[]; stickyIndexes: number[]; left: number[]; right: number[] } = { widths: [], stickyIndexes: [], left: [], right: [] };
+  for (let i = 0; i < columns.length; i++) {
+    const column = columns[i];
+    data.widths.push(column.width);
+    if (column.sticky) {
+      data.stickyIndexes.push(i);
+    }
+    if (column.sticky === 'left') {
+      data.left.push(i);
+    }
+    if (column.sticky === 'right') {
+      data.right.push(i);
+    }
+  }
+  return data;
+};
+
+export const lerp = (a: number, b: number, t: number) => {
+  return a + (b - a) * t;
+};
+
+export function easeInOutQuint(t: number) {
+  return t < 0.5 ? 16 * t * t * t * t * t : 1 + 16 * --t * t * t * t * t;
+}
+export function easeInOutQuad(t: number): number {
+  return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
+}
