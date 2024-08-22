@@ -48,7 +48,6 @@ const EquiptAi = () => {
       setTopics(data);
     } catch (error) {
       toastConfig.setToastConfig(error);
-      console.error(error);
     }
   };
 
@@ -126,7 +125,9 @@ const EquiptAi = () => {
     setChatId(null);
     setChats([]);
     setSelectedTopics([]);
-    handleOpenTopicModal();
+    if (topics?.length) {
+      handleOpenTopicModal();
+    }
   };
 
   const handleExportChat = async () => {
@@ -247,6 +248,7 @@ const EquiptAi = () => {
                       askQuestion();
                     }
                   }}
+                  autoComplete='off'
                 />
                 <IconButton
                   style={{ borderRadius: 999, padding: 10 }}

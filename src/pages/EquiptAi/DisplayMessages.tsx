@@ -55,7 +55,7 @@ const DisplayMessages = ({ chats, chatId, selectedTopics }: DisplayMessagesProps
       <>
         <div className=" flex flex-wrap items-center gap-2">
           {selectedTopics.map((t) => (
-            <Chip key={t._id} variant="outlined" size="small" label={t.aiModelTopicName} />
+            <Chip key={t._id} color='primary' label={t.aiModelTopicName} />
           ))}
         </div>
         <div className="flex h-[calc(100%_-_var(--head-h)_-_100px)] w-full items-center justify-center">
@@ -68,8 +68,8 @@ const DisplayMessages = ({ chats, chatId, selectedTopics }: DisplayMessagesProps
   return (
     <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto scroll-smooth" ref={containerRef}>
       <div className="flex flex-wrap gap-2">
-        {selectedTopics.map((t) => (
-          <Chip key={t._id} variant="outlined" size="small" label={t.aiModelTopicName} />
+        {selectedTopics?.map((t) => (
+          <Chip key={t._id} color='primary' label={t?.aiModelTopicName} />
         ))}
       </div>
       {chats ? (
