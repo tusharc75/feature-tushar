@@ -4711,3 +4711,8 @@ td.google-visualization-orgchart-node {
     border: 1px solid var(--common-border-color) !important;
   }
 }
+.editable-table-cell {
+  &[data-sticky-td='true'] {
+    background-color: var(--dark-primary, white);
+  }
+}
