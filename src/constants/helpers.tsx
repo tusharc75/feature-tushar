@@ -1130,26 +1130,50 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   fields.forEach((input) => {
     let message = `${input.fieldLabel} is required`;
     const fields: any = [];
-    let logic = LOGIC[0];
+    let validation: any = null;
     if (input?.visibilityCondition?.length > 0) {
       input?.visibilityCondition?.forEach((condition) => {
-        logic = condition?.logic;
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            fields.push(field);
+            fields.push({ ...field, index: condition?.index, logic: condition?.logic });
           }
         });
       });
+
+      validation = (...args) => {
+        let validate = false;
+        for (let i = 0; i < fields?.length; ) {
+          const field = fields[i];
+          const condition = input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
+          if (condition?.logic === LOGIC[0]) {
+            if (condition?.fields?.every((f, j) => args[i + j] === f?.value)) {
+              validate = true;
+            } else {
+              validate = false;
+            }
+          } else if (condition?.logic === LOGIC[1]) {
+            if (condition?.fields?.some((f, j) => args[i + j] === f?.value)) {
+              validate = true;
+            } else {
+              validate = false;
+            }
+          }
+          if (!validate) {
+            break;
+          }
+          i = i + condition?.fields?.length;
+        }
+        return validate;
+      };
     }
     if (input.type === 'singleLine') {
       // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
       schema[input.fieldName] = input.required
-        ? fields?.length
+        ? fields?.length && validation
           ? string().when(
               fields?.map((f) => f?.fieldName),
               {
-                is: (...args) =>
-                  logic === LOGIC[0] ? fields?.every?.((f, i) => args[i] === f?.value) : fields?.some?.((f, i) => args[i] === f?.value),
+                is: validation,
                 then: string().required(message),
                 otherwise: string()
               }
@@ -1232,12 +1256,11 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else {
       // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
       schema[input.fieldName] = input.required
-        ? fields?.length
+        ? fields?.length && validation
           ? string().when(
               fields?.map((f) => f?.fieldName),
               {
-                is: (...args) =>
-                  logic === LOGIC[0] ? fields?.every?.((f, i) => args[i] === f?.value) : fields?.some?.((f, i) => args[i] === f?.value),
+                is: validation,
                 then: string().required(message),
                 otherwise: string()
               }
@@ -3534,8 +3557,7 @@ export function debounceCallBack<T extends (...args: any[]) => void>(func: T, ti
 }
 export type DebounceCallBack = ReturnType<typeof debounceCallBack>;
 
-
 export const MFA_METHOD = {
-  emailOtp: "emailOtp",
-  totp: "totp"
-}
+  emailOtp: 'emailOtp',
+  totp: 'totp'
+};
