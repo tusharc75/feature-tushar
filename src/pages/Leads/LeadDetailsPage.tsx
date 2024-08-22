@@ -90,8 +90,27 @@ const LeadDetailsPage = () => {
       if (processSteps && processSteps.isRead && leadData) {
         const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === leadData[processFieldName]);
         setActiveStep(currentStepToShow);
-        if (currentStepToShow == steps.length - 1) {
-          setShowAtLast(true);
+    
+        if(currentStepToShow+1 >= steps.length - 1){
+          const isAtLastStep = currentStepToShow === steps.length - 1;
+          setShowAtLast(isAtLastStep);
+          let dontHavePermissions = [];
+          if (!permissions['customerAccount'].isCreate) {
+            dontHavePermissions.push('Customer Account');
+          }
+          if (!permissions['customerContact'].isCreate) {
+            dontHavePermissions.push('Customer Contact');
+          }
+          if (!permissions['opportunity'].isCreate) {
+            dontHavePermissions.push('Opportunity');
+          }
+          setHasPermissionToConvertToOpportunity(
+            dontHavePermissions.length === 0 &&
+            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+            allowedToEdit &&
+            leadData[processFieldName] &&
+             currentStepToShow+1>=steps.length-1
+          );
         } else {
           setShowAtLast(false);
         }
@@ -109,24 +128,8 @@ const LeadDetailsPage = () => {
     axiosInstance()
       .get(`${leadApi}/${id}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
-        let dontHavePermissions = [];
-        if (!permissions['customerAccount'].isCreate) {
-          dontHavePermissions.push('Customer Account');
-        }
-        if (!permissions['customerContact'].isCreate) {
-          dontHavePermissions.push('Customer Contact');
-        }
-        if (!permissions['opportunity'].isCreate) {
-          dontHavePermissions.push('Opportunity');
-        }
         const isAllowedToUpdate = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data);
-        setHasPermissionToConvertToOpportunity(
-          dontHavePermissions.length === 0 &&
-          user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-          isAllowedToUpdate &&
-          data[processFieldName] &&
-          data[processFieldName].toLowerCase() === 'qualified'
-        );
+       
         setIsLeadAlreadyConvertedToOpportunity(
           data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
         );
@@ -244,6 +247,10 @@ const LeadDetailsPage = () => {
           leadName: null,
           message: null
         });
+        if(activeStep!==steps.length-1){
+        setActiveStep(steps.length-1);
+        handleMarkAsCompleted();
+        }
         history.push(`${routes.opportunityDetail.path}/${data.data[0]}`);
       })
       .catch((error) => {
@@ -285,7 +292,7 @@ const LeadDetailsPage = () => {
       });
   };
 
-  const handleMarkAsCompleted = (data) => {
+  const handleMarkAsCompleted = (data = null) => {
     setShowAtLast(false);
     let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
