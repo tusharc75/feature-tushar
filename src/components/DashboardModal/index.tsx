@@ -18,6 +18,7 @@ export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
   open?: boolean;
   contentMaxHeight?: string;
   footer?: ReactNode;
+  dialogContentProps?: React.HTMLAttributes<HTMLDivElement>;
 }
 
 export interface ModalHead {
@@ -43,6 +44,7 @@ const DashboardModal: FC<ModalProps> = ({
   open = undefined,
   contentMaxHeight = '250px',
   footer,
+  dialogContentProps,
   ...props
 }) => {
   const [themeColor] = useAppTheme();
@@ -108,8 +110,9 @@ const DashboardModal: FC<ModalProps> = ({
         </Box>
       </MuiDialogTitle>
       <CustomDialogContent
+        {...dialogContentProps}
         className={`${styles.dialogContent} ${className}`}
-        style={{ maxHeight: maximized ? 'calc(100vh - 135px)' : contentMaxHeight }}
+        style={{ maxHeight: maximized ? 'calc(100vh - 135px)' : contentMaxHeight, ...(dialogContentProps?.style || {}) }}
       >
         {children && children}
       </CustomDialogContent>
