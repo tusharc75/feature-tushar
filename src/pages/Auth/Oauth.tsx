@@ -29,7 +29,7 @@ const Oauth = () => {
       email: values.email,
       password: values.password
     };
-    axiosInstance().post('/user/login', data)
+    axiosInstance().post('/user/auth', data)
       .then(async ({ data: response }) => {
         setSubmitting(false);
         const { data } = response;
