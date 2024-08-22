@@ -160,12 +160,12 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
       oData = optionDatas || [];
     } else {
       // for market segment kind of situation
-      // const optionDatas = options?.filter((o) => {
-      //   if (has(o, fieldData?.fieldName)) {
-      //     return isEmpty(o[fieldData?.fieldName]);
-      //   } else return true;
-      // });
-      // oData = optionDatas;
+      const optionDatas = options?.filter((o) => {
+        if (has(o, fieldData?.fieldName)) {
+          return isEmpty(o[fieldData?.fieldName]);
+        } else return true;
+      });
+      oData = optionDatas;
     }
     return oData || [];
   }

@@ -38,7 +38,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
   const [columns, setColumns] = useState(null);
   const [costDialog, setCostDialog] = useState({ open: false, _id: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [viewCost, setViewCost] = useState({ open: false, data: null });
+  const [viewCost, setViewCost] = useState({ open: false, data: null ,title: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [showConformationReject, setShowConformationReject] = useState({ open: false, _id: null });
 
@@ -176,7 +176,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                       size="small"
                       aria-label="cost"
                       onClick={() => {
-                        setViewCost({ open: true, data: row?.original?.cost });
+                        setViewCost({ open: true, data: row?.original?.cost ,title: row?.original?.productName});
                       }}
                     >
                       <Visibility fontSize="small" color={'primary'} />
@@ -299,8 +299,9 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
       {viewCost.open && (
         <ViewCost
           data={viewCost.data}
+          title = {viewCost.title}
           onClose={() => {
-            setViewCost({ open: false, data: null });
+            setViewCost({ open: false, data: null ,title : null});
           }}
           subcontractAssemblyData={subcontractAssemblyData}
         />
