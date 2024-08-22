@@ -161,6 +161,7 @@ const DynamicForm = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
+    console.log(queryString);
 
     axiosInstance()
       .get(`dynamic-form/${queryString}`, {
