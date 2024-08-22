@@ -1,3 +1,4 @@
+//! in development will be replaced by common arrange view compoenent
 import { forwardRef } from 'react';
 import ArrangeViewMenu from './ArrangeViewMenu';
 import { TActios, TInitialState } from 'src/components/CustomEditableGridNew/hooks/tableReducer';
