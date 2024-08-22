@@ -40,7 +40,7 @@ const Login = () => {
       (async () => {
         try {
           const graphToken = await getAzureAcessToken(instance);
-          const res = await axiosInstance().post('/user/login/azure', {
+          const res = await axiosInstance().post('/user/auth/azure', {
             'graph-token': graphToken
           });
           const { data } = res.data;
@@ -72,7 +72,7 @@ const Login = () => {
       email: values.email,
       password: values.password
     };
-    axiosInstance().post('/user/login', data).then(async ({ data: response }) => {
+    axiosInstance().post('/user/auth', data).then(async ({ data: response }) => {
       const { data } = response;
       setSubmitting(false);
       history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
