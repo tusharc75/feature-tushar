@@ -859,7 +859,6 @@ const Report = () => {
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchResourceData}
                   hideSelection={true}
-                  key={historicalReportFooterData ? 'withFooter' : 'withoutFooter'}
                   reportSave={true}
                   pagination={false}
                   setWholeRowsCellColor={(rowData) => {
