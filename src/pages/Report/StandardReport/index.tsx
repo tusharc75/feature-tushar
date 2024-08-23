@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { Grid, Button, Box, IconButton } from '@material-ui/core';
 import { camelCase, capitalize, isArray, startCase } from 'lodash';
@@ -71,12 +71,13 @@ const Report = () => {
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
   const [defaultColumns, setDefaultColumns] = React.useState([]);
+  const [historicalReportFooterData, setHistoricalReportFooterData] = React.useState<Record<string, number>>(null);
 
   // Grid Configs
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
   const { state, dispatch } = useTableReducer();
-  const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
+  const { loading, page, sorting, search, limit, filters, pageSizes, colState, dataRows } = state;
 
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
   const [showPadData, setShowPadData] = React.useState({ open: false, data: [] });
@@ -525,6 +526,16 @@ const Report = () => {
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
         });
+        if (type === 'historical-report') {
+          data = data.filter((d) => {
+            if (Boolean(d?.startDate)) {
+              return true;
+            } else {
+              setHistoricalReportFooterData(d);
+              return false;
+            }
+          });
+        }
         dispatch({ type: 'initialize', data: data, count: count });
         setTimeout(() => {
           dispatch({ type: 'loading', loading: false });
@@ -704,6 +715,22 @@ const Report = () => {
       });
   };
 
+  useEffect(() => {
+    if (type === 'historical-report' && historicalReportFooterData) {
+      const dataKeys = Object.keys(historicalReportFooterData);
+      const newColumns = columns.map((col) => {
+        if (col.accessor === 'startDate') {
+          return { ...col, Footer: 'Total' };
+        }
+        if (dataKeys.includes(col.accessor)) {
+          return { ...col, Footer: historicalReportFooterData[col.accessor] };
+        }
+        return col;
+      });
+      setColumns(newColumns);
+    }
+  }, [columns?.length, type, historicalReportFooterData]);
+
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <div className="main-container-v1">
@@ -823,21 +850,25 @@ const Report = () => {
           )}
           <div>
             {columns ? (
-              <CustomReactTable
-                height={'calc(100vh - 200px)'}
-                columns={columns}
-                state={state}
-                dispatch={dispatch}
-                renderedFrom={renderedFrom}
-                refreshGrid={fetchResourceData}
-                hideSelection={true}
-                reportSave={true}
-                setWholeRowsCellColor={(rowData) => {
-                  if (!rowData?.startDate && type === 'historical-report') return 'footerRow';
-                  return '';
-                }}
-                isClientSideGrid={type === 'historical-report' ? true : false}
-              />
+              <>
+                <CustomReactTable
+                  height={'calc(100vh - 200px)'}
+                  columns={columns}
+                  state={state}
+                  dispatch={dispatch}
+                  renderedFrom={renderedFrom}
+                  refreshGrid={fetchResourceData}
+                  hideSelection={true}
+                  key={historicalReportFooterData ? 'withFooter' : 'withoutFooter'}
+                  reportSave={true}
+                  pagination={false}
+                  setWholeRowsCellColor={(rowData) => {
+                    if (!rowData?.startDate && type === 'historical-report') return 'footerRow';
+                    return '';
+                  }}
+                  isClientSideGrid={type === 'historical-report' ? true : false}
+                />
+              </>
             ) : (
               <Box p={2} height={500}>
                 <CommonSkeleton lenArray={[...Array(10).keys()]} />
