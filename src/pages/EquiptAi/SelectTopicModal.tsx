@@ -101,9 +101,16 @@ const SelectTopicModal = ({ handleClose, topics, setSelectedTopics, selectedTopi
         className="mb-2"
       />
       <div className="mb-2 flex flex-wrap gap-2">
-        {selectedTopics?.length > 0 ? <p></p> : <p className="py-1 text-center text-gray-500">No Topics selected</p>}
+        {selectedTopics?.length > 0 ? null : <p className="py-1 text-center text-gray-500">No Topics selected</p>}
         {selectedTopics?.map((c) => (
-          <Chip key={c._id} color="primary" variant="default" label={c?.aiModelTopicName} onDelete={() => handleUnselect(c)} />
+          <Chip
+            key={c._id}
+            color="primary"
+            variant="default"
+            label={c?.aiModelTopicName}
+            onDelete={() => handleUnselect(c)}
+            onClick={() => handleUnselect(c)}
+          />
         ))}
       </div>
       <div className="flex-grow overflow-auto rounded-md p-3 [border:1px_solid_var(--common-border-color)] ">
