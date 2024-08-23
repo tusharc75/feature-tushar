@@ -31,6 +31,7 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import { FiExternalLink } from 'react-icons/fi';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 interface LoadingGridProps {
   permissions: any;
@@ -219,7 +220,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             Header: 'Index',
             width: 70,
             sticky: isMobile ? 'none' : 'left',
-            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+            Cell: ({ row }) => (
+              <div className="d-flex align-items-center gap-2">
+                <h5 className="text-truncate">{row?.original?.index}</h5>
+                {row?.original?.loadingTicketId && (
+                  <HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
+                    <LocalShippingIcon fontSize="small" color={'primary'} />
+                  </HtmlTooltip>
+                )}
+              </div>
+            )
           },
           ...newColumns,
           ...extraColumn
