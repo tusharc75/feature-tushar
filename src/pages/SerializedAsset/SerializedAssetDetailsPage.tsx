@@ -45,6 +45,7 @@ import DepreciationHistory from './DepreciationHistory';
 import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import StatusChangeFieldDialog from './StatusChangeFieldDialog';
+import VolumeData from 'src/pages/IotChart/VolumeData';
 // import DataSimulationDialog from '../IotChart/DataSimulation';
 
 const SerializedAssetDetailsPage = () => {
@@ -508,11 +509,12 @@ const SerializedAssetDetailsPage = () => {
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={1}>Current</CustomTab>}
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={2}>Performance Analysis</CustomTab>}
           {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={3}>Alarms</CustomTab>}
-          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={4}>Status</CustomTab>}
-          {resourceData && resourceData?.steps?.length && <CustomTab value={5}>Associations</CustomTab>}
-          <CustomTab value={6}>History</CustomTab>
-          {user?.user?.brandPolicy?.serializedAssetCertification && <CustomTab value={7}>Certification History</CustomTab>}
-          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={8}>Depreciation History</CustomTab>}
+          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={4}>Volume Data</CustomTab>}
+          {deviceTemplate && assetDetails?.iotUnit && <CustomTab value={5}>Status</CustomTab>}
+          {resourceData && resourceData?.steps?.length && <CustomTab value={6}>Associations</CustomTab>}
+          <CustomTab value={7}>History</CustomTab>
+          {user?.user?.brandPolicy?.serializedAssetCertification && <CustomTab value={8}>Certification History</CustomTab>}
+          {user?.user?.brandPolicy?.serializedAssetDepreciation && <CustomTab value={9}>Depreciation History</CustomTab>}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {assetDetails && <DetailsPageHeader mainPoints={mainPoints} />}
@@ -545,9 +547,12 @@ const SerializedAssetDetailsPage = () => {
           <Alarms deviceTemplate={deviceTemplate} assetId={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={4}>
-          <Status assetId={id} dataPoints={dataPoints} />
+          <VolumeData assetId={id} />
         </TabPanel>
         <TabPanel value={tabValue} index={5}>
+          <Status assetId={id} dataPoints={dataPoints} />
+        </TabPanel>
+        <TabPanel value={tabValue} index={6}>
           <Step
             resourceData={resourceData}
             resourceId={id}
@@ -556,10 +561,10 @@ const SerializedAssetDetailsPage = () => {
             allowedToEdit={permissions?.serializedAsset?.isUpdate}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={6}>
+        <TabPanel value={tabValue} index={7}>
           <AssetHistory id={id} status={assetDetails?.status} resourceData={resourceData} fields={fields} />
         </TabPanel>
-        <TabPanel value={tabValue} index={7}>
+        <TabPanel value={tabValue} index={8}>
           <CertificationHistory
             id={id}
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
@@ -567,7 +572,7 @@ const SerializedAssetDetailsPage = () => {
             assetDetails={assetDetails}
           />
         </TabPanel>
-        <TabPanel value={tabValue} index={8}>
+        <TabPanel value={tabValue} index={9}>
           <DepreciationHistory id={id} />
         </TabPanel>
       </Box>
