@@ -179,9 +179,9 @@ const Products = ({
           title={
             row.original?.canDelete
               ? 'Delete'
-              : row?.original?.loadingStatus === DELIVERY_TICKET_STATUS.inTransit
+              : row?.original?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit
                 ? 'Loading ticket is already created'
-                : row?.original?.loadingStatus === DELIVERY_TICKET_STATUS.delivered
+                : row?.original?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
                   ? 'Loading ticket is already delivered'
                   : row?.original?.serialNumber?.length > 0
                     ? 'Serial Number is already assigned'
@@ -243,7 +243,7 @@ const Products = ({
           finalObject['canDelete'] = !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
           finalObject['hideSelection'] = !finalObject['canDelete'];
           finalObject['serialNumber'] = data?.serialNumber?.filter((e) => e.product === u?.product);
-          finalObject['loadingStatus'] = deliveryTicketProduct?.find((d) => d?.product === u?.product)
+          finalObject['loadingTicketStatus'] = deliveryTicketProduct?.find((d) => d?.product === u?.product)
             ? deliveryTicketProduct?.find((d) => d?.product === u?.product)?.status
             : '';
 
@@ -345,7 +345,7 @@ const Products = ({
 
   const onSaveEdit = (data, row) => {
     if (!data || !data?.qty || row?.type !== MATERIAL_TYPE.product) return;
-    if (row.canDelete === false && row?.loadingStatus) {
+    if (row.canDelete === false && row?.loadingTicketStatus) {
       toastConfig.setToastConfig({
         type: 'error',
         message: "Qty can't be updated",
@@ -402,7 +402,7 @@ const Products = ({
       fetchData();
       return;
     }
-    if (data.canDelete === false && data?.loadingStatus) {
+    if (data.canDelete === false && data?.loadingTicketStatus) {
       toastConfig.setToastConfig({
         type: 'error',
         message: "Qty can't be updated",
