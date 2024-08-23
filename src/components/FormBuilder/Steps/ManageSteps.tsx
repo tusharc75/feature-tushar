@@ -14,6 +14,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { Autocomplete } from '@material-ui/lab';
 import { getLookupResource, getResourceField } from '../helper';
 import ConfigureField from 'src/components/FormBuilder/Steps/ConfigureField';
+import StepActions from './StepActions';
 
 const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
@@ -21,7 +22,7 @@ const stepSchema = object().shape({
 
 const MATERIAL_TYPE = ['product', 'service', 'package'];
 
-const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
+const ManageSteps = ({ isSubmitting, data, onSuccess, onClose, resource }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValues, setInitialValues] = useState({});
@@ -32,6 +33,7 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
   const [resourceFieldOption, setResourceFieldOption] = useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
   const [openField, setOpenField] = useState(false);
+  const [openStepActions, setOpenStepActions] = useState(false);
 
   useEffect(() => {
     getResourceList();
@@ -69,7 +71,8 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
         linkResourceName: data?.linkResourceName || '',
         linkResourceField: data?.linkResourceField || '',
         readOnly: data?.readOnly || false,
-        fields: data?.fields || []
+        fields: data?.fields || [],
+        createActions: data?.createActions || []
       });
     } else {
       setInitialValues({
@@ -83,7 +86,8 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
         linkResourceName: '',
         linkResourceField: '',
         readOnly: false,
-        fields: []
+        fields: [],
+        createActions: []
       });
     }
   }, [data]);
@@ -93,9 +97,9 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
       toastConfig.setToastConfig({ open: true, type: 'error', message: 'Please add fields' });
       return
     }
-   let updatedValues = values
-    if(data?._id){
-      updatedValues = {...values, stepId: data?._id}
+    let updatedValues = values
+    if (data?._id) {
+      updatedValues = { ...values, stepId: data?._id }
     }
     if (updatedValues?.linkWithResource) {
       updatedValues.fields = [];
@@ -366,6 +370,21 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
                     >
                       Add Fields
                     </Button>
+                    {!values['linkWithMaterial'] && (
+                      <>
+                        <Button
+                          className='ml-2'
+                          variant="contained"
+                          color="primary"
+                          size="small"
+                          onClick={() => {
+                            setOpenStepActions(true);
+                          }}
+                        >
+                          Create Actions
+                        </Button>
+                      </>
+                    )}
                   </Box>
                 )}
               </Form>
@@ -421,6 +440,19 @@ const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
                   setFieldValue('fields', data)
                   setOpenField(false);
                 }}
+              />
+            )}
+            {openStepActions && (
+              <StepActions
+                resource={resource}
+                onClose={() => {
+                  setOpenStepActions(false);
+                }}
+                onSuccess={(data) => {
+                  setFieldValue('createActions', data)
+                  setOpenStepActions(false);
+                }}
+                stepData={values}
               />
             )}
           </>
