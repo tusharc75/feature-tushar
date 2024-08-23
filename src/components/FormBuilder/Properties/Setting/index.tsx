@@ -145,7 +145,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   color="primary"
                 />
               }
-              label="Show Warning Tooltip"
+              label="Show Warning Message"
             />
           </Grid>
           <Grid item xs={12} md={6}>

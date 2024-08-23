@@ -13,7 +13,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import CustomButton from 'src/components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, GenerateResourceLineNumber } from 'src/constants/helpers';
+import { CustomDialogTransition, transferAsset, setFieldsInAscendingOrder, GenerateResourceLineNumber, convertDateInDateTime } from 'src/constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Box, Grid } from '@material-ui/core';
@@ -22,6 +22,7 @@ import ConfirmCancelDialog from 'src/components/ConfirmCancelDialog';
 import { useData } from 'src/StateProvider/Provider';
 import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
+import moment from 'moment';
 
 interface Props {
   isClone?: boolean;
@@ -32,6 +33,7 @@ interface Props {
   referenceType?: string;
   referenceId?: string;
   referenceData?: any;
+  assets?: any;
 }
 
 const ManageTransferAsset: FC<Props> = (props) => {
@@ -46,7 +48,8 @@ const ManageTransferAsset: FC<Props> = (props) => {
     number = '',
     referenceType = null,
     referenceId = null,
-    referenceData = null
+    referenceData = null,
+    assets = null,
   } = props;
 
   const toastConfig = useContext(CustomToastContext);
@@ -62,6 +65,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
   const [cloneHeading, setCloneHeading] = useState('');
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [createDateMin, setCreateDateMin] = useState(new Date());
 
   useEffect(() => {
     axiosInstance()
@@ -206,6 +210,25 @@ const ManageTransferAsset: FC<Props> = (props) => {
     }
   }, [formValues]);
 
+
+  useEffect(() => {
+    if (allFields?.some((e) => e?.fieldName === 'createDate') && assets && assets?.length) {
+      findValidationDate();
+    }
+  }, [allFields, assets]);
+
+  const findValidationDate = async () => {
+    const {
+      data: { data }
+    } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets, last: 1 });
+    var lastDate: any = new Date();
+    if (data?.date) {
+      lastDate = new Date(data?.date);
+      lastDate.setHours(0, 0, 0);
+    }
+    setCreateDateMin(lastDate);
+  };
+
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (transferAssetId && isClone === false) {
@@ -239,6 +262,11 @@ const ManageTransferAsset: FC<Props> = (props) => {
     if (values?.transferType === 'Internal') {
       if (values?.transferFromPlant === values?.transfertoPlant) {
         errors['transfertoPlant'] = 'Transfer from and to plant can not be same';
+      }
+    }
+    if (allFields?.find((e) => e?.fieldName === 'createDate')) {
+      if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
+        errors['createDate'] = `Please select valid date`;
       }
     }
     return errors;
@@ -490,6 +518,31 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                         setFieldValue('transfertoPlant', '');
                                       }
                                     }}
+                                  />
+                                </Grid>
+                              ) : field.fieldName === 'createDate' ? (
+                                <Grid key={index2} item xs={12} sm={6} md={6}>
+                                  <FormTypes
+                                    {...field}
+                                    fieldData={field}
+                                    fields={initialData.fields}
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    setFieldValue={(name, value) => {
+                                      var newDate = convertDateInDateTime(value);
+                                      setFieldValue(name, newDate);
+                                    }}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    minDate={createDateMin}
                                   />
                                 </Grid>
                               ) : (

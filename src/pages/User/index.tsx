@@ -26,6 +26,7 @@ import routes from './../../components/Helpers/Routes';
 import { checkSuperAdminAccess, gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from './../../constants/helpers';
 import GenerateAutoPassword from './GenerateAutoPassword';
 import ManageUserDialog from './ManageUserDialog';
+import { isMobile, isTablet } from "react-device-detect";
 
 const User: FC = () => {
   const renderedFrom = camelCase(routes?.user.title);
@@ -616,7 +617,7 @@ const User: FC = () => {
         </Dialog>
       )}
       {regionalRolesDialogOpen && (
-        <Dialog fullWidth maxWidth="xs" open={regionalRolesDialogOpen} onClose={handleRegionalRolesCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="xs" open={regionalRolesDialogOpen} onClose={handleRegionalRolesCloseDialog} aria-labelledby="assign-roles-dialog">
           <AssignEntityDialog
             entitiesDialogOpen={regionalRolesDialogOpen}
             handleCloseDialog={handleRegionalRolesCloseDialog}

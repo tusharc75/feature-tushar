@@ -109,19 +109,19 @@ const MaterialHandling = () => {
 
     const { filterById, deepFilter } = { ...filterQuery };
 
-    if (warehouseOptions && !filterById?.find((e) => e.field === 'warehouse')) {
-      filterById.push({ field: 'warehouse', term: { $in: warehouseOptions?.map((e) => e?.optionValue) } });
-    }
+    // if (warehouseOptions && !filterById?.find((e) => e.field === 'warehouse')) {
+    //   filterById.push({ field: 'warehouse', term: { $in: warehouseOptions?.map((e) => e?.optionValue) } });
+    // }
 
-    if (filterById?.length > 0 || deepFilter?.length > 0) {
-      api = `${api}?filterType=and`;
-    }
-    if (filterById?.length > 0) {
-      api = `${api}&filterById=${JSON.stringify(filterById)}`;
-    }
-    if (deepFilter?.length > 0) {
-      api = `${api}&deepFilter=${JSON.stringify(deepFilter)}`;
-    }
+    // if (filterById?.length > 0 || deepFilter?.length > 0) {
+    //   api = `${api}?filterType=and`;
+    // }
+    // if (filterById?.length > 0) {
+    //   api = `${api}&filterById=${JSON.stringify(filterById)}`;
+    // }
+    // if (deepFilter?.length > 0) {
+    //   api = `${api}&deepFilter=${JSON.stringify(deepFilter)}`;
+    // }
     axiosInstance()
       .get(api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {

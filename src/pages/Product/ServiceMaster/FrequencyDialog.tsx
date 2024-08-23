@@ -14,6 +14,7 @@ import { isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
 
+
 const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
   const toastConfig = useContext(CustomToastContext);
 
@@ -35,6 +36,7 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
         toastConfig.setToastConfig(error);
       });
   }, [serviceData?._id]);
+
 
   const handleSave = (values) => {
     setLoading(true);
@@ -79,10 +81,7 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
             showRequiredLabel={true}
             onClose={onClose}
           />
-          <Formik
-            initialValues={initialData.values}
-            onSubmit={handleSave}
-          >
+          <Formik initialValues={initialData.values} onSubmit={handleSave}>
             {({ values, errors, touched, submitForm, setFieldValue }) => (
               <>
                 <CustomDialogContent>

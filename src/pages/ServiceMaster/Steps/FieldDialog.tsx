@@ -10,6 +10,7 @@ import { FormBuilder } from '../../../components/FormBuilder';
 import { uniq, map } from 'lodash';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
+import { checkFormulaLoop } from 'src/constants/formulaUtility';
 
 const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, reference = '', fields = null, notEditable = false }) => {
   const {
@@ -95,22 +96,13 @@ const FieldDialog = ({ handleClose, handleSucess, serviceIds, stepIds = null, re
         data.push(_field_data);
       });
     });
-    const errorFields = [];
-    const fieldNameMap: any = [];
-    data?.forEach((e) => {
-      if (fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)) {
-        errorFields.push(fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)?.fieldLabel);
-      } else {
-        fieldNameMap.push({ fieldName: e.fieldName, fieldLabel: e.fieldLabel });
-      }
-    });
-    if (errorFields?.length) {
+    const result = checkFormulaLoop(data);
+    if (result.error) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: `Field ${errorFields?.toString()} duplicate`
+        message: result.message
       });
-      setSubmitting(false);
       return false;
     }
     if (reference === 'workOrder') {

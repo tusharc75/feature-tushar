@@ -139,7 +139,6 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             show: true,
             disabled: true,
             order: 0,
-            cellRenderer: 'commonRenderer',
             primaryField: true
           }
         ];
@@ -151,9 +150,9 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             const currencyField: any =
               e?.type === 'currencyAmount'
                 ? {
-                    ...ele,
-                    fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
-                  }
+                  ...ele,
+                  fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
+                }
                 : {};
 
             rows.forEach((data) => {
@@ -379,7 +378,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  onSelect={() => {}}
+                  onSelect={() => { }}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}

@@ -1,28 +1,66 @@
 import { Box, Button, Dialog, MenuItem } from '@material-ui/core';
-import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition } from 'src/constants/helpers';
-import { useContext, useEffect, useState } from 'react';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import CustomButton from 'src/components/Helpers/CustomButton';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
-import { generateColumn, generateRows, yupSchemaForBulkEdit } from 'src/components/CustomEditableGridNew/helper';
-import CustomTable from 'src/components/CustomEditableGridNew/CustomTable';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { DetailsPageHeader } from 'src/components/PageHeaders';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import ArrangeView from 'src/components/CustomEditableGridNew/ArrangeView';
+import CustomTable from 'src/components/CustomEditableGridNew/CustomTable';
+import { generateColumn, generateRows, yupSchemaForBulkEdit } from 'src/components/CustomEditableGridNew/helper';
+import { TActios, TInitialState } from 'src/components/CustomEditableGridNew/hooks/tableReducer';
+import { getStickyColumnNames, useGridMetaData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
 import { AddField } from 'src/components/FormBuilder/AddField';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import { DetailsPageHeader } from 'src/components/PageHeaders';
+import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
+import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+
+export * from 'src/components/CustomEditableGridNew/hooks/tableReducer';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
-const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, handleSave, isSubmitting, referenceId = null, restData = [] }) => {
-  const toastConfig = useContext(CustomToastContext);
+export type ApplyViewRef = { applyViewInTable: (order: string[], hide: string[]) => void };
 
-  const [columns, setColumns] = useState(null);
+type CustomEditableGridProps = {
+  state: TInitialState;
+  dispatch: React.Dispatch<TActios>;
+  onClose: () => void;
+  fields?: any[];
+  data: any[];
+  extraDisabledFields: any;
+  handleSave: (data: any[]) => void;
+  isSubmitting: boolean;
+  referenceId: string | null;
+  restData: any[];
+  renderedFrom;
+};
+
+const CustomEditableGrid = ({
+  state,
+  dispatch,
+  onClose,
+  fields = [],
+  data,
+  extraDisabledFields,
+  handleSave,
+  isSubmitting,
+  referenceId = null,
+  restData = [],
+  renderedFrom = ''
+}: CustomEditableGridProps) => {
+  const { columnOrder, loading, visibleColumns } = state;
+  const applyViewRef = useRef<ApplyViewRef>(null);
+
+  const toastConfig = useContext(CustomToastContext);
+  const { gridMetaData } = useGridMetaData();
+  const tableData = gridMetaData[renderedFrom] || { order: [], hide: [] };
+
+  const [columns, setColumns] = useState<any[]>(null);
   const [allFields, setAllFields] = useState([]);
   const [flatRows, setFlatRows] = useState(null);
   const [constColummns, setConstColummns] = useState([]);
@@ -30,6 +68,7 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [isAddField, setIsAddField] = useState(false);
   const [addedField, setAddedField] = useState([]);
+  const [scrollToHeader, setScrollToHeader] = useState('');
 
   useEffect(() => {
     if (referenceId) {
@@ -53,7 +92,6 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
         _fields = sortBy(_fields, function (item) {
           return levalOrderBy.indexOf(item.leval);
         });
-
         setAllFields(JSON.parse(JSON.stringify(_fields)));
         const { newColumns, constColumns } = generateColumn(_fields);
         setColumns(newColumns);
@@ -97,13 +135,13 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
   const addButtonMenuItems = () => {
     return (
       <>
-        <HtmlTooltip title="Add Existing Product">
+        <HtmlTooltip title="Add Existing Products">
           <MenuItem
             onClick={() => {
               setIsAddExistingProduct(true);
             }}
           >
-            Add Existing Product
+            Add Existing Products
           </MenuItem>
         </HtmlTooltip>
       </>
@@ -114,18 +152,36 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
     setFlatRows([...flatRows, ...rows?.map((r, i) => ({ ...r, index: flatRows?.length + i + 1, id: r?._id }))]);
   };
 
+  const finalColumns = useMemo(() => {
+    return columns
+      ?.filter((c) => visibleColumns[c.id])
+      .sort((a, b) => columnOrder.findIndex((c) => c === a.id) - columnOrder.findIndex((c) => c === b.id));
+  }, [columnOrder, columns, visibleColumns]);
+
   const rightSideContents = () => {
     return (
-      <Button
-        size="small"
-        variant="contained"
-        color="primary"
-        onClick={() => {
-          setIsAddField(true);
-        }}
-      >
-        Add Field
-      </Button>
+      <>
+        <ArrangeView
+          ref={applyViewRef}
+          columns={columns}
+          hideSelection={true}
+          renderedFrom={renderedFrom}
+          dispatchTable={dispatch}
+          state={state}
+          expander={false}
+          appliedView={tableData}
+        />
+        <Button
+          size="small"
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setIsAddField(true);
+          }}
+        >
+          Add Field
+        </Button>
+      </>
     );
   };
 
@@ -187,26 +243,18 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
                   rightSideContents={rightSideContents()}
                   hasXpadding={false}
                 />
-                <div
-                  style={{
-                    display: 'block',
-                    overflow: 'auto',
-                    height: '100%',
-                    marginTop: '10px'
-                  }}
-                  className="custom-react-table editable-table-v1 border"
-                >
-                  <CustomTable
-                    columns={columns}
-                    flatRows={flatRows}
-                    setFlatRows={setFlatRows}
-                    constColummns={constColummns}
-                    fields={allFields}
-                    extraDisabledFields={extraDisabledFields}
-                    error={error}
-                    updateData={updateData}
-                  />
-                </div>
+
+                <CustomTable
+                  columns={finalColumns}
+                  flatRows={flatRows}
+                  setFlatRows={setFlatRows}
+                  constColummns={constColummns}
+                  fields={allFields}
+                  extraDisabledFields={extraDisabledFields}
+                  error={error}
+                  updateData={updateData}
+                  scrollToHeader={scrollToHeader}
+                />
               </Box>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -222,6 +270,11 @@ const CustomEditableGrid = ({ onClose, fields = [], data, extraDisabledFields, h
                 onClick={() => {
                   if (isEmpty(error)) {
                     handleSave([...flatRows?.map((f) => ({ ...f, fields: [...(f?.fields || []), ...addedField] })), ...restData]);
+                  } else {
+                    const err = Object.keys(error);
+                    if (err?.length) {
+                      setScrollToHeader(err[0]);
+                    }
                   }
                 }}
               >

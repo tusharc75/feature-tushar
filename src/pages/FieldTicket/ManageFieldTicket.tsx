@@ -32,6 +32,7 @@ import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper'
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import moment from 'moment';
 import FormTypes from 'src/components/Helpers/FormTypes';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
@@ -49,11 +50,25 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
   const [formsData, setFormsData] = useState([]);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchFields();
     referenceData?.service && fetchServiceSteps(referenceData?.service);
   }, []);
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      const ignoreField = ['currency', 'owner', 'pdfTemplate'];
+      if(referenceData) {
+        ignoreField.push('fieldServiceOrderNumber');
+      }
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields, ignoreField)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
 
   const fetchServiceSteps = (serviceId) => {
     if (!isOffline) {
@@ -400,6 +415,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   Cancel
                 </Button>
                 <Button
+                  id="dialog-save-button"
                   disabled={loading || submitting}
                   variant="contained"
                   color="primary"

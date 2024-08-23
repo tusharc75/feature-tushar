@@ -1,30 +1,31 @@
-import camelCase from 'lodash/camelCase';
-import { Link } from 'react-router-dom';
-import NoDataCell from 'src/components/Helpers/NoDataCell';
-import moment from 'moment';
 import { Avatar, Box } from '@material-ui/core';
+import { Image } from '@material-ui/icons';
+import InfoIcon from '@material-ui/icons/Info';
+import { isArray, isObject } from 'lodash';
+import camelCase from 'lodash/camelCase';
+import moment from 'moment';
+import { Link } from 'react-router-dom';
+import { useGridMetaData } from 'src/components/CustomReactTable/ArrangeView/utils';
+import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
+import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
+import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
+import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
+import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 import {
   dateFormat,
   dateTimeFormat,
   formatAmountWithCurrency,
-  getFileIconSrc,
+  formatTotalforTableFooter,
   getUniqueCurrencies,
   sidebarResourceObjectFromValues
 } from 'src/constants/helpers';
-import routes from '../../Helpers/Routes';
 import { useData } from 'src/StateProvider/Provider';
-import { Image } from '@material-ui/icons';
 import CopyToClipboard from '../../Helpers/CopyToClipboard';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import SignatureCell from 'src/components/CustomReactTable/Cells/SignatureCell';
-import DropdownCell from 'src/components/CustomReactTable/Cells/DropdownCell';
-import { find, isArray, isObject, result } from 'lodash';
-import InfoIcon from '@material-ui/icons/Info';
-import { getGridMetaDataFromLocalStorage } from '../utils';
+import routes from '../../Helpers/Routes';
 import DataListCell from '../Cells/DataListCell';
-import { MultiImageCell } from 'src/components/CustomReactTable/Cells/MultiImageCell';
-import { MultiFileCell } from 'src/components/CustomReactTable/Cells/MultiFileCell';
-import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
+import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -122,25 +123,6 @@ export const getCompletedByField = () => {
   ];
 };
 
-export const getColumnHiddenStatus = (renderedFrom, fieldName) => {
-  let gridMetaData = getGridMetaDataFromLocalStorage();
-  if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-    return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
-  }
-  return true;
-};
-
-export const checkStaticField = (renderedFrom, fieldData) => {
-  let gridMetaData = getGridMetaDataFromLocalStorage();
-  if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
-    return {
-      ...fieldData,
-      show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true
-    };
-  }
-  return fieldData;
-};
-
 export const getSortedColumns = (columns = []) => {
   return columns.sort(function (a, b) {
     let columnNameA = a?.headerName?.toUpperCase(); // ignore upper and lowercase
@@ -157,25 +139,34 @@ export const getSortedColumns = (columns = []) => {
 
 export const staticColumns = ['createdBy', 'updatedBy'];
 
-const getTitle = (data) => {
-  if (data.length) {
-    let restParams = data.map((o) => (o?.optionLabel ? o?.optionLabel : typeof o !== 'object' ? o : '')).join(', ');
-    return restParams;
-  }
-  return '';
-};
-
 export default function useColumns() {
   const {
     state: { permissions, user }
   }: any = useData();
 
+  const { gridMetaData } = useGridMetaData();
+
+  const getColumnHiddenStatus = (renderedFrom, fieldName) => {
+    if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+      return gridMetaData[renderedFrom]?.hide?.indexOf(fieldName) >= 0 ? false : true;
+    }
+    return true;
+  };
+
+  const checkStaticField = (renderedFrom, fieldData) => {
+    if (gridMetaData[renderedFrom] && gridMetaData[renderedFrom]?.hide && gridMetaData[renderedFrom]?.hide?.length) {
+      return {
+        ...fieldData,
+        show: gridMetaData[renderedFrom]?.hide?.indexOf(fieldData?.field) >= 0 ? false : true
+      };
+    }
+    return fieldData;
+  };
+
   const generateColumns = (renderedFrom, fields, detailScreenRoute = null, masterPage = false, currency = null) => {
     if (!currency) {
       currency = user?.user?.brandCurrency || 'USD';
     }
-
-    let gridMetaData = getGridMetaDataFromLocalStorage();
 
     let updatedTitle = camelCase(renderedFrom);
     const column = [];
@@ -226,7 +217,7 @@ export default function useColumns() {
           field.displayUnits.forEach((_unit) => {
             field.displayCurrency.forEach((_currency) => {
               let fieldName = field.fieldName + '_' + _currency.toLowerCase() + '_' + _unit.toLowerCase();
-              let fieldLabel = field.fieldLabel + ' ' + _unit + '/' + _currency;
+              let fieldLabel = field.fieldLabel + ' ' + _currency + '/' + _unit;
               column.push({
                 ...commonFieldData,
                 id: fieldName,
@@ -271,7 +262,7 @@ export default function useColumns() {
                   <>
                     {field?.isHideColumnSum
                       ? ''
-                      : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? total}`}
+                      : `${currencySymbol} ${formatAmountWithCurrency(currency, total)?.amountWithouCurrencyCode ?? formatTotalforTableFooter(total)}`}
                   </>
                 );
               }
@@ -481,7 +472,7 @@ export default function useColumns() {
           editable: Boolean(field?.isColumnEditable),
           cell: ({ row }) => (
             <div>
-              <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : 0}</h5>
+              <h5 className="text-truncate">{row.original[field?.fieldName] ? row.original[field?.fieldName] : <NoDataCell />}</h5>
             </div>
           )
         });
@@ -512,7 +503,7 @@ export default function useColumns() {
             const total = rows
               ?.filter((f) => !f.original.parentId && f.original.hasOwnProperty(field.fieldName) && !isNaN(f.original[field.fieldName]))
               .reduce((sum, row) => Number(row.original[commonFieldData.accessor]) + sum, 0);
-            return <>{field?.isHideColumnSum ? '' : total}</>;
+            return <>{field?.isHideColumnSum ? '' : formatTotalforTableFooter(total)}</>;
           }
         });
       } else if (field.type === 'signature') {
@@ -532,6 +523,15 @@ export default function useColumns() {
               <GroupSignatureCell original={row?.original} field={field} />
             </div>
           )
+        });
+      } else if (field.type === 'counter') {
+        column.push({
+          ...commonFieldData,
+          disableFilters: true,
+          disableSortBy: true,
+          cell: ({ row }) => {
+            return <NumberCell rowData={row.original} field={field} />;
+          }
         });
       } else if (field.type === 'percent') {
         column.push({
@@ -573,5 +573,5 @@ export default function useColumns() {
     return column;
   };
 
-  return { generateColumns };
+  return { generateColumns, checkStaticField, getColumnHiddenStatus };
 }

@@ -8,22 +8,13 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { camelCase, map, sortBy, uniq } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomEditableGrid, { useTableReducer as useEditableTableReducer } from 'src/components/CustomEditableGridNew';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import routes from '../../components/Helpers/Routes';
 import { extractFields, handleAutoCalculation } from '../../constants/formulaUtility';
-import {
-  QUOTE_PROCESS_STATUS,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  priceTemplate,
-  productCategory,
-  productTemplate,
-  sidebarResource,
-  supplierContact
-} from '../../constants/helpers';
+import { QUOTE_PROCESS_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource, supplierContact } from '../../constants/helpers';
 import CustomReactTable, { useColumns, useTableReducer } from '../CustomReactTable';
 import HtmlTooltip from '../CustomTooltipTitle';
 import { AddField } from '../FormBuilder/AddField';
@@ -39,11 +30,6 @@ import BulkEditDialog from './BulkEditDialog';
 import ProductDialog from './ProductDialog';
 import SupplierAskPrice from './SupplierAskPrice';
 import ViewSupplierPriceDialog from './ViewSupplierPriceDialog';
-import NoDataCell from '../Helpers/NoDataCell';
-import { Link } from 'react-router-dom';
-import CustomEditableGrid from 'src/components/CustomEditableGridNew';
-import { AiOutlineImport } from 'react-icons/ai';
-import { CustomImport } from 'src/components/productBuilder/CustomImport';
 
 let levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
 
@@ -103,6 +89,8 @@ const ProductBuilder = (props) => {
   }: any = useData();
 
   const { state, dispatch } = useTableReducer();
+  const { state: editableState, dispatch: editableDispatch } = useEditableTableReducer();
+
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
   const [columns, setColumns] = useState(null);
 
@@ -128,16 +116,30 @@ const ProductBuilder = (props) => {
             width: 150,
             show: true,
             disabled: true,
-            cellRenderer: 'productNameRenderer',
-            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+            Cell: ({ row }) => {
+              return (
+                <div>
+                  {!Editable ? (
+                    <p className="text-truncate">{row.original.index}</p>
+                  ) : (
+                    <p
+                      onClick={() => {
+                        openProductModel(row.original?._id);
+                      }}
+                      className="link text-truncate"
+                    >
+                      {row.original.index}
+                    </p>
+                  )}
+                </div>
+              );
+            }
           }
         ];
         let fields = data.productFields || [];
-
         data?.productTemplate?.forEach((ele) => {
           fields = [...fields, ...ele.fields];
         });
-
         data?.priceTemplate?.forEach((ele) => {
           ele?.fields?.forEach((item) => {
             if (item.type === 'converter' || item.type === 'currencyAmount' || item.isConverter === true) {
@@ -158,30 +160,7 @@ const ProductBuilder = (props) => {
           });
           fields = [...fields, ...ele.fields];
         });
-        let newColumns = generateColumns(routes.product.title, fields, null, false, currency);
-        newColumns.forEach((column) => {
-          if (column?.accessor === 'productName') {
-            column.cell = ({ row }) => (
-              <span>
-                {row?.original?.['productName'] ? (
-                  <>
-                    <Link
-                      className="link text-truncate"
-                      title={row?.original?.['productName']}
-                      to={`${routes.productDetail.path}/${row?.original?.productId}`}
-                      target={'_blank'}
-                      rel="noopener noreferrer"
-                    >
-                      {row?.original?.['productName']}
-                    </Link>
-                  </>
-                ) : (
-                  <NoDataCell />
-                )}
-              </span>
-            );
-          }
-        });
+        let newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path, false, currency);
         columns = [...columns, ...newColumns];
 
         if (stage && stage === 'product') {
@@ -575,12 +554,12 @@ const ProductBuilder = (props) => {
             }}
             disabled={isDisabledInlineEdit()}
           >
-            {isMobile && !isTablet ? '' : 'Inline Edit'}
+            {'Inline Edit'}
           </MenuItem>
         )}
         {stage === 'cost' && permissions?.isUpdate && (
           <MenuItem onClick={handelOpenBulkEdit} disabled={checkUniqTemplate()}>
-            {isMobile && !isTablet ? '' : 'Bulk Edit'}
+            {'Bulk Edit'}
           </MenuItem>
         )}
         <MenuItem disabled={selectedRecords.length ? false : true} onClick={() => setShowDeleteConfirmBox(true)}>
@@ -769,9 +748,12 @@ const ProductBuilder = (props) => {
       )}
       {inlineBulkEdit && fromQuote && (
         <CustomEditableGrid
+          state={editableState}
+          dispatch={editableDispatch}
           onClose={() => {
             setInlineBulkEdit(false);
           }}
+          renderedFrom={renderedFrom}
           data={selectedRecords}
           extraDisabledFields={['productCategory', 'productTemplate', 'entity', 'priceTemplate']}
           handleSave={(products) => {

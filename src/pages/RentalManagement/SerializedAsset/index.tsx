@@ -49,7 +49,7 @@ import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAssignStepAssignSerializedAsset, nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
-const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit }) => {
+const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip, stepFullScreen, allowedToEdit, checkProgressiveBilling }) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
@@ -1259,9 +1259,11 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
           isAdding={isAdding}
           selectedProducts={assetAssignedProduct}
           filterByPlant={rentalManagementData?.warehouse}
+          selectedRecordsOfMain={selectedRecords}
           handleSuccess={() => {
             setAddSerializedAssetDialog({ open: false });
             fetchData();
+            checkProgressiveBilling();
             setAssetAssignedProduct([]);
             setAdding(false);
           }}

@@ -14,7 +14,7 @@ const TooltipWithStyle = withStyles((theme) => ({
 const HtmlTooltip = ({ children, className, onClick, style = {}, ...props }: TooltipProps) => {
   return (
     <TooltipWithStyle {...props} enterTouchDelay={0} placement="top" arrow>
-      <span style={style} onClick={onClick} className={cn('tooltip-asdfkljashdfkjas', className)}>
+      <span style={style} onClick={onClick} className={cn('html-custom-tooltip', className)}>
         {children}
       </span>
     </TooltipWithStyle>

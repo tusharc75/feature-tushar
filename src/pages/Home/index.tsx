@@ -20,7 +20,8 @@ import { DynamicIcon } from 'src/assets/IconGenerator';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
-  link: 'https://docs.equip-t.com/'
+  // link: 'https://docs.equip-t.com/auth/login',
+   link: 'https://docs.equip-t.com'
 };
 
 function Dashboard() {
@@ -30,7 +31,6 @@ function Dashboard() {
   const [sections, setSections] = useState([]);
   const [objBySectionName, setObjBySectionName] = useState(null);
   const { isOffline } = useContext(CustomOfflineContext);
-
   useEffect(() => {
     let allData = [];
 
@@ -63,7 +63,6 @@ function Dashboard() {
         return `/${kebabCase(item.name)}`;
     }
   };
-
   return (
     <Fragment>
       <div className={` ${styles.contentWrapper}`}>
@@ -73,9 +72,9 @@ function Dashboard() {
             {!isOffline && <Chart />}
           </div>
           <div className={styles.rightContainer}>
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
-            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools"/>
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration"/>
+            <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual"/>
           </div>
         </div>
       </div>
@@ -217,7 +216,8 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
           aria-label={`open ${mode}`}
           onClick={() => {
             if (mode === 'User Manual') {
-              window.open(userManual.link);
+              const token = localStorage.getItem('token');
+              window.open(`${userManual.link}/?token=${encodeURIComponent(token)}`);
             } else {
               setModalContent({ items: colabData, title: mode, icon: <img src={SVGImages(mode)} alt={`${mode} Logo`} /> });
             }

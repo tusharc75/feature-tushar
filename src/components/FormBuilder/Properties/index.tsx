@@ -215,6 +215,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             ele.dataListId = values.dataList ? values.dataListId : '';
             ele.columnSize = values.columnSize || 6;
             ele.preFilters = values.preFilters?.length > 0 ? values.preFilters : [];
+            ele.lookupPreFilterFields = values.lookupPreFilterFields?.length > 0 ? values.lookupPreFilterFields : [];
             ele.htmlDescription = values.htmlDescription || '';
             ele.entityWiseLookup = values?.entityWiseLookup || false;
             ele.isMinMaxValue = values?.isMinMaxValue || false;
@@ -548,7 +549,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
                       />
                     </TabPanel>
                     <TabPanel value={tabValue} index={1}>
-                      <Visibility values={values} setFieldValue={setFieldValue} fields={fields} fieldData={fieldData} />
+                      <Visibility values={values} setFieldValue={setFieldValue} fields={fields} fieldsToExclude={[fieldData?.fieldName]} />
                     </TabPanel>
                     <TabPanel value={tabValue} index={2}>
                       <Setting

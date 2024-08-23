@@ -1,43 +1,15 @@
-import axios from 'axios';
-import { useHistory, Link } from 'react-router-dom';
-import React, { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useData } from 'src/StateProvider/Provider';
-import { SET_GRID_METADATA, SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
-import { backendApi } from 'src/config';
+import { useHistory } from 'react-router-dom';
 
 const AzureSSOLogin = () => {
-  const { dispatch }: any = useData();
-  const history = useHistory()
+  const history = useHistory();
   useEffect(() => {
     const searchParams = new URLSearchParams(document.location.search);
     const token = searchParams.get('token');
     (async () => {
       if (token) {
-        const res = await axios.get(backendApi + "/user/me", {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        })
-        const { data: { data } } = res;
-
-        if (data?.user?.gridMetaData) {
-          let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
-          localStorage.setItem('gridMetaData', tempMetaData);
-          dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
-        }
-
-        dispatch({ type: SET_USER, payload: data });
-
-        if (data?.role?.selectedEntity?._id) {
-          dispatch({
-            type: SET_SELECTED_ENTITY,
-            payload: data.role.selectedEntity._id
-          });
-        }
-
-        localStorage.setItem('token', token);
-
-        window.location.href = '/';
+        history.push({ pathname: '/login/mfa', search: '?token=' + token });
       } else {
         window.location.href = '/sso-login-error';
       }

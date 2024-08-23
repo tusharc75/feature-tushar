@@ -13,6 +13,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 import { getLookupResource, getResourceField } from '../helper';
+import ConfigureField from 'src/components/FormBuilder/Steps/ConfigureField';
 
 const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
@@ -20,7 +21,7 @@ const stepSchema = object().shape({
 
 const MATERIAL_TYPE = ['product', 'service', 'package'];
 
-const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
+const ManageSteps = ({ isSubmitting, data, onSuccess, onClose }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [initialValues, setInitialValues] = useState({});
@@ -30,6 +31,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
   const [resourceOption, setResourceOption] = useState([]);
   const [resourceFieldOption, setResourceFieldOption] = useState([]);
   const [resourceFieldsLoading, setResourceFieldsLoading] = React.useState(false);
+  const [openField, setOpenField] = useState(false);
 
   useEffect(() => {
     getResourceList();
@@ -66,7 +68,8 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
         linkWithResource: data?.linkWithResource || false,
         linkResourceName: data?.linkResourceName || '',
         linkResourceField: data?.linkResourceField || '',
-        readOnly: data?.readOnly || false
+        readOnly: data?.readOnly || false,
+        fields: data?.fields || []
       });
     } else {
       setInitialValues({
@@ -79,46 +82,25 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
         linkWithResource: false,
         linkResourceName: '',
         linkResourceField: '',
-        readOnly: false
+        readOnly: false,
+        fields: []
       });
     }
   }, [data]);
 
   const handleSubmit = (values) => {
-    setSubmitting(true);
-    if (data?._id) {
-      axiosInstance()
-        .put(`/sa-formbuilder/steps/${resourceId}`, { ...values, stepId: data?._id })
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
-    } else {
-      axiosInstance()
-        .post(`/sa-formbuilder/steps/${resource}`, values)
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
-        });
+    if (!values.linkWithResource && !values.linkWithMaterial && !values?.fields?.length) {
+      toastConfig.setToastConfig({ open: true, type: 'error', message: 'Please add fields' });
+      return
     }
+   let updatedValues = values
+    if(data?._id){
+      updatedValues = {...values, stepId: data?._id}
+    }
+    if (updatedValues?.linkWithResource) {
+      updatedValues.fields = [];
+    }
+    onSuccess(updatedValues)
   };
 
   const validate = (values) => {
@@ -129,11 +111,9 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
     if (values.linkWithResource && !values?.linkResourceName) {
       errors['linkResourceName'] = 'please select Resource';
     }
-
     if (values.linkWithResource && !values?.linkResourceField) {
       errors['linkResourceField'] = 'please select Field';
     }
-
     if (values.linkWithMaterial && !values?.linkedMaterial?.length) {
       errors['linkedMaterial'] = 'please select Material';
     }
@@ -281,7 +261,7 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     <Box>
                       <Autocomplete
                         id="linkResourceField"
-                        options={resourceFieldOption}
+                        options={resourceFieldOption?.filter((e) => e?.lookup)}
                         disabled={resourceFieldsLoading}
                         getOptionLabel={(option: any) => (option ? option?.fieldLabel : '')}
                         getOptionSelected={(option: any, val) => option?.fieldName === val}
@@ -374,6 +354,20 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                     label="Show In Pdf"
                   />
                 </Box>
+                {!values['linkWithResource'] && (
+                  <Box className="mt-2">
+                    <Button
+                      variant="contained"
+                      color="primary"
+                      size="small"
+                      onClick={() => {
+                        setOpenField(true);
+                      }}
+                    >
+                      Add Fields
+                    </Button>
+                  </Box>
+                )}
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
@@ -389,13 +383,13 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                 Cancel
               </Button>
               <Button
-                disabled={submitting}
+                disabled={isSubmitting}
                 variant="contained"
                 color="primary"
                 size="small"
                 type="submit"
                 onClick={submitForm}
-                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+                endIcon={isSubmitting && <CircularProgress color="inherit" size={18} />}
               >
                 {' '}
                 Save
@@ -416,6 +410,19 @@ const ManageSteps = ({ resource, resourceId, data, onSuccess, onClose }) => {
                 }}
               />
             ) : null}
+
+            {openField && (
+              <ConfigureField
+                step={values}
+                handleClose={() => {
+                  setOpenField(false);
+                }}
+                handleSucess={(data) => {
+                  setFieldValue('fields', data)
+                  setOpenField(false);
+                }}
+              />
+            )}
           </>
         )}
       </Formik>

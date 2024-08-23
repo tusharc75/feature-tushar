@@ -125,6 +125,12 @@ export const resourcePolicy = [
         fieldLabel: 'Show BOM',
         type: 'checkBox',
         defaultValue: false
+      },
+      {
+        fieldName: 'consumablesSerialNumberRequired',
+        fieldLabel: 'Consumables Serial Number Required',
+        type: 'checkBox',
+        defaultValue: false
       }
     ]
   },
@@ -150,11 +156,28 @@ export const resourcePolicy = [
         defaultValue: false
       },
       {
-        fieldName: 'invoiceCurrentDateAutoSelect',
-        fieldLabel: 'Invoice Current Date Auto Select',
+        fieldName: 'hidePackageInInvoice',
+        fieldLabel: 'Hide Package In Invoice',
+        type: 'checkBox',
+        defaultValue: false
+      },
+      {
+        fieldName: 'servicePriceRequired',
+        fieldLabel: 'Service Price Required',
         type: 'checkBox',
         defaultValue: false
       }
     ]
-  }
+  },
+  {
+    resource: sidebarResource.invoice,
+    policy: [
+      {
+        fieldName: 'rentalInvoiceFields',
+        fieldLabel: 'Rental Invoice Fields',
+        type: 'multiSelect',
+        defaultValue: []
+      }
+    ]
+  },
 ];

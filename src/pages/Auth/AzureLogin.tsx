@@ -1,12 +1,13 @@
 import { useState, useContext, useEffect } from 'react';
 import { useData } from '../../StateProvider/Provider';
-import { SET_USER, SET_SELECTED_ENTITY, SET_GRID_METADATA } from '../../StateProvider/actionTypes';
+import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
 import { isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import LogIn from '../../components/Azure/LogIn';
+import { useHistory } from 'react-router-dom';
 
 const AzureLogin = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -15,33 +16,18 @@ const AzureLogin = () => {
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
+  const history = useHistory();
+
   useEffect(() => {
     if (!isEmpty(account)) {
       (async () => {
         try {
           const graphToken = await getAzureAcessToken(instance);
-          const res = await axiosInstance().post('/user/login/azure', {
+          const res = await axiosInstance().post('/user/auth/azure', {
             'graph-token': graphToken
           });
           const { data } = res.data;
-
-          if (data?.user?.gridMetaData) {
-            let tempMetaData = JSON.stringify(data?.user?.gridMetaData);
-            localStorage.setItem('gridMetaData', tempMetaData);
-            dispatch({ type: SET_GRID_METADATA, payload: data?.user?.gridMetaData });
-          }
-
-          dispatch({ type: SET_USER, payload: data });
-
-          if (data?.role?.selectedEntity?._id) {
-            dispatch({
-              type: SET_SELECTED_ENTITY,
-              payload: data.role.selectedEntity._id
-            });
-          }
-
-          localStorage.setItem('token', data.token);
-
+          history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
         } catch (e) {
           setCounter(10);
           setInvalidAzureLogin(true);
@@ -50,6 +36,7 @@ const AzureLogin = () => {
       })();
     }
   }, [account]);
+
   useEffect(() => {
     if (invalidAzureLogin) {
       if (invalidAzureLogin && counter) {

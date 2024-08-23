@@ -1,15 +1,15 @@
-import { IconButton } from '@material-ui/core';
-import { ArrowBack, Visibility } from '@material-ui/icons';
+import { Avatar, IconButton } from '@material-ui/core';
+import { ArrowBack } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import io, { Socket } from 'socket.io-client';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
-import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import io, { Socket } from 'socket.io-client';
 import { backendApi } from 'src/config';
-import SendMessage from 'src/pages/WorkSpace/MessagePanel/SendMessage';
+import { cn } from 'src/constants/helpers';
 import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
+import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
+import { ChannelData, Message, TChannel } from 'src/pages/WorkSpace/types';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 type MessagePanelProps = {
   selectedChannel: TChannel | null;
@@ -21,8 +21,8 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
-
   const [socket, setSocket] = useState<Socket>(null);
+  const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
 
   const token = localStorage.getItem('token');
 
@@ -56,18 +56,23 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
 
   return (
     <>
-      <div className="relative flex-grow">
+      <div
+        className={cn(
+          'relative flex-grow transition-all duration-300 [--thread-bar-width:360px] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]',
+          threadDialogOpen?.open && 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]'
+        )}
+      >
         {selectedChannel && channelData && (
-          <>
-            <div className="head p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]">
+          <div className="flex h-[var(--h)] flex-col">
+            <div className={cn('p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
+                <div className="flex min-h-[32px] items-center gap-2">
                   {mobScreen && (
                     <IconButton size={'small'} onClick={() => setSelectedChannel(null)}>
                       <ArrowBack />
                     </IconButton>
                   )}
-                  <h5 className="text-[18px] font-bold">{selectedChannel.title}</h5>
+                  <h5 className="line-clamp-1 text-[18px] font-bold">{selectedChannel.title}</h5>
                 </div>
                 <HtmlTooltip
                   title={
@@ -89,22 +94,43 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
                     style={{ border: '1px solid var(--common-border-color)', borderRadius: 8, padding: '2px 5px' }}
                     onClick={() => setIsMemberDialogOpen(true)}
                   >
-                    <span className="flex items-center gap-2">
-                      <Visibility fontSize="small" color="primary" /> {channelData?.members.length}
+                    <span className="flex flex-row-reverse">
+                      {channelData?.members.map((d, i) => {
+                        if (i > 3) return null;
+                        return (
+                          <Avatar
+                            style={{
+                              width: 22,
+                              height: 22,
+                              borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)',
+                              fontSize: 12,
+                              marginRight: i !== 0 ? '-6px' : '5px',
+                              outline: '2px solid var(--dark-primary,white)'
+                            }}
+                            variant="rounded"
+                            className="my-[2px]"
+                            src={d.avatar}
+                          >
+                            {d?.optionLabel.match(/(\b\S)?/g).join('')}
+                          </Avatar>
+                        );
+                      })}
                     </span>
+                    <span className="text-[13px] font-bold leading-[20px]">{channelData?.members.length}</span>
                   </IconButton>
                 </HtmlTooltip>
               </div>
-              <p className="text-sm text-gray-500">{selectedChannel.description}</p>
+              <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel.description}</p>
             </div>
-            <div className="body max-h-[calc(100vh-320px)] overflow-y-auto">
-              <Messages channelId={selectedChannel?._id} socket={socket} />
-            </div>
-          </>
+            <Messages
+              channelId={selectedChannel?._id}
+              socket={socket}
+              threadDialogOpen={threadDialogOpen}
+              setThreadDialogOpen={setThreadDialogOpen}
+              channelData={channelData}
+            />
+          </div>
         )}
-        <div className="footer">
-          <SendMessage channelId={selectedChannel?._id} socket={socket} />
-        </div>
       </div>
       {isMemberDialogOpen && (
         <ViewMembers

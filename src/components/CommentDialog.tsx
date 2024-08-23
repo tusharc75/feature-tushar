@@ -61,7 +61,7 @@ export default function CommentDialog({ required = false, handleSubmit, handleCl
             <Button size="small" variant="outlined" color="primary" onClick={handleClose}>
                 Cancel
             </Button>
-            <Button size="small" onClick={() => {
+            <Button id={'dialog-submit-button'} size="small" onClick={() => {
                 if (comment) {
                     handleSubmit(comment)
                 } else {

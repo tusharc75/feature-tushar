@@ -13,7 +13,14 @@ import ConfirmationDialogRaw from 'src/components/Helpers/ConfirmationDialog';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
-import { FIELD_TICKET_STATUS, SERVICE_ORDER_STATUS, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import {
+  FIELD_TICKET_STATUS,
+  SERVICE_ORDER_STATUS,
+  cloneResourceData,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageFieldTicket from 'src/pages/FieldTicket/ManageFieldTicket';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
@@ -22,9 +29,21 @@ import HideWhenOffline from 'src/components/HideWhenOffline';
 import { camelCase } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
 import { FiExternalLink } from 'react-icons/fi';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAddFieldTicket, generateFieldTicketActions } from '../walkmeSteps';
 
-const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, allowedToEdit, handleChangeStatus, resource, enableGlobalSearch = true }) => {
+const FieldTicket = ({
+  serviceOrderData,
+  serviceOrderFields = [],
+  fetchServiceOrderData,
+  setNextStep,
+  allowedToEdit,
+  handleChangeStatus,
+  resource,
+  enableGlobalSearch = true
+}) => {
   const toastConfig = useContext(CustomToastContext);
+  const { setWalkmeData } = useSetWalkmeData();
 
   const renderedFrom = camelCase(routes?.fieldTicket.title);
 
@@ -35,6 +54,8 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
   const [openDialog, setOpenDialog] = useState({ open: false, isClone: false, id: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [allFields, setAllFields] = useState([]);
+
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -42,15 +63,24 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
   const { isOffline } = useContext(CustomOfflineContext);
 
   useEffect(() => {
-    const cancleToken = axios.CancelToken.source();
+    const cancelToken = axios.CancelToken.source();
     fetchGridColumns();
-    return () => cancleToken.cancel();
+    return () => cancelToken.cancel();
   }, []);
 
   useEffect(() => {
-    const cancleToken = axios.CancelToken.source();
-    fetchData(cancleToken);
-    return () => cancleToken.cancel();
+    let stepData = [];
+    stepData.push(generateAddFieldTicket(false));
+    if (dataRows?.length) {
+      stepData.push(...generateFieldTicketActions(0));
+    }
+    setWalkmeData(stepData);
+  }, [dataRows]);
+
+  useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
+    fetchData(cancelToken);
+    return () => cancelToken.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedEntity, serviceOrderData]);
 
@@ -63,6 +93,7 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
         const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldTicket}`, { cancelToken: cancelToken?.token });
         data = response?.data?.data;
       }
+      setAllFields(JSON.parse(JSON.stringify(data)));
       const newColumns = generateColumns(routes.fieldTicket?.title, data, routes.fieldTicketDetail.path);
       newColumns?.forEach((o) => {
         if (o.accessor === 'fieldTicketNumber') {
@@ -85,7 +116,6 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
-
               </div>
             ) : (
               <NoDataCell />
@@ -179,7 +209,7 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
       .put(`${routes.fieldTicket.path}/remove`, { ids: deleteRecord })
       .then(() => {
         fetchData();
-        fetchServiceOrderData()
+        fetchServiceOrderData();
         setShowDeleteConfirmBox(false);
         setDeleteRecord(null);
       })
@@ -208,6 +238,7 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
               onClick={() => {
                 setOpenDialog({ open: true, isClone: false, id: row?.original?._id });
               }}
+              id={`edit-field-ticket-button-${row.index || 0}`}
             >
               <EditIcon fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
@@ -224,6 +255,7 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
                   onClick={() => {
                     setOpenDialog({ open: true, isClone: true, id: row?.original?._id });
                   }}
+                  id={`clone-field-ticket-button-${row.index || 0}`}
                 >
                   <FileCopyIcon fontSize="small" color={permissions?.fieldTicket?.isCreate ? 'primary' : 'disabled'} />
                 </IconButton>
@@ -256,6 +288,7 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
     return (
       <>
         <MenuItem
+          id={'add-field-ticket-menu-item'}
           onClick={() => {
             setOpenDialog({ open: true, isClone: false, id: null });
           }}
@@ -275,11 +308,23 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
             setShowDeleteConfirmBox(true);
             setDeleteRecord(selectedRecords.map((d) => d._id));
           }}
+          id={'delete-menu-item'}
         >
           Delete
         </MenuItem>
       </>
     );
+  };
+
+  const getRefrenceData = () => {
+    const referenceData: any = cloneResourceData(
+      serviceOrderFields?.map((f) => f?.fieldData),
+      allFields?.map((f) => f?.fieldData),
+      serviceOrderData,
+      user.user?.brandCurrency
+    );
+    referenceData['fieldServiceOrder'] = serviceOrderData?._id;
+    return referenceData;
   };
 
   return (
@@ -317,29 +362,12 @@ const FieldTicket = ({ serviceOrderData, fetchServiceOrderData, setNextStep, all
           id={openDialog.id}
           isClone={openDialog.isClone}
           onClose={() => setOpenDialog({ open: false, isClone: false, id: null })}
-          referenceData={{
-            fieldServiceOrder: serviceOrderData?._id,
-            warehouse: serviceOrderData?.warehouse?.optionValue || '',
-            wellName: serviceOrderData?.wellName?.optionValue || '',
-            wellNumber: serviceOrderData?.wellNumber?.map((m) => m.optionValue) || [],
-            numberOfWells: serviceOrderData?.numberOfWells,
-            estimateStartDate: serviceOrderData?.estimateStartDate || '',
-            estimateEndDate: serviceOrderData?.estimateEndDate || '',
-            customerAccount: serviceOrderData?.customerAccount?.optionValue || '',
-            customerContact: serviceOrderData?.customerContact?.optionValue || '',
-            billingAddress: serviceOrderData?.billingAddress?.optionValue || '',
-            shippingAddress: serviceOrderData?.shippingAddress?.optionValue || '',
-            taxCode: serviceOrderData?.taxCode?.optionValue || '',
-            pricingCondition: serviceOrderData?.pricingCondition?.optionValue || '',
-            rentalJob: serviceOrderData?.rentalJob?.optionValue || '',
-            padName: serviceOrderData?.padName?.optionValue || '',
-            collaborator: serviceOrderData?.collaborator?.map((m) => m.optionValue) || []
-          }}
+          referenceData={getRefrenceData()}
           onSuccess={() => {
             if (serviceOrderData?.status === SERVICE_ORDER_STATUS.new) {
               handleChangeStatus(SERVICE_ORDER_STATUS.inProgress);
             }
-             fetchServiceOrderData();
+            fetchServiceOrderData();
             setOpenDialog({ open: false, isClone: false, id: null });
             fetchData();
           }}

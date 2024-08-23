@@ -19,8 +19,7 @@ import {
   rentalManagement,
   MATERIAL_TYPE,
   ASSET_STATUS,
-  sidebarResource,
-  treeToFlatArray
+  sidebarResource
 } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -33,26 +32,41 @@ import MomentUtils from '@date-io/moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import styles from '../../Leads/Header.module.scss';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEqual, startCase } from 'lodash';
 import InfoIcon from '@material-ui/icons/InfoOutlined';
 import EditIcon from '@material-ui/icons/Edit';
 import RentalJobQtyDialog from '../Productpackage/RentalJobQtyDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import InvoiceDataDialog from 'src/pages/RentalManagement/ProgressiveBilling/InvoiceDataDialog';
 
 const calculateServiceDays = (serviceLog: any[], startDate: any, endDate: any) => {
-  const logs = serviceLog?.filter(s => s.endDate);
-  if (!logs?.length) return 0;
   const uniqueDates = new Set<string>();
-  serviceLog.forEach(log => {
-    const logStartDate = new Date(log.startDate);
-    const logEndDate = new Date(log.endDate);
-    for (let date = logStartDate; date <= logEndDate; date.setDate(date.getDate() + 1)) {
-      if (moment(date).isBetween(moment(startDate), moment(endDate), null, '[]')) {
-        uniqueDates.add(date.toISOString().split('T')[0]);
+  const logs = []
+  const newStartDate = moment(startDate).startOf('day');
+  const newEndDate = moment(endDate).startOf('day');
+  serviceLog?.forEach(log => {
+    const logStartDate = moment(log.startDate).startOf('day');
+    const logEndDate = moment(log.endDate || endDate).startOf('day');
+    let index = 0;
+    let tempStartDate
+    let tempEndDate
+    let count = 0;
+    for (const m = moment(logStartDate); m.diff(logEndDate, 'days') <= 0; m.add(1, 'days')) {
+      if (m.isBetween(newStartDate, newEndDate, null, '[]')) {
+        uniqueDates.add(m.format('MM/DD/YYYY'));
+        if (index === 0) {
+          tempStartDate = new Date(m.format('MM/DD/YYYY'));
+        }
+        tempEndDate = new Date(m.format('MM/DD/YYYY'));;
+        count++;
+        index++;
       }
     }
+    if (count) {
+      logs.push({ startDate: tempStartDate, endDate: tempEndDate, actualJobDuration: count })
+    }
   });
-  return uniqueDates.size;
+  return { actualJobDuration: uniqueDates.size, logs };
 }
 
 const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
@@ -63,19 +77,20 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     state: { user }
   }: any = useData();
 
-  const [isUpdating, setUpdating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [material, setMaterial] = useState([]);
   const [orginalMaterial, setOrginalMaterial] = useState([]);
   const [columns, setColumns] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [allFields, setAllFields] = useState([]);
-  const [appliedDate, setAppliedDate] = useState(false);
   const [isApplingDate, setIsApplingDate] = useState(false);
   const [rowsApplied, setRowsApplied] = useState([]);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [proRata, setProRata] = useState(true);
-  const [resourceData, setResourceData] = useState(null);
+  const [rentalResourceData, setRentalResourceData] = useState(null);
+  const [invoiceResourceData, setInvoiceResourceData] = useState(null);
+  const [openInvoiceDataDialog, setOpenInvoiceDataDialog] = useState(false)
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -85,10 +100,15 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     axiosInstance()
       .get(`/dynamic-form/policy?resource=${sidebarResource.rentalManagement}`)
       .then(({ data: { data } }) => {
-        setResourceData(data);
-        if (data?.policy?.invoiceCurrentDateAutoSelect) {
-          setEndDate(new Date());
-        }
+        setRentalResourceData(data);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
+    axiosInstance()
+      .get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`)
+      .then(({ data: { data } }) => {
+        setInvoiceResourceData(data);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -293,13 +313,23 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
-    data.material = data?.material?.filter((e) => e[`price_${rentalManagementData?.currency?.toLowerCase()}`]);
+    const currency = rentalManagementData?.currency?.toLowerCase();
+
+    data.material = data?.material?.filter((e) => e[`price_${currency}`] || e[`finalPrice_${currency}`]);
+
+    if (rentalResourceData?.policy?.hidePackageInInvoice) {
+      data.material = data.material?.filter((e) => e.type !== MATERIAL_TYPE.package)
+      data.material?.forEach((e) => {
+        e.parentId = null;
+      })
+    }
 
     let newMaterial: any = [];
     data?.material?.forEach((d) => {
-      if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
-        d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
-      } else if (d?.type === MATERIAL_TYPE.package && !d?.actualStartDate) {
+      // if (d?.type === MATERIAL_TYPE.service && !d?.actualStartDate) {
+      //   d['actualStartDate'] = new Date(d?.estimateStartDate).toISOString();
+      // } else
+      if (d?.type === MATERIAL_TYPE.package && !d?.actualStartDate) {
         d['actualStartDate'] = d?.estimateStartDate;
       }
       if (returnTicketProducts[d?.materialId] > 0) {
@@ -337,11 +367,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         if (element?.parentId === null && element?.type === MATERIAL_TYPE.product && element?.productDetail?.serializedProduct) {
         } else {
           let values: any = {};
-          values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
-          values['manualEndDate'] = element?.actualEndDate;
-          if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            values['actualJobDuration'] = calculateServiceDays(element?.serviceLog, element['actualStartDate'], values['actualEndDate']);
+          if (element.type !== MATERIAL_TYPE.service) {
+            values['actualEndDate'] = element?.actualEndDate || element?.estimateEndDate;
           }
+          values['manualEndDate'] = element?.actualEndDate;
           const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
           newMaterial.push({ ...element, ...calValues });
 
@@ -414,14 +443,23 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         return materialData;
       }).filter((d) => d.qty > 0);
     }
+
+    data.material?.forEach((element) => {
+      if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
+        const { actualJobDuration } = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
+        element.actualJobDuration = actualJobDuration;
+      }
+    })
+
     setMaterial(data?.material);
     setOrginalMaterial(data?.material);
     initializeTable(data?.material);
   };
 
-  const initializeTable = (material, fromRoot = true) => {
+  const initializeTable = (material) => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
+
     const rows = material?.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
@@ -456,9 +494,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           : true;
       parent.subRows = generateNestedData(material, parent);
     });
-    if (resourceData?.policy?.invoiceCurrentDateAutoSelect && rows?.length > 0 && fromRoot) {
-      handleApplyDate(rows, material);
-    }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -506,12 +541,11 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     }
   };
 
-  const handleApplyDate = async (allRows = [], rawMaterial = []) => {
-    const records = allRows?.length > 0 ? [...treeToFlatArray(allRows, 'subRows')] : [...selectedRecords];
-    const _material = rawMaterial?.length > 0 ? rawMaterial : material;
+  const handleApplyDate = async () => {
+    const records = [...selectedRecords];
+
     setIsApplingDate(true);
     dispatch({ type: 'loading', loading: true });
-    let tempValues: any = { actualEndDate: endDate };
     const childRows: any = [];
     var inUseStandByDays = [];
     if (user?.user?.brandPolicy?.assetDeliveredStatus) {
@@ -557,7 +591,10 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
     }
 
     let rows: any = [];
+
     records?.forEach((element) => {
+      let values: any = { actualEndDate: endDate };
+
       if (element.type === MATERIAL_TYPE.manualEntry) {
         element.isAppliedBill = true;
         rows.push(element);
@@ -566,14 +603,15 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
 
         const product = invoicedProducts?.material?.find((p) => p._id === element._id);
 
-        const productStartDateTime = new Date(new Date(element.actualStartDate).toLocaleDateString()).getTime();
-        const selectedEndDateTime = new Date(new Date(endDate).toLocaleDateString()).getTime();
+        const productStartDateTime = moment(new Date(element.actualStartDate));
+        const selectedEndDateTime = moment(new Date(endDate));
 
-        if (selectedEndDateTime < productStartDateTime) {
+        if (productStartDateTime.isAfter(selectedEndDateTime)) {
           element.invalidDate = true;
-        } else if (product) {
-          const productEndDateTime = new Date(new Date(product?.endDate).toLocaleDateString()).getTime();
-          if (selectedEndDateTime < productEndDateTime) {
+        }
+        else if (product) {
+          const productEndDateTime = moment(new Date(product?.endDate));
+          if (productEndDateTime.isAfter(selectedEndDateTime)) {
             element.invalidDate = true;
           } else {
             element.invalidDate = false;
@@ -581,25 +619,20 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
         }
 
         if (element?.manualEndDate) {
-          const productManualEndDate = new Date(new Date(element?.manualEndDate).toLocaleDateString()).getTime();
-          if (selectedEndDateTime > productManualEndDate) {
-            tempValues.actualEndDate = element?.manualEndDate;
+          const productManualEndDate = moment(new Date(element?.manualEndDate));
+          if (selectedEndDateTime.isAfter(productManualEndDate)) {
+            values.actualEndDate = element?.manualEndDate;
           }
-          if (productManualEndDate < productStartDateTime) {
+          if (productStartDateTime.isAfter(productManualEndDate)) {
             element.invalidDate = true;
           }
         }
 
-        if (element?.type === MATERIAL_TYPE.service && element?.serviceLog?.length && element?.actualEndDate) {
-          tempValues.actualEndDate = element?.actualEndDate;
-        }
-
         let priceFieldName = `price_${rentalManagementData?.currency?.toLowerCase()}`;
 
+        const extraRows: any = []
         const priceField = allFields?.find((e) => e.fieldName === 'price');
-
         let calValues: any;
-        let values = JSON.parse(JSON.stringify(tempValues));
 
         if (inUseStandByDays?.length) {
           const daysFound = inUseStandByDays?.find((e) => e.parentIds?.includes(element._id));
@@ -609,7 +642,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             values['standByDaysNotChargeable'] = daysFound[ASSET_STATUS.standByNotChargeable] || 0;
           }
         }
-
         if (element.pricingMethod === 'Per Week') {
           if (proRata) {
             values['pricingMethod'] = 'Per Day';
@@ -658,27 +690,177 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           );
         } else {
           if (element?.type === MATERIAL_TYPE.service && element?.pricingMethod === 'Per Day' && element?.serviceLog?.length) {
-            values['actualJobDuration'] = calculateServiceDays(element?.serviceLog, element['actualStartDate'], element['actualEndDate']);
-            if (!values['actualJobDuration']) {
-              element.invalidDate = true;
+            const { actualJobDuration, logs } = calculateServiceDays(element?.serviceLog, element['actualStartDate'], values['actualEndDate']);
+            if (logs?.length > 1) {
+              values['actualStartDate'] = logs[0]?.startDate
+              values['actualEndDate'] = logs[0]?.endDate
+              values['actualJobDuration'] = logs[0]?.actualJobDuration;
+              element.hideSelection = true;
+              logs?.forEach((e, index) => {
+                if (index !== 0) {
+                  const row = { ...element };
+                  const tempValue = {};
+                  tempValue['actualStartDate'] = e?.startDate
+                  tempValue['actualEndDate'] = e?.endDate
+                  tempValue['actualJobDuration'] = e?.actualJobDuration;
+                  const tempCalValues = autoCalculateSpecificFields(tempValue, { ...row, ...tempValue }, allFields);
+                  row.isAppliedBill = true;
+                  row.hideSelection = true;
+                  extraRows.push({ ...row, ...tempCalValues });
+                }
+              })
+            }
+            else {
+              values['actualJobDuration'] = actualJobDuration;
+              if (!actualJobDuration) {
+                element.invalidDate = true;
+              }
             }
           }
           calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields);
         }
         element.isAppliedBill = true;
         rows.push({ ...element, ...calValues });
+        if (extraRows?.length) {
+          rows = [...rows, ...extraRows]
+        }
       }
     });
-    let tempRows = _material?.map((obj) => rows.find((o) => o._id === obj._id) || obj);
+    let tempRows: any = [];
+    material?.forEach((obj) => {
+      if (rows.filter((o) => o._id === obj._id)?.length) {
+        tempRows = [...tempRows, ...rows.filter((o) => o._id === obj._id)]
+      }
+      else {
+        tempRows.push(obj)
+      }
+    })
+
+    const parentPackages = tempRows?.filter((ele) => !ele.parentId && ele.type === MATERIAL_TYPE.package);
+    parentPackages.forEach((parent) => {
+      processPackage(parent, tempRows)
+    });
+
     setMaterial(tempRows);
-    initializeTable([...tempRows, ...childRows], false);
+    initializeTable([...tempRows, ...childRows]);
     setRowsApplied((prevState) => {
       let prevRowsApplied = prevState.filter((obj) => !rows.map((d) => d._id).includes(obj._id));
       return [...prevRowsApplied, ...rows, ...childRows];
     });
     setIsApplingDate(false);
-    setAppliedDate(true);
   };
+
+  const processPackage = (parent, allMaterial) => {
+
+    const processMaterial = (parent) => {
+      if ([MATERIAL_TYPE.service, MATERIAL_TYPE.product].includes(parent.type)) {
+        return parent;
+      }
+
+      const childMaterial = allMaterial?.filter(m => m.parentId && isEqual(m.parentId, parent._id)) || [];
+      const childData = [];
+      childMaterial?.forEach((child) => {
+        const data = processMaterial(child);
+        childData.push(data);
+      });
+      let updatedParent = parent;
+      if (childData?.length > 0) {
+        updatedParent = sumOnParent(parent, childData, allFields, rentalManagementData.currency);
+        let calValues = autoCalculateSpecificFields({ ['actualEndDate']: updatedParent['actualEndDate'] }, updatedParent, allFields);
+
+        if (calValues['actualJobDuration']) {
+          updatedParent['actualJobDuration'] = calValues['actualJobDuration'];
+        }
+        Object.assign(parent, updatedParent);
+      }
+
+      return updatedParent;
+    };
+
+    processMaterial(parent);
+  }
+
+  const sumOnParent = (parent, child, fields, currency) => {
+    const resetFields = []
+    fields.forEach((element) => {
+
+      if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
+        if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+          element.displayUnits.forEach((_unit) => {
+            resetFields.push({ fieldName: element.fieldName + "_" + _unit.toLowerCase(), type: "amount" })
+          })
+        }
+        else if (element.type === "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
+          element.displayUnits.forEach((_unit) => {
+            element.displayCurrency.forEach((_currency) => {
+              resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase() + "_" + _unit.toLowerCase(), type: "amount" })
+            })
+          })
+        }
+        else if (element.type === "currencyAmount") {
+          element.displayCurrency.forEach((_currency) => {
+            resetFields.push({ fieldName: element.fieldName + "_" + _currency.toLowerCase(), type: "amount" })
+          })
+        }
+      }
+      else if (element.type === "percent") {
+        resetFields.push({ fieldName: element.fieldName, type: "percent" })
+      }
+      else if (element.type === "date") {
+        resetFields.push({ fieldName: element.fieldName, type: "date" })
+      }
+
+    })
+    const sumValues: any = {}
+    resetFields.forEach((_field: any) => {
+      sumValues[_field.fieldName] = 0;
+      if (['actualStartDate', 'actualEndDate'].includes(_field.fieldName)) {
+        const { minStartDate, maxEndDate } = child?.reduce(
+          (acc, ele) => {
+            if (ele?.actualStartDate) {
+              const startDate = new Date(ele?.actualStartDate);
+              if (!acc.minStartDate || startDate < acc.minStartDate) {
+                acc.minStartDate = startDate;
+              }
+            }
+            if (ele?.actualEndDate) {
+              const endDate = new Date(ele?.actualEndDate);
+              if (!acc.maxEndDate || endDate > acc.maxEndDate) {
+                acc.maxEndDate = endDate;
+              }
+            }
+            return acc;
+          },
+          { minStartDate: null, maxEndDate: null }
+        );
+
+        sumValues['actualStartDate'] = minStartDate;
+        sumValues['actualEndDate'] = maxEndDate;
+      } else {
+        child.forEach(element => {
+          sumValues[_field.fieldName] += element[_field.fieldName] ? element[_field.fieldName] : 0;
+        });
+      }
+    });
+
+    resetFields.forEach((ele) => {
+      if (ele.type === "amount") {
+        parent[ele.fieldName] = sumValues[ele.fieldName];
+      }
+      else {
+        if (ele.fieldName === "discountPercentage") {
+          parent[ele.fieldName] = parseFloat(((sumValues[`discount_${currency?.toLowerCase()}`] / sumValues[`totalPrice_${currency?.toLowerCase()}`]) * 100)?.toFixed(2));
+        }
+        if (ele.fieldName === "taxPercentage") {
+          parent[ele.fieldName] = parseFloat(((sumValues[`tax_${currency?.toLowerCase()}`] / (sumValues[`totalPrice_${currency?.toLowerCase()}`] - sumValues[`discount_${currency?.toLowerCase()}`])) * 100)?.toFixed(2));
+        }
+        if (['actualStartDate', 'actualEndDate'].includes(ele.fieldName)) {
+          parent[ele.fieldName] = sumValues[ele.fieldName];
+        }
+      }
+    })
+    return parent;
+  }
 
   const handleSaveData = async (rows: any) => {
     rows[0].isAppliedBill = true;
@@ -696,14 +878,16 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       return [...prevRowsApplied, ...rows];
     });
     setIsProductEdit({ open: false, rowData: null });
-    setAppliedDate(true);
   };
 
-  const handleCreateBill = () => {
+  const handleCreateBill = (invoiceData = null) => {
     rowsApplied?.forEach((element) => {
       delete element?.index;
-      if (element.type !== MATERIAL_TYPE.other) {
+      if (![MATERIAL_TYPE.other, MATERIAL_TYPE.manualEntry]?.includes(element.type)) {
         delete element?.detail;
+      }
+      if (element.type !== MATERIAL_TYPE.manualEntry) {
+        delete element?.description;
       }
       delete element?.qtyDisplay;
       delete element?.hideSelection;
@@ -715,9 +899,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       delete element?.manualEndDate;
       delete element?.isAppliedBill;
       delete element?.serviceLog;
-      if (element.type !== MATERIAL_TYPE.manualEntry) {
-        delete element?.description;
-      }
       if (element.type === MATERIAL_TYPE.service && element?.parentId) {
         if (!rowsApplied?.find((e) => e._id === element?.parentId)) {
           element.parentId = null;
@@ -725,18 +906,19 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
       }
     });
 
-    setUpdating(true);
+    setIsSubmitting(true);
     axiosInstance()
       .post(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing`, {
         material: rowsApplied.filter((d) => d.type !== MATERIAL_TYPE.manualEntry),
-        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry)
+        additionalCost: rowsApplied.filter((d) => d.type === MATERIAL_TYPE.manualEntry),
+        invoiceData: invoiceData
       })
       .then(() => {
-        setUpdating(false);
+        setIsSubmitting(false);
         onSuccess();
       })
       .catch((error) => {
-        setUpdating(false);
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -767,26 +949,6 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                           />
                         </FormGroup>
                       </div>
-                      {/* <KeyboardDatePicker
-                            autoOk
-                            fullWidth
-                            size="small"
-                            disablePast
-                            variant="inline"
-                            inputVariant="outlined"
-                            minDate={estimateStartDate}
-                            value={startDate}
-                            name="startDate"
-                            label="Start Date"
-                            onChange={(date: any) => {
-                              setStartDate(date ? date : null);
-                            }}
-                            format={dateFormat}
-                            InputLabelProps={{
-                              shrink: true
-                            }}
-                            margin="dense"
-                          /> */}
                       <KeyboardDatePicker
                         autoOk
                         fullWidth
@@ -796,7 +958,7 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                         // minDate={endDate || new Date()}
                         value={endDate}
                         name="endDate"
-                        label="End Date"
+                        label="Invoice Closing Date"
                         onChange={(date: any) => {
                           setEndDate(date ? date : null);
                         }}
@@ -808,14 +970,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                       />
                       <Box style={{ display: 'flex', gap: '5px' }}>
                         <HtmlTooltip
-                          title={
-                            !Boolean(
-                              selectedRecords &&
-                              selectedRecords?.length &&
-                              (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
-                            )
-                              ? 'Please select product to apply'
-                              : ''
+                          title={selectedRecords?.length === 0 ? 'Please select items to apply'
+                            : selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry) ? ''
+                              : !moment(endDate)?.isValid() ? 'Please select valid date' : ''
                           }
                         >
                           <span>
@@ -824,10 +981,8 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                               color="primary"
                               disabled={
                                 isApplingDate ||
-                                !Boolean(
-                                  selectedRecords &&
-                                  selectedRecords?.length &&
-                                  (endDate || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
+                                !Boolean(selectedRecords?.length &&
+                                  (endDate && moment(endDate)?.isValid() || selectedRecords?.every((d) => d.type === MATERIAL_TYPE.manualEntry))
                                 )
                               }
                               size="small"
@@ -840,49 +995,38 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                           </span>
                         </HtmlTooltip>
                       </Box>
-                      {/* <Button
-                        variant="contained"
-                        color="primary"
-                        disabled={
-                          selectedProducts.filter((d) => !['Per Day', 'Per Week', 'Per Month'].includes(d.pricingMethod)).length === 0 ||
-                          selectedProducts.length !== 1
-                        }
-                        size="small"
-                        onClick={() => {
-                          setOpenQtyEdit(true);
-                        }}
-                      >
-                        Edit Qty
-                      </Button> */}
                     </Grid>
                   </Box>
                 </Grid>
               </Grid>
             </MuiPickersUtilsProvider>
-            {columns ? (
-              <Box zIndex={5} p={1}>
-                <CustomReactTable
-                  height={'calc(100vh - 250px)'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  setWholeRowsCellColor={(rowData) => {
-                    if (rowData?.invalidDate) return 'error';
-                    if (rowData?.isAppliedBill) return 'isAppliedBill';
-                    return '';
-                  }}
-                  refreshGrid={fetchData}
-                  renderedFrom={renderedFrom}
-                  isClientSideGrid={true}
-                  expander={true}
-                />
-              </Box>
-            ) : (
-              <Box p={2} height={500}>
-                <CommonSkeleton lenArray={[...Array(10).keys()]} />
-              </Box>
-            )}
           </Fragment>
+          {columns ? (
+            <Box zIndex={5} p={1}>
+              <CustomReactTable
+                height={'calc(100vh - 250px)'}
+                columns={columns}
+                state={state}
+                dispatch={dispatch}
+                setWholeRowsCellColor={(rowData) => {
+                  if (rowData?.invalidDate) return 'error';
+                  if (rowData?.isAppliedBill) return 'isAppliedBill';
+                  return '';
+                }}
+                refreshGrid={() => {
+                  setRowsApplied([])
+                  fetchData()
+                }}
+                renderedFrom={renderedFrom}
+                isClientSideGrid={true}
+                expander={rentalResourceData?.policy?.hidePackageInInvoice ? false : true}
+              />
+            </Box>
+          ) : (
+            <Box p={2} height={500}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
         </CustomDialogContent>
         <CustomDialogFooter>
           <Button
@@ -897,12 +1041,9 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
             Cancel
           </Button>
           <HtmlTooltip
-            title={
-              !appliedDate
-                ? 'Please select items and apply end date'
-                : rowsApplied?.some((d) => d.invalidDate === true)
-                  ? 'Please select an appropriate date !'
-                  : 'Create Bill'
+            title={rowsApplied?.length === 0 ? 'Please select items and invoice closing date then apply '
+              : rowsApplied?.some((d) => d.invalidDate === true) ? 'Please select an appropriate date !'
+                : 'Create Bill'
             }
           >
             <span>
@@ -911,9 +1052,13 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
                 variant="contained"
                 color="primary"
                 size="small"
-                disabled={isUpdating || !appliedDate || rowsApplied.some((d) => d.invalidDate === true)}
+                disabled={isSubmitting || rowsApplied?.length === 0 || rowsApplied.some((d) => d.invalidDate === true)}
                 onClick={() => {
-                  handleCreateBill();
+                  if (invoiceResourceData?.policy?.rentalInvoiceFields?.length > 0) {
+                    setOpenInvoiceDataDialog(true)
+                  } else {
+                    handleCreateBill();
+                  }
                 }}
               >
                 Create Bill
@@ -933,9 +1078,21 @@ const CreateBillingDialog = ({ rentalManagementData, onClose, onSuccess }) => {
           rowData={orginalMaterial.find((d) => d._id === isProductEdit.rowData._id)}
           material={material}
           selectedProducts={[]}
-          loading={isUpdating}
+          loading={isSubmitting}
           isQtyOnly={true}
           isRateRequired={false}
+        />
+      )}
+      {openInvoiceDataDialog && (
+        <InvoiceDataDialog
+          onClose={() => {
+            setOpenInvoiceDataDialog(false)
+          }}
+          rentalInvoiceFields={invoiceResourceData?.policy?.rentalInvoiceFields}
+          onSuccess={(data) => {
+            handleCreateBill(data)
+            setOpenInvoiceDataDialog(false)
+          }}
         />
       )}
     </Fragment>

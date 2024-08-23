@@ -34,6 +34,7 @@ import getAzureAcessToken from '../../Azure/getAzureAccessToken';
 import { RelatedToDispay } from '../Helpers/RelatedToDispay';
 import ImageAttachments from './ImageAttachments';
 import ImagePreview from './ImagePreview';
+import { StepDefination, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 // const emailSchemaHelper = array()
 //   .transform(function (value, originalValue) {
@@ -93,6 +94,7 @@ export const CreateEmail = ({
   referenceType = '',
   isAttachmentLoading = false
 }) => {
+  const walkmeInstance = useGetWalkmeInstance();
   const {
     state: { user }
   }: any = useData();
@@ -143,6 +145,27 @@ export const CreateEmail = ({
     return () => cancelTokenSource.cancel();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    cratefieldSteps();
+  }, []);
+
+  const cratefieldSteps = () => {
+    const data: StepDefination[] = [
+      { target: '#send-email-dialog-subject-input', title: 'Write a subject', nextOnValueChange: true },
+      { target: '#send-email-dialog-to-input', title: 'Select recipients', nextOnValueChange: true, fieldType: 'multiSelect' },
+      {
+        target: '#editor_ifr',
+        title: 'Write your message',
+        content: 'Press Ctrl+Enter to resume ride',
+        nextOnFocusOut: true
+      }
+    ];
+    if (walkmeInstance) {
+      walkmeInstance.instance.insertAtCurrentIndex(data);
+      walkmeInstance.handleNext();
+    }
+  };
 
   const checkImageUrl = (url) => {
     let extension = url.substring(url.lastIndexOf('.')).toLowerCase();
@@ -353,8 +376,6 @@ export const CreateEmail = ({
     setQuoteBuilderOtherAttachments(quoteBuilderOtherAttachments.filter((o) => o?.name !== (name?.name || name)));
   };
 
-  const classes = useStyles();
-
   const renderQuotesOtherFileThumbnails = (
     <>
       {quoteBuilderOtherAttachments && quoteBuilderOtherAttachments.length > 0 ? (
@@ -477,6 +498,7 @@ export const CreateEmail = ({
                           <Grid item xs={12}>
                             <TextField
                               autoComplete="off"
+                              id={'send-email-dialog-subject-input'}
                               variant="outlined"
                               type="text"
                               label="Subject"
@@ -496,6 +518,7 @@ export const CreateEmail = ({
                               disableCloseOnSelect={true}
                               options={emailUsersOptions.filter((option) => values.cc.indexOf(option) < 0)}
                               freeSolo
+                              id={'send-email-dialog-to-input'}
                               renderTags={(value, getTagProps) =>
                                 value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
                               }
@@ -512,6 +535,7 @@ export const CreateEmail = ({
                                 />
                               )}
                               value={values['to']}
+                              datatype="multiSelect"
                               onBlur={(e: any) => {
                                 if (e.target.value && e.target.value.trim() != '' && validations.email.test(e.target.value)) {
                                   setFieldValue('to', isQuoteBuilder ? [e.target.value] : [...values['to'], e.target.value]);
@@ -537,6 +561,7 @@ export const CreateEmail = ({
                               disableCloseOnSelect={true}
                               options={isQuoteBuilder ? cc : emailUsersOptions.filter((option) => values.to.indexOf(option) < 0)}
                               freeSolo
+                              id={'send-email-dialog-cc-input'}
                               renderTags={(value, getTagProps) =>
                                 value.map((option, index) => <Chip variant="outlined" label={option} {...getTagProps({ index })} />)
                               }
@@ -628,6 +653,7 @@ export const CreateEmail = ({
                     if (isEqual(initialValues, values)) handleClose();
                     else setShowConfirmDialog(true);
                   }}
+                  id={'send-email-dialog-cancel-button'}
                 >
                   Cancel
                 </Button>
@@ -642,6 +668,7 @@ export const CreateEmail = ({
                       e.preventDefault();
                       submitForm();
                     }}
+                    id={'send-email-dialog-send-button'}
                   >
                     {sending ? (
                       <>

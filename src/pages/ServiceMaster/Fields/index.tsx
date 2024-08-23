@@ -9,6 +9,7 @@ import { CustomDialogTransition, fieldLabelToFieldName, serviceMaster } from 'sr
 import axiosInstance from 'src/axios/axiosInstance';
 import { map, uniq } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import { checkFormulaLoop } from 'src/constants/formulaUtility';
 
 const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '', fields = null }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -87,27 +88,18 @@ const ConfigureFields = ({ serviceId, handleClose, handleSucess, reference = '',
         data.push(_field_data);
       });
     });
-    const errorFields = [];
-    const fieldNameMap: any = [];
-    data?.forEach((e) => {
-      if (fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)) {
-        errorFields.push(fieldNameMap?.find((ele) => ele.fieldName === e.fieldName)?.fieldLabel);
-      } else {
-        fieldNameMap.push({ fieldName: e.fieldName, fieldLabel: e.fieldLabel });
-      }
-    });
-    if (errorFields?.length) {
+    const result = checkFormulaLoop(data);
+    if (result.error) {
       toastConfig.setToastConfig({
         open: true,
         type: 'error',
-        message: `Field ${errorFields?.toString()} duplicate`
+        message: result.message
       });
       return false;
     }
-
     if (reference === 'workOrder') {
       handleSucess(data);
-	  setSubmitting(false);
+      setSubmitting(false);
     } else {
       axiosInstance()
         .post(`${serviceMaster.api}/service-fields/${serviceId}`, data)

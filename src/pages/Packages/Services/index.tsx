@@ -16,8 +16,10 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
-const ServiceTable = ({ packageId, packageData }) => {
-  const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_${packageData?.packageType || 'product'}`;
+const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
+
+  const renderedFrom = `${camelCase(routes?.packages.title)}_service'}`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, user }
@@ -47,15 +49,7 @@ const ServiceTable = ({ packageId, packageData }) => {
         let rows = data.map((u) => {
           let res = {
             ...prepareDataForGrid(u, user),
-            inventoryCount: u?.qty,
-            warehouses: u.warehouse?.map((w) => w.warehouseName).join(', '),
-            productCategoryChipColor: u.productCategory?.chipColour
           };
-          for (let col in res) {
-            if (res[col] && res[col].optionLabel) {
-              res[col] = res[col].optionLabel;
-            }
-          }
           return res;
         });
         dispatch({ type: 'initialize', data: rows, count: data.length });
@@ -75,6 +69,15 @@ const ServiceTable = ({ packageId, packageData }) => {
       filter: false,
       sortable: false,
       Cell: ({ row }) => (row.original?.order ? <div>{row?.original?.order}</div> : <NoDataCell />)
+    },
+    {
+      accessor: 'qty',
+      Header: 'Qty',
+      editable: allowedToEdit,
+      disableFilters: true,
+      disableSortBy: true,
+      disabled: true,
+      Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
     }
   ];
 
@@ -83,24 +86,10 @@ const ServiceTable = ({ packageId, packageData }) => {
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
     data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path);
-    setColumns([...defaultColumns, ...newColumns, ActionsRenderer]);
+    setColumns([...defaultColumns, ...newColumns]);
   };
 
-  const ActionsRenderer = {
-    accessor: 'qty',
-    Header: 'Qty',
-    minWidth: 100,
-    width: 100,
-    sticky: 'right',
-    editable: permissions?.packages?.isUpdate,
-    cellEditor: 'numericCellEditor',
-    disableFilters: true,
-    disableSortBy: true,
-    canDrag: false,
-    Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
-  };
-
-  const handleUpdateQuantity = (data, row) => {
+  const onSaveInlineEdit = (data, row) => {
     axiosInstance()
       .put(`${packages.api}/${packageId}/services`, {
         ids: [row?._id],
@@ -179,7 +168,7 @@ const ServiceTable = ({ packageId, packageData }) => {
   const addButtonMenuItems = () => {
     return (
       <>
-        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Services</MenuItem>
+        <MenuItem onClick={() => setShowServiceAssignDialog(true)}>Add Existing Services</MenuItem>
       </>
     );
   };
@@ -200,7 +189,7 @@ const ServiceTable = ({ packageId, packageData }) => {
   };
 
   const rightSideContents = () => {
-    return permissions?.packages?.isCreate || permissions?.packages?.isUpdate &&
+    return (allowedToEdit && (
       <>
         <ImportExportMenu
           permissions={permissions?.packages}
@@ -218,14 +207,16 @@ const ServiceTable = ({ packageId, packageData }) => {
           Arrange
         </Button>
       </>
+    )
+    );
   };
 
   return (
     <Box>
       <DetailsPageHeader
-        isAddButtonVisible={permissions?.packages?.isUpdate}
+        isAddButtonVisible={allowedToEdit}
         addButtonMenuItems={addButtonMenuItems()}
-        isActionButtonVisible={permissions?.packages?.isUpdate}
+        isActionButtonVisible={allowedToEdit}
         actionButtonMenuItems={actionButtonMenuItems()}
         actionButtonProps={{ disabled: selectedRecords.length === 0 || isRemovingServices }}
         rightSideContents={rightSideContents()}
@@ -233,15 +224,16 @@ const ServiceTable = ({ packageId, packageData }) => {
       />
       {columns ? (
         <CustomReactTable
-          height={'calc(100vh - 393px)'}
+          height={fullHeight ? 'calc(100vh - 250px)' : 'calc(100vh - 393px)'}
           columns={columns}
           state={state}
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={fetchData}
-          onSaveEdit={handleUpdateQuantity}
-          hideSelection={permissions?.packages?.isCreate || permissions?.packages?.isUpdate ? false : true}
+          onSaveEdit={onSaveInlineEdit}
+          hideSelection={!allowedToEdit}
+          hideExportTable={true}
         />
       ) : (
         <Box p={2} height={500}>

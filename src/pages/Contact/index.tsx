@@ -6,7 +6,7 @@ import { camelCase } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { AiOutlineDeploymentUnit } from 'react-icons/ai';
 import { Link, useHistory } from 'react-router-dom';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -28,6 +28,7 @@ import WarhouseList from '../Account/Warehouse/WarhouseList';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
+import { isMobile, isTablet } from "react-device-detect";
 
 const types = [
   {
@@ -77,7 +78,7 @@ export default function Contact(props) {
   const [isAddingWarehouse, setAddingWarehouse] = useState(false);
   const [entities, setEntities] = useState([]);
   const [columns, setColumns] = useState(null);
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
 
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -547,6 +548,7 @@ export default function Contact(props) {
           {showAssignEntityDialog && (
             <Dialog
               fullWidth
+              fullScreen={isMobile || isTablet}
               maxWidth="xs"
               open={showAssignEntityDialog}
               onClose={() => setShowAssignEntityDialog(false)}

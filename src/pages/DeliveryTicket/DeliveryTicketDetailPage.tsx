@@ -50,6 +50,9 @@ import DeliveryTicketProduct from './DeliveryTicketProduct';
 import ManageDeliveryTicket from './ManageDeliveryTicket';
 import ViewSignsDialog from './ViewSignsDialog';
 import { updateSignatureOffline } from './deliveryTicketOfflineHelper';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { RiFolderReceivedLine } from 'react-icons/ri';
+import { TbTruckDelivery } from 'react-icons/tb';
 
 export default function DeliveryTicketDetail(props) {
   const renderedFrom = `${camelCase(routes?.deliveryTicket.title)}_grid-1`;
@@ -137,8 +140,11 @@ export default function DeliveryTicketDetail(props) {
         }
       }
       data = data.filter((fields: any) => {
-        if ([...Object.keys(DELIVERY_TICKET_REFERENCE_TYPE)?.filter((e) => e !== ticketTypeKey),
-          'pickupFromType', 'deliveryToType'].includes(fields.fieldData.fieldName)) {
+        if (
+          [...Object.keys(DELIVERY_TICKET_REFERENCE_TYPE)?.filter((e) => e !== ticketTypeKey), 'pickupFromType', 'deliveryToType'].includes(
+            fields.fieldData.fieldName
+          )
+        ) {
           return false;
         }
         if (fields.fieldData.sectionName.includes('Fields')) {
@@ -413,7 +419,9 @@ export default function DeliveryTicketDetail(props) {
   };
 
   const handleChangeStatusInUse = (status, prevStatus, date) => {
-    const assets = dataRows?.map((e) => e._id);
+    const assets = dataRows?.map((e) => {
+      return { asset: e._id, uniqueId: e.uniqueId };
+    });
     if (assets?.length) {
       axiosInstance()
         .put(`${rentalManagement.api}/${deliveryTicketData?.rentalJob?.optionValue}/assets-inuse-standby`, {
@@ -455,8 +463,9 @@ export default function DeliveryTicketDetail(props) {
                 deliveryTicketData?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob &&
                 [DELIVERY_TICKET_STATUS.inTransit].includes(deliveryTicketData?.status) &&
                 [DELIVERY_TICKET_TYPE.loading, DELIVERY_TICKET_TYPE.receiving].includes(deliveryTicketData?.ticketType) && (
-                  <Button
-                    variant={isMobile && !isTablet ? 'text' : 'contained'}
+                  <ThemeButton
+                    iconForMobile={deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? <TbTruckDelivery /> : <RiFolderReceivedLine />}
+                    mobileTooltip={deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
                     className="btn-outline-v1"
                     size="small"
                     onClick={() => {
@@ -476,8 +485,9 @@ export default function DeliveryTicketDetail(props) {
                     style={isMobile && !isTablet ? { color: 'var(--teal)' } : {}}
                   >
                     {deliveryTicketData?.ticketType === DELIVERY_TICKET_TYPE.loading ? 'Delivered to Customer' : 'Receive Item'}
-                  </Button>
+                  </ThemeButton>
                 )}
+
               {permissions?.deliveryTicket?.isUpdate &&
                 canEdit &&
                 ![DELIVERY_TICKET_STATUS.delivered, DELIVERY_TICKET_STATUS.cancelled].includes(deliveryTicketData?.status) && (
@@ -510,7 +520,9 @@ export default function DeliveryTicketDetail(props) {
                 hideDetailButton={true}
                 fileName={`${routes.deliveryTicket.title}-${deliveryTicketData?.ticketName}`}
                 columns={serializedAssetColumns?.length ? serializedAssetColumns : productColumns}
-                defaultColumns={serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']}
+                defaultColumns={
+                  serializedAssetColumns?.length ? ['assetNumber', 'product', 'productDescription'] : ['productName', 'productDescription']
+                }
               />
               <ActivityButton
                 referenceId={deliveryTicketData?._id}
@@ -586,7 +598,7 @@ export default function DeliveryTicketDetail(props) {
           {permissions?.serializedAsset?.isRead && (
             <TabPanel value={tabValue} index={1}>
               <Grid container spacing={1} className="p-2">
-                <Grid item xs={12} className="mt-2 d-flex gap-2">
+                <Grid item xs={12} className="d-flex mt-2 gap-2">
                   {deliveryTicketData?.status === 'New' && (
                     <IconButton
                       onClick={() => {

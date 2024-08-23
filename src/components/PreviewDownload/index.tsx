@@ -59,7 +59,7 @@ function PreviewDownload({
 
   const [emailAttachments, setEmailAttachments] = useState([]);
 
-  const handleView = (type, operation, subType, visibleColumns) => {
+  const handleView = (type, operation, subType, visibleColumns, sortBy= '', orderBy= '') => {
     setLoadingType(subType);
     setBtnLoading(operation);
 
@@ -80,6 +80,9 @@ function PreviewDownload({
           api = `/pdf/${referenceId}/detail?resource=${resource}&columns=${showColumns}`;
         } else {
           api = `/pdf/${referenceId}?resource=${resource}&columns=${showColumns}`;
+        }
+        if(sortBy && orderBy) {
+          api = `${api}&sortBy=${sortBy}&orderBy=${orderBy}`;
         }
       }
     }
@@ -165,6 +168,7 @@ function PreviewDownload({
           {
             <ThemeButton
               size="small"
+              id={'details-page-preview-button'}
               tooltip="Preview"
               iconForMobile={<VisibilityIcon />}
               startIcon={<VisibilityIcon />}
@@ -183,6 +187,7 @@ function PreviewDownload({
 
           <ThemeButton
             iconForMobile={<DownloadIcon />}
+            id={'details-page-download-button'}
             tooltip="Download"
             startIcon={<DownloadIcon />}
             disabled={btnLoading === 'Download'}
@@ -199,6 +204,7 @@ function PreviewDownload({
 
           {isExcelDownload && (
             <ThemeButton
+              id={'details-page-export-to-excel-button'}
               iconForMobile={<ExportIcon />}
               tooltip="Export To Excel"
               startIcon={<ExportIcon />}
@@ -213,6 +219,7 @@ function PreviewDownload({
           {isSendEmail && (
             <ThemeButton
               iconForMobile={<MdEmail />}
+              id={'details-page-send-email-button'}
               disabled={btnLoading === 'Send Email'}
               startIcon={<MdEmail />}
               tooltip="Send Email"
@@ -235,7 +242,7 @@ function PreviewDownload({
           handleClose={() => {
             setShowColumnsDialog({ open: false, type: '', operation: '' });
           }}
-          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel) => {
+          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortBy= '', orderBy= '') => {
             if (showColumnsDialog.operation === 'Send Email') {
               setLoadingType('email');
               handleView('PDF', 'base64', 'Regular', visibleColumnsPdf);
@@ -251,7 +258,9 @@ function PreviewDownload({
                 showColumnsDialog.type,
                 showColumnsDialog.operation,
                 subType,
-                showColumnsDialog.type === 'Excel' ? visibleColumnsExcel : visibleColumnsPdf
+                showColumnsDialog.type === 'Excel' ? visibleColumnsExcel : visibleColumnsPdf,
+                sortBy,
+                orderBy
               );
             }
           }}

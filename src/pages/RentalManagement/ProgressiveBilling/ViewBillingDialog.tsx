@@ -7,7 +7,7 @@ import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, checkIsAllowedToEdit, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, checkIsAllowedToDelete, checkIsAllowedToEdit, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -24,8 +24,9 @@ import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { useData } from 'src/StateProvider/Provider';
 import { FiExternalLink } from 'react-icons/fi';
+import { DeleteButton } from 'src/components/Helpers/Buttons';
 
-const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSuccess }) => {
+const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess, allowCreateInvoice, isLatestInvoice }) => {
 
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
 
@@ -46,17 +47,44 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     state: { user, permissions }
   }: any = useData();
 
-  const [allowedToEdit, setAllowedToEdit] = useState(checkIsAllowedToEdit(user, sidebarResource.invoice, invoiceData?.orignalData) && permissions?.invoice?.isUpdate);
+  const [invoiceData, setInvoiceData] = useState(null);
+
+  const [allowedToEdit, setAllowedToEdit] = useState(false);
+  const [allowedToDelete, setAllowedToDelete] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchFields();
-  }, []);
+    fetchInvoiceData()
+  }, [invoiceId]);
 
   useEffect(() => {
-    if (columns) {
+    if (invoiceData) {
+      fetchFields();
+    }
+  }, [invoiceData]);
+
+  useEffect(() => {
+    if (columns && invoiceData) {
       fetchData();
     }
-  }, [columns]);
+  }, [columns, invoiceData]);
+
+  const fetchInvoiceData = async () => {
+    try {
+      let data;
+      const response: any = await axiosInstance().get(`${invoice.api}/${invoiceId}`);
+      data = response?.data?.data;
+      setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice);
+      setAllowedToDelete(
+        permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue)
+        && data?.canDelete && allowCreateInvoice
+      );
+      setInvoiceData(data);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchFields = async () => {
     try {
@@ -171,23 +199,20 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                 <Box ml={1} />
               </>
             )}
-            {
-              row.original['type'] !== MATERIAL_TYPE.other && (
-                <IconButton
-                  disabled={!invoiceData?.isLatestInvoice}
-                  size="small"
-                  aria-label="Details"
-                  onClick={() => {
-                    const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
-                    getNestedSubRows(obj, row.original);
-                    setViewBillDialogConfirm({ open: true, rows: obj });
-                  }}
-                >
-                  <Delete color={invoiceData?.isLatestInvoice ? 'error' : 'disabled'} />
-                </IconButton>
-              )
-            }
-
+            {row.original['type'] !== MATERIAL_TYPE.other && (
+              <IconButton
+                disabled={!isLatestInvoice}
+                size="small"
+                aria-label="Details"
+                onClick={() => {
+                  const obj: any = [{ id: row.original._id, type: row.original?.type, materialId: row.original?.materialId }];
+                  getNestedSubRows(obj, row.original);
+                  setViewBillDialogConfirm({ open: true, rows: obj });
+                }}
+              >
+                <Delete fontSize='small' color={isLatestInvoice ? 'error' : 'disabled'} />
+              </IconButton>
+            )}
           </Grid>
         )
       });
@@ -202,10 +227,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
     dispatch({ type: 'selection', selectedRecords: [] });
 
     var data: any = [];
-    const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
+    const response = await axiosInstance().get(`${invoice.api}/material/${invoiceId}`);
     data = response?.data?.data;
 
-    const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceData._id}/additional-cost`);
+    const responseAdditionalCostData = await axiosInstance().get(`${invoice.api}/${invoiceId}/additional-cost`);
     let additionalCostData = responseAdditionalCostData?.data?.data;
 
     const rows = data.material.filter((e) => e.parentId === null);
@@ -322,10 +347,30 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchData();
+        fetchInvoiceData()
         setViewBillDialogConfirm({ open: false, rows: [] });
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+      });
+  };
+
+  const handleDeleteInvoice = async () => {
+    setIsSubmitting(true);
+    axiosInstance().put(`${invoice.api}/remove`, { ids: [invoiceId] })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowDeleteConfirmBox(false);
+        setIsSubmitting(false);
+        onSuccess();
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+        setIsSubmitting(false);
       });
   };
 
@@ -343,21 +388,26 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
                   referenceId={invoiceData?._id}
                   columns={columns}
                   isSendEmail={true}
+                  hideDetailButton={dataRows?.find((e) => e?.subRows?.length) ? false : true}
                 />
               )}
               <Box display="flex" alignItems="center">
-                <Button
-                  variant="outlined"
-                  color="default"
-                  size="small"
-                  onClick={handleClick}
-                  aria-controls="action-menu"
-                  disabled={selectedRecords?.length && invoiceData?.isLatestInvoice ? false : true}
-                  endIcon={<ExpandMore />}
-                  className="new-dropdown-v1"
-                >
-                  Actions
-                </Button>
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
+                <Box ml={1} />
+                {allowedToEdit &&
+                  <Button
+                    variant="outlined"
+                    color="default"
+                    size="small"
+                    onClick={handleClick}
+                    aria-controls="action-menu"
+                    disabled={selectedRecords?.length && isLatestInvoice ? false : true}
+                    endIcon={<ExpandMore />}
+                    className="new-dropdown-v1"
+                  >
+                    Actions
+                  </Button>
+                }
                 <Menu
                   id="action-menu"
                   anchorEl={anchorEl}
@@ -442,7 +492,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
           isRateRequired={false}
         />
       )}
-      {viewBillDialogConfirm.open ? (
+      {viewBillDialogConfirm.open && (
         <ConfirmationDialog
           open={viewBillDialogConfirm.open}
           message={`Are you sure you want to delete ?`}
@@ -454,7 +504,21 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceData, onClose, onSucce
             handleDeleteData(viewBillDialogConfirm.rows);
           }}
         />
-      ) : null}
+      )}
+
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete invoice ${invoiceData?.invoiceNumber || ''} ?`}
+          onClose={() => {
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={() => {
+            handleDeleteInvoice();
+          }}
+        />
+      )}
     </Fragment>
   );
 };

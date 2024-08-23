@@ -39,13 +39,17 @@ function PreviewDownloadMultiple({ referenceIds }) {
   const [loadingType, setLoadingType] = useState(null);
   const [btnLoading, setBtnLoading] = useState(null);
 
-  const handleView = (operation, visibleColumns) => {
+  const handleView = (operation, visibleColumns, sortBy= '', orderBy= '') => {
     setLoadingType('Regular');
     setBtnLoading(operation);
 
     let showColumns = visibleColumns?.map((e) => e?.fieldName)?.toString();
 
     let api = `/pdf/multiple?resource=${sidebarResource.deliveryTicket}&columns=${showColumns}&ids=${referenceIds}`;
+
+    if (sortBy && orderBy) {
+      api = `${api}&sortBy=${sortBy}&orderBy=${orderBy}`;
+    }
 
     const responseType = 'blob';
 
@@ -123,8 +127,8 @@ function PreviewDownloadMultiple({ referenceIds }) {
           handleClose={() => {
             setShowColumnsDialog({ open: false, operation: '' });
           }}
-          handleView={(subType, visibleColumnsPdf) => {
-            handleView(showColumnsDialog.operation, visibleColumnsPdf);
+          handleView={(subType, visibleColumnsPdf, visibleColumnsExcel, sortBy= '', orderBy= '') => {
+            handleView(showColumnsDialog.operation, visibleColumnsPdf, sortBy, orderBy);
           }}
           loadingType={loadingType}
           hideDetailButton={true}

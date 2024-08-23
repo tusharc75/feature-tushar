@@ -140,7 +140,7 @@ const AssignDataDialog = (props) => {
       case 'user':
         return `${data?.firstName ?? ''}  ${data.lastName}`;
       case 'lead':
-        return `${data?.salutation ?? ''} ${data?.firstName ?? ''} ${data?.middleName ?? ''}  ${data.lastName}`;
+        return `${data?.firstName ?? ''} ${data?.middleName ?? ''}  ${data.lastName}`;
       case 'opportunity':
         return `${data.opportunityName}`;
       case 'quote-builder':
@@ -148,7 +148,7 @@ const AssignDataDialog = (props) => {
       case 'customer-account':
         return `${data.accountName}`;
       case 'customer-contact':
-        return `${data?.salutation ?? ''} ${data?.concatedName ?? ''}`;
+        return `${data?.concatedName ?? ''}`;
       default:
         break;
     }
@@ -187,10 +187,10 @@ const AssignDataDialog = (props) => {
           );
         case 'lead':
           return (
-            data.salutation.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.middleName.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.lastName.toLowerCase().search(value.toLowerCase()) !== -1
+            data.salutation?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.firstName?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.middleName?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data.lastName?.toLowerCase().search(value.toLowerCase()) !== -1
           );
         case 'opportunity':
           return data.opportunityName.toLowerCase().search(value.toLowerCase()) !== -1;
@@ -200,10 +200,10 @@ const AssignDataDialog = (props) => {
           return data.accountName.toLowerCase().search(value.toLowerCase()) !== -1;
         case 'customer-contact':
           return (
-            data.salutation.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.firstName.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.middleName.toLowerCase().search(value.toLowerCase()) !== -1 ||
-            data.lastName.toLowerCase().search(value.toLowerCase()) !== -1
+            data?.salutation?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data?.firstName?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data?.middleName?.toLowerCase().search(value.toLowerCase()) !== -1 ||
+            data?.lastName?.toLowerCase().search(value.toLowerCase()) !== -1
           );
         default:
           break;

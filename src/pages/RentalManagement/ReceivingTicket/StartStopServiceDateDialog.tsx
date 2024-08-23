@@ -6,6 +6,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomDialogTransition, displayDate, normalizeDate } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { useEffect, useState } from 'react';
+import moment from 'moment';
 
 const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, loading, minStartDate = null, maxEndDate = null }) => {
 
@@ -15,7 +16,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
     if (type) {
       setInitialValues({
         startDate: minStartDate ? new Date(minStartDate) : new Date(),
-        endDate: minStartDate ? new Date(minStartDate) : new Date()
+        ...(type !== 'start' ? { endDate: minStartDate ? new Date(minStartDate) : new Date() } : {})
       })
     } else {
       setInitialValues({
@@ -28,21 +29,21 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
   const onSubmit = (values) => {
     handleSubmit({
       ...values,
-      startDate: new Date(values.startDate)?.toISOString(),
-      ...(values.endDate && { endDate: new Date(values.endDate).toISOString() })
+      startDate: moment(values.startDate).format('MM/DD/YYYY'),
+      ...(values.endDate && { endDate: moment(values.endDate).format('MM/DD/YYYY') })
     });
   };
 
   const validate = (values) => {
     const errors = {};
     if (values?.endDate && normalizeDate(values?.startDate) > normalizeDate(values.endDate)) {
-      errors['endDate'] = `End Date can't be less than Start Date`;
+      errors['endDate'] = `Please enter valid end date`;
     }
     if (minStartDate && normalizeDate(values?.startDate) < normalizeDate(minStartDate)) {
-      errors['startDate'] = `Start Date can't be less than ${displayDate(minStartDate)}`;
+      errors['startDate'] = `Actual Start Date can't be less than ${displayDate(minStartDate)}`;
     }
     if (maxEndDate && normalizeDate(values?.endDate) > normalizeDate(maxEndDate)) {
-      errors['endDate'] = `End Date can't be greater than ${displayDate(maxEndDate)}`;
+      errors['endDate'] = `Actual End Date can't be greater than ${displayDate(maxEndDate)}`;
     }
     return errors;
   };
@@ -61,48 +62,48 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
       <Formik initialValues={initialValues} onSubmit={(val) => { onSubmit(val) }} enableReinitialize={true} validate={validate}>
         {({ values, errors, touched, setFieldValue }) => (
           <Form >
-            <CustomDialogHeader title={`Set Start/End Date`} onClose={onClose} />
+            <CustomDialogHeader title={`Set Actual ${type === 'start' ? 'Start' : type === 'startStop' ? 'Start/End' : 'End'} Date`} onClose={onClose} />
             <CustomDialogContent>
               <Box p={2}>
                 <Grid container spacing={2}>
-                  <Grid item xs={12} sm={12}>
-                    <FormTypes
-                      size="small"
-                      fullWidth
-                      required={true}
-                      values={values}
-                      errors={errors}
-                      touched={touched}
-                      type="date"
-                      label={`Start Date`}
-                      name="startDate"
-                      onChange={(date) => {
-                        setFieldValue('startDate', date);
-                      }}
-                      {...(minStartDate ? { minDate: minStartDate } : {})}
-                      {...(values.endDate ? { maxDate: values.endDate } : {})}
-                    />
-                  </Grid>
-                  {(data?.endDate || type) &&
-                    (
-                      <Grid item xs={12} sm={12}>
-                        <FormTypes
-                          size="small"
-                          fullWidth
-                          required={true}
-                          values={values}
-                          errors={errors}
-                          touched={touched}
-                          type="date"
-                          label={`End Date`}
-                          name="endDate"
-                          onChange={(date) => {
-                            setFieldValue('endDate', date);
-                          }}
-                          minDate={values.startDate}
-                          {...(maxEndDate ? { maxDate: maxEndDate } : {})}
-                        />
-                      </Grid>
+                  {type !== 'stop' && (
+                    <Grid item xs={12} sm={12}>
+                      <FormTypes
+                        size="small"
+                        fullWidth
+                        required={true}
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        type="date"
+                        label={`Actual Start Date`}
+                        name="startDate"
+                        onChange={(date) => {
+                          setFieldValue('startDate', date);
+                        }}
+                        {...(minStartDate ? { minDate: minStartDate } : {})}
+                      />
+                    </Grid>
+                  )}
+                  {(data?.endDate || type === 'startStop' || type === 'stop') &&
+                    (<Grid item xs={12} sm={12}>
+                      <FormTypes
+                        size="small"
+                        fullWidth
+                        required={true}
+                        values={values}
+                        errors={errors}
+                        touched={touched}
+                        type="date"
+                        label={`Actual End Date`}
+                        name="endDate"
+                        onChange={(date) => {
+                          setFieldValue('endDate', date);
+                        }}
+                        minDate={values.startDate}
+                        {...(maxEndDate ? { maxDate: maxEndDate } : {})}
+                      />
+                    </Grid>
                     )}
                 </Grid>
               </Box>

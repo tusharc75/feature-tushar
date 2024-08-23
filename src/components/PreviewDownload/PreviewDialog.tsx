@@ -41,8 +41,11 @@ export const PreviewDialog = ({
   const [selectedExcelView, setSelectedExcelView] = useState(null);
   const [visibleColumnsExcel, setVisibleColumnsExcel] = useState([]);
 
+  const [sortBy, setSortBy] = useState(null);
+  const [orderBy, setOrderBy] = useState(null);
+
   useEffect(() => {
-    setDefaultColumns()
+    setDefaultColumns();
   }, [columns]);
 
   useEffect(() => {
@@ -53,7 +56,7 @@ export const PreviewDialog = ({
     const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
     setVisibleColumnsPdf([...temp]);
     setVisibleColumnsExcel([...temp]);
-  }
+  };
 
   const fetchUserViews = () => {
     axiosInstance()
@@ -61,10 +64,10 @@ export const PreviewDialog = ({
       .then(({ data: { data } }) => {
         setViews(data);
         if (!selectedPdfView && data?.length === 1) {
-          handleSelectView(data[0])
+          handleSelectView(data[0]);
         }
         if (selectedPdfView && data?.length && data?.find((e) => e._id === selectedPdfView?._id)) {
-          handleSelectView(data?.find((e) => e._id === selectedPdfView?._id))
+          handleSelectView(data?.find((e) => e._id === selectedPdfView?._id));
         }
       })
       .catch((err) => {
@@ -74,14 +77,30 @@ export const PreviewDialog = ({
 
   const handleSelectView = (data) => {
     setSelectedPdfView(data);
-    if (data && data.columns) {
+    if (data?.columns) {
       const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
-      setVisibleColumnsPdf(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
-      setVisibleColumnsExcel(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
+      setVisibleColumnsPdf(
+        columnsArray
+          ?.map((e) => {
+            return allColumn.find((col) => col.fieldName === e);
+          })
+          .filter((col) => col !== undefined)
+      );
+      setVisibleColumnsExcel(
+        columnsArray
+          ?.map((e) => {
+            return allColumn.find((col) => col.fieldName === e);
+          })
+          .filter((col) => col !== undefined)
+      );
+      if (data?.sortBy) {
+        setSortBy(allColumn.find(col => col.fieldName === data?.sortBy));
+      }
+      if (data?.orderBy) {
+        setOrderBy(data?.orderBy);
+      }
     }
   };
-
-
 
   return (
     <>
@@ -113,7 +132,7 @@ export const PreviewDialog = ({
         <CustomDialogContent>
           <Grid container justify="space-between" alignItems="center">
             <Grid item style={{ padding: 5, marginTop: 10 }} xs={12} md={12} sm={12}>
-              {type?.includes('PDF') &&
+              {type?.includes('PDF') && (
                 <PreviewFields
                   views={views}
                   selectedView={selectedPdfView}
@@ -123,10 +142,15 @@ export const PreviewDialog = ({
                   fetchUserViews={fetchUserViews}
                   allColumn={allColumn}
                   resource={resource}
-                  type={"PDF"}
+                  type={'PDF'}
                   defaultColumns={defaultColumns}
-                />}
-              {type?.includes('Excel') &&
+                  sortBy={sortBy}
+                  setSortBy={setSortBy}
+                  orderBy={orderBy}
+                  setOrderBy={setOrderBy}
+                />
+              )}
+              {type?.includes('Excel') && (
                 <Box mt={3}>
                   <PreviewFields
                     views={views}
@@ -137,34 +161,30 @@ export const PreviewDialog = ({
                     fetchUserViews={fetchUserViews}
                     allColumn={allColumn}
                     resource={resource}
-                    type={"Excel"}
+                    type={'Excel'}
                     defaultColumns={defaultColumns}
                   />
                 </Box>
-              }
+              )}
             </Grid>
-            {isAsyncDownload &&
-              <DownloadHistory
-                referenceId={referenceId}
-                resource={resource}
-                loadingType={loadingType}
-              />
-            }
+            {isAsyncDownload && <DownloadHistory referenceId={referenceId} resource={resource} loadingType={loadingType} />}
           </Grid>
         </CustomDialogContent>
         <CustomDialogFooter>
-          {type?.includes('Excel') && type?.includes('PDF') ? null :
+          {type?.includes('Excel') && type?.includes('PDF') ? null : (
             <CustomButton
+              id={'show-column-dialog-save-update-button'}
               onClick={() => {
                 setShowSaveViewDialog({ open: true, data: type === 'Excel' ? selectedExcelView : selectedPdfView });
               }}
-              disabled={visibleColumnsPdf?.length == 0}
+              disabled={visibleColumnsPdf?.length == 0 || (sortBy && !orderBy)}
               size="small"
               className="yellow-button"
             >
-              {type === 'Excel' ? selectedExcelView ? 'Update View' : 'Save View' : selectedPdfView ? 'Update View' : 'Save View'}
-            </CustomButton>}
-          {operation === 'Send Email' ?
+              {type === 'Excel' ? (selectedExcelView ? 'Update View' : 'Save View') : selectedPdfView ? 'Update View' : 'Save View'}
+            </CustomButton>
+          )}
+          {operation === 'Send Email' ? (
             <CustomButton
               variant="contained"
               className="no-shadow"
@@ -173,21 +193,24 @@ export const PreviewDialog = ({
               loading={loadingType === 'Regular'}
               disabled={loadingType || visibleColumnsPdf?.length === 0}
               onClick={(e) => {
-                handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
+                handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
               }}
+              id={'show-column-dialog-send-email-button'}
             >
               {operation}
-            </CustomButton> :
+            </CustomButton>
+          ) : (
             <>
               <CustomButton
                 variant="contained"
                 className="no-shadow"
                 color="primary"
+                id={'show-column-dialog-export-button'}
                 size="small"
                 loading={loadingType === 'Regular'}
-                disabled={loadingType || visibleColumnsPdf?.length === 0}
+                disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                 onClick={(e) => {
-                  handleView('Regular', visibleColumnsPdf, visibleColumnsExcel);
+                  handleView('Regular', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                 }}
               >
                 {type === 'Excel' ? 'Export' : hideDetailButton ? `${operation}` : `${button1Title} ${operation}`}
@@ -197,17 +220,19 @@ export const PreviewDialog = ({
                   variant="contained"
                   color="primary"
                   className="no-shadow"
+                  id={'show-column-dialog-operation-2-button'}
                   size="small"
                   loading={loadingType === 'Detail'}
-                  disabled={loadingType || visibleColumnsPdf?.length === 0}
+                  disabled={loadingType || visibleColumnsPdf?.length === 0 || (sortBy && !orderBy)}
                   onClick={(e) => {
-                    handleView('Detail', visibleColumnsPdf, visibleColumnsExcel);
+                    handleView('Detail', visibleColumnsPdf, visibleColumnsExcel, sortBy?.fieldName, orderBy);
                   }}
                 >
                   {`${button2Title} ${operation}`}
                 </CustomButton>
-              )}</>
-          }
+              )}
+            </>
+          )}
         </CustomDialogFooter>
       </Dialog>
       {showSaveViewDialog.open && (
@@ -222,6 +247,8 @@ export const PreviewDialog = ({
             setShowSaveViewDialog({ open: false, data: null });
           }}
           viewData={showSaveViewDialog.data}
+          sortBy={sortBy}
+          orderBy={orderBy}
         />
       )}
     </>

@@ -38,7 +38,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
   const [columns, setColumns] = useState(null);
   const [costDialog, setCostDialog] = useState({ open: false, _id: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [viewCost, setViewCost] = useState({ open: false, data: null });
+  const [viewCost, setViewCost] = useState({ open: false, data: null ,title: null });
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [showConformationReject, setShowConformationReject] = useState({ open: false, _id: null });
 
@@ -176,7 +176,7 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
                       size="small"
                       aria-label="cost"
                       onClick={() => {
-                        setViewCost({ open: true, data: row?.original?.cost });
+                        setViewCost({ open: true, data: row?.original?.cost ,title: row?.original?.productName});
                       }}
                     >
                       <Visibility fontSize="small" color={'primary'} />
@@ -226,21 +226,6 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
     dispatch({ type: 'loading', loading: false });
   };
 
-  const handleReceived = (value) => {
-    setIsSubmitting(true);
-    axiosInstance()
-      .put(`${routes.subcontractAssembly.path}/${subcontractAssemblyData?._id}/material/received`, { cost: value, _id: costDialog?._id })
-      .then((res) => {
-        fetchData();
-        fetchParentData();
-        setIsSubmitting(false);
-        setCostDialog({ open: false, _id: null });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-        setIsSubmitting(false);
-      });
-  };
 
   const handelReject = () => {
     setIsSubmitting(true);
@@ -293,12 +278,13 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
           onClose={() => {
             setCostDialog({ open: false, _id: null });
           }}
-          onSuccess={(val) => {
-            handleReceived(val);
+          onSuccess={() => {
+            fetchData();
+            fetchParentData();
+            setCostDialog({ open: false, _id: null });
           }}
           _id={costDialog._id}
           subcontractAssemblyData={subcontractAssemblyData}
-          isSubmitting={isSubmitting}
         />
       )}
       {historyDialog.open && (
@@ -313,8 +299,9 @@ const Receiving = ({ subcontractAssemblyData, stepFullScreen, fetchParentData, a
       {viewCost.open && (
         <ViewCost
           data={viewCost.data}
+          title = {viewCost.title}
           onClose={() => {
-            setViewCost({ open: false, data: null });
+            setViewCost({ open: false, data: null ,title : null});
           }}
           subcontractAssemblyData={subcontractAssemblyData}
         />

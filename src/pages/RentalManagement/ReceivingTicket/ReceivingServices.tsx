@@ -4,44 +4,35 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import Grid from '@material-ui/core/Grid/Grid';
 import axiosInstance from 'src/axios/axiosInstance';
-import {
-  MATERIAL_TYPE,
-  dateFormat,
-  rentalManagement,
-} from 'src/constants/helpers';
+import { MATERIAL_TYPE, dateFormat, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { IconButton, MenuItem } from '@material-ui/core';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
-import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { camelCase, isEmpty } from 'lodash';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import moment from 'moment';
-import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
 import ServiceLogDialog from 'src/pages/RentalManagement/ReceivingTicket/ServiceLogDialog';
 import StartStopServiceDateDialog from 'src/pages/RentalManagement/ReceivingTicket/StartStopServiceDateDialog';
 import CustomMessageDialog from 'src/components/MessageDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../../StateProvider/Provider';
+import { rentalManagementActions, rentalManagementMessage } from 'src/constants/messageHelpers';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { Delete } from '@material-ui/icons';
 
-const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords }) => {
-
+const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
 
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services`;
-
   const toastConfig = useContext(CustomToastContext);
-
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
-
-    const {
-    state: { user }
-  }: any = useData();
-
+  const [deleteServiceLogConfirmDialog, setDeleteServiceLogConfirmDialog] = useState({ open: false, data: null });
+  const { state: { user } }: any = useData();
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [columns, setColumns] = useState(null);
-  const [tabValue, setTabValue] = useState(0);
   const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false, minStartDate: null });
   const [serviceLogDialog, setServiceLogDialog] = useState({ open: false, data: null });
   const { state, dispatch } = useTableReducer();
@@ -68,7 +59,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           <div className="d-flex align-items-center gap-2">
             <h5 className="text-truncate">{row?.original?.index}</h5>
             {row?.original?.type === MATERIAL_TYPE.service && row?.original?.serviceLog?.length ? (
-              <HtmlTooltip title={'View Service Logs'}>
+              <HtmlTooltip title={'View Logs'}>
                 <span>
                   <IconButton
                     size="small"
@@ -85,13 +76,13 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         )
       },
       {
-        accessor: 'assetNumber',
+        accessor: 'serviceName',
         Header: 'Details',
         disabled: true,
         sticky: isMobile || isTablet ? 'none' : 'left',
         Cell: ({ row }) => (
           <div className="flex items-center gap-2">
-            <p className="text-truncate">{row?.original?.assetNumber}</p>
+            <p className="text-truncate">{row?.original?.serviceName}</p>
             <IconButton
               size="small"
               onClick={() => {
@@ -122,7 +113,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       },
       {
         accessor: 'manualStartDate',
-        Header: 'Start Date',
+        Header: 'Actual Start Date',
         Cell: ({ row }) =>
           row?.original?.manualStartDate ? (
             <h5 className="text-truncate" title={`${moment(row?.original?.manualStartDate).format(dateFormat)}`}>
@@ -134,7 +125,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       },
       {
         accessor: 'manualEndDate',
-        Header: 'End Date',
+        Header: 'Actual End Date',
         Cell: ({ row }) =>
           row?.original?.manualEndDate ? (
             <h5 className="text-truncate" title={`${moment(row?.original?.manualEndDate).format(dateFormat)}`}>
@@ -147,6 +138,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       {
         accessor: 'startDate',
         Header: 'System Start Date',
+        show: false,
         Cell: ({ row }) =>
           row?.original?.startDate ? (
             <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
@@ -159,6 +151,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       {
         accessor: 'endDate',
         Header: 'System End Date',
+        show: false,
         Cell: ({ row }) =>
           row?.original?.endDate ? (
             <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
@@ -168,6 +161,38 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
             <NoDataCell />
           )
       },
+      {
+        accessor: 'action',
+        Header: 'Actions',
+        minWidth: 100,
+        width: 100,
+        sticky: 'right',
+        disableFilters: true,
+        disableSortBy: true,
+        canDrag: false,
+        Cell: ({ row }) => {
+          const serviceLogCount = row?.original?.serviceLog?.length;
+          const recentServiceLogStartDate = serviceLogCount ? row?.original?.serviceLog[serviceLogCount - 1]?.startDate : null;
+          const recentServiceLogEndDate = serviceLogCount ? row?.original?.serviceLog[serviceLogCount - 1]?.endDate : null;
+          const maxInvoiceDate = row?.original?.maxInvoiceDate;
+          const cannotDelete = !serviceLogCount || (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) || (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) || (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
+          return (
+            <>
+              <HtmlTooltip title={!serviceLogCount ? rentalManagementMessage.serviceNotstarted : cannotDelete ? rentalManagementMessage.invoiceCreated :  'Delete recent log'}>
+                <span>
+                  <IconButton
+                    size="small"
+                    disabled={cannotDelete}
+                    onClick={() => { setDeleteServiceLogConfirmDialog({ open: true, data: [{ _id: row.original._id, serviceLogId: row?.original?.serviceLog[serviceLogCount - 1]._id }] }) }}
+                  >
+                    <Delete fontSize="small" color={cannotDelete ? 'disabled' : 'error'} />
+                  </IconButton>
+                </span>
+              </HtmlTooltip>
+            </>
+          )
+        }
+      }
     ];
     setColumns(column);
   };
@@ -185,15 +210,15 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
   };
 
   const handleSubmitChangeDates = (values, type: string = '') => {
+    dispatch({ type: 'loading', loading: true });
     let data;
     setServiceConfirmationDialog({ ...serviceConfirmationDialog, loading: true });
     data = { ids: selectedRecords?.map((s) => s?.uniqueId) };
     data['type'] = type;
-    // data['date'] = values.date;
-    data['startDate'] = values.startDate;
-    data['endDate'] = values.endDate;
-
-    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
+    data['startDate'] = moment(values.startDate).format('MM/DD/YYYY');
+    data['endDate'] = moment(values.endDate).format('MM/DD/YYYY');
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData?._id}/start-end-date`, data)
       .then((response) => {
         toastConfig.setToastConfig({
           open: true,
@@ -205,55 +230,69 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
+        dispatch({ type: 'loading', loading: false });
         setServiceConfirmationDialog({ open: false, type: null, loading: false, minStartDate: null });
       });
   };
 
+  const handleDeleteServiceLogs = (data: any[]) => {
+    setOkBtnLoading(true);
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance().delete(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/service-log`, { data }).then((response) => {
+      toastConfig.setToastConfig({
+        open: true,
+        message: response?.data?.message,
+        type: 'success'
+      });
+      setOkBtnLoading(false);
+      setDeleteServiceLogConfirmDialog({ open: false, data: null });
+      fetchRecords();
+    }).catch((err) => {
+      setOkBtnLoading(false);
+      setDeleteServiceLogConfirmDialog({ open: false, data: null });
+      toastConfig.setToastConfig(err);
+      dispatch({ type: 'loading', loading: false });
+    })
+  };
+
   return (
-    <Box mt={1}>
-      <CustomTabs value={tabValue} onChange={() => { }} style={{ marginBottom: -1 }}>
-        <CustomTab value={0} label={'Services'} primaryColor={true} />
-      </CustomTabs>
-      <TabPanel value={tabValue} index={0}>
-        <Box className="container-with-border" p={2} style={{ WebkitBorderTopLeftRadius: 0, borderTopRightRadius: 0 }}>
-          <DetailsPageHeader
-            isAddButtonVisible={false}
-            isActionButtonVisible={allowedToEdit && user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
-            actionButtonMenuItems={
-              <ActionButtonMenuItems
-                {...{
-                  selectedRecords,
-                  setOpenMessageDialog,
-                  setServiceConfirmationDialog,
-                }}
-              />
-            }
-            actionButtonProps={{ disabled: selectedRecords.length === 0 }}
-            hasXpadding
+    <Box>
+      <DetailsPageHeader
+        isAddButtonVisible={false}
+        isActionButtonVisible={allowedToEdit && user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
+        actionButtonMenuItems={
+          <ActionButtonMenuItems
+            {...{
+              selectedRecords,
+              setOpenMessageDialog,
+              setServiceConfirmationDialog,
+              setDeleteServiceLogConfirmDialog
+            }}
           />
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={12} sm={12}>
-              {columns ? (
-                <CustomReactTable
-                  height={'300px'}
-                  columns={columns}
-                  state={state}
-                  dispatch={dispatch}
-                  renderedFrom={`${renderedFrom}_services`}
-                  isClientSideGrid={true}
-                  hideSelection={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
-                  hideAction={true}
-                  refreshGrid={fetchRecords}
-                />
-              ) : (
-                <Box p={2} height={300}>
-                  <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                </Box>
-              )}
-            </Grid>
-          </Grid>
-        </Box>
-      </TabPanel>
+        }
+        actionButtonProps={{ disabled: selectedRecords.length === 0 }}
+        hasXpadding
+      />
+      <Grid container>
+        <Grid item xs={12} md={12} sm={12}>
+          {columns ? (
+            <CustomReactTable
+              height={stepFullScreen ? 'calc(100vh - 150px)' : 'calc(100vh - 393px)'}
+              columns={columns}
+              state={state}
+              dispatch={dispatch}
+              renderedFrom={renderedFrom}
+              isClientSideGrid={true}
+              hideSelection={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
+              refreshGrid={fetchRecords}
+            />
+          ) : (
+            <Box p={2} height={300}>
+              <CommonSkeleton lenArray={[...Array(10).keys()]} />
+            </Box>
+          )}
+        </Grid>
+      </Grid>
       {openMessageDialog.open && (
         <CustomMessageDialog
           open={openMessageDialog.open}
@@ -267,15 +306,16 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
         <ServiceLogDialog
           rentalId={rentalManagementData?._id}
           id={serviceLogDialog?.data?.uniqueId}
-          assetNumber={serviceLogDialog?.data?.assetNumber}
-          open={serviceLogDialog?.open}
+          serviceName={serviceLogDialog?.data?.serviceName}
           onClose={() => {
             setServiceLogDialog({ open: false, data: null });
           }}
           onSuccess={() => {
-            fetchRecords()
+            fetchRecords();
           }}
-          renderedFrom={renderedFrom}
+          allowedToEdit={allowedToEdit}
+          fetchRecords={fetchRecords}
+          maxInvoiceDate={serviceLogDialog?.data?.maxInvoiceDate}
         />
       )}
       {serviceConfirmationDialog.open && (
@@ -293,6 +333,19 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           minStartDate={serviceConfirmationDialog.minStartDate}
         />
       )}
+      {deleteServiceLogConfirmDialog.open && (
+        <ConfirmationDialog
+          open={deleteServiceLogConfirmDialog.open}
+          message={`Are you sure you want to delete recent log for selected service(s)?`}
+          onClose={() => {
+            setDeleteServiceLogConfirmDialog({ open: false, data: null });
+          }}
+          onOk={() => {
+            handleDeleteServiceLogs(deleteServiceLogConfirmDialog.data);
+          }}
+          okBtnLoading={okBtnLoading}
+        />
+      )}
     </Box>
   );
 };
@@ -303,36 +356,59 @@ const ActionButtonMenuItems = ({
   selectedRecords,
   setOpenMessageDialog,
   setServiceConfirmationDialog,
+  setDeleteServiceLogConfirmDialog
 }) => {
 
-  // const validateAction = (action) => {
-  //   const errorMessages = [];
-  //   selectedRecords.forEach((e) => {
-  //     if (action === rentalManagementActions.startService) {
-  //       const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-  //       if (!isEmpty(serviceLogEntry)) {
-  //         errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
-  //       }
-  //     }
-  //     else if (action === rentalManagementActions.stopService) {
-  //       const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
-  //       if (!serviceLogEntry) {
-  //         errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
-  //       }
-  //     }
-  //   });
-  //   if (errorMessages?.length) {
-  //     setOpenMessageDialog({ open: true, errorMessages: errorMessages });
-  //     return true;
-  //   }
-  //   return false;
-  // };
+  const validateAction = (action) => {
+    const errorMessages = [];
+    selectedRecords.forEach((e) => {
+      if (action === rentalManagementActions.startService) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!isEmpty(serviceLogEntry)) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
+        }
+      }
+      else if (action === rentalManagementActions.stopService) {
+        const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
+        if (!serviceLogEntry) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
+        }
+      } else if (action === rentalManagementActions.deleteServiceLog) {
+        const serviceLogCount = e?.serviceLog?.length;
+        const recentServiceLogStartDate = serviceLogCount ? e?.serviceLog[serviceLogCount - 1]?.startDate : null;
+        const recentServiceLogEndDate = serviceLogCount ? e?.serviceLog[serviceLogCount - 1]?.endDate : null;
+        const maxInvoiceDate = e?.maxInvoiceDate;
+        const cannotDelete = !serviceLogCount || (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) || (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) || (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
+        if (!serviceLogCount) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
+        } else if (cannotDelete) {
+          errorMessages.push({ index: e.index, message: rentalManagementMessage.invoiceCreated });
+        }
+      }
+    });
+    if (errorMessages?.length) {
+      setOpenMessageDialog({ open: true, errorMessages: errorMessages });
+      return true;
+    }
+    return false;
+  };
 
   return (<>
-    {/* <MenuItem
+    <MenuItem
       onClick={() => {
         if (!validateAction(rentalManagementActions.startService)) {
-          setServiceConfirmationDialog({ open: true, type: 'start' });
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            d?.serviceLog?.forEach((l: any) => {
+              if (l?.endDate) dates.push(new Date(l.endDate));
+            })
+          })
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+            date.setDate(date.getDate() + 1);
+          }
+          setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
         }
       }}
     >
@@ -341,27 +417,59 @@ const ActionButtonMenuItems = ({
     <MenuItem
       onClick={() => {
         if (!validateAction(rentalManagementActions.stopService)) {
-          setServiceConfirmationDialog({ open: true, type: 'stop' });
+          const dates = [];
+          selectedRecords?.forEach((d: any) => {
+            const serviceLogEntry = d?.serviceLog?.find((log: any) => !log.endDate);
+            dates.push(new Date(serviceLogEntry?.startDate));
+          })
+          let date = null;
+          if (dates?.length) {
+            date = new Date(Math.max(...dates));
+          }
+          date = selectedRecords?.reduce((maxDate, record) => {
+            if (record?.maxInvoiceDate) {
+              const recordDate = new Date(record.maxInvoiceDate);
+              return recordDate > maxDate ? recordDate : maxDate;
+            }
+            return maxDate;
+          }, date);
+          setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
         }
       }}
     >
       Stop Service(s)
-    </MenuItem> */}
+    </MenuItem>
     <MenuItem onClick={() => {
-      const dates = [];
-      selectedRecords?.forEach((d: any) => {
-        d?.serviceLog?.forEach((l: any) => {
-          dates.push(new Date(l.endDate));
+      if (!validateAction(rentalManagementActions.startService)) {
+        const dates = [];
+        selectedRecords?.forEach((d: any) => {
+          d?.serviceLog?.forEach((l: any) => {
+            dates.push(new Date(l.endDate));
+          })
         })
-      })
-      let date = null;
-      if (dates?.length) {
-        date = new Date(Math.max(...dates));
-        date = new Date().setDate(new Date(date).getDate() + 1)
+        let date = null;
+        if (dates?.length) {
+          date = new Date(Math.max(...dates));
+          date.setDate(date.getDate() + 1);
+        }
+        setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
       }
-      setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
     }}>
       Start/Stop Service(s)
+    </MenuItem>
+    <MenuItem onClick={() => {
+      if (!validateAction(rentalManagementActions.deleteServiceLog)) {
+        const data = [];
+        selectedRecords?.forEach((d: any) => {
+          data.push({
+            _id: d?.uniqueId,
+            serviceLogId: d?.serviceLog[d?.serviceLog?.length - 1]?._id
+          });
+        })
+        setDeleteServiceLogConfirmDialog({ open: true, data });
+      }
+    }}>
+      Delete Service Log(s)
     </MenuItem>
   </>
   );

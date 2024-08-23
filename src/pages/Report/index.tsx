@@ -27,7 +27,6 @@ import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 let cancelTokenSource = null;
 
 const Report = () => {
-
   const initialRender = React.useRef(true);
   const toastConfig = React.useContext(CustomToastContext);
   const {
@@ -48,10 +47,8 @@ const Report = () => {
   const [resourceOptions, setResourceOptions] = React.useState(null);
   const [formValues, setFormValues] = React.useState({});
   const [resourceColumns, setResourceColumns] = React.useState([]);
-  const [isExporting, setExporting] = React.useState(false);
   const [loadingColumns, setLoadingColumns] = React.useState(false);
   const [statusPeriod, setStatusPeriod] = React.useState(false);
-  const [reportList, setReportList] = React.useState([]);
   const [selectedReportView, setSelectedReportView] = React.useState(null);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
 
@@ -198,17 +195,6 @@ const Report = () => {
       initialRender.current = false;
     }
   }, []);
-
-  React.useEffect(() => {
-    axiosInstance()
-      .get(`/report-colum-setting?resource=${resource}`)
-      .then(({ data: { data } }) => {
-        setReportList(data);
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  }, [showGrid]);
 
   React.useEffect(() => {
     if (showGrid) {
@@ -381,7 +367,7 @@ const Report = () => {
     } else {
       api = `/report${routes[resourceCamelCase].path}/export?exportColumn=${JSON.stringify(newColumns)}&${filterQuery}`;
     }
-    return api
+    return api;
   };
 
   return (
@@ -408,7 +394,7 @@ const Report = () => {
                         permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
                         module={''}
                         api={getApi()}
-                        afterImportCompleted={() => { }}
+                        afterImportCompleted={() => {}}
                         onlyExport={true}
                       />
                     )}
@@ -422,7 +408,7 @@ const Report = () => {
           <>
             <div className="header-panel">
               <Grid container className={styles.filter_side_container}>
-                <Grid item xs={12} className="d-flex align-items-center gap-1 layout-for-tablet">
+                <Grid item xs={12} className="d-flex align-items-center layout-for-tablet gap-1">
                   <Box display="flex" justifyContent="center" alignItems="center">
                     {showGrid && (
                       <Box mr={1}>
@@ -467,7 +453,7 @@ const Report = () => {
                   }}
                 />
                 <DialogContent>
-                  <div className="p-4 pt-5 min-h-[350px]">
+                  <div className="min-h-[350px] p-4 pt-5">
                     <ReportFilters
                       resourceColumns={resourceColumns}
                       betweenDate={betweenDate}
@@ -485,10 +471,6 @@ const Report = () => {
                       formValues={formValues}
                       setFormValues={setFormValues}
                       loadingColumns={loadingColumns}
-                      setSelectedReportView={setSelectedReportView}
-                      selectedReportView={selectedReportView}
-                      reportList={reportList}
-                      setReportList={setReportList}
                       statusPeriod={statusPeriod}
                       setStatusPeriod={setStatusPeriod}
                       statusPeriodDate={statusPeriodDate}

@@ -5,7 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { CustomDialogTransition, dateFormat, gridLoadingTimeout, rentalManagement } from 'src/constants/helpers';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
-import { isEmpty } from 'lodash';
+import { camelCase, isEmpty } from 'lodash';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
@@ -13,17 +13,22 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { Edit } from '@material-ui/icons';
+import { Delete, Edit } from '@material-ui/icons';
 import StartStopServiceDateDialog from './StartStopServiceDateDialog';
+import { useData } from 'src/StateProvider/Provider';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
-const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFrom, onSuccess }) => {
+const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allowedToEdit, fetchRecords, maxInvoiceDate = null }) => {
 
+  const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services_logs`;
+
+  const { state: { user } }: any = useData();
   const { state, dispatch } = useTableReducer();
   const toastConfig = useContext(CustomToastContext);
-
   const [editDateDialog, setEditDateDialog] = useState({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
-
   const { dataRows } = state;
+  const [deleteServiceLogConfirmDialog, setDeleteServiceLogConfirmDialog] = useState({ open: false, data: null });
+  const [okBtnLoading, setOkBtnLoading] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -33,19 +38,18 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     try {
       dispatch({ type: 'loading', loading: true });
       const response = await axiosInstance().get(`${rentalManagement.api}/productpackage/${rentalId}/${id}/service-log`);
-      const invoiceResponse = await axiosInstance().get(`/rental-management/${rentalId}/invoice/material-end-date-qty`);
-      let invoiceData = invoiceResponse?.data?.data?.material || [];
-      const maxInvoiceDate = invoiceData?.find((ele)=> ele._id===id)?.endDate;
       const serviceLogData = response?.data?.data;
-
-      serviceLogData?.forEach((log)=>{
-        if(maxInvoiceDate && log.endDate<=maxInvoiceDate){
+      serviceLogData?.forEach((log, index) => {
+        if (index === 0) {
+          log.canDelete = true;
+        }
+        if ((maxInvoiceDate && log?.endDate >= maxInvoiceDate && log.startDate <= maxInvoiceDate) || (maxInvoiceDate >= log.startDate && !log?.endDate) || (maxInvoiceDate && log?.endDate <= maxInvoiceDate)) {
           log.canEdit = false;
-        }else{
+          log.canDelete = false;
+        } else {
           log.canEdit = true;
         }
       })
-      
       dispatch({ type: 'initialize', data: serviceLogData, count: serviceLogData?.length });
       setTimeout(() => { dispatch({ type: 'loading', loading: false }) }, gridLoadingTimeout);
     } catch (e) {
@@ -54,60 +58,10 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     }
   };
 
-  const onSaveInlineEdit = async (inputField, updatedData) => {
-    if (inputField.hasOwnProperty('startDate')) {
-      for (const [index, d] of dataRows.entries()) {
-        if (d._id === updatedData._id) {
-          if (updatedData['endDate'] && new Date(updatedData['endDate']) < new Date(inputField['startDate'])) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't exceed End Date` });
-            return;
-          } else if (index !== dataRows?.length - 1 && new Date(dataRows[index + 1].endDate) > new Date(inputField['startDate'])) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't be less than previous log End Date` });
-            return;
-          }
-        }
-      }
-    } else if (inputField.hasOwnProperty('endDate')) {
-      for (const [index, d] of dataRows.entries()) {
-        if (d._id === updatedData._id) {
-          if (!d.endDate) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `Service not stopped yet` });
-            return;
-          }
-          if (new Date(updatedData['startDate']) > new Date(inputField['endDate'])) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `Start Date can't exceed End Date` });
-            return;
-          } else if (index !== 0 && new Date(dataRows[index - 1].startDate) < new Date(inputField['endDate'])) {
-            toastConfig.setToastConfig({ open: true, type: 'error', message: `End Date can't be greater than next log Start Date` });
-            return;
-          }
-        }
-      }
-    }
-    dispatch({ type: 'loading', loading: true });
-    const values: any = { _id: updatedData?._id };
-    Object.keys(inputField)?.map((_key) => {
-      values[_key] = updatedData[_key] ? updatedData[_key] : '';
-    });
-    let data = { ids: [id], type: 'update', ...values };
-    axiosInstance().put(`${rentalManagement.api}/${rentalId}/start-end-date`, data).then(({ data }) => {
-      fetchData();
-      onSuccess();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
-      });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-      dispatch({ type: 'loading', loading: false });
-    });
-  };
-
   const columns: any = [
     {
       accessor: 'startDate',
-      Header: 'Start Date',
+      Header: 'Actual Start Date',
       disabled: true,
       disableFilters: true,
       disableSortBy: true,
@@ -130,7 +84,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
     },
     {
       accessor: 'endDate',
-      Header: 'End Date',
+      Header: 'Actual End Date',
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
@@ -193,7 +147,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       Cell: ({ row }) => {
         return (
           <>
-            <HtmlTooltip title={row?.original?.canEdit ?`Update - Start Date/End Date` : 'Invoice already created'}>
+            <HtmlTooltip title={row?.original?.canEdit ? `Update -Actual Start Date/Actual End Date` : 'Invoice already created'}>
               <span>
                 <IconButton
                   size="small"
@@ -210,12 +164,29 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
                         }
                       }
                     })
-                    minStartDate = minStartDate ? new Date(minStartDate) : null;
-                    maxEndDate = maxEndDate ? new Date(maxEndDate) : null;
+                    if (minStartDate) {
+                      minStartDate = new Date(minStartDate);
+                      minStartDate.setDate(minStartDate.getDate() + 1);
+                    }
+                    if (maxEndDate) {
+                      maxEndDate = new Date(maxEndDate);
+                      maxEndDate.setDate(maxEndDate.getDate() - 1);
+                    }
                     setEditDateDialog({ open: true, loading: false, minStartDate: minStartDate, maxEndDate: maxEndDate, data: row?.original });
                   }}
                 >
                   <Edit fontSize="small" color={row?.original?.canEdit ? 'primary' : 'disabled'} />
+                </IconButton>
+              </span>
+            </HtmlTooltip>
+            <HtmlTooltip title={!row?.original?.canEdit ? `Invoice already created` : row?.original?.canDelete ? 'Delete' : 'Can only delete most recent log'}>
+              <span>
+                <IconButton
+                  size="small"
+                  disabled={!row?.original?.canDelete}
+                  onClick={() => { setDeleteServiceLogConfirmDialog({ open: true, data: [{ _id: id, serviceLogId: row.original._id }] }) }}
+                >
+                  <Delete fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
@@ -245,9 +216,30 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       });
   };
 
+  const handleDeleteServiceLogs = (data: any[]) => {
+    setOkBtnLoading(true);
+    dispatch({ type: 'loading', loading: true });
+    axiosInstance().delete(`${rentalManagement.api}/productpackage/${rentalId}/service-log`, { data }).then((response) => {
+      toastConfig.setToastConfig({
+        open: true,
+        message: response?.data?.message,
+        type: 'success'
+      });
+      setOkBtnLoading(false);
+      setDeleteServiceLogConfirmDialog({ open: false, data: null });
+      fetchData();
+      fetchRecords();
+    }).catch((err) => {
+      setOkBtnLoading(false);
+      setDeleteServiceLogConfirmDialog({ open: false, data: null });
+      toastConfig.setToastConfig(err);
+      dispatch({ type: 'loading', loading: false });
+    })
+  };
+
   return (
     <Dialog
-      open={open}
+      open={true}
       TransitionComponent={CustomDialogTransition}
       fullScreen={true}
       onClose={(e, reason) => {
@@ -258,7 +250,7 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
       maxWidth="sm"
       fullWidth
     >
-      <CustomDialogHeader title={`${assetNumber || ''} Service Logs`} onClose={onClose} showRequiredLabel={false} />
+      <CustomDialogHeader title={`${serviceName || ''} - Logs`} onClose={onClose} showRequiredLabel={false} />
       <CustomDialogContent>
         {columns ? (
           <CustomReactTable
@@ -269,9 +261,9 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
             renderedFrom={renderedFrom}
             isClientSideGrid={true}
             hideSelection={true}
-            hideAction={false}
+            hideAction={!allowedToEdit || !user?.role?.selectedEntity?.policy?.isAllowServicePerformRentalManagement}
             hideExportTable={true}
-          // onSaveEdit={onSaveInlineEdit}
+            refreshGrid={fetchData}
           />
         ) : (
           <Box p={2} height={500}>
@@ -283,13 +275,20 @@ const ServiceLogDialog = ({ rentalId, id, assetNumber, open, onClose, renderedFr
             data={editDateDialog.data}
             type={null}
             open={editDateDialog.open}
-            onClose={() => {
-              setEditDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null });
-            }}
+            onClose={() => { setEditDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null }) }}
             handleSubmit={handleSubmitChangeDates}
             loading={editDateDialog.loading}
             minStartDate={editDateDialog.minStartDate}
             maxEndDate={editDateDialog.maxEndDate}
+          />
+        )}
+        {deleteServiceLogConfirmDialog.open && (
+          <ConfirmationDialog
+            open={deleteServiceLogConfirmDialog}
+            message={`Are you sure you want to delete log?`}
+            onClose={() => { setDeleteServiceLogConfirmDialog({ open: false, data: null }) }}
+            onOk={() => { handleDeleteServiceLogs(deleteServiceLogConfirmDialog.data) }}
+            okBtnLoading={okBtnLoading}
           />
         )}
       </CustomDialogContent>

@@ -6,7 +6,7 @@ import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { checkStaticField, getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { ListingPageHeader } from 'src/components/PageHeaders';
@@ -18,13 +18,22 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import routes from '../../components/Helpers/Routes';
-import { checkIsAllowedToDelete, fieldServiceOrder, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  fieldServiceOrder,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource
+} from '../../constants/helpers';
 import ManageServiceOrder from './ManageServiceOrder';
 import { findAll, findOne, insertUpdate, objectStore, setUpindexDB } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import { fieldServiceOrderAddOffline, fieldServiceOrderClearOffline } from './Services/OfflineHelper';
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createFieldServiceOrderFlow } from './walkmeSteps';
 
 let serviceOrderTimeout;
 
@@ -39,6 +48,8 @@ const ServiceOrder = () => {
       value: 2
     }
   ];
+
+  const { setWalkmeData } = useSetWalkmeData();
 
   const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
 
@@ -57,7 +68,7 @@ const ServiceOrder = () => {
   const [columns, setColumns] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
 
-  const { generateColumns } = useColumns();
+  const { generateColumns, checkStaticField } = useColumns();
 
   const { isOffline } = useContext(CustomOfflineContext);
 
@@ -73,10 +84,11 @@ const ServiceOrder = () => {
     } else {
       const response = await axiosInstance().get(`/field?resource=${sidebarResource.fieldServiceOrder}`);
       data = response?.data?.data;
+      setWalkmeData([createFieldServiceOrderFlow(data)]);
       try {
         insertUpdate(objectStore.resource, sidebarResource.fieldServiceOrder, data);
       } catch (e) {
-        console.error(`Field Service Order : ${e.message}`);
+        toastConfig.setToastConfig(e);
       }
     }
     const newColumns = generateColumns(renderedFrom, data, routes.fieldServiceOrderDetail.path, true);
@@ -246,7 +258,10 @@ const ServiceOrder = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.fieldServiceOrder?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, finalObject?.ownerId) &&
+            u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: rows.length });
@@ -262,7 +277,10 @@ const ServiceOrder = () => {
           let rows = data?.map((u) => {
             let finalObject: any = prepareDataForGrid(u);
             finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-            finalObject['canDelete'] = permissions?.fieldServiceOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, finalObject?.ownerId) && u?.canDelete;
+            finalObject['canDelete'] =
+              permissions?.fieldServiceOrder?.isDelete &&
+              checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, finalObject?.ownerId) &&
+              u?.canDelete;
             return finalObject;
           });
           dispatch({ type: 'initialize', data: rows, count: count });
@@ -302,7 +320,7 @@ const ServiceOrder = () => {
     return (
       <>
         <MenuItem
-          disabled={selectedRecords.every((e) => e.canDelete) ? selectedRecords?.length ? false : true : true}
+          disabled={selectedRecords.every((e) => e.canDelete) ? (selectedRecords?.length ? false : true) : true}
           onClick={() => {
             setShowDeleteConfirmBox(true);
           }}
@@ -312,7 +330,10 @@ const ServiceOrder = () => {
         <MenuItem disabled={!selectedRecords.length} onClick={() => handleAddOffline()}>
           {`Add ${routes.fieldServiceOrder.title} Offline`}
         </MenuItem>
-        <MenuItem disabled={!selectedRecords.length} onClick={() => handleRemoveoffline(selectedRecords?.map(e => e._id))}>{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
+        <MenuItem
+          disabled={!selectedRecords.length}
+          onClick={() => handleRemoveoffline(selectedRecords?.map((e) => e._id))}
+        >{`Clear Offline Data (${selectedRecords.length})`}</MenuItem>
         <MenuItem onClick={() => handleRemoveoffline()}>Clear All Offline Data</MenuItem>
       </>
     );
@@ -322,7 +343,7 @@ const ServiceOrder = () => {
     <section className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[routes.fieldServiceOrder]} />
-        {!isOffline &&
+        {!isOffline && (
           <ImportExportLinks
             permissions={permissions?.fieldServiceOrder}
             module="fieldServiceOrder"
@@ -339,7 +360,7 @@ const ServiceOrder = () => {
             }}
             additionalParams={getQueryString(true)}
           />
-        }
+        )}
       </div>
       <CustomContainer>
         <ListingPageHeader
@@ -377,8 +398,9 @@ const ServiceOrder = () => {
         {showDeleteConfirmBox && (
           <ConfirmationDialog
             open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${deleteRecord?.fieldServiceOrderNumber || ''
-              } ? `}
+            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
+              deleteRecord?.fieldServiceOrderNumber || ''
+            } ? `}
             onClose={() => {
               setDeleteRecord(null);
               setShowDeleteConfirmBox(false);

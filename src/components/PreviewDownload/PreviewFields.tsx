@@ -11,6 +11,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { ViewDialog } from './ViewDialog';
 import ArrangeView from './ArrangeView';
 import HtmlTooltip from '../CustomTooltipTitle';
+import { startCase } from 'lodash';
 
 const icon = <CheckBoxOutlineBlankIcon fontSize="small" />;
 const checkedIcon = <CheckBoxIcon fontSize="small" />;
@@ -25,7 +26,11 @@ export const PreviewFields = ({
     allColumn,
     resource,
     type,
-    defaultColumns = []
+    defaultColumns = [],
+    sortBy = null,
+    setSortBy = null,
+    orderBy = null,
+    setOrderBy = null,
 }) => {
     const toastConfig = useContext(CustomToastContext);
 
@@ -35,7 +40,7 @@ export const PreviewFields = ({
     const setDefaultColumns = () => {
         const temp = defaultColumns?.length > 0 ? allColumn?.filter((e: any) => defaultColumns?.includes(e?.fieldName)) : allColumn;
         setVisibleColumns([...temp]);
-      };
+    };
 
     const handleDeleteView = () => {
         axiosInstance()
@@ -58,9 +63,15 @@ export const PreviewFields = ({
 
     const handleSelectView = (data) => {
         setSelectedView(data);
-        if (data && data.columns) {
+        if (data?.columns) {
             const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
             setVisibleColumns(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
+        }
+        if (setSortBy && data?.sortBy) {
+            setSortBy(allColumn.find(col => col.fieldName === data?.sortBy));
+        }
+        if (setOrderBy && data?.orderBy) {
+            setOrderBy(data?.orderBy);
         }
     };
 
@@ -111,8 +122,14 @@ export const PreviewFields = ({
                                     setVisibleColumns(allColumn);
                                 } else if (['Select All', ...allColumn?.map((e) => e?.fieldName)].sort().toString() === val?.map((e) => e?.fieldName).sort().toString()) {
                                     setVisibleColumns([]);
+                                    setSortBy(null);
+                                    setOrderBy(null);
                                 } else {
                                     setVisibleColumns(val);
+                                    if (!val.find((e) => e?.fieldName === sortBy?.fieldName)) {
+                                        setSortBy(null);
+                                        setOrderBy(null);
+                                    }
                                 }
                             }}
                             options={[{ fieldLabel: 'Select All', fieldName: 'Select All' }, ...allColumn]}
@@ -146,6 +163,41 @@ export const PreviewFields = ({
                             setColumns={setVisibleColumns} />
                     </Box>
                 </Box>
+                {type === 'PDF' && (
+                    <Box display="flex" justifyContent="space-between" alignItems="center" pt={4}>
+                        <Box width="48%" mr={1}>
+                            <Autocomplete
+                                options={visibleColumns?.filter((e) => e?.fieldName !== 'index')}
+                                getOptionLabel={(option: any) => option.fieldLabel}
+                                getOptionSelected={(option: any, value: any) => option.fieldName === value.fieldName}
+                                fullWidth
+                                value={sortBy}
+                                onChange={(event, newValue) => {
+                                    setSortBy(newValue);
+                                    if (!newValue) setOrderBy(null);
+                                }}
+                                size="small"
+                                renderInput={(params) => (
+                                    <TextField {...params} label={`Sort By`} variant="outlined" />
+                                )}
+                            />
+                        </Box>
+                        <Box width="48%">
+                            <Autocomplete
+                                options={['ascending', 'descending']}
+                                getOptionLabel={(option) => startCase(option)}
+                                fullWidth
+                                value={orderBy}
+                                onChange={(event, newValue) => {
+                                    setOrderBy(newValue);
+                                }}
+                                size="small"
+                                disabled={!sortBy}
+                                renderInput={(params) => <TextField {...params} label={`Order By`} variant="outlined" />}
+                            />
+                        </Box>
+                    </Box>
+                )}
             </FormControl>
 
             {isViewDeleteConfirm.open && (
@@ -168,6 +220,8 @@ export const PreviewFields = ({
                         setShowSaveViewDialog({ open: false, data: null });
                     }}
                     viewData={showSaveViewDialog.data}
+                    sortBy={sortBy}
+                    orderBy={orderBy}
                 />
             )}
         </>

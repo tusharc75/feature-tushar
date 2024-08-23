@@ -9,7 +9,8 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField
+  TextField,
+  useMediaQuery
 } from '@material-ui/core';
 import { ExpandMore } from '@material-ui/icons';
 import { Autocomplete } from '@material-ui/lab';
@@ -25,55 +26,79 @@ import { Accordion, AccordionDetails, AccordionSummary } from 'src/components/Cu
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { sidebarResource } from 'src/constants/helpers';
+import { cn, sidebarResource } from 'src/constants/helpers';
 import { OnSelectDataType } from 'src/pages/PlanningView/Calendar/type';
 import './calendarView.scss';
 import { useData } from 'src/StateProvider/Provider';
+import { isMobile, isTablet } from 'react-device-detect';
 
 const DragAndDropCalendar = withDragAndDrop(Calendar as any);
+
 const localizer = momentLocalizer(moment);
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-
 function CalendarView({ resourceList, selectedResource, setSelectedResource, setQueryString }, ref) {
-
   const {
     state: { permissions }
   }: any = useData();
 
   const FILTERS = [
-    ...(permissions?.warehouse?.isRead ? [{
-      label: routes.warehouse.title,
-      value: 'Warehouse',
-      key: 'warehouse'
-    }] : []),
-    ...(permissions?.product?.isRead ? [{
-      label: routes.product.title,
-      value: 'Product',
-      key: 'product'
-    }] : []),
-    ...(permissions?.serializedAsset?.isRead ? [{
-      label: routes.serializedAsset.title,
-      value: 'Serialized Asset',
-      key: 'asset'
-    }] : []),
-    ...(permissions?.serviceMaster?.isRead ? [{
-      label: routes.serviceMaster.title,
-      value: 'Service Master',
-      key: 'service'
-    }] : []),
-    ...(permissions?.customerAccount?.isRead ? [{
-      label: routes.customerAccount.title,
-      value: 'Customer Account',
-      key: 'customerAccount'
-    }] : []),
-    ...(permissions?.competencies?.isRead ? [{
-      label: routes.competencies.title,
-      value: 'Competencies',
-      key: 'competencies'
-    }] : []),
+    ...(permissions?.warehouse?.isRead
+      ? [
+          {
+            label: routes.warehouse.title,
+            value: 'Warehouse',
+            key: 'warehouse'
+          }
+        ]
+      : []),
+    ...(permissions?.product?.isRead
+      ? [
+          {
+            label: routes.product.title,
+            value: 'Product',
+            key: 'product'
+          }
+        ]
+      : []),
+    ...(permissions?.serializedAsset?.isRead
+      ? [
+          {
+            label: routes.serializedAsset.title,
+            value: 'Serialized Asset',
+            key: 'asset'
+          }
+        ]
+      : []),
+    ...(permissions?.serviceMaster?.isRead
+      ? [
+          {
+            label: routes.serviceMaster.title,
+            value: 'Service Master',
+            key: 'service'
+          }
+        ]
+      : []),
+    ...(permissions?.customerAccount?.isRead
+      ? [
+          {
+            label: routes.customerAccount.title,
+            value: 'Customer Account',
+            key: 'customerAccount'
+          }
+        ]
+      : []),
+    ...(permissions?.competencies?.isRead
+      ? [
+          {
+            label: routes.competencies.title,
+            value: 'Competencies',
+            key: 'competencies'
+          }
+        ]
+      : [])
   ];
 
   const ASSET_FILTERS = [
@@ -97,11 +122,25 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     }
   ];
 
+  const RENTAL_JOB_FILTERS = [
+    {
+      label: routes.rentalManagement.title,
+      value: 'Rental Management',
+      key: 'rentalJob'
+    },
+    {
+      label: routes.padMaster.title,
+      value: 'Pad Master',
+      key: 'padMaster'
+    }
+  ];
+
   const [themeMode] = useAppTheme();
   const toastConfig = useContext(CustomToastContext);
+  const mobileView = isMobile && !isTablet;
 
   const [events, setEvents] = useState([]);
-  const [view, setView] = useState<View>('month');
+  const [view, setView] = useState<View>(mobileView ? 'day' : 'month');
   const [lookupResource, setLookUpResource] = useState(null);
   const [selectedLookUpResourceData, setSelectedLookUpResourceData] = useState(null);
 
@@ -140,6 +179,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   const [anchor, setAnchor] = useState(null);
 
   const [lookupLoading, setLookupLoading] = useState(false);
+  const [isDataFetching, setIsDataFetching] = useState(false);
 
   useImperativeHandle(ref, () => ({
     fetchData
@@ -170,7 +210,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   }, [dateRange]);
 
   useEffect(() => {
-    let lookupResource = [...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS]?.map((e) => e.value)?.toString();
+    let lookupResource = [...FILTERS, ...ASSET_FILTERS, ...PRODUCT_FILTERS, ...RENTAL_JOB_FILTERS]?.map((e) => e.value)?.toString();
     if (lookupResource) {
       setLookupLoading(true);
       axiosInstance()
@@ -209,6 +249,8 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
           setFilters(ASSET_FILTERS);
         } else if (selectedResource.resource === sidebarResource.product) {
           setFilters(PRODUCT_FILTERS);
+        } else if (selectedResource.resource === sidebarResource.rentalManagement) {
+          setFilters([...FILTERS, ...RENTAL_JOB_FILTERS]);
         } else {
           setFilters(FILTERS);
         }
@@ -250,6 +292,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
   };
 
   const fetchData = () => {
+    setIsDataFetching(true);
     const queryString = getQueryString();
     setQueryString(queryString);
     axiosInstance()
@@ -332,20 +375,50 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               });
             }
           }
+          let title = d[selectedResource.fieldName];
+          let start = new Date(d[selectedResource.start]);
+          let end = new Date(d[selectedResource.end]);
+          let fulfillStatus = d?.fulfillStatus;
+          let startDraggable = true;
+          let endDraggable = true;
+
+          if (selectedResource.resource === sidebarResource.rentalManagement) {
+            if (d?.parentAccount?.optionLabel) {
+              title = `${title} (Parent-${d?.parentAccount?.optionLabel})`;
+            }
+            if (d?.padName?.optionLabel) {
+              title = `${title}(Pad-${d?.padName?.optionLabel})`;
+            }
+            if (d?.actualStartDate) {
+              start = new Date(d?.actualStartDate);
+              startDraggable = false;
+            }
+            if (d?.actualEndDate) {
+              end = new Date(d?.actualEndDate);
+              endDraggable = false;
+            }
+            if (!d?.actualEndDate && moment(new Date()).isAfter(moment(d?.estimateEndDate))) {
+              fulfillStatus = 'ERROR';
+            }
+          }
           return {
             id: d._id,
-            title: d[selectedResource.fieldName],
-            start: new Date(d[selectedResource.start]),
-            end: new Date(d[selectedResource.end]),
+            title: title,
+            start: start,
+            end: end,
             allDay: true,
             resource: selectedResource.resource,
-            fulfillStatus: d?.fulfillStatus
+            fulfillStatus: fulfillStatus,
+            startDraggable: startDraggable,
+            endDraggable: endDraggable
           };
         });
+
         setEvents([...rows, ...otherData]);
         setStaticEvents([...rows, ...otherData]);
       })
-      .catch((err) => { });
+      .catch((err) => {})
+      .finally(() => setIsDataFetching(false));
   };
 
   useEffect(() => {
@@ -358,13 +431,6 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       });
     }
   }, [selectedFilters]);
-
-  const onView = useCallback(
-    (view) => {
-      setView(view);
-    },
-    [setView]
-  );
 
   const clickableEventInListView = () => {
     const header = document.getElementsByClassName('rbc-header')[2];
@@ -469,21 +535,49 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
+        fetchData();
       });
   };
 
-  const moveEvent = ({ event, start, end }) => {
+  const resize = (event, start, end) => {
     const filterEvents = staticEvents.filter((ev) => ev.id !== event.id);
     const existing = staticEvents.find((ev) => ev.id === event.id) ?? {};
     setEvents([...filterEvents, { ...existing, start, end }]);
     updateData(event, start, end);
   };
 
+  const moveEvent = ({ event, start, end }) => {
+    if (event?.resource === sidebarResource?.rentalManagement && !(event?.startDraggable && event?.endDraggable)) {
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'warning',
+        message: `can't change start date or end date`
+      });
+    } else {
+      resize(event, start, end);
+    }
+  };
+
   const resizeEvent = ({ event, start, end }) => {
-    const filterEvents = staticEvents.filter((ev) => ev.id !== event.id);
-    const existing = staticEvents.find((ev) => ev.id === event.id) ?? {};
-    setEvents([...filterEvents, { ...existing, start, end }]);
-    updateData(event, start, end);
+    if (event?.resource === sidebarResource?.rentalManagement) {
+      if (!event?.startDraggable && !moment(event?.start).isSame(moment(start))) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'warning',
+          message: `can't change start date`
+        });
+      } else if (!event?.endDraggable && !moment(event?.end).isSame(moment(end))) {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'warning',
+          message: `can't change end date`
+        });
+      } else {
+        resize(event, start, end);
+      }
+    } else {
+      resize(event, start, end);
+    }
   };
 
   const onNavigate = (date) => {
@@ -536,6 +630,13 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
         color = 'white';
       } else if (obj?.type === 'debit') {
         backgroundColor = themeMode === 'light' ? 'rgb(255 236 204)' : 'rgb(217 138 42)';
+      }
+    }
+
+    if (obj?.resource === sidebarResource.rentalManagement) {
+      if (obj?.fulfillStatus === 'ERROR') {
+        backgroundColor = 'rgb(220, 53, 69)';
+        color = 'white';
       }
     }
 
@@ -605,7 +706,7 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
     <>
       <div>
         <Box display="flex" flexDirection="column">
-          <div className="flex flex-wrap gap-2 pr-[66px]">
+          <div className="flex flex-wrap gap-2 max-[560px]:pt-[40px] min-[561px]:pr-[100px]">
             <Autocomplete
               options={resourceList}
               getOptionLabel={(option) => (option && option?.title) || ''}
@@ -650,77 +751,90 @@ function CalendarView({ resourceList, selectedResource, setSelectedResource, set
               })}
           </Box>
         </Box>
-        {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
-          <DragAndDropCalendar
-            defaultDate={defaultDate}
-            defaultView={'day'}
-            events={events}
-            formats={formats}
-            localizer={localizer}
-            onEventDrop={moveEvent}
-            onEventResize={resizeEvent}
-            popup={true}
-            messages={{
-              agenda: 'List'
-            }}
-            resizable
-            views={{ month: true, week: true, day: true, agenda: true }}
-            onView={onView}
-            view={view}
-            eventPropGetter={(obj: any) => {
-              const style = setEventStyle(obj);
-              return {
-                style
-              };
-            }}
-            onNavigate={(date) => {
-              onNavigate(date);
-            }}
-            onSelectEvent={(event: any) => {
-              window.open(`${selectedResource.path}/${event.id}`);
-            }}
-          />
-        ) : (
-          <Calendar
-            defaultDate={defaultDate}
-            defaultView={'day'}
-            events={events}
-            formats={formats}
-            localizer={localizer}
-            popup={true}
-            messages={{
-              agenda: 'List'
-            }}
-            views={{ month: true, week: true, day: true, agenda: true }}
-            onView={onView}
-            view={view}
-            eventPropGetter={(obj: any) => {
-              const style = setEventStyle(obj);
-              return {
-                style
-              };
-            }}
-            onNavigate={(date) => {
-              onNavigate(date);
-            }}
-            onSelectEvent={(data: any, event: any) => {
-              if (selectedResource.resource === sidebarResource.product) {
-                setAnchor(event.nativeEvent.target);
-                if (data?.type) {
-                  const newData: OnSelectDataType[] = data.data;
-                  setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
-                }
-              } else {
-                if (data.resource) {
-                  const resource = resourceList?.find((r) => r.resource === data.resource);
-                  window.open(`${resource.path}/${data.id}`);
-                } else {
-                  window.open(`${selectedResource.path}/${data.id}`);
-                }
-              }
-            }}
-          />
-        )}
+        <div className={cn('relative')}>
+          {selectedResource?.resource === sidebarResource.rentalManagement || selectedResource?.resource === sidebarResource.planning ? (
+            <>
+              <DragAndDropCalendar
+                defaultDate={defaultDate}
+                key={mobileView ? 'mobile' : 'desktop'}
+                defaultView={mobileView ? 'day' : 'month'}
+                events={events}
+                formats={formats}
+                localizer={localizer}
+                onEventDrop={moveEvent}
+                onEventResize={resizeEvent}
+                popup={!mobileView}
+                messages={{
+                  agenda: 'List'
+                }}
+                resizable
+                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                onView={setView}
+                view={view}
+                eventPropGetter={(obj: any) => {
+                  const style = setEventStyle(obj);
+                  return {
+                    style
+                  };
+                }}
+                onNavigate={(date) => {
+                  onNavigate(date);
+                }}
+                onSelectEvent={(event: any) => {
+                  window.open(`${selectedResource.path}/${event.id}`);
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Calendar
+                defaultDate={defaultDate}
+                key={mobileView ? 'mobile' : 'desktop'}
+                defaultView={mobileView ? 'day' : 'month'}
+                events={events}
+                formats={formats}
+                localizer={localizer}
+                popup={!mobileView}
+                messages={{
+                  agenda: 'List'
+                }}
+                views={mobileView ? ['day', 'agenda'] : ['month', 'week', 'day', 'agenda']}
+                onView={setView}
+                view={view}
+                eventPropGetter={(obj: any) => {
+                  const style = setEventStyle(obj);
+                  return {
+                    style
+                  };
+                }}
+                onNavigate={(date) => {
+                  onNavigate(date);
+                }}
+                onSelectEvent={(data: any, event: any) => {
+                  if (selectedResource.resource === sidebarResource.product) {
+                    setAnchor(event.nativeEvent.target);
+                    if (data?.type) {
+                      const newData: OnSelectDataType[] = data.data;
+                      setOpen({ open: true, data: mapObjectToList(groupBy(newData, 'resource')), type: data?.type });
+                    }
+                  } else {
+                    if (data.resource) {
+                      const resource = resourceList?.find((r) => r.resource === data.resource);
+                      window.open(`${resource.path}/${data.id}`);
+                    } else {
+                      window.open(`${selectedResource.path}/${data.id}`);
+                    }
+                  }
+                }}
+              />
+            </>
+          )}
+          {isDataFetching && (
+            <span className={cn('absolute inset-0 z-10 flex items-center justify-center bg-white/50 dark:bg-black/50')}>
+              <CircularProgress />
+            </span>
+          )}
+        </div>
         {isOpen.open && (
           <Popover
             open={isOpen.open}
@@ -761,6 +875,7 @@ const RenderTable = ({ data }) => {
             <TableCell>Qty</TableCell>
             <TableCell>{routes.warehouse.title}</TableCell>
             <TableCell>{routes.customerAccount.title}</TableCell>
+            {data?.find((e) => e?.padName) && <TableCell>Pad Name</TableCell>}
           </TableRow>
         </TableHead>
         <TableBody>
@@ -802,6 +917,11 @@ const RenderTable = ({ data }) => {
               <TableCell component="th" scope="row">
                 {row?.customerAccount?.optionLabel ? row?.customerAccount?.optionLabel : <NoDataCell />}
               </TableCell>
+              {data?.find((e) => e?.padName) && (
+                <TableCell component="th" scope="row">
+                  {row?.padName?.optionLabel ? row?.padName?.optionLabel : <NoDataCell />}
+                </TableCell>
+              )}
             </TableRow>
           ))}
         </TableBody>

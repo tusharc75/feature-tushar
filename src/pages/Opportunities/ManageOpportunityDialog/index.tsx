@@ -9,7 +9,7 @@ import {
   getObjKeysWithValues,
   opportunity,
   setFieldsInAscendingOrder,
-  GenerateResourceLineNumber,
+  GenerateResourceLineNumber
 } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
@@ -42,7 +42,6 @@ export default function ManageOpportunityDialog({
   opportunityId,
   isClone = false
 }) {
-
   const { opportunityApi } = opportunity;
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
@@ -59,43 +58,43 @@ export default function ManageOpportunityDialog({
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
-    axiosInstance().get(`/field?resource=Opportunity&entity=${selectedEntity}`).then(async ({ data: { data } }) => {
+    axiosInstance()
+      .get(`/field?resource=Opportunity&entity=${selectedEntity}`)
+      .then(async ({ data: { data } }) => {
+        const process = data.find((obj) => obj?.fieldData?.type === 'process')?.fieldData;
+        if (process) {
+          data = data?.filter((e) => e.fieldData.sectionName !== process?.additionalInfoSection);
+        }
 
-      const process = data.find((obj) => obj?.fieldData?.type === 'process')?.fieldData;
-      if (process) {
-        data = data?.filter((e) => e.fieldData.sectionName !== process?.additionalInfoSection)
-      }
+        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-      if (opportunityId) {
-        var opportunityData: any = await axiosInstance().get(`${opportunityApi}/${opportunityId}?entity=${selectedEntity}`);
-        opportunityData = opportunityData?.data?.data;
-        if (isClone) {
-          const { opportunityName, ...rest } = opportunityData;
-          rest['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-          setCloneHeading(opportunityName);
+        if (opportunityId) {
+          var opportunityData: any = await axiosInstance().get(`${opportunityApi}/${opportunityId}?entity=${selectedEntity}`);
+          opportunityData = opportunityData?.data?.data;
+          if (isClone) {
+            const { opportunityName, ...rest } = opportunityData;
+            rest['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+            setCloneHeading(opportunityName);
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+            });
+          } else {
+            setInitialData({
+              fields: fieldsDataForUpdate,
+              values: { ...getObjKeysWithValues(opportunityData, fieldsDataForUpdate) }
+            });
+          }
+        } else {
+          let initialData = { ...getObjKeys('', fieldsDataForCreate) };
+          initialData['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate);
           setInitialData({
-            fields: fieldsDataForUpdate,
-            values: { ...getObjKeysWithValues(rest, fieldsDataForCreate, true, user) }
+            fields: fieldsDataForCreate,
+            values: initialData
           });
         }
-        else {
-          setInitialData({
-            fields: fieldsDataForUpdate,
-            values: { ...getObjKeysWithValues(opportunityData, fieldsDataForUpdate) }
-          });
-        }
-      } else {
-        let initialData = { ...getObjKeys('', fieldsDataForCreate) };
-        initialData['opportunityName'] = GenerateResourceLineNumber(fieldsDataForCreate); 
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: initialData
-        });
-      }
-    });
+      });
   }, []);
 
   const handleSubmit = (values) => {
@@ -121,8 +120,7 @@ export default function ManageOpportunityDialog({
           toastConfig.setToastConfig(error);
           setLoading(false);
         });
-    }
-    else {
+    } else {
       values = { ...values, _id: dataToUpdate._id };
       setLoading(true);
       axiosInstance()
@@ -171,7 +169,7 @@ export default function ManageOpportunityDialog({
         open={open}
       >
         {initialData?.fields?.length ? (
-          <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit} >
+          <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} onSubmit={handleSubmit}>
             {({ submitForm, values, errors, touched, setFieldValue }) => (
               <Fragment>
                 <CustomDialogHeader
@@ -192,14 +190,16 @@ export default function ManageOpportunityDialog({
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
                     <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={setFieldValue}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                  />
+                      errors={errors}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                      resource={resource}
+                      referenceId={opportunityId}
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>

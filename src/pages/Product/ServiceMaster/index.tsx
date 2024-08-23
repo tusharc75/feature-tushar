@@ -26,6 +26,8 @@ import { product, serviceMaster } from 'src/constants/helpers';
 import AssignStepDialog from './AssignStepDialog/Index';
 import FrequencyDialog from './FrequencyDialog';
 import { FiExternalLink } from 'react-icons/fi';
+import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import ServiceCondition from 'src/pages/Product/ServiceMaster/ServiceCondition';
 
 interface Props {
   renderedFrom: string;
@@ -46,6 +48,7 @@ const ServiceMaster = (props: Props) => {
   const [isAssigning, setIsAssigning] = useState(false);
   const [orignalData, setOrignalData] = useState([]);
   const [frequencyDialog, setFrequencyDialog] = useState({ open: false, data: null });
+  const [tabValue, setTabValue] = useState(0);
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -537,8 +540,18 @@ const ServiceMaster = (props: Props) => {
     );
   };
 
+  const handleMainTabChange = (event: any, newValue: number) => {
+    setTabValue(newValue);
+    dispatch({ type: 'selection', selectedRecords: [] });
+  };
+
   return (
     <Fragment>
+      <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+          <CustomTab value={0} label={'Normal'} primaryColor={true} />
+          <CustomTab value={1} label={'Conditional'} primaryColor={true} />
+        </CustomTabs>
+        <TabPanel value={tabValue} index={0}>
       {permissions?.product?.isUpdate && (
         <>
           <DetailsPageHeader
@@ -569,6 +582,10 @@ const ServiceMaster = (props: Props) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
+    </TabPanel>
+    <TabPanel value={tabValue} index={1}>
+      <ServiceCondition renderedFrom={renderedFrom} id={id} />
+      </TabPanel>
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}

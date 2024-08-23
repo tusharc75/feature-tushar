@@ -18,7 +18,6 @@ import {
 import moment from 'moment';
 import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FiltersContext } from 'src/StateProvider/FiltersContext/FiltersContext';
-import { useData } from 'src/StateProvider/Provider';
 import { SEARCH, useStore } from 'src/StateProvider/fastContext';
 import SwipableListForMobile from 'src/components/CustomReactTable/SwipableListForMobile';
 import { flattenArray } from 'src/constants/columns';
@@ -38,9 +37,7 @@ import {
   extractLastNumberFromDataRange,
   fitToColumn,
   getExcelColumnNameFromRange,
-  getStickyColumnNames,
-  getUniqueDataByKey,
-  updateGridHiddenColumns,
+  getUniqueRows,
   useSkipper
 } from './utils';
 
@@ -89,10 +86,6 @@ const CustomReactTable = ({
     columnOrder,
     sorting
   }: TInitialState = state;
-
-  const {
-    state: { user }
-  }: any = useData();
 
   const debouncedSearch = useDebounce(search, 500);
 
@@ -148,14 +141,9 @@ const CustomReactTable = ({
       0,
       columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string
     );
-    const stickyColumns = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection }).stickyColumns;
-    const newcolumnOrderToSave = newColumnOrder?.filter((o) => !stickyColumns?.includes(o));
+    // const stickyColumns = getStickyColumnNames({ allColumn: newColumns, expander, hideSelection }).stickyColumns;
+    // const newcolumnOrderToSave = newColumnOrder?.filter((o) => !stickyColumns?.includes(o));
 
-    updateGridHiddenColumns({
-      renderedFrom,
-      user,
-      columnOrder: newcolumnOrderToSave
-    });
     dispatch({ type: 'setColumnOrder', columnOrder: newColumnOrder });
     table.setColumnOrder(newColumnOrder);
     return [...columnOrder];
@@ -343,7 +331,7 @@ const CustomReactTable = ({
       const { subRows, ...rest } = d.original;
       return { ...rest };
     });
-    const testData = getUniqueDataByKey([...currentPageSelectedRows, ...selectedRecords]);
+    const testData = getUniqueRows([...currentPageSelectedRows, ...selectedRecords]);
     const newData = [];
     for (const data of testData) {
       if (selectedRowIds.includes(`${data._id}_${data?.index || 0}`)) newData.push(data);
@@ -362,6 +350,7 @@ const CustomReactTable = ({
       table.resetRowSelection();
     }
   }, [selectedRecords.length, table]);
+
   useEffect(() => {
     if (selectedRecords.length !== Object.keys(rowSelection).length) {
       const selectedRowIds = selectedRecords.map((d) => d._id);
@@ -405,7 +394,8 @@ const CustomReactTable = ({
   const handleTableExport = () => {
     clearTimeout(exportTimeout);
     setExportTableView(true);
-    const isFooterPresent = newColumns.some((c) => typeof c.Footer === 'function');
+    const { columnVisibility } = table.getState();
+    const isFooterPresent = newColumns.some((c) => columnVisibility[c?.id] && typeof c.Footer === 'function');
     exportTimeout = setTimeout(() => {
       if (!tableRef.current) return;
       const wb = xlsx.utils.book_new();
@@ -475,7 +465,9 @@ const CustomReactTable = ({
 
   const onDragEnd = (event: DragEndEvent) => {
     setActiveHeader(null);
+
     if (!event.over) return;
+    if (event.over.data.current.isNotDraggable) return;
     const { active, over } = event;
     if (active.id === over.id) return;
     reorder(active.id as string, over.id as string);

@@ -1,5 +1,6 @@
 import { generateFormFieldSteps, StepDefination, WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
+import { sidebarResource } from 'src/constants/helpers';
 
 export const generateAddExistingProduct = (waitForStepInsertion = false): WalkmeData => ({
   name: 'Add Existing Product',
@@ -20,7 +21,7 @@ export const generateAddExistingProduct = (waitForStepInsertion = false): Walkme
       content: 'Click here to add existing product.'
     },
     {
-      target: '#Product-table-checkbox-0',
+      target: `#${sidebarResource.product}-table-checkbox-0`,
       title: 'Add a Product'
     },
     {
@@ -64,7 +65,7 @@ export const generateAddChildProduct = (index: number, waitForStepInsertion = fa
       title: 'Add Existing Product'
     },
     {
-      target: '#Product-table-checkbox-0',
+      target: `#${sidebarResource.product}-table-checkbox-0`,
       title: 'Add a Product'
     },
     {
@@ -169,19 +170,60 @@ export const generateDeliveredToCustomer = (index: number, waitForStepInsertion 
   return data;
 };
 
-export const generateCreateReceivingTicket = (index: number): WalkmeData => {
+export const generateCreateReceivingTicket = (renderedFrom: string, showAssetDataDialog = true): WalkmeData => {
   const data: WalkmeData = {
     name: 'Create Receiving Ticket',
     url: '/rental-management/detail/:id',
     steps: [
       {
-        target: `#rentalJobs_grid-4-table-checkbox-${index}`,
+        target: `#${renderedFrom.split(' ').join('-')}-table-select-all-checkbox`,
         title: 'Select a product'
       },
       { target: '#details-page-action-button', title: 'Actions' },
-      { target: '#create-receiving-ticket-menu-item', title: 'Create Receiving Ticket' },
-      { target: '#confirmation-dialog-confirm-button', title: 'Confirm', waitForStepInsertion: true }
+      { target: '#create-receiving-ticket-chargaeble-menu-item', title: 'Create Receiving Ticket', waitForStepInsertion: !showAssetDataDialog }
     ]
+  };
+  if (showAssetDataDialog) {
+    data.steps.push({ target: '#asset-details-change-dialog-save-button', title: 'Save', waitForStepInsertion: true });
+  }
+  data.steps.push({ target: '#manage-ticket-dialog-save-button', title: 'Save' });
+  return data;
+};
+
+export const generateReceiveItem = (renderedFrom: string): WalkmeData => {
+  const data: WalkmeData = {
+    name: 'Received Items',
+    url: '/rental-management/detail/:id',
+    steps: [
+      {
+        target: `#${renderedFrom.split(' ').join('-')}-table-select-all-checkbox`,
+        title: 'Select a product'
+      },
+      { target: '#details-page-action-button', title: 'Actions' },
+      { target: '#received-items-menu-item', title: 'Create Receiving Ticket' }
+    ]
+  };
+  return data;
+};
+
+export const createSendEmailStep = () => {
+  const data: WalkmeData = {
+    name: 'Send Email',
+    url: '/rental-management/detail/:id',
+    steps: [
+      { target: '#details-page-send-email-button', title: 'Select View', willOpenDialog: true },
+      { target: '#show-column-dialog-send-email-button', title: 'Send Email', waitForStepInsertion: true, willOpenDialog: true },
+      { target: '#send-email-dialog-send-button', title: 'Send' }
+    ]
+  };
+  return data;
+};
+
+export const createCloseStep = (renderedFrom: string) => {
+  const data: WalkmeData = {
+    name: 'Close',
+    url: '/rental-management/detail/:id',
+    steps: [{ target: '#rental-management-close-button', title: `Close ${renderedFrom}` }]
   };
   return data;
 };

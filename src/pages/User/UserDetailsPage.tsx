@@ -69,6 +69,8 @@ import ManageUserDialog from './ManageUserDialog';
 import OpportunityAccordionInUserDetail from './OpportunityAccordionInUserDetail';
 import UserSession from './UserSession';
 
+import { isMobile, isTablet } from "react-device-detect";
+
 const useStyles = makeStyles((theme) => ({
   dataValue: {
     fontWeight: 500,
@@ -730,6 +732,7 @@ const UserDetailsPage = () => {
       {showAssignEntityDialog && (
         <Dialog
           fullWidth
+          fullScreen={isMobile || isTablet}
           maxWidth="xs"
           open={showAssignEntityDialog}
           onClose={entityDialogClose}

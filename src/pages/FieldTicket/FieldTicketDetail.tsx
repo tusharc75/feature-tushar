@@ -38,8 +38,11 @@ import Step from '../DynamicForm/Step';
 import ManageFieldTicket from './ManageFieldTicket';
 import Submit from './Submit';
 import Material from './material';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateAddExistingService } from './walkmeSteps';
 
 const FieldTicketDetail = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const { id } = useParams();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -72,6 +75,11 @@ const FieldTicketDetail = () => {
       fetchFields();
       fetchData();
       fetchPolicy();
+    }
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(generateAddExistingService(true).steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
     }
   }, [id, isOffline]);
 
