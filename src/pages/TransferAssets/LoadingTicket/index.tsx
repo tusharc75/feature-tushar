@@ -220,7 +220,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             Header: 'Index',
             width: 70,
             sticky: isMobile ? 'none' : 'left',
-            // Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
             Cell: ({ row }) => (
               <div className="d-flex align-items-center gap-2">
                 <h5 className="text-truncate">{row?.original?.index}</h5>
