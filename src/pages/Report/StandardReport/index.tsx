@@ -723,7 +723,7 @@ const Report = () => {
           return { ...col, Footer: 'Total' };
         }
         if (dataKeys.includes(col.accessor)) {
-          return { ...col, Footer: historicalReportFooterData[col.accessor] };
+          return { ...col, Footer: historicalReportFooterData[col.accessor] ?? <NoDataCell /> };
         }
         return col;
       });
