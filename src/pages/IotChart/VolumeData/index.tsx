@@ -37,6 +37,8 @@ const VolumeData = ({assetId}) => {
           accessor: 'date',
           Header: 'Date',
           width: 120,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <div>
                 {moment(row?.original?.date)?.format(dateTimeFormat)}
@@ -47,6 +49,8 @@ const VolumeData = ({assetId}) => {
           accessor: 'TotalVolInBBLs',
           Header: 'Total Vol In BBLs',
           width: 120,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <div>
                 {row?.original?.TotalVolInBBLs}
@@ -57,6 +61,8 @@ const VolumeData = ({assetId}) => {
           accessor: 'TotalVolOutBBLs',
           Header: 'Total Vol Out BBLs',
           width: 120,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <div>
                 {row?.original?.TotalVolOutBBLs}
@@ -67,6 +73,8 @@ const VolumeData = ({assetId}) => {
           accessor: 'TotalMinutesRecycle',
           Header: 'Total Minutes Recycle',
           width: 120,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <div>
                 {row?.original?.TotalMinutesRecycle}
@@ -77,6 +85,8 @@ const VolumeData = ({assetId}) => {
           accessor: 'TotalMinutesPurge',
           Header: 'Total Minutes Purge',
           width: 120,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <div>
                 {row?.original?.TotalMinutesPurge}
@@ -87,6 +97,8 @@ const VolumeData = ({assetId}) => {
           accessor: 'TotalMinutesFill',
           Header: 'Total Minutes Fill',
           width: 120,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <div>
                 {row?.original?.TotalMinutesFill}
@@ -97,6 +109,8 @@ const VolumeData = ({assetId}) => {
           accessor: 'minid',
           Header: 'MINID',
           width: 120,
+          disableFilters: true,
+          disableSortBy: true,
           Cell: ({ row }) => (
             <div>
                 {row?.original?.minid}
@@ -183,22 +197,6 @@ const VolumeData = ({assetId}) => {
       deepFilter = `${deepFilter}&entity=${selectedEntity}`;
     }
     deepFilter = `${deepFilter}&asset=${assetId}`
-
-    const { filterByIds, deepFilters } = gridFilterParser(filters);
-
-    if (filterByIds?.length) {
-      deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
-    }
-    if (deepFilters?.length) {
-      deepFilter = `${deepFilter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilters))}`;
-    }
-    if (filterByIds?.length || deepFilters?.length) {
-      deepFilter = `${deepFilter}&filterType=and`;
-    }
-
-    if (sorting.length > 0) {
-      deepFilter = `${deepFilter}&sortBy=${sorting[0].colId}&orderBy=${sorting[0].sort}`;
-    }
 
     return deepFilter;
   };
