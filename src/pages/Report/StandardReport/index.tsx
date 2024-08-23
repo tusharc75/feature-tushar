@@ -860,11 +860,7 @@ const Report = () => {
                   refreshGrid={fetchResourceData}
                   hideSelection={true}
                   reportSave={true}
-                  pagination={false}
-                  setWholeRowsCellColor={(rowData) => {
-                    if (!rowData?.startDate && type === 'historical-report') return 'footerRow';
-                    return '';
-                  }}
+                  pagination={type !== 'historical-report'}
                   isClientSideGrid={type === 'historical-report' ? true : false}
                 />
               </>
