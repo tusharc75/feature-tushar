@@ -4,7 +4,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
@@ -30,6 +30,16 @@ const VolumeData = ({assetId}) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
+
+  useEffect(() => {
+    fetchGridColumns();
+  }, []);
+
+  useEffect(() => {
+    const cancelTokenSource = axios.CancelToken.source();
+    fetchData(cancelTokenSource);
+    return () => cancelTokenSource.cancel();
+  }, [page, limit, selectedEntity]);
 
   const fetchGridColumns = () => {
       const columns = [
@@ -227,16 +237,6 @@ const VolumeData = ({assetId}) => {
         toastConfig.setToastConfig(error);
       });
   };
-
-  useEffect(() => {
-    fetchGridColumns();
-  }, []);
-
-  useEffect(() => {
-    const cancelTokenSource = axios.CancelToken.source();
-    fetchData(cancelTokenSource);
-    return () => cancelTokenSource.cancel();
-  }, [page, limit, filters, sorting, selectedEntity]);
 
   const ActionMenuItems = () => {
     return (
