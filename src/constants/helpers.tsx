@@ -1003,7 +1003,12 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = [];
     } else if (key.type === 'description') {
     } else if (key.type === 'groupSignature') {
-      obj[key.fieldName] = [];
+      if (isArray(value) && value?.length) {
+        obj[key.fieldName] = value?.map((e) => { return { signature: '', user: e } });
+      }
+      else {
+        obj[key.fieldName] = [];
+      }
     } else {
       obj[key.fieldName] = value;
     }
@@ -2570,24 +2575,10 @@ export const REPORT_LIST = [
     defaultColumn: true
   },
   {
-    title: 'Daily Volume Revenue Report',
+    title: 'Volume Report',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'dailyVolumeRevenueReport',
-    defaultColumn: true
-  },
-  {
-    title: 'Day Wise Volume Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'dayWiseVolumeReport',
-    defaultColumn: true
-  },
-  {
-    title: 'Weekly/Monthly Volume Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'historicalReport',
+    type: 'volumeReport',
     defaultColumn: true,
     notMultiSelectFields: ['frequency']
   },

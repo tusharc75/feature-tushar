@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { Grid, Button, Box, IconButton } from '@material-ui/core';
-import { camelCase, capitalize, isArray, startCase } from 'lodash';
+import { camelCase, capitalize, isArray, isNumber, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -18,8 +18,8 @@ import {
   downloadExcel,
   isObjectEmpty,
   sidebarResource,
-  dateFormat,
-  REPORT_LIST
+  REPORT_LIST,
+  formatAmountWithCurrency
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -71,7 +71,7 @@ const Report = () => {
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
   const [defaultColumns, setDefaultColumns] = React.useState([]);
-  const [historicalReportFooterData, setHistoricalReportFooterData] = React.useState<Record<string, number>>(null);
+  const [footerData, setFooterData] = React.useState<Record<string, number>>(null);
 
   // Grid Configs
   const { generateColumns } = useColumns();
@@ -94,7 +94,7 @@ const Report = () => {
       } = await axiosInstance().get(`/report/${type}/column`);
       let newColumns = generateColumns(type, columnFields);
       newColumns?.forEach((o) => {
-        if (type === 'inventory-history') {
+        if (resourceCamelCase === 'inventoryHistory') {
           if (o?.accessor === 'type') {
             o.cell = ({ row }) => CreditDebitTypeRenderer(row);
           }
@@ -102,7 +102,7 @@ const Report = () => {
             o.cell = ({ row }) => CreditDebitRenderer(row);
           }
         }
-        if (type === 'fleet-report') {
+        if (resourceCamelCase === 'fleetReport') {
           if (o?.accessor === 'unitNumber') {
             o.cell = ({ row }) => UnitNameRenderer(row);
           }
@@ -125,7 +125,7 @@ const Report = () => {
         }
         o.editable = false;
       });
-      if (type === 'inventory-evaluation') {
+      if (resourceCamelCase === 'inventoryEvaluation') {
         newColumns?.forEach((e) => {
           if (e.accessor === 'productName') {
             e.cell = ({ row }) => ProductRenderer(row);
@@ -139,7 +139,8 @@ const Report = () => {
           }
         });
         columns = [...newColumns, ActionsRenderer];
-      } else if (type === 'in-used-serialized-asset') {
+      }
+      else if (resourceCamelCase === 'inUsedSerializedAsset') {
         newColumns?.forEach((e) => {
           if (['billingAddress', 'shippingAddress']?.includes(e.accessor)) {
             e.disableFilters = true;
@@ -147,15 +148,8 @@ const Report = () => {
           }
         });
         columns = [...newColumns];
-      } else if (type === 'day-wise-volume-report') {
-        newColumns?.forEach((e) => {
-          if (['asset', 'customerAccount', 'padName']?.includes(e.accessor)) {
-            e.disableFilters = true;
-            e.disableSortBy = true;
-          }
-        });
-        columns = [...newColumns];
-      } else if (type === 'purchase-order-details') {
+      }
+      else if (resourceCamelCase === 'purchaseOrderDetails') {
         newColumns?.forEach((e) => {
           if (['productId', 'productNumber', 'productDescription', 'serviceName', 'serviceDescription', 'description']?.includes(e.accessor)) {
             e.disableFilters = true;
@@ -163,22 +157,11 @@ const Report = () => {
           }
         });
         columns = [...newColumns];
-      } else if (type === 'historical-report') {
-        newColumns?.forEach((e) => {
-          if (['startDate']?.includes(e.accessor)) {
-            e.cell = ({ row }) => (
-              <div>
-                {row?.original?.startDate ? (
-                  <h5 title={`${moment(row?.original?.startDate).format(dateFormat)}`}>{moment(row?.original?.startDate)?.format(dateFormat)}</h5>
-                ) : (
-                  'Total'
-                )}
-              </div>
-            );
-          }
-        });
+      }
+      else if (resourceCamelCase === 'volumeReport') {
         columns = [...newColumns, ActionsRenderer];
-      } else {
+      }
+      else {
         columns = [...newColumns];
       }
       setResourceColumns(filterFields);
@@ -430,7 +413,7 @@ const Report = () => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        {type === 'inventory-evaluation' && (
+        {resourceCamelCase === 'inventoryEvaluation' && (
           <HtmlTooltip title={'View History'}>
             <span>
               <IconButton
@@ -445,7 +428,7 @@ const Report = () => {
             </span>
           </HtmlTooltip>
         )}
-        {type === 'historical-report' && row?.original['startDate'] && (
+        {resourceCamelCase === 'volumeReport' && (
           <HtmlTooltip title={'View Pad Wise Data'}>
             <span>
               <IconButton
@@ -526,13 +509,13 @@ const Report = () => {
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
         });
-        if (type === 'historical-report') {
+        if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase)) {
           data = data.filter((d) => {
-            if (Boolean(d?.startDate)) {
-              return true;
-            } else {
-              setHistoricalReportFooterData(d);
+            if (d?.isFooter) {
+              setFooterData(d);
               return false;
+            } else {
+              return true;
             }
           });
         }
@@ -716,20 +699,25 @@ const Report = () => {
   };
 
   useEffect(() => {
-    if (type === 'historical-report' && historicalReportFooterData) {
-      const dataKeys = Object.keys(historicalReportFooterData);
-      const newColumns = columns.map((col) => {
-        if (col.accessor === 'startDate') {
+    if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) && footerData) {
+      const dataKeys = Object.keys(footerData);
+      const newColumns = columns.map((col, index) => {
+        if (index === 0) {
           return { ...col, Footer: 'Total' };
         }
         if (dataKeys.includes(col.accessor)) {
-          return { ...col, Footer: historicalReportFooterData[col.accessor] ?? <NoDataCell /> };
+          return {
+            ...col, Footer: footerData[col.accessor] && isNumber(footerData[col.accessor]) ?
+              col?.type === "currencyNumber" ?
+                `${formatAmountWithCurrency(col?.currency, footerData[col.accessor])?.fullFormatAmountWithoutSpace}` :
+                footerData[col.accessor] : <NoDataCell />
+          };
         }
         return col;
       });
       setColumns(newColumns);
     }
-  }, [columns?.length, type, historicalReportFooterData]);
+  }, [columns?.length, type, footerData]);
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -738,7 +726,7 @@ const Report = () => {
           <CustomBreadCrumbs routes={[{ title: 'Reports', path: '/reports' }, { title: reportConfig?.title }]} />
           {showGrid && (
             <div id="importExportLinks" style={{ minWidth: 80 }}>
-              {type === 'in-used-serialized-asset' ? (
+              {resourceCamelCase === 'inUsedSerializedAsset' ? (
                 <AsynImportExportMenu
                   resource={sidebarResource.report}
                   subResource={type}
@@ -746,7 +734,7 @@ const Report = () => {
                   permissions={permissions?.report}
                   module={routes.productionOrder.title}
                   api={`/report/${type}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -853,15 +841,16 @@ const Report = () => {
               <>
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
-                  columns={columns}
+                  columns={!selectedData?.['dayWise']?.value && resourceCamelCase === 'dailyVolumeReport'
+                    ? columns?.filter((e) => e.accessor !== 'date') : columns}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}
                   refreshGrid={fetchResourceData}
                   hideSelection={true}
                   reportSave={true}
-                  pagination={type !== 'historical-report'}
-                  isClientSideGrid={type === 'historical-report' ? true : false}
+                  pagination={[`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) ? false : true}
+                  isClientSideGrid={[`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) ? true : false}
                 />
               </>
             ) : (

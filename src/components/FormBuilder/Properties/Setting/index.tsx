@@ -70,6 +70,16 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   touched={touched}
                   errors={errors}
                 />
+              ) : fieldData.type === 'groupSignature' ? (
+                <ResourceDropdown
+                  type={'multiSelect'}
+                  lookupResource={'User'}
+                  value={values['defaultValue']}
+                  setFieldValue={setFieldValue}
+                  brandId={brandId}
+                  touched={touched}
+                  errors={errors}
+                />
               ) : (
                 <Box display="block">
                   <TextField
@@ -594,9 +604,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Entity values={values} setFieldValue={setFieldValue} errors={errors} touched={touched} brandId={brandId} />
       <Box mt={1}>
         <FormControl component="fieldset">
-          <FormLabel component="legend">
-            Column Size
-          </FormLabel>
+          <FormLabel component="legend">Column Size</FormLabel>
           <RadioGroup
             aria-label="columnSize"
             name="columnSize"
@@ -606,8 +614,8 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               setFieldValue('columnSize', Number(e?.target?.value));
             }}
           >
-            <FormControlLabel value={6} control={<Radio size='small' />} label="Col 6" />
-            <FormControlLabel value={12} control={<Radio size='small' />} label="Col 12" />
+            <FormControlLabel value={6} control={<Radio size="small" />} label="Col 6" />
+            <FormControlLabel value={12} control={<Radio size="small" />} label="Col 12" />
           </RadioGroup>
         </FormControl>
       </Box>
