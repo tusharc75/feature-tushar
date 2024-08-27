@@ -1988,6 +1988,7 @@ const ReceivingTicket = ({
                   ASSET_STATUS.standByNotChargeable,
                   ASSET_STATUS.inTransit,
                   ASSET_STATUS.inRepair,
+                  ASSET_STATUS.repair,
                   ASSET_STATUS.scrapRequested
                 ].includes(f.status)
               )
