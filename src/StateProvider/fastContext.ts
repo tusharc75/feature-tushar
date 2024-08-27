@@ -24,7 +24,7 @@ const initialState: {
   isSidebarOpenedByButton: boolean;
   walkMeSteps: WalkmeData[];
   walkMeInstance: StateWalkmeInstance | null;
-  gridMetaData: { [key: string]: { hide: string[]; order: string[] } | null };
+  gridMetaData: { [key: string]: { hide: string[]; order: string[]; name?: string; id?: string } | null };
 } = {
   searchQuery: '',
   themeColor: 'light',

@@ -28,6 +28,7 @@ type TTableProps = {
   virtualization: boolean;
   onRowClick: (row: Row<any>) => void;
   resource: string;
+  pagination?: boolean;
 };
 
 const TableComponent = forwardRef(function (
@@ -47,7 +48,8 @@ const TableComponent = forwardRef(function (
     exportTableView = false,
     virtualization = false,
     onRowClick,
-    resource
+    resource,
+    pagination
   }: TTableProps,
   ref: ForwardedRef<HTMLTableElement>
 ) {
@@ -203,10 +205,14 @@ const TableComponent = forwardRef(function (
 
   // const footers;
 
-  const footerRowFound = useMemo(() => {
-    const found = table?.getFooterGroups()[0].headers.some((h) => h.column.columnDef.footer);
-    return found;
-  }, [table]);
+  const footerRowFound = table?.getFooterGroups()[0].headers.some((h) => h.column.columnDef.footer);
+
+  const tableRowsLengthGreterThanZero = table.getRowModel().rows.length > 0;
+
+  const isFooterVisible = useMemo(
+    () => isClientSideGrid && footerRowFound && tableRowsLengthGreterThanZero,
+    [footerRowFound, isClientSideGrid, tableRowsLengthGreterThanZero]
+  );
 
   return (
     <>
@@ -214,7 +220,8 @@ const TableComponent = forwardRef(function (
         style={{
           display: 'block',
           overflow: loading ? 'hidden' : 'auto',
-          height: height ?? '100%'
+          maxHeight: height ?? '100%',
+          height: isFooterVisible && !pagination ? 'unset' : height || '100%'
         }}
         className="isolate z-10 border bg-[var(--dark-primary,_white)] max-[900px]:min-h-[500px]"
         ref={virtualization ? parentRef : undefined}
@@ -284,9 +291,9 @@ const TableComponent = forwardRef(function (
           >
             {virtualization ? <VirtualTable /> : <NormalTable />}
           </TableBody>
-          {isClientSideGrid && footerRowFound && table.getRowModel().rows.length > 0 && (
+          {isFooterVisible && (
             <>
-              <tfoot>
+              <tfoot className="">
                 {table?.getFooterGroups().map((footerGroup) => {
                   return (
                     <tr key={footerGroup.id}>
