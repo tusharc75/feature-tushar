@@ -80,6 +80,7 @@ const SerializedAsset = ({
 
   const fetchFields = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, false);
+    fields = fields?.filter((f) => f?.isRead);
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {

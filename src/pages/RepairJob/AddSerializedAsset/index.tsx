@@ -63,6 +63,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
   const fetchFields = async () => {
     setColumns(null);
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, true);
+    fields = fields?.filter((f) => f?.isRead);
 
     const isPriceRequired = fields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
