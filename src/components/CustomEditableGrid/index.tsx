@@ -1,49 +1,31 @@
-import {
-  Box,
-  Button,
-  Dialog,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableFooter,
-  TableHead,
-  TableRow,
-  Tooltip
-} from '@material-ui/core';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { Box, Button, Dialog, TableBody, TableCell, TableFooter, TableHead, TableRow } from '@material-ui/core';
+import MaUTable from '@material-ui/core/Table';
+import { isEmpty } from 'lodash';
+import { useEffect, useMemo, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
+import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
+import {
+  useColumnOrder,
+  useExpanded,
+  useFilters,
+  useFlexLayout,
+  useResizeColumns,
+  useRowSelect,
+  useRowState,
+  useSortBy,
+  useTable
+} from 'react-table';
+import { useSticky } from 'react-table-sticky';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import { flattenArray } from 'src/constants/columns';
 import { CustomDialogTransition, getObjKeysWithValues } from 'src/constants/helpers';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomButton from '../Helpers/CustomButton';
-import FormTypes from './FormTypes';
-import DeleteIcon from '@material-ui/icons/Delete';
-import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
-import { FieldArray, Form, Formik, FormikProps } from 'formik';
-import { yupSchemaForBulkEdit } from './helper';
-import MaUTable from '@material-ui/core/Table';
-import {
-  useTable,
-  useExpanded,
-  useRowSelect,
-  useFlexLayout,
-  useSortBy,
-  useResizeColumns,
-  useFilters,
-  useColumnOrder,
-  usePagination,
-  useRowState
-} from 'react-table';
-import { useSticky } from 'react-table-sticky';
-import { FaAngleDown, FaAngleRight } from 'react-icons/fa';
-import { isEmpty } from 'lodash';
-import { flattenArray } from 'src/constants/columns';
 import { calculateRowsField } from '../RentalManagment/helper';
+import FormTypes from './FormTypes';
+import { yupSchemaForBulkEdit } from './helper';
 
 const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSave }) => {
   const [fullScreen, setFullScreen] = useState(true);
@@ -216,9 +198,9 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
                 overflow: 'auto',
                 height: '100%'
               }}
-              className="border custom-react-table editable-table-v1"
+              className="custom-react-table editable-table-v1 border"
             >
-              <MaUTable {...getTableProps()} size="small" className="tableWrap table sticky">
+              <MaUTable {...getTableProps()} size="small" className="tableWrap sticky table">
                 <TableHead style={{ overflowY: 'auto', overflowX: 'hidden' }} className="header">
                   {headerGroups.map((headerGroup, index) => (
                     <>
@@ -230,7 +212,7 @@ const CustomEditableGrid = ({ onClose, data, fields, columns, currency, handleSa
                             className="th text-truncate table-header overflow-initial"
                           >
                             <div className="d-flex align-items-center justify-content-space-between pos-rel">
-                              <div className="d-flex gap-2 align-items-center" {...column.getSortByToggleProps({ title: undefined })}>
+                              <div className="d-flex align-items-center gap-2" {...column.getSortByToggleProps({ title: undefined })}>
                                 <span>{column.render('Header')}</span>
                               </div>
                             </div>
