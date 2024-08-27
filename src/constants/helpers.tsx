@@ -2570,24 +2570,10 @@ export const REPORT_LIST = [
     defaultColumn: true
   },
   {
-    title: 'Daily Volume Revenue Report',
+    title: 'Volume Report',
     permission: 'iotChart',
     key: 'standardReport',
-    type: 'dailyVolumeRevenueReport',
-    defaultColumn: true
-  },
-  {
-    title: 'Day Wise Volume Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'dayWiseVolumeReport',
-    defaultColumn: true
-  },
-  {
-    title: 'Weekly/Monthly Volume Report',
-    permission: 'iotChart',
-    key: 'standardReport',
-    type: 'historicalReport',
+    type: 'volumeReport',
     defaultColumn: true,
     notMultiSelectFields: ['frequency']
   },
