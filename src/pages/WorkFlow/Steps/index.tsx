@@ -181,6 +181,7 @@ const Steps = ({ resource, loading, id }) => {
               setOpen({ open: false, data: null });
             }}
             isSubmitting={isSubmitting}
+            resource={resource}
           />
         )}
 

@@ -11,6 +11,7 @@ import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
   DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_STATUS,
   DELIVERY_TICKET_TYPE,
   MATERIAL_TYPE,
   TRANSFER_INVENTORY_STATUS,
@@ -29,7 +30,16 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { startCase } from 'lodash';
 import { FiExternalLink } from 'react-icons/fi';
 
-const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, renderedFrom, allowedToEdit, fetchTransferInventoryData, updateStatus, stepFullScreen }) => {
+const Products = ({
+  transferInventoryData,
+  setNextStep,
+  setNextStepToolTip,
+  renderedFrom,
+  allowedToEdit,
+  fetchTransferInventoryData,
+  updateStatus,
+  stepFullScreen
+}) => {
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -56,32 +66,27 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
   }, []);
 
   const fetchGridColumns = async () => {
-    const column: any = [{
-      accessor: 'index',
-      Header: 'Index',
-      width: 70,
-      sticky: 'left',
-      Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
-      Footer: () => {
-        return <>Total</>;
+    const column: any = [
+      {
+        accessor: 'index',
+        Header: 'Index',
+        width: 70,
+        sticky: 'left',
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Footer: () => {
+          return <>Total</>;
+        }
+      },
+      {
+        accessor: 'type',
+        Header: 'Type',
+        disableFilters: true,
+        disabled: true,
+        sticky: isMobile || isTablet ? 'none' : 'left',
+        width: 100,
+        Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
       }
-    },
-    {
-      accessor: 'type',
-      Header: 'Type',
-      disableFilters: true,
-      disabled: true,
-      sticky: isMobile || isTablet ? 'none' : 'left',
-      width: 100,
-      Cell: ({ row }) =>
-        row.original['type'] ? (
-          <p>
-            {`${startCase(row.original?.type)} `}
-          </p>
-        ) : (
-          <NoDataCell />
-        )
-    },];
+    ];
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
@@ -114,7 +119,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
               ) : (
                 <p className="text-truncate">{row.original?.productName}</p>
               )}
-              {row.original.type === MATERIAL_TYPE.product &&
+              {row.original.type === MATERIAL_TYPE.product && (
                 <IconButton
                   size="small"
                   onClick={() => {
@@ -123,20 +128,18 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
                 >
                   <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                 </IconButton>
-              }
+              )}
             </div>
           )
         });
-      }
-      else if (e?.fieldName === 'serializedProduct') {
+      } else if (e?.fieldName === 'serializedProduct') {
         column.push({
           accessor: 'serializedProductShow',
           Header: e?.fieldLabel,
           show: true,
           Cell: ({ row }) => (row.original?.serializedProductShow ? <div>{row.original?.serializedProductShow}</div> : <NoDataCell />)
         });
-      }
-      else {
+      } else {
         column.push({
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
@@ -172,7 +175,19 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
     canDrag: false,
     Cell: ({ row }) => (
       <>
-        <HtmlTooltip title={row.original?.canDelete ? 'Delete' : deleteDisable}>
+        <HtmlTooltip
+          title={
+            row.original?.canDelete
+              ? 'Delete'
+              : row?.original?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit
+                ? 'Loading ticket is already created'
+                : row?.original?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered
+                  ? 'Loading ticket is already delivered'
+                  : row?.original?.serialNumber?.length > 0
+                    ? 'Serial Number is already assigned'
+                    : deleteDisable
+          }
+        >
           <IconButton
             disabled={!row.original?.canDelete}
             onClick={() => {
@@ -205,67 +220,73 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
     var deliveryTicketProduct = [];
     deliveryTicketList?.forEach((e) => {
       if (e?.products && e?.products?.length) {
-        deliveryTicketProduct = [...deliveryTicketProduct, ...e?.products];
+        deliveryTicketProduct = [...deliveryTicketProduct, ...e?.products?.map((p) => ({ ...p, status: e?.status }))];
       }
     });
-    axiosInstance().get(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`).then(({ data: { data } }) => {
-      let rows = data?.products?.map((u: any, index: any) => {
-        let finalObject: any = prepareDataForGrid(u);
-        finalObject['index'] = index + 1;
-        finalObject['type'] = MATERIAL_TYPE.product;
-        finalObject['productId'] = u?.product;
-        finalObject['productName'] = u?.productDetail?.productName;
-        finalObject['productNumber'] = u?.productDetail?.productNumber;
-        finalObject['productDescription'] = u?.productDetail?.productDescription;
-        finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
-        finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? 'Yes' : 'No';
-        finalObject['qty'] = u.qty;
-        finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
-        finalObject['isChecked'] = false;
-        finalObject['allowedToEdit'] = false;
-        finalObject['canDelete'] = !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
-        finalObject['hideSelection'] = !finalObject['canDelete'];
-        finalObject['serialNumber'] = data?.serialNumber?.filter((e) => e.product === u?.product);
+    axiosInstance()
+      .get(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`)
+      .then(({ data: { data } }) => {
+        let rows = data?.products?.map((u: any, index: any) => {
+          let finalObject: any = prepareDataForGrid(u);
+          finalObject['index'] = index + 1;
+          finalObject['type'] = MATERIAL_TYPE.product;
+          finalObject['productId'] = u?.product;
+          finalObject['productName'] = u?.productDetail?.productName;
+          finalObject['productNumber'] = u?.productDetail?.productNumber;
+          finalObject['productDescription'] = u?.productDetail?.productDescription;
+          finalObject['serializedProduct'] = u?.productDetail?.serializedProduct;
+          finalObject['serializedProductShow'] = u?.productDetail?.serializedProduct ? 'Yes' : 'No';
+          finalObject['qty'] = u.qty;
+          finalObject['inventory'] = u.inventoryDetail?.inventory || 0;
+          finalObject['isChecked'] = false;
+          finalObject['allowedToEdit'] = false;
+          finalObject['canDelete'] = !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
+          finalObject['hideSelection'] = !finalObject['canDelete'];
+          finalObject['serialNumber'] = data?.serialNumber?.filter((e) => e.product === u?.product);
+          finalObject['loadingTicketStatus'] = deliveryTicketProduct?.find((d) => d?.product === u?.product)
+            ? deliveryTicketProduct?.find((d) => d?.product === u?.product)?.status
+            : '';
 
-        finalObject.subRows = []
-        data?.serialNumber?.filter((e) => e.product === u?.product)?.forEach((e, i) => {
-          finalObject.subRows.push({
-            _id: e._id,
-            index: `${finalObject?.index}.${(i + 1)}`,
-            type: 'serialNumber',
-            productName: e?.serialNumber,
-            canDelete: finalObject?.canDelete,
-            qty: 1
-          })
-        })
-        if (finalObject?.subRows?.length) finalObject.canDelete = false;
-        return {
-          ...finalObject
-        };
-      });
-      if (rows?.length) {
-        const serializedProduct = rows?.filter((e) => e?.serializedProduct)
-        if (serializedProduct?.length) {
-          if (serializedProduct?.every((r) => r?.qty === r?.serialNumber?.length)) {
+          finalObject.subRows = [];
+          data?.serialNumber
+            ?.filter((e) => e.product === u?.product)
+            ?.forEach((e, i) => {
+              finalObject.subRows.push({
+                _id: e._id,
+                index: `${finalObject?.index}.${i + 1}`,
+                type: 'serialNumber',
+                productName: e?.serialNumber,
+                canDelete: finalObject?.canDelete,
+                qty: 1
+              });
+            });
+          if (finalObject?.subRows?.length) finalObject.canDelete = false;
+          return {
+            ...finalObject
+          };
+        });
+        if (rows?.length) {
+          const serializedProduct = rows?.filter((e) => e?.serializedProduct);
+          if (serializedProduct?.length) {
+            if (serializedProduct?.every((r) => r?.qty === r?.serialNumber?.length)) {
+              setNextStep(true);
+              setNextStepToolTip(null);
+            } else {
+              setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
+            }
+          } else {
             setNextStep(true);
             setNextStepToolTip(null);
-          } else {
-            setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
           }
+        } else {
+          setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
         }
-        else {
-          setNextStep(true);
-          setNextStepToolTip(null);
-        }
-      } else {
-        setNextStepToolTip(transferInventoryMessage.assignSerialNumbers);
-      }
-      setProductSerialNumbers(data?.serialNumber)
-      dispatch({ type: 'initialize', data: rows, count: rows?.length });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+        setProductSerialNumbers(data?.serialNumber);
+        dispatch({ type: 'initialize', data: rows, count: rows?.length });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((err) => {
         toastConfig.setToastConfig(err);
       });
@@ -305,8 +326,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
           await axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData?._id}/serial-number/remove`, {
             ids: showConfirmBox.data?.filter((e) => e.type === 'serialNumber')?.map((e) => e._id)
           });
-        }
-        else {
+        } else {
           await axiosInstance().put(`${routes.transferInventory.path}/${transferInventoryData?._id}/product/remove`, {
             ids: showConfirmBox.data?.filter((e) => e.type === MATERIAL_TYPE.product)?.map((e) => e.productId)
           });
@@ -325,7 +345,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
 
   const onSaveEdit = (data, row) => {
     if (!data || !data?.qty || row?.type !== MATERIAL_TYPE.product) return;
-    if (row.canDelete === false) {
+    if (row.canDelete === false && row?.loadingTicketStatus) {
       toastConfig.setToastConfig({
         type: 'error',
         message: "Qty can't be updated",
@@ -382,7 +402,7 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
       fetchData();
       return;
     }
-    if (data.canDelete === false) {
+    if (data.canDelete === false && data?.loadingTicketStatus) {
       toastConfig.setToastConfig({
         type: 'error',
         message: "Qty can't be updated",
@@ -468,20 +488,20 @@ const Products = ({ transferInventoryData, setNextStep, setNextStepToolTip, rend
   const actionButtonMenuItems = () => {
     return (
       <>
-        {selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 &&
+        {selectedRecords?.filter((e) => e?.serializedProduct && e?.qty - e?.serialNumber?.length > 0)?.length > 0 && (
           <MenuItem
             onClick={() => {
-              setAssignSerialNumbersDialog({ open: true, data: selectedRecords?.filter(s => s.type !== 'serialNumber' && s?.serializedProduct) });
+              setAssignSerialNumbersDialog({ open: true, data: selectedRecords?.filter((s) => s.type !== 'serialNumber' && s?.serializedProduct) });
             }}
           >
             {`Assign Serial Numbers`}
           </MenuItem>
-        }
+        )}
         <MenuItem
           onClick={() => {
             setShowConfirmBox({ open: true, data: selectedRecords });
           }}
-          disabled={selectedRecords?.some(s => !s.canDelete)}
+          disabled={selectedRecords?.some((s) => !s.canDelete)}
         >
           {`Delete`}
         </MenuItem>
