@@ -181,6 +181,9 @@ const TransferAssetDetailPage = () => {
         } else {
           setCanReceive(true);
         }
+        if (data?.status === TRANSFER_ASSET_STATUS.completed) {
+          setTransferIsEnded(true);
+        }
         setTransferAssetData(data);
       })
       .catch((err) => {
@@ -317,7 +320,6 @@ const TransferAssetDetailPage = () => {
                   transferAssetData={transferAssetData}
                   permissions={permissions}
                   setNextStep={setNextStep}
-                  setTransferIsEnded={setTransferIsEnded}
                   updateTransferStatus={updateTransferStatus}
                   isTransferEnded={isTransferEnded}
                   renderedFrom={`${renderedFrom}_grid-2`}
@@ -331,9 +333,7 @@ const TransferAssetDetailPage = () => {
                   currentStep={currentStep}
                   transferAssetId={id}
                   transferAssetData={transferAssetData}
-                  permissions={permissions}
                   setNextStep={setNextStep}
-                  setTransferIsEnded={setTransferIsEnded}
                   updateTransferStatus={updateTransferStatus}
                   isTransferEnded={isTransferEnded}
                   renderedFrom={`${renderedFrom}_grid-3`}
