@@ -13,8 +13,11 @@ type GroupSignatureCellProps = {
 };
 
 function GroupSignatureCell({ field, original, enableDilaog = true }: GroupSignatureCellProps) {
-  const signatures = isArray(original?.[field.fieldName]) ? original?.[field.fieldName]?.filter((ele) => ele.user && ele.signature) : [];
+
+  const signatures = isArray(original?.[field.fieldName]) ? original?.[field.fieldName] : [];
+
   const NoData = enableDilaog ? <NoDataCell /> : <span className="block">-</span>;
+
   if (!signatures?.length) return NoData;
 
   const columns: RenderCellTableColumnDef<any>[] = [
@@ -25,7 +28,7 @@ function GroupSignatureCell({ field, original, enableDilaog = true }: GroupSigna
           {row?.user?.concatedName}
         </Link>
       ),
-      head: 'User Name',
+      head: 'User',
       width: '200px'
     },
     {
