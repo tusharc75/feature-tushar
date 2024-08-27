@@ -3,6 +3,7 @@ import { Typography, TextField, Box } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import Signature from 'src/components/Helpers/FormTypes/Signature';
 import { useData } from 'src/StateProvider/Provider';
+import { isObject } from 'lodash';
 
 const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
   const {
@@ -14,28 +15,16 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
   useEffect(() => {
     let selectedUsers = [];
     let fieldValue = [];
-    if (!values[name]) {
-      // selectedUsers = fieldData?.option?.filter((user) => [...fieldData?.signatureUsers].includes(user.optionValue)) || [];
-      // setSelectedSignatureUsers(selectedUsers);
-      // fieldValue = selectedUsers.map((ele) => {
-      //   return {
-      //     user: ele.optionValue,
-      //     signature: ''
-      //   };
-      // });
-      // setFieldValue(name, fieldValue);
-    } else {
-      const userIds = values[name]?.map((ele) => ele.user?._id);
-      fieldValue = values[name]?.map((ele) => {
-        return {
-          ...ele,
-          user: ele?.user?._id
-        };
-      });
-      selectedUsers = fieldData?.option?.filter((user) => [...userIds].includes(user.optionValue));
-      setSelectedSignatureUsers(selectedUsers);
-      setFieldValue(name, fieldValue);
-    }
+    const userIds = values[name]?.map((ele) => isObject(ele?.user) ? ele?.user?._id : ele?.user);
+    fieldValue = values[name]?.map((ele) => {
+      return {
+        ...ele,
+        user: isObject(ele?.user) ? ele?.user?._id : ele?.user
+      };
+    });
+    selectedUsers = fieldData?.option?.filter((user) => [...userIds].includes(user.optionValue));
+    setSelectedSignatureUsers(selectedUsers);
+    setFieldValue(name, fieldValue);
   }, []);
 
   return (
@@ -66,37 +55,37 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
             setFieldValue(name, [...updatedFieldValue]);
             setSelectedSignatureUsers(newVal);
           }}
-          renderInput={(params) => <TextField {...params} label="Signature Users" name="signatureUsers" variant="outlined" />}
+          renderInput={(params) => <TextField {...params} label="Signature Users" name={name} variant="outlined" />}
         />
         <div className="flex flex-col flex-wrap gap-2">
           {values[name]?.length
             ? values[name]?.map((value) => {
-                const userName = selectedSignatureUsers?.find((ele) => ele.optionValue === value.user)?.optionLabel;
-                return (
-                  <Box className="flex items-center justify-between">
-                    <Typography>{userName}</Typography>
-                    <Signature
-                      label={''}
-                      name={`signature`}
-                      touched={{}}
-                      errors={{}}
-                      values={value ?? {}}
-                      isTooltip={false}
-                      tooltipMessage={''}
-                      setFieldValue={(_, dataUrl: string) => {
-                        const updatedData = [...(values[name] ?? [])];
-                        updatedData.forEach((data) => {
-                          if (data.user === value.user) {
-                            data.signature = dataUrl;
-                          }
-                        });
-                        setFieldValue(name, updatedData);
-                      }}
-                      disable={user?.user?._id !== value.user}
-                    />
-                  </Box>
-                );
-              })
+              const userName = selectedSignatureUsers?.find((ele) => ele.optionValue === value.user)?.optionLabel;
+              return (
+                <Box className="flex items-center justify-between">
+                  <Typography>{userName}</Typography>
+                  <Signature
+                    label={''}
+                    name={`signature`}
+                    touched={{}}
+                    errors={{}}
+                    values={value ?? {}}
+                    isTooltip={false}
+                    tooltipMessage={''}
+                    setFieldValue={(_, dataUrl: string) => {
+                      const updatedData = [...(values[name] ?? [])];
+                      updatedData.forEach((data) => {
+                        if (data.user === value.user) {
+                          data.signature = dataUrl;
+                        }
+                      });
+                      setFieldValue(name, updatedData);
+                    }}
+                    disable={user?.user?._id !== value.user}
+                  />
+                </Box>
+              );
+            })
             : null}
         </div>
       </div>

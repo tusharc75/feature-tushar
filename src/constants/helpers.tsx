@@ -1003,7 +1003,12 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       obj[key.fieldName] = [];
     } else if (key.type === 'description') {
     } else if (key.type === 'groupSignature') {
-      obj[key.fieldName] = [];
+      if (isArray(value) && value?.length) {
+        obj[key.fieldName] = value?.map((e) => { return { signature: '', user: e } });
+      }
+      else {
+        obj[key.fieldName] = [];
+      }
     } else {
       obj[key.fieldName] = value;
     }
