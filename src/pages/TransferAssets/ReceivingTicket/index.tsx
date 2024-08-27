@@ -19,7 +19,8 @@ import {
   deliveryTicket,
   prepareDataForGrid,
   serializedAsset,
-  sidebarResource
+  sidebarResource,
+  TRANSFER_ASSET_STATUS
 } from 'src/constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import InfoIcon from '@material-ui/icons/Info';
@@ -28,11 +29,9 @@ import { FiExternalLink } from 'react-icons/fi';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 interface ReceivingGridProps {
-  permissions: any;
   transferAssetData: any;
   transferAssetId: string | any;
   setNextStep: any;
-  setTransferIsEnded?: any;
   currentStep: number;
   updateTransferStatus?: any;
   renderedFrom?: string;
@@ -43,11 +42,9 @@ interface ReceivingGridProps {
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
   const {
-    permissions,
     transferAssetId,
     transferAssetData,
     setNextStep,
-    setTransferIsEnded,
     updateTransferStatus,
     isTransferEnded,
     renderedFrom,
@@ -306,11 +303,9 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         setNextStep(true);
       }
       if (transferAssetData?.transferType.includes('External')) {
-        if (inventoryDelivered.length === dataRows?.filter((d) => d.status !== 'Lost').length) {
-          setTransferIsEnded(true);
-          updateTransferStatus('Completed');
-        } else {
-          setTransferIsEnded(false);
+        if (transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed
+          && inventoryDelivered.length === dataRows?.filter((d) => d.status !== ASSET_STATUS.lost).length) {
+          updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
         }
       }
     }

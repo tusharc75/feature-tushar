@@ -39,7 +39,6 @@ interface LoadingGridProps {
   transferAssetId: string | any;
   setNextStep: any;
   currentStep: number;
-  setTransferIsEnded?: any;
   updateTransferStatus?: any;
   isTransferEnded: boolean;
   renderedFrom?: string;
@@ -54,7 +53,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     transferAssetId,
     transferAssetData,
     setNextStep,
-    setTransferIsEnded,
     updateTransferStatus,
     isTransferEnded,
     renderedFrom,
@@ -97,12 +95,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       }
       if (transferAssetData?.transferType === 'Internal') {
         if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
-          setTransferIsEnded(true);
           if (transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed) {
             updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
           }
-        } else {
-          setTransferIsEnded(false);
         }
       }
     }
@@ -539,8 +534,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Replace Assets
         </MenuItem>
         {permissions?.transferAsset?.isUpdate &&
-        selectedRecords.length &&
-        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+          selectedRecords.length &&
+          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {
