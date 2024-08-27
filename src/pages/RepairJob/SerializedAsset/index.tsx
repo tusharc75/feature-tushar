@@ -34,7 +34,7 @@ import {
 } from '../../../constants/helpers';
 import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import RepairProcess from '../RepairProcess';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
 const SerializedAsset = ({
@@ -79,7 +79,7 @@ const SerializedAsset = ({
   }, []);
 
   const fetchFields = async () => {
-    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, false);
+    let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, false);
     const {
       data: { data }
     } = await axiosInstance().put(`/field/find-field-labels`, {
