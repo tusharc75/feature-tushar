@@ -1,4 +1,5 @@
 import { Box, Dialog, Grid } from "@material-ui/core";
+import { isNumber } from "lodash";
 import { useEffect, useState } from "react";
 import CustomDialogContent from "src/components/CustomDialog/CustomDialogContent";
 import CustomDialogHeader from "src/components/CustomDialog/CustomDialogHeader";
@@ -20,7 +21,7 @@ const PadData = ({ handleClose, column, data }) => {
 	}, [data])
 
 	const fetchColumns = () => {
-		setColumns([{
+		const newColumn = [{
 			accessor: 'padName',
 			Header: 'Pad Name',
 			width: 200,
@@ -31,7 +32,7 @@ const PadData = ({ handleClose, column, data }) => {
 							onClick={() => {
 								window.open(`${routes.padMasterDetail.path}/${row?.original?.padName?.optionValue}`)
 							}}>{row?.original?.padName?.optionLabel}</p>
-					) : 'Total'}
+					) : <NoDataCell />}
 				</div>
 			),
 		}, {
@@ -48,11 +49,23 @@ const PadData = ({ handleClose, column, data }) => {
 					) : <NoDataCell />}
 				</div>
 			),
-		}, ...column])
+		}, ...column]
+		const footerData = data;
+		const dataKeys = Object.keys(footerData);
+		const updatedColumn = newColumn?.map((col, index) => {
+			if (index === 0) {
+				return { ...col, Footer: 'Total' };
+			}
+			if (dataKeys.includes(col.accessor)) {
+				return { ...col, Footer: footerData[col.accessor] && isNumber(footerData[col.accessor]) ? footerData[col.accessor] : <NoDataCell /> };
+			}
+			return col;
+		});
+		setColumns(updatedColumn)
 	}
 
 	const fetchRecords = () => {
-		dispatch({ type: 'initialize', data: [...(data?.padData || []), data], count: (data?.padData?.length + 1) });
+		dispatch({ type: 'initialize', data: [...(data?.padData || [])], count: data?.padData?.length });
 	}
 
 	return (
@@ -72,10 +85,7 @@ const PadData = ({ handleClose, column, data }) => {
 							refreshGrid={fetchRecords}
 							hideSelection={true}
 							hideAction={true}
-							setWholeRowsCellColor={(rowData) => {
-								if (!rowData?.padName) return 'footerRow';
-								return '';
-							}}
+							pagination={false}
 						/>
 					) : (
 						<Box p={2} height={500}>
