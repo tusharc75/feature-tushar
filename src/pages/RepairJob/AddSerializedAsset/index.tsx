@@ -5,7 +5,7 @@ import { Fragment, useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
-import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -62,7 +62,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
 
   const fetchFields = async () => {
     setColumns(null);
-    let fields = await fetch_child_resource_fields(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, true);
+    let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.repairJobAsset, repairJobData?.currency, true);
 
     const isPriceRequired = fields?.filter((el) => el.fieldName === 'price' && el.required).length > 0;
     setIsRateRequired(isPriceRequired);
