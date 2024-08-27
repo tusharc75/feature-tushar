@@ -52,26 +52,14 @@ const DisplayMessages = ({ chats, chatId, selectedTopics }: DisplayMessagesProps
 
   if (!chatId && !chats?.length) {
     return (
-      <>
-        <div className=" flex flex-wrap items-center gap-2">
-          {selectedTopics.map((t) => (
-            <Chip key={t._id} color='primary' label={t.aiModelTopicName} />
-          ))}
-        </div>
-        <div className="flex h-[calc(100%_-_var(--head-h)_-_100px)] w-full items-center justify-center">
-          <BsStars className="text-[var(--new-theme-color)]" size={50} />
-        </div>
-      </>
+      <div className="flex h-[calc(100%_-_var(--head-h)_-_100px)] w-full items-center justify-center">
+        <BsStars className="text-[var(--new-theme-color)]" size={50} />
+      </div>
     );
   }
 
   return (
     <div className="max-h-[calc(100%_-_var(--head-h)_-_100px)] overflow-y-auto scroll-smooth" ref={containerRef}>
-      <div className="flex flex-wrap gap-2">
-        {selectedTopics?.map((t) => (
-          <Chip key={t._id} color='primary' label={t?.aiModelTopicName} />
-        ))}
-      </div>
       {chats ? (
         <>
           {chats?.map((chat, i) => {
