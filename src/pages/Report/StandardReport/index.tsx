@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
 import { Grid, Button, Box, IconButton } from '@material-ui/core';
-import { camelCase, capitalize, isArray, startCase } from 'lodash';
+import { camelCase, capitalize, isArray, isNumber, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -18,8 +18,8 @@ import {
   downloadExcel,
   isObjectEmpty,
   sidebarResource,
-  dateFormat,
-  REPORT_LIST
+  REPORT_LIST,
+  formatAmountWithCurrency
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -71,7 +71,7 @@ const Report = () => {
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
   const [defaultColumns, setDefaultColumns] = React.useState([]);
-  const [historicalReportFooterData, setHistoricalReportFooterData] = React.useState<Record<string, number>>(null);
+  const [footerData, setFooterData] = React.useState<Record<string, number>>(null);
 
   // Grid Configs
   const { generateColumns } = useColumns();
@@ -512,7 +512,7 @@ const Report = () => {
         if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase)) {
           data = data.filter((d) => {
             if (d?.isFooter) {
-              setHistoricalReportFooterData(d);
+              setFooterData(d);
               return false;
             } else {
               return true;
@@ -699,20 +699,25 @@ const Report = () => {
   };
 
   useEffect(() => {
-    if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) && historicalReportFooterData) {
-      const dataKeys = Object.keys(historicalReportFooterData);
+    if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) && footerData) {
+      const dataKeys = Object.keys(footerData);
       const newColumns = columns.map((col, index) => {
         if (index === 0) {
           return { ...col, Footer: 'Total' };
         }
         if (dataKeys.includes(col.accessor)) {
-          return { ...col, Footer: historicalReportFooterData[col.accessor] ?? <NoDataCell /> };
+          return {
+            ...col, Footer: footerData[col.accessor] && isNumber(footerData[col.accessor]) ?
+              col?.type === "currencyNumber" ?
+                `${formatAmountWithCurrency(col?.currency, footerData[col.accessor])?.fullFormatAmountWithoutSpace}` :
+                footerData[col.accessor] : <NoDataCell />
+          };
         }
         return col;
       });
       setColumns(newColumns);
     }
-  }, [columns?.length, type, historicalReportFooterData]);
+  }, [columns?.length, type, footerData]);
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
@@ -836,7 +841,8 @@ const Report = () => {
               <>
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
-                  columns={columns}
+                  columns={!selectedData?.['dayWise']?.value && resourceCamelCase === 'dailyVolumeReport'
+                    ? columns?.filter((e) => e.accessor !== 'date') : columns}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}

@@ -7,7 +7,7 @@ import CustomReactTable, { useTableReducer } from "src/components/CustomReactTab
 import CommonSkeleton from "src/components/Helpers/CommonSkeleton";
 import NoDataCell from "src/components/Helpers/NoDataCell";
 import routes from "src/components/Helpers/Routes";
-import { CustomDialogTransition } from "src/constants/helpers";
+import { CustomDialogTransition, formatAmountWithCurrency } from "src/constants/helpers";
 
 const PadData = ({ handleClose, column, data }) => {
 
@@ -57,7 +57,12 @@ const PadData = ({ handleClose, column, data }) => {
 				return { ...col, Footer: 'Total' };
 			}
 			if (dataKeys.includes(col.accessor)) {
-				return { ...col, Footer: footerData[col.accessor] && isNumber(footerData[col.accessor]) ? footerData[col.accessor] : <NoDataCell /> };
+				return {
+					...col, Footer: footerData[col.accessor] && isNumber(footerData[col.accessor]) ?
+						col?.type === "currencyNumber" ?
+							`${formatAmountWithCurrency(col?.currency, footerData[col.accessor])?.fullFormatAmountWithoutSpace}` :
+							footerData[col.accessor] : <NoDataCell />
+				};
 			}
 			return col;
 		});
