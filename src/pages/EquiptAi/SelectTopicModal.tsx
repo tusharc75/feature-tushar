@@ -63,7 +63,10 @@ const SelectTopicModal = ({ handleClose, topics, setSelectedTopics, selectedTopi
         title: 'Select Topic',
         fullScreenOption: true
       }}
-      handleClose={() => handleClose()}
+      handleClose={() => {
+        setSelectedTopics([]);
+        handleClose();
+      }}
       aria-labelledby="confirmation-dialog-title"
       open={true}
       contentMaxHeight={'500px'}
