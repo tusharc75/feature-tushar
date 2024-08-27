@@ -18,6 +18,7 @@ import xlsx from 'xlsx-js-style';
 import DisplayMessages from 'src/pages/EquiptAi/DisplayMessages';
 import { useData } from 'src/StateProvider/Provider';
 import SelectTopicModal from 'src/pages/EquiptAi/SelectTopicModal';
+import { isArray } from 'lodash';
 
 const EquiptAi = () => {
   const {
@@ -76,6 +77,8 @@ const EquiptAi = () => {
     axiosInstance()
       .get(`/generative-ai/chat/${chatId}`)
       .then(({ data: { data } }) => {
+        setSelectedTopics(isArray(data?.topics) && data?.topics?.length ?
+          data?.topics?.map((e) => { return { _id: e.optionValue, aiModelTopicName: e.optionLabel } }) : []);
         setChats(data?.history);
         setChatTitle(data?.title);
       })
@@ -183,7 +186,6 @@ const EquiptAi = () => {
       <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
         <div className="relative flex h-[var(--container-height)] min-h-[400px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:280px]">
           <HistorySidebar
-            setSelectedTopics={setSelectedTopics}
             chatHistory={chatHistory}
             hadleNewChat={hadleNewChat}
             isSidebarOpen={isSidebarOpen}
@@ -266,7 +268,12 @@ const EquiptAi = () => {
         </div>
       </CustomContainer>
       {selectTopicModalOpen && (
-        <SelectTopicModal handleClose={handleCloseTopicModal} selectedTopics={selectedTopics} setSelectedTopics={setSelectedTopics} topics={topics} />
+        <SelectTopicModal
+          handleClose={handleCloseTopicModal}
+          selectedTopics={selectedTopics}
+          setSelectedTopics={setSelectedTopics}
+          topics={topics}
+        />
       )}
     </section>
   );
