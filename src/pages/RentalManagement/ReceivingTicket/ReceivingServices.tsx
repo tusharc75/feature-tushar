@@ -135,32 +135,32 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
             <NoDataCell />
           )
       },
-      {
-        accessor: 'startDate',
-        Header: 'System Start Date',
-        show: false,
-        Cell: ({ row }) =>
-          row?.original?.startDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
-              {moment(row?.original?.startDate)?.format(dateFormat)}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )
-      },
-      {
-        accessor: 'endDate',
-        Header: 'System End Date',
-        show: false,
-        Cell: ({ row }) =>
-          row?.original?.endDate ? (
-            <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
-              {moment(row?.original?.endDate)?.format(dateFormat)}
-            </h5>
-          ) : (
-            <NoDataCell />
-          )
-      },
+      // {
+      //   accessor: 'startDate',
+      //   Header: 'System Start Date',
+      //   show: false,
+      //   Cell: ({ row }) =>
+      //     row?.original?.startDate ? (
+      //       <h5 className="text-truncate" title={`${moment(row?.original?.startDate).format(dateFormat)}`}>
+      //         {moment(row?.original?.startDate)?.format(dateFormat)}
+      //       </h5>
+      //     ) : (
+      //       <NoDataCell />
+      //     )
+      // },
+      // {
+      //   accessor: 'endDate',
+      //   Header: 'System End Date',
+      //   show: false,
+      //   Cell: ({ row }) =>
+      //     row?.original?.endDate ? (
+      //       <h5 className="text-truncate" title={`${moment(row?.original?.endDate).format(dateFormat)}`}>
+      //         {moment(row?.original?.endDate)?.format(dateFormat)}
+      //       </h5>
+      //     ) : (
+      //       <NoDataCell />
+      //     )
+      // },
       {
         accessor: 'action',
         Header: 'Actions',
@@ -178,7 +178,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           const cannotDelete = !serviceLogCount || (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) || (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) || (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
           return (
             <>
-              <HtmlTooltip title={!serviceLogCount ? rentalManagementMessage.serviceNotstarted : cannotDelete ? rentalManagementMessage.invoiceCreated :  'Delete recent log'}>
+              <HtmlTooltip title={!serviceLogCount ? rentalManagementMessage.serviceNotstarted : cannotDelete ? rentalManagementMessage.invoiceCreated : 'Delete recent log'}>
                 <span>
                   <IconButton
                     size="small"
@@ -320,7 +320,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
       )}
       {serviceConfirmationDialog.open && (
         <StartStopServiceDateDialog
-          data={selectedRecords}
+          data={null}
           type={serviceConfirmationDialog.type}
           open={serviceConfirmationDialog.open}
           onClose={() => {
