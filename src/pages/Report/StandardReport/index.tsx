@@ -457,6 +457,11 @@ const Report = () => {
     dispatch({ type: 'loading', loading: true });
 
     var api = `/report/${type}`;
+
+    if (reportConfig?.title === 'Sales Funnel Report') {
+      api += `/sales-funnel`;
+    }
+
     axiosInstance()
       .get(`${api}${filterQuery}`, {
         cancelToken: cancelTokenSource?.token
@@ -677,6 +682,10 @@ const Report = () => {
 
     var api = '';
     api = `/report/${type}/export`;
+
+    if (reportConfig?.title === 'Sales Funnel Report') {
+      api += `/sales-funnel`;
+    }
 
     axiosInstance()
       .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`, {
