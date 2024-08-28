@@ -2599,7 +2599,13 @@ export const REPORT_LIST = [
     type: 'iotDataPoints',
     defaultColumn: true,
     notMultiSelectFields: ['asset', 'interval']
-  }
+  },
+  {
+    title: 'Sales Funnel Report',
+    permission: 'lead',
+    key: 'standardReport',
+    type: 'sales-funnel'
+  },
 ];
 
 export const RESOURCE_CALENDAR = [
