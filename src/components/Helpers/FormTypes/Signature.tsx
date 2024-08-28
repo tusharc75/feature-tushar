@@ -35,7 +35,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             width={500}
             minScreenshotWidth={500}
             screenshotFormat="image/jpeg"
-            // videoConstraints={videoConstraints}
+          // videoConstraints={videoConstraints}
           />
         ) : (
           <img src={picture} />
@@ -169,48 +169,38 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
           ) : (
             <FaSignature style={{ width: 70, height: 70, color: '#5b5b5b' }} />
           )}
-
-          {/* <Box display="flex" justifyContent="center" alignItems="center" position="absolute" top="0" right="0" width="100%" height="100%">
-        {isImgUploading && (
-          <>
-            <CircularProgress variant="determinate" value={imageUploadProgress} />
-            <Box top={0} left={0} bottom={0} right={0} position="absolute" display="flex" alignItems="center" justifyContent="center">
-              <Typography variant="caption" component="div" color="textSecondary">{`${imageUploadProgress}%`}</Typography>
-            </Box>
-          </>
-        )}
-      </Box> */}
         </Box>
         <Box>
-          <label htmlFor={name}>
+          <HtmlTooltip title='Add Signature'>
+            <label htmlFor={name}>
+              <IconButton
+                onClick={() => {
+                  setOpenDialog(true);
+                }}
+                disabled={disable}
+                color="primary"
+                size="small"
+                aria-label="upload sign"
+                component="span"
+              >
+                <AddCircle />
+              </IconButton>
+            </label>
+          </HtmlTooltip>
+          <HtmlTooltip title='Remove Signature'>
             <IconButton
-              onClick={() => {
-                setOpenDialog(true);
-              }}
-              disabled={disable}
-              title="Add sign"
-              color="primary"
+              disabled={Boolean(!values[name]) || disable}
+              className={Boolean(!values[name]) ? '' : 'errorColor'}
               size="small"
-              aria-label="upload sign"
+              aria-label="delete sign"
               component="span"
+              onClick={() => {
+                setFieldValue(name, '');
+              }}
             >
-              <AddCircle />
+              <Delete />
             </IconButton>
-          </label>
-
-          <IconButton
-            disabled={Boolean(!values[name]) || disable}
-            title="Remove sign"
-            className={Boolean(!values[name]) ? '' : 'errorColor'}
-            size="small"
-            aria-label="delete sign"
-            component="span"
-            onClick={() => {
-              setFieldValue(name, '');
-            }}
-          >
-            <Delete />
-          </IconButton>
+          </HtmlTooltip>
           {isTooltip && Boolean(tooltipMessage) && (
             <IconButton size="small">
               <HtmlTooltip title={tooltipMessage}>
