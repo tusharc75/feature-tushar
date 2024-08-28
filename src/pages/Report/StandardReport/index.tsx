@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useParams, useHistory, Link } from 'react-router-dom';
-import { Grid, Button, Box, IconButton } from '@material-ui/core';
-import { camelCase, capitalize, isArray, isNumber, startCase } from 'lodash';
+import { Grid, Button, Box, IconButton, CircularProgress } from '@material-ui/core';
+import { camelCase, capitalize, isArray, isEmpty, isNumber, isObject, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -70,7 +70,6 @@ const Report = () => {
   const [resourceOptions, setResourceOptions] = React.useState(null);
   const [formValues, setFormValues] = React.useState({});
   const [resourceColumns, setResourceColumns] = React.useState([]);
-  const [isExporting, setExporting] = React.useState(false);
   const [loadingColumns, setLoadingColumns] = React.useState(false);
   const [statusPeriod, setStatusPeriod] = React.useState(false);
   const [statusTimeFrame, setStatusTimeFrame] = React.useState<any>('custom');
@@ -81,15 +80,16 @@ const Report = () => {
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
   const { state, dispatch } = useTableReducer();
-  const { loading, page, sorting, search, limit, filters, pageSizes, colState, dataRows } = state;
+  const { loading, page, sorting, search, limit, filters, pageSizes, visibleColumns } = state;
 
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
   const [showPadData, setShowPadData] = React.useState({ open: false, data: [] });
   const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
   const [isSendMail, setIsSendMail] = React.useState(false);
-  const [isDownloading, setIsDownloading] = React.useState(false);
   const [emailAttachments, setEmailAttachments] = React.useState([]);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
+
+  const [isProcessing, setIsProcessing] = React.useState(null);
 
   const fetchGridColumns = async () => {
     try {
@@ -660,8 +660,13 @@ const Report = () => {
 
     if (isExport) {
       let newColumns = columns.map((col) => col.accessor);
-      if (colState.length) {
-        newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor);
+      if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
+        newColumns = []
+        for (const [key, value] of Object.entries(visibleColumns)) {
+          if (value) {
+            newColumns.push(key);
+          }
+        }
       }
       filterQuery = `${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`;
     }
@@ -669,47 +674,62 @@ const Report = () => {
     return `?${filterQuery}`;
   };
 
-  const exportData = (sendMail = false) => {
-    if (isExporting) return;
+  const exportData = (exportType = 'excel') => {
+
     toastConfig.setToastConfig({
       open: true,
-      message: `Please wait ${sendMail ? '' : 'exporting data'}`,
+      message: `Please wait ${exportType === 'sendMail' ? '' : 'exporting data'}`,
       type: 'info'
     });
-    let newColumns = columns.map((col) => col.accessor);
-    if (colState.length) {
-      newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor);
-    }
-    if(!sendMail) setExporting(true);
-    
+
+    setIsProcessing(exportType)
+
     let filterQuery = getQueryString(true);
 
     var api = '';
-    api = `/report/${type}/export`;
+    if (exportType === 'pdf') {
+      api = `/report/${type}/pdf`;
+    }
+    else {
+      api = `/report/${type}/export`;
+    }
 
-    axiosInstance()
-      .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`, {
-        responseType: 'arraybuffer'
-      })
-      .then((res) => {
-        const fileName = res.headers['content-disposition'].split('filename=')[1];
-        if(sendMail){
+    axiosInstance().get(`${api}${filterQuery}`, {
+      responseType: 'arraybuffer'
+    }).then((res) => {
+      const fileName = res.headers['content-disposition'].split('filename=')[1];
+      if (exportType === 'sendMail') {
         const blobData = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         generateBase64forFile(blobData, fileName, 'xlsx');
-        }else {
-          downloadExcel(res.data, fileName);
-          setExporting(false);
-          toastConfig.setToastConfig({
-            open: true,
-            message: 'Successfully Exported',
-            type: 'success'
-          });
-        }
-      })
-      .catch((err) => {
-        setExporting(false);
-        toastConfig.setToastConfig(err);
-      });
+        setIsProcessing(null);
+      }
+      else if (exportType === 'pdf') {
+        const url = window.URL.createObjectURL(new Blob([res.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName + '.pdf');
+        document.body.appendChild(link);
+        link.click();
+        toastConfig.setToastConfig({
+          open: true,
+          message: 'Successfully Exported',
+          type: 'success'
+        });
+        setIsProcessing(null);
+      }
+      else {
+        downloadExcel(res.data, fileName);
+        toastConfig.setToastConfig({
+          open: true,
+          message: 'Successfully Exported',
+          type: 'success'
+        });
+        setIsProcessing(null);
+      }
+    }).catch((err) => {
+      setIsProcessing(null);
+      toastConfig.setToastConfig(err);
+    });
   };
 
   const generateBase64forFile = (blobData, fileName, extension) => {
@@ -729,37 +749,6 @@ const Report = () => {
       setIsSendMail(true);
     };
   };
-
-  const handleDownload = async ()=>{
-    toastConfig.setToastConfig({
-      open: true,
-      message: 'Please wait exporting data',
-      type: 'info'
-    });
-    setIsDownloading(true);
-    axiosInstance()
-      .get(`/report/${type}/pdf`, {
-        responseType: 'blob'
-      })
-      .then(({ data }) => {
-        const url = window.URL.createObjectURL(new Blob([data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', reportConfig.title + '.pdf');
-        document.body.appendChild(link);
-        link.click();
-        setIsDownloading(false);
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Successfully Exported',
-          type: 'success'
-        });
-      })
-      .catch((err) => {
-        toastConfig.setToastConfig(err);
-        setIsDownloading(false);
-      });
-  }
 
   useEffect(() => {
     if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) && footerData) {
@@ -806,23 +795,38 @@ const Report = () => {
                 />
               ) : (
                 <div className="flex gap-1 items-center">
-                {reportConfig?.isSendMail && 
-                ( 
-                <Button variant="outlined" size="small" disabled={isSendMail} onClick={()=> exportData(true)} className={`btn-outline-v-1`}>
-                  Send Mail
-                </Button>
-              )}
-                {reportConfig?.isExportPdf && 
-                (
-                  <Button variant="outlined" size="small" disabled={isDownloading} onClick={()=> handleDownload()} className={`btn-outline-v-1`}>
-                  Export To Pdf
-                </Button>
-              )}
-                 <Button variant="outlined" size="small" disabled={isExporting} onClick={()=> exportData()} className={`btn-outline-v-1`}>
-                  Export To Excel
-                </Button>
+                  {reportConfig?.isSendMail &&
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={isProcessing === 'sendMail'}
+                      onClick={() => exportData('sendMail')}
+                      startIcon={isProcessing === 'sendMail' && <CircularProgress color="inherit" size={18} />}
+                      className={`btn-outline-v-1`}>
+                      Send Mail
+                    </Button>
+                  }
+                  {reportConfig?.isExportPdf &&
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      disabled={isProcessing === 'pdf'}
+                      onClick={() => exportData('pdf')}
+                      startIcon={isProcessing === 'pdf' && <CircularProgress color="inherit" size={18} />}
+
+                      className={`btn-outline-v-1`}>
+                      Export To PDF
+                    </Button>}
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    disabled={isProcessing === 'excel'}
+                    onClick={() => exportData('excel')}
+                    startIcon={isProcessing === 'excel' && <CircularProgress color="inherit" size={18} />}
+                    className={`btn-outline-v-1`}>
+                    Export To Excel
+                  </Button>
                 </div>
-               
               )}
             </div>
           )}
@@ -960,38 +964,38 @@ const Report = () => {
       )}
       {isSendMail && (
         <Dialog
-        open={isSendMail}
-        fullScreen={fullScreen || isMobile || isTablet}
-        TransitionComponent={CustomDialogTransition}
-        aria-labelledby="customized-dialog-title"
-        maxWidth="md"
-        onClose={() => {
-          setIsSendMail(false);
-          setEmailAttachments([]);
-          setFullScreen(false);
-        }}
-        fullWidth
-      >
-        <CreateEmail
-        isQuoteBuilder={true}
-        relatedTo = {null}
-        emailId={null}
-        handleClose={() => {
-            setIsSendMail(false)
-            setEmailAttachments([]);
-        }}
-        fetchData={()=>{
+          open={isSendMail}
+          fullScreen={fullScreen || isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
+          aria-labelledby="customized-dialog-title"
+          maxWidth="md"
+          onClose={() => {
             setIsSendMail(false);
             setEmailAttachments([]);
-        }}
-        qouteBuilderAttachments={emailAttachments}
-        isMinimized={true}
-        onMinimizeMaximize={() => {
-            setFullScreen((prevState) => !prevState);
-        }}
-        showManimizeMaximize={true}
-      />
-      </Dialog>
+            setFullScreen(false);
+          }}
+          fullWidth
+        >
+          <CreateEmail
+            isQuoteBuilder={true}
+            relatedTo={null}
+            emailId={null}
+            handleClose={() => {
+              setIsSendMail(false)
+              setEmailAttachments([]);
+            }}
+            fetchData={() => {
+              setIsSendMail(false);
+              setEmailAttachments([]);
+            }}
+            qouteBuilderAttachments={emailAttachments}
+            isMinimized={true}
+            onMinimizeMaximize={() => {
+              setFullScreen((prevState) => !prevState);
+            }}
+            showManimizeMaximize={true}
+          />
+        </Dialog>
       )
       }
     </MuiPickersUtilsProvider>
