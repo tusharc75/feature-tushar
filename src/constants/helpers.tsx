@@ -2600,7 +2600,7 @@ export const REPORT_LIST = [
     title: 'Sales Funnel Report',
     permission: 'lead',
     key: 'standardReport',
-    type: 'lead'
+    type: 'sales-funnel'
   },
 ];
 
