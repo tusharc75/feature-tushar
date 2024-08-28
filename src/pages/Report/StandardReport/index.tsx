@@ -457,7 +457,6 @@ const Report = () => {
     dispatch({ type: 'loading', loading: true });
 
     var api = `/report/${type}`;
-
     axiosInstance()
       .get(`${api}${filterQuery}`, {
         cancelToken: cancelTokenSource?.token
@@ -678,7 +677,7 @@ const Report = () => {
 
     var api = '';
     api = `/report/${type}/export`;
-    
+
     axiosInstance()
       .get(`${api}${filterQuery}&exportColumn=${JSON.stringify(newColumns)}`, {
         responseType: 'arraybuffer'
