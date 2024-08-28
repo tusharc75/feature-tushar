@@ -13,15 +13,15 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
   const [initialValues, setInitialValues] = useState(null);
 
   useEffect(() => {
-    if (type) {
-      setInitialValues({
-        startDate: minStartDate ? new Date(minStartDate) : new Date(),
-        ...(type !== 'start' ? { endDate: minStartDate ? new Date(minStartDate) : new Date() } : {})
-      })
-    } else {
+    if (data) {
       setInitialValues({
         startDate: new Date(data.startDate),
         ...(data?.endDate && { endDate: new Date(data.endDate) })
+      })
+    } else {
+      setInitialValues({
+        startDate: minStartDate ? new Date(minStartDate) : new Date(),
+        ...(type !== 'start' ? { endDate: minStartDate ? new Date(minStartDate) : new Date() } : {})
       })
     }
   }, [data, type]);
@@ -85,7 +85,7 @@ const StartStopServiceDateDialog = ({ data, type, open, onClose, handleSubmit, l
                       />
                     </Grid>
                   )}
-                  {(data?.endDate || type === 'startStop' || type === 'stop') &&
+                  {(type === 'startStop' || type === 'stop') &&
                     (<Grid item xs={12} sm={12}>
                       <FormTypes
                         size="small"
