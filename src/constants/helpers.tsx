@@ -2572,7 +2572,9 @@ export const REPORT_LIST = [
     permission: 'iotChart',
     key: 'standardReport',
     type: 'dailyVolumeReport',
-    defaultColumn: true
+    defaultColumn: true,
+    isExportPdf: true,
+    isSendMail: true
   },
   {
     title: 'Volume Report',
@@ -2580,7 +2582,9 @@ export const REPORT_LIST = [
     key: 'standardReport',
     type: 'volumeReport',
     defaultColumn: true,
-    notMultiSelectFields: ['frequency']
+    notMultiSelectFields: ['frequency'],
+    isExportPdf: true,
+    isSendMail: true
   },
   {
     title: 'Unit Downtime Report',

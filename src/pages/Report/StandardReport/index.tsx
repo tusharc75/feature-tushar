@@ -19,7 +19,8 @@ import {
   isObjectEmpty,
   sidebarResource,
   REPORT_LIST,
-  formatAmountWithCurrency
+  formatAmountWithCurrency,
+  CustomDialogTransition
 } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
@@ -38,6 +39,9 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import AsynImportExportMenu from 'src/components/AsynImportExportMenu';
 import WarningIcon from '@material-ui/icons/Warning';
 import PadData from 'src/pages/Report/PadData';
+import PreviewDownload from 'src/components/PreviewDownload';
+import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
+import { isMobile, isTablet } from 'react-device-detect';
 
 let cancelTokenSource = null;
 
@@ -82,6 +86,10 @@ const Report = () => {
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });
   const [showPadData, setShowPadData] = React.useState({ open: false, data: [] });
   const [showPricefilter, setShowPricefilter] = React.useState({ warehouse: null, fromDate: null, toDate: null });
+  const [isSendMail, setIsSendMail] = React.useState(false);
+  const [isDownloading, setIsDownloading] = React.useState(false);
+  const [emailAttachments, setEmailAttachments] = React.useState([]);
+  const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
 
   const fetchGridColumns = async () => {
     try {
@@ -661,18 +669,19 @@ const Report = () => {
     return `?${filterQuery}`;
   };
 
-  const exportData = () => {
+  const exportData = (sendMail = false) => {
     if (isExporting) return;
     toastConfig.setToastConfig({
       open: true,
-      message: 'Please wait exporting data',
+      message: `Please wait ${sendMail ? '' : 'exporting data'}`,
       type: 'info'
     });
     let newColumns = columns.map((col) => col.accessor);
     if (colState.length) {
       newColumns = colState?.filter((col) => col?.isVisible).map((col) => col?.accessor);
     }
-    setExporting(true);
+    if(!sendMail) setExporting(true);
+    
     let filterQuery = getQueryString(true);
 
     var api = '';
@@ -684,8 +693,62 @@ const Report = () => {
       })
       .then((res) => {
         const fileName = res.headers['content-disposition'].split('filename=')[1];
-        downloadExcel(res.data, fileName);
+        if(sendMail){
+        const blobData = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        generateBase64forFile(blobData, fileName, 'xlsx');
+        }else {
+          downloadExcel(res.data, fileName);
+          setExporting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            message: 'Successfully Exported',
+            type: 'success'
+          });
+        }
+      })
+      .catch((err) => {
         setExporting(false);
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  const generateBase64forFile = (blobData, fileName, extension) => {
+    let reader = new FileReader();
+    reader.readAsDataURL(blobData);
+    reader.onloadend = function () {
+      let base64data: any = reader.result;
+      const attachments = {
+        base64: base64data.substring(parseInt(base64data.indexOf(',') + 1)),
+        contentType: base64data.split(';')[0].split(':')[1],
+        extension: `.${extension}`,
+        name: fileName
+      };
+      setEmailAttachments((prevState) => {
+        return [...prevState, attachments];
+      });
+      setIsSendMail(true);
+    };
+  };
+
+  const handleDownload = async ()=>{
+    toastConfig.setToastConfig({
+      open: true,
+      message: 'Please wait exporting data',
+      type: 'info'
+    });
+    setIsDownloading(true);
+    axiosInstance()
+      .get(`/report/${type}/pdf`, {
+        responseType: 'blob'
+      })
+      .then(({ data }) => {
+        const url = window.URL.createObjectURL(new Blob([data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', reportConfig.title + '.pdf');
+        document.body.appendChild(link);
+        link.click();
+        setIsDownloading(false);
         toastConfig.setToastConfig({
           open: true,
           message: 'Successfully Exported',
@@ -693,10 +756,10 @@ const Report = () => {
         });
       })
       .catch((err) => {
-        setExporting(false);
         toastConfig.setToastConfig(err);
+        setIsDownloading(false);
       });
-  };
+  }
 
   useEffect(() => {
     if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) && footerData) {
@@ -742,9 +805,24 @@ const Report = () => {
                   additionalParams={getQueryString(true)}
                 />
               ) : (
-                <Button variant="outlined" size="small" disabled={isExporting} onClick={exportData} className={`btn-outline-v-1`}>
-                  Export All
+                <div className="flex gap-1 items-center">
+                {reportConfig?.isSendMail && 
+                ( 
+                <Button variant="outlined" size="small" disabled={isSendMail} onClick={()=> exportData(true)} className={`btn-outline-v-1`}>
+                  Send Mail
                 </Button>
+              )}
+                {reportConfig?.isExportPdf && 
+                (
+                  <Button variant="outlined" size="small" disabled={isDownloading} onClick={()=> handleDownload()} className={`btn-outline-v-1`}>
+                  Export To Pdf
+                </Button>
+              )}
+                 <Button variant="outlined" size="small" disabled={isExporting} onClick={()=> exportData()} className={`btn-outline-v-1`}>
+                  Export To Excel
+                </Button>
+                </div>
+               
               )}
             </div>
           )}
@@ -880,6 +958,42 @@ const Report = () => {
           data={showPadData.data}
         />
       )}
+      {isSendMail && (
+        <Dialog
+        open={isSendMail}
+        fullScreen={fullScreen || isMobile || isTablet}
+        TransitionComponent={CustomDialogTransition}
+        aria-labelledby="customized-dialog-title"
+        maxWidth="md"
+        onClose={() => {
+          setIsSendMail(false);
+          setEmailAttachments([]);
+          setFullScreen(false);
+        }}
+        fullWidth
+      >
+        <CreateEmail
+        isQuoteBuilder={true}
+        relatedTo = {null}
+        emailId={null}
+        handleClose={() => {
+            setIsSendMail(false)
+            setEmailAttachments([]);
+        }}
+        fetchData={()=>{
+            setIsSendMail(false);
+            setEmailAttachments([]);
+        }}
+        qouteBuilderAttachments={emailAttachments}
+        isMinimized={true}
+        onMinimizeMaximize={() => {
+            setFullScreen((prevState) => !prevState);
+        }}
+        showManimizeMaximize={true}
+      />
+      </Dialog>
+      )
+      }
     </MuiPickersUtilsProvider>
   );
 };
