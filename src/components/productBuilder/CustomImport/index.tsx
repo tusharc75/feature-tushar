@@ -36,6 +36,7 @@ import { AddColumnDialog } from 'src/components/productBuilder/CustomImport/AddC
 import { Add, Delete } from '@material-ui/icons';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import RowNumberDialog from 'src/components/productBuilder/CustomImport/RowNumberDialog';
+import ImportedDataDialog from 'src/components/productBuilder/CustomImport/ImpoetedDataDialog';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -59,6 +60,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [openRowNumberDialog, setOpenRowNumberDialog] = useState(false);
+  const [showImportedData, setShowImportedData] = useState({ open: false, data: null, wsname: '' });
 
   const charToNum = (char) => {
     let num = 0;
@@ -383,6 +385,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
           ?.map((_r: any, i) => {
             const _row: any = [];
             if (i === 0) {
+              _row.push('PRODUCT DESCRIPTION');
               _r?.forEach((ele, j) => {
                 if (templateImportHeader?.some((t) => t?.value === ele)) {
                   _row.push(ele);
@@ -391,6 +394,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                 }
               });
             } else {
+              _row.push('');
               _r?.forEach((ele, j) => {
                 if (!indexes?.includes(j)) {
                   _row.push(ele);
@@ -400,19 +404,24 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             return _row;
           });
 
-        const newWorksheet = utils.json_to_sheet(updatedData, { skipHeader: true });
-
-        const newWorkbook = utils.book_new();
-        utils.book_append_sheet(newWorkbook, newWorksheet, wsname);
-
-        const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
-        const excelBuffer = write(newWorkbook, { bookType: 'xlsx', type: 'array' });
-        const blob = new Blob([excelBuffer], { type: fileType });
-
-        handleSave(blob);
+        setShowImportedData({ open: true, data: updatedData, wsname: wsname });
       };
       reader.readAsArrayBuffer(file);
     }
+  };
+
+  const rowDataToFile = (rowData) => {
+    const newWorksheet = utils.json_to_sheet(rowData, { skipHeader: true });
+
+    const newWorkbook = utils.book_new();
+    utils.book_append_sheet(newWorkbook, newWorksheet, showImportedData.wsname);
+
+    const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
+    const excelBuffer = write(newWorkbook, { bookType: 'xlsx', type: 'array' });
+    const blob = new Blob([excelBuffer], { type: fileType });
+    setShowImportedData({ open: false, data: null, wsname: '' });
+
+    handleSave(blob);
   };
 
   const handleSave = (file) => {
@@ -641,7 +650,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                         <TableRow key={_key?.value}>
                           <TableCell component="th" scope="row">
                             {' '}
-                            {_key?.label} {_key?.value === field?.fieldLabel?.toUpperCase() && <span style={{ color: '#dc3545' }}>*</span>}
+                            {_key?.label}
+                            {/* {_key?.value === field?.fieldLabel?.toUpperCase() && <span style={{ color: '#dc3545' }}>*</span>} */}
                             {addedField?.map((f) => f?.fieldLabel?.toUpperCase())?.includes(_key?.label) && (
                               <IconButton
                                 size="small"
@@ -661,12 +671,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                 (ele) => !keyValue.some((e) => e.customImportHeader === ele.value) || ele?.value === selectedCustomInputHeader
                               )}
                               getOptionLabel={(option) => option?.label || ''}
-                              // value={customImportHeader.find((_value) => {
-                              //   if (_value?.value === selectedCustomInputHeader) {
-                              //     return true;
-                              //   }
-                              //   return null;
-                              // })}
                               value={
                                 customImportHeader?.filter((h) => h?.value === selectedCustomInputHeader)?.length > 0
                                   ? customImportHeader?.filter((h) => h?.value === selectedCustomInputHeader)[0]
@@ -682,15 +686,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                  error={
-                                    _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                    !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
-                                  }
-                                  helperText={
-                                    _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                    !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
-                                    'Required field'
-                                  }
+                                  // error={
+                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                  // }
+                                  // helperText={
+                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                  //   'Required field'
+                                  // }
                                 />
                               )}
                             />
@@ -711,17 +715,18 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               onClick={handleCustomImport}
               variant="contained"
               color="primary"
-              disabled={
-                loading ||
-                !values?.productCategory ||
-                !values?.productTemplate ||
-                !values?.priceTemplate ||
-                !keyValue?.some(
-                  (k) =>
-                    k?.templateImportHeader === fields?.find((f) => f?.fieldName === 'productName')?.fieldLabel?.toUpperCase() &&
-                    k?.customImportHeader
-                )
-              }
+              disabled={loading || !values?.productCategory || !values?.productTemplate || !values?.priceTemplate}
+              // disabled={
+              //   loading ||
+              //   !values?.productCategory ||
+              //   !values?.productTemplate ||
+              //   !values?.priceTemplate ||
+              //   !keyValue?.some(
+              //     (k) =>
+              //       k?.templateImportHeader === fields?.find((f) => f?.fieldName === 'productName')?.fieldLabel?.toUpperCase() &&
+              //       k?.customImportHeader
+              //   )
+              // }
               loading={loading}
             >
               Save
@@ -785,6 +790,19 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                 handleFileImport(data);
               }}
               file={files}
+            />
+          )}
+          {showImportedData.open && (
+            <ImportedDataDialog
+              handleClose={() => {
+                setShowImportedData({ open: false, data: null, wsname: '' });
+              }}
+              data={showImportedData.data}
+              productCategory={values?.productCategory}
+              productTemplate={values?.productTemplate}
+              onSuccess={(data) => {
+                rowDataToFile(data);
+              }}
             />
           )}
         </>
