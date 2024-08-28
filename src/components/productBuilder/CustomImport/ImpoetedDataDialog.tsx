@@ -17,11 +17,9 @@ const useStyles = makeStyles((theme) => ({
     border: '1px solid #dddddd',
     textAlign: 'left',
     padding: '10px',
-    minWidth: '250px'
+    minWidth: '220px'
   },
   thp: {
-    border: '1px solid #dddddd',
-    textAlign: 'left',
     padding: '0px 10px',
     minWidth: '350px'
   }
@@ -62,15 +60,25 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
           <Box>
             <table className={classes.table}>
               <tr>
+                <th className={classes.th} style={{ minWidth: '100px' }}>
+                  Index
+                </th>
                 {data[0]?.map((d) => {
-                  return <th className={classes.th}>{d}</th>;
+                  return (
+                    <th title={d} className={`${classes.th} text-truncate`}>
+                      {d} {d === 'PRODUCT DESCRIPTION' && <span style={{ color: '#dc3545' }}>*</span>}
+                    </th>
+                  );
                 })}
               </tr>
               {rows?.map((row, index) => (
                 <tr key={index}>
+                  <td className={classes.th} style={{ minWidth: '100px' }}>
+                    {index + 1}
+                  </td>
                   {row?.map((r, i) => {
                     return i === 0 ? (
-                      <td className={classes.thp}>
+                      <td className={`${classes.th} ${classes.thp}`}>
                         <Autocomplete
                           id="custom-import-product-description"
                           size="small"
@@ -91,7 +99,9 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
                         />
                       </td>
                     ) : (
-                      <td className={classes.th}>{r}</td>
+                      <td title={r} className={`${classes.th} text-truncate`}>
+                        {r}
+                      </td>
                     );
                   })}
                 </tr>
