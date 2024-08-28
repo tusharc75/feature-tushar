@@ -147,7 +147,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
       Cell: ({ row }) => {
         return (
           <>
-            <HtmlTooltip title={row?.original?.canEdit ? `Update -Actual Start Date/Actual End Date` : 'Invoice already created'}>
+            <HtmlTooltip title={row?.original?.canEdit ? `Update -Actual Start/End Date` : 'Invoice already created'}>
               <span>
                 <IconButton
                   size="small"
@@ -273,7 +273,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
         {editDateDialog.open && (
           <StartStopServiceDateDialog
             data={editDateDialog.data}
-            type={null}
+            type={editDateDialog?.data?.endDate ? 'startStop' : 'start'}
             open={editDateDialog.open}
             onClose={() => { setEditDateDialog({ open: false, loading: false, minStartDate: null, maxEndDate: null, data: null }) }}
             handleSubmit={handleSubmitChangeDates}
@@ -284,7 +284,7 @@ const ServiceLogDialog = ({ rentalId, id, serviceName, onClose, onSuccess, allow
         )}
         {deleteServiceLogConfirmDialog.open && (
           <ConfirmationDialog
-            open={deleteServiceLogConfirmDialog}
+            open={deleteServiceLogConfirmDialog.open}
             message={`Are you sure you want to delete log?`}
             onClose={() => { setDeleteServiceLogConfirmDialog({ open: false, data: null }) }}
             onOk={() => { handleDeleteServiceLogs(deleteServiceLogConfirmDialog.data) }}
