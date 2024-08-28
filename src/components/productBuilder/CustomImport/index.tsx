@@ -801,8 +801,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               productCategory={values?.productCategory}
               productTemplate={values?.productTemplate}
               onSuccess={(data) => {
-                console.log('ddddddddddd', data);
-                // rowDataToFile(data);
+                rowDataToFile(data);
               }}
             />
           )}
