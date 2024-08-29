@@ -91,12 +91,6 @@ const TransferAssetDetailPage = () => {
     }
   }, [id]);
 
-  useEffect(()=>{
-    if(transferAssetData?.status===TRANSFER_ASSET_STATUS.completed){
-      setTransferIsEnded(true);
-    }
-  },[transferAssetData])
-
   const updateProcessStatus = (step: number) => {
     axiosInstance()
       .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus: stepNames[step] })
