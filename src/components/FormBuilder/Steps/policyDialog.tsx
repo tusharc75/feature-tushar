@@ -289,7 +289,29 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
 
   const [fieldOptions, setFieldOptions] = useState([]);
   const [statusOptions, setStatusOptions] = useState([]);
-  const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data] });
+  const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data], fields: Data?.fields });
+
+  useEffect(()=>{
+    fetchResourceFields();
+  },[])
+
+  const fetchResourceFields = async ()=>{
+    const updatedFields = [...Data.fields];
+    const lookupResources = updatedFields.reduce((acc, ele) => {
+      if (ele?.lookupResource) {
+        acc.push(ele.lookupResource);
+      }
+      return acc;
+    }, []);
+    const lookupString = lookupResources?.join(',');
+    const options = await fetchResourceOptions(lookupString);
+    for (const ele of updatedFields) {
+      if(ele?.lookupResource){
+        ele.option = options[ele.lookupResource];
+       }
+     }
+      setInitialData((prevState)=> ({...prevState, fields: updatedFields}) );
+    }
 
   useEffect(() => {
     let fieldsData = [...fields];
@@ -324,7 +346,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                 onClick={() => {
                   const data = [...initialData?.fieldsData];
                   data.push({ status: '', fields: [] });
-                  setInitialData({ fieldsData: [...data] });
+                  setInitialData((prevState)=> ({...prevState, fieldsData: [...data] }) );
                   onChange(null, data);
                 }}
               >
@@ -333,8 +355,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
             </HtmlTooltip>
           </div>
           {initialData?.fieldsData?.map((value, index) => (
-            <div className="flex items-center justify-center gap-1 p-2" key={index}>
-              {Data?.fields?.map((field) => (
+          <div className="flex items-center justify-between gap-1 p-2 border border-[var(--common-border-color)] mb-4 mt-4" key={index}>
+            <div className="grid md:grid-cols-3 sm:grid-cols-1 gap-2 w-[94%]">
+              {initialData?.fields?.map((field) => (
                 field?.type === 'checkBox' ?
                   <FormControlLabel
                     control={<Checkbox name={field.fieldName} checked={value[field.fieldName]}
@@ -343,14 +366,14 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                         setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
                         let updatedData = [...initialData?.fieldsData];
                         updatedData[index][field.fieldName] = updatedVal;
-                        setInitialData({ fieldsData: updatedData });
+                        setInitialData((prevState)=> ({...prevState, fieldsData: updatedData }) );
                         onChange(null, updatedData);
                       }}
                     />} label={field?.fieldLabel} />
                   :
                   <DropDownField
                     key={field.fieldName}
-                    options={field?.fieldName === 'status' ? getStatusOptions(initialData?.fieldsData) : fieldOptions}
+                    options={field?.lookupResource ? field.option : field?.fieldName === 'status' ? getStatusOptions(initialData?.fieldsData) : fieldOptions}
                     error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
                     touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
                     onChange={(e, val) => {
@@ -358,12 +381,12 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                       setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
                       let updatedData = [...initialData?.fieldsData];
                       updatedData[index][field.fieldName] = updatedVal;
-                      setInitialData({ fieldsData: updatedData });
+                      setInitialData((prevState)=> ({...prevState, fieldsData: updatedData }) );
                       onChange(null, updatedData);
                     }}
                     value={
                       field?.type === 'multiselect'
-                        ? fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
+                        ? field?.lookupResource ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue)) : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                         : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
                     }
                     multiple={field?.type === 'multiselect'}
@@ -371,6 +394,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                     fieldName={field?.fieldLabel}
                   />
               ))}
+              </div>       
               <HtmlTooltip title='Remove'>
                 <IconButton
                   size="small"
@@ -379,7 +403,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                   onClick={() => {
                     const updatedData = [...initialData.fieldsData];
                     updatedData.splice(index, 1);
-                    setInitialData({ fieldsData: [...updatedData] });
+                    setInitialData((prevState)=> ({...prevState, fieldsData: updatedData }) );
                     onChange(null, updatedData);
                   }}
                 >
@@ -397,3 +421,10 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     </>
   );
 };
+
+const fetchResourceOptions=  async (resources)=> {
+  const {
+    data: { data: lookupResourceOptions }
+  } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${resources}`);
+ return lookupResourceOptions
+}

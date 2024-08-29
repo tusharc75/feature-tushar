@@ -29,12 +29,14 @@ import moment from 'moment';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import CustomButton from 'src/components/Helpers/CustomButton';
 
 const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progressiveBilling }) => {
 
   const toastConfig = useContext(CustomToastContext);
 
   const [isUpdating, setUpdating] = useState(false);
+  const [isDateApplying, setIsDateApplying] = useState(false);
 
   const [material, setMaterial] = useState([]);
 
@@ -46,7 +48,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   const [rowsApplied, setRowsApplied] = useState([]);
 
   const { state, dispatch } = useTableReducer();
-  const { dataRows, selectedRecords } = state;
+  const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
   const {
@@ -293,6 +295,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
   };
 
   const handleApplyDate = async () => {
+    setIsDateApplying(true)
     let tempValues: any = { actualEndDate: endDate };
     let newEndDate = moment(endDate).toISOString()
     const invoiceResponse = await axiosInstance().get(`/generate-invoice/${resourceData[0]?._id}/invoice/material-end-date-qty?resource=${resource}`);
@@ -342,6 +345,7 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
       return [...prevRowsApplied, ...rows];
     });
     setAppliedDate(true);
+    setIsDateApplying(false)
   };
 
   const handleCreateInvoice = () => {
@@ -422,17 +426,19 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
                         <Box>
                           <HtmlTooltip title={selectedRecords?.length ? '' : 'Please select items to apply'}>
                             <span>
-                              <Button
+                              <CustomButton
+                                id="dialog-apply-button"
+                                loading={isDateApplying}
+                                disabled={selectedRecords?.length && moment(endDate)?.isValid() ? isDateApplying : true}
                                 variant="contained"
                                 color="primary"
-                                disabled={selectedRecords?.length && moment(endDate)?.isValid() ? false : true}
-                                size="small"
+                                type="button"
                                 onClick={() => {
                                   handleApplyDate();
                                 }}
                               >
                                 Apply
-                              </Button>
+                              </CustomButton>
                             </span>
                           </HtmlTooltip>
                         </Box>
@@ -491,18 +497,19 @@ const CreateInvoiceDialog = ({ onClose, onSuccess, resourceData, resource, progr
             }
           >
             <span>
-              <Button
-                type="button"
+              <CustomButton
+                id="dialog-save-button"
+                loading={isUpdating}
+                disabled={progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false}
                 variant="contained"
                 color="primary"
-                size="small"
-                disabled={progressiveBilling ? isUpdating || !appliedDate || !rowsApplied?.length || rowsApplied.some((d) => d.invalidDate === true) : false}
+                type="button"
                 onClick={() => {
                   handleCreateInvoice();
                 }}
               >
                 Create Invoice
-              </Button>
+              </CustomButton>
             </span>
           </HtmlTooltip>
         </CustomDialogFooter>
