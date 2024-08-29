@@ -8,7 +8,8 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
-const cellClassName = 'w-[220px] max-w-[220px] p-[10px] text-left [border:1px_solid_var(--common-border-color)]';
+const cellClassName =
+  'w-[220px] max-w-[220px] p-[10px] text-left [border-bottom:1px_solid_var(--common-border-color)] [border-right:1px_solid_var(--common-border-color)]';
 const indexStickyClassName = 'sticky sm:left-0 z-10 w-[var(--index-col-size)] bg-[var(--dark-primary,white)]';
 const descriptionStickyClassName = 'sticky sm:left-[var(--index-col-size)] z-10 bg-[var(--dark-primary,white)]';
 
