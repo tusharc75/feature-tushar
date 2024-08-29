@@ -18,7 +18,7 @@ import {
   MenuItem,
   Typography
 } from '@material-ui/core';
-import { CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
 import { AiOutlineImport } from 'react-icons/ai';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -37,6 +37,7 @@ import { Add, Delete } from '@material-ui/icons';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import RowNumberDialog from 'src/components/productBuilder/CustomImport/RowNumberDialog';
 import ImportedDataDialog from 'src/components/productBuilder/CustomImport/ImpoetedDataDialog';
+import ViewDialog from 'src/components/productBuilder/CustomImport/ViewDialog';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -60,7 +61,10 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [fieldLabelOptions, setFieldLabelOptions] = useState([]);
   const [addAnchorEl, setAddAnchorEl] = useState(null);
   const [openRowNumberDialog, setOpenRowNumberDialog] = useState(false);
-  const [showImportedData, setShowImportedData] = useState({ open: false, data: null, wsname: '' });
+  const [showImportedData, setShowImportedData] = useState({ open: false, data: null });
+  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [excelMappingExtraData, setExcelMappingExtraData] = useState(null);
+  const [selectedView, setSelectedView] = useState(null);
 
   const charToNum = (char) => {
     let num = 0;
@@ -131,11 +135,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
 
   useEffect(() => {
     let _keyValue = [];
-    customImportHeader?.forEach((_value) => {
-      if (templateImportHeader?.find((templateImportHeader) => templateImportHeader?.value === _value?.value) ? true : false) {
-        _keyValue = [..._keyValue, { templateImportHeader: _value?.value, customImportHeader: _value?.value }];
-      }
-    });
+    if (selectedView) {
+      _keyValue = selectedView && selectedView?.column ? selectedView?.column : [];
+    } else {
+      customImportHeader?.forEach((_value) => {
+        if (templateImportHeader?.find((templateImportHeader) => templateImportHeader?.value === _value?.value) ? true : false) {
+          _keyValue = [..._keyValue, { systemColumn: _value?.value, importedColumn: _value?.value }];
+        }
+      });
+    }
 
     setKeyValue(_keyValue);
   }, [templateImportHeader, customImportHeader]);
@@ -302,6 +310,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
         result.push({ value: curr, label: curr });
         return result;
       }, []);
+
       setCustomImportHeaader(headers);
       setIsUploading(false);
     };
@@ -369,9 +378,9 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
 
         const headers: any = jsonData[0];
         const newHeaders = headers?.map((header) => {
-          const _header = keyValue?.find((k) => k?.customImportHeader === header);
+          const _header = keyValue?.find((k) => k?.importedColumn === header);
           if (_header) {
-            return _header?.templateImportHeader;
+            return _header?.systemColumn;
           }
           return header;
         });
@@ -385,7 +394,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
           ?.map((_r: any, i) => {
             const _row: any = [];
             if (i === 0) {
-              _row.push('PRODUCT DESCRIPTION');
               _r?.forEach((ele, j) => {
                 if (templateImportHeader?.some((t) => t?.value === ele)) {
                   _row.push(ele);
@@ -394,7 +402,6 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                 }
               });
             } else {
-              _row.push('');
               _r?.forEach((ele, j) => {
                 if (!indexes?.includes(j)) {
                   _row.push(ele);
@@ -404,7 +411,18 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
             return _row;
           });
 
-        setShowImportedData({ open: true, data: updatedData, wsname: wsname });
+        if (updatedData[0]?.some((u) => u === 'PRODUCT DESCRIPTION')) {
+          rowDataToFile(updatedData);
+        } else {
+          updatedData?.forEach((row, i) => {
+            if (i === 0) {
+              row.unshift('PRODUCT DESCRIPTION');
+            } else {
+              row.unshift('');
+            }
+          });
+          setShowImportedData({ open: true, data: updatedData });
+        }
       };
       reader.readAsArrayBuffer(file);
     }
@@ -414,12 +432,12 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     const newWorksheet = utils.json_to_sheet(rowData, { skipHeader: true });
 
     const newWorkbook = utils.book_new();
-    utils.book_append_sheet(newWorkbook, newWorksheet, showImportedData.wsname);
+    utils.book_append_sheet(newWorkbook, newWorksheet, 'sheet1');
 
     const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8';
     const excelBuffer = write(newWorkbook, { bookType: 'xlsx', type: 'array' });
     const blob = new Blob([excelBuffer], { type: fileType });
-    setShowImportedData({ open: false, data: null, wsname: '' });
+    setShowImportedData({ open: false, data: null });
 
     handleSave(blob);
   };
@@ -623,6 +641,19 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                     </MenuItem>
                   </Menu>
                 </>
+                <Button
+                  id={'custom-import-dialog-add-view-menu-button'}
+                  variant={'contained'}
+                  color="primary"
+                  size="small"
+                  disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
+                  onClick={(e) => {
+                    setShowViewDialog(true);
+                  }}
+                  aria-controls="add-view-menu"
+                >
+                  {selectedView ? 'Edit View' : 'Add View'}
+                </Button>
               </div>
             </div>
             {isUploading ? (
@@ -644,7 +675,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   </TableHead>
                   <TableBody>
                     {templateImportHeader?.map((_key) => {
-                      const selectedCustomInputHeader = keyValue.find((kv) => kv.templateImportHeader === _key?.value)?.customImportHeader;
+                      const selectedCustomInputHeader = keyValue.find((kv) => kv.systemColumn === _key?.value)?.importedColumn;
                       const field = fields?.find((f) => f?.fieldName === 'productName');
                       return (
                         <TableRow key={_key?.value}>
@@ -668,7 +699,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                               size="small"
                               id={_key?.value}
                               options={customImportHeader?.filter(
-                                (ele) => !keyValue.some((e) => e.customImportHeader === ele.value) || ele?.value === selectedCustomInputHeader
+                                (ele) => !keyValue.some((e) => e.importedColumn === ele.value) || ele?.value === selectedCustomInputHeader
                               )}
                               getOptionLabel={(option) => option?.label || ''}
                               value={
@@ -677,8 +708,8 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   : ''
                               }
                               onChange={(event, newValue) => {
-                                const tempKeyValues = keyValue?.filter((e) => e.templateImportHeader !== _key?.value);
-                                setKeyValue([...tempKeyValues, { templateImportHeader: _key?.value, customImportHeader: newValue?.value }]);
+                                const tempKeyValues = keyValue?.filter((e) => e.systemColumn !== _key?.value);
+                                setKeyValue([...tempKeyValues, { systemColumn: _key?.value, importedColumn: newValue?.value }]);
                               }}
                               style={{ maxWidth: '500px' }}
                               renderInput={(params) => (
@@ -729,7 +760,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               // }
               loading={loading}
             >
-              Save
+              Submit
             </CustomButton>
           </CustomDialogFooter>
           {addSystemColumn && (
@@ -786,22 +817,39 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               handleClose={() => {
                 setOpenRowNumberDialog(false);
               }}
-              onSuccess={(data) => {
+              onSuccess={(data, excelMappingView) => {
                 handleFileImport(data);
+                setExcelMappingExtraData(data);
+                setSelectedView(excelMappingView);
               }}
               file={files}
+              resource={ACTIVITY_RESOURCE.quote}
             />
           )}
           {showImportedData.open && (
             <ImportedDataDialog
               handleClose={() => {
-                setShowImportedData({ open: false, data: null, wsname: '' });
+                setShowImportedData({ open: false, data: null });
               }}
               data={showImportedData.data}
               productCategory={values?.productCategory}
               productTemplate={values?.productTemplate}
               onSuccess={(data) => {
                 rowDataToFile(data);
+              }}
+            />
+          )}
+          {showViewDialog && (
+            <ViewDialog
+              onClose={() => {
+                setShowViewDialog(false);
+              }}
+              resource={ACTIVITY_RESOURCE.quote}
+              extraData={{ column: keyValue, sheet: excelMappingExtraData }}
+              selectedView={selectedView}
+              onSuccess={(view) => {
+                setSelectedView(view);
+                setShowViewDialog(false);
               }}
             />
           )}

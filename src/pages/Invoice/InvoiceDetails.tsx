@@ -330,6 +330,7 @@ const InvoiceDetails = () => {
                   currentStep={currentStep}
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
+                  setStepFullScreen={() => setStepFullScreen(true)}
                 />
                 <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {currentStep === 0 && invoiceData && (

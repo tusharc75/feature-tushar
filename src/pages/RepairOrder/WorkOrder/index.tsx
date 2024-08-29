@@ -43,6 +43,7 @@ import {
 } from '../../../constants/helpers';
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
+import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
 
 const WorkOrder = ({
@@ -59,7 +60,9 @@ const WorkOrder = ({
   const renderedFrom = 'repair_order_workorder';
   const toastConfig = useContext(CustomToastContext);
 
-  const { state: { user, permissions } } = useData();
+  const {
+    state: { user, permissions }
+  } = useData();
 
   const [columns, setColumns] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
@@ -86,6 +89,7 @@ const WorkOrder = ({
   const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
   const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
   const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
+  const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const { state, dispatch } = useTableReducer();
   const { dataRows, selectedRecords } = state;
@@ -105,7 +109,7 @@ const WorkOrder = ({
   useEffect(() => {
     fetchFields();
     fetchData();
-    fetchPolicy()
+    fetchPolicy();
   }, [repairOrderData]);
 
   useEffect(() => {
@@ -537,7 +541,7 @@ const WorkOrder = ({
         .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
-          setOpenAssetDataDialog({ open: false, statusPolicy: null })
+          setOpenAssetDataDialog({ open: false, statusPolicy: null });
           fetchData();
           toastConfig.setToastConfig({
             open: true,
@@ -576,14 +580,15 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.service
-        ? parent?.serviceDetail?.serviceName
-        : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent?.serializedAssetDetail?.assetNumber
-            : parent?.packageDetail?.packageName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent?.serviceDetail?.serviceName
+          : parent.type === MATERIAL_TYPE.product
+            ? parent?.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent?.serializedAssetDetail?.assetNumber
+              : parent?.packageDetail?.packageName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -597,14 +602,15 @@ const WorkOrder = ({
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${parent.type === MATERIAL_TYPE.service
-        ? parent.serviceDetail?.status
-        : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.status
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail.status
-            : parent.packageDetail?.status
-        }`;
+      parent.status = `${
+        parent.type === MATERIAL_TYPE.service
+          ? parent.serviceDetail?.status
+          : parent.type === MATERIAL_TYPE.product
+            ? parent.productDetail?.status
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail.status
+              : parent.packageDetail?.status
+      }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
@@ -613,7 +619,8 @@ const WorkOrder = ({
         parent.serviceStatus = parent.workOrderStatus;
       }
       parent.subRows = generateNestedData(data.material, parent);
-      if (parent.subRows?.filter((e) => e.type === MATERIAL_TYPE.service)?.every((e) => e.status === WORKORDER_SERVICE_STATUS.pending) &&
+      if (
+        parent.subRows?.filter((e) => e.type === MATERIAL_TYPE.service)?.every((e) => e.status === WORKORDER_SERVICE_STATUS.pending) &&
         ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(parent?.workOrder?.status)
       ) {
         parent.canAutoCompleteWorkOrder = true;
@@ -1137,7 +1144,7 @@ const WorkOrder = ({
             }}
             disabled={
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
+              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
                 ? false
                 : true
             }
@@ -1145,6 +1152,13 @@ const WorkOrder = ({
             Auto Complete Work Order(s)
           </MenuItem>
         )}
+        <MenuItem
+          onClick={() => {
+            setShowDrawingDialog({ open: true, workOrder: selectedRecords[0]?.workOrder?._id });
+          }}
+        >
+          Upload Drawing
+        </MenuItem>
         {!resourcePolicy?.hideCompleteSkipRevertService && (
           <MenuItem
             onClick={() => {
@@ -1169,8 +1183,8 @@ const WorkOrder = ({
           <MenuItem
             disabled={
               selectedRecords?.length &&
-                selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
-                !isWorkOrderCompleted(selectedRecords)
+              selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
+              !isWorkOrderCompleted(selectedRecords)
                 ? false
                 : true
             }
@@ -1348,12 +1362,13 @@ const WorkOrder = ({
             <ConfirmationDialog
               okBtnLoading={isSubmitting}
               open={showServiceActionConfirmBox.open}
-              message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-                ? 'complete'
-                : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                  ? 'skip'
-                  : 'revert'
-                } this Service(s)`}
+              message={`Are you sure you want to ${
+                showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+                  ? 'complete'
+                  : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                    ? 'skip'
+                    : 'revert'
+              } this Service(s)`}
               onClose={() => {
                 setShowServiceActionConfirmBox({ open: false, action: '' });
               }}
@@ -1371,9 +1386,9 @@ const WorkOrder = ({
               onOk={() => {
                 const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.available);
                 if (statusPolicy) {
-                  setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy })
+                  setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy });
                 } else {
-                  handleAutoComplete()
+                  handleAutoComplete();
                 }
               }}
             />
@@ -1386,7 +1401,7 @@ const WorkOrder = ({
               setAssetsData={null}
               onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
               onSuccess={(data) => {
-                handleAutoComplete(data)
+                handleAutoComplete(data);
               }}
             />
           )}
@@ -1411,12 +1426,13 @@ const WorkOrder = ({
                     return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork, parentId: d.workOrder._id };
                   }) || []
               }
-              title={`Arrange Services (${selectedRecords
-                ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
-                ?.map((d) => {
-                  return d.serializedAssetDetail.assetNumber;
-                })[0]
-                })`}
+              title={`Arrange Services (${
+                selectedRecords
+                  ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
+                  ?.map((d) => {
+                    return d.serializedAssetDetail.assetNumber;
+                  })[0]
+              })`}
               handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
               handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}
               loading={isSubmitting}
@@ -1463,6 +1479,14 @@ const WorkOrder = ({
                 }
               }}
               okBtnLoading={isSubmitting}
+            />
+          )}
+          {showDrawingDialog.open && (
+            <DiagramDialog
+              referenceId={showDrawingDialog.workOrder}
+              handleClose={() => {
+                setShowDrawingDialog({ open: false, workOrder: null });
+              }}
             />
           )}
         </Grid>
