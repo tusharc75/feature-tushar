@@ -101,6 +101,12 @@ export const resourcePolicy = [
             type: 'multiselect'
           },
           {
+            fieldName: 'products',
+            fieldLabel: 'Products',
+            type: 'multiselect',
+            lookupResource: sidebarResource.product
+          },
+          {
             fieldName: 'sumDecimalField',
             fieldLabel: 'Sum(Decimal Field)',
             type: 'checkBox',
