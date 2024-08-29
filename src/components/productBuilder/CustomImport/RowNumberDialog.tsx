@@ -1,24 +1,29 @@
 import { Box, Button, Dialog, Grid, IconButton, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { FieldArray, Form, Formik } from 'formik';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import { read, utils } from 'xlsx';
+import { read } from 'xlsx';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
+import axiosInstance from 'src/axios/axiosInstance';
+import { RiDeleteBin6Fill } from 'react-icons/ri';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const RowNumberDialog = ({ handleClose, onSuccess, file }) => {
+const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
+  const toastConfig = useContext(CustomToastContext);
+
   const [initialValues, setInitialValues] = useState({ cell: [] });
   const [sheetNames, setSheetNames] = useState([]);
-
-  const handleSave = (values) => {
-    onSuccess(values?.cell);
-  };
+  const [excelMappingData, setExcelMappingData] = useState([]);
+  const [selectedView, setSelectedView] = useState(null);
+  const [confirmationDelete, setConfirmationDelete] = useState({ open: false, data: null });
 
   useEffect(() => {
     if (file) {
@@ -34,6 +39,10 @@ const RowNumberDialog = ({ handleClose, onSuccess, file }) => {
     }
   }, [file]);
 
+  useEffect(() => {
+    fetchExcelMappingView();
+  }, []);
+
   const addRemove = (values, type, index) => {
     let data = values?.cell || [];
     if (type === 'add') {
@@ -47,6 +56,45 @@ const RowNumberDialog = ({ handleClose, onSuccess, file }) => {
       data.splice(index, 1);
     }
     setInitialValues({ cell: [...data] });
+  };
+
+  const fetchExcelMappingView = () => {
+    axiosInstance()
+      .get(`/excel-mapping?resource=${resource}`)
+      .then(({ data: { data } }) => {
+        setExcelMappingData(data);
+      })
+      .catch((error) => {});
+  };
+
+  const deleteExcelMappingView = () => {
+    axiosInstance()
+      .put(`/excel-mapping/remove`, { ids: confirmationDelete.data?.map((d) => d?._id) })
+      .then(({ data }) => {
+        fetchExcelMappingView();
+        setConfirmationDelete({ open: false, data: null });
+        setSelectedView(null);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
+
+  useEffect(() => {
+    let cell = [{ sheetName: '', startRowCell: '', endRowCell: '', headerRow: '1' }];
+    if (selectedView) {
+      cell = selectedView?.sheet;
+    }
+    setInitialValues({ cell: cell });
+  }, [selectedView]);
+
+  const handleSave = (values) => {
+    onSuccess(values?.cell, selectedView);
   };
 
   return (
@@ -70,6 +118,40 @@ const RowNumberDialog = ({ handleClose, onSuccess, file }) => {
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box>
+                  <Box mb={2} width={350}>
+                    <Autocomplete
+                      fullWidth
+                      size="small"
+                      options={excelMappingData}
+                      getOptionLabel={(option) => option?.name || ''}
+                      getOptionSelected={(option: any, val) => option?._id === val}
+                      value={selectedView}
+                      onChange={(event: any, newValue: any) => {
+                        setSelectedView(newValue ? newValue : null);
+                      }}
+                      renderOption={(option) => (
+                        <Box display={'flex'} alignItems={'center'} justifyContent={'space-between'} width={'100%'}>
+                          <span style={{ width: 'calc(100% - 71px)' }}>{option?.name}</span>
+                          <Box>
+                            <HtmlTooltip title={'Delete'} placement="top" arrow enterTouchDelay={0}>
+                              <IconButton
+                                size="small"
+                                onClick={() => {
+                                  setConfirmationDelete({ open: true, data: [option] });
+                                }}
+                              >
+                                <RiDeleteBin6Fill />
+                              </IconButton>
+                            </HtmlTooltip>
+                          </Box>
+                        </Box>
+                      )}
+                      id="select-view"
+                      renderInput={(params) => (
+                        <TextField {...params} margin="dense" size={'small'} fullWidth label="Select a View" variant="outlined" />
+                      )}
+                    />
+                  </Box>
                   <FieldArray
                     name="cell"
                     render={(arrayHelpers) =>
@@ -199,6 +281,14 @@ const RowNumberDialog = ({ handleClose, onSuccess, file }) => {
                 Submit
               </Button>
             </CustomDialogFooter>
+            {confirmationDelete.open && (
+              <ConfirmationDialog
+                open={true}
+                message={`Are you sure you want to delete ${confirmationDelete?.data[0]?.name} ?`}
+                onClose={() => setConfirmationDelete({ open: false, data: null })}
+                onOk={deleteExcelMappingView}
+              />
+            )}
           </>
         )}
       </Formik>
