@@ -114,7 +114,7 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
             Cancel
           </Button>
           <CustomButton onClick={handleSave} variant="contained" color="primary" disabled={!rows?.every((r) => r[0])}>
-            Save
+            Submit
           </CustomButton>
         </CustomDialogFooter>
       </>
