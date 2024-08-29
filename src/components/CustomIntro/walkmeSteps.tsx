@@ -1,7 +1,7 @@
 import { generateFormFieldSteps, StepDefination, WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
 
-export const createJobsFlow = (fields: any, page: string): WalkmeData => {
+export const createResourceFlow = (fields: any, page: string): WalkmeData => {
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
   const data: WalkmeData = {

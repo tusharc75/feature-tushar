@@ -13,14 +13,14 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageServiceMaster from './ManageServiceMaster';
 import FieldDialog from './Steps/FieldDialog';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
-import { createJobsFlow } from 'src/components/CustomIntro/walkmeSteps';
+import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
 const ServiceMaster = () => {
   const renderedFrom = camelCase(routes?.serviceMaster.title);
@@ -55,7 +55,7 @@ const ServiceMaster = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
     data = response?.data?.data;
-    setWalkmeData([createJobsFlow(data, "serviceMaster")]);
+    setWalkmeData([createResourceFlow(data, ACTIVITY_RESOURCE.serviceMaster)]);
     let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
