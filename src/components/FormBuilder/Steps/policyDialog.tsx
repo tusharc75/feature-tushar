@@ -29,11 +29,12 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
     setInitialValues({
       data: defaultPolicy.policy.map((e) => {
         return {
+          ...e,
           fieldName: e.fieldName,
           fieldLabel: e.fieldLabel,
           type: e.type,
           data: currentPolicy && currentPolicy?.hasOwnProperty(e.fieldName) ? currentPolicy[e.fieldName] : e.defaultValue,
-          fields: e?.fields || []
+          fields: e?.fields || [],
         };
       })
     });
@@ -193,8 +194,11 @@ export default PolicyDialog;
 const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource, setFieldValue, fields, loading }) => {
 
   if (type === 'checkBox') {
-    return <CheckBoxField data={data} onChange={onChange} />;
-  } else if (type === 'multipleFields') {
+    return <CheckBoxField
+      data={data}
+      onChange={onChange} />;
+  }
+  else if (type === 'multipleFields') {
     return (
       <MultipleFormFields
         idx={idx}
@@ -208,7 +212,6 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
       />
     );
   } else if (type === 'multiSelect') {
-
     const options = fields?.filter((ele) => !ele.fieldData?.primaryField)?.map((e) => {
       return {
         optionLabel: e?.fieldData?.fieldLabel,
@@ -216,7 +219,6 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
         order: e?.fieldData?.order
       };
     })
-
     return (
       <>
         {!loading ? (
@@ -243,6 +245,41 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
           </Box>
         )}
       </>
+    )
+  }
+  else if (type === 'dropDown') {
+    let options = []
+    if (data?.fieldOption) {
+      options = fields?.find((e) => e?.fieldData?.fieldName === data?.fieldOption)?.fieldData?.option || [];
+    }
+    return (
+      <Grid container spacing={2}>
+        <Grid item lg={6} md={6} sm={6} xs={12}>
+          <Autocomplete
+            fullWidth
+            size="small"
+            options={options}
+            getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+            getOptionSelected={(option: any, val) => {
+              return option?.optionValue === val?.optionValue;
+            }}
+            value={options?.find((e) => e.optionValue === data?.data) || {}}
+            onChange={(e, val) => {
+              onChange(null, val?.optionValue || '')
+            }}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                margin="dense"
+                label={data?.fieldLabel}
+                name={data?.fieldName}
+                variant="outlined"
+                size="small"
+              />
+            )}
+          />
+        </Grid>
+      </Grid>
     )
   }
   return null;
@@ -291,11 +328,11 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   const [statusOptions, setStatusOptions] = useState([]);
   const [initialData, setInitialData] = useState({ fieldsData: [...Data?.data], fields: Data?.fields });
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchResourceFields();
-  },[])
+  }, [])
 
-  const fetchResourceFields = async ()=>{
+  const fetchResourceFields = async () => {
     const updatedFields = [...Data.fields];
     const lookupResources = updatedFields.reduce((acc, ele) => {
       if (ele?.lookupResource) {
@@ -306,12 +343,12 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
     const lookupString = lookupResources?.join(',');
     const options = await fetchResourceOptions(lookupString);
     for (const ele of updatedFields) {
-      if(ele?.lookupResource){
+      if (ele?.lookupResource) {
         ele.option = options[ele.lookupResource];
-       }
-     }
-      setInitialData((prevState)=> ({...prevState, fields: updatedFields}) );
+      }
     }
+    setInitialData((prevState) => ({ ...prevState, fields: updatedFields }));
+  }
 
   useEffect(() => {
     let fieldsData = [...fields];
@@ -346,7 +383,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                 onClick={() => {
                   const data = [...initialData?.fieldsData];
                   data.push({ status: '', fields: [] });
-                  setInitialData((prevState)=> ({...prevState, fieldsData: [...data] }) );
+                  setInitialData((prevState) => ({ ...prevState, fieldsData: [...data] }));
                   onChange(null, data);
                 }}
               >
@@ -355,46 +392,45 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
             </HtmlTooltip>
           </div>
           {initialData?.fieldsData?.map((value, index) => (
-          <div className="flex items-center justify-between gap-1 p-2 border border-[var(--common-border-color)] mb-4 mt-4" key={index}>
-            <div className="grid md:grid-cols-3 sm:grid-cols-1 gap-2 w-[94%]">
-              {initialData?.fields?.map((field) => (
-                field?.type === 'checkBox' ?
-                  <FormControlLabel
-                    control={<Checkbox name={field.fieldName} checked={value[field.fieldName]}
-                      onChange={(e) => {
-                        const updatedVal = e.target.checked;
+            <div className="flex items-center justify-between gap-1 p-2 border border-[var(--common-border-color)] mb-4 mt-4" key={index}>
+              <div className="grid md:grid-cols-3 sm:grid-cols-1 gap-2 w-[94%]">
+                {initialData?.fields?.map((field) => (
+                  field?.type === 'checkBox' ?
+                    <FormControlLabel
+                      control={<Checkbox name={field.fieldName} checked={value[field.fieldName]}
+                        onChange={(e) => {
+                          const updatedVal = e.target.checked;
+                          setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
+                          let updatedData = [...initialData?.fieldsData];
+                          updatedData[index][field.fieldName] = updatedVal;
+                          setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
+                          onChange(null, updatedData);
+                        }}
+                      />} label={field?.fieldLabel} />
+                    : <DropDownField
+                      key={field.fieldName}
+                      options={field?.lookupResource ? field.option : field?.fieldName === 'status' ? getStatusOptions(initialData?.fieldsData) : fieldOptions}
+                      error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
+                      touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
+                      onChange={(e, val) => {
+                        const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
                         setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
                         let updatedData = [...initialData?.fieldsData];
                         updatedData[index][field.fieldName] = updatedVal;
-                        setInitialData((prevState)=> ({...prevState, fieldsData: updatedData }) );
+                        setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                         onChange(null, updatedData);
                       }}
-                    />} label={field?.fieldLabel} />
-                  :
-                  <DropDownField
-                    key={field.fieldName}
-                    options={field?.lookupResource ? field.option : field?.fieldName === 'status' ? getStatusOptions(initialData?.fieldsData) : fieldOptions}
-                    error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
-                    touched={touched?.data && touched.data[idx].data[index][field.fieldName]}
-                    onChange={(e, val) => {
-                      const updatedVal = isArray(val) ? val?.map((ele) => ele.optionValue) : val?.optionValue;
-                      setFieldValue(`data.${idx}.data.${index}.${field.fieldName}`, updatedVal);
-                      let updatedData = [...initialData?.fieldsData];
-                      updatedData[index][field.fieldName] = updatedVal;
-                      setInitialData((prevState)=> ({...prevState, fieldsData: updatedData }) );
-                      onChange(null, updatedData);
-                    }}
-                    value={
-                      field?.type === 'multiselect'
-                        ? field?.lookupResource ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue)) : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
-                        : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
-                    }
-                    multiple={field?.type === 'multiselect'}
-                    fieldLabel={field?.fieldLabel}
-                    fieldName={field?.fieldLabel}
-                  />
-              ))}
-              </div>       
+                      value={
+                        field?.type === 'multiselect'
+                          ? field?.lookupResource ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue)) : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
+                          : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
+                      }
+                      multiple={field?.type === 'multiselect'}
+                      fieldLabel={field?.fieldLabel}
+                      fieldName={field?.fieldLabel}
+                    />
+                ))}
+              </div>
               <HtmlTooltip title='Remove'>
                 <IconButton
                   size="small"
@@ -403,7 +439,7 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                   onClick={() => {
                     const updatedData = [...initialData.fieldsData];
                     updatedData.splice(index, 1);
-                    setInitialData((prevState)=> ({...prevState, fieldsData: updatedData }) );
+                    setInitialData((prevState) => ({ ...prevState, fieldsData: updatedData }));
                     onChange(null, updatedData);
                   }}
                 >
@@ -422,9 +458,9 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
   );
 };
 
-const fetchResourceOptions=  async (resources)=> {
+const fetchResourceOptions = async (resources) => {
   const {
     data: { data: lookupResourceOptions }
   } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${resources}`);
- return lookupResourceOptions
+  return lookupResourceOptions
 }
