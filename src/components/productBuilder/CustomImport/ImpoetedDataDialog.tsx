@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, makeStyles, TextField } from '@material-ui/core';
+import { Box, Button, Dialog, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -6,28 +6,13 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
 
-const useStyles = makeStyles((theme) => ({
-  table: {
-    borderCollapse: 'collapse',
-    width: '100%'
-  },
-  th: {
-    border: '1px solid #dddddd',
-    textAlign: 'left',
-    padding: '10px',
-    minWidth: '220px'
-  },
-  thp: {
-    padding: '0px 10px',
-    minWidth: '350px'
-  }
-}));
+const cellClassName = 'w-[220px] max-w-[220px] p-[10px] text-left [border:1px_solid_var(--common-border-color)]';
+const indexStickyClassName = 'sticky sm:left-0 z-10 w-[var(--index-col-size)] bg-[var(--dark-primary,white)]';
+const descriptionStickyClassName = 'sticky sm:left-[var(--index-col-size)] z-10 bg-[var(--dark-primary,white)]';
 
 const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplate, onSuccess }) => {
-  const classes = useStyles();
-
   const [rows, setRows] = useState([]);
   const [products, setProducts] = useState([]);
 
@@ -57,15 +42,20 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
       <>
         <CustomDialogHeader title="Imported Data" onClose={handleClose} />
         <CustomDialogContent>
-          <Box>
-            <table className={classes.table}>
+          <Box className="max-h-[calc(100vh-140px)] min-h-[600px] overflow-auto [border:1px_solid_var(--common-border-color)]">
+            <table className={'w-full border-separate border-spacing-0 [--index-col-size:100px]'}>
               <tr>
-                <th className={classes.th} style={{ minWidth: '100px' }}>
-                  Index
-                </th>
+                <th className={cn(cellClassName, ' top-0 min-w-0 max-w-[var(--index-col-size)]', indexStickyClassName)}>Index</th>
                 {data[0]?.map((d) => {
                   return (
-                    <th title={d} className={`${classes.th} text-truncate`}>
+                    <th
+                      title={d}
+                      className={cn(
+                        cellClassName,
+                        `text-truncate sticky top-0 bg-[var(--dark-primary,white)]`,
+                        d === 'PRODUCT DESCRIPTION' && descriptionStickyClassName
+                      )}
+                    >
                       {d} {d === 'PRODUCT DESCRIPTION' && <span style={{ color: '#dc3545' }}>*</span>}
                     </th>
                   );
@@ -73,12 +63,12 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
               </tr>
               {rows?.map((row, index) => (
                 <tr key={index}>
-                  <td className={classes.th} style={{ minWidth: '100px' }}>
+                  <td className={cn(cellClassName, indexStickyClassName)} style={{ minWidth: '100px' }}>
                     {index + 1}
                   </td>
                   {row?.map((r, i) => {
                     return i === 0 ? (
-                      <td className={`${classes.th} ${classes.thp}`}>
+                      <td className={cn(cellClassName, 'min-w-[350px] p-[0_10px]', descriptionStickyClassName)}>
                         <Autocomplete
                           id="custom-import-product-description"
                           size="small"
@@ -99,7 +89,7 @@ const ImportedDataDialog = ({ handleClose, data, productCategory, productTemplat
                         />
                       </td>
                     ) : (
-                      <td title={r} className={`${classes.th} text-truncate`}>
+                      <td title={r} className={`${cellClassName} text-truncate`}>
                         {r}
                       </td>
                     );
