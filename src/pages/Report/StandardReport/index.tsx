@@ -674,15 +674,15 @@ const Report = () => {
     return `?${filterQuery}`;
   };
 
-  const exportData = (exportType = 'excel') => {
+  const exportData = (exportType = 'excel', processType = 'excel') => {
 
     toastConfig.setToastConfig({
       open: true,
-      message: `Please wait ${exportType === 'sendMail' ? '' : 'exporting data'}`,
+      message: `Please wait ${processType==='sendMail' ? '' : 'exporting data'}`,
       type: 'info'
     });
 
-    setIsProcessing(exportType)
+    setIsProcessing(processType)
 
     let filterQuery = getQueryString(true);
 
@@ -693,17 +693,17 @@ const Report = () => {
     else {
       api = `/report/${type}/export`;
     }
-
+    const extension = exportType==='excel' ? 'xlsx' : 'pdf'
+    const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     axiosInstance().get(`${api}${filterQuery}`, {
       responseType: 'arraybuffer'
     }).then((res) => {
       const fileName = res.headers['content-disposition'].split('filename=')[1];
-      if (exportType === 'sendMail') {
-        const blobData = new Blob([res.data], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-        generateBase64forFile(blobData, fileName, 'xlsx');
-        setIsProcessing(null);
+      if (processType === 'sendMail') {
+        const blobData = new Blob([res.data], { type: contentType });
+        generateBase64forFile(blobData, fileName, extension);
       }
-      else if (exportType === 'pdf') {
+      else if (processType === 'pdf') {
         const url = window.URL.createObjectURL(new Blob([res.data]));
         const link = document.createElement('a');
         link.href = url;
@@ -746,9 +746,15 @@ const Report = () => {
       setEmailAttachments((prevState) => {
         return [...prevState, attachments];
       });
-      setIsSendMail(true);
     };
   };
+
+useEffect(()=> {
+  if(emailAttachments?.length>1){
+    setIsProcessing(null);
+    setIsSendMail(true);
+  }
+},[emailAttachments])
 
   useEffect(() => {
     if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) && footerData) {
@@ -800,7 +806,10 @@ const Report = () => {
                       variant="outlined"
                       size="small"
                       disabled={isProcessing === 'sendMail'}
-                      onClick={() => exportData('sendMail')}
+                      onClick={ () =>{ 
+                         exportData('excel', 'sendMail');
+                         exportData('pdf', 'sendMail');
+                      }}
                       startIcon={isProcessing === 'sendMail' && <CircularProgress color="inherit" size={18} />}
                       className={`btn-outline-v-1`}>
                       Send Mail
@@ -811,7 +820,7 @@ const Report = () => {
                       variant="outlined"
                       size="small"
                       disabled={isProcessing === 'pdf'}
-                      onClick={() => exportData('pdf')}
+                      onClick={() => exportData('pdf', 'pdf')}
                       startIcon={isProcessing === 'pdf' && <CircularProgress color="inherit" size={18} />}
 
                       className={`btn-outline-v-1`}>
@@ -821,7 +830,7 @@ const Report = () => {
                     variant="outlined"
                     size="small"
                     disabled={isProcessing === 'excel'}
-                    onClick={() => exportData('excel')}
+                    onClick={() => exportData('excel', 'excel')}
                     startIcon={isProcessing === 'excel' && <CircularProgress color="inherit" size={18} />}
                     className={`btn-outline-v-1`}>
                     Export To Excel
