@@ -88,7 +88,7 @@ export const resourcePolicy = [
           {
             fieldName: 'status',
             fieldLabel: 'Status',
-            type: 'dropdown'
+            type: 'dropDown'
           },
           {
             fieldName: 'fields',
@@ -183,7 +183,13 @@ export const resourcePolicy = [
         fieldLabel: 'Rental Invoice Fields',
         type: 'multiSelect',
         defaultValue: []
-      }
+      },
+      {
+        fieldName: 'rentalInvoiceStatus',
+        fieldLabel: 'Rental Invoice Status',
+        type: 'dropDown',
+        fieldOption: 'status'
+      },
     ]
   },
 ];
