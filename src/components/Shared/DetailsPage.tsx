@@ -192,7 +192,7 @@ const Details = (props: DetailProps) => {
     } else if (input.type === 'dateTime') {
       text = values[input.fieldName] ? displayDateTime(values[input.fieldName]) : '-';
     } else if (input.type === 'lookUpDisplay') {
-      text = values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
+      text = isArray(values[input.fieldName]) ? values[input.fieldName]?.map((e) => e?.optionLabel)?.toString() : values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }
