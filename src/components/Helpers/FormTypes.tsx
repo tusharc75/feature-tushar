@@ -821,7 +821,7 @@ const FormTypes = (props) => {
   };
 
   const getLookUpDisplayValue = (fieldData, values) => {
-    var label = '';
+    var label: any = '';
     const lookUpField = fields?.find((e) => e.fieldName === fieldData?.lookUpField);
     if (lookUpField && values[lookUpField?.fieldName]) {
       const option = lookUpField?.option?.find((e) => e.optionValue === values[lookUpField?.fieldName]);
@@ -829,7 +829,7 @@ const FormTypes = (props) => {
         label = option[fieldData?.lookUpFieldDisplay] || '';
       }
     }
-    return label;
+    return label?.optionLabel || label;
   };
 
   const isVisible = () => {

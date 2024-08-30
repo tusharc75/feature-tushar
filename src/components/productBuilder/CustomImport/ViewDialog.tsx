@@ -69,7 +69,7 @@ const ViewDialog = ({ onClose, resource, extraData = null, selectedView = null, 
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
               <CustomDialogHeader
-                title={selectedView ? 'Edit View' : 'Create View'}
+                title={selectedView ? 'Edit excel mapping' : 'Create excel mapping'}
                 onClose={onClose}
                 showRequiredLabel={true}
                 showManimizeMaximize={true}

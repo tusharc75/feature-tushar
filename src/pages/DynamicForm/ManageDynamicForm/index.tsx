@@ -14,6 +14,7 @@ import { useHistory } from 'react-router-dom';
 import { CustomDialogTransition, GenerateResourceLineNumber, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 const ManageDynamicForm = ({
   resource,
@@ -28,6 +29,10 @@ const ManageDynamicForm = ({
 }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
+  const {
+    state: { user }
+  }: any = useData();
+
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -65,9 +70,17 @@ const ManageDynamicForm = ({
                 });
               });
             }
+            let fields = fieldsDataForUpdate;
+            if (isClone) {
+              fields = fieldsDataForCreate;
+              const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField);
+              if (primaryField) {
+                data[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
+              }
+            }
             setInitialData({
-              fields: isClone ? fieldsDataForCreate : fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, isClone ? fieldsDataForCreate : fieldsDataForUpdate)
+              fields: fields,
+              values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fields)
             });
           })
           .catch((error) => {
