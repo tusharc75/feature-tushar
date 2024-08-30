@@ -2652,6 +2652,15 @@ export const REPORT_LIST = [
     type: 'iotUnitDowntimeReport'
   },
   {
+    title: 'Pad Job Volume Report',
+    permission: 'iotChart',
+    key: 'standardReport',
+    type: 'rentalVolumeReport',
+    defaultColumn: true,
+    isExportPdf: true,
+    isSendMail: true
+  },
+  {
     title: 'IOT Data Points',
     permission: 'iotChart',
     key: 'standardReport',
