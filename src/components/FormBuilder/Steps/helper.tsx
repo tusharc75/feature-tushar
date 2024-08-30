@@ -192,4 +192,15 @@ export const resourcePolicy = [
       },
     ]
   },
+  {
+    resource: sidebarResource.opportunity,
+    policy: [
+      {
+        fieldName: 'outcomeFields',
+        fieldLabel: 'Outcome Fields',
+        type: 'multiSelect',
+        defaultValue: []
+      },
+    ]
+  },
 ];
