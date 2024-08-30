@@ -652,7 +652,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   }}
                   aria-controls="add-view-menu"
                 >
-                  {selectedView ? 'Edit View' : 'Add View'}
+                  {selectedView ? 'Edit excel mapping' : 'Add excel mapping'}
                 </Button>
               </div>
             </div>
