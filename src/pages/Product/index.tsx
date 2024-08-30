@@ -25,11 +25,14 @@ import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
 import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
 const ignoreField = ['qty', 'priceTemplate'];
 
 const Product = () => {
   const renderedFrom = camelCase(routes?.product.title);
+  const { setWalkmeData } = useSetWalkmeData();
   const { state, dispatch } = useTableReducer();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -100,6 +103,7 @@ const Product = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.product}&view=true`)
       .then(({ data: { data } }) => {
+        setWalkmeData([createResourceFlow(sidebarResource.product, data)]);
         if (data.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
           setIsProductTemplate(false);
         }
