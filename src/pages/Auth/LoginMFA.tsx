@@ -184,7 +184,7 @@ const LoginMFA = () => {
                     An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and be
                     redirected.
                   </p>
-                  <div className="mb-6 px-5">
+                  <div className="mb-6 md:px-5">
                     <OtpInput
                       validateChar={(character, index) => /^[0-9]$/.test(character)}
                       value={otp}
