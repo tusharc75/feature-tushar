@@ -82,7 +82,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       if (manualEntryIndex !== -1) {
         stepData.push(generateEditManualEntry(false, manualEntryIndex));
       }
-      if (walkmeInstance && walkmeInstance.type === 'flow' &&  !isStepDataSet.current) {
+      if (walkmeInstance && walkmeInstance.type === 'flow' && !isStepDataSet.current) {
         isStepDataSet.current = true;
         let steps = [];
         if (serviceIndex !== -1 && !dataRows[serviceIndex]?.isValid) {
@@ -100,11 +100,11 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
 
   const fetchFields = async () => {
     let data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
+    setAllFields(JSON.parse(JSON.stringify(data)));
     data = data?.filter((f) => f?.isRead);
     let costField: any = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketCost, fieldTicketData?.currency, true, isOffline);
     costField = costField?.filter((f) => f?.isRead);
     setCostFields(costField);
-    setAllFields(JSON.parse(JSON.stringify(data)));
     const newColumns = generateColumns(renderedFrom, data, null, false, fieldTicketData?.currency);
     let column: any = [
       {

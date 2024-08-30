@@ -9,13 +9,12 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CHILD_RESOURCE, CustomDialogTransition, fieldTicket, getObjKeys, setFieldsInAscendingOrder, yupSchema } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldTicket, getObjKeys, setFieldsInAscendingOrder } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { FaDiceOne } from 'react-icons/fa';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import { array, object, string } from 'yup';
-import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
-import { generateFormFieldSteps, generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const submitValidation = object().shape({
   signature: string(),
@@ -164,8 +163,8 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
                                       imageOrFileUploadCompletePercentage={
                                         ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                           ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          }
                                           : null
                                       }
                                       fields={initialData?.fields}
