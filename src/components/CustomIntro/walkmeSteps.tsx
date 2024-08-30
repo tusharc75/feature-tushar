@@ -1,12 +1,14 @@
-import { generateFormFieldSteps, StepDefination, WalkmeData } from 'src/components/CustomIntro';
+import { camelCase } from 'lodash';
+import { generateFormFieldSteps, WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
 
-export const createResourceFlow = (fields: any, page: string): WalkmeData => {
+export const createResourceFlow = (resource: string, fields: any): WalkmeData => {
+
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
   const data: WalkmeData = {
-    name: `Add ${routes[page].title}`,
-    url: `${routes[page].path}`,
+    name: `Add ${routes?.[camelCase(resource)]?.title}`,
+    url: `${routes?.[camelCase(resource)]?.path}`,
     type: 'flow',
     steps: [
       {
