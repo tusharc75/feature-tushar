@@ -14,14 +14,17 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, packages, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, packages, prepareDataForGrid, sidebarResource, ACTIVITY_RESOURCE } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManagePackageDialog from './ManagePackageDialog';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
 const PackageList = () => {
   const renderedFrom = camelCase(routes?.packages.title);
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -55,6 +58,7 @@ const PackageList = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.packages}&entity=${selectedEntity}&view=true`);
     data = response?.data?.data;
+    setWalkmeData([createResourceFlow(data, ACTIVITY_RESOURCE.packages)]);
     const newColumns = generateColumns(renderedFrom, data, routes.packagesDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
