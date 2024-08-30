@@ -5,7 +5,7 @@ import { FaUserPlus } from 'react-icons/fa6';
 import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { gridSize, setFieldsInAscendingOrder } from '../../constants/helpers';
-import FormTypes, { isSectionVisible } from './FormTypes';
+import FormTypes, { isFieldVisible, isSectionVisible } from './FormTypes';
 
 const InputField = (props) => {
   const {
@@ -59,7 +59,7 @@ const InputField = (props) => {
                 <Box marginY={2}>
                   <Grid spacing={3} container>
                     {form.sectionFields.map((field) =>
-                      field.type === 'converter' || field.type === 'currencyAmount' ? (
+                      field?.type === 'converter' || field?.type === 'currencyAmount' || field?.isConverter ? (
                         <FormTypes
                           {...rest}
                           {...field}
@@ -78,53 +78,7 @@ const InputField = (props) => {
                           fieldData={field}
                           disabled={Boolean(referenceId) && field.disableOnEdit}
                         />
-                      ) : field.fieldName === 'day' ? (
-                        values.recurrence === 'Monthly' && (
-                          <Grid item xs={12} sm={6} md={6}>
-                            <FormTypes
-                              {...rest}
-                              {...field}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={setFieldValue}
-                              required={field.required}
-                              isTooltip={field.isTooltip}
-                              tooltipMessage={field.tooltipMessage}
-                              fields={fieldsData}
-                              fieldData={field}
-                              disabled={Boolean(referenceId) && field.disableOnEdit}
-                            />
-                          </Grid>
-                        )
-                      ) : field.fieldName === 'dayName' ? (
-                        values.recurrence === 'Weekly' && (
-                          <Grid item xs={12} sm={6} md={6}>
-                            <FormTypes
-                              {...rest}
-                              {...field}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={setFieldValue}
-                              required={field.required}
-                              isTooltip={field.isTooltip}
-                              tooltipMessage={field.tooltipMessage}
-                              fields={fieldsData}
-                              fieldData={field}
-                              disabled={Boolean(referenceId) && field.disableOnEdit}
-                            />
-                          </Grid>
-                        )
-                      ) : (
+                      ) : isFieldVisible(field, fieldsData, values) ? (
                         <Grid
                           key={field.fieldName}
                           item
@@ -152,23 +106,23 @@ const InputField = (props) => {
                             onChange={
                               field.fieldName === 'currency'
                                 ? (e, val) => {
-                                    if (val && val.currencyCode) {
-                                      setFieldValue(field.fieldName, val.currencyCode);
-                                      setCurrencySymbol(val.symbolNative);
-                                    } else {
-                                      setFieldValue(field.fieldName, '');
-                                      setCurrencySymbol(null);
-                                    }
+                                  if (val && val.currencyCode) {
+                                    setFieldValue(field.fieldName, val.currencyCode);
+                                    setCurrencySymbol(val.symbolNative);
+                                  } else {
+                                    setFieldValue(field.fieldName, '');
+                                    setCurrencySymbol(null);
                                   }
+                                }
                                 : null
                             }
                             imageOrFileUploadCompletePercentage={
                               ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                 ? (completePercentage) => {
-                                    if (onImageUploadCompletePercentage) {
-                                      onImageUploadCompletePercentage(completePercentage);
-                                    }
+                                  if (onImageUploadCompletePercentage) {
+                                    onImageUploadCompletePercentage(completePercentage);
                                   }
+                                }
                                 : null
                             }
                             fields={fieldsData}
@@ -176,7 +130,7 @@ const InputField = (props) => {
                             disabled={Boolean(referenceId) && field.disableOnEdit}
                           />
                         </Grid>
-                      )
+                      ) : null
                     )}
                   </Grid>
                 </Box>
