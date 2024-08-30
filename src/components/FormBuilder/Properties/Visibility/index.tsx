@@ -17,7 +17,7 @@ const useStyles = makeStyles({
 });
 
 
-const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {  
+const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
   const classes = useStyles();
   const [open, setOpen] = useState({ open: false, group: null, data: null });
   const [anchorEl, setAnchorEl] = useState({});
@@ -37,7 +37,7 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
       setFieldValue('visibilityCondition', [
         {
           index: 0,
-          logic: LOGIC[0],
+          logic: LOGIC.AND,
           fields: []
         }
       ]);
@@ -102,7 +102,7 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
                   size="small"
                   color="primary"
                   classes={{ grouped: classes.group }}
-                  value={c?.logic || LOGIC[0]}
+                  value={c?.logic || LOGIC.AND}
                   exclusive
                   onChange={(e, val) => {
                     setFieldValue(
@@ -117,11 +117,11 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
                   }}
                   aria-label="logic"
                 >
-                  <ToggleButton size="small" value={LOGIC[0]}>
-                    {LOGIC[0]}
+                  <ToggleButton size="small" value={LOGIC.AND}>
+                    {LOGIC.AND}
                   </ToggleButton>
-                  <ToggleButton size="small" value={LOGIC[1]}>
-                    {LOGIC[1]}
+                  <ToggleButton size="small" value={LOGIC.OR}>
+                    {LOGIC.OR}
                   </ToggleButton>
                 </ToggleButtonGroup>
               </Box>
@@ -167,16 +167,15 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
                 alignItems={'center'}
                 mt={1}
               >
-                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${
-                  fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
+                <Typography variant="body2">{`${fields?.find((f) => f?.fieldName === _f?.fieldName)?.fieldLabel} is ${fields?.find((f) => f?.fieldName === _f?.fieldName)?.lookup || fields?.find((f) => f?.fieldName === _f?.fieldName)?.dataList
+                  ? data[_f?.fieldName]
                     ? data[_f?.fieldName]
-                      ? data[_f?.fieldName]
-                          ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
-                          ?.map((v) => v?.optionLabel)
-                          ?.join(', ')
-                      : ''
-                    : _f?.value
-                }`}</Typography>
+                      ?.filter((d) => _f?.value?.split(',').includes(d?.optionValue))
+                      ?.map((v) => v?.optionLabel)
+                      ?.join(', ')
+                    : ''
+                  : _f?.value
+                  }`}</Typography>
                 <Box>
                   <IconButton
                     aria-label="setting"
@@ -240,7 +239,7 @@ const Visibility = ({ values, setFieldValue, fields, fieldsToExclude }) => {
               ...values?.visibilityCondition,
               {
                 index: values?.visibilityCondition?.length,
-                logic: LOGIC[0],
+                logic: LOGIC.AND,
                 fields: []
               }
             ]);

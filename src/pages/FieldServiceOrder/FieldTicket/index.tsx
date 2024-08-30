@@ -16,6 +16,8 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import {
   FIELD_TICKET_STATUS,
   SERVICE_ORDER_STATUS,
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
   cloneResourceData,
   gridLoadingTimeout,
   prepareDataForGrid,
@@ -148,14 +150,10 @@ const FieldTicket = ({
       let rows = data?.map((u) => {
         let finalObject = prepareDataForGrid(u);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-        var isAllowedToEdit = [...(u.collaborator ?? []), u.owner].some((d) => d?.optionValue === user?.user?._id);
-        finalObject['allowedToEdit'] =
-          isAllowedToEdit && permissions?.fieldTicket?.isUpdate && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-        finalObject['canDelete'] =
-          u?.canDelete &&
-          permissions?.fieldTicket?.isDelete &&
-          u?.owner?.optionValue === user?.user?._id &&
-          ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, u)
+          && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && u?.canDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.fieldTicket, u.owner.optionValue)
         let res = {
           ...finalObject
         };

@@ -30,6 +30,7 @@ import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
 import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
+import { LOGIC } from 'src/components/FormBuilder/helper';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -1132,8 +1133,72 @@ export const removeEmptyKeys = (obj: object) => {
 export const yupSchema = (fields: any[], validEmail = true) => {
   const schema = {};
   fields.forEach((input) => {
+    let message = `${input.fieldLabel} is required`;
+
+    const fields: any = [];
+    let validation: any = null;
+    if (input?.visibilityCondition?.length > 0) {
+      input?.visibilityCondition?.forEach((condition) => {
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            fields.push({ ...field, index: condition?.index, logic: condition?.logic });
+          }
+        });
+      });
+
+      const parseValue = (value) => {
+        if (value?.toLowerCase() === 'yes') {
+          return true;
+        }
+        else if (value?.toLowerCase() === 'no') {
+          return false;
+        }
+        else {
+          value
+        }
+      }
+
+      validation = (...args) => {
+        let validate = false;
+        for (let i = 0; i < fields?.length;) {
+          const field = fields[i];
+          const condition = input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
+          if (condition?.logic === LOGIC.AND) {
+            if (condition?.fields?.every((f, j) => args[i + j] === parseValue(f?.value))) {
+              validate = true;
+            } else {
+              validate = false;
+            }
+          } else if (condition?.logic === LOGIC.OR) {
+            if (condition?.fields?.some((f, j) => args[i + j] === parseValue(f?.value))) {
+              validate = true;
+            } else {
+              validate = false;
+            }
+          }
+          if (!validate) {
+            break;
+          }
+          i = i + condition?.fields?.length;
+        }
+        return validate;
+      };
+    }
+
     if (input.type === 'singleLine') {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      schema[input.fieldName] = input.required
+        ? fields?.length && validation
+          ? string().when(
+            fields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
+          : string().required(message)
+        : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
@@ -1208,7 +1273,19 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'groupSignature') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
+      schema[input.fieldName] = input.required
+        ? fields?.length && validation
+          ? string().when(
+            fields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
+          : string().required(message)
+        : string();
     }
   });
 
@@ -1334,8 +1411,6 @@ export const convertDateTimToDate = (date) => {
   return newDate;
 };
 
-
-
 interface IPermission {
   [key: string]: {
     isCreate: boolean;
@@ -1406,12 +1481,10 @@ export const getPermissions = (user, selectedEntity = undefined): IPermission | 
         });
       }
 
-
       localStorage.setItem('routes', JSON.stringify(routesAndTitle));
       return permissions;
-    }
-    catch (e) {
-      console.log(e)
+    } catch (e) {
+      console.log(e);
     }
   }
 };
@@ -2941,7 +3014,7 @@ export const WORK_FLOW_STATUS = {
   open: 'Open',
   inProgress: 'In-Progress',
   completed: 'Completed'
-}
+};
 
 export const INVOICE_STATUS = {
   new: 'New',
@@ -3508,8 +3581,7 @@ export function debounceCallBack<T extends (...args: any[]) => void>(func: T, ti
 }
 export type DebounceCallBack = ReturnType<typeof debounceCallBack>;
 
-
 export const MFA_METHOD = {
-  emailOtp: "emailOtp",
-  totp: "totp"
-}
+  emailOtp: 'emailOtp',
+  totp: 'totp'
+};

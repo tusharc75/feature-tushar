@@ -281,6 +281,99 @@ export const checkCondition = (fields, fieldName, value, values) => {
   }
 };
 
+export const isSectionVisible = (section, fieldsData, values, fromDetailsPage = false) => {
+  let fieldData = section?.sectionFields?.find((field) => field?.sectionProperties?.visibilityCondition?.length > 0);
+  if (fromDetailsPage) {
+    const newData = section?.sectionFields?.find((field) => field?.fieldData?.sectionProperties?.visibilityCondition?.length > 0);
+    fieldData = newData ? newData.fieldData : undefined;
+  }
+  if (fieldData) {
+    let visible = false;
+    let show = true;
+    fieldData?.sectionProperties?.visibilityCondition?.forEach((condition, i) => {
+      if (condition?.logic === LOGIC.AND) {
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            if (!checkCondition(fieldsData, field?.fieldName, field?.value, values)) {
+              show = false;
+              return;
+            }
+          }
+        });
+      } else if (condition?.logic === LOGIC.OR) {
+        let count = 0;
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            if (checkCondition(fieldsData, field?.fieldName, field?.value, values)) {
+              return;
+            } else {
+              count = count + 1;
+            }
+          }
+        });
+
+        if (count === condition?.fields?.length) {
+          show = false;
+        }
+      }
+      if (!show) {
+        visible = false;
+        return;
+      }
+      if (i === fieldData?.sectionProperties?.visibilityCondition?.length - 1) {
+        visible = show;
+      }
+    });
+    return visible;
+  }
+  return true;
+};
+
+export const isFieldVisible = (fieldData, fields, values) => {
+  if (fieldData?.visibilityCondition?.length > 0) {
+    let visible = false;
+    let show = true;
+    fieldData?.visibilityCondition?.forEach((condition, i) => {
+      if (condition?.logic === LOGIC.AND) {
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            if (!checkCondition(fields, field?.fieldName, field?.value, values)) {
+              show = false;
+              return;
+            }
+          }
+        });
+      } else if (condition?.logic === LOGIC.OR) {
+        let count = 0;
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            if (checkCondition(fields, field?.fieldName, field?.value, values)) {
+              return;
+            } else {
+              count = count + 1;
+            }
+          }
+        });
+
+        if (count === condition?.fields?.length) {
+          show = false;
+        }
+      }
+
+      if (!show) {
+        visible = false;
+        return;
+      }
+
+      if (i === fieldData?.visibilityCondition?.length - 1) {
+        visible = show;
+      }
+    });
+    return visible;
+  }
+  return true;
+};
+
 const FormTypes = (props) => {
   const theme = useTheme();
   const tempProps = {
@@ -832,52 +925,7 @@ const FormTypes = (props) => {
     return label?.optionLabel || label;
   };
 
-  const isVisible = () => {
-    if (fieldData?.visibilityCondition?.length > 0) {
-      let visible = false;
-      let show = true;
-      fieldData?.visibilityCondition?.forEach((condition, i) => {
-        if (condition?.logic === LOGIC[0]) {
-          condition?.fields?.forEach((field) => {
-            if (field?.fieldName && field?.value) {
-              if (!checkCondition(fields, field?.fieldName, field?.value, values)) {
-                show = false;
-                return;
-              }
-            }
-          });
-        } else if (condition?.logic === LOGIC[1]) {
-          let count = 0;
-          condition?.fields?.forEach((field) => {
-            if (field?.fieldName && field?.value) {
-              if (checkCondition(fields, field?.fieldName, field?.value, values)) {
-                return;
-              } else {
-                count = count + 1;
-              }
-            }
-          });
-
-          if (count === condition?.fields?.length) {
-            show = false;
-          }
-        }
-
-        if (!show) {
-          visible = false;
-          return;
-        }
-
-        if (i === fieldData?.visibilityCondition?.length - 1) {
-          visible = show;
-        }
-      });
-      return visible;
-    }
-    return true;
-  };
-
-  return fieldData?.hiddenField ? null : !fieldData || isVisible() ? (
+  return fieldData?.hiddenField ? null : !fieldData || isFieldVisible(fieldData, fields, values) ? (
     type === 'singleLine' || (type === 'lookUpDisplay' && fromFilter) ? (
       <InfoLabel
         info={tooltipMessage}
