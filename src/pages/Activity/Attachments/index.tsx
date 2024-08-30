@@ -547,7 +547,7 @@ export default function Attachment() {
       )
       .catch((error) => {
         toastConfig.setToastConfig(error);
-        dispatch({ type: 'error', error: true });
+        // dispatch({ type: 'error', error: true });
       })
       .finally(() => {
         setTimeout(() => {
