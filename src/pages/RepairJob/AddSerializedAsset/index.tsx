@@ -132,14 +132,14 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
                   ) : (
                     <p className="text-truncate">{row.original.assetNumber}</p>
                   )}
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original._id}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                 </>
               ) : (
                 <NoDataCell />

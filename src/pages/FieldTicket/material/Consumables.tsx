@@ -102,12 +102,12 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
   useEffect(() => {
     fetchData();
-  }, [selectedServiceOption, tabValue]);
+  }, [selectedServiceOption, tabValue, services]);
 
   const fetchColumns = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
-    fields = fields?.filter((f) => f?.isRead);
     setAllFields(JSON.parse(JSON.stringify(fields)));
+    fields = fields?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
     const column: any = [
       {

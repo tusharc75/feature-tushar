@@ -90,8 +90,8 @@ const QuotationQtyDialog: FC<EditDialogProps> = ({
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     var data = await fetch_child_resource_fields_perm(CHILD_RESOURCE.quotationProduct, quotationData?.currency, true);
-    data = data?.filter((f) => f?.isRead);
     setAllFields(JSON.parse(JSON.stringify(data)));
+    data = data?.filter((f) => f?.isRead);
     if (isBulkedit) {
       let unitArray: any = [];
       let pricingMethodArray: any = [];
