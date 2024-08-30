@@ -325,6 +325,15 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const handleAdd = async (rows) => {
     setIsAdding(true);
     const material: any = [];
+    var taxCodeData: any = null;
+      if (invoiceData?.taxCode) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${invoiceData?.taxCode?.optionValue}&materialType=${addDialog.type}`);
+        if (data?.length) {
+          taxCodeData = data[0];
+        }
+      }
     if (addDialog.type === MATERIAL_TYPE.serializedAsset && addDialog.parentId) {
       rows?.forEach((e) => {
         material.push(e);
@@ -338,6 +347,10 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.parentId = addDialog.parentId;
         element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+        if (taxCodeData) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
         const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
       
           if (calValues && calValues['actualJobDuration']) {
