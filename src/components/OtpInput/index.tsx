@@ -247,7 +247,10 @@ const OtpInput = React.forwardRef((props: OtpInputProps, propRef: OtpInputProps[
             variant="outlined"
             value={character}
             inputRef={inputRef}
-            className={`MuiOtpInput-TextField MuiOtpInput-TextField-${index + 1} ${TextFieldClassName || ''}  [&_.MuiInputBase-input]:!p-[10px_0px] [&_.MuiInputBase-input]:text-center`}
+            className={cn(
+              `MuiOtpInput-TextField MuiOtpInput-TextField-${index + 1}  [&_.MuiInputBase-input]:!p-[10px_0px] [&_.MuiInputBase-input]:text-center`,
+              TextFieldClassName || ''
+            )}
             onPaste={(event) => {
               event.preventDefault();
               handleOneInputPaste(event);
