@@ -590,7 +590,7 @@ export default function ImportExportLinks({
         {isCustomImport && permission?.isUpdate && (
           <MenuItem
             onClick={() => {
-              setCustomImportDialog(true)
+              setCustomImportDialog(true);
               handleClose();
             }}
           >
@@ -644,14 +644,14 @@ export default function ImportExportLinks({
           api={api}
         />
       )}
-       {customImportDialog && (
+      {customImportDialog && (
         <CustomImport
           handleClose={() => {
             setCustomImportDialog(false);
           }}
           onSuccess={() => {
             setCustomImportDialog(false);
-            onSuccessCustomImport()
+            onSuccessCustomImport();
           }}
           refrenceId={refrenceId}
           currency={currency}

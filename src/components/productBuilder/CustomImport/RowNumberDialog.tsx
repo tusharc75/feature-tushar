@@ -148,7 +148,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                       )}
                       id="select-view"
                       renderInput={(params) => (
-                        <TextField {...params} margin="dense" size={'small'} fullWidth label="Select a View" variant="outlined" />
+                        <TextField {...params} margin="dense" size={'small'} fullWidth label="Select excel mapping" variant="outlined" />
                       )}
                     />
                   </Box>
