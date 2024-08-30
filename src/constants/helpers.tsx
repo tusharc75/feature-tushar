@@ -1163,13 +1163,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         for (let i = 0; i < fields?.length;) {
           const field = fields[i];
           const condition = input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
-          if (condition?.logic === LOGIC[0]) {
+          if (condition?.logic === LOGIC.AND) {
             if (condition?.fields?.every((f, j) => args[i + j] === parseValue(f?.value))) {
               validate = true;
             } else {
               validate = false;
             }
-          } else if (condition?.logic === LOGIC[1]) {
+          } else if (condition?.logic === LOGIC.OR) {
             if (condition?.fields?.some((f, j) => args[i + j] === parseValue(f?.value))) {
               validate = true;
             } else {

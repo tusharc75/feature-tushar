@@ -26,7 +26,7 @@ const InputField = (props) => {
       let visible = false;
       let show = true;
       fieldData?.sectionProperties?.visibilityCondition?.forEach((condition, i) => {
-        if (condition?.logic === LOGIC[0]) {
+        if (condition?.logic === LOGIC.AND) {
           condition?.fields?.forEach((field) => {
             if (field?.fieldName && field?.value) {
               if (!checkCondition(fieldsData, field?.fieldName, field?.value, values)) {
@@ -35,7 +35,7 @@ const InputField = (props) => {
               }
             }
           });
-        } else if (condition?.logic === LOGIC[1]) {
+        } else if (condition?.logic === LOGIC.OR) {
           let count = 0;
           condition?.fields?.forEach((field) => {
             if (field?.fieldName && field?.value) {
