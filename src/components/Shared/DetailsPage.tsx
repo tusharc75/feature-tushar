@@ -1,7 +1,7 @@
 import { Avatar, Box, GridSize, IconButton, ImageList, ImageListItem, makeStyles, Link as MuiLink, Typography } from '@material-ui/core';
 import { Image, InfoOutlined, MoreHoriz } from '@material-ui/icons';
 import { camelCase, isArray, kebabCase } from 'lodash';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
 import { Link } from 'react-router-dom';
 import routes from 'src/components/Helpers/Routes';
@@ -32,6 +32,7 @@ import { FaUserPlus } from 'react-icons/fa6';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
+import { isFieldVisible, isSectionVisible } from 'src/components/Helpers/FormTypes';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -111,12 +112,13 @@ const Details = (props: DetailProps) => {
   const [dialogData, setDialogData] = useState<any>(null);
   const [open, setOpen] = useState({ open: false, section: null });
   const [taskData, setTaskdata] = useState(null);
+  const fieldsData = useMemo(() => fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData), [fields]);
 
   useEffect(() => {
     sortArray();
-    const fieldData = fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData);
-    const vals = getObjKeysWithValues(data, fieldData);
-    fieldData?.forEach((e) => {
+    // const fieldData = fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData);
+    const vals = getObjKeysWithValues(data, fieldsData);
+    fieldsData?.forEach((e) => {
       if (e.type === 'lookUpDisplay') {
         vals[e.fieldName] = data[e.fieldName];
       }
@@ -474,6 +476,7 @@ const Details = (props: DetailProps) => {
   return (
     <div className="form-v1">
       {formDataWithFollowUps?.map((form) => {
+        if (!isSectionVisible(form, fieldsData, initialVals, true)) return null;
         return (
           form.name && (
             <React.Fragment key={form.name}>
@@ -502,69 +505,72 @@ const Details = (props: DetailProps) => {
                   )}
                 </div>
                 <div className="formdata-v1 grid grid-cols-12">
-                  {form.sectionFields.map((field, i) => (
-                    <div
-                      className={cn(
-                        `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
-                        'col-span-12'
-                      )}
-                      key={i}
-                    >
+                  {form.sectionFields.map((field, i) => {
+                    if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
+                    return (
                       <div
                         className={cn(
-                          isTypeFile(field.fieldData.type) && 'flex-wrap',
-                          'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                          `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
+                          'col-span-12'
                         )}
+                        key={i}
                       >
-                        <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
-                          <div className={cn('d-flex formdata-title-v1 min-h-full', isTypeFile(field.fieldData.type) && '!border-r-0')}>
-                            <h4 title={field.fieldData.fieldLabel} className={`text-truncate `}>
-                              {field.fieldData.fieldLabel}
-                            </h4>
-                            {field.fieldData.isTooltip && (
-                              <HtmlTooltip title={field.fieldData.tooltipMessage}>
-                                <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
-                              </HtmlTooltip>
+                        <div
+                          className={cn(
+                            isTypeFile(field.fieldData.type) && 'flex-wrap',
+                            'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                          )}
+                        >
+                          <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
+                            <div className={cn('d-flex formdata-title-v1 min-h-full', isTypeFile(field.fieldData.type) && '!border-r-0')}>
+                              <h4 title={field.fieldData.fieldLabel} className={`text-truncate `}>
+                                {field.fieldData.fieldLabel}
+                              </h4>
+                              {field.fieldData.isTooltip && (
+                                <HtmlTooltip title={field.fieldData.tooltipMessage}>
+                                  <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
+                                </HtmlTooltip>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
+                            {field.fieldData.type === 'imageUpload' ? (
+                              <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
+                                <span
+                                  className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
+                                  onClick={() => {
+                                    if (initialVals[field.fieldData.fieldName]) {
+                                      setDialogData({
+                                        index: 0,
+                                        title: field.fieldData.fieldLabel,
+                                        open: true,
+                                        images: [initialVals[field.fieldData.fieldName]]
+                                      });
+                                    }
+                                  }}
+                                >
+                                  <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
+                                    <Image style={{ fontSize: 30 }} />
+                                  </Avatar>
+                                </span>
+                              </Box>
+                            ) : (
+                              <Box display="flex" alignItems="center" className="formdata-text-v1">
+                                {renderData(initialVals, field.fieldData)}
+                              </Box>
+                            )}
+                            {field.followUpData?.length > 0 && (
+                              <RenderFollowUP
+                                data={field.followUpData}
+                                columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
+                              />
                             )}
                           </div>
                         </div>
-
-                        <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
-                          {field.fieldData.type === 'imageUpload' ? (
-                            <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
-                              <span
-                                className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
-                                onClick={() => {
-                                  if (initialVals[field.fieldData.fieldName]) {
-                                    setDialogData({
-                                      index: 0,
-                                      title: field.fieldData.fieldLabel,
-                                      open: true,
-                                      images: [initialVals[field.fieldData.fieldName]]
-                                    });
-                                  }
-                                }}
-                              >
-                                <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
-                                  <Image style={{ fontSize: 30 }} />
-                                </Avatar>
-                              </span>
-                            </Box>
-                          ) : (
-                            <Box display="flex" alignItems="center" className="formdata-text-v1">
-                              {renderData(initialVals, field.fieldData)}
-                            </Box>
-                          )}
-                          {field.followUpData?.length > 0 && (
-                            <RenderFollowUP
-                              data={field.followUpData}
-                              columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
-                            />
-                          )}
-                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             </React.Fragment>
