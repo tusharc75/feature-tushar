@@ -23,7 +23,7 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import CreateProduct from '../../components/Product/CreateProduct';
 import ImportExportLinks from '../../components/Product/ImportExportLinks';
-import { ACTIVITY_RESOURCE, gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from '../../constants/helpers';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
@@ -103,7 +103,7 @@ const Product = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.product}&view=true`)
       .then(({ data: { data } }) => {
-        setWalkmeData([createResourceFlow(data, ACTIVITY_RESOURCE.product)]);
+        setWalkmeData([createResourceFlow(sidebarResource.product, data)]);
         if (data.filter((e) => e.fieldData.fieldName === 'productTemplate').length === 0) {
           setIsProductTemplate(false);
         }

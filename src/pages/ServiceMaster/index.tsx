@@ -13,7 +13,7 @@ import axiosInstance from '../../axios/axiosInstance';
 import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
-import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource, ACTIVITY_RESOURCE } from '../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageServiceMaster from './ManageServiceMaster';
@@ -55,7 +55,7 @@ const ServiceMaster = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.serviceMaster}`);
     data = response?.data?.data;
-    setWalkmeData([createResourceFlow(data, ACTIVITY_RESOURCE.serviceMaster)]);
+    setWalkmeData([createResourceFlow(sidebarResource.serviceMaster, data)]);
     let newColumns = generateColumns(renderedFrom, data, routes.serviceMasterDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };
