@@ -144,16 +144,15 @@ const ServiceOrderDetailsPage = () => {
 
       setAllowedToEdit(
         permissions?.fieldServiceOrder?.isUpdate &&
-          checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToEdit(user, sidebarResource.fieldServiceOrder, data) &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
       setAllowedToDelete(
         permissions?.fieldServiceOrder?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
-          data.canDelete &&
-          ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
+        checkIsAllowedToDelete(user, sidebarResource.fieldServiceOrder, data.owner.optionValue) &&
+        data.canDelete &&
+        ![SERVICE_ORDER_STATUS.closed]?.includes(data?.status)
       );
-      setServiceOrderData(data);
       let fieldServiceSteps = permissions?.invoice?.isRead ? steps : steps?.filter((e) => e.name !== 'Field Ticket Invoice');
       setSteps(fieldServiceSteps);
       if ([SERVICE_ORDER_STATUS.closed]?.includes(data?.status)) {
@@ -161,6 +160,7 @@ const ServiceOrderDetailsPage = () => {
       } else {
         setCurrentStep(steps.map((s) => s.name).indexOf(data?.processStatus) !== -1 ? steps.map((s) => s.name).indexOf(data?.processStatus) : 0);
       }
+      setServiceOrderData(data);
     } catch (error) {
       setLoadingDetails(false);
       toastConfig.setToastConfig(error);
@@ -189,7 +189,7 @@ const ServiceOrderDetailsPage = () => {
       .then(({ data }) => {
         fetchServiceOrderData();
       })
-      .catch((error) => {});
+      .catch((error) => { });
   };
 
   const getServiceOrderFields = async () => {
