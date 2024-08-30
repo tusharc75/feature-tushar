@@ -38,7 +38,7 @@ import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import Autocomplete, { createFilterOptions } from '@material-ui/lab/Autocomplete';
 import { DatePicker, KeyboardDatePicker, KeyboardDateTimePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import parse from 'autosuggest-highlight/parse';
-import { find, result, throttle } from 'lodash';
+import { find, isArray, result, throttle } from 'lodash';
 import MuiPhoneInput from 'material-ui-phone-number';
 import React, { Fragment, useContext, useEffect, useRef } from 'react';
 import NumberFormat from 'react-number-format';
@@ -922,7 +922,8 @@ const FormTypes = (props) => {
         label = option[fieldData?.lookUpFieldDisplay] || '';
       }
     }
-    return label?.optionLabel || label;
+    return isArray(label) ? label?.map((e) => e?.optionLabel)?.toString() :
+      label?.optionLabel || label;
   };
 
   return fieldData?.hiddenField ? null : !fieldData || isFieldVisible(fieldData, fields, values) ? (
