@@ -1,4 +1,4 @@
-import { Grid } from '@material-ui/core';
+import { Grid, useMediaQuery } from '@material-ui/core';
 import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
 import { useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
@@ -16,35 +16,46 @@ const viewTypes = [
     key: 'Calender',
     value: 2
   }
-];
+] as const;
+
+type ViewType = (typeof viewTypes)[number]['value'];
 
 const PlanningCalendar = () => {
-  const [viewType, setViewType] = useState(1);
+  const isMobile = useMediaQuery('(max-width:768px)');
+  const [viewType, setViewType] = useState<ViewType>(isMobile ? 2 : 1);
 
   return (
     <div className="main-container-v1">
       <div className="headerbox-v1">
         <CustomBreadCrumbs routes={[{ title: routes.planningCalendar.title, path: routes.planningCalendar.path }]} />
-        <ToggleButtonGroup
-          size="small"
-          value={viewType}
-          exclusive
-          onChange={(event, newFilter) => {
-            setViewType(newFilter);
-          }}
-        >
-          {viewTypes.map((k, index) => {
-            return (
-              <ToggleButton size="small" value={k.value} key={index} style={{ minWidth: 'max-content' }}>
-                {k.key}
-              </ToggleButton>
-            );
-          })}
-        </ToggleButtonGroup>
+        {!isMobile && (
+          <ToggleButtonGroup
+            size="small"
+            value={viewType}
+            exclusive
+            onChange={(event, newFilter) => {
+              setViewType(newFilter);
+            }}
+          >
+            {viewTypes.map((k, index) => {
+              return (
+                <ToggleButton size="small" value={k.value} key={index} style={{ minWidth: 'max-content' }}>
+                  {k.key}
+                </ToggleButton>
+              );
+            })}
+          </ToggleButtonGroup>
+        )}
       </div>
       <CustomContainer styles={{ minHeight: 'calc(100vh-200px)' }}>
-        {viewType === 1 && <Roadmap />}
-        {viewType === 2 && <CalendarView />}
+        {isMobile ? (
+          <CalendarView />
+        ) : (
+          <>
+            {viewType === 1 && <Roadmap />}
+            {viewType === 2 && <CalendarView />}
+          </>
+        )}
       </CustomContainer>
     </div>
   );
