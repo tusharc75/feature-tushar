@@ -355,6 +355,26 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                       values={values}
                       setFieldValue={(name, value) => {
                         setFieldValue(name, value);
+                        if (name === 'fullAddress') {
+                          (_, val) => {
+                            if (typeof val !== 'object') return;
+                            getFullAddress(val);
+                            if (!val?.place_id) {
+                              setAddressDetail(null);
+                            }
+                          }
+                        }
+                        else{
+                          (e: React.ChangeEvent<HTMLInputElement>) => {
+                            const { name, value } = e.target;
+                            if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                            setAddressDetail((prevState: any) => ({
+                              ...prevState,
+                              [name]: value
+                            }));
+                            setLatLngChangedManually(true);
+                          }
+                        }
                       }}
                       touched={touched}
                       fieldsData={initialData.fields}
