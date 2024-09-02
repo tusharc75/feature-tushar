@@ -22,9 +22,12 @@ import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageWarehouse from './ManageWarehouse';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
 const Warehouse = () => {
   const renderedFrom = camelCase(routes?.warehouse.title);
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const { state, dispatch } = useTableReducer();
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
@@ -61,6 +64,8 @@ const Warehouse = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.warehouse}`);
     data = response?.data?.data;
+    setWalkmeData([createResourceFlow(sidebarResource.warehouse, data)]);
+
     const newColumns = generateColumns(renderedFrom, data, routes.warehouseDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
   };

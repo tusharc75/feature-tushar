@@ -258,8 +258,18 @@ export class HandleSteps {
         this.tempIndex = -1;
       }
     }
+    // if previous step will open dialog then retry to get element position in 500ms to see if there is any layout shift
+    if (this.currentIndex > 0) {
+      const prevStep = this.steps[this.currentIndex - 1];
+      if (prevStep.willOpenDialog) {
+        setTimeout(() => {
+          this.getCurrentStep(true, this.currentIndex);
+        }, 500);
+      }
+    }
     this.getCurrentStep();
   }
+
   previous() {
     if (this.currentIndex === 0) {
       this.getCurrentStep();
@@ -305,24 +315,6 @@ export class HandleSteps {
       this.sendUpdateSignal();
       const { bottom, height, left, right, top, width, x, y } = element?.getBoundingClientRect();
       const positionData = { bottom, height, left: left + window.scrollX, right, top: top + window.scrollY, width, x, y };
-      // this.scrollToCurrentStep(element);
-
-      // Check if value exist then move on to the next step
-      // if (activeStep.skipIfValueExist) {
-      //   const inputElement = element as HTMLInputElement;
-      //   let validator = (value: string) => {
-      //     if (['decimal', 'currencyAmount'].includes(activeStep.fieldType)) {
-      //       return value.length > 0 && Number(value) !== 0;
-      //     }
-      //     return value.length > 0;
-      //   };
-
-      //   if (validator(inputElement.value)) {
-      //     this.clicked = false;
-      //     this.next();
-      //     return;
-      //   }
-      // }
 
       this.currentStepData = {
         ...activeStep,
@@ -330,11 +322,9 @@ export class HandleSteps {
         index: index,
         element
       };
-      // Settimeout with 0 sec delay will move these function calls to js task queue and will execute later
-      // setTimeout(() => {
+
       this.attachObservers();
       this.sendUpdateSignal();
-      // }, 0);
     }
   }
 
