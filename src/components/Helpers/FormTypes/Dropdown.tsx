@@ -158,14 +158,15 @@ function dropdownOptions(options, values, fields, fieldData, newAddressOptionLis
     } else if (fieldData?.fieldName === 'collaborator') {
       const optionDatas = options?.filter((option: any) => option?.optionValue !== values['owner']) || [];
       oData = optionDatas || [];
-    } else {
+    }
+    else {
       // for market segment kind of situation
-      const optionDatas = options?.filter((o) => {
-        if (has(o, fieldData?.fieldName)) {
-          return isEmpty(o[fieldData?.fieldName]);
-        } else return true;
-      });
-      oData = optionDatas;
+      // const optionDatas = options?.filter((o) => {
+      //   if (has(o, fieldData?.fieldName)) {
+      //     return isEmpty(o[fieldData?.fieldName]);
+      //   } else return true;
+      // });
+      //oData = optionDatas;
     }
     return oData || [];
   }
