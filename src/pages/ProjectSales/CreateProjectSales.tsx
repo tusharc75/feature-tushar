@@ -12,6 +12,7 @@ import {
   setFieldsInAscendingOrder,
   getObjKeysWithValues,
   GenerateResourceLineNumber,
+  sidebarResource,
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -23,6 +24,7 @@ import routes from 'src/components/Helpers/Routes';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import InputField from 'src/components/Helpers/InputField';
 interface InitialData {
   fields: any[];
   values: object;
@@ -54,19 +56,12 @@ const CreateProjectSales = ({
   });
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const history = useHistory();
-  const [formsData, setFormsData] = useState([]);
 
   const [productSalesName, setProductSalesName] = useState('');
   const [currencySymbol, setCurrencySymbol] = useState(null);
 
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-  useEffect(() => {
-    if (initialData.fields.length > 0) {
-      setFormsData(setFieldsInAscendingOrder(initialData.fields));
-    }
-  }, [initialData.fields]);
 
   useEffect(() => {
     getInitialData();
@@ -244,237 +239,24 @@ const CreateProjectSales = ({
               />
               <CustomDialogContent>
                 <Form noValidate>
-                  {formsData &&
-                    formsData.map((form, index1) => {
-                      return form.name ? (
-                        <div key={index1}>
-                          <div className={'detail-box-content'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                          </div>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field, index2) => (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
-                                  {field.fieldName === 'projectCategory' ? (
-                                    <FormTypes
-                                      {...field}
-                                      disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                    />
-                                  ) : field.fieldName === 'startDate' ? (
-                                    <FormTypes
-                                      {...field}
-                                      disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      maxDate={values.endDate}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                    />
-                                  ) : field.fieldName === 'endDate' ? (
-                                    <FormTypes
-                                      {...field}
-                                      disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      minDate={values.startDate}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                    />
-                                  ) : field.fieldName === 'entity' ? (
-                                    <FormTypes
-                                      {...field}
-                                      disabled={Boolean(projectSalesId) && !isClone && field.disableOnEdit}
-                                      multiple
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      onChange={(e, value) => {
-                                        setFieldValue(field.fieldName, value ? value.filter((v) => v.optionValue).map((val) => val.optionValue) : []);
-                                        if (initialData?.fields?.some((e) => e.fieldName === 'projectManager')) {
-                                          setFieldValue('projectManager', '');
-                                        }
-                                      }}
-                                    />
-                                  ) : field.fieldName === 'projectManager' ? (
-                                    <FormTypes
-                                      {...field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={
-                                        values['entity'] && values['entity'].length
-                                          ? field.option.filter((data) => values['entity']?.some((d) => data.entities?.some((e) => e.entity === d)))
-                                          : field.option
-                                      }
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      onChange={(e, value) => {
-                                        setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                      }}
-                                    />
-                                  ) : field.fieldName === 'currency' ? (
-                                    <FormTypes
-                                      {...field}
-                                      disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      onChange={(e, val) => {
-                                        if (val && val.currencyCode) {
-                                          setFieldValue(field.fieldName, val.currencyCode);
-                                          setCurrencySymbol(val.symbolNative);
-                                        } else {
-                                          setFieldValue(field.fieldName, '');
-                                          setCurrencySymbol(null);
-                                        }
-                                      }}
-                                    />
-                                  ) : field.fieldName.trim() === 'amount' ? (
-                                    <FormTypes
-                                      disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                                      fieldId={field._id}
-                                      lookup={field.lookup}
-                                      // {...rest}
-                                      selectedCurrencyCode={values['currency']}
-                                      startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                    />
-                                  ) : (
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      fields={initialData.fields}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                      disabled={(projectSalesId && field.fieldName === 'projectManager') || (!projectSalesId && field.disableOnEdit)}
-                                    />
-                                  )}
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </Box>
-                        </div>
-                      ) : (
-                        form.sectionFields.map((field) => (
-                          <FormTypes
-                            {...field}
-                            disabled={Boolean(projectSalesId) && field.disableOnEdit}
-                            fieldData={field}
-                            fields={initialData.fields}
-                            values={values}
-                            errors={errors}
-                            touched={touched}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={field.option}
-                            setFieldValue={(name, value) => {
-                              setFieldValue(name, value);
-                            }}
-                            required={field.required}
-                            fullWidth
-                            isTooltip={field?.isTooltip || false}
-                            tooltipMessage={field?.tooltipMessage}
-                            size="small"
-                            style={{ visibility: 'hidden' }}
-                          />
-                        ))
-                      );
-                    })}
+                <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                        if(name === 'entity'){
+                            if (initialData?.fields?.some((e) => e.fieldName === 'projectManager')) {
+                              setFieldValue('projectManager', '');
+                            }
+                        }
+                      }}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                      resource={sidebarResource.projectSales}
+                      referenceId={projectSalesId || null}
+                    />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -497,7 +279,7 @@ const CreateProjectSales = ({
                   loading={isSubmitting}
                   variant="contained"
                   color="primary"
-                  disabled={uploadingImageOrFileProgress > 0}
+                  disabled={isSubmitting}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
