@@ -267,7 +267,6 @@ export class HandleSteps {
         }, 500);
       }
     }
-    console.log(this);
     this.getCurrentStep();
   }
 
