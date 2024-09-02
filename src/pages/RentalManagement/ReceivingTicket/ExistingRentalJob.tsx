@@ -40,7 +40,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, ticketType: '', data: {}, rentalJob: null });
   const [showRentalDialog, setShowRentalDialog] = useState({ open: false, data: {} });
   const [assetsAdd, setAssetsAdd] = useState([]);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, data: null });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null, data: null });
 
   const { state, dispatch } = useTableReducer();
   const { selectedRecords } = state;
@@ -256,6 +256,22 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
       });
   };
 
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = productInventory?.filter(r => statusPolicy?.products?.includes(r?.productId))?.map(a => a?._id)
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds }
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: productInventory?.map(a => a?._id) }
+      }
+    }
+    return result;
+  }
+
   const cloneRentalDetail = (rentalData) => {
     const data: any = {};
     data._id = referenceData._id;
@@ -269,10 +285,12 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
         } else {
           isOnlyAssetAdd = true;
         }
-        if (!isOnlyAssetAdd && assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
+        if (!isOnlyAssetAdd && checkAssetPolicy(ASSET_STATUS.underReview)) {
+          const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview)
           setOpenAssetDataDialog({
             open: true,
-            statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
+            statusPolicy: statusPolicy,
+            _ids: assetIds,
             data: { _id: rentalData._id, deliveryTo: rentalData.customerAccount, deliveryToAddress: rentalData.shippingAddress }
           });
         } else {
@@ -314,10 +332,12 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
                 } else {
                   isOnlyAssetAdd = true;
                 }
-                if (!isOnlyAssetAdd && assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview)) {
+                if (!isOnlyAssetAdd && checkAssetPolicy(ASSET_STATUS.underReview)) {
+                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview)
                   setOpenAssetDataDialog({
                     open: true,
-                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
+                    statusPolicy: statusPolicy,
+                    _ids: assetIds,
                     data: {
                       _id: selectedRecords[0]?._id,
                       deliveryTo: selectedRecords[0]?.customerAccountId,
@@ -389,13 +409,13 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
 
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
-          ids={productInventory?.map((e) => e._id)}
+          ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={() => { }}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, data: null })}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, data: null })}
           onSuccess={(_assetData) => {
             handleCreateReceivingTicket(openAssetDataDialog.data, false, _assetData);
-            setOpenAssetDataDialog({ open: false, statusPolicy: null, data: null });
+            setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, data: null });
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}
         />

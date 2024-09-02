@@ -88,7 +88,7 @@ const WorkOrder = ({
   const [selectedServiceOption, setSelectedServiceOption] = useState(null);
   const [showServiceActionConfirmBox, setShowServiceActionConfirmBox] = useState({ open: false, action: '' });
   const [showCloseReopenConfirmation, setShowCloseReopenConfirmation] = useState({ open: false, type: '' });
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
   const [showDrawingDialog, setShowDrawingDialog] = useState({ open: false, workOrder: null });
 
   const { state, dispatch } = useTableReducer();
@@ -522,6 +522,22 @@ const WorkOrder = ({
     }
   };
 
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = autoCompleteData?.filter(r => statusPolicy?.products?.includes(r?.productId))?.map(a => a?.materialId)
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds }
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: autoCompleteData?.map(a => a?.materialId) }
+      }
+    }
+    return result;
+  }
+
   const handleAutoComplete = (assetData = null) => {
     let ids = [];
     if (autoCompleteData && autoCompleteData.length > 0) {
@@ -541,7 +557,7 @@ const WorkOrder = ({
         .then(({ data }) => {
           setCompleting(false);
           setCompleteConfirmBox(false);
-          setOpenAssetDataDialog({ open: false, statusPolicy: null });
+          setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null });
           fetchData();
           toastConfig.setToastConfig({
             open: true,
@@ -580,15 +596,14 @@ const WorkOrder = ({
     createWorkorderService(rows);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent?.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.product
-            ? parent?.productDetail?.productName
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent?.serializedAssetDetail?.assetNumber
-              : parent?.packageDetail?.packageName
-      }`;
+      parent.detail = `${parent.type === MATERIAL_TYPE.service
+        ? parent?.serviceDetail?.serviceName
+        : parent.type === MATERIAL_TYPE.product
+          ? parent?.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent?.serializedAssetDetail?.assetNumber
+            : parent?.packageDetail?.packageName
+        }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -602,15 +617,14 @@ const WorkOrder = ({
       parent.productName = parent?.serializedAssetDetail?.product?.optionLabel || '';
       parent.productId = parent?.serializedAssetDetail?.product?.optionValue || '';
       parent.qty = parent.qty;
-      parent.status = `${
-        parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.status
-          : parent.type === MATERIAL_TYPE.product
-            ? parent.productDetail?.status
-            : parent.type === MATERIAL_TYPE.serializedAsset
-              ? parent.serializedAssetDetail.status
-              : parent.packageDetail?.status
-      }`;
+      parent.status = `${parent.type === MATERIAL_TYPE.service
+        ? parent.serviceDetail?.status
+        : parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.status
+          : parent.type === MATERIAL_TYPE.serializedAsset
+            ? parent.serializedAssetDetail.status
+            : parent.packageDetail?.status
+        }`;
       parent.workOrderNumber = parent?.workOrder?.workOrderNumber;
 
       parent.hideSelection = false;
@@ -1144,7 +1158,7 @@ const WorkOrder = ({
             }}
             disabled={
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length &&
-              selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
+                selectedRecords.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e?.canAutoCompleteWorkOrder)
                 ? false
                 : true
             }
@@ -1183,8 +1197,8 @@ const WorkOrder = ({
           <MenuItem
             disabled={
               selectedRecords?.length &&
-              selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
-              !isWorkOrderCompleted(selectedRecords)
+                selectedRecords?.some((e) => e.type === MATERIAL_TYPE.service && e.status !== WORKORDER_SERVICE_STATUS.pending) &&
+                !isWorkOrderCompleted(selectedRecords)
                 ? false
                 : true
             }
@@ -1362,13 +1376,12 @@ const WorkOrder = ({
             <ConfirmationDialog
               okBtnLoading={isSubmitting}
               open={showServiceActionConfirmBox.open}
-              message={`Are you sure you want to ${
-                showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
-                  ? 'complete'
-                  : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
-                    ? 'skip'
-                    : 'revert'
-              } this Service(s)`}
+              message={`Are you sure you want to ${showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.completed
+                ? 'complete'
+                : showServiceActionConfirmBox.action === WORKORDER_SERVICE_STATUS.skipped
+                  ? 'skip'
+                  : 'revert'
+                } this Service(s)`}
               onClose={() => {
                 setShowServiceActionConfirmBox({ open: false, action: '' });
               }}
@@ -1384,9 +1397,9 @@ const WorkOrder = ({
                 setCompleteConfirmBox(false);
               }}
               onOk={() => {
-                const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.available);
+                const statusPolicy = checkAssetPolicy(ASSET_STATUS.available);
                 if (statusPolicy) {
-                  setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy });
+                  setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds });
                 } else {
                   handleAutoComplete();
                 }
@@ -1396,10 +1409,10 @@ const WorkOrder = ({
 
           {openAssetDataDialog.open && (
             <AssetDetailsChangeDialog
-              ids={autoCompleteData?.map((e) => e.materialId)}
+              ids={openAssetDataDialog._ids}
               statusPolicy={openAssetDataDialog.statusPolicy}
               setAssetsData={null}
-              onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+              onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
               onSuccess={(data) => {
                 handleAutoComplete(data);
               }}
@@ -1426,13 +1439,12 @@ const WorkOrder = ({
                     return { _id: d?.uniqueId, name: d?.serviceDetail?.serviceName, order: d?.order, preWork: d?.preWork, parentId: d.workOrder._id };
                   }) || []
               }
-              title={`Arrange Services (${
-                selectedRecords
-                  ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
-                  ?.map((d) => {
-                    return d.serializedAssetDetail.assetNumber;
-                  })[0]
-              })`}
+              title={`Arrange Services (${selectedRecords
+                ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset && e.workOrder._id === arrangeView.workOrderIds[arrangeView.currentIndex])
+                ?.map((d) => {
+                  return d.serializedAssetDetail.assetNumber;
+                })[0]
+                })`}
               handleClose={() => setArrangeView({ open: false, workOrderIds: [], currentIndex: 0 })}
               handleSubmit={(data) => handleArrangeUpdate(data, arrangeView.workOrderIds[arrangeView.currentIndex])}
               loading={isSubmitting}
