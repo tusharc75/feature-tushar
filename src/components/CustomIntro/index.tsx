@@ -120,7 +120,7 @@ const CustomIntro = () => {
       handleSteps.current.resume();
     }
 
-    if (currentStepData?.willOpenDialog) {
+    if (currentStepData?.willOpenDialog || currentStepData.waitForStepInsertion) {
       // check if dialog will open then wait for 500ms to let dialog open properly
       timeout = setTimeout(() => {
         handleSteps.current?.next();
