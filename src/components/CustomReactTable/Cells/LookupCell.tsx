@@ -8,7 +8,9 @@ const LookupCell = ({ field, original }) => {
       : '';
 
   const key = `rest${field.fieldName}`;
-  if (Array.isArray(original[key])) text += original[key]?.map((e) => e?.optionLabel)?.toString();
+
+  if (Array.isArray(original[key])) text += `,${original[key]?.map((e) => e?.optionLabel)?.toString()}`;
+
   if (typeof original[key] === 'string') text += original[key];
 
   return (
