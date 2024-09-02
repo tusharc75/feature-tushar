@@ -555,8 +555,7 @@ export default function useColumns() {
       } else if (field.type === 'lookUpDisplay') {
         column.push({
           ...commonFieldData,
-          editable: Boolean(field?.isColumnEditable),
-          ...(Boolean(field?.isColumnEditable) && ['dropDown', 'multiSelect']?.includes(field.type) ? { option: field?.option } : {}),
+          editable: false,
           cell: ({ row }) => <LookupCell field={field} original={row?.original} />
         });
       } else {
