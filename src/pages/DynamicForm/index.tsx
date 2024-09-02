@@ -165,21 +165,23 @@ const DynamicForm = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`dynamic-form/${queryString}`, {
-      headers: {
-        Resource: resource
-      },
-      cancelToken: cancelTokenSource?.token
-    }).then(({ data: { data, count } }) => {
-      let rows = data.map((u) => {
-        let finalObject = prepareDataForGrid(u, user);
-        finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-        finalObject['allowedToEdit'] = permissions[renderedFrom]?.isUpdate;
-        finalObject['canDelete'] = permissions[renderedFrom]?.isDelete;
-        return finalObject;
-      });
-      dispatch({ type: 'initialize', data: rows, count: count });
-    })
+    axiosInstance()
+      .get(`dynamic-form/${queryString}`, {
+        headers: {
+          Resource: resource
+        },
+        cancelToken: cancelTokenSource?.token
+      })
+      .then(({ data: { data, count } }) => {
+        let rows = data.map((u) => {
+          let finalObject = prepareDataForGrid(u, user);
+          finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
+          finalObject['allowedToEdit'] = permissions[renderedFrom]?.isUpdate;
+          finalObject['canDelete'] = permissions[renderedFrom]?.isDelete;
+          return finalObject;
+        });
+        dispatch({ type: 'initialize', data: rows, count: count });
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       })
