@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext, Fragment } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, Grid } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../components/Helpers/FormTypes';
 import CustomButton from '../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
@@ -13,38 +12,31 @@ import {
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
-  setFieldsInAscendingOrder,
   yupSchema,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource
 } from '../../constants/helpers';
 import axiosInstance from '../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, open, referenceData = null, isDisableCustomerAccount = false }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
-  // const [data, setData] = useState({ fields: [], initialValues: {} });
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const {
-    state: { user, permissions }
+    state: { user }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [jobDetails, setJobDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   useEffect(() => {
     setLoading(true);
@@ -205,62 +197,19 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                 />
                 <CustomDialogContent>
                   <Form>
-                    {formsData &&
-                      formsData.map((form, i) => {
-                        return (
-                          form.name && (
-                            <div key={i}>
-                              <div className={'detail-box-content'}>
-                                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                              </div>
-                              <Box marginY={2}>
-                                <Grid spacing={3} container>
-                                  {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                        <FormTypes
-                                          jobId={jobId}
-                                          {...field}
-                                          fieldData={field}
-                                          disabled={
-                                            field.fieldName === 'currency'
-                                              ? jobDetails && jobDetails?.material?.length
-                                                ? true
-                                                : false
-                                              : jobId && field.disableOnEdit && !isClone
-                                          }
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field?.isTooltip || false}
-                                          tooltipMessage={field?.tooltipMessage}
-                                          size="small"
-                                          imageOrFileUploadCompletePercentage={
-                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                              ? (completePercentage) => {
-                                                  setUploadingImageOrFileProgress(completePercentage);
-                                                }
-                                              : null
-                                          }
-                                          fields={initialData?.fields}
-                                        />
-                                    </Grid>
-                                  ))}
-                                </Grid>
-                              </Box>
-                            </div>
-                          )
-                        );
-                      })}
+                      <InputField
+                        errors={errors}
+                        values={values}
+                        setFieldValue={(name, value) => {
+                          setFieldValue(name, value);
+                        }}
+                        touched={touched}
+                        fieldsData={initialData.fields}
+                        size="small"
+                        fullWidth
+                        resource={sidebarResource.job}
+                        referenceId={jobId || null}
+                      />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
@@ -283,7 +232,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    disabled={loading}
                     onClick={(e) => {
                       e.preventDefault();
                       handleScroll(errors);
