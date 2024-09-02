@@ -109,7 +109,7 @@ const WorkOrderDetails = () => {
 
   const [workOrderCostFields, setWorkOrderCostFields] = useState(null)
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
 
   const columns = [
     { accessor: 'index', Header: 'Index' },
@@ -275,7 +275,7 @@ const WorkOrderDetails = () => {
           type: 'success',
           message: data
         });
-        setOpenAssetDataDialog({ open: false, statusPolicy: null })
+        setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })
         fetchWorkOrderData();
         setIsSubmitting(false);
       })
@@ -358,6 +358,22 @@ const WorkOrderDetails = () => {
       });
   };
 
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = statusPolicy?.products?.includes(workOrderData?.product?.optionValue) ? [workOrderData?.serializedAsset?.optionValue] : []
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds }
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: [workOrderData?.serializedAsset?.optionValue] }
+      }
+    }
+    return result;
+  }
+
   const toolbarButtons: ToolbarComponents<ButtonType | MenuItemProps>[] = [
     {
       id: `Repair Job`,
@@ -420,9 +436,9 @@ const WorkOrderDetails = () => {
         if (workOrderData?.type === WORK_ORDER_TYPE.productionOrder && workOrderCostFields?.length) {
           setOpenTotalCostDialog(true)
         } else if (workOrderData?.type === WORK_ORDER_TYPE.repairOrder) {
-          const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.available);
+          const statusPolicy = checkAssetPolicy(ASSET_STATUS.available);
           if (statusPolicy) {
-            setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy })
+            setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds })
           } else {
             updateStatus(WORK_ORDER_STATUS.completed)
           }
@@ -779,10 +795,10 @@ const WorkOrderDetails = () => {
       )}
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
-          ids={[workOrderData?.serializedAsset?.optionValue]}
+          ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={null}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
           onSuccess={(data) => {
             updateStatus(WORK_ORDER_STATUS.completed, null, null, data)
           }}

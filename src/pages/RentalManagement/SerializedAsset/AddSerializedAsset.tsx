@@ -84,7 +84,7 @@ const AddSerializedAsset = ({
   const [certificateExpireAlert, setCertificateExpireAlert] = useState({ open: false, asset: '' });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, type: '' });
+  const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null, type: '' });
   const [underReviewAssetData, setUnderReviewAssetData] = useState(null);
 
   useEffect(() => {
@@ -399,6 +399,22 @@ const AddSerializedAsset = ({
       });
   };
 
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = selectedRecords?.filter(r => statusPolicy?.products?.includes(r?.productId))?.map(a => a?._id)
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds }
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: selectedRecords?.map(a => a?._id) }
+      }
+    }
+    return result;
+  }
+
   const handleAddButtonClick = useCallback(() => {
     if (referenceType === 'Rental Job') {
       if (
@@ -413,10 +429,12 @@ const AddSerializedAsset = ({
             ?.toString()
         });
         return;
-      } else if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+      } else if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+        const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved)
         setOpenAssetDataDialog({
           open: true,
-          statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+          statusPolicy: statusPolicy,
+          _ids: assetIds,
           type: 'add'
         });
         return;
@@ -534,10 +552,12 @@ const AddSerializedAsset = ({
                         size="small"
                         color="primary"
                         onClick={() => {
-                          if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+                          if (checkAssetPolicy(ASSET_STATUS.reserved)) {
+                            const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved)
                             setOpenAssetDataDialog({
                               open: true,
-                              statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                              statusPolicy: statusPolicy,
+                              _ids: assetIds,
                               type: 'transfer'
                             });
                           } else {
@@ -692,10 +712,12 @@ const AddSerializedAsset = ({
             setInuseAssetConfirmBox(false);
           }}
           onOk={() => {
-            if (assetPolicyData?.policy?.statusChangeFields?.find((e) => e.status === ASSET_STATUS.underReview)) {
+            if (checkAssetPolicy(ASSET_STATUS.underReview)) {
+              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview)
               setOpenAssetDataDialog({
                 open: true,
-                statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview),
+                statusPolicy: statusPolicy,
+                _ids: assetIds,
                 type: 'underReview'
               });
             } else {
@@ -714,27 +736,29 @@ const AddSerializedAsset = ({
       )}
       {openAssetDataDialog.open && (
         <AssetDetailsChangeDialog
-          ids={selectedRecords?.map((e) => e._id)}
+          ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
           setAssetsData={() => { }}
-          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' })}
+          onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
-              if (assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved)) {
+              if (checkAssetPolicy(ASSET_STATUS.reserved)) {
                 if (openAssetDataDialog.type === 'underReview') {
                   setUnderReviewAssetData(data);
+                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved)
                   setOpenAssetDataDialog({
                     open: true,
-                    statusPolicy: assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved),
+                    statusPolicy: statusPolicy,
+                    _ids: assetIds,
                     type: 'reserved'
                   });
                 } else {
                   handleAutoTransferAssets(underReviewAssetData, data);
-                  setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+                  setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
                 }
               } else {
                 handleAutoTransferAssets(data);
-                setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+                setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
               }
             } else {
               if (openAssetDataDialog.type === 'add') {
@@ -742,7 +766,7 @@ const AddSerializedAsset = ({
               } else {
                 setShowTransferAssetDialog({ open: true, data: data });
               }
-              setOpenAssetDataDialog({ open: false, statusPolicy: null, type: '' });
+              setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' });
             }
           }}
           staticLookUpFilters={{ wellNumber: referenceData?.wellNumber }}

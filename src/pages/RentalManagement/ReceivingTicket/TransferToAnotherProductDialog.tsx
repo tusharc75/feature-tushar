@@ -20,7 +20,7 @@ const TransferToAnotherProductDialog = ({ onClose, onSuccess, rentalManagementDa
 	const { state, dispatch } = useTableReducer();
 	const { selectedRecords } = state;
 	const [isSubmitting, setIsSubmitting] = useState(false)
-	const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null });
+	const [openAssetDataDialog, setOpenAssetDataDialog] = useState({ open: false, statusPolicy: null, _ids: null });
 
 	useEffect(() => {
 		fetchData()
@@ -107,6 +107,22 @@ const TransferToAnotherProductDialog = ({ onClose, onSuccess, rentalManagementDa
 		return true
 	}
 
+	const checkAssetPolicy = (status) => {
+		let result: any = null;
+		const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+		if (statusPolicy) {
+			if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+				const assetIds = assets?.filter(r => statusPolicy?.products?.includes(r?.productId))?.map(a => a?._id)
+				if (assetIds && assetIds?.length > 0) {
+					result = { statusPolicy: statusPolicy, assetIds: assetIds }
+				}
+			} else {
+				result = { statusPolicy: statusPolicy, assetIds: assets?.map(a => a?._id) }
+			}
+		}
+		return result;
+	}
+
 	return (
 		<>
 			<Dialog
@@ -138,9 +154,9 @@ const TransferToAnotherProductDialog = ({ onClose, onSuccess, rentalManagementDa
 									color="primary"
 									type="submit"
 									onClick={() => {
-										const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.reserved);
+										const statusPolicy = checkAssetPolicy(ASSET_STATUS.reserved);
 										if (statusPolicy) {
-											setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy });
+											setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds });
 										}
 										else {
 											handleAdd([])
@@ -167,13 +183,13 @@ const TransferToAnotherProductDialog = ({ onClose, onSuccess, rentalManagementDa
 			</Dialog>
 			{openAssetDataDialog.open && (
 				<AssetDetailsChangeDialog
-					ids={assets?.map((e) => e._id)}
+					ids={openAssetDataDialog._ids}
 					statusPolicy={openAssetDataDialog.statusPolicy}
 					setAssetsData={() => { }}
-					onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null })}
+					onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null })}
 					onSuccess={(data) => {
 						handleAdd(data)
-						setOpenAssetDataDialog({ open: false, statusPolicy: null });
+						setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null });
 					}}
 					staticLookUpFilters={{
 						wellNumber: rentalManagementData?.wellNumber

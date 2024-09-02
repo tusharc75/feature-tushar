@@ -146,7 +146,7 @@ const ReceivingTicket = ({
 
   const [columns, setColumns] = useState(null);
   const [assetPolicyData, setAssetPolicyData] = useState(null);
-  const [openAssetDetailDialog, setOpenAssetDetailDialog] = useState({ open: false, statusPolicy: null, referenceData: {}, ticketType: null });
+  const [openAssetDetailDialog, setOpenAssetDetailDialog] = useState({ open: false, statusPolicy: null, _ids: null, referenceData: {}, ticketType: null });
   const [assetsData, setAssetsData] = useState([]);
   const [transferAnotherPackageDialog, setTransferAnotherPackageialog] = useState(false);
   const [serviceData, setServiceData] = useState([]);
@@ -1433,6 +1433,22 @@ const ReceivingTicket = ({
     setColumns(column);
   };
 
+  const checkAssetPolicy = (status) => {
+    let result: any = null;
+    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = selectedRecords?.filter(r => r?.type === 'Asset' && statusPolicy?.products?.includes(r?.productId))?.map(a => a?._id)
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds }
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: selectedRecords?.filter(r => r?.type === 'Asset')?.map(a => a?._id) }
+      }
+    }
+    return result;
+  }
+
   const handleTicketDialog = (ticketType, deliveryToType, open = true) => {
     const data = {};
     data['ticketName'] = rentalManagementData.rentalJobName;
@@ -1482,10 +1498,9 @@ const ReceivingTicket = ({
     if (rentalManagementData?.processor?.optionValue) {
       data['processor'] = rentalManagementData?.processor?.optionValue;
     }
-
-    const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === ASSET_STATUS.underReview);
+    const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview)
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
-      setOpenAssetDetailDialog({ open: true, statusPolicy: statusPolicy, referenceData: data, ticketType: ticketType });
+      setOpenAssetDetailDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds, referenceData: data, ticketType: ticketType });
     } else {
       setShowTicketDialog({ open: open, ticketType: ticketType, data: data });
     }
@@ -2313,15 +2328,15 @@ const ReceivingTicket = ({
       )}
       {openAssetDetailDialog.open && (
         <AssetDetailsChangeDialog
-          ids={selectedRecords?.filter((e) => e.type === 'Asset')?.map((e) => e._id)}
+          ids={openAssetDetailDialog._ids}
           statusPolicy={openAssetDetailDialog.statusPolicy}
           setAssetsData={setAssetsData}
           ticketType={openAssetDetailDialog.ticketType}
-          onClose={() => setOpenAssetDetailDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null })}
+          onClose={() => setOpenAssetDetailDialog({ open: false, statusPolicy: null, _ids: null, referenceData: null, ticketType: null })}
           onSuccess={() => {
             const referenceData = openAssetDetailDialog.referenceData;
             const ticketType = openAssetDetailDialog.ticketType;
-            setOpenAssetDetailDialog({ open: false, statusPolicy: null, referenceData: null, ticketType: null });
+            setOpenAssetDetailDialog({ open: false, statusPolicy: null, _ids: null, referenceData: null, ticketType: null });
             setShowTicketDialog({ open: true, ticketType: ticketType, data: referenceData });
           }}
         />
