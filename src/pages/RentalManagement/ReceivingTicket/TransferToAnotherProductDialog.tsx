@@ -110,10 +110,14 @@ const TransferToAnotherProductDialog = ({ onClose, onSuccess, rentalManagementDa
 	const checkAssetPolicy = (status) => {
 		let result: any = null;
 		const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
-		if (statusPolicy && statusPolicy?.products?.length > 0) {
-			const assetIds = assets?.filter(r => statusPolicy?.products?.includes(r?.productId))?.map(a => a?._id)
-			if (assetIds && assetIds?.length > 0) {
-				result = { statusPolicy: statusPolicy, assetIds: assetIds }
+		if (statusPolicy) {
+			if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+				const assetIds = assets?.filter(r => statusPolicy?.products?.includes(r?.productId))?.map(a => a?._id)
+				if (assetIds && assetIds?.length > 0) {
+					result = { statusPolicy: statusPolicy, assetIds: assetIds }
+				}
+			} else {
+				result = { statusPolicy: statusPolicy, assetIds: assets?.map(a => a?._id) }
 			}
 		}
 		return result;

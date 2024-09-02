@@ -361,10 +361,14 @@ const WorkOrderDetails = () => {
   const checkAssetPolicy = (status) => {
     let result: any = null;
     const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
-    if (statusPolicy && statusPolicy?.products?.length > 0) {
-      const assetIds = statusPolicy?.products?.includes(workOrderData?.product?.optionValue) ? [workOrderData?.serializedAsset?.optionValue] : []
-      if (assetIds && assetIds?.length > 0) {
-        result = { statusPolicy: statusPolicy, assetIds: assetIds }
+    if (statusPolicy) {
+      if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
+        const assetIds = statusPolicy?.products?.includes(workOrderData?.product?.optionValue) ? [workOrderData?.serializedAsset?.optionValue] : []
+        if (assetIds && assetIds?.length > 0) {
+          result = { statusPolicy: statusPolicy, assetIds: assetIds }
+        }
+      } else {
+        result = { statusPolicy: statusPolicy, assetIds: [workOrderData?.serializedAsset?.optionValue] }
       }
     }
     return result;
