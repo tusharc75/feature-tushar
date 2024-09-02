@@ -26,6 +26,7 @@ import CopyToClipboard from '../../Helpers/CopyToClipboard';
 import routes from '../../Helpers/Routes';
 import DataListCell from '../Cells/DataListCell';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
+import LookupCell from 'src/components/CustomReactTable/Cells/LookupCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -550,6 +551,13 @@ export default function useColumns() {
               )}
             </div>
           )
+        });
+      } else if (field.type === 'lookUpDisplay') {
+        column.push({
+          ...commonFieldData,
+          editable: Boolean(field?.isColumnEditable),
+          ...(Boolean(field?.isColumnEditable) && ['dropDown', 'multiSelect']?.includes(field.type) ? { option: field?.option } : {}),
+          cell: ({ row }) => <LookupCell field={field} original={row?.original} />
         });
       } else {
         column.push({
