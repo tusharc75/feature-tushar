@@ -56,6 +56,7 @@ const CreditMemo = () => {
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.creditMemoDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    console.log(columns);
   };
 
   const ActionsRenderer = {
@@ -232,8 +233,10 @@ const CreditMemo = () => {
           // actionButtonProps
           // actionMenuItems
           // addButtonProps
-          // addButtonOnclick
-          isAddButtonVisible={false}
+          addButtonOnclick={() => {
+            setShowManageDialog({ open: true, isClone: false, idToClone: null });
+          }}
+          isAddButtonVisible={permissions?.creditMemo?.isCreate }
         />
         {columns ? (
           <CustomReactTable
@@ -246,7 +249,6 @@ const CreditMemo = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.creditMemo}
-            hideAction={true}
           />
         ) : (
           <Box p={2} height={500}>

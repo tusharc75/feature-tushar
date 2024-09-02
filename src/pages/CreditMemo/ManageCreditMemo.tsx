@@ -1,4 +1,4 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import { Fragment, useContext, useEffect, useState } from 'react';
@@ -11,12 +11,12 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, GenerateResourceLineNumber, setFieldsInAscendingOrder, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, GenerateResourceLineNumber, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from 'src/components/Helpers/FormTypes';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = null,  referenceData = null, isRedirectToDetailPage = true }) => {
   
@@ -37,10 +37,6 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
   useEffect(() => {
     fetchFields();
   }, []);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   const fetchFields = async () => {
     try {
@@ -176,62 +172,19 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData?.map((form, i) => {
-                      return form?.name ? (
-                        <div key={i}>
-                          <div className={'detail-box-content'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                          </div>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field) => (
-                                <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                  <FormTypes
-                                    creditMemoId={creditMemoId}
-                                    {...field}
-                                    fieldData={field}
-                                    disabled={
-                                      field.fieldName === 'currency'
-                                        ? creditMemoId
-                                          ? field?.disableOnEdit && !isClone
-                                          : field?.isUneditable && field?.disableOnEdit
-                                            ? true
-                                            : false
-                                        : creditMemoId && field.disableOnEdit && !isClone
-                                    }
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    imageOrFileUploadCompletePercentage={
-                                      ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                        ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(completePercentage);
-                                        }
-                                        : null
-                                    }
-                                    fields={initialData?.fields}
-                                  />
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </Box>
-                        </div>
-                      ) : null;
-                    })}
+                <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                      }}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                      resource={sidebarResource.creditMemo}
+                      referenceId={creditMemoId|| null}
+                    />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
