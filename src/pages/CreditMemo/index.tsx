@@ -56,7 +56,6 @@ const CreditMemo = () => {
     data = response?.data?.data;
     let newColumns = generateColumns(renderedFrom, data, routes.creditMemoDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
-    console.log(columns);
   };
 
   const ActionsRenderer = {
