@@ -8,7 +8,7 @@ import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTab
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import routes from 'src/components/Helpers/Routes';
-import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { dateTimeFormat, gridLoadingTimeout, prepareDataForGrid } from 'src/constants/helpers';
 import { deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
@@ -16,16 +16,19 @@ import axios, { CancelTokenSource } from 'axios';
 import moment from 'moment';
 import EditIcon from '@material-ui/icons/Edit';
 import ManageVolumeData from './ManageVolumeData';
+import { camelCase } from 'lodash';
 
-const VolumeData = ({assetId}) => {
-  const renderedFrom = 'iotChart_VolumeData';
+const VolumeData = ({ assetId }) => {
+
+  const renderedFrom = `${camelCase(routes.iotChart.title)}_VolumeData`;
+
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { selectedEntity }
   }: any = useData();
   const { state, dispatch } = useTableReducer();
-  const { page, limit, filters, sorting, selectedRecords } = state;
-  const [showManageDialog, setShowManageDialog] = useState({ open: false, data: null});
+  const { page, limit, selectedRecords } = state;
+  const [showManageDialog, setShowManageDialog] = useState({ open: false, data: null });
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
@@ -42,93 +45,93 @@ const VolumeData = ({assetId}) => {
   }, [page, limit, selectedEntity]);
 
   const fetchGridColumns = () => {
-      const columns = [
-        {
-          accessor: 'date',
-          Header: 'Date',
-          width: 120,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-                {moment(row?.original?.date)?.format(dateTimeFormat)}
-            </div>
-          )
-        },
-        {
-          accessor: 'TotalVolInBBLs',
-          Header: 'Total Vol In BBLs',
-          width: 120,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-                {row?.original?.TotalVolInBBLs}
-            </div>
-          )
-        },
-        {
-          accessor: 'TotalVolOutBBLs',
-          Header: 'Total Vol Out BBLs',
-          width: 120,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-                {row?.original?.TotalVolOutBBLs}
-            </div>
-          )
-        },
-        {
-          accessor: 'TotalMinutesRecycle',
-          Header: 'Total Minutes Recycle',
-          width: 120,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-                {row?.original?.TotalMinutesRecycle}
-            </div>
-          )
-        },
-        {
-          accessor: 'TotalMinutesPurge',
-          Header: 'Total Minutes Purge',
-          width: 120,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-                {row?.original?.TotalMinutesPurge}
-            </div>
-          )
-        },
-        {
-          accessor: 'TotalMinutesFill',
-          Header: 'Total Minutes Fill',
-          width: 120,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-                {row?.original?.TotalMinutesFill}
-            </div>
-          )
-        },
-        {
-          accessor: 'minid',
-          Header: 'MINID',
-          width: 120,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-                {row?.original?.minid}
-            </div>
-          )
-        },
-      ];
-      setColumns([...columns, ActionsRenderer]);
+    const columns = [
+      {
+        accessor: 'date',
+        Header: 'Date',
+        width: 120,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {moment(row?.original?.date)?.format(dateTimeFormat)}
+          </div>
+        )
+      },
+      {
+        accessor: 'TotalVolInBBLs',
+        Header: 'Total Vol In BBLs',
+        width: 120,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original?.TotalVolInBBLs}
+          </div>
+        )
+      },
+      {
+        accessor: 'TotalVolOutBBLs',
+        Header: 'Total Vol Out BBLs',
+        width: 120,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original?.TotalVolOutBBLs}
+          </div>
+        )
+      },
+      {
+        accessor: 'TotalMinutesRecycle',
+        Header: 'Total Minutes Recycle',
+        width: 120,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original?.TotalMinutesRecycle}
+          </div>
+        )
+      },
+      {
+        accessor: 'TotalMinutesPurge',
+        Header: 'Total Minutes Purge',
+        width: 120,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original?.TotalMinutesPurge}
+          </div>
+        )
+      },
+      {
+        accessor: 'TotalMinutesFill',
+        Header: 'Total Minutes Fill',
+        width: 120,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original?.TotalMinutesFill}
+          </div>
+        )
+      },
+      {
+        accessor: 'minid',
+        Header: 'MINID',
+        width: 120,
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => (
+          <div>
+            {row?.original?.minid}
+          </div>
+        )
+      },
+    ];
+    setColumns([...columns, ActionsRenderer]);
   };
 
   const ActionsRenderer = {
@@ -177,9 +180,7 @@ const VolumeData = ({assetId}) => {
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-
-    axiosInstance()
-      .get(`${routes?.serializedAsset?.path}/iot-volume${queryString}`, { cancelToken: cancelTokenSource?.token })
+    axiosInstance().get(`${routes?.serializedAsset?.path}/iot-volume${queryString}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data, count } }) => {
         let rows = data?.map((u: any) => {
           let finalObject: any = prepareDataForGrid(u);
@@ -200,14 +201,9 @@ const VolumeData = ({assetId}) => {
       });
   };
 
-  const getQueryString = (isExport = false) => {
+  const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;
-
-    if (selectedEntity) {
-      deepFilter = `${deepFilter}&entity=${selectedEntity}`;
-    }
     deepFilter = `${deepFilter}&asset=${assetId}`
-
     return deepFilter;
   };
 
@@ -269,52 +265,52 @@ const VolumeData = ({assetId}) => {
   return (
     <Fragment>
       <DetailsPageHeader
-        isAddButtonVisible={true}
-        isActionButtonVisible={true}
+        isAddButtonVisible={false}
+        isActionButtonVisible={false}
         actionButtonMenuItems={<ActionMenuItems />}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         addButtonMenuItems={addButtonMenuItems()}
         hasXpadding={false}
       />
-
-        {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 300px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
-        
-        {showDeleteConfirmBox && (
-          <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete volume data?`}
-            onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
-            }}
-            okBtnLoading={isSubmitting}
-            onOk={handleDelete}
-          />
-        )}
-        {showManageDialog.open && (
-          <ManageVolumeData
-            data={showManageDialog.data}
-            onClose={() => setShowManageDialog({ open: false, data: null })}
-            onSuccess={() => {
-              fetchData();
-              setShowManageDialog({ open: false, data: null });
-            }}
-            assetId={assetId}
-          />
-        )}
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 300px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchData}
+          hideAction={true}
+          hideSelection={true}
+        />
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
+      {showDeleteConfirmBox && (
+        <ConfirmationDialog
+          open={showDeleteConfirmBox}
+          message={`Are you sure you want to delete volume data?`}
+          onClose={() => {
+            setDeleteRecord(null);
+            setShowDeleteConfirmBox(false);
+          }}
+          okBtnLoading={isSubmitting}
+          onOk={handleDelete}
+        />
+      )}
+      {showManageDialog.open && (
+        <ManageVolumeData
+          data={showManageDialog.data}
+          onClose={() => setShowManageDialog({ open: false, data: null })}
+          onSuccess={() => {
+            fetchData();
+            setShowManageDialog({ open: false, data: null });
+          }}
+          assetId={assetId}
+        />
+      )}
     </Fragment>
   );
 };
