@@ -1,4 +1,4 @@
-import { IconButton, useMediaQuery } from '@material-ui/core';
+import { Chip, IconButton, useMediaQuery } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { FaArrowUp } from 'react-icons/fa6';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -18,6 +18,7 @@ import xlsx from 'xlsx-js-style';
 import DisplayMessages from 'src/pages/EquiptAi/DisplayMessages';
 import { useData } from 'src/StateProvider/Provider';
 import SelectTopicModal from 'src/pages/EquiptAi/SelectTopicModal';
+import { isArray } from 'lodash';
 
 const EquiptAi = () => {
   const {
@@ -52,7 +53,7 @@ const EquiptAi = () => {
   };
 
   useEffect(() => {
-    if (permissions?.aiModelTopic.isRead) {
+    if (permissions?.aiModelTopic?.isRead) {
       fetchTopics();
     }
   }, []);
@@ -76,6 +77,13 @@ const EquiptAi = () => {
     axiosInstance()
       .get(`/generative-ai/chat/${chatId}`)
       .then(({ data: { data } }) => {
+        setSelectedTopics(
+          isArray(data?.topics) && data?.topics?.length
+            ? data?.topics?.map((e) => {
+                return { _id: e.optionValue, aiModelTopicName: e.optionLabel };
+              })
+            : []
+        );
         setChats(data?.history);
         setChatTitle(data?.title);
       })
@@ -183,7 +191,6 @@ const EquiptAi = () => {
       <CustomContainer className="!min-h-[var(--container-height)] !p-0 [--container-height:calc(100vh-150px)] max-[768px]:[--container-height:calc(100vh-179px)]">
         <div className="relative flex h-[var(--container-height)] min-h-[400px] gap-3 overflow-hidden [--head-h:56px] [--sidebar-w:280px]">
           <HistorySidebar
-            setSelectedTopics={setSelectedTopics}
             chatHistory={chatHistory}
             hadleNewChat={hadleNewChat}
             isSidebarOpen={isSidebarOpen}
@@ -195,11 +202,11 @@ const EquiptAi = () => {
           />
           <div
             className={cn(
-              'relative min-h-full flex-grow p-[15px] transition-all duration-300 md:p-[25px]',
+              'relative min-h-full min-w-0 flex-grow p-[15px] transition-all duration-300 md:p-[25px]',
               isSidebarOpen && !isMobile ? '' : 'ml-[calc(var(--sidebar-w)_*_-1_-_11px)] w-[calc(100%_+_var(--sidebar-w))]'
             )}
           >
-            <div className="head mb-3 flex items-center justify-between gap-2">
+            <div className="head mb-3 flex items-center justify-between gap-3">
               {!isSidebarOpen && (
                 <div className="flex items-center gap-2">
                   <HtmlTooltip title={isSidebarOpen ? 'Close Sidebar' : 'Open Sidebar'}>
@@ -215,12 +222,15 @@ const EquiptAi = () => {
                     startIcon={<Chat fontSize={'small'} />}
                     size="small"
                     onClick={() => hadleNewChat()}
-                    style={{ padding: 8 }}
+                    style={{ padding: 8, minWidth: 'max-content' }}
                   >
                     New Chat
                   </ThemeButton>
                 </div>
               )}
+              <div className="flex min-w-0 gap-2 overflow-x-auto py-1">
+                {selectedTopics?.map((t) => <Chip size="small" key={t._id} color="primary" label={t?.aiModelTopicName} />)}
+              </div>
               <div className="ml-auto">
                 {chats?.length ? (
                   <HtmlTooltip title={'Download Chat'}>
@@ -248,7 +258,7 @@ const EquiptAi = () => {
                       askQuestion();
                     }
                   }}
-                  autoComplete='off'
+                  autoComplete="off"
                 />
                 <IconButton
                   style={{ borderRadius: 999, padding: 10 }}

@@ -52,8 +52,8 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
     }
   }, [step]);
 
-  const fetchColumns = () => {
-    const newColumns = generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
+  const fetchColumns = async () => {
+    setColumns(null)
     const column: any = [
       {
         accessor: 'index',
@@ -115,55 +115,53 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         ]
         : [])
     ];
-    setColumns([
-      ...column,
-      ...newColumns,
-      {
-        accessor: 'action',
-        Header: 'Actions',
-        minWidth: 100,
-        width: 110,
-        sticky: 'right',
-        disableFilters: true,
-        disableSortBy: true,
-        canDrag: false,
-        Cell: ({ row }) => (
-          <>
-            {step?.fields?.length > 0 &&
-              <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                <span>
-                  <IconButton
-                    size="small"
-                    aria-label="Edit"
-                    disabled={allowedToEdit ? false : true}
-                    onClick={() => {
-                      setOpen({ open: true, id: row?.original?._id });
-                    }}
-                  >
-                    <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                  </IconButton>
-                </span>
-              </HtmlTooltip>
-            }
-            <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+    const newColumns = await generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
+    const ActionsRenderer = {
+      accessor: 'action',
+      Header: 'Actions',
+      minWidth: 100,
+      width: 110,
+      sticky: 'right',
+      disableFilters: true,
+      disableSortBy: true,
+      canDrag: false,
+      Cell: ({ row }) => (
+        <>
+          {step?.fields?.length > 0 &&
+            <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
               <span>
                 <IconButton
                   size="small"
-                  aria-label="Delete"
+                  aria-label="Edit"
                   disabled={allowedToEdit ? false : true}
                   onClick={() => {
-                    setDeleteRecord(row?.original);
-                    setShowDeleteConfirmBox(true);
+                    setOpen({ open: true, id: row?.original?._id });
                   }}
                 >
-                  <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+                  <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
                 </IconButton>
               </span>
             </HtmlTooltip>
-          </>
-        )
-      }
-    ])
+          }
+          <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
+            <span>
+              <IconButton
+                size="small"
+                aria-label="Delete"
+                disabled={allowedToEdit ? false : true}
+                onClick={() => {
+                  setDeleteRecord(row?.original);
+                  setShowDeleteConfirmBox(true);
+                }}
+              >
+                <DeleteIcon fontSize="small" color={allowedToEdit ? 'error' : 'disabled'} />
+              </IconButton>
+            </span>
+          </HtmlTooltip>
+        </>
+      )
+    };
+    setColumns([...column, ...newColumns, ActionsRenderer])
   };
 
   const fetchData = () => {

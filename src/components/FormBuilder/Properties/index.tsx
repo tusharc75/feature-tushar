@@ -335,14 +335,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
               ele.dropdownOnConverter = values.dropdownOnConverter;
             }
 
-            if (['signature', 'groupSignature'].includes(fieldData.type)) {
-              if (values?.signatureUsers && values?.signatureUsers?.length) {
-                ele.signatureUsers = values.signatureUsers;
-              } else {
-                ele.signatureUsers = [];
-              }
-            }
-
             if (fieldData?.lookup) {
               if (values.lookupDependentOn) {
                 ele.lookupDependentOn = values.lookupDependentOn;

@@ -1,49 +1,30 @@
 import { Fragment, useEffect, useState } from 'react';
 import { Typography, TextField, Box } from '@material-ui/core';
-import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import Signature from 'src/components/Helpers/FormTypes/Signature';
 import { useData } from 'src/StateProvider/Provider';
+import { isObject } from 'lodash';
 
 const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
   const {
     state: { user }
   }: any = useData();
-  const [users, setUsers] = useState([]);
-  const [selectedSignatureUsers, setSelectedSignatureUsers] = useState([]);
-  
-  useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=User`)
-      .then(({ data: { data } }) => {
-        setUsers(data['User']);
-        let selectedUsers = []
-        let fieldValue = [];
-        if (!values[name]) {
-          selectedUsers = data['User']?.filter((user) => [...fieldData?.signatureUsers].includes(user.optionValue)) || [];
-          setSelectedSignatureUsers(selectedUsers);
-           fieldValue = selectedUsers.map((ele) => {
-            return {
-              user: ele.optionValue,
-              signature: ''
-            }
-          })
-          setFieldValue(name, fieldValue);
-        } else {
-          const userIds = values[name]?.map((ele) => ele.user?._id);
-          fieldValue = values[name]?.map((ele) => {
-            return {
-              ...ele,
-              user: ele?.user?._id,
-            }
-          });
-          selectedUsers = data['User']?.filter((user) => [...userIds].includes(user.optionValue));
-          setSelectedSignatureUsers(selectedUsers);
-          setFieldValue(name, fieldValue);
-        }
 
-      })
-      .catch((error) => { });
+  const [selectedSignatureUsers, setSelectedSignatureUsers] = useState([]);
+
+  useEffect(() => {
+    let selectedUsers = [];
+    let fieldValue = [];
+    const userIds = values[name]?.map((ele) => isObject(ele?.user) ? ele?.user?._id : ele?.user);
+    fieldValue = values[name]?.map((ele) => {
+      return {
+        ...ele,
+        user: isObject(ele?.user) ? ele?.user?._id : ele?.user
+      };
+    });
+    selectedUsers = fieldData?.option?.filter((user) => [...userIds].includes(user.optionValue));
+    setSelectedSignatureUsers(selectedUsers);
+    setFieldValue(name, fieldValue);
   }, []);
 
   return (
@@ -52,7 +33,7 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
       <div className="mt-1 flex flex-col justify-center gap-3">
         <Autocomplete
           disableCloseOnSelect={false}
-          options={users}
+          options={fieldData?.option}
           fullWidth
           multiple
           size="small"
@@ -68,20 +49,20 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
                 return {
                   user: ele.optionValue,
                   signature: ''
-                }
+                };
               }
-            })
+            });
             setFieldValue(name, [...updatedFieldValue]);
             setSelectedSignatureUsers(newVal);
           }}
-          renderInput={(params) => <TextField {...params} label="Signature Users" name="signatureUsers" variant="outlined" />}
+          renderInput={(params) => <TextField {...params} label="Signature Users" name={name} variant="outlined" />}
         />
         <div className="flex flex-col flex-wrap gap-2">
-          {values[name]?.length ?
-            values[name]?.map((value) => {
-              const userName = selectedSignatureUsers?.find((ele)=> ele.optionValue===value.user)?.optionLabel;
+          {values[name]?.length
+            ? values[name]?.map((value) => {
+              const userName = selectedSignatureUsers?.find((ele) => ele.optionValue === value.user)?.optionLabel;
               return (
-                <Box className="flex justify-between items-center">
+                <Box className="flex items-center justify-between">
                   <Typography>{userName}</Typography>
                   <Signature
                     label={''}
@@ -100,11 +81,12 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
                       });
                       setFieldValue(name, updatedData);
                     }}
-                    disable={user?.user?._id!==value.user}
+                    disable={user?.user?._id !== value.user}
                   />
                 </Box>
               );
-            }) : null}
+            })
+            : null}
         </div>
       </div>
     </Box>

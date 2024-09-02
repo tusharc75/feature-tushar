@@ -41,8 +41,9 @@ type ArrangeViewMenuProps = {
   columns: any[];
   hideSelection: boolean;
   expander: boolean;
+  appliedView?: { hide: string[]; order: string[]; name?: string; id?: string };
 };
-const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander }: ArrangeViewMenuProps) => {
+const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection, expander, appliedView }: ArrangeViewMenuProps) => {
   const walkmeInstance = useGetWalkmeInstance();
   const { loading } = state;
   const { gridMetaData, setGridMetaData } = useGridMetaData();
@@ -62,9 +63,9 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [editCreateDialogData, setEditCreateDialogData] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
   const [confirmationDialog, setConfirmationDialog] = useState<{ open: boolean; data: GridViewSavedData | null }>({ open: false, data: null });
-  const [selected, setSelected] = useState(defaultView);
+  const [selected, setSelected] = useState(appliedView ? { ...appliedView, _id: appliedView.id } : defaultView);
 
-  const applyViewInTable = (order: string[], hide: string[]) => {
+  const applyViewInTable = (order: string[], hide: string[], name?: string, id?: string) => {
     const stickycolumns = getStickyColumnNames({ allColumn: columns, hideSelection, expander: expander });
     let columnOrder = [];
     const columnHiddenStateData = {};
@@ -83,19 +84,21 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
 
     const newData = {
       ...gridMetaData,
-      [renderedFrom]: { hide, order }
+      [renderedFrom]: { hide, order, name, id }
     };
 
     setGridMetaData(newData);
   };
 
   useEffect(() => {
-    if (defaultView) {
-      applyViewInTable(defaultView?.order || [], defaultView?.hide || []);
+    if (appliedView) {
+      applyViewInTable(appliedView.order, appliedView.hide, appliedView.name, appliedView.id);
+    } else if (defaultView) {
+      applyViewInTable(defaultView?.order || [], defaultView?.hide || [], defaultView.name, defaultView._id);
     } else {
       applyViewInTable([], []);
     }
-  }, [renderedFrom, defaultView, columns.length]);
+  }, [renderedFrom, columns.length]);
 
   const getAllSavedViews = useCallback(async () => {
     try {
@@ -110,7 +113,7 @@ const ArrangeViewMenu = ({ renderedFrom, dispatch, state, columns, hideSelection
   }, [renderedFrom, toastConfig, contextDispatch, user]);
 
   const applyView = (data: GridViewSavedData) => {
-    applyViewInTable(data.order, data.hide);
+    applyViewInTable(data.order, data.hide, data.name, data._id);
     setSelected(data);
   };
 

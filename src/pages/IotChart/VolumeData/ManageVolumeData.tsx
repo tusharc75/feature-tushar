@@ -10,120 +10,179 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
-import { useHistory } from 'react-router-dom';
-import { CustomDialogTransition, GenerateResourceLineNumber, rentalManagement } from 'src/constants/helpers';
+import routes from 'src/components/Helpers/Routes';
+import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
+import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../../constants/helpers';
 
-const ManageDynamicForm = ({
-  resource,
-  resourcePath = '',
-  onClose,
-  onSuccess,
-  redirected = true,
-  isClone = false,
-  id = null,
-  referenceData = null,
-  collaborateTools = false
-}) => {
-  const history = useHistory();
-  const toastConfig = useContext(CustomToastContext);
+const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
   const {
     state: { user }
   }: any = useData();
-
+  const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
   const [loading, setLoading] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
 
   useEffect(() => {
     fetchFields();
   }, []);
 
-  const fetchFields = async () => {
-    try {
-      let data;
-      const response = await axiosInstance().get(`/field?resource=${resource}`);
-      data = response?.data?.data;
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+  const columns = [
+    {
+      fieldData: {
+        fieldLabel: 'Date',
+        fieldName: 'date',
+        isTooltip: false,
+        option: [],
+        order: 1,
+        required: true,
+        tooltipMessage: '',
+        sectionName: 'Volume Data',
+        type: 'date',
+      },
+      isCreate: true,
+      isDelete: true,
+      isUpdate: true,
+    },
+    {
+      fieldData: {
+        fieldLabel: 'Total Vol In BBLs',
+        fieldName: 'TotalVolInBBLs',
+        isTooltip: false,
+        option: [],
+        order: 2,
+        required: true,
+        tooltipMessage: '',
+        sectionName: 'Volume Data',
+        type: 'number',
+      },
+      isCreate: true,
+      isDelete: true,
+      isUpdate: true,
+    },
+    {
+      fieldData: {
+        fieldLabel: 'Total Vol Out BBLs',
+        fieldName: 'TotalVolOutBBLs',
+        isTooltip: false,
+        option: [],
+        order: 3,
+        required: true,
+        tooltipMessage: '',
+        sectionName: 'Volume Data',
+        type: 'number',
+      },
+      isCreate: true,
+      isDelete: true,
+      isUpdate: true,
+    },
+    {
+      fieldData: {
+        fieldLabel: 'Total Minutes Recycle',
+        fieldName: 'TotalMinutesRecycle',
+        isTooltip: false,
+        option: [],
+        order: 4,
+        required: false,
+        defaultValue: 0,
+        tooltipMessage: '',
+        sectionName: 'Volume Data',
+        type: 'number',
+      },
+      isCreate: true,
+      isDelete: true,
+      isUpdate: true,
+    },
+    {
+      fieldData: {
+        fieldLabel: 'Total Minutes Purge',
+        fieldName: 'TotalMinutesPurge',
+        isTooltip: false,
+        option: [],
+        order: 5,
+        defaultValue: 0,
+        required: false,
+        tooltipMessage: '',
+        sectionName: 'Volume Data',
+        type: 'number',
+      },
+      isCreate: true,
+      isDelete: true,
+      isUpdate: true,
+    },
+    {
+      fieldData: {
+        fieldLabel: 'Total Minutes Fill',
+        fieldName: 'TotalMinutesFill',
+        isTooltip: false,
+        option: [],
+        order: 6,
+        required: true,
+        tooltipMessage: '',
+        sectionName: 'Volume Data',
+        type: 'number',
+      },
+      isCreate: true,
+      isDelete: true,
+      isUpdate: true,
+    },
+    {
+      fieldData: {
+        fieldLabel: 'MINID',
+        fieldName: 'minid',
+        isTooltip: false,
+        option: [],
+        order: 7,
+        required: true,
+        tooltipMessage: '',
+        sectionName: 'Volume Data',
+        type: 'number',
+      },
+      isCreate: true,
+      isDelete: true,
+      isUpdate: true,
+    },
+  ]
 
-      if (id) {
-        axiosInstance()
-          .get(`/dynamic-form/${id}`, {
-            headers: {
-              Resource: resource
-            }
-          })
-          .then(({ data: { data } }) => {
-            if (referenceData) {
-              Object.keys(referenceData)?.forEach((_r) => {
-                fieldsDataForUpdate?.forEach((_f) => {
-                  if (_f?.fieldName === _r) {
-                    _f.disabled = true;
-                    return;
-                  }
-                });
-              });
-            }
-            let fields = fieldsDataForUpdate;
-            if (isClone) {
-              fields = fieldsDataForCreate;
-              const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField);
-              if (primaryField) {
-                data[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
-              }
-            }
+  const fetchFields = async () => {
+      let fieldsDataForCreate = columns.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+      let fieldsDataForUpdate = columns.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
+
+      if (data) {
+        fieldsDataForUpdate[0].isUneditable = true;
             setInitialData({
-              fields: fields,
-              values: isClone ? getObjKeysWithValues(data, fields, true, user) : getObjKeysWithValues(data, fields)
+              fields: fieldsDataForUpdate,
+              values: getObjKeysWithValues(data, fieldsDataForUpdate)
             });
-          })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
-          });
       } else {
         const tempInitialData = getObjKeys('', fieldsDataForCreate);
-        const primaryField = fieldsDataForCreate?.find((e) => e?.primaryField && e?.isSystemGenerate);
-        if (primaryField) {
-          tempInitialData[primaryField?.fieldName] = GenerateResourceLineNumber(fieldsDataForCreate);
-        }
-        if (referenceData) {
-          Object.keys(referenceData)?.forEach((_r) => {
-            fieldsDataForCreate?.forEach((_f) => {
-              if (_f?.fieldName === _r) {
-                _f.disabled = true;
-                tempInitialData[_f?.fieldName] = referenceData[_f?.fieldName];
-                return;
-              }
-            });
-          });
-        }
         setInitialData({
           fields: fieldsDataForCreate,
           values: tempInitialData
         });
       }
-    } catch (error) {
-      toastConfig.setToastConfig(error);
-    }
   };
 
   const handleSubmit = (values) => {
-    const primaryField = initialData?.fields?.find((e) => e?.primaryField);
     setSubmitting(true);
-    if (id && !isClone) {
-      values._id = id;
+    const updatedValues = {
+      TotalVolInBBLs: parseInt(values.TotalVolInBBLs) || 0,
+      TotalVolOutBBLs: parseInt(values.TotalVolOutBBLs) || 0,
+      TotalMinutesRecycle: parseInt(values.TotalMinutesRecycle) || 0,
+      TotalMinutesPurge: parseInt(values.TotalMinutesPurge) || 0,
+      TotalMinutesFill: parseInt(values.TotalMinutesFill) || 0,
+      minid: parseInt(values.minid) || 0,
+      date: values.date,
+      asset: assetId
+    }
+  
+    if (data) {
       axiosInstance()
-        .put(`/dynamic-form`, values, {
-          headers: {
-            Resource: resource
-          }
-        })
+        .put(`${routes.serializedAsset?.path}/iot-volume`, {_id: data?._id, ...updatedValues})
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
@@ -139,19 +198,10 @@ const ManageDynamicForm = ({
         });
     } else {
       axiosInstance()
-        .post(`/dynamic-form`, values, {
-          headers: {
-            Resource: resource
-          }
-        })
+        .post(`${routes.serializedAsset?.path}/iot-volume`, updatedValues)
         .then(({ data: { data, message } }) => {
           setLoading(false);
-          if (redirected) {
-            history.push(`${resourcePath}/detail/${data._id}`);
-            onSuccess(data.data);
-          } else {
-            onSuccess(data, primaryField);
-          }
+          onSuccess(data.data);
           setSubmitting(true);
           toastConfig.setToastConfig({
             open: true,
@@ -169,45 +219,8 @@ const ManageDynamicForm = ({
 
   function validate(values) {
     const errors = {};
-    const counterFields = initialData?.fields?.filter((f) => f?.type === 'counter');
-    if (counterFields?.length) {
-      counterFields?.forEach((field) => {
-        field?.subFields.forEach((_field) => {
-          if (_field?.required && values[field?.fieldName]?.some((v) => !v[_field?.fieldName])) {
-            errors[field?.fieldName] = `${field?.fieldLabel} is required`;
-          }
-        });
-      });
-    }
     return errors;
   }
-
-  const handleScroll = (errors) => {
-    const err = Object.keys(errors);
-    if (err?.length) {
-      const input = document.querySelector(`input[name=${err[0]}]`);
-      input?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'start'
-      });
-    }
-  };
-
-  //This is for fixed logic
-  const handleFixedBrandWiseLogic = async (name, value, setFieldValue) => {
-    if (name === 'rentalJob' && resource === 'Daily Inspection Report' && initialData?.fields?.find((e) => e.fieldName === 'assets')) {
-      const response: any = await axiosInstance().get(`${rentalManagement.api}/${value}`);
-      if (response?.data?.data?.productInventory?.length) {
-        setFieldValue(
-          'assets',
-          response?.data?.data?.productInventory?.map((e) => e.inventory)
-        );
-      } else {
-        setFieldValue('assets', []);
-      }
-    }
-  };
 
   return (
     <Dialog
@@ -232,7 +245,7 @@ const ManageDynamicForm = ({
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${id ? (isClone ? `Clone` : `Edit`) : `Create`}`}
+                title={data ? `Edit Volume Data` : 'Create Volume Data'}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -244,20 +257,11 @@ const ManageDynamicForm = ({
                   <InputField
                     errors={errors}
                     values={values}
-                    setFieldValue={(name, value) => {
-                      setFieldValue(name, value);
-                      handleFixedBrandWiseLogic(name, value, setFieldValue);
-                    }}
+                    setFieldValue={setFieldValue}
                     touched={touched}
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
-                    onImageUploadCompletePercentage={(completePercentage) => {
-                      setUploadingImageOrFileProgress(completePercentage);
-                    }}
-                    resource={resource}
-                    referenceId={id || null}
-                    collaborateTools={collaborateTools}
                   />
                 </Form>
               </CustomDialogContent>
@@ -274,16 +278,12 @@ const ManageDynamicForm = ({
                   Cancel
                 </Button>
                 <Button
-                  disabled={uploadingImageOrFileProgress > 0 || loading || submitting}
+                  disabled={loading || submitting}
                   variant="contained"
                   color="primary"
                   type="submit"
                   size="small"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleScroll(errors);
-                    submitForm();
-                  }}
+                  onClick={submitForm}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
                   {' '}
@@ -296,7 +296,6 @@ const ManageDynamicForm = ({
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
-                    handleScroll(errors);
                     submitForm();
                   }}
                   onClose={() => {
@@ -317,4 +316,4 @@ const ManageDynamicForm = ({
   );
 };
 
-export default ManageDynamicForm;
+export default ManageVolumeData;

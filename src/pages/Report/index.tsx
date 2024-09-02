@@ -1,7 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
 import { Grid, Button, Box } from '@material-ui/core';
-import { camelCase, startCase } from 'lodash';
+import { camelCase, isEmpty, isObject, startCase } from 'lodash';
 import axios from 'axios';
 import moment from 'moment';
 import { MdDescription, MdFilterList } from 'react-icons/md';
@@ -55,7 +55,7 @@ const Report = () => {
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
   const { state, dispatch } = useTableReducer();
-  const { loading, page, sorting, search, limit, filters, pageSizes, colState } = state;
+  const { loading, page, sorting, search, limit, filters, pageSizes, visibleColumns } = state;
 
   const fetchGridColumns = async () => {
     setLoadingColumns(true);
@@ -357,8 +357,13 @@ const Report = () => {
 
   const getApi = () => {
     let newColumns = columns.map((col) => col.accessor);
-    if (colState.length) {
-      newColumns = colState?.filter((col) => col.isVisible).map((col) => col.accessor);
+    if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
+      newColumns = []
+      for (const [key, value] of Object.entries(visibleColumns)) {
+        if (value) {
+          newColumns.push(key);
+        }
+      }
     }
     let filterQuery = getFilter(true);
     let api = null;
@@ -394,7 +399,7 @@ const Report = () => {
                         permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
                         module={''}
                         api={getApi()}
-                        afterImportCompleted={() => {}}
+                        afterImportCompleted={() => { }}
                         onlyExport={true}
                       />
                     )}

@@ -31,6 +31,7 @@ import ManageDeliveryTicket from 'src/pages/DeliveryTicket/ManageDeliveryTicket'
 import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSerializedAsset';
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import { FiExternalLink } from 'react-icons/fi';
+import LocalShippingIcon from '@material-ui/icons/LocalShipping';
 
 interface LoadingGridProps {
   permissions: any;
@@ -38,7 +39,6 @@ interface LoadingGridProps {
   transferAssetId: string | any;
   setNextStep: any;
   currentStep: number;
-  setTransferIsEnded?: any;
   updateTransferStatus?: any;
   isTransferEnded: boolean;
   renderedFrom?: string;
@@ -53,7 +53,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     transferAssetId,
     transferAssetData,
     setNextStep,
-    setTransferIsEnded,
     updateTransferStatus,
     isTransferEnded,
     renderedFrom,
@@ -96,12 +95,9 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       }
       if (transferAssetData?.transferType === 'Internal') {
         if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
-          setTransferIsEnded(true);
           if (transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed) {
             updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
           }
-        } else {
-          setTransferIsEnded(false);
         }
       }
     }
@@ -219,7 +215,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             Header: 'Index',
             width: 70,
             sticky: isMobile ? 'none' : 'left',
-            Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
+            Cell: ({ row }) => (
+              <div className="d-flex align-items-center gap-2">
+                <h5 className="text-truncate">{row?.original?.index}</h5>
+                {row?.original?.loadingTicketId && (
+                  <HtmlTooltip title={`Loading Ticket ${row?.original?.loadingTicketStatus}`}>
+                    <LocalShippingIcon fontSize="small" color={'primary'} />
+                  </HtmlTooltip>
+                )}
+              </div>
+            )
           },
           ...newColumns,
           ...extraColumn
@@ -529,8 +534,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           Replace Assets
         </MenuItem>
         {permissions?.transferAsset?.isUpdate &&
-        selectedRecords.length &&
-        selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+          selectedRecords.length &&
+          selectedRecords?.filter((f) => f.hasOwnProperty('loadingTicket') && f?.loadingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
           selectedRecords?.length ? (
           <MenuItem
             onClick={() => {

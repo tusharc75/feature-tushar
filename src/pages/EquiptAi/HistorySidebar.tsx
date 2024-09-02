@@ -1,7 +1,6 @@
 import { IconButton, List, ListItem, ListItemText, Menu, MenuItem } from '@material-ui/core';
 import MoreHorizIcon from '@material-ui/icons/MoreHoriz';
 import React, { useCallback, useEffect, useState } from 'react';
-
 import { Chat, Delete } from '@material-ui/icons';
 import { Skeleton } from '@material-ui/lab';
 import { groupBy } from 'lodash';
@@ -20,7 +19,6 @@ type HistorySidebarProps = {
   handleDelete: (id: string) => void;
   chatId: string | null;
   isMobile: boolean;
-  setSelectedTopics: React.Dispatch<React.SetStateAction<any[]>>;
 };
 
 type ChatHistory = {
@@ -38,7 +36,6 @@ const HistorySidebar = ({
   handleDelete,
   chatId,
   isMobile,
-  setSelectedTopics
 }: HistorySidebarProps) => {
   const [selectedChatHistory, setSelectedChatHistory] = useState<string>(null);
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
@@ -111,6 +108,7 @@ const HistorySidebar = ({
     groupHistory(chatHistory);
   }, [chatHistory, groupHistory]);
 
+
   return (
     <aside
       className={cn(
@@ -149,7 +147,6 @@ const HistorySidebar = ({
                       button
                       onClick={() => {
                         if (isMobile) setIsSidebarOpen(false);
-                        setSelectedTopics([]);
                         getOneChatHistory(history._id);
                       }}
                       key={history._id}

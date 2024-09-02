@@ -21,4 +21,7 @@ export const getLookupOption = async (brandId, resource) => {
     return data[resource] || [];
 }
 
-export const LOGIC = ['AND', 'OR']
+export const LOGIC = {
+    AND: 'AND',
+    OR: 'OR',
+}
