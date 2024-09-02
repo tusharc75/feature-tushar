@@ -97,7 +97,7 @@ const ManageRentalManagementDialog = ({
             setRentalDetails(data);
             if (data?.canEdit === false) {
               fieldsDataForUpdate?.forEach((e) => {
-                if (['customerAccount']?.includes(e?.fieldName)) {
+                if (['customerAccount', 'parentAccount']?.includes(e?.fieldName)) {
                   e.isUneditable = true;
                 }
               });
@@ -392,8 +392,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         fields={rentalData.fields}
