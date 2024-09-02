@@ -190,7 +190,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (row.sectionId.toString() === sectionId.toString()) {
         row.field.forEach((ele) => {
           if (ele._id.toString() === fieldData._id.toString()) {
-            ele.fieldLabel = values.fieldLabel;
+            ele.fieldLabel = values.fieldLabel?.trim();
             ele.required = values.required;
             ele.isTooltip = values.isTooltip;
             ele.tooltipMessage = values.tooltipMessage;
