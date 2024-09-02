@@ -1,14 +1,11 @@
-import { Box, Button, Grid, InputAdornment } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import Dialog from '@material-ui/core/Dialog';
-import InfoIcon from '@material-ui/icons/Info';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import moment from 'moment';
 import PropTypes from 'prop-types';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
-import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
@@ -18,32 +15,16 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../components/Helpers/CustomButton';
-import FormTypes from '../../components/Helpers/FormTypes';
 import {
   CustomDialogTransition,
   GenerateResourceLineNumber,
   budget,
   getObjKeys,
   getObjKeysWithValues,
-  getUniqueCurrencies,
-  setFieldsInAscendingOrder,
+  sidebarResource,
   yupSchema
 } from '../../constants/helpers';
-
-const budgetMonths = [
-  'januaryBudget',
-  'februaryBudget',
-  'marchBudget',
-  'aprilBudget',
-  'mayBudget',
-  'juneBudget',
-  'julyBudget',
-  'augustBudget',
-  'septemberBudget',
-  'octoberBudget',
-  'novemberBudget',
-  'decemberBudget'
-];
+import InputField from 'src/components/Helpers/InputField';
 
 export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId, isClone }) {
   const { api } = budget;
@@ -54,99 +35,53 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
     values: {}
   });
   const {
-    state: { permissions, selectedEntity, user }
+    state: { user }
   }: any = useData();
 
-  const [formsData, setFormsData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currencySymbol, setCurrencySymbol] = useState(null);
-  const [currency, setCurrency] = useState(null);
-
-  const [salesRepDataSource, setSalesRepDataSource] = useState([]);
-  const [usersDataSource, setUsersDataSource] = useState([]);
-
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
     getBudgetFields();
-    setCurrency(user.entity.find((d) => d._id === selectedEntity).currency);
-    setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === user.entity.find((d) => d._id === selectedEntity).currency)?.symbolNative);
   }, []);
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-    if (initialData.values && initialData.values['entity']) {
-      onSalesRepDropdownOpen(initialData.values['entity']);
-    }
-  }, [initialData.fields]);
-
-  const onSalesRepDropdownOpen = (selectedEntity) => {
-    if (selectedEntity) {
-      let newTempArray = [];
-
-      [selectedEntity].forEach((d) => {
-        usersDataSource.forEach((item) => {
-          if (item.entities?.find((s) => s.entity === d)) {
-            if (!newTempArray.find((s) => s.optionValue === item.optionValue)) {
-              newTempArray.push(item);
-            }
-          }
-        });
-      });
-      setSalesRepDataSource(newTempArray);
-    } else {
-      setSalesRepDataSource(usersDataSource);
-    }
-  };
 
   const getBudgetFields = () => {
     axiosInstance()
       .get(`/field?resource=Budget`)
       .then(({ data: { data } }) => {
-        const filterData = budgetId ? data.filter((d) => d.isUpdate) : data.filter((d) => d.isCreate);
-
-        const salesRepDropdownData = filterData.map((m) => m.fieldData).find((d) => d.fieldName === 'salesRep');
-        if (salesRepDropdownData) {
-          setUsersDataSource(salesRepDropdownData.option);
-        }
-
+        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
         if (budgetId) {
-          let newFields = [];
-
           axiosInstance()
             .get(`${api}/${budgetId}`)
             .then(({ data: { data } }) => {
               data.year = new Date(`${data.year}-01-01`);
-
-              filterData.map((_f) => {
-                if (_f.fieldData.fieldName === 'currency') {
-                  setCurrencySymbol(getUniqueCurrencies().find((d) => d.currencyCode === data['currency'])?.symbolNative);
-                }
-                newFields.push(_f.fieldData);
-              });
-
               let clonedData = { ...data };
-
               if (isClone) {
                 let { name, _id, ...rest } = clonedData;
                 clonedData = { ...rest };
-                clonedData['name'] = GenerateResourceLineNumber(newFields); 
+                clonedData['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
+                let tempObjKeysWithValues = getObjKeysWithValues(clonedData, fieldsDataForCreate, true, user) 
+                setInitialData({
+                  fields: fieldsDataForCreate,
+                  values: tempObjKeysWithValues
+                });
+              }else {
+                setInitialData({
+                  fields: fieldsDataForUpdate,
+                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                });
               }
-              setInitialData({
-                fields: newFields,
-                values: isClone ? getObjKeysWithValues(clonedData, newFields, true, user) : getObjKeysWithValues(clonedData, newFields)
-              });
             })
             .catch((error) => {
               toastConfig.setToastConfig(error);
             });
         } else {
-          let tempObjKeysWithValues = getObjKeys('', filterData);
-          let fields=filterData.map((m) => m.fieldData);
-          tempObjKeysWithValues['name'] = GenerateResourceLineNumber(fields);
+          let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
+          tempObjKeysWithValues['name'] = GenerateResourceLineNumber(fieldsDataForCreate);
           setInitialData({
-            fields: fields,
+            fields: fieldsDataForCreate,
             values: tempObjKeysWithValues
           });
         }
@@ -246,179 +181,24 @@ export default function ManageBudgetDialog({ open, onSuccess, onClose, budgetId,
                 />
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                    {formsData &&
-                      formsData.map((form, index1) => {
-                        return form.name ? (
-                          <div key={index1}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field, index2) => (
-                                  <Grid key={index2} item xs={12} sm={6} md={6}>
-                                    {field.fieldName === 'entity' ? (
-                                      <FormTypes
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        required={field.required}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        disabled={Boolean(budgetId) && field.disableOnEdit}
-                                        size="small"
-                                        onChange={(e, value) => {
-                                          setFieldValue(field.fieldName, value ? value.optionValue : '');
-                                          setFieldValue('salesRep', '');
-                                        }}
-                                      />
-                                    ) : field.fieldName === 'currency' ? (
-                                      <FormTypes
-                                        // {...rest}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        disabled={Boolean(budgetId) && field.disableOnEdit}
-                                        size="small"
-                                        onChange={(e, val) => {
-                                          if (val && val.currencyCode) {
-                                            setFieldValue(field.fieldName, val.currencyCode);
-                                            setCurrencySymbol(val.symbolNative);
-                                          } else {
-                                            setFieldValue(field.fieldName, '');
-                                            setCurrencySymbol(null);
-                                          }
-                                        }}
-                                      />
-                                    ) : budgetMonths.some((d) => d === field.fieldName.trim()) ? (
-                                      <FormTypes
-                                        // {...rest}
-                                        selectedCurrencyCode={values['currency'] || currency}
-                                        startAdornment={currencySymbol ? <InputAdornment position="start">{currencySymbol}</InputAdornment> : ''}
-                                        values={values}
-                                        disabled={Boolean(budgetId) && field.disableOnEdit}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : field.fieldName === 'salesRep' ? (
-                                      <Grid key={field.fieldName} item xs={12} sm={12} md={12}>
-                                        <Grid container spacing={1}>
-                                          <Grid item xs={11} sm={11} md={11}>
-                                            <FormTypes
-                                              fields={initialData.fields}
-                                              fieldData={field}
-                                              errors={errors}
-                                              touched={touched}
-                                              label={field.fieldLabel}
-                                              name={field.fieldName}
-                                              type={field.type}
-                                              required={field.required}
-                                              fullWidth
-                                              isTooltip={field.isTooltip}
-                                              tooltipMessage={field.tooltipMessage}
-                                              onChange={(e, val) => {
-                                                setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                              }}
-                                              size="small"
-                                              values={values}
-                                              options={salesRepDataSource}
-                                              doNotShowInfoTooltip={true}
-                                              onOpen={() => {
-                                                onSalesRepDropdownOpen(values['entity']);
-                                              }}
-                                            />
-                                          </Grid>
-                                          {field?.tooltipMessage ? (
-                                            <Grid item xs={1} sm={1} md={1}>
-                                              <HtmlTooltip title={field?.tooltipMessage ?? ''}>
-                                                <InfoIcon color="disabled" />
-                                              </HtmlTooltip>
-                                            </Grid>
-                                          ) : null}
-                                        </Grid>
-                                      </Grid>
-                                    ) : (
-                                      <FormTypes
-                                        // {...rest}
-                                        values={values}
-                                        fieldData={field}
-                                        fields={initialData.fields}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={field.fieldName === 'year' ? new Date(moment().subtract('1', 'year').calendar()) : undefined}
-                                        imageOrFileUploadCompletePercentage={null}
-                                      />
-                                    )}
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        ) : (
-                          form.sectionFields.map((field) => (
-                            <FormTypes
-                              // {...rest}
-                              values={values}
-                              errors={errors}
-                              touched={touched}
-                              label={field.fieldLabel}
-                              name={field.fieldName}
-                              type={field.type}
-                              options={field.option}
-                              setFieldValue={(name, value) => {
-                                setFieldValue(name, value);
-                              }}
-                              required={field.required}
-                              fullWidth
-                              isTooltip={field?.isTooltip || false}
-                              tooltipMessage={field?.tooltipMessage}
-                              size="small"
-                              style={{ visibility: 'hidden' }}
-                            />
-                          ))
-                        );
-                      })}
+                  <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                        if(name === 'entity'){
+                          if (initialData?.fields?.some((e) => e.fieldName === 'salesRep')) {
+                            setFieldValue('salesRep', '');
+                          }
+                       }
+                      }}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                      resource={sidebarResource.budget}
+                      referenceId={budgetId || null}
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
