@@ -18,7 +18,6 @@ import {
   cloneResourceData,
   fieldServiceOrder,
   serviceMaster,
-  setFieldsInAscendingOrder,
   sidebarResource,
   restoreObjKeysWithValues
 } from 'src/constants/helpers';
@@ -31,8 +30,8 @@ import { FaDiceOne } from 'react-icons/fa';
 import { findOne, insertUpdate, objectStore } from 'src/constants/indexdbhelper';
 import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 import moment from 'moment';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
@@ -49,20 +48,18 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
-  const [formsData, setFormsData] = useState([]);
   const walkmeInstance = useGetWalkmeInstance();
   const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchFields();
-    referenceData?.service && fetchServiceSteps(referenceData?.service);
   }, []);
 
   useEffect(() => {
     if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
       isStepDataSet.current = true;
       const ignoreField = ['currency', 'owner', 'pdfTemplate'];
-      if(referenceData) {
+      if (referenceData) {
         ignoreField.push('fieldServiceOrderNumber');
       }
       walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields, ignoreField)]);
@@ -180,7 +177,8 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
       }
       onSuccess();
       setSubmitting(false);
-    } else if (id && !isClone) {
+    }
+    else if (id && !isClone) {
       values._id = id;
       axiosInstance()
         .put(`${routes.fieldTicket?.path}`, values)
@@ -197,7 +195,8 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
           setSubmitting(false);
           toastConfig.setToastConfig(error);
         });
-    } else {
+    }
+    else {
       axiosInstance()
         .post(`${routes.fieldTicket?.path}`, values)
         .then(({ data }) => {
@@ -221,12 +220,6 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
         });
     }
   };
-
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
-
 
   function validate(values) {
     const errors = {};
@@ -305,61 +298,33 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                        if (name === 'wellNumber') {
-                                          if (initialData?.fields.find((e) => e?.fieldName === 'numberOfWells')) {
-                                            if (value) {
-                                              setFieldValue('numberOfWells', value?.length);
-                                            } else {
-                                              setFieldValue('numberOfWells', 0);
-                                            }
-                                          }
-                                        }
-                                        else if (name === 'fieldServiceOrder') {
-                                          if (value) {
-                                            fetchFieldServiceOrderData(value);
-                                          }
-                                        }
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      fields={initialData?.fields}
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                      if (name === 'wellNumber') {
+                        if (initialData?.fields.find((e) => e?.fieldName === 'numberOfWells')) {
+                          if (value) {
+                            setFieldValue('numberOfWells', value?.length);
+                          } else {
+                            setFieldValue('numberOfWells', 0);
+                          }
+                        }
+                      }
+                      else if (name === 'fieldServiceOrder') {
+                        if (value) {
+                          fetchFieldServiceOrderData(value);
+                        }
+                      }
+                    }}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.fieldTicket}
+                    referenceId={id || null}
+                  />
                 </Form>
                 {initialData?.fields?.find((f) => f?.fieldName === 'service' && f?.lookupResource === RESOURCE_LABEL.serviceMaster) && (
                   <>

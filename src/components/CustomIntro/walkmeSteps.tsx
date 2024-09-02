@@ -3,7 +3,6 @@ import { generateFormFieldSteps, WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
 
 export const createResourceFlow = (resource: string, fields: any): WalkmeData => {
-
   const ignoreField = ['currency', 'owner', 'pdfTemplate'];
 
   const data: WalkmeData = {
@@ -13,7 +12,8 @@ export const createResourceFlow = (resource: string, fields: any): WalkmeData =>
     steps: [
       {
         title: `Add`,
-        target: '#add-button'
+        target: '#add-button',
+        willOpenDialog: true
       },
       ...generateFormFieldSteps(fields, ignoreField),
       {

@@ -517,7 +517,7 @@ const Report = () => {
           let finalObject: any = prepareDataForGrid(u);
           return finalObject;
         });
-        if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase)) {
+        if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase)) {
           data = data.filter((d) => {
             if (d?.isFooter) {
               setFooterData(d);
@@ -678,7 +678,7 @@ const Report = () => {
 
     toastConfig.setToastConfig({
       open: true,
-      message: `Please wait ${processType==='sendMail' ? '' : 'exporting data'}`,
+      message: `Please wait ${processType === 'sendMail' ? '' : 'exporting data'}`,
       type: 'info'
     });
 
@@ -693,7 +693,7 @@ const Report = () => {
     else {
       api = `/report/${type}/export`;
     }
-    const extension = exportType==='excel' ? 'xlsx' : 'pdf'
+    const extension = exportType === 'excel' ? 'xlsx' : 'pdf'
     const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
     axiosInstance().get(`${api}${filterQuery}`, {
       responseType: 'arraybuffer'
@@ -749,15 +749,15 @@ const Report = () => {
     };
   };
 
-useEffect(()=> {
-  if(emailAttachments?.length>1){
-    setIsProcessing(null);
-    setIsSendMail(true);
-  }
-},[emailAttachments])
+  useEffect(() => {
+    if (emailAttachments?.length > 1) {
+      setIsProcessing(null);
+      setIsSendMail(true);
+    }
+  }, [emailAttachments])
 
   useEffect(() => {
-    if ([`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) && footerData) {
+    if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
       const dataKeys = Object.keys(footerData);
       const newColumns = columns.map((col, index) => {
         if (index === 0) {
@@ -806,9 +806,9 @@ useEffect(()=> {
                       variant="outlined"
                       size="small"
                       disabled={isProcessing === 'sendMail'}
-                      onClick={ () =>{ 
-                         exportData('excel', 'sendMail');
-                         exportData('pdf', 'sendMail');
+                      onClick={() => {
+                        exportData('excel', 'sendMail');
+                        exportData('pdf', 'sendMail');
                       }}
                       startIcon={isProcessing === 'sendMail' && <CircularProgress color="inherit" size={18} />}
                       className={`btn-outline-v-1`}>
@@ -940,8 +940,8 @@ useEffect(()=> {
                   refreshGrid={fetchResourceData}
                   hideSelection={true}
                   reportSave={true}
-                  pagination={[`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) ? false : true}
-                  isClientSideGrid={[`dailyVolumeReport`, 'volumeReport']?.includes(resourceCamelCase) ? true : false}
+                  pagination={[`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? false : true}
+                  isClientSideGrid={[`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) ? true : false}
                 />
               </>
             ) : (

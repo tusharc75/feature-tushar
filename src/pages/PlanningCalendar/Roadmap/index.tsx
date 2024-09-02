@@ -146,7 +146,7 @@ const RoadMap = () => {
   return (
     <Box>
       <div className="flex flex-wrap justify-between">
-        <div className="grid md:grid-cols-2 w-full md:max-w-[calc(100%-161px)] xl:grid-cols-4 gap-4">
+        <div className="grid w-full gap-4 md:max-w-[calc(100%-161px)] md:grid-cols-2 xl:grid-cols-4">
           <MuiPickersUtilsProvider utils={MomentUtils}>
             <Autocomplete
               fullWidth

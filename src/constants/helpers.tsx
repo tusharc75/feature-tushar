@@ -1,27 +1,10 @@
 import { Slide } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
-import {
-  AddBox,
-  ArrowDownward,
-  Check,
-  ChevronLeft,
-  ChevronRight,
-  Clear,
-  DeleteOutline,
-  Edit,
-  FilterList,
-  FirstPage,
-  LastPage,
-  Remove,
-  SaveAlt,
-  Search,
-  ViewColumn
-} from '@material-ui/icons';
 import clsx, { ClassValue } from 'clsx';
 import { camelCase, isArray, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
-import React, { forwardRef } from 'react';
+import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
 import { stepIconInterface } from 'src/components/Steps/icons';
@@ -29,7 +12,6 @@ import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
-import TrainAiModel from 'src/pages/EquiptAi/TrainAiModel';
 import { LOGIC } from 'src/components/FormBuilder/helper';
 
 interface stepInterface extends stepIconInterface {
@@ -1725,151 +1707,6 @@ export const determineLightOrDark = (color: any) => {
   }
 };
 
-/**
- * Convert Miliseconds to Hour
- */
-
-//  Currencies Short Form Symbols
-// const SI_SYMBOL = ["", "k", "M", "G", "T", "P", "E", "Z", "Y"];
-
-// export const formatAmountWithCurrency = (currencyCode, amount) => {
-
-//   if (!currencyCode && !amount || (!amount || isNaN(amount))) {
-//     return {
-//       shortFormatAmount: "", fullFormatAmount: ""
-//     }
-//   }
-
-//   // what tier? (determines SI symbol)
-//   var tier = Math.log10(Math.abs(amount)) / 3 | 0;
-
-//   // if zero, we don't need a suffix
-//   // if (tier == 0) return {
-//   //   shortFormatAmount: amount, fullFormatAmount: amount
-//   // }
-
-//   // get suffix and determine scale
-//   var suffix = SI_SYMBOL[tier];
-//   var scale = Math.pow(10, tier * 3);
-
-//   // scale the number
-//   var scaled = amount / scale;
-
-//   // format number and add suffix, For eg - 1.2M, 3.2k etc
-//   const formattedAmount = `${(amount % scale) !== 0 ? scaled.toFixed(1) : scaled}${suffix}`;
-
-//   const filterCountries = currencies.filter(
-//     (data) => data?.currencyCode === currencyCode
-//   );
-
-//   //  Make default language "en"
-//   let language = "en";
-
-//   let options = {
-//     style: "currency",
-//     currency: currencyCode,
-//   };
-
-//   if (Number.isInteger(amount)) {
-//     options["maximumFractionDigits"] = 0;
-//   }
-
-//   if (filterCountries.length === 0) {
-//     return {
-//       shortFormatAmount: formattedAmount,
-//       fullFormatAmount: new Intl.NumberFormat(
-//         `${language}`,
-//         options
-//       ).format(amount)
-//         .replace(/^(\D+)/, "$1 ")
-//     };
-//   }
-
-//   let currencyData = filterCountries[0];
-//   let combinedAllLanguages = filterCountries[0].languages;
-
-//   if (filterCountries.length > 1) {
-//     combinedAllLanguages = [...new Set(filterCountries.map(m => m.languages).flat())];
-
-//     switch (currencyCode) {
-//       case "AUD":
-//         currencyData = filterCountries.find(f => f.country === "Australia");
-//         break;
-
-//       case "CHF":
-//         currencyData = filterCountries.find(f => f.country === "Switzerland");
-//         break;
-
-//       case "EUR":
-//         currencyData = filterCountries.find(f => f.country === "France");
-//         break;
-
-//       case "GBP":
-//         currencyData = filterCountries.find(f => f.country === "United Kingdom");
-//         break;
-
-//       case "NOK":
-//         currencyData = filterCountries.find(f => f.country === "Norway");
-//         break;
-
-//       case "NZD":
-//         currencyData = filterCountries.find(f => f.country === "New Zeland");
-//         break;
-
-//       case "XAF":
-//         currencyData = filterCountries.find(f => f.country === "Cameroon");
-//         break;
-
-//       case "XCD":
-//         currencyData = filterCountries.find(f => f.country === "Dominica");
-//         break;
-
-//       case "XOF":
-//         currencyData = filterCountries.find(f => f.country === "Benin");
-//         break;
-
-//       case "XPF":
-//         currencyData = filterCountries.find(f => f.country === "French Polynesia");
-//         break;
-//     }
-
-//     //  just for safe side, if no record found, change the value to initial state;
-//     if (!currencyData) {
-//       currencyData = filterCountries[0];
-//     }
-
-//     currencyData.languages = [...new Set(filterCountries.map(m => m.languages).flat())];
-//   }
-
-//   // Check if that currency's country has multiple language,
-//   //  And if it has "en", then pick that one, or else take first of the array of languages
-//   if (
-//     currencyData.languages.length > 0 &&
-//     currencyData.languages.some((d) => d !== language)
-//   ) {
-//     language = currencyData.languages[0];
-//   }
-
-//   if (!currencyData) {
-//     return {
-//       shortFormatAmount: formattedAmount,
-//       fullFormatAmount: new Intl.NumberFormat(
-//         `${language}`,
-//         options
-//       ).format(amount).replace(/^(\D+)/, "$1 ")
-//     };
-//   }
-
-//   return {
-//     shortFormatAmount: `${currencyData.symbolNative} ${formattedAmount}`,
-//     fullFormatAmount: new Intl.NumberFormat(
-//       `${language}-${currencyData.countryCode}`,
-//       options
-//     ).format(amount).replace(/^(\D+)/, "$1 ")
-
-//     // `${currencyData.symbolNative} ${amount}`,
-//   };
-// }
 
 export const graphOptions = {
   layout: {
@@ -2533,7 +2370,7 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
-    title: 'Work Order',
+    title: sidebarResource.workOrder,
     permission: 'workOrder',
     key: 'workOrder',
     type: 'dynamic'
@@ -2666,7 +2503,7 @@ export const REPORT_LIST = [
     type: 'iotUnitDowntimeReport'
   },
   {
-    title: 'Pad Job Volume Report',
+    title: `Pad Job Volume Report`,
     permission: 'iotChart',
     key: 'standardReport',
     type: 'rentalVolumeReport',
