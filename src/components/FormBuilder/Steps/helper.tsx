@@ -88,35 +88,41 @@ export const resourcePolicy = [
           {
             fieldName: 'status',
             fieldLabel: 'Status',
-            type: 'dropDown'
+            type: 'dropDown',
+            required: true,
           },
           {
             fieldName: 'fields',
             fieldLabel: 'Fields',
-            type: 'multiselect'
+            type: 'multiSelect',
+            required: true,
           },
           {
             fieldName: 'fieldsReset',
             fieldLabel: 'Fields Reset',
-            type: 'multiselect'
+            type: 'multiSelect',
+            required: false,
           },
           {
             fieldName: 'products',
             fieldLabel: 'Products',
-            type: 'multiselect',
-            lookupResource: sidebarResource.product
+            type: 'multiSelect',
+            lookupResource: sidebarResource.product,
+            required: false,
           },
           {
             fieldName: 'sumDecimalField',
             fieldLabel: 'Sum(Decimal Field)',
             type: 'checkBox',
-            defaultValue: false
+            defaultValue: false,
+            required: false,
           },
           {
             fieldName: 'autoIncrementDecimalField',
             fieldLabel: 'Auto Increment(Decimal Field)',
             type: 'checkBox',
-            defaultValue: false
+            defaultValue: false,
+            required: false,
           }
         ],
         defaultValue: []

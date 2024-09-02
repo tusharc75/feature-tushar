@@ -79,14 +79,17 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
   const validate = (values) => {
     const errors = {};
     if (resource === sidebarResource.serializedAsset) {
+      const validationFields = initialValues[`data`]?.[0]?.fields?.filter((e) => e.required);
       values.data.forEach((value, index) => {
         value?.data?.forEach((ele, idx) => {
-          if (!ele['fields'] || !ele['fields'].length) {
-            errors[`data.${index}.data.${idx}.fields`] = `Fields are required`;
-          }
-          if (!ele['status']) {
-            errors[`data.${index}.data.${idx}.status`] = `Status is required`;
-          }
+          validationFields?.forEach((e) => {
+            if (!ele[e?.fieldName]) {
+              errors[`data.${index}.data.${idx}.status`] = `${e?.fieldLabel} is required`;
+            }
+            else if (e?.type === 'multiSelect' && (!ele[e?.fieldName] || !ele[e?.fieldName].length)) {
+              errors[`data.${index}.data.${idx}.fields`] = `${e?.fieldLabel} is required`;
+            }
+          })
         });
       });
     }
@@ -144,7 +147,6 @@ const PolicyDialog = ({ resourceData, resource, onClose, onSuccess }) => {
                                   ['data']: val
                                 });
                                 const res = initialValues.data;
-
                                 res.forEach((r) => {
                                   if (r.fieldName === data.fieldName) {
                                     r.data = val;
@@ -196,7 +198,8 @@ const RenderFormFields = ({ data, type, onChange, idx, errors, touched, resource
   if (type === 'checkBox') {
     return <CheckBoxField
       data={data}
-      onChange={onChange} />;
+      onChange={onChange}
+    />;
   }
   else if (type === 'multipleFields') {
     return (
@@ -407,7 +410,8 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                           onChange(null, updatedData);
                         }}
                       />} label={field?.fieldLabel} />
-                    : <DropDownField
+                    :
+                    <DropDownField
                       key={field.fieldName}
                       options={field?.lookupResource ? field.option : field?.fieldName === 'status' ? getStatusOptions(initialData?.fieldsData) : fieldOptions}
                       error={errors[`data.${idx}.data.${index}.${field.fieldName}`]}
@@ -421,13 +425,14 @@ const MultipleFormFields = ({ data: Data, idx, onChange, errors, touched, resour
                         onChange(null, updatedData);
                       }}
                       value={
-                        field?.type === 'multiselect'
+                        field?.type === 'multiSelect'
                           ? field?.lookupResource ? field?.option?.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue)) : fieldOptions.filter((opt) => value[`${field.fieldName}`]?.some((val) => val === opt.optionValue))
                           : statusOptions?.filter((ele) => ele?.optionValue === value[`${field.fieldName}`])[0]
                       }
-                      multiple={field?.type === 'multiselect'}
+                      multiple={field?.type === 'multiSelect'}
                       fieldLabel={field?.fieldLabel}
                       fieldName={field?.fieldLabel}
+                      required={field?.required}
                     />
                 ))}
               </div>
