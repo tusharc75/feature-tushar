@@ -83,11 +83,6 @@ function reducer(state: TInitialState, action: TActios) {
         ...state,
         showFilteredRecordsOnly: !state.showFilteredRecordsOnly
       };
-    case 'updateColumnState':
-      return {
-        ...state,
-        colState: action.colState
-      };
     case 'loadingExpanderRowId':
       return {
         ...state,
@@ -124,7 +119,6 @@ const intialState = {
   currentEditingCellPosition: null,
   error: false,
   showFilteredRecordsOnly: false,
-  colState: [],
   loadingExpanderRowId: null,
   initialDataLoaded: false,
   visibleColumns: {},
@@ -145,7 +139,6 @@ export type TInitialState = {
   currentEditingCellPosition: { rowId: string; columnName: string } | null;
   error: boolean;
   showFilteredRecordsOnly: boolean;
-  colState: any[];
   loadingExpanderRowId: string | null;
   initialDataLoaded: boolean;
   visibleColumns: { [key: string]: boolean };
@@ -168,7 +161,6 @@ export type TActios =
   | { type: 'error'; error: boolean }
   | { type: 'showFilteredRecordsOnly' }
   | { type: 'hiddenColumns'; hiddenColumns: boolean }
-  | { type: 'updateColumnState'; colState: any[] }
   | { type: 'loadingExpanderRowId'; loadingExpanderRowId: string | null }
   | { type: 'setVisibleColumns'; visibleColumns: { [key: string]: boolean } }
   | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] };

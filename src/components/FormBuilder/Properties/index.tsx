@@ -190,7 +190,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       if (row.sectionId.toString() === sectionId.toString()) {
         row.field.forEach((ele) => {
           if (ele._id.toString() === fieldData._id.toString()) {
-            ele.fieldLabel = values.fieldLabel;
+            ele.fieldLabel = values.fieldLabel?.trim();
             ele.required = values.required;
             ele.isTooltip = values.isTooltip;
             ele.tooltipMessage = values.tooltipMessage;
@@ -333,14 +333,6 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
 
             if (ele.isDropdown) {
               ele.dropdownOnConverter = values.dropdownOnConverter;
-            }
-
-            if (['signature', 'groupSignature'].includes(fieldData.type)) {
-              if (values?.signatureUsers && values?.signatureUsers?.length) {
-                ele.signatureUsers = values.signatureUsers;
-              } else {
-                ele.signatureUsers = [];
-              }
             }
 
             if (fieldData?.lookup) {

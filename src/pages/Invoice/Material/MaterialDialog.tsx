@@ -1,4 +1,4 @@
-import { FC, useEffect, useState, Fragment, useRef } from 'react';
+import { FC, useEffect, useState, Fragment, useRef, useContext } from 'react';
 import { Button, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -19,6 +19,9 @@ import moment from 'moment';
 import { bulkUpdate, calculateRowsField } from 'src/components/RentalManagment/helper';
 import { ContactlessOutlined } from '@material-ui/icons';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -45,6 +48,7 @@ const MaterialDialog: FC<EditDialogProps> = ({
   showSaveAndNext,
   loadingEdit
 }) => {
+  const toastConfig = useContext(CustomToastContext);
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [allFields, setAllFields] = useState([]);
@@ -62,6 +66,27 @@ const MaterialDialog: FC<EditDialogProps> = ({
   useEffect(() => {
     fetchFields();
   }, [rowData]);
+
+  const fetchTaxRate = async (billingAddress: any, taxCode = null) => {
+    const zipCode = billingAddress?.zipCode;
+    const state = billingAddress?.state;
+    const county = billingAddress?.county;
+
+    let materialType;
+    if (isBulkedit) {
+      materialType = rowData[0]?.type;
+    } else {
+      materialType = rowData?.type;
+    }
+    try {
+      const response = await axiosInstance().get(
+        `${routes?.taxMaster.path}/by-zipcode?zipCode=${zipCode}&state=${state}&county=${county}&materialType=${materialType}${taxCode && `&taxCode=${taxCode}`}`
+      );
+      return response?.data?.data || [];
+    } catch (e) {
+      toastConfig.setToastConfig(e);
+    }
+  };
 
   const fetchFields = async () => {
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, true);
@@ -158,13 +183,22 @@ const MaterialDialog: FC<EditDialogProps> = ({
     EvaluteproductFields(data);
   };
 
-  const EvaluteproductFields = (fields) => {
+  const EvaluteproductFields = async (fields) => {
     const sections = uniq(map(fields, 'sectionName'));
     const customData = sections.map((name) => {
       let sectionFields = fields.filter((field) => field.sectionName === name);
       sectionFields = orderBy(sectionFields, 'order', 'asc');
       return { name, sectionFields };
     });
+    if ((invoiceData?.taxCode || (invoiceData?.billingAddress &&
+      (invoiceData?.billingAddress?.zipCode || invoiceData?.billingAddress?.state || invoiceData?.billingAddress?.county)))) {
+      const taxCodeOptions = await fetchTaxRate(invoiceData?.billingAddress, invoiceData?.taxCode?.optionValue || null);
+      fields?.forEach((e: any) => {
+        if (e?.fieldName === 'taxCode') {
+          e.option = taxCodeOptions;
+        }
+      });
+    }
     setFields(customData);
   };
 
@@ -405,7 +439,46 @@ const MaterialDialog: FC<EditDialogProps> = ({
                                       </Box>
                                     </Box>
                                   </Grid>
-                                ) : (
+                                ) : ['taxCode'].includes(field.fieldName) ? (
+                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                    <Box display="flex">
+                                      <Box flexGrow={1}>
+                                        <FormTypes
+                                          {...field}
+                                          fields={initialData.fields}
+                                          fieldData={field}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                            const taxCode = field.option?.find((d) => d.optionValue === value);
+                                            setFieldValue('taxPercentage', taxCode?.taxRate || 0);
+                                            const result = autoCalculateSpecificFields(
+                                              { ['taxPercentage']: taxCode?.taxRate || 0 },
+                                              values,
+                                              initialData.fields
+                                            );
+                                            if (Object.keys(result).length >= 1) {
+                                              for (var x in result) {
+                                                setFieldValue(x, result[x]);
+                                              }
+                                            }
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field.isTooltip}
+                                          tooltipMessage={field.tooltipMessage}
+                                          size="small"
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </Grid>
+                                ): (
                                   <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
                                     <Box display="flex">
                                       <Box flexGrow={1}>

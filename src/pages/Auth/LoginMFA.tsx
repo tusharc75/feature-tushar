@@ -15,7 +15,6 @@ import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChat
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { MFA_METHOD } from 'src/constants/helpers';
 
-
 const LoginMFA = () => {
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
@@ -58,30 +57,34 @@ const LoginMFA = () => {
 
   const handleResendCode = () => {
     setIsCodeSending(true);
-    axiosInstance().post('/user/mfa-auth/resend-otp', { token: token }).then(({ data: { data } }) => {
-      setIsCodeSending(false);
-      setTimeLeft(60);
-      history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: 'Sent Successfully'
+    axiosInstance()
+      .post('/user/mfa-auth/resend-otp', { token: token })
+      .then(({ data: { data } }) => {
+        setIsCodeSending(false);
+        setTimeLeft(60);
+        history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: 'Sent Successfully'
+        });
+      })
+      .catch((error) => {
+        setTimeLeft(0);
+        setIsCodeSending(false);
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      setTimeLeft(0);
-      setIsCodeSending(false);
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const verifyToken = () => {
-    axiosInstance().post('/user/mfa-auth/verify-token', { token: token })
+    axiosInstance()
+      .post('/user/mfa-auth/verify-token', { token: token })
       .then(({ data: { data } }) => {
-        settokenData(data)
-        setSelectedMethod(data?.authenticationMethod)
+        settokenData(data);
+        setSelectedMethod(data?.authenticationMethod);
       })
       .catch((error) => {
-        settokenData(null)
+        settokenData(null);
         history.push({ pathname: '/login' });
       });
   };
@@ -148,7 +151,7 @@ const LoginMFA = () => {
   return (
     <>
       <CssBaseline />
-      {tokenData ?
+      {tokenData ? (
         <>
           <div className="flex min-h-screen items-center justify-center bg-[var(--dark-secondary,white)] px-3 py-3">
             <div className="w-full max-w-[500px] rounded-2xl bg-[var(--dark-primary,white)] p-5 text-center shadow-lg [border:1px_solid_var(--common-border-color)]">
@@ -169,29 +172,25 @@ const LoginMFA = () => {
                   {tokenData?.isMFASetup && <MenuItem value={MFA_METHOD.totp}>Authenticator App</MenuItem>}
                 </Select>
               </FormControl>
-              {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ?
+              {selectedMethod === MFA_METHOD.emailOtp && tokenData?.authenticationMethod === MFA_METHOD.totp ? (
                 <Box mt={2} mb={2}>
-                  <Button
-                    disableElevation
-                    variant="contained"
-                    color="primary"
-                    onClick={handleResendCode}
-                  >
+                  <Button disableElevation variant="contained" color="primary" onClick={handleResendCode}>
                     Send Code
                   </Button>
                 </Box>
-                :
+              ) : (
                 <>
                   <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
-                    An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and
-                    be redirected.
+                    An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and be
+                    redirected.
                   </p>
-                  <div className="mb-6 px-5">
+                  <div className="mb-6 md:px-5">
                     <OtpInput
                       validateChar={(character, index) => /^[0-9]$/.test(character)}
                       value={otp}
                       onChange={(value) => setOtp(value)}
                       TextFieldsProps={{ size: 'small' }}
+                      autoFocus
                     />
                   </div>
                   {selectedMethod === 'emailOtp' && (
@@ -222,14 +221,15 @@ const LoginMFA = () => {
                     Submit
                   </Button>
                 </>
-              }
+              )}
             </div>
           </div>
         </>
-        : <Box p={2} height={500}>
+      ) : (
+        <Box p={2} height={500}>
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
-      }
+      )}
     </>
   );
 };

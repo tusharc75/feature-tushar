@@ -121,7 +121,7 @@ const CreateProduct = (props) => {
               });
               setInitialData({
                 fields: newField,
-                values: isClone ? getObjKeysWithValues(data.productData, newField, true, user) :getObjKeysWithValues(data.productData, newField)
+                values: isClone ? getObjKeysWithValues(data.productData, newField, true, user) : getObjKeysWithValues(data.productData, newField)
               });
               EvaluteproductFields(newField);
               if (_isProductTemplate) {
@@ -909,6 +909,7 @@ const CreateProduct = (props) => {
                   disabled={uploadingImageOrFileProgress > 0 || submitting}
                   size="small"
                   color="primary"
+                  id="dialog-cancel-button"
                   onClick={() => {
                     if (!isEqual(ref.current.values, initialData.values)) {
                       setShowConfirmDialog(true);
@@ -924,6 +925,7 @@ const CreateProduct = (props) => {
                   variant="contained"
                   color="primary"
                   type="submit"
+                  id="dialog-save-button"
                   disabled={uploadingImageOrFileProgress > 0 || submitting}
                   onClick={(e) => {
                     e.preventDefault();
@@ -931,7 +933,6 @@ const CreateProduct = (props) => {
                     submitForm();
                   }}
                 >
-                  {' '}
                   Save
                 </CustomButton>
               </CustomDialogFooter>

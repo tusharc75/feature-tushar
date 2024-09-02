@@ -26,6 +26,7 @@ import MaterialDialog from './MaterialDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
+import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 
 const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, allowedToEdit }) => {
   const renderedFrom = `${camelCase(routes?.invoice.title)}_Material`;
@@ -324,6 +325,15 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
   const handleAdd = async (rows) => {
     setIsAdding(true);
     const material: any = [];
+    var taxCodeData: any = null;
+      if (invoiceData?.taxCode) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`${routes?.taxMaster.path}/by-zipcode?taxCode=${invoiceData?.taxCode?.optionValue}&materialType=${addDialog.type}`);
+        if (data?.length) {
+          taxCodeData = data[0];
+        }
+      }
     if (addDialog.type === MATERIAL_TYPE.serializedAsset && addDialog.parentId) {
       rows?.forEach((e) => {
         material.push(e);
@@ -336,9 +346,40 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         element.unit = d?.unitMain && d?.unitMain?.length ? d.unitMain[0] : d?.unit ? d?.unit : '';
         element.qty = d.qty ? parseFloat(d.qty) : 1;
         element.parentId = addDialog.parentId;
+        element.pricingMethod = d.pricingMethodMain && d.pricingMethodMain.length ? d.pricingMethodMain[0] : '';
+        if (taxCodeData) {
+          element.taxCode = taxCodeData?.optionValue;
+          element.taxPercentage = taxCodeData?.taxRate || 0;
+        }
+        const calValues = autoCalculateSpecificFields({ pricingMethod: element.pricingMethod }, element, allFields);
+      
+          if (calValues && calValues['actualJobDuration']) {
+            element.actualJobDuration = calValues['actualJobDuration'];
+          }
         material.push(element);
       });
     }
+    const priceData: any = await calculatePrice(material);
+
+    material.forEach((element) => {
+      const rateResult = priceData?.filter(
+        (e) =>
+          e.materialId === element.materialId &&
+          e.materialType === element.type &&
+          e.unit === element.unit &&
+          e.pricingMethod === element.pricingMethod
+      );
+      if (rateResult.length && rateResult[0].mrp) {
+        const priceFieldName = `price_${invoiceData?.currency?.toLowerCase()}`;
+        element[priceFieldName] = rateResult[0].mrp;
+        const calValues = autoCalculateSpecificFields(
+          { [priceFieldName]: rateResult[0].mrp, pricingCondition: rateResult[0].conditionId },
+          element,
+          allFields
+        );
+        Object.assign(element, calValues);
+      }
+    });
     setAssetAssignedProduct([]);
     axiosInstance()
       .post(`${routes?.invoice?.path}/material/${invoiceData._id}`, { material })
@@ -487,11 +528,11 @@ const Material = ({ invoiceData, fetchInvoiceData, setNextStep, stepFullScreen, 
         });
     }
   };
-
+ 
   const calculatePrice = (arr: any[]) => {
     if (invoiceData) {
       const data: any = {};
-      data.conditionType = [(invoiceData?.repairOrder || invoiceData?.salesOrder) ? PRICING_SETUP_TYPE.price : PRICING_SETUP_TYPE.rent];
+      data.conditionType = [(invoiceData?.rentalJob || invoiceData?.fieldTicket?.length) ? PRICING_SETUP_TYPE.rent : PRICING_SETUP_TYPE.price];
       const material: any = [];
       arr?.forEach((ele) => {
         const obj = {

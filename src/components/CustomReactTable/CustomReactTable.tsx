@@ -69,7 +69,8 @@ const CustomReactTable = ({
   hideExportTable = false,
   showOnlyMobileView = false,
   onRowClick = null,
-  enableGlobalSearch = true
+  enableGlobalSearch = true,
+  pagination = true
 }) => {
   const {
     currentEditingCellPosition,
@@ -287,7 +288,7 @@ const CustomReactTable = ({
     getExpandedRowModel: getExpandedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
+    getPaginationRowModel: pagination ? getPaginationRowModel() : null,
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues()
@@ -544,6 +545,7 @@ const CustomReactTable = ({
                 height={height}
                 onRowClick={onRowClick}
                 resource={resource}
+                pagination={pagination}
               />
             </div>
           )}
@@ -567,7 +569,7 @@ const CustomReactTable = ({
               onRowClick={onRowClick}
             />
           ) : null}
-          {(!isClientSideGrid || data?.length > 25) && (
+          {(!isClientSideGrid || data?.length > 25) && pagination && (
             <Pagination
               count={isClientSideGrid ? table.getExpandedRowModel().rows.length : rowCount ?? data.length}
               page={page}

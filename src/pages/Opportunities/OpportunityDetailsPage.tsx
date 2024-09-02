@@ -132,9 +132,14 @@ function OpportunityDetailsPage() {
     if (id) {
       fetchData();
       fetchRelatedData();
-      fetchPolicy();
     }
   }, [id]);
+
+  useEffect(()=>{
+    if(id && opportunityFields?.length){
+      fetchPolicy();
+    }
+  },[id, opportunityFields])
 
   useEffect(() => {
     if (
@@ -219,6 +224,12 @@ function OpportunityDetailsPage() {
         data: { data }
       } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.opportunity}`);
       if (data) {
+        const policyFields = data?.policy?.outcomeFields;
+        const processSteps = opportunityFields?.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
+        if(processSteps && processSteps?.isRead && policyFields){
+          const policyOutcomeFields = opportunityFields?.filter((_field)=>[...policyFields]?.includes(_field.fieldData.fieldName));
+          setSectionFields(policyOutcomeFields);
+        }
         setResourceData(data);
       }
     } catch (error) {
@@ -359,13 +370,6 @@ function OpportunityDetailsPage() {
         }
 
         if (processSteps && processSteps.isRead) {
-          data.map((d) => {
-            if (d.fieldData.sectionName == processSteps.fieldData.additionalInfoSection && sectionFields.length == 0) {
-              setSectionFields((prevItems) => {
-                return [...prevItems, d];
-              });
-            }
-          });
 
           const allProcessSteps: StepInterface[] = processSteps.fieldData.option.map((m) => {
             return {
@@ -388,18 +392,11 @@ function OpportunityDetailsPage() {
                 (d) => d.optionLabel === passedOpportunityData[processFieldName]
               );
               setActiveStep(currentStepToShow);
-
-              if (currentStepToShow === allProcessSteps.length - 1) {
-                setOpportunityFields(filteredFields);
-              } else {
-                setOpportunityFields(filteredFields.filter((item) => item.fieldData.sectionName !== processSteps.fieldData.additionalInfoSection));
-              }
             }
           }
           setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
-        } else {
-          setOpportunityFields(filteredFields);
-        }
+        } 
+        setOpportunityFields(filteredFields);
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);

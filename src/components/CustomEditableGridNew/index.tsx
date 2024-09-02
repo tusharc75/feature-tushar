@@ -1,15 +1,15 @@
 import { Box, Button, Dialog, MenuItem } from '@material-ui/core';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import ArrangeView from 'src/components/CustomEditableGridNew/ArrangeView';
+import ArrangeView from 'src/components/CustomReactTable/ArrangeView';
 import CustomTable from 'src/components/CustomEditableGridNew/CustomTable';
 import { generateColumn, generateRows, yupSchemaForBulkEdit } from 'src/components/CustomEditableGridNew/helper';
 import { TActios, TInitialState } from 'src/components/CustomEditableGridNew/hooks/tableReducer';
-import { getStickyColumnNames, useGridMetaData } from 'src/components/CustomReactTable';
+import { useGridMetaData } from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { AddField } from 'src/components/FormBuilder/AddField';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -23,8 +23,6 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 export * from 'src/components/CustomEditableGridNew/hooks/tableReducer';
 
 var levalOrderBy = ['product', 'product-custom', 'product-template', 'price-template', 'product-builder-custom', 'price-builder-custom'];
-
-export type ApplyViewRef = { applyViewInTable: (order: string[], hide: string[]) => void };
 
 type CustomEditableGridProps = {
   state: TInitialState;
@@ -54,7 +52,6 @@ const CustomEditableGrid = ({
   renderedFrom = ''
 }: CustomEditableGridProps) => {
   const { columnOrder, loading, visibleColumns } = state;
-  const applyViewRef = useRef<ApplyViewRef>(null);
 
   const toastConfig = useContext(CustomToastContext);
   const { gridMetaData } = useGridMetaData();
@@ -162,7 +159,6 @@ const CustomEditableGrid = ({
     return (
       <>
         <ArrangeView
-          ref={applyViewRef}
           columns={columns}
           hideSelection={true}
           renderedFrom={renderedFrom}

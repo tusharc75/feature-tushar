@@ -61,13 +61,17 @@ const DynamicForm = () => {
 
   useEffect(() => {
     fetchGridColumns();
-  }, []);
+  }, [route]);
+
+  useEffect(() => {
+    dispatch({ type: 'selection', selectedRecords: [] });
+  }, [route]);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [search, page, limit, filters, sorting, selectedEntity, selectedType, showFilteredRecordsOnly]);
+  }, [route, search, page, limit, filters, sorting, selectedEntity, selectedType, showFilteredRecordsOnly]);
 
   const fetchGridColumns = async () => {
     let data;
@@ -161,8 +165,6 @@ const DynamicForm = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    console.log(queryString);
-
     axiosInstance()
       .get(`dynamic-form/${queryString}`, {
         headers: {

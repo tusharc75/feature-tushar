@@ -244,6 +244,7 @@ const Steps = ({ resource }) => {
             onClose={() => {
               setOpen({ open: false, data: null });
             }}
+            resource={resource}
           />
         )}
 

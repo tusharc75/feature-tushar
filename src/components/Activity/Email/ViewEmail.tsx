@@ -231,7 +231,7 @@ export const ViewEmail = ({
             };
             return {
               ...prev,
-              inboundEmails: [...prev.inboundEmails, newMail]
+              inboundEmails: [...(prev.inboundEmails || []), newMail]
             };
           });
           setLoading(false);

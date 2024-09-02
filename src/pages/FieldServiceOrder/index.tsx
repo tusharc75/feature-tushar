@@ -60,13 +60,12 @@ const ServiceOrder = () => {
   }: any = useData();
   const [selectedType, setSelectedType] = useState(getDefaultMyRecordType(user.user, sidebarResource.fieldServiceOrder));
   const [renderCount, setRenderCount] = useState(0);
-  const [deleteRecord, setDeleteRecord] = useState<any>({});
   const [showManageDialog, setShowManageDialog] = useState({ open: false, isClone: false, idToClone: null });
   const { state, dispatch } = useTableReducer();
 
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
-  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
+  const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, ids: [] });
 
   const { generateColumns, checkStaticField } = useColumns();
 
@@ -139,17 +138,8 @@ const ServiceOrder = () => {
     } else setRenderCount((preCount) => preCount + 1);
   }, [page, limit, selectedType, filters, sorting, selectedEntity, showFilteredRecordsOnly]);
 
-  const handleDelete = async () => {
-    let ids = [];
-    if (deleteRecord) {
-      ids.push(deleteRecord._id);
-    } else {
-      ids = selectedRecords.map((d) => d._id);
-    }
-    axiosInstance()
-      .put(`${fieldServiceOrder.api}/remove`, {
-        ids
-      })
+  const handleDelete = async (ids) => {
+    axiosInstance().put(`${fieldServiceOrder.api}/remove`, { ids })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -158,8 +148,7 @@ const ServiceOrder = () => {
         });
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
-        setShowDeleteConfirmBox(false);
-        setDeleteRecord(null);
+        setShowDeleteConfirmBox({ open: false, ids: [] });
       })
       .catch((error) => {
         dispatch({ type: 'loading', loading: false });
@@ -202,8 +191,7 @@ const ServiceOrder = () => {
                 aria-label="Delete"
                 disabled={row?.original?.canDelete ? false : true}
                 onClick={() => {
-                  setDeleteRecord(row.original);
-                  setShowDeleteConfirmBox(true);
+                  setShowDeleteConfirmBox({ open: true, ids: [row.original?._id] });
                 }}
               >
                 <DeleteIcon fontSize="small" color={row?.original?.canDelete ? 'error' : 'disabled'} />
@@ -322,7 +310,7 @@ const ServiceOrder = () => {
         <MenuItem
           disabled={selectedRecords.every((e) => e.canDelete) ? (selectedRecords?.length ? false : true) : true}
           onClick={() => {
-            setShowDeleteConfirmBox(true);
+            setShowDeleteConfirmBox({ open: true, ids: selectedRecords.map((d) => d._id) });
           }}
         >
           {`Delete (${selectedRecords.length})`}
@@ -395,17 +383,16 @@ const ServiceOrder = () => {
             <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
-        {showDeleteConfirmBox && (
+        {showDeleteConfirmBox.open && (
           <ConfirmationDialog
-            open={showDeleteConfirmBox}
-            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ${
-              deleteRecord?.fieldServiceOrderNumber || ''
-            } ? `}
+            open={showDeleteConfirmBox.open}
+            message={`Are you sure you want to delete the ${routes?.fieldServiceOrder.title?.toLowerCase()}${selectedRecords.length ? 's' : ''} ? `}
             onClose={() => {
-              setDeleteRecord(null);
-              setShowDeleteConfirmBox(false);
+              setShowDeleteConfirmBox({ open: false, ids: [] });
             }}
-            onOk={handleDelete}
+            onOk={() => {
+              handleDelete(showDeleteConfirmBox.ids)
+            }}
           />
         )}
       </CustomContainer>
