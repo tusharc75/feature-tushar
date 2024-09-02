@@ -361,7 +361,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                       size="small"
                       fullWidth
                       resource={sidebarResource.address}
-                      referenceId={addressData._id || null}
+                      referenceId={addressData?._id || null}
                     />
                 </Form>
                 <div>
