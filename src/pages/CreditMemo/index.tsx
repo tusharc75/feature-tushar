@@ -232,10 +232,8 @@ const CreditMemo = () => {
           // actionButtonProps
           // actionMenuItems
           // addButtonProps
-          addButtonOnclick={() => {
-            setShowManageDialog({ open: true, isClone: false, idToClone: null });
-          }}
-          isAddButtonVisible={permissions?.creditMemo?.isCreate }
+          // addButtonOnclick
+          isAddButtonVisible={false}
         />
         {columns ? (
           <CustomReactTable
@@ -248,6 +246,7 @@ const CreditMemo = () => {
             showOnlyShowFilteredRecordSwitch={true}
             showFilters={true}
             resource={sidebarResource.creditMemo}
+            hideAction={true}
           />
         ) : (
           <Box p={2} height={500}>
