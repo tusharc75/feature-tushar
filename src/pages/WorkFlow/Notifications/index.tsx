@@ -108,7 +108,7 @@ const Notifications = ({ resource, id }) => {
         </Box>
       ) : (
         <Box p={2}>
-          <CommonSkeleton lenArray={[...Array(5).keys()]} />
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
 
