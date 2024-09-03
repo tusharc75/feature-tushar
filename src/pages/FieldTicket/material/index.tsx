@@ -294,7 +294,6 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
-    fetchData();
   };
 
   const generateNestedData = (material, parent) => {
@@ -464,6 +463,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           handleChangeStatus(FIELD_TICKET_STATUS.inProgress);
         }
         fetchMaterial();
+        fetchData();
         setMaterialDialog({ open: false, type: '', parentId: null });
         setAssignRentalDataDialog({ open: false, type: '' });
         setIsSubmitting(false);
@@ -484,6 +484,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         d.type = MATERIAL_TYPE.manualEntry;
         await insertUpdate(objectStore.fieldTicketMaterial, id, d);
         fetchMaterial();
+        fetchData();
         setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
         setUpdating(false);
       }
@@ -497,6 +498,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [...rows])
         .then(() => {
           fetchMaterial();
+          fetchData();
           setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
           setUpdating(false);
         })
@@ -612,6 +614,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       }
       setDeleting(false);
       fetchMaterial();
+      fetchData();
       setDeleteData(null);
     } catch (error) {
       setDeleting(false);
@@ -845,6 +848,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           fieldTicketData={fieldTicketData}
           fetchMaterial={fetchMaterial}
           stepFullScreen={stepFullScreen}
+          fetchData={fetchData}
         />
       </Box>
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.service && (
