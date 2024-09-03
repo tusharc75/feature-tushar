@@ -529,7 +529,7 @@ const Details = (props: DetailProps) => {
                             <div
                               className={cn('d-flex formdata-title-v1 min-h-full items-center', isTypeFile(field.fieldData.type) && '!border-r-0')}
                             >
-                              <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-0' : ''}`}>
+                              <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
                                 {field.fieldData.fieldLabel}
                               </h4>
                               {field.fieldData.isTooltip && (
