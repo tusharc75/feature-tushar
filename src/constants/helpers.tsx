@@ -3422,3 +3422,15 @@ export const MFA_METHOD = {
   emailOtp: 'emailOtp',
   totp: 'totp'
 };
+
+
+export const findSimilarRecords = (array, property) => {
+  const similarRecords: any = {};
+  array.forEach(item => {
+    if (!similarRecords[item[property]]) {
+      similarRecords[item[property]] = [];
+    }
+    similarRecords[item[property]].push(item);
+  });
+  return Object.values(similarRecords).filter((group: any) => group.length > 1);
+};
