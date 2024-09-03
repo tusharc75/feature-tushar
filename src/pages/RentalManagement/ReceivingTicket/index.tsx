@@ -46,6 +46,7 @@ import {
   REPAIR_JOB_STATUS,
   dateFormat,
   deliveryTicket,
+  findSimilarRecords,
   gridLoadingTimeout,
   serializedAsset as productInventoryHelperObject,
   rentalManagement,
@@ -244,6 +245,15 @@ const ReceivingTicket = ({
         ...dataRows?.filter((e) => receivingTicketIds?.includes(e?.receivingTicketId)),
         ...dataRows?.filter((e) => returnTicketIds?.includes(e?.returnTicketId))
       ];
+
+      const similarRecords = findSimilarRecords(records?.filter((e) => e.type === 'Asset'), '_id');
+      if (similarRecords?.length) {
+        similarRecords?.forEach((ele: any) => {
+          ele?.forEach((e: any) => {
+            errorMessages.push({ index: e.index, message: rentalManagementMessage.sameAssetsSelected });
+          })
+        })
+      }
     }
     records.forEach((e) => {
       if (action === rentalManagementActions.deliveredToCustomer) {
