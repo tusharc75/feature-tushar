@@ -192,7 +192,11 @@ const Details = (props: DetailProps) => {
     } else if (input.type === 'dateTime') {
       text = values[input.fieldName] ? displayDateTime(values[input.fieldName]) : '-';
     } else if (input.type === 'lookUpDisplay') {
-      text = isArray(values[input.fieldName]) ? values[input.fieldName]?.map((e) => e?.optionLabel)?.toString() : values[input.fieldName] ? values[input.fieldName]?.optionLabel : '-';
+      text = isArray(values[input.fieldName])
+        ? values[input.fieldName]?.map((e) => e?.optionLabel)?.toString()
+        : values[input.fieldName]
+          ? values[input.fieldName]?.optionLabel
+          : '-';
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }
@@ -522,12 +526,14 @@ const Details = (props: DetailProps) => {
                           )}
                         >
                           <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
-                            <div className={cn('d-flex formdata-title-v1 min-h-full', isTypeFile(field.fieldData.type) && '!border-r-0')}>
-                              <h4 title={field.fieldData.fieldLabel} className={`text-truncate `}>
+                            <div
+                              className={cn('d-flex formdata-title-v1 min-h-full items-center', isTypeFile(field.fieldData.type) && '!border-r-0')}
+                            >
+                              <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
                                 {field.fieldData.fieldLabel}
                               </h4>
                               {field.fieldData.isTooltip && (
-                                <HtmlTooltip title={field.fieldData.tooltipMessage}>
+                                <HtmlTooltip title={field.fieldData.tooltipMessage} className="pr-2">
                                   <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
                                 </HtmlTooltip>
                               )}
