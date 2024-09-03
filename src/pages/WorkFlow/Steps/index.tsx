@@ -143,7 +143,7 @@ const Steps = ({ resource, loading, id }) => {
   const sensors = useDndSensors();
 
   return (
-    <Box className="conditions-container container-with-border mb-2 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4">
+    <Box className="conditions-container sm:mb-3 sm:p-3 md:mb-2 md:p-2">
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
         <Button
           variant="contained"
