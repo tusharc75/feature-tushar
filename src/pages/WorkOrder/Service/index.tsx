@@ -919,7 +919,7 @@ const Service = ({
             );
           }}
           isSubmitting={isSubmitting}
-          extraStaticFilter={serviceDialog.preWork == null ? [] : [{ field: 'preWork', term: serviceDialog.preWork }]}
+          extraStaticFilter={serviceDialog?.preWork ? [{ field: 'preWork', term: serviceDialog.preWork }] : []}
         />
       )}
       {serviceDialog.open && serviceDialog.type === 'newService' && (
