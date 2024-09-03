@@ -38,7 +38,7 @@ const CreateWorkFlow = () => {
   const fetchWorkFlowData = async () => {
     setLoading(true);
     axiosInstance()
-      .get(`${routes?.workFlow?.path}/${id}`)
+      .get(`${routes?.workflow?.path}/${id}`)
       .then(({ data: { data } }) => {
         setLoading(false);
         setWorkFlowData(data);
@@ -59,7 +59,7 @@ const CreateWorkFlow = () => {
         <Box className="headerbox-v1">
           <Box className="nav-v1">
             <CustomBreadCrumbs
-              routes={[routes.workFlow, { title: workFlowData ? workFlowData.workFlowName : '' }]}
+              routes={[routes.workflow, { title: workFlowData ? workFlowData.workflowName : '' }]}
               isConfirmBeforeClick={true}
               onBreadCrumbClick={(path) => {
                 history.push({ pathname: path });
@@ -77,12 +77,12 @@ const CreateWorkFlow = () => {
                       <TextField
                         variant="outlined"
                         type="text"
-                        label="Work Flow Name"
+                        label="Workflow Name"
                         disabled={true}
-                        name="workFlowName"
+                        name="workflowName"
                         fullWidth
                         margin="dense"
-                        value={workFlowData.workFlowName || ''}
+                        value={workFlowData.workflowName || ''}
                         // onChange={(e) => {
                         //   setWorkFlowName(e.target.value.trimStart());
                         // }}
@@ -92,17 +92,17 @@ const CreateWorkFlow = () => {
                       <TextField
                         variant="outlined"
                         type="text"
-                        label="Work Flow Resource"
+                        label="Workflow Resource"
                         disabled={true}
-                        name="workFlowResource"
+                        name="workflowResource"
                         fullWidth
                         margin="dense"
-                        value={workFlowData.workFlowResource || ''}
+                        value={workFlowData.workflowResource || ''}
                       />
                     </Grid>
                   </Grid>
                   <Grid item xs={3} container justifyContent="flex-end">
-                    {permissions?.workFlow?.isUpdate && (
+                    {permissions?.workflow?.isUpdate && (
                       <Box className="gap-1">
                         <Button
                           disabled={false}
@@ -113,8 +113,8 @@ const CreateWorkFlow = () => {
                               open: true,
                               data: {
                                 _id: workFlowData?._id,
-                                workFlowName: workFlowData.workFlowName,
-                                workFlowResource: workFlowData.workFlowResource
+                                workflowName: workFlowData.workflowName,
+                                workflowResource: workFlowData.workflowResource
                               }
                             })
                           }
@@ -131,7 +131,7 @@ const CreateWorkFlow = () => {
                         size="small"
                         style={isMobile && !isTablet ? { color: 'var(--error)' } : {}}
                         onClick={() => {
-                          history.push({ pathname: routes.workFlow.path });
+                          history.push({ pathname: routes.workflow.path });
                         }}
                       >
                         {' '}
@@ -142,26 +142,26 @@ const CreateWorkFlow = () => {
                 </Grid>
               </Box>
               <Box>
-              <CustomTabs value={tabValue} onChange={handleMainTabChange}>
-              <CustomTab value={0} label={'Activation Condition'} />
-              <CustomTab value={1} label={'Steps'}  />
-              <CustomTab value={2} label={'Notifications'} />
-             </CustomTabs>
-             <TabPanel value={tabValue} index={0}>
-             <ActivationCondition
-                  resource={workFlowData?.workFlowResource}
-                  fetchWorkFlowData={fetchWorkFlowData}
-                  activationCondition={workFlowData?.activationCondition}
-                  loading={loading}
-                  id={id}
-                />
-             </TabPanel>
-             <TabPanel value={tabValue} index={1}>
-             <Steps resource={workFlowData?.workFlowResoure} loading={loading} id={id} />
-             </TabPanel>
-             <TabPanel value={tabValue} index={2}>
-             <Notifications resource={workFlowData?.workFlowResoure} id={id} />
-             </TabPanel>
+                <CustomTabs value={tabValue} onChange={handleMainTabChange}>
+                  <CustomTab value={0} label={'Activation Condition'} />
+                  <CustomTab value={1} label={'Steps'} />
+                  <CustomTab value={2} label={'Notifications'} />
+                </CustomTabs>
+                <TabPanel value={tabValue} index={0}>
+                  <ActivationCondition
+                    resource={workFlowData?.workflowResource}
+                    fetchWorkFlowData={fetchWorkFlowData}
+                    activationCondition={workFlowData?.activationCondition}
+                    loading={loading}
+                    id={id}
+                  />
+                </TabPanel>
+                <TabPanel value={tabValue} index={1}>
+                  <Steps resource={workFlowData?.workflowResoure} loading={loading} id={id} />
+                </TabPanel>
+                <TabPanel value={tabValue} index={2}>
+                  <Notifications resource={workFlowData?.workflowResoure} id={id} />
+                </TabPanel>
               </Box>
             </Fragment>
           ) : (
