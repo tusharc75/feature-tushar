@@ -40,9 +40,7 @@ const Notifications = ({ resource, id }) => {
     <Fragment>
       {!notifLoading ? (
         <Box
-          border={1}
-          borderColor="var(--common-border-color)"
-          className="conditions-container container-with-border mb-2 flex flex-col gap-1 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4"
+          className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-2 md:p-2"
         >
           <Box border={1} borderColor="var(--common-border-color)" p={1} px={1} display={'flex'} flexDirection={'column'} mt={1} borderRadius={'5px'}>
             <Box className="mb-2">
