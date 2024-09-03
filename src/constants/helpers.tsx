@@ -522,7 +522,7 @@ export const RESOURCE_LABEL = {
   equiptAi: 'Equipt Ai',
   trainAiModel: 'Train Ai Model',
   workSpace: 'Work Space',
-  workFlow: 'Work Flow',
+  workFlow: 'Workflow',
   workflowReport: 'Workflow Report'
 };
 
