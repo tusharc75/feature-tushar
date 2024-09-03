@@ -552,11 +552,26 @@ function Dropdown({
                           const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
                           if (filterFields?.length) {
                             filterFields?.forEach((ele: any) => {
-                              if (ele?.lookupDependentOnField && ele?.type === 'dropDown' && val && val[ele?.lookupDependentOnField]) {
+                              if (ele?.type === 'dropDown' && ele?.lookupDependentOnField && val && val[ele?.lookupDependentOnField]) {
                                 if (Array.isArray(val[ele?.lookupDependentOnField]) && val[ele?.lookupDependentOnField]?.length === 1) {
                                   setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
                                 } else {
                                   setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                }
+                              }
+                              else if (ele?.type === 'dropDown' && ele?.lookupDependentOnField === '' && val && val?.optionValue) {
+                                const filterFieldDropDownOptions = ele?.option?.filter((o: any) => {
+                                  if (o?.hasOwnProperty(ele?.lookupDependentOn)) {
+                                    if (Array.isArray(o[ele?.lookupDependentOn])) {
+                                      return o[ele?.lookupDependentOn]?.includes(val?.optionValue);
+                                    } else {
+                                      return o[ele?.lookupDependentOn] === val?.optionValue;
+                                    }
+                                  }
+                                  return false;
+                                });
+                                if (filterFieldDropDownOptions?.length === 1) {
+                                  setFieldValue(ele?.fieldName, filterFieldDropDownOptions[0]?.optionValue);
                                 }
                               }
                             });
