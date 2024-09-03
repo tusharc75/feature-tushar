@@ -36,7 +36,7 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -440,6 +440,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         });
         setConsumablesDialog(false);
         fetchData();
+        fetchFieldTicketData();
         setSubmitting(false);
       })
       .catch((error) => {
@@ -481,6 +482,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       }
       setDeleting(false);
       fetchData();
+      fetchFieldTicketData();
       setDeleteData(null);
     } catch (error) {
       setDeleting(false);
