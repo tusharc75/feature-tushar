@@ -35,7 +35,7 @@ import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomInt
 import { generateAddExistingService, generateAddManualEntry, generateAddNewService, generateAddProductConsumable, generateAddTechnician, generateEditManualEntry, generateEditService } from '../walkmeSteps';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
-const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy }) => {
+const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -294,6 +294,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+    fetchData();
   };
 
   const generateNestedData = (material, parent) => {
