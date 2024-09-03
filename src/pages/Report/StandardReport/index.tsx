@@ -564,7 +564,7 @@ const Report = () => {
     if (selectedResources.length > 0) {
       if (selectedData) {
         const keys = selectedData ? Object.keys(selectedData) : [];
-        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup);
+        const idFilter = keys.filter((key) => selectedData[key] && selectedData[key].lookup && selectedData[key]?.value?.length > 0);
         const forDeepFilter = keys.filter((key) => selectedData[key] && !selectedData[key].lookup);
         let filterById = idFilter.map((key) => {
           if (key === 'warehouse') {
