@@ -74,7 +74,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
       });
     }else{
       axiosInstance()
-      .post(`${routes.workFlow.path}`, {...values, status: WORK_FLOW_STATUS.open})
+      .post(`${routes.workFlow.path}`, {...values})
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,

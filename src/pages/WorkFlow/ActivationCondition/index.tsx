@@ -86,9 +86,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
   return (
     <Fragment>
       <Box
-        border={1}
-        borderColor="var(--common-border-color)"
-        className="conditions-container container-with-border mb-2 flex flex-col gap-1 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4"
+        className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-4 md:p-2"
       >
         <Box>
           <Button
@@ -156,8 +154,8 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
             ))
           ) : null
         ) : (
-          <Box p={2} height={200}>
-            <CommonSkeleton lenArray={[...Array(5).keys()]} />
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
       </Box>

@@ -1276,12 +1276,12 @@ const routes = {
   workFlow: {
     title: storedRoutes && storedRoutes.workFlow && storedRoutes.workFlow?.title ? storedRoutes.workFlow?.title
       : RESOURCE_LABEL.workFlow,
-    path: '/work-flow'
+    path: '/workflow'
   },
   workFlowDetail: {
     title: storedRoutes && storedRoutes.workFlow && storedRoutes.workFlow?.title ? storedRoutes.workFlow?.title
       : RESOURCE_LABEL.workFlow,
-    path: '/work-flow/:id'
+    path: '/workflow/:id'
   },
   workflowReport: {
     title: storedRoutes && storedRoutes.workflowReport && storedRoutes.workflowReport?.title ? storedRoutes.workflowReport?.title
