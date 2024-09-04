@@ -11,7 +11,6 @@ import { useLocation, useHistory } from 'react-router-dom';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useData } from '../../StateProvider/Provider';
 import { isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 import { isEqual } from 'lodash';
@@ -39,8 +38,6 @@ export default function ManageUserDialog({
   const [initialData, setInitialData] = useState({ fields: [], values: dataToUpdate ? dataToUpdate : {} });
   const location = useLocation();
   const history = useHistory();
-  const [formsData, setFormsData] = useState([]);
-  const [reportsToDataSource, setReportsToDataSource] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -82,20 +79,6 @@ export default function ManageUserDialog({
     getInitialData();
   }, [getInitialData]);
 
-  // useEffect(() => {
-  //   if (initialData.fields.length > 0) {
-  //     const reportsToDropdownData = initialData.fields.find((d) => d.fieldName === 'reportsTo');
-  //     if (reportsToDropdownData) {
-  //       if (isNew) {
-  //         setReportsToDataSource(reportsToDropdownData.option);
-  //       } else {
-  //         let currentContactRemovedDataSource = reportsToDropdownData.option.filter((d) => d?.optionValue !== userId);
-  //         setReportsToDataSource(currentContactRemovedDataSource);
-  //       }
-  //     }
-  //     setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  //   }
-  // }, [initialData.fields]);
 
   const handleSubmit = (values) => {
     setSubmitting(true);
