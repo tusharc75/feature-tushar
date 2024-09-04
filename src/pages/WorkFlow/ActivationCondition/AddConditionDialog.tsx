@@ -35,14 +35,13 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
         setOptions(fields?.find((f) => f?.fieldName === selectedField?.fieldName)?.option || []);
       }
     } else if (['checkBox', 'switch'].includes(selectedField?.type)) {
-      console.log('hello')
       setOptions([
         { optionLabel: 'YES', optionValue: 'yes' },
         { optionLabel: 'NO', optionValue: 'no' }
       ]);
     }
   }, [selectedField]);
-console.log(options)
+
   const getData = async () => {
     var data = await getLookupOption('', selectedField?.lookupResource);
     if (selectedField?.lookupResource === sidebarResource.user) {
