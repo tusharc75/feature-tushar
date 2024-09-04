@@ -111,6 +111,11 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
     const data: any = {
       fromRentalId: referenceData?._id,
       toRentalId: toRentalData?._id,
+      isReceivingTicketCreated: false,
+    }
+
+    if ([ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(productInventory[0]?.status)) {
+      data.isReceivingTicketCreated = true
     }
 
     const assets: any = [];
@@ -234,7 +239,7 @@ const ExistingRentalJob = ({ referenceData, referenceType, productInventory, onC
           onSuccess={(_selectedPackage) => {
             setSelectedPackage(_selectedPackage)
             const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview)
-            if (statusPolicy) {
+            if (statusPolicy && ![ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(productInventory[0]?.status)) {
               setOpenAssetDataDialog({ open: true, statusPolicy: statusPolicy?.statusPolicy, _ids: statusPolicy?.assetIds, type: 'underReview', data: selectedRecords[0] })
             } else {
               handlePerformTransfer(selectedRecords[0])
