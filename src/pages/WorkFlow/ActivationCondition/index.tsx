@@ -70,7 +70,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
   const handleDelete = (condition) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.workFlow.path}/${id}/activation-condition/delete`, { activationConditionId: condition?._id })
+      .put(`${routes.workflow.path}/${id}/activation-condition/delete`, { activationConditionId: condition?._id })
       .then(() => {
         setDeleting(false);
         fetchWorkFlowData();
@@ -85,9 +85,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
 
   return (
     <Fragment>
-      <Box
-        className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-4 md:p-2"
-      >
+      <Box className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-4 md:p-2">
         <Box>
           <Button
             variant="contained"
@@ -125,31 +123,31 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
                       : ''
                     : ele['fieldValue']
                 }`}</Typography>
-                
-                  <div className="min-w-fit">
-                    <HtmlTooltip title={'Edit'}>
-                      <IconButton
-                        size="small"
-                        aria-label="Edit"
-                        onClick={() => {
-                          setOpen({ open: true, data: ele });
-                        }}
-                      >
-                        <EditIcon fontSize="small" color={'primary'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                    <HtmlTooltip title={'Delete'}>
-                      <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        onClick={() => {
-                          setDeleteData(ele);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={'error'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </div>
+
+                <div className="min-w-fit">
+                  <HtmlTooltip title={'Edit'}>
+                    <IconButton
+                      size="small"
+                      aria-label="Edit"
+                      onClick={() => {
+                        setOpen({ open: true, data: ele });
+                      }}
+                    >
+                      <EditIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={'Delete'}>
+                    <IconButton
+                      size="small"
+                      aria-label="Delete"
+                      onClick={() => {
+                        setDeleteData(ele);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" color={'error'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
               </Box>
             ))
           ) : null
