@@ -350,39 +350,36 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form noValidate>
-                  <InputField
-                      errors={errors}
-                      values={values}
-                      setFieldValue={(name, value) => {
-                        setFieldValue(name, value);
-                        if (name === 'fullAddress') {
-                          (_, val) => {
-                            if (typeof val !== 'object') return;
-                            getFullAddress(val);
-                            if (!val?.place_id) {
-                              setAddressDetail(null);
-                            }
-                          }
+                <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={(name, val) => {
+                      setFieldValue(name, val);
+                    }}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.address}
+                    referenceId={addressData?._id || null}
+                    onChange={(field, e, val) => {
+                      if (field.fieldName === 'fullAddress') {
+                        if (typeof val !== 'object') return;
+                        getFullAddress(val);
+                        if (!val?.place_id) {
+                          setAddressDetail(null);
                         }
-                        else{
-                          (e: React.ChangeEvent<HTMLInputElement>) => {
-                            const { name, value } = e.target;
-                            if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
-                            setAddressDetail((prevState: any) => ({
-                              ...prevState,
-                              [name]: value
-                            }));
-                            setLatLngChangedManually(true);
-                          }
-                        }
-                      }}
-                      touched={touched}
-                      fieldsData={initialData.fields}
-                      size="small"
-                      fullWidth
-                      resource={sidebarResource.address}
-                      referenceId={addressData?._id || null}
-                    />
+                      } else {
+                        const { name, value } = e.target;
+                        if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                        setAddressDetail((prevState: any) => ({
+                          ...prevState,
+                          [name]: value
+                        }));
+                        setLatLngChangedManually(true);
+                      }
+                    }}
+              />
                 </Form>
                 <div>
                   <p>Drag or click to select new coordinates</p>
