@@ -120,14 +120,14 @@ const getNotiUser = (data, key) => {
   if (!data || !data?.ids?.length) return <span></span>;
   const { ids, type } = data;
   if (type) {
-    str1 += type === 'User' ? `${key} will be sent to users - ` : `${key} will be sent to users associated with these roles - `;
+    str1 += type === 'Users' ? `${key} will be sent to users - ` : `${key} will be sent to users associated with these roles - `;
   }
   if (ids && ids.length > 0) {
     str2 = ids.map((v, i) => (
       <span key={v.optionValue}>
         <a
           className="link text-truncate"
-          href={`${routes[`${type === 'Role' ? 'roleDetail' : 'userDetail'}`].path}/${v.optionValue}`}
+          href={`${routes[`${type === 'Roles' ? 'roleDetail' : 'userDetail'}`].path}/${v.optionValue}`}
           target="_blank"
           rel="noopener noreferrer"
         >
