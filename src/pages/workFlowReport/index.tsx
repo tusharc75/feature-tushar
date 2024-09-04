@@ -37,7 +37,7 @@ const WorkFlowReport = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`${routes?.workFlow?.path}`)
+      .get(`${routes?.workflow?.path}`)
       .then(({ data: { data } }) => {
         setWorkFlowOptions(data);
       })
@@ -49,13 +49,13 @@ const WorkFlowReport = () => {
   const fetchGridColumns = () => {
     const columns = [
       {
-        accessor: 'workFlow',
-        Header: 'Work Flow',
+        accessor: 'workflow',
+        Header: 'Workflow',
         width: 150,
         Cell: ({ row }) => (
           <div>
             <Link className="link" to={`${routes.workflowReportDetail.path}/${row?.original?._id}`}>
-              {row?.original?.workFlow}
+              {row?.original?.workflow}
             </Link>
           </div>
         )
@@ -141,10 +141,14 @@ const WorkFlowReport = () => {
           <Autocomplete
             className="min-w-[200px] max-w-[400px] flex-grow"
             options={workFlowOptions}
-            getOptionLabel={(option) => option?.workFlowName || ''}
+            getOptionLabel={(option) => option?.workflowName || ''}
             size="small"
-            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Work Flow Filter" variant="outlined" />}
-            value={workFlowOptions.filter((data) => data._id === selectedWorkFlow).length ? workFlowOptions.filter((data) => data._id === selectedWorkFlow)[0] : ''}
+            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Workflow Filter" variant="outlined" />}
+            value={
+              workFlowOptions.filter((data) => data._id === selectedWorkFlow).length
+                ? workFlowOptions.filter((data) => data._id === selectedWorkFlow)[0]
+                : ''
+            }
             onChange={(event: any, val: any) => {
               setSelectedWorkFlow(val && val._id ? val._id : '');
             }}

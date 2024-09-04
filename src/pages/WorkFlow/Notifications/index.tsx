@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@material-ui/core';
+import { Box, Button, Divider, Typography } from '@material-ui/core';
 import { Fragment, useContext, useEffect, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
@@ -25,7 +25,7 @@ const Notifications = ({ resource, id }) => {
   const fetchData = () => {
     setNotifLoading(true);
     axiosInstance()
-      .get(`${routes.workFlow.path}/${id}/notifications`)
+      .get(`${routes.workflow.path}/${id}/notifications`)
       .then(({ data: { data } }) => {
         setNotificationData(data);
         setNotifLoading(false);
@@ -39,13 +39,11 @@ const Notifications = ({ resource, id }) => {
   return (
     <Fragment>
       {!notifLoading ? (
-        <Box
-          className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-2 md:p-2"
-        >
-          <Box border={1} borderColor="var(--common-border-color)" p={1} px={1} display={'flex'} flexDirection={'column'} mt={1} borderRadius={'5px'}>
-            <Box className="mb-2">
+        <Box className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-2 md:p-2">
+          <Box p={1} px={1} display={'flex'} flexDirection={'column'} mt={1} borderRadius={'5px'}>
+            <Box className="mb-5">
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 size="small"
                 onClick={() => {
@@ -57,19 +55,11 @@ const Notifications = ({ resource, id }) => {
             </Box>
             <Typography variant="body2">{getNotiUser(notificationData?.activationNotification, NOTIF_TYPE.activationNotification)}</Typography>
           </Box>
-          <Box
-            border={1}
-            borderColor="var(--common-border-color)"
-            p={1}
-            px={1}
-            display={'flex'}
-            flexDirection={'column'}
-            mt={1}
-            borderRadius={'5px'}
-          >
-            <Box className="mb-2">
+          <Divider />
+          <Box p={1} px={1} display={'flex'} flexDirection={'column'} mt={1} borderRadius={'5px'}>
+            <Box className="mb-5">
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 size="small"
                 onClick={() => {
@@ -81,19 +71,11 @@ const Notifications = ({ resource, id }) => {
             </Box>
             <Typography variant="body2">{getNotiUser(notificationData?.stoppedNotification, NOTIF_TYPE.stoppedNotification)}</Typography>
           </Box>
-          <Box
-            border={1}
-            borderColor="var(--common-border-color)"
-            p={1}
-            px={1}
-            display={'flex'}
-            flexDirection={'column'}
-            mt={1}
-            borderRadius={'5px'}
-          >
-            <Box className="mb-2">
+          <Divider />
+          <Box p={1} px={1} display={'flex'} flexDirection={'column'} mt={1} borderRadius={'5px'}>
+            <Box className="mb-5">
               <Button
-                variant="contained"
+                variant="outlined"
                 color="primary"
                 size="small"
                 onClick={() => {
@@ -134,20 +116,25 @@ export default Notifications;
 
 const getNotiUser = (data, key) => {
   let str1 = '';
-  let str2 = ''
-  if(!data || !data?.ids?.length) return <span></span>
-  const {ids, type} = data;
+  let str2 = '';
+  if (!data || !data?.ids?.length) return <span></span>;
+  const { ids, type } = data;
   if (type) {
-    str1 += type === 'User' ? `${key} will be sent to users - ` : `${key} will be sent to users associated with these roles - `;
+    str1 += type === 'Users' ? `${key} will be sent to users - ` : `${key} will be sent to users associated with these roles - `;
   }
   if (ids && ids.length > 0) {
-     str2 = ids.map((v, i) => (
+    str2 = ids.map((v, i) => (
       <span key={v.optionValue}>
-      <a className="link text-truncate" href={`${routes[`${type==='Role' ? 'roleDetail' : 'userDetail'}`].path}/${v.optionValue}`} target="_blank" rel="noopener noreferrer">
-        {v.optionLabel}
-      </a>
-      {i < ids.length - 1 && ', '}
-    </span>
+        <a
+          className="link text-truncate"
+          href={`${routes[`${type === 'Roles' ? 'roleDetail' : 'userDetail'}`].path}/${v.optionValue}`}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          {v.optionLabel}
+        </a>
+        {i < ids.length - 1 && ', '}
+      </span>
     ));
   }
   return (
