@@ -15,11 +15,11 @@ import routes from 'src/components/Helpers/Routes';
 
 const NotifSendType = [
   {
-    key: 'User',
+    key: 'Users',
     value: 0
   },
   {
-    key: 'Role',
+    key: 'Roles',
     value: 1
   }
 ];
@@ -42,7 +42,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
       });
     } else {
       setInitialValues({
-        type: 'Role',
+        type: 'Roles',
         ids: []
       });
     }
@@ -122,7 +122,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
             />
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
-                <Grid>
+                <Grid className="py-2">
                   <ToggleButtonGroup
                     size="small"
                     value={values?.type}
@@ -145,7 +145,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                     })}
                   </ToggleButtonGroup>
                 </Grid>
-                {values['type'] === 'Role' ? (
+                {values['type'] === 'Roles' ? (
                   <>
                     <Box>
                       <Autocomplete
