@@ -45,7 +45,7 @@ const WorkFlow = () => {
     const columns = [
       {
         accessor: 'workFlowName',
-        Header: 'Work Flow Name',
+        Header: 'Workflow Name',
         width: 150,
         Cell: ({ row }) => (
           <div>
@@ -57,7 +57,7 @@ const WorkFlow = () => {
       },
       {
         accessor: 'workFlowResource',
-        Header: 'Work Flow Resource',
+        Header: 'Workflow Resource',
         width: 150,
         Cell: ({ row }) => (
           <div>
