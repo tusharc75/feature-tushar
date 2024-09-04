@@ -166,6 +166,46 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     }
   }, [values]);
 
+  const getDataHeaderRowWise = (headerRow = 1, header: any, fromCol = 0, toCol = 0, fromRow = 0, newHeaders: any, jsonData: any) => {
+    if (headerRow === 1) {
+      header?.forEach((h, i) => {
+        if (i >= fromCol && i <= toCol) {
+          newHeaders.push({
+            header: h,
+            column: i
+          });
+        }
+      });
+    } else if (headerRow === 2) {
+      const headers2: any = jsonData[fromRow + 1];
+      let j;
+      header.forEach((h, i) => {
+        if (i >= fromCol && i <= toCol) {
+          let name = headers2[i] ? h + ' ' + headers2[i] : h;
+          let index = i;
+
+          const diff = i - j;
+          if (diff != 1) {
+            for (let k = j + 1; k < i; k++) {
+              if (headers2[k]) {
+                newHeaders.push({
+                  header: header[j] + ' ' + headers2[k],
+                  column: k
+                });
+              }
+            }
+          }
+          j = index;
+
+          newHeaders.push({
+            header: name,
+            column: index
+          });
+        }
+      });
+    }
+  }
+
   const handleImport = (e) => {
     let files = e.target.files[0];
     setFiles(files);
@@ -174,7 +214,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
 
   const handleFileImport = (values) => {
     setOpenRowNumberDialog(false);
-    if (values?.length && values?.some((v) => v?.startRowCell && v?.endRowCell)) {
+    if (values?.length > 0) {
       const reader = new FileReader();
       reader.onload = (e) => {
         const data = e.target.result;
@@ -185,61 +225,38 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
           const ws = readedData.Sheets[value?.sheetName || readedData.SheetNames[0]];
           const jsonData = utils.sheet_to_json(ws, { header: 1 });
 
-          const startRowCell = value?.startRowCell?.match(/^(\D+)(\d+)$/);
-          const endRowCell = value?.endRowCell?.match(/^(\D+)(\d+)$/);
-          const headerRow = +value?.headerRow;
-          const fromCol = charToNum(startRowCell[1]) - 1;
-          const fromRow = +startRowCell[2] - 1;
-          const toCol = charToNum(endRowCell[1]) - 1;
-          const toRow = +endRowCell[2] - 1;
-
-          const header: any = jsonData[fromRow];
           const newHeaders: any = [];
 
-          if (headerRow === 1) {
-            header?.forEach((h, i) => {
-              if (i >= fromCol && i <= toCol) {
-                newHeaders.push({
-                  header: h,
-                  column: i
-                });
-              }
+          const headerRow = +value?.headerRow;
+          if (value?.startRowCell && value?.endRowCell) {
+            const startRowCell = value?.startRowCell?.match(/^(\D+)(\d+)$/);
+            const endRowCell = value?.endRowCell?.match(/^(\D+)(\d+)$/);
+            const fromCol = charToNum(startRowCell[1]) - 1;
+            const fromRow = +startRowCell[2] - 1;
+            const toCol = charToNum(endRowCell[1]) - 1;
+            const toRow = +endRowCell[2] - 1;
+
+            const header: any = jsonData[fromRow];
+
+            getDataHeaderRowWise(headerRow, header, fromCol, toCol, fromRow, newHeaders, jsonData)
+            newData.push({
+              header: newHeaders,
+              data: jsonData,
+              fromRow: headerRow === 1 ? fromRow + 1 : fromRow + 2,
+              toRow: toRow
             });
-          } else if (headerRow === 2) {
-            const headers2: any = jsonData[fromRow + 1];
-            let j;
-            header.forEach((h, i) => {
-              if (i >= fromCol && i <= toCol) {
-                let name = headers2[i] ? h + ' ' + headers2[i] : h;
-                let index = i;
-
-                const diff = i - j;
-                if (diff != 1) {
-                  for (let k = j + 1; k < i; k++) {
-                    if (headers2[k]) {
-                      newHeaders.push({
-                        header: header[j] + ' ' + headers2[k],
-                        column: k
-                      });
-                    }
-                  }
-                }
-                j = index;
-
-                newHeaders.push({
-                  header: name,
-                  column: index
-                });
-              }
+          } else {
+            const header: any = jsonData[0];
+            getDataHeaderRowWise(headerRow, header, 0, (header?.length - 1), 0, newHeaders, jsonData)
+            newData.push({
+              header: newHeaders,
+              data: jsonData,
+              fromRow: headerRow === 1 ? 1 : 2,
+              toRow: (jsonData?.filter(d => !isEmpty(d))?.length - 1)
             });
           }
-          newData.push({
-            header: newHeaders,
-            data: jsonData,
-            fromRow: headerRow === 1 ? fromRow + 1 : fromRow + 2,
-            toRow: toRow
-          });
         });
+
         const newJsonData: any = [];
 
         const noOfRow = Math.max(...newData?.map((obj) => obj.toRow - obj.fromRow));
@@ -263,7 +280,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
         const blob = new Blob([excelBuffer], { type: fileType });
 
         handleFileImport1(blob);
-      };
+      }
       reader.readAsArrayBuffer(files);
     } else {
       handleFileImport1(files);
@@ -643,7 +660,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                 </>
                 <Button
                   id={'custom-import-dialog-add-view-menu-button'}
-                  variant={'contained'}
+                  variant={'outlined'}
                   color="primary"
                   size="small"
                   disabled={isUploading || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
@@ -652,7 +669,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   }}
                   aria-controls="add-view-menu"
                 >
-                  {selectedView ? 'Edit excel mapping' : 'Add excel mapping'}
+                  Save Excel Mapping
                 </Button>
               </div>
             </div>
@@ -746,7 +763,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               onClick={handleCustomImport}
               variant="contained"
               color="primary"
-              disabled={loading || !values?.productCategory || !values?.productTemplate || !values?.priceTemplate}
+              disabled={loading || !values?.productCategory || !values?.productTemplate || !values?.priceTemplate || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
               // disabled={
               //   loading ||
               //   !values?.productCategory ||

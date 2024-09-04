@@ -51,39 +51,39 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
   };
 
   const handleSubmit = (values) => {
-    setSubmitting(true)
-    if(data){
+    setSubmitting(true);
+    if (data) {
       axiosInstance()
-      .put(`${routes.workFlow.path}/${id}/activation-condition`, {...values, activationConditionId: data?._id})
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        .put(`${routes.workflow.path}/${id}/activation-condition`, { ...values, activationConditionId: data?._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setSubmitting(false);
+          onSuccess();
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-        setSubmitting(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-    }else{
+    } else {
       axiosInstance()
-      .post(`${routes.workFlow.path}/${id}/activation-condition`, values)
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        .post(`${routes.workflow.path}/${id}/activation-condition`, values)
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setSubmitting(false);
+          onSuccess();
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-        setSubmitting(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     }
   };
 
@@ -124,24 +124,17 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                     id="fields"
                     disabled={data ? true : false}
                     options={
-                      fields?.filter(
-                        (f) =>
-                          !activationCondition?.map((d)=> d?.fieldName)?.includes(f.fieldName)
-                      )?.length > 0
-                        ? fields?.filter(
-                          (f) =>
-                            !activationCondition?.map((d)=> d?.fieldName)?.includes(f.fieldName)
-                        )?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))
+                      fields?.filter((f) => !activationCondition?.map((d) => d?.fieldName)?.includes(f.fieldName))?.length > 0
+                        ? fields
+                            ?.filter((f) => !activationCondition?.map((d) => d?.fieldName)?.includes(f.fieldName))
+                            ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))
                         : []
                     }
                     getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                     getOptionSelected={(option: any, val) => option.optionValue === val}
                     value={
                       fields
-                        ?.filter(
-                          (f) =>
-                            f?.fieldName === values?.fieldName
-                        )
+                        ?.filter((f) => f?.fieldName === values?.fieldName)
                         ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))[0]
                     }
                     onChange={(e: any, value) => {
@@ -164,41 +157,41 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                   />
                   {values?.fieldName &&
                     (selectedField?.type === 'dropDown' || selectedField?.type === 'multiSelect' || selectedField?.type === 'checkBox' ? (
-                        <Autocomplete
-                          id="fieldValue"
-                          options={options}
-                          disableCloseOnSelect={selectedField?.type === 'checkBox' ? false : true}
-                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                          multiple={selectedField?.type === 'checkBox' ? false : true}
-                          value={
-                            values?.fieldValue && selectedField?.type === 'checkBox'
-                              ? options?.filter((data) => data?.optionValue === values?.fieldValue)?.length > 0
-                                ? options?.filter((data) => data?.optionValue === values?.fieldValue)[0]
-                                : ''
-                              : options?.filter((data) => values?.fieldValue?.split(',')?.includes(data?.optionValue))?.length > 0
+                      <Autocomplete
+                        id="fieldValue"
+                        options={options}
+                        disableCloseOnSelect={selectedField?.type === 'checkBox' ? false : true}
+                        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                        multiple={selectedField?.type === 'checkBox' ? false : true}
+                        value={
+                          values?.fieldValue && selectedField?.type === 'checkBox'
+                            ? options?.filter((data) => data?.optionValue === values?.fieldValue)?.length > 0
+                              ? options?.filter((data) => data?.optionValue === values?.fieldValue)[0]
+                              : ''
+                            : options?.filter((data) => values?.fieldValue?.split(',')?.includes(data?.optionValue))?.length > 0
                               ? options?.filter((data) => values?.fieldValue?.split(',')?.includes(data?.optionValue))
                               : []
+                        }
+                        onChange={(e, val) => {
+                          if (selectedField?.type === 'checkBox') {
+                            setFieldValue('fieldValue', val && val?.optionValue ? val?.optionValue : '');
+                          } else {
+                            setFieldValue('fieldValue', val?.map((v) => v?.optionValue)?.join(',') || '');
                           }
-                          onChange={(e, val) => {
-                            if (selectedField?.type === 'checkBox') {
-                              setFieldValue('fieldValue', val && val?.optionValue ? val?.optionValue : '');
-                            } else {
-                              setFieldValue('fieldValue', val?.map((v) => v?.optionValue)?.join(',') || '');
-                            }
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              margin="dense"
-                              variant="outlined"
-                              label="Field Value"
-                              name="fieldValue"
-                              placeholder="Field Value"
-                              error={touched['fieldValue'] && Boolean(errors['fieldValue'])}
-                              helperText={touched['fieldValue'] && errors['fieldValue']}
-                            />
-                          )}
-                        />
+                        }}
+                        renderInput={(params) => (
+                          <TextField
+                            {...params}
+                            margin="dense"
+                            variant="outlined"
+                            label="Field Value"
+                            name="fieldValue"
+                            placeholder="Field Value"
+                            error={touched['fieldValue'] && Boolean(errors['fieldValue'])}
+                            helperText={touched['fieldValue'] && errors['fieldValue']}
+                          />
+                        )}
+                      />
                     ) : (
                       <TextField
                         variant="outlined"
@@ -223,8 +216,14 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
               <Button size="small" onClick={onClose} disabled={submitting} color="primary">
                 Cancel
               </Button>
-              <Button size="small" type="submit" disabled={submitting} color="primary" variant="contained" onClick={submitForm}
-              endIcon={submitting && <CircularProgress color="inherit" size={18} />}
+              <Button
+                size="small"
+                type="submit"
+                disabled={submitting}
+                color="primary"
+                variant="contained"
+                onClick={submitForm}
+                endIcon={submitting && <CircularProgress color="inherit" size={18} />}
               >
                 Save
               </Button>

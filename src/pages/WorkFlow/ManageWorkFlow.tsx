@@ -20,11 +20,11 @@ import ConfirmationCancelDialog from '../../components/ConfirmCancelDialog';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const workFlowSchema = object().shape({
-  workFlowName: string().required('Please enter Work Flow name'),
-  workFlowResource: string().required('Please enter Work Flow Resource')
+  workflowName: string().required('Please enter Workflow Name'),
+  workflowResource: string().required('Please enter Workflow Resource')
 });
 
-const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, data= null }) => {
+const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, data = null }) => {
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -35,15 +35,15 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
   const [resourceOption, setResourceOption] = useState(null);
 
   useEffect(() => {
-    if(data){
+    if (data) {
       setInitialValues({
-        workFlowName: data?.workFlowName,
-        workFlowResource: data?.workFlowResource
+        workflowName: data?.workflowName,
+        workflowResource: data?.workflowResource
       });
-    }else{
+    } else {
       setInitialValues({
-        workFlowName: '',
-        workFlowResource: ''
+        workflowName: '',
+        workflowResource: ''
       });
     }
     getResourceList();
@@ -56,38 +56,38 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-    if(data?._id){
+    if (data?._id) {
       axiosInstance()
-      .put(`${routes?.workFlow?.path}`, {...values, _id: data?._id})
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        .put(`${routes?.workflow?.path}`, { ...values, _id: data?._id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setSubmitting(false);
+          onSuccess();
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-        setSubmitting(false);
-        onSuccess();
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
-    }else{
+    } else {
       axiosInstance()
-      .post(`${routes.workFlow.path}`, {...values, status: WORK_FLOW_STATUS.open})
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        .post(`${routes.workflow.path}`, { ...values, status: WORK_FLOW_STATUS.open })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setSubmitting(false);
+          history.push(`${routes.workflow.path}/${data?.data?._id}`);
+        })
+        .catch((error) => {
+          setSubmitting(false);
+          toastConfig.setToastConfig(error);
         });
-        setSubmitting(false);
-        history.push(`${routes.workFlow.path}/${data?.data?._id}`);
-      })
-      .catch((error) => {
-        setSubmitting(false);
-        toastConfig.setToastConfig(error);
-      });
     }
   };
 
@@ -127,16 +127,16 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                     <TextField
                       variant="outlined"
                       type="text"
-                      label="Work Flow Name"
+                      label="Workflow Name"
                       required={true}
-                      name="workFlowName"
+                      name="workflowName"
                       fullWidth
                       margin="dense"
                       size="small"
-                      value={values['workFlowName']}
-                      error={touched['workFlowName'] && Boolean(errors['workFlowName'])}
-                      helperText={touched['workFlowName'] && errors['workFlowName']}
-                      onChange={(e) => setFieldValue('workFlowName', e.target.value.trimStart())}
+                      value={values['workflowName']}
+                      error={touched['workflowName'] && Boolean(errors['workflowName'])}
+                      helperText={touched['workflowName'] && errors['workflowName']}
+                      onChange={(e) => setFieldValue('workflowName', e.target.value.trimStart())}
                     />
                   </Box>
                   <Box>
@@ -147,24 +147,24 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                       getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                       getOptionSelected={(option: any, val) => option.optionValue === val}
                       value={
-                        resourceOption && resourceOption?.filter((data) => data.optionValue === values['workFlowResource'])?.length
-                          ? resourceOption && resourceOption?.filter((data) => data.optionValue === values['workFlowResource'])[0]
+                        resourceOption && resourceOption?.filter((data) => data.optionValue === values['workflowResource'])?.length
+                          ? resourceOption && resourceOption?.filter((data) => data.optionValue === values['workflowResource'])[0]
                           : ''
                       }
                       onChange={(e: any, value) => {
-                        setFieldValue('workFlowResource', value && value?.optionValue ? value.optionValue : '');
+                        setFieldValue('workflowResource', value && value?.optionValue ? value.optionValue : '');
                       }}
                       renderInput={(params) => (
                         <TextField
                           {...params}
                           margin="dense"
                           variant="outlined"
-                          label="Work Flow Resource"
-                          placeholder="Work Flow Resource"
-                          name="workFlowResource"
+                          label="Workflow Resource"
+                          placeholder="Workflow Resource"
+                          name="workflowResource"
                           required
-                          error={touched['workFlowResource'] && Boolean(errors['workFlowResource'])}
-                          helperText={touched['workFlowResource'] && errors['workFlowResource']}
+                          error={touched['workflowResource'] && Boolean(errors['workflowResource'])}
+                          helperText={touched['workflowResource'] && errors['workflowResource']}
                         />
                       )}
                     />

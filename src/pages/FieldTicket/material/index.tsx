@@ -35,7 +35,7 @@ import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomInt
 import { generateAddExistingService, generateAddManualEntry, generateAddNewService, generateAddProductConsumable, generateAddTechnician, generateEditManualEntry, generateEditService } from '../walkmeSteps';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
 
-const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy }) => {
+const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep, handleChangeStatus, resourcePolicy, fetchData }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Material`;
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -463,6 +463,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           handleChangeStatus(FIELD_TICKET_STATUS.inProgress);
         }
         fetchMaterial();
+        fetchData();
         setMaterialDialog({ open: false, type: '', parentId: null });
         setAssignRentalDataDialog({ open: false, type: '' });
         setIsSubmitting(false);
@@ -483,6 +484,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         d.type = MATERIAL_TYPE.manualEntry;
         await insertUpdate(objectStore.fieldTicketMaterial, id, d);
         fetchMaterial();
+        fetchData();
         setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
         setUpdating(false);
       }
@@ -496,6 +498,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
         .post(`${routes.fieldTicket?.path}/${fieldTicketData?._id}/cost`, [...rows])
         .then(() => {
           fetchMaterial();
+          fetchData();
           setShowCostDialog({ open: false, data: null, showSaveAndNext: false });
           setUpdating(false);
         })
@@ -611,6 +614,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
       }
       setDeleting(false);
       fetchMaterial();
+      fetchData();
       setDeleteData(null);
     } catch (error) {
       setDeleting(false);
@@ -844,6 +848,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           fieldTicketData={fieldTicketData}
           fetchMaterial={fetchMaterial}
           stepFullScreen={stepFullScreen}
+          fetchData={fetchData}
         />
       </Box>
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.service && (

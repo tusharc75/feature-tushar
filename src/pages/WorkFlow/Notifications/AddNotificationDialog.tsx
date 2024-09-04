@@ -38,7 +38,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
     if (data) {
       setInitialValues({
         type: data?.type,
-        ids: data?.ids?.map((e)=> e?.optionValue) ?? []
+        ids: data?.ids?.map((e) => e?.optionValue) ?? []
       });
     } else {
       setInitialValues({
@@ -48,9 +48,9 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
     }
   }, [data]);
 
-  useEffect(()=>{
+  useEffect(() => {
     fetchOptionsData();
-  },[])
+  }, []);
 
   const fetchOptionsData = () => {
     axiosInstance()
@@ -66,21 +66,21 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
 
   const handleSubmit = (values) => {
     setSubmitting(true);
-      axiosInstance()
-        .put(`${routes.workFlow.path}/${id}/notifications`, { ...values, typeOfNotification: camelCase(type) })
-        .then(({ data }) => {
-          setSubmitting(false);
-          onSuccess();
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: data.message
-          });
-        })
-        .catch((error) => {
-          setSubmitting(false);
-          toastConfig.setToastConfig(error);
+    axiosInstance()
+      .put(`${routes.workflow.path}/${id}/notifications`, { ...values, typeOfNotification: camelCase(type) })
+      .then(({ data }) => {
+        setSubmitting(false);
+        onSuccess();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
         });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   // const validate = (values) => {
@@ -105,7 +105,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
         }
       }}
     >
-      <Formik initialValues={initialValues} onSubmit={handleSubmit} validate={()=>{}}>
+      <Formik initialValues={initialValues} onSubmit={handleSubmit} validate={() => {}}>
         {({ values, errors, setFieldValue, touched, submitForm }) => (
           <>
             <CustomDialogHeader
@@ -121,27 +121,31 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
               showManimizeMaximize={true}
             />
             <CustomDialogContent>
-              
               <Form autoComplete="off" autoCorrect="off" noValidate>
-              <Grid>
-                <ToggleButtonGroup size="small" value={values?.type} exclusive onChange={(e, newFilter)=>{
-                    setFieldValue('type', newFilter);
-                    if(data && newFilter === data?.type){
-                      setFieldValue('ids', data?.ids?.map((e)=> e.optionValue) ?? []);
-                    }else{
-                      setFieldValue('ids', []);
-                    }
-                }}>
-                  {NotifSendType.map((k, index) => {
-                    return (
-                      <ToggleButton style={{ width: 80 }} value={k.key} key={index}>
-                        {k.key}
-                      </ToggleButton>
-                    );
-                  })}
-                </ToggleButtonGroup>
-              </Grid>
-                {values['type'] ==='Role' ? (
+                <Grid>
+                  <ToggleButtonGroup
+                    size="small"
+                    value={values?.type}
+                    exclusive
+                    onChange={(e, newFilter) => {
+                      setFieldValue('type', newFilter);
+                      if (data && newFilter === data?.type) {
+                        setFieldValue('ids', data?.ids?.map((e) => e.optionValue) ?? []);
+                      } else {
+                        setFieldValue('ids', []);
+                      }
+                    }}
+                  >
+                    {NotifSendType.map((k, index) => {
+                      return (
+                        <ToggleButton style={{ width: 80 }} value={k.key} key={index}>
+                          {k.key}
+                        </ToggleButton>
+                      );
+                    })}
+                  </ToggleButtonGroup>
+                </Grid>
+                {values['type'] === 'Role' ? (
                   <>
                     <Box>
                       <Autocomplete
@@ -157,7 +161,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                         }
                         multiple
                         onChange={(e: any, value) => {
-                          setFieldValue('ids', value?.length>0 ? value.map((ele)=> ele.optionValue) : []);
+                          setFieldValue('ids', value?.length > 0 ? value.map((ele) => ele.optionValue) : []);
                         }}
                         renderInput={(params) => (
                           <TextField
@@ -175,8 +179,8 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                       />
                     </Box>
                   </>
-                ):
-                <>
+                ) : (
+                  <>
                     <Box>
                       <Autocomplete
                         id="ids"
@@ -190,7 +194,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                             : []
                         }
                         onChange={(e: any, value) => {
-                          setFieldValue('ids', value?.length>0 ? value.map((ele)=> ele.optionValue) : []);
+                          setFieldValue('ids', value?.length > 0 ? value.map((ele) => ele.optionValue) : []);
                         }}
                         multiple
                         renderInput={(params) => (
@@ -209,7 +213,7 @@ const AddNotificationDialog = ({ data, type, onSuccess, onClose, id }) => {
                       />
                     </Box>
                   </>
-                }
+                )}
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>
