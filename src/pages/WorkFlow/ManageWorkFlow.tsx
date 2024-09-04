@@ -114,7 +114,7 @@ const ManageWorkFlow = ({ onClose, onSuccess, isRedirectToDetailPage = false, da
                   if (isEqual(initialValues, values)) onClose();
                   else setShowConfirmDialog(true);
                 }}
-                title={`${data ? 'Edit' : 'Add'} Work Flow`}
+                title={`${data ? 'Edit' : 'Add'} Workflow`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);

@@ -97,7 +97,7 @@ const CreateWorkFlow = () => {
                         name="workflowResource"
                         fullWidth
                         margin="dense"
-                        value={workFlowData.workflowResource || ''}
+                        value={workFlowData?.workflowResource?.optionLabel || ''}
                       />
                     </Grid>
                   </Grid>
@@ -114,7 +114,7 @@ const CreateWorkFlow = () => {
                               data: {
                                 _id: workFlowData?._id,
                                 workflowName: workFlowData.workflowName,
-                                workflowResource: workFlowData.workflowResource
+                                workflowResource: workFlowData.workflowResource?.optionValue
                               }
                             })
                           }
@@ -149,7 +149,7 @@ const CreateWorkFlow = () => {
                 </CustomTabs>
                 <TabPanel value={tabValue} index={0}>
                   <ActivationCondition
-                    resource={workFlowData?.workflowResource}
+                    resource={workFlowData?.workflowResource?.optionValue}
                     fetchWorkFlowData={fetchWorkFlowData}
                     activationCondition={workFlowData?.activationCondition}
                     loading={loading}
@@ -157,10 +157,10 @@ const CreateWorkFlow = () => {
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  <Steps resource={workFlowData?.workflowResoure} loading={loading} id={id} />
+                  <Steps resource={workFlowData?.workflowResoure?.optionValue} loading={loading} id={id} />
                 </TabPanel>
                 <TabPanel value={tabValue} index={2}>
-                  <Notifications resource={workFlowData?.workflowResoure} id={id} />
+                  <Notifications resource={workFlowData?.workflowResource?.optionValue} id={id} />
                 </TabPanel>
               </Box>
             </Fragment>
