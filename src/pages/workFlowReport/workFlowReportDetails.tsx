@@ -26,11 +26,11 @@ const WorkFlowReportDetail = () => {
     fetchData();
   }, [id]);
 
-  useEffect(()=>{
-    if(workFlowReportData){
+  useEffect(() => {
+    if (workFlowReportData) {
       fetchWorkFlowData();
     }
-  },[workFlowReportData])
+  }, [workFlowReportData]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -46,31 +46,29 @@ const WorkFlowReportDetail = () => {
       });
   };
 
-  const fetchWorkFlowData = async ()=>{
+  const fetchWorkFlowData = async () => {
     axiosInstance()
-    .get(`${routes.workFlow.path}/${workFlowReportData?.workFlow}`)
-    .then(({ data: { data } }) => {
-      setWorkFlowData(data);
-    })
-    .catch((err) => {
-      toastConfig.setToastConfig(err);
-    });
-  }
+      .get(`${routes.workflow.path}/${workFlowReportData?.workflow}`)
+      .then(({ data: { data } }) => {
+        setWorkFlowData(data);
+      })
+      .catch((err) => {
+        toastConfig.setToastConfig(err);
+      });
+  };
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
 
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
         <Box className="nav-v1">
-          <CustomBreadCrumbs routes={[routes.workflowReport, { title: workFlowData?.workFlowName }]} />
+          <CustomBreadCrumbs routes={[routes.workflowReport, { title: workFlowData?.workflowName }]} />
         </Box>
         <Box className="controls-v1">
-          <Box className="control-buttons-v1">
-          </Box>
+          <Box className="control-buttons-v1"></Box>
         </Box>
       </Box>
       <Box className={`detail-container-v1`}>
@@ -84,16 +82,16 @@ const WorkFlowReportDetail = () => {
             </Grid>
           ) : (
             <Step
-            resourceData={workFlowData}
-            resourceId={id}
-            resource={'Workflow Report'}
-            data={workFlowReportData}
-            allowedToEdit={permissions?.repairOrder?.isUpdate}
-          />
+              resourceData={workFlowData}
+              resourceId={id}
+              resource={'Workflow Report'}
+              data={workFlowReportData}
+              allowedToEdit={permissions?.repairOrder?.isUpdate}
+            />
           )}
         </TabPanel>
       </Box>
-      </Box>
+    </Box>
   );
 };
 
