@@ -143,7 +143,7 @@ const WorkFlowReport = () => {
             options={workFlowOptions}
             getOptionLabel={(option) => option?.workflowName || ''}
             size="small"
-            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Work Flow Filter" variant="outlined" />}
+            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Workflow Filter" variant="outlined" />}
             value={
               workFlowOptions.filter((data) => data._id === selectedWorkFlow).length
                 ? workFlowOptions.filter((data) => data._id === selectedWorkFlow)[0]

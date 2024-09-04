@@ -114,6 +114,7 @@ const WorkFlow = () => {
           finalObject['canDelete'] = permissions?.workflow?.isDelete;
           return finalObject;
         });
+        console.log(rows)
         dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
       })
       .catch((error) => {
