@@ -74,7 +74,8 @@ export default function NewCreateQuotePdfTemplate() {
     header: '',
     footer: '',
     aboveTable: '',
-    belowTable: ''
+    belowTable: '',
+    tabelSummaryLeftSide: ''
   });
   const [initialValues, setInitialValues] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -215,6 +216,7 @@ export default function NewCreateQuotePdfTemplate() {
             footer: tempPdfTemplate.footer,
             aboveTable: tempPdfTemplate.aboveTable,
             belowTable: tempPdfTemplate.belowTable,
+            tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide,
             entity: tempPdfTemplate.entity ? tempPdfTemplate.entity : [],
             type: tempPdfTemplate.type,
             owner: tempPdfTemplate.owner && tempPdfTemplate.owner !== undefined ? tempPdfTemplate.owner : user.user._id,
@@ -224,7 +226,8 @@ export default function NewCreateQuotePdfTemplate() {
             header: tempPdfTemplate.header,
             footer: tempPdfTemplate.footer,
             aboveTable: tempPdfTemplate.aboveTable,
-            belowTable: tempPdfTemplate.belowTable
+            belowTable: tempPdfTemplate.belowTable,
+            tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide,
           });
         } else {
           try {
@@ -242,6 +245,7 @@ export default function NewCreateQuotePdfTemplate() {
               footer: data?.footer,
               aboveTable: data?.aboveTable,
               belowTable: data?.belowTable,
+              tabelSummaryLeftSide: data?.tabelSummaryLeftSide,
               entity: data?.entity ? data?.entity : [],
               type: data?.type,
               owner: data?.owner && data.owner !== undefined ? data?.owner : user.user._id,
@@ -251,7 +255,8 @@ export default function NewCreateQuotePdfTemplate() {
               header: data?.header,
               footer: data?.footer,
               aboveTable: data?.aboveTable,
-              belowTable: data?.belowTable
+              belowTable: data?.belowTable,
+              tabelSummaryLeftSide: data?.tabelSummaryLeftSide,
             });
             if (tempQuoteData?._id) {
               setHasPermissionToUpdate(true);
@@ -292,6 +297,7 @@ export default function NewCreateQuotePdfTemplate() {
         footer: '',
         aboveTable: '',
         belowTable: '',
+        tabelSummaryLeftSide: '',
         entity: selectedEntity ? [selectedEntity] : [],
         type: '',
         owner: user.user._id,
@@ -846,6 +852,30 @@ export default function NewCreateQuotePdfTemplate() {
                         width={isLandscapChecked ? 793 : 725}
                         height={300}
                         initialValue={initialValues?.footer}
+                        imageOrFileUploadCompletePercentage={(completePercentage) => null}
+                        showVariableDropdown={true}
+                        variables={variables}
+                        isCheckHeight={true}
+                      />
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} className="mt-4">
+                    <Box className={classes.tinyMCEContainer}>
+                      <Typography className={classes.headingLabel} variant="h5" component="h5">
+                        Tabel Summary Left Side
+                      </Typography>
+                      <TinyMce
+                        disabledEditor={!hasPermissionToUpdate}
+                        id="tabelSummaryLeftSide"
+                        onChange={(value) => {
+                          setDetails((prevState) => ({
+                            ...prevState,
+                            tabelSummaryLeftSide: value
+                          }));
+                        }}
+                        width={isLandscapChecked ? 793 : 725}
+                        height={300}
+                        initialValue={initialValues?.tabelSummaryLeftSide}
                         imageOrFileUploadCompletePercentage={(completePercentage) => null}
                         showVariableDropdown={true}
                         variables={variables}
