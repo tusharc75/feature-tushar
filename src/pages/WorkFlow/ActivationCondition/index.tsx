@@ -98,7 +98,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
             Add Condition
           </Button>
         </Box>
-        {resourceFields?.length > 0 ? (
+        {resourceFields?.length > 0 && !loading ? (
           activationCondition?.length > 0 ? (
             activationCondition?.map((ele, j) => (
               <Box
@@ -110,7 +110,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
                 display={'flex'}
                 justifyContent={'space-between'}
                 alignItems={'center'}
-                mt={1}
+                mt={2}
                 borderRadius={'5px'}
               >
                 <Typography variant="body2">{`${resourceFields?.find((f) => ele?.fieldName === f?.fieldName)?.fieldLabel} is ${
@@ -150,7 +150,11 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
                 </div>
               </Box>
             ))
-          ) : null
+          ) : (
+        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+          Activation Conditions not added yet!
+        </Box>
+          )
         ) : (
           <Box p={2} height={500}>
             <CommonSkeleton lenArray={[...Array(10).keys()]} />

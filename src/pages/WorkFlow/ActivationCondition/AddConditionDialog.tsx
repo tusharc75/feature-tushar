@@ -34,7 +34,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
       } else {
         setOptions(fields?.find((f) => f?.fieldName === selectedField?.fieldName)?.option || []);
       }
-    } else if (selectedField?.type === 'checkBox') {
+    } else if (['checkBox', 'switch'].includes(selectedField?.type)) {
       setOptions([
         { optionLabel: 'YES', optionValue: 'yes' },
         { optionLabel: 'NO', optionValue: 'no' }
@@ -156,15 +156,15 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                     )}
                   />
                   {values?.fieldName &&
-                    (selectedField?.type === 'dropDown' || selectedField?.type === 'multiSelect' || selectedField?.type === 'checkBox' ? (
+                    (selectedField?.type === 'dropDown' || selectedField?.type === 'multiSelect' || ['checkBox', 'switch'].includes(selectedField?.type) ? (
                       <Autocomplete
                         id="fieldValue"
                         options={options}
-                        disableCloseOnSelect={selectedField?.type === 'checkBox' ? false : true}
+                        disableCloseOnSelect={['checkBox', 'switch'].includes(selectedField?.type) ? false : true}
                         getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                        multiple={selectedField?.type === 'checkBox' ? false : true}
+                        multiple={['checkBox', 'switch'].includes(selectedField?.type) ? false : true}
                         value={
-                          values?.fieldValue && selectedField?.type === 'checkBox'
+                          values?.fieldValue && ['checkBox', 'switch'].includes(selectedField?.type)
                             ? options?.filter((data) => data?.optionValue === values?.fieldValue)?.length > 0
                               ? options?.filter((data) => data?.optionValue === values?.fieldValue)[0]
                               : ''
@@ -173,7 +173,7 @@ const ConditionDialog = ({ onClose, data, fields, activationCondition, onSuccess
                               : []
                         }
                         onChange={(e, val) => {
-                          if (selectedField?.type === 'checkBox') {
+                          if (['checkBox', 'switch'].includes(selectedField?.type)) {
                             setFieldValue('fieldValue', val && val?.optionValue ? val?.optionValue : '');
                           } else {
                             setFieldValue('fieldValue', val?.map((v) => v?.optionValue)?.join(',') || '');
