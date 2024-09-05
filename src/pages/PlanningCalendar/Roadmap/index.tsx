@@ -2,6 +2,7 @@ import MomentUtils from '@date-io/moment';
 import { Box, Button, TextField, Typography } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -9,12 +10,11 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { dateFormat, downloadExcel } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import Calendar from './Calendar';
 import ActivityList from './ActivityList';
+import Calendar from './Calendar';
 import CalendarList from './CalendarList';
 import MobileRoadmap from './MobileRoadmap';
 import { Activity } from './types';
-import { useVirtualizer } from '@tanstack/react-virtual';
 
 const stateDateFormat = 'YYYY-MM-DD';
 
