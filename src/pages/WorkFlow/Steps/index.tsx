@@ -1,7 +1,7 @@
 import { Box, Button, IconButton } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import BuildIcon from '@material-ui/icons/Build';
+import SettingIcon from '@material-ui/icons/Settings';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { MdDragIndicator } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -18,6 +18,7 @@ import ManageSteps from 'src/components/FormBuilder/Steps/ManageSteps';
 import routes from 'src/components/Helpers/Routes';
 import { sortBy } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
+import Setting from 'src/pages/WorkFlow/Steps/Settings';
 
 const Steps = ({ resource, loading, id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,13 +28,16 @@ const Steps = ({ resource, loading, id }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [steps, setSteps] = useState(null);
+  const [data, setData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
 
   const fetchData = useCallback(async (cancelTokenSource?: CancelTokenSource) => {
     setStepsLoading(true);
     axiosInstance()
       .get(`${routes.workflow.path}/${id}/steps`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
+        setData(data);
         setSteps(sortBy(data?.steps, 'order'));
         setStepsLoading(false);
       })
@@ -152,6 +156,16 @@ const Steps = ({ resource, loading, id }) => {
         >
           Add Step
         </Button>
+        <HtmlTooltip title={'Setting'}>
+            <IconButton
+              aria-label="Setting"
+              onClick={() => {
+                setOpenSetting(true);
+              }}
+            >
+              <SettingIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
       </Box>
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
@@ -179,6 +193,19 @@ const Steps = ({ resource, loading, id }) => {
             }}
             isSubmitting={isSubmitting}
             resource={resource}
+          />
+        )}
+        {openSetting && (
+          <Setting
+            onClose={() => {
+              setOpenSetting(false);
+            }}
+            onSuccess={() => {
+              fetchData();
+              setOpenSetting(false);
+            }}
+            id={id}
+            stepsStyle={data?.stepsStyle}
           />
         )}
 
