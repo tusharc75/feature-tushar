@@ -23,9 +23,7 @@ const VolumeData = ({ assetId }) => {
   const renderedFrom = `${camelCase(routes.iotChart.title)}_VolumeData`;
 
   const toastConfig = useContext(CustomToastContext);
-  const {
-    state: { selectedEntity }
-  }: any = useData();
+
   const { state, dispatch } = useTableReducer();
   const { page, limit, selectedRecords } = state;
   const [showManageDialog, setShowManageDialog] = useState({ open: false, data: null });
@@ -33,6 +31,10 @@ const VolumeData = ({ assetId }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [columns, setColumns] = useState(null);
+
+  const {
+    state: { permissions, selectedEntity }
+  }: any = useData();
 
   useEffect(() => {
     fetchGridColumns();
@@ -265,8 +267,8 @@ const VolumeData = ({ assetId }) => {
   return (
     <Fragment>
       <DetailsPageHeader
-        isAddButtonVisible={false}
-        isActionButtonVisible={false}
+        isAddButtonVisible={permissions?.serializedAsset?.isUpdate}
+        isActionButtonVisible={permissions?.serializedAsset?.isUpdate}
         actionButtonMenuItems={<ActionMenuItems />}
         actionButtonProps={{ disabled: selectedRecords.length === 0 }}
         addButtonMenuItems={addButtonMenuItems()}
@@ -280,8 +282,8 @@ const VolumeData = ({ assetId }) => {
           dispatch={dispatch}
           renderedFrom={renderedFrom}
           refreshGrid={fetchData}
-          hideAction={true}
-          hideSelection={true}
+          hideAction={!permissions?.serializedAsset?.isUpdate}
+          hideSelection={!permissions?.serializedAsset?.isUpdate}
         />
       ) : (
         <Box p={2} height={500}>
