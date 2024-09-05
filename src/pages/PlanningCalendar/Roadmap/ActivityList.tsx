@@ -3,6 +3,7 @@ import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import { Virtualizer } from '@tanstack/react-virtual';
+import React from 'react';
 
 type ActivityListProps = {
   activity: any[];
@@ -51,7 +52,7 @@ export default function ActivityList({ activity, expanded, selected, handleToggl
                 transform: `translateY(${row.start - rowVirtualizer.options.scrollMargin}px)`
               }}
             >
-              <TreeNode data={newActivity} handleSelect={handleSelect} />
+              <MemoizedTreeNode data={newActivity} handleSelect={handleSelect} />
             </div>
           );
         })}
@@ -100,3 +101,5 @@ const TreeNode = ({ data, handleSelect }) => {
     />
   );
 };
+
+const MemoizedTreeNode = React.memo(TreeNode);

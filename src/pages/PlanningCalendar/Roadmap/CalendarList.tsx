@@ -1,6 +1,7 @@
 import { Box, Typography } from '@material-ui/core';
 import { TreeItem, TreeView } from '@material-ui/lab';
 import moment from 'moment';
+import React from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 const types = [
@@ -45,7 +46,7 @@ export default function CalendarList({
                 transform: `translateY(${row.start - rowVirtualizer.options.scrollMargin}px)`
               }}
             >
-              <TreeNode obj={newActivity} index={row.index} endDate={endDate} startDate={startDate} totalDay={totalDay} dayPixel={dayPixel} />
+              <MemoizedTreeNode obj={newActivity} index={row.index} endDate={endDate} startDate={startDate} totalDay={totalDay} dayPixel={dayPixel} />
             </div>
           );
         })}
@@ -111,3 +112,5 @@ const TreeNode = ({ obj, index, endDate, startDate, totalDay, dayPixel }) => {
     />
   );
 };
+
+const MemoizedTreeNode = React.memo(TreeNode);
