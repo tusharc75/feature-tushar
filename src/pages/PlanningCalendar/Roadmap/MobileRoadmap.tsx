@@ -1,5 +1,5 @@
 import React, { FC, Fragment, useCallback, useMemo, useState } from 'react';
-import type { TProductStatus } from './types';
+import type { Activity } from './types';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { Typography, Box, Avatar, IconButton, Collapse, Tooltip, Button } from '@material-ui/core';
 import { Close, Map, ExpandMore, ExpandLess, DateRange } from '@material-ui/icons';
@@ -7,7 +7,7 @@ import moment from 'moment';
 import { dateTimeFormat, dateFormat } from 'src/constants/helpers';
 
 interface MobileRoadmapProps {
-  activity: TProductStatus[];
+  activity: Activity[];
   expanded: any;
   selected: string | null;
   handleToggle: any;
@@ -41,15 +41,15 @@ const MobileRoadmap: FC<MobileRoadmapProps> = ({ activity, expanded, selected, h
 
   return (
     <div className="mt-4 border border-[var(--common-border-color)]">
-      <div className="head py-2 px-3  sticky top-[112px]" style={{ borderBottom: '1px solid var(--common-border-color)' }}>
+      <div className="head sticky top-[112px]  px-3 py-2" style={{ borderBottom: '1px solid var(--common-border-color)' }}>
         <p className="text-[18px] font-semibold">Products</p>
       </div>
-      <div className="overflow-auto max-h-[600px]">
+      <div className="max-h-[600px] overflow-auto">
         {activity.map((data, index) => {
           return (
-            <section key={data._id} className="py-2 px-3" title={data.productName || data.name}>
+            <section key={data._id} className="px-3 py-2" title={data.productName || data.name}>
               <div
-                className="head-section cursor-pointer flex flex-wrap items-center truncate justify-between"
+                className="head-section flex cursor-pointer flex-wrap items-center justify-between truncate"
                 onClick={(e) => {
                   e.stopPropagation();
                   handleChange(`${index}_${data.productName || data.name}`);
@@ -82,7 +82,7 @@ const MobileRoadmap: FC<MobileRoadmapProps> = ({ activity, expanded, selected, h
 export default MobileRoadmap;
 
 type TSubTreeProps = {
-  data: TProductStatus['planning'];
+  data: Activity['planning'];
   subTrees: {
     _id: string;
     name: string;
@@ -115,13 +115,13 @@ const RenderSubTree: FC<TSubTreeProps> = ({ data, subTrees }) => {
     <>
       {subTrees.map((tree) => {
         return (
-          <div className="grid gap-2 mt-3" key={tree._id}>
+          <div className="mt-3 grid gap-2" key={tree._id}>
             <Button
               variant="contained"
               role="button"
               fullWidth
               tabIndex={'0'}
-              className="px-3 py-2 no-shadow"
+              className="no-shadow px-3 py-2"
               style={{ background: tree.color }}
               onClick={() => handleChange(tree.name)}
               endIcon={compareCollapse(tree.name) ? <ExpandLess /> : <ExpandMore />}
@@ -134,8 +134,8 @@ const RenderSubTree: FC<TSubTreeProps> = ({ data, subTrees }) => {
                   if (dataMap[item.type] !== tree.name) return null;
                   else {
                     return (
-                      <div className="bg-[white] dark:bg-[var(--dark-secondary)] p-2 rounded-md border border-[var(--common-border-color)]">
-                        <div className="flex justify-between flex-wrap gap-2 text-[12px] text-gray-500 dark:text-gray-300 mb-1">
+                      <div className="rounded-md border border-[var(--common-border-color)] bg-[white] p-2 dark:bg-[var(--dark-secondary)]">
+                        <div className="mb-1 flex flex-wrap justify-between gap-2 text-[12px] text-gray-500 dark:text-gray-300">
                           {moment(item.startDate).format(dateFormat)} - {moment(item.endDate).format(dateFormat)}
                         </div>
                         <p>
@@ -146,7 +146,7 @@ const RenderSubTree: FC<TSubTreeProps> = ({ data, subTrees }) => {
                   }
                 })}
                 {data.filter((item) => dataMap[item.type] === tree.name).length === 0 && (
-                  <div className="text-center p-3 bg-[white] dark:bg-[var(--dark-secondary)] rounded-md">No Data Found</div>
+                  <div className="rounded-md bg-[white] p-3 text-center dark:bg-[var(--dark-secondary)]">No Data Found</div>
                 )}
               </div>
             </Collapse>

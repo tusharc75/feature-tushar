@@ -1,93 +1,25 @@
-import React, { useMemo } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography, Box } from '@material-ui/core';
-import { TreeView, TreeItem } from '@material-ui/lab';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { Box, Typography } from '@material-ui/core';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
-import { useAppTheme } from 'src/constants/AppConfig';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import { TreeItem, TreeView } from '@material-ui/lab';
+import { Virtualizer } from '@tanstack/react-virtual';
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    '&:hover > $content': {
-      backgroundColor: theme.palette.action.hover
-    },
-    '&:focus > $content, &$selected > $content': {
-      backgroundColor: `var(--tree-view-bg-color, ${theme.palette.grey[400]})`,
-      color: 'var(--tree-view-color)'
-    },
-    '&:focus > $content $label, &:hover > $content $label, &$selected > $content $label': {
-      backgroundColor: 'transparent'
-    }
-  },
-  label: {
-    paddingLeft: 0
-  },
-  group: {
-    paddingLeft: 0,
-    '& $content': {
-      paddingLeft: 0
-    }
-  }
-}));
+type ActivityListProps = {
+  activity: any[];
+  expanded: string[];
+  selected: string;
+  handleToggle: any;
+  handleSelect: any;
+  rowVirtualizer: Virtualizer<any, Element>;
+};
 
-export default function ActivityList(props) {
-  const [theme] = useAppTheme();
-  // const [colorState, setColorState] = useState([])
+const types = [
+  { _id: '1', name: 'Planned', color: 'bg-[hsl(46,95%,92%)] dark:bg-[#dda900]' },
+  { _id: '2', name: 'In-Use', color: 'bg-[hsl(342,100%,97%)] dark:bg-[#cd3865]' },
+  { _id: '3', name: 'Available', color: 'bg-[hsl(206,100%,97%)] dark:bg-[#176fb2]' }
+];
 
-  const types = useMemo(
-    () => [
-      { _id: '1', name: 'Planned', color: theme === 'light' ? 'hsl(46, 95%, 92%)' : '#dda900' },
-      { _id: '2', name: 'In-Use', color: theme === 'light' ? 'hsl(342, 100%, 97%)' : '#cd3865' },
-      { _id: '3', name: 'Available', color: theme === 'light' ? 'hsl(206, 100%, 97%)' : '#176fb2' }
-    ],
-    [theme]
-  );
-  const classes = useStyles();
-
-  const { activity, expanded, selected, handleToggle, handleSelect } = props;
-
-  const getTreeNodes = (treeList) => {
-    return treeList.map((data, index) => {
-      let children = [];
-      if (data?.productName) {
-        children = getTreeNodes(types);
-        children.push(<div></div>);
-      }
-      let label = (
-        <Box
-          width={'100%'}
-          height={30}
-          className="d-flex align-items-center"
-          style={{ backgroundColor: data?.color || 'var(--dark-secondary, white)' }}
-          onClick={(event) => {
-            handleSelect(event, data);
-          }}
-        >
-          {data?.productName ? (
-            <Typography variant="subtitle2" className="text-truncate" title={data?.productName}>
-              {data?.productName}
-            </Typography>
-          ) : (
-            <Typography className="text-truncate">{data?.name}</Typography>
-          )}
-        </Box>
-      );
-      return (
-        <TreeItem
-          key={index}
-          nodeId={data._id.toString()}
-          label={label}
-          children={children}
-          classes={{
-            root: classes.root,
-            group: classes.group
-          }}
-        />
-      );
-    });
-  };
-
-  let TreeNodes = getTreeNodes(activity);
+export default function ActivityList({ activity, expanded, selected, handleToggle, handleSelect, rowVirtualizer }: ActivityListProps) {
   return (
     <>
       <TreeView
@@ -96,12 +28,75 @@ export default function ActivityList(props) {
         expanded={expanded}
         selected={selected}
         onNodeToggle={handleToggle}
+        style={{
+          height: rowVirtualizer.getTotalSize(),
+          position: 'relative'
+        }}
         // onNodeSelect={handleSelect}
       >
-        {TreeNodes.map((node) => {
-          return node;
+        {rowVirtualizer.getVirtualItems().map((row) => {
+          const newActivity = activity[row.index];
+
+          return (
+            <div
+              key={newActivity._id}
+              data-index={row.index}
+              data-id={newActivity?._id}
+              ref={(node) => rowVirtualizer.measureElement(node)}
+              className="absolute left-0 top-0 w-full transition-all duration-300"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                transform: `translateY(${row.start - rowVirtualizer.options.scrollMargin}px)`
+              }}
+            >
+              <TreeNode data={newActivity} handleSelect={handleSelect} />
+            </div>
+          );
         })}
       </TreeView>
     </>
   );
 }
+
+const TreeNode = ({ data, handleSelect }) => {
+  const label = (
+    <Box
+      className="d-flex align-items-center h-[30px] w-full bg-[var(--dark-secondary,white)]"
+      onClick={(event) => {
+        handleSelect(event, data);
+      }}
+    >
+      {data?.productName ? (
+        <Typography variant="subtitle2" className="text-truncate" title={data?.productName}>
+          {data?.productName}
+        </Typography>
+      ) : (
+        <Typography className="text-truncate">{data?.name}</Typography>
+      )}
+    </Box>
+  );
+
+  return (
+    <TreeItem
+      style={{ width: '100%' }}
+      key={data._id}
+      nodeId={data._id.toString()}
+      label={label}
+      children={types.map((t) => (
+        <Box
+          key={t._id}
+          width={'100%'}
+          height={30}
+          className={`d-flex align-items-center ${t?.color || 'var(--dark-secondary, white)'} `}
+          onClick={(event) => {
+            handleSelect(event, data);
+          }}
+        >
+          <Typography className="text-truncate">{t?.name}</Typography>
+        </Box>
+      ))}
+    />
+  );
+};
