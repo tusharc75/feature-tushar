@@ -32,6 +32,7 @@ import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineCo
 import moment from 'moment';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
+import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 
 const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, referenceData = null, fullScreenView = false }) => {
   const {
@@ -48,6 +49,7 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [stepOptions, setStepOptions] = useState(referenceData?.steps || []);
   const [completeSteps, setCompleteSteps] = useState([]);
+  const [showConfirmCloneDetailsDialog, setShowConfirmCloneDetailsDialog] = useState(false)
   const walkmeInstance = useGetWalkmeInstance();
   const isStepDataSet = useRef(false);
 
@@ -386,7 +388,13 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   color="primary"
                   size="small"
                   type="submit"
-                  onClick={submitForm}
+                  onClick={() => {
+                    if (id && isClone) {
+                      setShowConfirmCloneDetailsDialog(true)
+                    } else {
+                      submitForm()
+                    }
+                  }}
                   endIcon={submitting && <CircularProgress color="inherit" size={18} />}
                 >
                   {' '}
@@ -399,7 +407,11 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   open={showConfirmDialog}
                   onSave={() => {
                     setShowConfirmDialog(false);
-                    submitForm();
+                    if (id && isClone) {
+                      setShowConfirmCloneDetailsDialog(true)
+                    } else {
+                      submitForm()
+                    }
                   }}
                   onClose={() => {
                     setShowConfirmDialog(false);
@@ -407,6 +419,21 @@ const ManageFieldTicket = ({ onClose, onSuccess, isClone = false, id = null, ref
                   }}
                 />
               ) : null}
+              {showConfirmCloneDetailsDialog && (
+                <ConfirmationDialog
+                  open={true}
+                  message="Please confirm this if you want to clone  details ?"
+                  onOk={() => {
+                    setFieldValue('fieldTicketId', id)
+                    setShowConfirmCloneDetailsDialog(false)
+                    submitForm()
+                  }}
+                  onClose={() => {
+                    setShowConfirmCloneDetailsDialog(false)
+                    submitForm()
+                  }}
+                />
+              )}
             </Fragment>
           )}
         </Formik>
