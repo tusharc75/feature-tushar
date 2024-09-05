@@ -90,30 +90,10 @@ function Calendar({ dayPixel, startDate, endDate, columnVirtualizer }: CalendarP
               </div>
             </Box>
           ))}
-          {/* {allDates.map((date) => (
-            <div
-              key={date}
-              style={{
-                minWidth: dayPixel,
-                maxWidth: dayPixel,
-                textAlign: 'center',
-                float: 'left',
-                borderLeft: '1px solid #dfdfdf'
-              }}
-              className="[border-bottom:1px_solid_var(--common-border-color)]"
-            >
-              <Typography variant="body2" color={'textSecondary'} display="block">
-                {date.split(' ')[0]}
-              </Typography>
-              <Typography variant="caption" color={'textSecondary'} display="block">
-                {date.split(' ')[1]}
-              </Typography>
-            </div>
-          ))} */}
         </div>
       </Box>
     )
   );
 }
 
-export default memo(Calendar);
+export default Calendar;
