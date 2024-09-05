@@ -17,22 +17,6 @@ import { useHistory } from 'react-router-dom';
 import { Autocomplete } from '@material-ui/lab';
 import { WORK_FLOW_STATUS } from 'src/constants/helpers';
 
-const workflowStatusOptions = [
-  {
-    optionLabel: 'Open',
-    optionValue: 'Open'
-  },
-  {
-    optionLabel: 'In-Progress',
-    optionValue: 'In-Progress'
-  },
-  {
-    optionLabel: 'Completed',
-    optionValue: 'Completed'
-  }
-
-]
-
 const WorkFlowReport = () => {
   const renderedFrom = camelCase(routes?.workflowReport.title);
   const toastConfig = useContext(CustomToastContext);
