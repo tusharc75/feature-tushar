@@ -1,18 +1,22 @@
-import { Grid, Box, TextField, Typography, Button } from '@material-ui/core';
+import MomentUtils from '@date-io/moment';
+import { Box, Button, TextField, Typography } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import moment from 'moment';
 import React, { useContext, useEffect, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
 import { dateFormat, downloadExcel } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import Calendar from '../../TechnicianScheduler/Roadmap/Calendar';
 import ActivityList from './ActivityList';
+import Calendar from './Calendar';
 import CalendarList from './CalendarList';
-import { MuiPickersUtilsProvider, KeyboardDatePicker } from '@material-ui/pickers';
-import MomentUtils from '@date-io/moment';
-import routes from 'src/components/Helpers/Routes';
 import MobileRoadmap from './MobileRoadmap';
-import { isMobile, isTablet } from 'react-device-detect';
+import { Activity } from './types';
+
+const stateDateFormat = 'YYYY-MM-DD';
 
 const RoadMap = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -22,11 +26,9 @@ const RoadMap = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
 
-  const [calendarType, setCalendarType] = useState('week');
-
   const scrollRef = React.useRef(null);
 
-  const [activity, setActivity] = useState([]);
+  const [activity, setActivity] = useState<Activity[]>([]);
 
   const [expanded, setExpanded] = React.useState([]);
   const [selected, setSelected] = React.useState(null);
@@ -37,8 +39,8 @@ const RoadMap = () => {
   const [day, setDay] = React.useState([]);
 
   useEffect(() => {
-    const date1 = moment(startDate);
-    const date2 = moment(endDate);
+    const date1 = moment(startDate, stateDateFormat);
+    const date2 = moment(endDate, stateDateFormat);
     const diff = date2.diff(date1, 'days');
     setTotalDay(diff);
     executeScroll();
@@ -105,14 +107,7 @@ const RoadMap = () => {
   };
 
   let height = window.innerHeight - 300;
-  var dayPixel = 0;
-  if (calendarType === 'month') {
-    dayPixel = 8.5;
-  } else if (calendarType === 'week') {
-    dayPixel = 35;
-  } else {
-    dayPixel = 3;
-  }
+  const dayPixel = 35;
 
   const taskScroolRef = React.useRef(null);
   const onscroll = (event) => {
@@ -142,6 +137,25 @@ const RoadMap = () => {
         toastConfig.setToastConfig(error);
       });
   };
+
+  const columnVirtualizer = useVirtualizer({
+    horizontal: true,
+    count: totalDay,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: (i) => dayPixel,
+    overscan: 2
+  });
+
+  const rowVirtualizer = useVirtualizer({
+    count: activity.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: (i) => 120,
+    overscan: 5,
+    measureElement: (d) => {
+      const id = d.getAttribute('data-id');
+      return expanded.includes(id) ? 120 : 30;
+    }
+  });
 
   return (
     <Box>
@@ -258,69 +272,83 @@ const RoadMap = () => {
                 >
                   <Box>
                     <ActivityList
-                      fetchRoadmap={fetchRoadmap}
                       activity={activity}
                       expanded={expanded}
                       selected={selected}
                       handleToggle={handleToggle}
                       handleSelect={handleSelect}
+                      rowVirtualizer={rowVirtualizer}
                     />
                     <Box height={70}></Box>
                   </Box>
                 </div>
               </Box>
-              <Box
+              <div
                 id="scrollDayLiner"
                 onScroll={onscroll}
-                border={1}
-                borderColor="var(--common-border-color)"
-                style={{ position: 'relative', overflow: 'auto' }}
+                className="relative overflow-auto [border:1px_solid_var(--common-border-color)]"
+                ref={scrollRef}
               >
-                <Calendar calendarType={calendarType} dayPixel={dayPixel} startDate={moment(startDate)} endDate={moment(endDate)} />
+                <Calendar
+                  columnVirtualizer={columnVirtualizer}
+                  dayPixel={dayPixel}
+                  startDate={moment(startDate, stateDateFormat)}
+                  endDate={moment(endDate, stateDateFormat)}
+                />
                 <Box width="100%" height="100%" style={{ position: 'absolute', zIndex: 1 }}>
                   <Box style={{ position: 'absolute', width: totalDay * dayPixel }}>
                     <CalendarList
-                      fetchRoadmap={fetchRoadmap}
+                      stateDateFormat={stateDateFormat}
+                      dayPixel={dayPixel}
                       activity={activity}
                       expanded={expanded}
                       selected={selected}
                       handleSelect={handleSelect}
-                      startDate={moment(startDate)}
-                      endDate={moment(endDate)}
+                      startDate={moment(startDate, stateDateFormat)}
+                      endDate={moment(endDate, stateDateFormat)}
                       totalDay={totalDay}
-                      calendarType={calendarType}
+                      rowVirtualizer={rowVirtualizer}
                     />
                   </Box>
                 </Box>
-                <Box width={totalDay * dayPixel} height={'100%'} style={{ position: 'sticky', top: 0, bottom: 0 }}>
-                  <div ref={scrollRef}>
-                    {day?.map((day) => {
-                      return (
-                        <Box
-                          height={'100%'}
-                          style={{
-                            position: 'absolute',
-                            left: day * dayPixel,
-                            width: dayPixel,
-                            background: day % 2 === 0 ? 'var(--dark-primary-light, #f8fffe)' : 'var(--dark-secondary, white)'
-                          }}
-                        ></Box>
-                      );
-                    })}
+                <Box
+                  style={{
+                    width: `${columnVirtualizer.getTotalSize()}px`,
+                    position: 'relative',
+                    height: '100%'
+                  }}
+                >
+                  <div>
+                    {columnVirtualizer.getVirtualItems().map((virtualColumn) => (
+                      <Box
+                        key={virtualColumn.index}
+                        height={'100%'}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          height: rowVirtualizer.getTotalSize(),
+                          transform: `translateX(${virtualColumn.start}px)`,
+                          width: dayPixel
+                        }}
+                        className={virtualColumn.index % 2 === 0 ? 'bg-[var(--dark-primary-light,#f8fffe)]' : 'bg-[var(--dark-secondary,white)]'}
+                      ></Box>
+                    ))}
                     <Box
                       id="dayLiner"
                       height={'100%'}
                       style={{
                         position: 'absolute',
-                        left: (100 * moment().diff(moment(startDate), 'days')) / totalDay + '%',
-                        width: dayPixel
+                        left: (100 * moment().diff(moment(startDate, stateDateFormat), 'days')) / totalDay + '%',
+                        width: dayPixel,
+                        height: rowVirtualizer.getTotalSize()
                       }}
                     >
                       <Box style={{ margin: 'auto' }} width={2} border={2} borderColor="var(--common-border-color)" height={'100%'}></Box>
                     </Box>
                   </div>
                 </Box>
-              </Box>
+              </div>
             </Box>
           </Box>
         </Box>
