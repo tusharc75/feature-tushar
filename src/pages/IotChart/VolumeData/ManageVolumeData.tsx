@@ -182,7 +182,7 @@ const ManageVolumeData = ({ onClose, onSuccess, data = null, assetId }) => {
   
     if (data) {
       axiosInstance()
-        .put(`${routes.serializedAsset?.path}/iot-volume`, {_id: data?._id, ...updatedValues})
+        .put(`${routes.serializedAsset?.path}/iot-volume`, {_id: data?._id,messageId:data.messageId, ...updatedValues})
         .then(({ data }) => {
           setSubmitting(false);
           onSuccess();
