@@ -725,8 +725,11 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   : ''
                               }
                               onChange={(event, newValue) => {
-                                const tempKeyValues = keyValue?.filter((e) => e.systemColumn !== _key?.value);
-                                setKeyValue([...tempKeyValues, { systemColumn: _key?.value, importedColumn: newValue?.value }]);
+                                let tempKeyValues = keyValue?.filter((e) => e.systemColumn !== _key?.value);
+                                if (newValue) {
+                                  tempKeyValues = [...tempKeyValues, { systemColumn: _key?.value, importedColumn: newValue?.value }]
+                                }
+                                setKeyValue(tempKeyValues);
                               }}
                               style={{ maxWidth: '500px' }}
                               renderInput={(params) => (
