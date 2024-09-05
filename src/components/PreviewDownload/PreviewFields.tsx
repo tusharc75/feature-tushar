@@ -63,9 +63,11 @@ export const PreviewFields = ({
 
     const handleSelectView = (data) => {
         setSelectedView(data);
-        if (data?.columns) {
-            const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
-            setVisibleColumns(columnsArray?.map(e => { return allColumn.find(col => col.fieldName === e) }).filter(col => col !== undefined));
+        if (data?.columns?.length > 0) {
+            setVisibleColumns(data.columns?.map(e => {
+                const temp = allColumn.find(col => col.fieldName === e.name);
+                return { ...temp, width: e.width };
+            }).filter(col => col !== undefined));
         }
         if (setSortBy && data?.sortBy) {
             setSortBy(allColumn.find(col => col.fieldName === data?.sortBy));
@@ -210,7 +212,7 @@ export const PreviewFields = ({
             )}
             {showSaveViewDialog.open && (
                 <ViewDialog
-                    columns={visibleColumns?.map((e) => e?.fieldName)}
+                    columns={visibleColumns}
                     resource={resource}
                     handleSucess={() => {
                         setShowSaveViewDialog({ open: false, data: null });
