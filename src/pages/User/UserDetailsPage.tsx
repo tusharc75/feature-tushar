@@ -710,7 +710,7 @@ const UserDetailsPage = () => {
             setOpenUpdateDialog(false);
             fetchUserData();
           }}
-          userId={userData._id}
+          userId={userData?._id}
           dataToUpdate={userData}
           isNew={false}
         />
