@@ -4,7 +4,7 @@ import Typography from '@material-ui/core/Typography';
 import moment from 'moment';
 import { Virtualizer } from '@tanstack/react-virtual';
 
-const getAllDaysInMonthFormatted = (date: moment.Moment): string[] => {
+const getAllDaysInMonthFormatted = (date: any): string[] => {
   const daysInMonth = date.daysInMonth();
   const days: string[] = [];
   for (let day = 1; day <= daysInMonth; day++) {
@@ -13,7 +13,7 @@ const getAllDaysInMonthFormatted = (date: moment.Moment): string[] => {
   return days;
 };
 
-const DaysBetweenDates = (startDate: moment.Moment, endDate: moment.Moment): [{ month: string; dates: string[] }[], allDates: string[]] => {
+const DaysBetweenDates = (startDate: any, endDate: any) => {
   const week: { month: string; dates: string[] }[] = [];
   const allDates: string[] = [];
   const totalMonths = endDate.diff(startDate, 'months');
@@ -30,8 +30,8 @@ const DaysBetweenDates = (startDate: moment.Moment, endDate: moment.Moment): [{ 
 
 type CalendarProps = {
   dayPixel: number;
-  startDate: moment.Moment;
-  endDate: moment.Moment;
+  startDate: any;
+  endDate: any;
   columnVirtualizer: Virtualizer<any, Element>;
 };
 

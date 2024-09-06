@@ -32,8 +32,6 @@ function Roadmap<T>({
   const tempData = data.slice(0, 25);
   const [calendarType, setCalendarType] = useState<'week' | 'month' | 'quarter'>('week');
 
-  console.log(getDaysBetweenDates(calendarType, startDate, endDate));
-
   return (
     <div className="h-[calc(100vh-200px)] overflow-auto [--primary-hover-bg:#dfdfdf] [border:1px_solid_var(--common-border-color)] dark:[--primary-hover-bg:var(--dark-secondary)]">
       <div className="table-container">
