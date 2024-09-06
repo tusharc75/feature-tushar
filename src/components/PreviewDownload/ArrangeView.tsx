@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
 import { DragIndicator } from '@material-ui/icons';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import update from 'immutability-helper';
@@ -44,6 +44,14 @@ export default function ArrangeView({ columns, setColumns }) {
     );
   };
 
+  const setColumnWidth = (id, width) => {
+    setColumn(
+      column.map((c) => {
+        return c.id === id ? { ...c, width } : c;
+      })
+    );
+  };
+
   const onDragStart = (event: DragStartEvent) => {
     if (!event?.active) return;
     setActiveItem(event.active.data.current?.props);
@@ -53,7 +61,7 @@ export default function ArrangeView({ columns, setColumns }) {
     setSubmitting(true);
     setColumns(
       column.map((e) => {
-        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel };
+        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel, width: e.width };
       })
     );
     setSubmitting(false);
@@ -98,7 +106,7 @@ export default function ArrangeView({ columns, setColumns }) {
               <SortableContext items={column?.map((c) => c.id) || []}>
                 <ul className="list-none">
                   {column.map((col, index) => (
-                    <RenderListItem key={col.id} index={index} id={col.id} fieldLabel={col.fieldLabel} />
+                    <RenderListItem key={col.id} index={index} id={col.id} fieldLabel={col.fieldLabel} width={col.width} setWidth={(w) => { setColumnWidth(col.id, w) }} />
                   ))}
                 </ul>
               </SortableContext>
@@ -125,9 +133,11 @@ interface ItemProps {
   id: any;
   fieldLabel: string;
   index: number;
+  width: string;
+  setWidth: (width: string) => void;
 }
 
-const RenderListItem = ({ index, id, fieldLabel }: ItemProps) => {
+const RenderListItem = ({ index, id, fieldLabel, width, setWidth }: ItemProps) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id,
     data: {
@@ -145,20 +155,31 @@ const RenderListItem = ({ index, id, fieldLabel }: ItemProps) => {
     <li
       style={style}
       ref={setNodeRef}
-      className={`${
-        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-      } list-none transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+        } list-none transition-colors`}
     >
       <div
         key={id}
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
-          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-        } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+          } `}
       >
         <ListItemIcon {...attributes} {...listeners} className="drag-handle !cursor-grab">
           <DragIndicator />
         </ListItemIcon>
         <ListItemText primary={fieldLabel} />
+        <Box width={'150px'}>
+          <TextField
+            variant="outlined"
+            margin="none"
+            size="small"
+            fullWidth
+            label="Width"
+            value={width}
+            onChange={(e) => {
+              setWidth(e?.target?.value);
+            }}
+          />
+        </Box>
       </div>
     </li>
   );
