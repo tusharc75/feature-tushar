@@ -173,10 +173,12 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth }: ItemProps) =
             margin="none"
             size="small"
             fullWidth
-            label="Width"
             value={width}
             onChange={(e) => {
               setWidth(e?.target?.value);
+            }}
+            InputProps={{
+              endAdornment: '%',
             }}
           />
         </Box>

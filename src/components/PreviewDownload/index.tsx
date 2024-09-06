@@ -9,7 +9,6 @@ import { CreateEmail } from '../Activity/Email/CreateEmail';
 import { PreviewDialog } from './PreviewDialog';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import { isTablet } from 'react-device-detect';
-import HtmlTooltip from '../CustomTooltipTitle';
 import { ThemeButton } from '../Helpers/Buttons';
 
 function PreviewDownload({
