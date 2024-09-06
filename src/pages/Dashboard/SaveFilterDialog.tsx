@@ -8,17 +8,18 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const schema = object().shape({
   title: string().required('Please enter title'),
   default: boolean(),
-  access: string().oneOf(['private', 'everyone']).required("Please select access option")
+  access: string().oneOf(['private', 'everyone']).required('Please select access option')
 });
 
 const ACCESS_OPTIONS = {
-  private: "private",
-  everyone: "everyone"
-}
+  private: 'private',
+  everyone: 'everyone'
+};
 
 function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterData }) {
   const toastConfig = useContext(CustomToastContext);
@@ -77,6 +78,7 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
   return (
     <Dialog
       maxWidth={'sm'}
+      TransitionComponent={CustomDialogTransition}
       open={true}
       fullWidth
       onClose={(e, reason) => {
@@ -110,25 +112,30 @@ function SaveFilterDialog({ handleClose, handleSucess, kpi, filterValue, filterD
                 <Box pt={1}>
                   <RadioGroup row>
                     <FormControlLabel
-                      control={<Radio
-                        checked={values['access'] === ACCESS_OPTIONS.private}
-                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)} name="private" />}
+                      control={
+                        <Radio
+                          checked={values['access'] === ACCESS_OPTIONS.private}
+                          onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)}
+                          name="private"
+                        />
+                      }
                       label="Private"
                     />
                     <FormControlLabel
-                      control={<Radio
-                        checked={values['access'] === ACCESS_OPTIONS.everyone}
-                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)} name="everyone"
-                      />}
+                      control={
+                        <Radio
+                          checked={values['access'] === ACCESS_OPTIONS.everyone}
+                          onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)}
+                          name="everyone"
+                        />
+                      }
                       label="Everyone"
                     />
                   </RadioGroup>
                 </Box>
                 <Box pt={1}>
                   <FormControlLabel
-                    control={<Checkbox checked={values['default']}
-                      onChange={(e) => setFieldValue('default', e.target.checked)}
-                      name="default" />}
+                    control={<Checkbox checked={values['default']} onChange={(e) => setFieldValue('default', e.target.checked)} name="default" />}
                     label="Set this as default"
                   />
                 </Box>

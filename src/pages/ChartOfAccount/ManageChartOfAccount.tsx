@@ -53,10 +53,10 @@ const ManageChartOfAccount = ({ onClose, onSuccess, isClone = false, id = null }
               const { accountNumber, ...rest } = data;
               setCloneHeading(accountNumber);
               tempData = rest;
-            } 
+            }
             setInitialData({
               fields: fields,
-              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) :getObjKeysWithValues(tempData, fields)
+              values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
             });
           })
           .catch((error) => {

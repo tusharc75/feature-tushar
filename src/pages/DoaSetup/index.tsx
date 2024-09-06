@@ -21,7 +21,7 @@ import { FaUserAltSlash, FaUserCheck } from 'react-icons/fa';
 import CustomDataGridNoDataFound from '../../components/Helpers/DataGridHelpers/CustomDataGridNoDataFound';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import CustomDataGridToolbar from '../../components/Helpers/DataGridHelpers/CustomDataGridToolbar';
-import { dateFormat } from '../../constants/helpers';
+import { CustomDialogTransition, dateFormat } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   actionBtn: {
@@ -436,7 +436,7 @@ export default function Doa() {
       </Container>
       <Box component="div">
         {userSingleSelect && (
-          <Dialog open={open} onClose={() => setOpen(false)} scroll="body" maxWidth="md" fullWidth>
+          <Dialog TransitionComponent={CustomDialogTransition} open={open} onClose={() => setOpen(false)} scroll="body" maxWidth="md" fullWidth>
             <DoaDialog
               userList={dataRows}
               doa={doa}

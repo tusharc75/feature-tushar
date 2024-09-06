@@ -77,19 +77,20 @@ export const PreviewDialog = ({
 
   const handleSelectView = (data) => {
     setSelectedPdfView(data);
-    if (data?.columns) {
-      const columnsArray = data?.columns?.split(',')?.map((item) => item?.trim());
+    if (data?.columns?.length) {
       setVisibleColumnsPdf(
-        columnsArray
+        data.columns
           ?.map((e) => {
-            return allColumn.find((col) => col.fieldName === e);
+            const col = allColumn.find((col) => col.fieldName === e.name);
+            return { ...col, width: e.width };
           })
           .filter((col) => col !== undefined)
       );
       setVisibleColumnsExcel(
-        columnsArray
+        data.columns
           ?.map((e) => {
-            return allColumn.find((col) => col.fieldName === e);
+            const col = allColumn.find((col) => col.fieldName === e.name);
+            return { ...col, width: e.width };
           })
           .filter((col) => col !== undefined)
       );
@@ -237,7 +238,7 @@ export const PreviewDialog = ({
       </Dialog>
       {showSaveViewDialog.open && (
         <ViewDialog
-          columns={type === 'Excel' ? visibleColumnsExcel?.map((e) => e?.fieldName) : visibleColumnsPdf?.map((e) => e?.fieldName)}
+          columns={type === 'Excel' ? visibleColumnsExcel : visibleColumnsPdf}
           resource={resource}
           handleSucess={() => {
             setShowSaveViewDialog({ open: false, data: null });

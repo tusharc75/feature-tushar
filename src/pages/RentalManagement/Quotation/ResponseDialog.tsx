@@ -4,7 +4,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
-import { QUOTATION_STATUS, rentalManagement } from 'src/constants/helpers';
+import { CustomDialogTransition, QUOTATION_STATUS, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
 const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
@@ -47,7 +47,14 @@ const ReponseDialog = ({ rentalId, onClose, onSuccess }) => {
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open onClose={closeManualDiaog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      fullWidth
+      TransitionComponent={CustomDialogTransition}
+      maxWidth="xs"
+      open
+      onClose={closeManualDiaog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title={`Response By Customer`} />
       <CustomDialogContent>
         <List style={{ padding: 0 }}>

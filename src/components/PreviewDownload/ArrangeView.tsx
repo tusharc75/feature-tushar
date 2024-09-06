@@ -1,4 +1,4 @@
-import { Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
 import { DragIndicator } from '@material-ui/icons';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import update from 'immutability-helper';
@@ -14,6 +14,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function ArrangeView({ columns, setColumns }) {
   const [open, setOpen] = useState(false);
@@ -44,6 +45,14 @@ export default function ArrangeView({ columns, setColumns }) {
     );
   };
 
+  const setColumnWidth = (id, width) => {
+    setColumn(
+      column.map((c) => {
+        return c.id === id ? { ...c, width } : c;
+      })
+    );
+  };
+
   const onDragStart = (event: DragStartEvent) => {
     if (!event?.active) return;
     setActiveItem(event.active.data.current?.props);
@@ -53,7 +62,7 @@ export default function ArrangeView({ columns, setColumns }) {
     setSubmitting(true);
     setColumns(
       column.map((e) => {
-        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel };
+        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel, width: e.width };
       })
     );
     setSubmitting(false);
@@ -82,7 +91,14 @@ export default function ArrangeView({ columns, setColumns }) {
         </IconButton>
       </HtmlTooltip>
       {open && (
-        <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={fullScreen || isMobile || isTablet}>
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          open
+          onClose={onClose}
+          maxWidth="sm"
+          fullWidth
+          fullScreen={fullScreen || isMobile || isTablet}
+        >
           <CustomDialogHeader
             title="Arrange Columns"
             onClose={onClose}
@@ -98,7 +114,16 @@ export default function ArrangeView({ columns, setColumns }) {
               <SortableContext items={column?.map((c) => c.id) || []}>
                 <ul className="list-none">
                   {column.map((col, index) => (
-                    <RenderListItem key={col.id} index={index} id={col.id} fieldLabel={col.fieldLabel} />
+                    <RenderListItem
+                      key={col.id}
+                      index={index}
+                      id={col.id}
+                      fieldLabel={col.fieldLabel}
+                      width={col.width}
+                      setWidth={(w) => {
+                        setColumnWidth(col.id, w);
+                      }}
+                    />
                   ))}
                 </ul>
               </SortableContext>
@@ -125,9 +150,11 @@ interface ItemProps {
   id: any;
   fieldLabel: string;
   index: number;
+  width: string;
+  setWidth: (width: string) => void;
 }
 
-const RenderListItem = ({ index, id, fieldLabel }: ItemProps) => {
+const RenderListItem = ({ index, id, fieldLabel, width, setWidth }: ItemProps) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id,
     data: {
@@ -159,6 +186,21 @@ const RenderListItem = ({ index, id, fieldLabel }: ItemProps) => {
           <DragIndicator />
         </ListItemIcon>
         <ListItemText primary={fieldLabel} />
+        <Box width={'150px'}>
+          <TextField
+            variant="outlined"
+            margin="none"
+            size="small"
+            fullWidth
+            value={width}
+            onChange={(e) => {
+              setWidth(e?.target?.value);
+            }}
+            InputProps={{
+              endAdornment: '%',
+            }}
+          />
+        </Box>
       </div>
     </li>
   );

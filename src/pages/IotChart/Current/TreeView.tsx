@@ -8,7 +8,7 @@ import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
 import moment from 'moment';
-import { dateTimeFormat24Hours } from 'src/constants/helpers';
+import { CustomDialogTransition, dateTimeFormat24Hours } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import Chart from '../Helper/Chart';
@@ -63,13 +63,12 @@ const AccordionDetails = withStyles((theme) => ({
 }))(MuiAccordionDetails);
 
 export default function TreeView({ expandedAccordition, setExpandedAccordition, category, currentData, assetId, deviceTemplate = null }) {
-  
   const [dateFilters, setDateFilters] = useState({
     from: new Date(moment().subtract(8, 'days').format('MM/DD/YYYY')),
     to: new Date(),
     intervals: 'perCycle'
   });
-  
+
   const [dataPoint, setDataPoint] = useState(null);
 
   const handleClose = () => {
@@ -102,9 +101,9 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                 {category?.iotDataPointsCategoryName}
               </Typography>
               {currentData?.find((d) => d?.category?.optionValue === category?._id && d?.redAlert) && (
-                <span className={`flex h-[6px] w-[6px] absolute -top-[3px] -left-[3px] z-10`}>
-                  <span className="absolute -top-[3px] -left-[3px] animate-ping inline-flex rounded-full bg-red-400 opacity-75 h-3 w-3"></span>
-                  <span className="inline-flex rounded-full bg-red-500 w-full h-full"></span>
+                <span className={`absolute -left-[3px] -top-[3px] z-10 flex h-[6px] w-[6px]`}>
+                  <span className="absolute -left-[3px] -top-[3px] inline-flex h-3 w-3 animate-ping rounded-full bg-red-400 opacity-75"></span>
+                  <span className="inline-flex h-full w-full rounded-full bg-red-500"></span>
                 </span>
               )}
             </Box>
@@ -118,7 +117,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                   <Box className="p-[10px] " width={'100%'} textAlign="end">
                     {' '}
                     Last Updated -{' '}
-                    <span className="text-gray-500 dark:text-gray-300 text-[12px]">
+                    <span className="text-[12px] text-gray-500 dark:text-gray-300">
                       {moment(currentData?.filter((d) => d?.category?.optionValue === category?._id)[0]?.time).format(dateTimeFormat24Hours)}
                     </span>
                   </Box>
@@ -131,7 +130,7 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
                       <Grid item xs={12} sm={6} lg={4} md={4}>
                         <Box
                           border="1px solid var(--common-border-color)"
-                          className={`p-[10px] rounded-md min-h-full ${data?.redAlert ? 'bg-red-300' : ''}`}
+                          className={`min-h-full rounded-md p-[10px] ${data?.redAlert ? 'bg-red-300' : ''}`}
                           display="flex"
                           justifyContent="space-between"
                           alignItems="center"
@@ -175,7 +174,15 @@ export default function TreeView({ expandedAccordition, setExpandedAccordition, 
         </AccordionDetails>
       </Accordion>
       {dataPoint && (
-        <Dialog fullWidth maxWidth="md" open onClose={handleClose} fullScreen aria-labelledby="assign-roles-dialog">
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          fullWidth
+          maxWidth="md"
+          open
+          onClose={handleClose}
+          fullScreen
+          aria-labelledby="assign-roles-dialog"
+        >
           <CustomDialogHeader title={`${dataPoint?.fieldLabel}`} showRequiredLabel={false} onClose={handleClose} />
           <CustomDialogContent isFooterPresent={false}>
             <Box mt={2}>

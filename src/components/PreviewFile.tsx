@@ -8,6 +8,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const imageExtensions = ['tif', 'tiff', 'bmp', 'jpg', 'jpeg', 'gif', 'png', 'eps', 'raw', 'cr2', 'nef', 'orf', 'sr2'];
 const pdfExtensions = ['pdf'];
@@ -178,7 +179,7 @@ export const PreviewFile = ({ fileName, component = 'IconButton', showDownload =
 
 const ViewImage = ({ imageDialogData, close, downloadProgress }) => {
   return (
-    <Dialog maxWidth="md" fullWidth fullScreen open={true} onClose={close}>
+    <Dialog TransitionComponent={CustomDialogTransition} maxWidth="md" fullWidth fullScreen open={true} onClose={close}>
       <CustomDialogHeader title={imageDialogData.fileName} onClose={close} showRequiredLabel={false} />
       <CustomDialogContent>
         <div className="flex min-h-[calc(100vh-128px)] items-center justify-center">

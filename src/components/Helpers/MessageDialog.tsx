@@ -7,51 +7,52 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import { Typography } from '@material-ui/core';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
-    root: {
-        width: '100%',
-        maxWidth: 360,
-        backgroundColor: theme.palette.background.paper,
-    },
-    paper: {
-        width: '80%',
-        maxHeight: 435,
-    },
+  root: {
+    width: '100%',
+    maxWidth: 360,
+    backgroundColor: theme.palette.background.paper
+  },
+  paper: {
+    width: '80%',
+    maxHeight: 435
+  }
 }));
 
 export default function MessageDialog({ onClose, open, message, header = 'Message' }) {
-    const classes = useStyles();
+  const classes = useStyles();
 
-    return (
-        <Dialog
-            disableBackdropClick
-            disableEscapeKeyDown
-            maxWidth="xs"
-            aria-labelledby="confirmation-dialog-title"
-            open={open}
-            classes={{
-                paper: classes.paper,
-            }}
-            id="confirmation-dialog"
-            keepMounted
-        >
-            <DialogTitle id="confirmation-dialog-title" className="text-white">{header}</DialogTitle>
-            <DialogContent dividers>
-                {
-                    message ? <Typography>{message}</Typography> : null
-                }
-            </DialogContent>
-            <DialogActions>
-                <Button size="small" onClick={onClose} color="primary">Close</Button>
-            </DialogActions>
-        </Dialog>
-    );
+  return (
+    <Dialog
+      disableBackdropClick
+      TransitionComponent={CustomDialogTransition}
+      disableEscapeKeyDown
+      maxWidth="xs"
+      aria-labelledby="confirmation-dialog-title"
+      open={open}
+      classes={{
+        paper: classes.paper
+      }}
+      id="confirmation-dialog"
+      keepMounted
+    >
+      <DialogTitle id="confirmation-dialog-title" className="text-white">
+        {header}
+      </DialogTitle>
+      <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
+      <DialogActions>
+        <Button size="small" onClick={onClose} color="primary">
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
 }
 
 MessageDialog.propTypes = {
-    open: PropTypes.bool.isRequired,
-    onClose: PropTypes.func.isRequired,
-    message: PropTypes.string.isRequired
+  open: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  message: PropTypes.string.isRequired
 };
-

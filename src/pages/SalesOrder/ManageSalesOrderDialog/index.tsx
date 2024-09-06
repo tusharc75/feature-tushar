@@ -26,7 +26,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import InputField from 'src/components/Helpers/InputField';
 
 const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, onClose, onSuccess, open }) => {
-
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
 
@@ -39,7 +38,6 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
-
 
   useEffect(() => {
     setLoading(true);
@@ -197,7 +195,7 @@ const ManageSalesOrderDialog = ({ isClone, salesOrderId, salesOrderData = null, 
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={setFieldValue}

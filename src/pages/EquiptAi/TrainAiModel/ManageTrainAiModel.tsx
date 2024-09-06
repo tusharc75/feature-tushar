@@ -27,17 +27,20 @@ const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   useEffect(() => {
-    axiosInstance().get(`/field?resource=${sidebarResource.trainAiModel}`)
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.trainAiModel}`)
       .then(({ data: { data } }) => {
         let fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         let fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
         if (trainAiModelId) {
-          axiosInstance().get(`/generative-ai/feed-data/` + trainAiModelId).then(({ data: { data } }) => {
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
-            });
-          })
+          axiosInstance()
+            .get(`/generative-ai/feed-data/` + trainAiModelId)
+            .then(({ data: { data } }) => {
+              setInitialData({
+                fields: fieldsDataForUpdate,
+                values: getObjKeysWithValues(data, fieldsDataForUpdate)
+              });
+            })
             .catch((error) => {
               toastConfig.setToastConfig(error);
             });
@@ -48,7 +51,8 @@ const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
             values: createValues
           });
         }
-      }).catch((error) => {
+      })
+      .catch((error) => {
         toastConfig.setToastConfig(error);
       });
   }, [trainAiModelId]);
@@ -57,32 +61,37 @@ const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
     setLoading(true);
     if (trainAiModelId) {
       values._id = trainAiModelId;
-      axiosInstance().put('/generative-ai/feed-data', values).then(({ data }) => {
-        setLoading(false);
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
+      axiosInstance()
+        .put('/generative-ai/feed-data', values)
+        .then(({ data }) => {
+          setLoading(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+        })
+        .catch((error) => {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
-    }
-    else {
-      axiosInstance().post('/generative-ai/feed-data', values).then(({ data }) => {
-        setLoading(false);
-        onSuccess();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data?.message
+    } else {
+      axiosInstance()
+        .post('/generative-ai/feed-data', values)
+        .then(({ data }) => {
+          setLoading(false);
+          onSuccess();
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data?.message
+          });
+        })
+        .catch((error) => {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
         });
-      }).catch((error) => {
-        setLoading(false);
-        toastConfig.setToastConfig(error);
-      });
     }
   };
 
@@ -117,9 +126,7 @@ const ManageTrainAiModel = ({ trainAiModelId = null, onClose, onSuccess }) => {
           {({ values, errors, touched, setFieldValue, handleSubmit }) => (
             <Fragment>
               <CustomDialogHeader
-                title={
-                  'Create ' + routes.trainAiModel.title
-                }
+                title={'Create ' + routes.trainAiModel.title}
                 onClose={() => {
                   if (isEqual(initialData.values, values)) onClose();
                   else setShowConfirmDialog(true);

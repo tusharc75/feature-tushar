@@ -1,4 +1,4 @@
-export interface TProductStatus {
+export interface Activity {
   _id?: string;
   productName?: string;
   name?: string;

@@ -27,7 +27,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { GridViewSavedData } from 'src/components/CustomReactTable/ArrangeView/ArrangeViewMenu';
 import { getStickyColumnNames } from 'src/components/CustomReactTable/utils';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
-import { cn } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { useDndSensors } from 'src/hooks';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { object, string } from 'yup';
@@ -248,7 +248,14 @@ const ArrangeViewDialog = ({ onClose, data, getAllSavedViews, renderedFrom, colu
       }}
     >
       {({ submitForm, values, errors, touched, setFieldValue, dirty }) => (
-        <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={!isMinimized || (isMobile && !isTablet) || isMobileView}>
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          open
+          onClose={onClose}
+          maxWidth="sm"
+          fullWidth
+          fullScreen={!isMinimized || (isMobile && !isTablet) || isMobileView}
+        >
           <CustomDialogHeader
             title={data ? 'Edit View' : 'Create View'}
             onClose={onClose}
@@ -436,12 +443,14 @@ const RenderListItem = ({ column, handleToggle, checked, index, values, setField
     <li
       ref={setNodeRef}
       style={style}
-      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-        } list-none transition-colors`}
+      className={`${
+        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+      } list-none transition-colors`}
     >
       <div
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-          } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
+          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+        } `}
       >
         <HtmlTooltip title={isFilteredColumn ? 'Clear search filter to arrange' : ''}>
           <ListItemIcon
