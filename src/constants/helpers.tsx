@@ -1118,21 +1118,26 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   fields.forEach((input) => {
     let message = `${input.fieldLabel} is required`;
 
-    const sectionVisibility = fields?.find(f => f?.sectionName === input?.sectionName && !isEmpty(f?.sectionProperties) && f?.sectionProperties?.visibilityCondition?.length > 0)?.sectionProperties?.visibilityCondition
-    const _fields: any = [];
+    const sectionProperties = fields?.find(f => f?.sectionName === input?.sectionName && f?.sectionProperties)?.sectionProperties
+    let sectionVisibility = [];
+    if (sectionProperties && sectionProperties?.visibilityCondition && sectionProperties?.visibilityCondition?.length) {
+      sectionVisibility = sectionProperties?.visibilityCondition;
+    }
+
+    const validationFields: any = [];
     let validation: any = null;
-    if (input?.visibilityCondition?.length > 0 || sectionVisibility?.length > 0) {
+    if (input?.visibilityCondition?.length || sectionVisibility?.length) {
       sectionVisibility?.forEach(condition => {
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            _fields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'section' });
+            validationFields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'section' });
           }
         });
       });
       input?.visibilityCondition?.forEach((condition) => {
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            _fields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'field' });
+            validationFields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'field' });
           }
         });
       });
@@ -1151,9 +1156,11 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < _fields?.length;) {
-          const field = _fields[i];
-          const condition = field?.type === 'section' ? sectionVisibility?.find((c) => c?.index === field?.index && c?.logic === field?.logic) : input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
+        for (let i = 0; i < validationFields?.length;) {
+          const field = validationFields[i];
+          const condition = field?.type === 'section' ?
+            sectionVisibility?.find((c) => c?.index === field?.index && c?.logic === field?.logic)
+            : input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
           if (condition?.logic === LOGIC.AND) {
             if (condition?.fields?.every((f, j) => checkValue(args[i + j], f?.value))) {
               validate = true;
@@ -1178,9 +1185,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
 
     if (input.type === 'singleLine') {
       schema[input.fieldName] = input.required
-        ? _fields?.length && validation
+        ? validationFields?.length && validation
           ? string().when(
-            _fields?.map((f) => f?.fieldName),
+            validationFields?.map((f) => f?.fieldName),
             {
               is: validation,
               then: string().required(message),
@@ -1265,9 +1272,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else {
       // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
       schema[input.fieldName] = input.required
-        ? _fields?.length && validation
+        ? validationFields?.length && validation
           ? string().when(
-            _fields?.map((f) => f?.fieldName),
+            validationFields?.map((f) => f?.fieldName),
             {
               is: validation,
               then: string().required(message),
