@@ -140,6 +140,19 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
     fetchData();
   }, []);
 
+  const getParentPricing = (row: any, fieldName: any) => {
+    let pricing = 0;
+    if (row?.subRows?.length > 0) {
+      row?.subRows?.forEach((subRow) => {
+        pricing += subRow[fieldName] || 0;
+      });
+    }
+    if (pricing === 0) {
+      return row[fieldName] || 0;
+    }
+    return pricing;
+  }
+
   const fetchData = () => {
     dispatch({ type: 'loading', loading: true });
     axios
@@ -147,6 +160,7 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       .then(({ data: { data } }) => {
         setQuotationDetailsData(data?.quotation);
         const material = data?.materials.filter((e) => !!!e?.parentId);
+        const filteredFields = data?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
         let rows = material?.map((item, index) => {
           let res: any = {
             ...prepareDataForGrid(item)
@@ -168,7 +182,11 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
                 : item?.type === MATERIAL_TYPE.package
                   ? item?.packageDetail?.packageDescription
                   : '';
-          res.subRows = generateNestedData(data?.materials, res);
+          res.subRows = generateNestedData(data?.materials, res, filteredFields);
+          filteredFields?.forEach((field) => {
+            const fieldName = `${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`;
+            res[fieldName] = getParentPricing(res, fieldName);
+          });
           return res;
         });
         let columns = [];
@@ -211,7 +229,6 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
           }
         ];
 
-        const filteredFields = data?.fields?.filter((e) => data?.requiredFields.includes(e.fieldName));
         const newColumns = generateColumns(renderedFrom, filteredFields, null, false, quotationData.currency);
         newColumns?.forEach((e) => {
           e.editable = true;
@@ -231,28 +248,31 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       });
   };
 
-  const generateNestedData = (material, parent) => {
+  const generateNestedData = (material, parent, filteredFields) => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
       _subRow.detail =
-        _subRow?.type === 'product'
+        _subRow?.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productName
-          : _subRow?.type === 'service'
+          : _subRow?.type === MATERIAL_TYPE.service
             ? _subRow?.serviceDetail?.serviceName
-            : _subRow?.type === 'package'
+            : _subRow?.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageName
               : '';
       _subRow.description =
-        _subRow?.type === 'product'
+        _subRow?.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
-          : _subRow?.type === 'service'
+          : _subRow?.type === MATERIAL_TYPE.service
             ? _subRow?.serviceDetail?.serviceDescription
-            : _subRow?.type === 'package'
+            : _subRow?.type === MATERIAL_TYPE.package
               ? _subRow?.packageDetail?.packageDescription
               : '';
-
-      _subRow.subRows = generateNestedData(material, _subRow);
+      _subRow.subRows = generateNestedData(material, _subRow, filteredFields);
+      filteredFields?.forEach((field) => {
+        const fieldName = `${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`;
+        _subRow[fieldName] = getParentPricing(_subRow, fieldName);
+      });
     });
 
     return subRows;
@@ -264,6 +284,28 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
     rows?.forEach((d) => {
       if (row?._id === d._id) {
         Object.assign(d, data);
+        requireFieldArray?.forEach((field) => {
+          const fieldName = `${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`;
+          if (data.hasOwnProperty(fieldName)) {
+            d?.subRows?.forEach((subRow) => {
+              subRow[fieldName] = 0;
+            });
+          }
+        });
+      } else {
+        if (d?.subRows?.length > 0) {
+          d.subRows.forEach((subRow) => {
+            if (subRow?._id === row?._id) {
+              Object.assign(subRow, data);
+              requireFieldArray?.forEach((field) => {
+                const fieldName = `${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`;
+                if (data.hasOwnProperty(fieldName)) {
+                  d[fieldName] = getParentPricing(d, fieldName);
+                }
+              });
+            }
+          });
+        }
       }
     });
     dispatch({ type: 'update', data: rows });
@@ -281,17 +323,29 @@ const QuotationSupplierPrice = ({ quotationData, openAuthId }) => {
       );
     }
 
-    const material = dataRows?.map((e) => {
+    const material = [];
+
+    dataRows?.forEach((e: any) => {
       const data: any = {};
       requireFieldArray?.forEach((field) => {
         data[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`] =
           e[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`];
       });
-
-      return {
+      material.push({
         _id: e._id,
         ...data
-      };
+      });
+      e?.subRows?.forEach((subRow) => {
+        const data: any = {};
+        requireFieldArray?.forEach((field) => {
+          data[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`] =
+            subRow[`${field?.fieldName}_${quotationData?.currency?.toLowerCase() || 'usd'}`];
+        });
+        material.push({
+          _id: subRow._id,
+          ...data
+        });
+      });
     });
 
     if (checkField) {
