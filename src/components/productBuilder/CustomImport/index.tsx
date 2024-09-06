@@ -50,7 +50,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   const [productTemplate, setProductTemplate] = useState([]);
   const [priceTemplate, setPriceTemplate] = useState([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [templateImportHeader, setTemplateImportHeaader] = useState([]);
+  const [templateImportHeader, setTemplateImportHeader] = useState([]);
   const [customImportHeader, setCustomImportHeaader] = useState([]);
   const [keyValue, setKeyValue] = useState([]);
   const [files, setFiles] = useState();
@@ -335,7 +335,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
   };
 
   const generateTemplateHeader = (fields) => {
-    setTemplateImportHeaader([]);
+    setTemplateImportHeader([]);
     const templateHeader: any = [];
     fields?.forEach((_field) => {
       if (_field?.type === 'converter' || _field?.type === 'currencyAmount' || _field?.isConverter === true) {
@@ -373,7 +373,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
       return result;
     }, []);
 
-    setTemplateImportHeaader(_templateHeader);
+    setTemplateImportHeader(_templateHeader);
   };
 
   const handleCustomImport = () => {
@@ -474,7 +474,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
     formData.append('productCategory', values?.productCategory);
     formData.append('productTemplate', values?.productTemplate);
     formData.append('priceTemplate', values?.priceTemplate);
-    formData.append('customImport', 1);
+    formData.append('customImport', "1");
     if (addedField?.length > 0) {
       formData.append('fields', JSON.stringify(addedField));
     }
@@ -511,8 +511,9 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
 
   const handleDeleteCustomColumns = (obj) => {
     setAddedField([...addedField?.filter((f) => f?.fieldLabel?.toUpperCase() != obj?.label)]);
-    setTemplateImportHeaader([...templateImportHeader?.filter((t) => t?.value != obj?.value)]);
+    setTemplateImportHeader([...templateImportHeader?.filter((t) => t?.value != obj?.value)]);
   };
+
 
   return (
     <>
@@ -737,15 +738,15 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                                   {...params}
                                   label=""
                                   variant="outlined"
-                                  // error={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
-                                  // }
-                                  // helperText={
-                                  //   _key?.value === field?.fieldLabel?.toUpperCase() &&
-                                  //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
-                                  //   'Required field'
-                                  // }
+                                // error={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader)
+                                // }
+                                // helperText={
+                                //   _key?.value === field?.fieldLabel?.toUpperCase() &&
+                                //   !keyValue?.some((k) => k?.templateImportHeader === field?.fieldLabel?.toUpperCase() && k?.customImportHeader) &&
+                                //   'Required field'
+                                // }
                                 />
                               )}
                             />
@@ -766,18 +767,9 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               onClick={handleCustomImport}
               variant="contained"
               color="primary"
-              disabled={loading || !values?.productCategory || !values?.productTemplate || !values?.priceTemplate || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
-              // disabled={
-              //   loading ||
-              //   !values?.productCategory ||
-              //   !values?.productTemplate ||
-              //   !values?.priceTemplate ||
-              //   !keyValue?.some(
-              //     (k) =>
-              //       k?.templateImportHeader === fields?.find((f) => f?.fieldName === 'productName')?.fieldLabel?.toUpperCase() &&
-              //       k?.customImportHeader
-              //   )
-              // }
+              disabled={loading || !values?.productCategory
+                || !values?.productTemplate || !values?.priceTemplate
+                || templateImportHeader?.length === 0 || customImportHeader?.length === 0}
               loading={loading}
             >
               Submit
@@ -798,7 +790,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   }
                 }
                 setAddedField([...addedField, { ..._data }]);
-                setTemplateImportHeaader([
+                setTemplateImportHeader([
                   ...templateImportHeader,
                   { value: _data?.fieldLabel?.toUpperCase(), label: _data?.fieldLabel?.toUpperCase() }
                 ]);
@@ -810,7 +802,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
           )}
           {addImportedColumn && (
             <AddColumnDialog
-              fieldLabelOptions={fieldLabelOptions}
+              fieldLabelOptions={fieldLabelOptions?.filter((e) => !keyValue?.map((e) => e?.importedColumn)?.includes(e?.fieldLabel))}
               handleClose={() => {
                 setAddImportedColumn(false);
               }}
@@ -822,9 +814,13 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                   }
                 }
                 setAddedField([...addedField, { ..._data }]);
-                setTemplateImportHeaader([
+                setTemplateImportHeader([
                   ...templateImportHeader,
                   { value: _data?.fieldLabel?.toUpperCase(), label: _data?.fieldLabel?.toUpperCase() }
+                ]);
+                setKeyValue([
+                  ...keyValue,
+                  { importedColumn: _data?.fieldLabel, systemColumn: _data?.fieldLabel }
                 ]);
                 setAddImportedColumn(false);
               }}
