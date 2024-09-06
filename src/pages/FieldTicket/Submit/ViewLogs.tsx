@@ -57,21 +57,30 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
           return row?.original['type'] ? <p className="text-truncate">{row?.original['type']}</p> : <NoDataCell />;
         }
       },
-      ...(permissions?.invoice?.isRead ? [{
-        accessor: 'invoice',
-        Header: 'Invoice',
-        width: 200,
-        disabled: true,
-        Cell: ({ row }) => {
-          return row?.original['invoice'] ? (
-            <a className="link text-truncate" href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`} target="_blank" rel="noreferrer">
-              {row?.original['invoice']}
-            </a>
-          ) : (
-            <NoDataCell />
-          );
-        }
-      }] : []),
+      ...(permissions?.invoice?.isRead
+        ? [
+            {
+              accessor: 'invoice',
+              Header: 'Invoice',
+              width: 200,
+              disabled: true,
+              Cell: ({ row }) => {
+                return row?.original['invoice'] ? (
+                  <a
+                    className="link text-truncate"
+                    href={`${routes.invoiceDetail.path}/${row?.original['invoiceId']}`}
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    {row?.original['invoice']}
+                  </a>
+                ) : (
+                  <NoDataCell />
+                );
+              }
+            }
+          ]
+        : []),
       {
         accessor: 'user',
         Header: 'User',
@@ -139,6 +148,7 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
       <Dialog
         open
         fullScreen={fullScreen}
+        TransitionComponent={CustomDialogTransition}
         maxWidth="md"
         fullWidth
         onClose={(e, reason) => {

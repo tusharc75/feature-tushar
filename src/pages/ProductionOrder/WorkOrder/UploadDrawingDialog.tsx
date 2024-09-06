@@ -6,7 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import { CircularProgress, Dialog } from '@material-ui/core';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { productionOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, productionOrder } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 
 const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
@@ -40,7 +40,7 @@ const UploadDrawingDialog = ({ productionOrderData, handleClose }) => {
   };
 
   return (
-    <Dialog open={true} onClose={handleClose} maxWidth="sm" fullWidth>
+    <Dialog open={true} onClose={handleClose} maxWidth="sm" TransitionComponent={CustomDialogTransition} fullWidth>
       <CustomDialogHeader showRequiredLabel={false} title="Upload Drawings" onClose={handleClose} />
       <CustomDialogContent>
         <Box mt={2} mb={1}>

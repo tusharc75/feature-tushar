@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Box, Button, CircularProgress, Dialog, Typography } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
-import { ACTIVITY_RESOURCE, rentalManagement } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, rentalManagement } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import ErrorIcon from '@material-ui/icons/Error';
@@ -76,7 +76,7 @@ const ShowProduct = ({ product }) => {
 
   return (
     <div
-      className="d-flex pl-3 pr-3 mt-3 flex-wrap"
+      className="d-flex mt-3 flex-wrap pl-3 pr-3"
       style={{
         gap: 24,
         padding: '14px 20px',
@@ -187,9 +187,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
             <div className="mt-2">
               {products
                 ?.filter((e) => e.baseWarehouse && e.qty > e.assetAvailable)
-                ?.map((product) => (
-                  <ShowProduct key={product._id} product={product} />
-                ))}
+                ?.map((product) => <ShowProduct key={product._id} product={product} />)}
             </div>
             {products?.filter((e) => !e.baseWarehouse)?.length > 0 && (
               <Box pt={3} style={{ ...styles.cardWithPb, ...styles.minH }}>
@@ -205,11 +203,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
                   }}
                 >{`${routes.serializedAsset.title} are available in other ${routes.warehouse.title}`}</Typography>
                 <div className="mt-2">
-                  {products
-                    ?.filter((e) => !e.baseWarehouse)
-                    ?.map((product) => (
-                      <ShowProduct key={product._id} product={product} />
-                    ))}
+                  {products?.filter((e) => !e.baseWarehouse)?.map((product) => <ShowProduct key={product._id} product={product} />)}
                   <div className="mt-3" style={{ ...styles.buttonContaier }}>
                     <Button
                       size="small"
@@ -235,6 +229,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       {taskDialog && (
         <Dialog
           open={taskDialog}
+          TransitionComponent={CustomDialogTransition}
           fullScreen={fullScreen || isMobile || isTablet}
           aria-taskDialog="customized-dialog-title"
           maxWidth={'md'}

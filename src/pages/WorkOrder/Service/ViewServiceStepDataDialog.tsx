@@ -5,6 +5,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import routes from 'src/components/Helpers/Routes';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selectedService }) => {
   const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
@@ -82,7 +83,15 @@ const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selec
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="consume-dialog">
+    <Dialog
+      fullWidth
+      maxWidth="md"
+      fullScreen={true}
+      open={true}
+      TransitionComponent={CustomDialogTransition}
+      onClose={handleClose}
+      aria-labelledby="consume-dialog"
+    >
       <CustomDialogHeader title={'View Service Steps Data'} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
         <Autocomplete

@@ -2,7 +2,7 @@ import { useEffect, useState, useContext, useRef } from 'react';
 import { Dialog, Grid, Box, Button, TextField, Typography, CircularProgress } from '@material-ui/core';
 import { Autocomplete, ToggleButtonGroup, ToggleButton } from '@material-ui/lab';
 import { Form, Formik, FormikProps } from 'formik';
-import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS } from 'src/constants/helpers';
+import { REPORT_LIST, SCHEDULE_FREQUENCY, FREQUENCY_WEEKS, CustomDialogTransition } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -73,7 +73,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
           } = await axiosInstance().get(`/schedule-report/${id}`);
 
           let resource: any = REPORT_LIST.find((item) => item.title === data.resource);
-          resource = { title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title, value: resource.title, key: resource.key, type: resource.type };
+          resource = {
+            title: resource.type === 'dynamic' ? routes[resource.key]?.title : resource.title,
+            value: resource.title,
+            key: resource.key,
+            type: resource.type
+          };
 
           await fetchGridColumns(resource);
           let newData: any = {
@@ -366,6 +371,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     <Dialog
       open
       maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
       fullScreen={fullScreen || isMobile || isTablet}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {

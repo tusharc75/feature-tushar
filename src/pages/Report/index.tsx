@@ -12,7 +12,14 @@ import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { prepareDataForGrid, gridLoadingTimeout, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
+import {
+  prepareDataForGrid,
+  gridLoadingTimeout,
+  primaryFields,
+  sidebarResource,
+  isObjectEmpty,
+  CustomDialogTransition
+} from './../../constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from './ReportFilters';
@@ -358,7 +365,7 @@ const Report = () => {
   const getApi = () => {
     let newColumns = columns.map((col) => col.accessor);
     if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
-      newColumns = []
+      newColumns = [];
       for (const [key, value] of Object.entries(visibleColumns)) {
         if (value) {
           newColumns.push(key);
@@ -399,7 +406,7 @@ const Report = () => {
                         permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
                         module={''}
                         api={getApi()}
-                        afterImportCompleted={() => { }}
+                        afterImportCompleted={() => {}}
                         onlyExport={true}
                       />
                     )}
@@ -443,6 +450,7 @@ const Report = () => {
                 open={true}
                 maxWidth="md"
                 fullWidth
+                TransitionComponent={CustomDialogTransition}
                 onClose={(e, reason) => {
                   if (reason !== 'backdropClick') {
                     setShowGrid(true);

@@ -13,6 +13,7 @@ import BoxWithBorder from '../../components/BoxWithBorder';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import RoleEngine from '../../components/Shared/RoleEngine';
 import UserRoles from './UserRoles';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function AssignedEntities({ entities, permissions, userId, onSuccess, loggedInUser, entityAccessIds = [], roleAccessIds = [] }) {
   const {
@@ -53,7 +54,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
       user: userId,
       entities: entityArray
     };
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     axiosInstance()
       .put(`/user/assign-entity`, dataObj)
       .then(() => {
@@ -62,12 +63,12 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
           type: 'success',
           open: true
         });
-        setIsSubmitting(false)
-        setRoleRemoveConfirmBox({ open: false, data: null })
+        setIsSubmitting(false);
+        setRoleRemoveConfirmBox({ open: false, data: null });
         onSuccess();
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -127,7 +128,15 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
   return (
     <>
       {showAssignEntityDialog && (
-        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="sm" open={showAssignEntityDialog} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          fullScreen={isMobile || isTablet}
+          fullWidth
+          maxWidth="sm"
+          TransitionComponent={CustomDialogTransition}
+          open={showAssignEntityDialog}
+          onClose={handleCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
           <AssignEntityDialog
             entitiesDialogOpen={showAssignEntityDialog}
             handleCloseDialog={handleCloseDialog}
@@ -253,7 +262,7 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                             permissions={permissions}
                             data={currentEntity.role}
                             unassignRole={(data) => {
-                              setRoleRemoveConfirmBox({ open: true, data: data })
+                              setRoleRemoveConfirmBox({ open: true, data: data });
                             }}
                           />
                         )}
@@ -272,8 +281,8 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
                       field={unionRoleData ? unionRoleData.field : []}
                       resource={unionRoleData ? unionRoleData.resource : []}
                       isDisable={true}
-                      setField={() => { }}
-                      setResource={() => { }}
+                      setField={() => {}}
+                      setResource={() => {}}
                     />
                   </BoxWithBorder>
                 </Grid>
@@ -286,10 +295,10 @@ export default function AssignedEntities({ entities, permissions, userId, onSucc
             open={roleRemoveConfirmBox.open}
             message={`Are you sure you want to unassign ${roleRemoveConfirmBox?.data?.name} ?`}
             onClose={() => {
-              setRoleRemoveConfirmBox({ open: false, data: null })
+              setRoleRemoveConfirmBox({ open: false, data: null });
             }}
             onOk={() => {
-              handleUnassignRole(roleRemoveConfirmBox.data)
+              handleUnassignRole(roleRemoveConfirmBox.data);
             }}
             okBtnLoading={isSubmitting}
           />

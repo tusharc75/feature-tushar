@@ -25,6 +25,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -218,7 +219,14 @@ const AssignRegionalRolesUserDialog = ({ entitiesDialogOpen, onSuccess, handleCl
   };
 
   return (
-    <Dialog fullWidth maxWidth="sm" open={entitiesDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="sm"
+      open={entitiesDialogOpen}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title={`Assign  User`} />
       <CustomDialogContent>
         {loadingData ? (

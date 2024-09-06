@@ -23,7 +23,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import Loader from 'src/components/Loader';
-import { PRICING_SETUP_TYPE, getUniqueCurrencies, pricingCondition } from 'src/constants/helpers';
+import { CustomDialogTransition, PRICING_SETUP_TYPE, getUniqueCurrencies, pricingCondition } from 'src/constants/helpers';
 
 const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }) => {
   const [pricingConditionData, setPricingConditionData] = useState([]);
@@ -54,7 +54,7 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
     data.supplier = [];
     data.customer = [referenceData?.customerAccount?.optionValue];
     data.warehouse = [referenceData?.warehouse?.optionValue];
-    data.address =referenceData?.shippingAddress?.optionValue ? [referenceData?.shippingAddress?.optionValue] : [];
+    data.address = referenceData?.shippingAddress?.optionValue ? [referenceData?.shippingAddress?.optionValue] : [];
     axiosInstance()
       .post(pricingCondition.api + `/calculatePrice`, data)
       .then(({ data: { data } }) => {
@@ -88,7 +88,14 @@ const CalculatePriceDialog = ({ handleSucess, onClose, referenceData, material }
   return (
     <>
       {pricingConditionData.length !== 0 ? (
-        <Dialog fullWidth maxWidth="xs" open={true} onClose={onClose} aria-labelledby="pricing-condition-dialog">
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          fullWidth
+          maxWidth="xs"
+          open={true}
+          onClose={onClose}
+          aria-labelledby="pricing-condition-dialog"
+        >
           <CustomDialogHeader title="Select Pricing Condition" showRequiredLabel={false} onClose={onClose} />
           <CustomDialogContent>
             {displayData.length === 0 ? (

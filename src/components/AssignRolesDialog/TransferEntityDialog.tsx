@@ -6,6 +6,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { camelCase } from 'lodash';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const TransferEntityDialog = ({ TransferEntityDialogOpen, onSuccess, handleCloseDialog, selectedRecs, entities, type, api }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -41,7 +42,14 @@ const TransferEntityDialog = ({ TransferEntityDialogOpen, onSuccess, handleClose
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open={TransferEntityDialogOpen} onClose={handleCloseDialog} aria-labelledby="dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="xs"
+      open={TransferEntityDialogOpen}
+      onClose={handleCloseDialog}
+      aria-labelledby="dialog"
+    >
       <CustomDialogHeader title="Transfer Entity" />
       <CustomDialogContent>
         {entities.length ? (
