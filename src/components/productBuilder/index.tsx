@@ -160,6 +160,15 @@ const ProductBuilder = (props) => {
           });
           fields = [...fields, ...ele.fields];
         });
+        data.product?.forEach((e) => {
+          if (e?.fields && e?.fields?.length) {
+            e?.fields?.forEach((field) => {
+              if (!fields?.find((e) => e.fieldName === field?.fieldName)) {
+                fields.push(field)
+              }
+            })
+          }
+        })
         let newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path, false, currency);
         columns = [...columns, ...newColumns];
 
