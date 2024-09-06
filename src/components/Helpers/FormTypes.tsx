@@ -160,34 +160,6 @@ const useStyles = makeStyles(() => ({
   }
 }));
 
-const RedSwitch = withStyles({
-  switchBase: {
-    color: red[500],
-    '&$checked': {
-      color: red[500]
-    },
-    '&$checked + $track': {
-      backgroundColor: red[500]
-    }
-  },
-  checked: {},
-  track: {}
-})(Switch);
-
-const GreenSwitch = withStyles({
-  switchBase: {
-    color: green[500],
-    '&$checked': {
-      color: green[500]
-    },
-    '&$checked + $track': {
-      backgroundColor: green[500]
-    }
-  },
-  checked: {},
-  track: {}
-})(Switch);
-
 const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, name, handleChange, isMultiple = false, values }) => {
   const [inputVal, setInputVal] = React.useState('');
   const [error, setError] = React.useState(null);
@@ -2212,13 +2184,7 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <FormControlLabel
-          control={
-            values[name] ? (
-              <RedSwitch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />
-            ) : (
-              <GreenSwitch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />
-            )
-          }
+          control={<Switch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />}
           label={getLabel(label)}
         />
       </InfoLabel>
