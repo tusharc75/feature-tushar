@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
-import { DragIndicator } from '@material-ui/icons';
+import { DragIndicator, Info } from '@material-ui/icons';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import update from 'immutability-helper';
 import { useEffect, useState } from 'react';
@@ -111,6 +111,12 @@ export default function ArrangeView({ columns, setColumns }) {
           />
           <CustomDialogContent>
             <DndContext onDragEnd={moveCard} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
+              <div className="sticky -top-2 z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
+                <p className=" flex select-none items-center gap-1 text-[12px] font-semibold text-gray-500">
+                  <Info fontSize="small" />
+                  Drag and drop to arrange, or enter the width as a percentage.
+                </p>
+              </div>
               <SortableContext items={column?.map((c) => c.id) || []}>
                 <ul className="list-none">
                   {column.map((col, index) => (
