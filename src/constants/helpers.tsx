@@ -1,7 +1,7 @@
 import { Grow, Zoom } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, isArray, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, isArray, isEmpty, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
 import React from 'react';
@@ -1118,40 +1118,50 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   fields.forEach((input) => {
     let message = `${input.fieldLabel} is required`;
 
-    const fields: any = [];
+    const sectionVisibility = fields?.find(f => f?.sectionName === input?.sectionName && !isEmpty(f?.sectionProperties) && f?.sectionProperties?.visibilityCondition?.length > 0)?.sectionProperties?.visibilityCondition
+    const _fields: any = [];
     let validation: any = null;
-    if (input?.visibilityCondition?.length > 0) {
+    if (input?.visibilityCondition?.length > 0 || sectionVisibility?.length > 0) {
+      sectionVisibility?.forEach(condition => {
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            _fields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'section' });
+          }
+        });
+      });
       input?.visibilityCondition?.forEach((condition) => {
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            fields.push({ ...field, index: condition?.index, logic: condition?.logic });
+            _fields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'field' });
           }
         });
       });
 
-      const parseValue = (value) => {
-        if (value?.toLowerCase() === 'yes') {
+      const checkValue = (value1, value2) => {
+        if (value2?.toLowerCase() === 'yes' && value1 === true) {
+          return true
+        } else if (value2?.toLowerCase() === 'no' && value1 === false) {
+          return true
+        } else if (value2?.split(',')?.includes(value1)) {
           return true;
-        } else if (value?.toLowerCase() === 'no') {
-          return false;
         } else {
-          value;
+          return false;
         }
-      };
+      }
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < fields?.length; ) {
-          const field = fields[i];
-          const condition = input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
+        for (let i = 0; i < _fields?.length;) {
+          const field = _fields[i];
+          const condition = field?.type === 'section' ? sectionVisibility?.find((c) => c?.index === field?.index && c?.logic === field?.logic) : input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
           if (condition?.logic === LOGIC.AND) {
-            if (condition?.fields?.every((f, j) => args[i + j] === parseValue(f?.value))) {
+            if (condition?.fields?.every((f, j) => checkValue(args[i + j], f?.value))) {
               validate = true;
             } else {
               validate = false;
             }
           } else if (condition?.logic === LOGIC.OR) {
-            if (condition?.fields?.some((f, j) => args[i + j] === parseValue(f?.value))) {
+            if (condition?.fields?.some((f, j) => checkValue(args[i + j], f?.value))) {
               validate = true;
             } else {
               validate = false;
@@ -1167,37 +1177,36 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     }
 
     if (input.type === 'singleLine') {
-      // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
       schema[input.fieldName] = input.required
-        ? fields?.length && validation
+        ? _fields?.length && validation
           ? string().when(
-              fields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            _fields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-            .required(`${input.fieldLabel} is required`)
+          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+          .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-            .matches(
-              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-              'Enter valid URL'
-            )
-            .required(`${input.fieldLabel} is required`)
-        : string().matches(
+          .matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          );
+          )
+          .required(`${input.fieldLabel} is required`)
+        : string().matches(
+          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+          'Enter valid URL'
+        );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1256,15 +1265,15 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else {
       // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
       schema[input.fieldName] = input.required
-        ? fields?.length && validation
+        ? _fields?.length && validation
           ? string().when(
-              fields?.map((f) => f?.fieldName),
-              {
-                is: validation,
-                then: string().required(message),
-                otherwise: string()
-              }
-            )
+            _fields?.map((f) => f?.fieldName),
+            {
+              is: validation,
+              then: string().required(message),
+              otherwise: string()
+            }
+          )
           : string().required(message)
         : string();
     }
@@ -3335,7 +3344,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) {}
+  } catch (error) { }
 };
 
 export const columnSize = (type) => {
@@ -3385,8 +3394,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
-  if (typeof callBack !== 'function') callBack = (text) => {};
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
+  if (typeof callBack !== 'function') callBack = (text) => { };
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
