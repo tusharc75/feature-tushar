@@ -14,6 +14,7 @@ import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import routes from 'src/components/Helpers/Routes';
 
 const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -49,7 +50,7 @@ const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open 
               }
               setInitialData({
                 fields: fields,
-                values: isClone ? getObjKeysWithValues(tempData, fields, true, user) :getObjKeysWithValues(tempData, fields)
+                values: isClone ? getObjKeysWithValues(tempData, fields, true, user) : getObjKeysWithValues(tempData, fields)
               });
             })
             .catch((error) => {
@@ -130,7 +131,7 @@ const ManageWarehouse = ({ warehouseId, close, onSuccess, isClone = false, open 
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <Fragment>
               <CustomDialogHeader
-                title={isClone ? `Clone - ${cloneHeading}` : warehouseId ? `Update ${initialData?.values['warehouseName'] ?? ''}` : 'Create Plant'}
+                title={isClone ? `Clone - ${cloneHeading}` : warehouseId ? `Update ${initialData?.values['warehouseName'] ?? ''}` : `Create ${routes.warehouse.title}`}
                 onClose={() => {
                   if (isEqual(values, initialData.values)) close();
                   else setShowConfirmDialog(true);

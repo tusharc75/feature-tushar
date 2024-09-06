@@ -422,7 +422,7 @@ const WorkOrderDetails = () => {
     {
       id: 'On-hold',
       type: 'menuItem',
-      isVisible: Boolean(allowedToEdit && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)),
+      isVisible: Boolean(allowedToEdit && !workOrderData?.currentRepairJob && [WORK_ORDER_STATUS.new, WORK_ORDER_STATUS.inProgress]?.includes(workOrderData?.status)),
       onClick: () => updateStatus(WORK_ORDER_STATUS.onHold),
       tooltip: `Change Status ${WORK_ORDER_STATUS.onHold}`,
       children: WORK_ORDER_STATUS.onHold
