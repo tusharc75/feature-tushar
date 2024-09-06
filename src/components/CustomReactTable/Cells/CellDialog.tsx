@@ -2,6 +2,7 @@ import { Dialog } from '@material-ui/core';
 import React from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 type CellDialogProps = {
   children: React.ReactNode;
@@ -21,7 +22,7 @@ const CellDialog = ({ children, dialogTitle = 'View', text = 'View', enableDilao
           <span onClick={() => setOpen(true)} className="link block !text-[var(--link)]">
             {text}
           </span>
-          <Dialog maxWidth="md" fullWidth open={open} onClose={onClose}>
+          <Dialog TransitionComponent={CustomDialogTransition} maxWidth="md" fullWidth open={open} onClose={onClose}>
             <CustomDialogHeader title={dialogTitle} onClose={onClose} showRequiredLabel={false} />
             <CustomDialogContent>{children}</CustomDialogContent>
           </Dialog>

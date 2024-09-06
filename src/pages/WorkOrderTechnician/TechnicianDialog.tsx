@@ -29,9 +29,8 @@ const TechnicianDialog = ({ handleClose, workOrderId, uniqueId, canPerform }) =>
     axiosInstance()
       .get(`${routes.workOrder.path}/${workOrderId}`)
       .then(({ data: { data } }) => {
-       
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.workOrder, data) && permissions?.workOrder?.isUpdate ? true : false);
-        setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.deleted ? true : false);
+        setCompleted(data?.status === WORK_ORDER_STATUS.completed || data?.status === WORK_ORDER_STATUS.onHold || data?.deleted ? true : false);
         setWorkOrderData({ ...data });
       })
       .catch((err) => {

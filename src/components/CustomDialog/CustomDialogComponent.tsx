@@ -7,6 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import PropTypes from 'prop-types';
 import { Button, Dialog } from '@material-ui/core';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 // Under Construction - Don't Use It Right Now: Punit
 function CustomDialogComponent({ title, open, onClose, children }) {
@@ -17,6 +18,7 @@ function CustomDialogComponent({ title, open, onClose, children }) {
       maxWidth="md"
       open={open}
       onClose={onClose}
+      TransitionComponent={CustomDialogTransition}
       aria-labelledby="form-dialog-title"
       fullScreen={isMobile || isTablet}
       fullWidth

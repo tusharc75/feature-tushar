@@ -1,18 +1,18 @@
-import { Slide } from '@material-ui/core';
+import { Grow, Zoom } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, isArray, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, isArray, isEmpty, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
+import { LOGIC } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
-import { LOGIC } from 'src/components/FormBuilder/helper';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -987,9 +987,10 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'description') {
     } else if (key.type === 'groupSignature') {
       if (isArray(value) && value?.length) {
-        obj[key.fieldName] = value?.map((e) => { return { signature: '', user: e } });
-      }
-      else {
+        obj[key.fieldName] = value?.map((e) => {
+          return { signature: '', user: e };
+        });
+      } else {
         obj[key.fieldName] = [];
       }
     } else {
@@ -1117,42 +1118,57 @@ export const yupSchema = (fields: any[], validEmail = true) => {
   fields.forEach((input) => {
     let message = `${input.fieldLabel} is required`;
 
-    const fields: any = [];
+    const sectionProperties = fields?.find(f => f?.sectionName === input?.sectionName && f?.sectionProperties)?.sectionProperties
+    let sectionVisibility = [];
+    if (sectionProperties && sectionProperties?.visibilityCondition && sectionProperties?.visibilityCondition?.length) {
+      sectionVisibility = sectionProperties?.visibilityCondition;
+    }
+
+    const validationFields: any = [];
     let validation: any = null;
-    if (input?.visibilityCondition?.length > 0) {
+    if (input?.visibilityCondition?.length || sectionVisibility?.length) {
+      sectionVisibility?.forEach(condition => {
+        condition?.fields?.forEach((field) => {
+          if (field?.fieldName && field?.value) {
+            validationFields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'section' });
+          }
+        });
+      });
       input?.visibilityCondition?.forEach((condition) => {
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            fields.push({ ...field, index: condition?.index, logic: condition?.logic });
+            validationFields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'field' });
           }
         });
       });
 
-      const parseValue = (value) => {
-        if (value?.toLowerCase() === 'yes') {
+      const checkValue = (value1, value2) => {
+        if (value2?.toLowerCase() === 'yes' && value1 === true) {
+          return true
+        } else if (value2?.toLowerCase() === 'no' && value1 === false) {
+          return true
+        } else if (value2?.split(',')?.includes(value1)) {
           return true;
-        }
-        else if (value?.toLowerCase() === 'no') {
+        } else {
           return false;
-        }
-        else {
-          value
         }
       }
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < fields?.length;) {
-          const field = fields[i];
-          const condition = input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
+        for (let i = 0; i < validationFields?.length;) {
+          const field = validationFields[i];
+          const condition = field?.type === 'section' ?
+            sectionVisibility?.find((c) => c?.index === field?.index && c?.logic === field?.logic)
+            : input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
           if (condition?.logic === LOGIC.AND) {
-            if (condition?.fields?.every((f, j) => args[i + j] === parseValue(f?.value))) {
+            if (condition?.fields?.every((f, j) => checkValue(args[i + j], f?.value))) {
               validate = true;
             } else {
               validate = false;
             }
           } else if (condition?.logic === LOGIC.OR) {
-            if (condition?.fields?.some((f, j) => args[i + j] === parseValue(f?.value))) {
+            if (condition?.fields?.some((f, j) => checkValue(args[i + j], f?.value))) {
               validate = true;
             } else {
               validate = false;
@@ -1168,11 +1184,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     }
 
     if (input.type === 'singleLine') {
-      // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
       schema[input.fieldName] = input.required
-        ? fields?.length && validation
+        ? validationFields?.length && validation
           ? string().when(
-            fields?.map((f) => f?.fieldName),
+            validationFields?.map((f) => f?.fieldName),
             {
               is: validation,
               then: string().required(message),
@@ -1257,9 +1272,9 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else {
       // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
       schema[input.fieldName] = input.required
-        ? fields?.length && validation
+        ? validationFields?.length && validation
           ? string().when(
-            fields?.map((f) => f?.fieldName),
+            validationFields?.map((f) => f?.fieldName),
             {
               is: validation,
               then: string().required(message),
@@ -1707,7 +1722,6 @@ export const determineLightOrDark = (color: any) => {
   }
 };
 
-
 export const graphOptions = {
   layout: {
     randomSeed: 2
@@ -1759,7 +1773,7 @@ export const CustomDialogTransition = React.forwardRef(function Transition(
   props: TransitionProps & { children?: React.ReactElement<any, any> },
   ref: React.Ref<unknown>
 ) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return <Grow ref={ref} {...props} />;
 });
 
 //  Don't use this for details screen as the model being passed is different
@@ -2524,7 +2538,7 @@ export const REPORT_LIST = [
     permission: 'lead',
     key: 'standardReport',
     type: 'salesFunnel'
-  },
+  }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -3423,10 +3437,9 @@ export const MFA_METHOD = {
   totp: 'totp'
 };
 
-
 export const findSimilarRecords = (array, property) => {
   const similarRecords: any = {};
-  array.forEach(item => {
+  array.forEach((item) => {
     if (!similarRecords[item[property]]) {
       similarRecords[item[property]] = [];
     }

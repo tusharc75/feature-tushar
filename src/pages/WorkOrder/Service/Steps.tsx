@@ -857,7 +857,9 @@ const Steps = ({
           message: data.message
         });
         setShowManageRepairJobDialog(false);
-        if (fetchWorkOrderData) fetchWorkOrderData();
+        if (fetchWorkOrderData) {
+          fetchWorkOrderData();
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -876,7 +878,9 @@ const Steps = ({
         });
         setRepairJobReceiveConfirmation(false);
         setIsSubmittingReceavingAsset(false);
-        if (fetchWorkOrderData) fetchWorkOrderData();
+        if (fetchWorkOrderData) {
+          fetchWorkOrderData();
+        }
       })
       .catch((error) => {
         setIsSubmittingReceavingAsset(false);

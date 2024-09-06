@@ -12,7 +12,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, CHILD_RESOURCE, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, workOrder } from 'src/constants/helpers';
 import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 import { FiExternalLink } from 'react-icons/fi';
@@ -75,20 +75,20 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
           <div className="flex items-center gap-2">
             <p className="text-truncate">{row.original.detail}</p>
             {[MATERIAL_TYPE.product, MATERIAL_TYPE.service, MATERIAL_TYPE.package].includes(row?.original?.type) && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === MATERIAL_TYPE.service) {
-                      window.open(`${routes.serviceMasterDetail.path}/${row?.original?.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.product) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    } else if (row.original.type === MATERIAL_TYPE.package) {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
+              <IconButton
+                size="small"
+                onClick={() => {
+                  if (row.original.type === MATERIAL_TYPE.service) {
+                    window.open(`${routes.serviceMasterDetail.path}/${row?.original?.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.product) {
+                    window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                  } else if (row.original.type === MATERIAL_TYPE.package) {
+                    window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                  }
+                }}
+              >
+                <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+              </IconButton>
             )}
           </div>
         )
@@ -213,18 +213,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceName
           : parent?.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productName
-          : parent?.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageName
-          : '';
+            ? parent?.productDetail?.productName
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageName
+              : '';
       parent.description =
         parent?.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription
           : parent?.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription
-          : parent?.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription
-          : '';
+            ? parent?.productDetail?.productDescription
+            : parent?.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription
+              : '';
       parent.subRows = generateNestedData(data?.data, parent);
     });
 
@@ -241,18 +241,18 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceName
           : _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productName
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : '';
+            ? _subRow?.productDetail?.productName
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageName
+              : '';
       _subRow.description =
         _subRow?.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription
           : _subRow?.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription
-          : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription
-          : '';
+            ? _subRow?.productDetail?.productDescription
+            : _subRow?.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription
+              : '';
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -268,6 +268,7 @@ const Versions = ({ workOrderId, workOrderData, handleClose }) => {
         open
         fullScreen
         maxWidth="md"
+        TransitionComponent={CustomDialogTransition}
         fullWidth
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {

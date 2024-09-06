@@ -15,7 +15,7 @@ import {
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { quoteBuilder } from '../../constants/helpers';
+import { CustomDialogTransition, quoteBuilder } from '../../constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -85,7 +85,14 @@ const AssignQuoteDialog = ({ quoteDialogOpen, onSuccess, handleCloseDialog, assi
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open={quoteDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="xs"
+      open={quoteDialogOpen}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title="Assign Quotes" />
       <CustomDialogContent>
         {loadingQuotes ? (

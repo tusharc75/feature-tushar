@@ -27,6 +27,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import {
   convertDateInDateTime,
   currencyCodeToSymbol,
+  CustomDialogTransition,
   dateFormatForInputControl,
   productInventory,
   sidebarResource
@@ -138,11 +139,11 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
           product.length > 1
             ? product?.map((e) => ({ product: e._id, qty: parseInt(values.qty), price: parseFloat(values.price), serialNumber: [] }))
             : product?.map((e) => ({
-              product: e._id,
-              qty: parseInt(values.qty),
-              price: parseFloat(values.price),
-              serialNumber: values['serialNumbers']
-            })),
+                product: e._id,
+                qty: parseInt(values.qty),
+                price: parseFloat(values.price),
+                serialNumber: values['serialNumbers']
+              })),
         warehouse: warehouse,
         storageLocation: values.storageLocation,
         receiveDate: values.customDate,
@@ -232,8 +233,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
 
       if (serialNumbersList.length > Number(values['qty'])) {
         errors['serialNumbers'] = `Please ${type === 'add' ? 'enter' : 'select'} serial numbers same as quantity`;
-      }
-      else if (duplicates.length > 0) {
+      } else if (duplicates.length > 0) {
         errors['serialNumbers'] = `Serial numbers cannot be duplicate`;
       }
       if (user?.user?.brandPolicy?.productInventorySerialNumberRequired && serialNumbersList.length !== Number(values['qty'])) {
@@ -321,6 +321,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
     <Dialog
       fullWidth
       maxWidth="sm"
+      TransitionComponent={CustomDialogTransition}
       open={true}
       fullScreen={fullScreen || isMobile || isTablet}
       onClose={(e, reason) => {
@@ -334,7 +335,7 @@ const AddRemove = ({ handleClose, handleSuccess, product, type, warehouse, stora
         initialData && (
           <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
             {({ touched, errors, setFieldValue, values }) => (
-              <Form autoComplete="off" autoCorrect="off" noValidate className="flex flex-col min-h-full">
+              <Form autoComplete="off" autoCorrect="off" noValidate className="flex min-h-full flex-col">
                 <MuiPickersUtilsProvider utils={DateUtils}>
                   <CustomDialogHeader
                     title={`${capitalize(type)} Inventory`}

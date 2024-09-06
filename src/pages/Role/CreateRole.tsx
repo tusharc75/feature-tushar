@@ -8,7 +8,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import Loader from '../../components/Loader';
 import RoleEngine from '../../components/Shared/RoleEngine';
-import { ROLE_TIER, roleTypes } from '../../constants/helpers';
+import { CustomDialogTransition, ROLE_TIER, roleTypes } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../StateProvider/Provider';
@@ -167,28 +167,29 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
       if (ele.parentResource === resource) {
         ele[access] = checked;
         if (checked) {
-          ele['isRead'] = checked
+          ele['isRead'] = checked;
         }
         if (['isRead', 'isCreate', 'isUpdate']?.includes(access)) {
           const childResourceFields = newField.filter((_field) => _field.fieldData.resource === ele.name);
-          childResourceFields?.forEach(_field => {
-            _field[access] = checked
+          childResourceFields?.forEach((_field) => {
+            _field[access] = checked;
             if (access === 'isCreate' || access === 'isUpdate') {
               if (checked) {
-                _field['isRead'] = checked
+                _field['isRead'] = checked;
               }
             }
           });
         }
       }
-    })
+    });
     setChildrenResource(toUpdateResource);
-  }
+  };
 
   return (
     <Dialog
       open={open}
       maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
       fullWidth
       fullScreen={fullScreen || isMobile || isTablet}
       onClose={(e, reason) => {
@@ -231,7 +232,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
         <>
           <CustomDialogContent>
             <Box paddingX={1} paddingY={2}>
-              <Box className="grid gap-2 grid-cols-1 md:grid-cols-3 mb-3">
+              <Box className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-3">
                 <TextField
                   required
                   variant="outlined"
@@ -294,7 +295,9 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                               height: fullScreen || isMobile || isTablet ? `calc(100vh - 200px)` : '500px'
                             }}
                             field={field}
-                            resource={childrenResource?.map((e, index) => { return { ...e, resourceId: index } })}
+                            resource={childrenResource?.map((e, index) => {
+                              return { ...e, resourceId: index };
+                            })}
                             setField={setField}
                             setResource={setChildrenResource}
                             tier={ROLE_TIER.tier1}

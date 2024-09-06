@@ -21,6 +21,7 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import SearchBox from '../../components/Helpers/SearchBox';
 import Loader from '../../components/Loader';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function AssignContactsDialog({
   opportunityId,
@@ -65,14 +66,14 @@ export default function AssignContactsDialog({
         contactType === 'supplier'
           ? getFilteredIds(currentContacts)
           : isDataAvailable('supplierContacts')
-          ? getFilteredIds(contacts.supplierContacts)
-          : [],
+            ? getFilteredIds(contacts.supplierContacts)
+            : [],
       customerContact:
         contactType === 'customer'
           ? getFilteredIds(currentContacts)
           : isDataAvailable('customerContacts')
-          ? getFilteredIds(contacts.customerContacts)
-          : [],
+            ? getFilteredIds(contacts.customerContacts)
+            : [],
       notToBeRemoved: contacts && contacts?.notToBeRemoved ? contacts.notToBeRemoved : null
     };
 
@@ -109,7 +110,14 @@ export default function AssignContactsDialog({
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open={open} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="xs"
+      open={open}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title={title} />
       <CustomDialogContent>
         {loadingUsers ? (
