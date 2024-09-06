@@ -1,6 +1,7 @@
-import { isArray, uniq } from "lodash";
+import { isArray, isEmpty, uniq } from "lodash";
 import { camelCase } from "lodash";
 import { fieldLabelToFieldName } from "./helpers";
+import { LOGIC } from "src/components/FormBuilder/helper";
 
 const removeBracket = (string) => {
     return string.replace(/{/g, '').replace(/}/g, '')
@@ -106,6 +107,43 @@ const formatDecimal = (value, decimalPlaces) => {
     }
 };
 
+const handleClearValueDependentOnVisibilityCondition = (fields, name, value, resultValues) => {
+    fields?.forEach(field => {
+        const visibilityCondition = field?.visibilityCondition?.length > 0 ? JSON.parse(JSON.stringify(field?.visibilityCondition)) : []
+        const sectionProperties = fields?.find(f => f?.sectionName === field?.sectionName && !isEmpty(f?.sectionProperties))?.sectionProperties;
+        if (sectionProperties && sectionProperties?.visibilityCondition && sectionProperties?.visibilityCondition?.length > 0) {
+            visibilityCondition.unshift(...sectionProperties?.visibilityCondition)
+        }
+        if (visibilityCondition?.length > 0) {
+            let inVisible = false;
+            for (let i = 0; i < visibilityCondition?.length; i++) {
+                const condition = visibilityCondition[i];
+                if (condition?.logic === LOGIC.AND) {
+                    if (
+                        !condition?.fields?.every((f) => f?.fieldName === name && f?.value?.split(',')?.includes(value))
+                    ) {
+                        inVisible = true;
+                    }
+                } else if (condition?.logic === LOGIC.OR) {
+                    if (!condition?.fields?.some((f) => f?.fieldName === name && f?.value?.split(',')?.includes(value))) {
+                        inVisible = true;
+                    }
+                }
+                if (inVisible) {
+                    break;
+                }
+            }
+            if (inVisible) {
+                let result: any = ''
+                if (field?.type === 'multiSelect') {
+                    result = []
+                }
+                resultValues[field.fieldName] = result
+            }
+        }
+    });
+}
+
 export const handleAutoCalculation = (fieldData, fields, values, name, currency, unit, value) => {
     let resultValues: any = {}
     resultValues[name] = value;
@@ -143,6 +181,8 @@ export const handleAutoCalculation = (fieldData, fields, values, name, currency,
                 }
             });
         }
+        handleClearValueDependentOnVisibilityCondition(fields, name, value, resultValues)
+
         for (var x in resultValues) {
             if (typeof resultValues[x] === "number") {
                 if (isNaN(resultValues[x])) {
