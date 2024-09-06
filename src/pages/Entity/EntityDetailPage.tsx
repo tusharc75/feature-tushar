@@ -24,7 +24,7 @@ import DoaDialog from '../DoaSetup/ManageDoa/ManageDoaDialog';
 import AssignedUsers from './AssignedUsers';
 import ManageEntity from './ManageEntity';
 import DoaSetup from '../DoaSetupNew';
-import { DOA_RESOURCE } from 'src/constants/helpers';
+import { CustomDialogTransition, DOA_RESOURCE } from 'src/constants/helpers';
 
 const EntityDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -487,7 +487,15 @@ const EntityDetailsPage = () => {
         />
       )}
       {showAssignUserDialog && (
-        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="sm" open={showAssignUserDialog} onClose={userDialogClose} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          fullScreen={isMobile || isTablet}
+          fullWidth
+          maxWidth="sm"
+          open={showAssignUserDialog}
+          onClose={userDialogClose}
+          aria-labelledby="assign-roles-dialog"
+        >
           <AssignEntityDialog
             entitiesDialogOpen={showAssignUserDialog}
             handleCloseDialog={userDialogClose}

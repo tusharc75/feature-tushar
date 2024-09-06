@@ -1,43 +1,20 @@
-import { useEffect, useState } from "react";
-import {
-  Dialog,
-  Button,
-  Box,
-  Grid,
-  CircularProgress,
-  useTheme,
-  useMediaQuery,
-  InputAdornment,
-} from "@material-ui/core";
-import { Formik, Form } from "formik";
-import {
-  getObjKeysWithValues,
-  getUniqueCurrencies,
-  yupSchema,
-} from "../../constants/helpers";
-import FormTypes from "../Helpers/FormTypes";
-import CustomDialogHeader from "../CustomDialog/CustomDialogHeader";
-import CustomDialogContent from "../CustomDialog/CustomDialogContent";
-import CustomDialogFooter from "../CustomDialog/CustomDialogFooter";
+import { useEffect, useState } from 'react';
+import { Dialog, Button, Box, Grid, CircularProgress, useTheme, useMediaQuery, InputAdornment } from '@material-ui/core';
+import { Formik, Form } from 'formik';
+import { CustomDialogTransition, getObjKeysWithValues, getUniqueCurrencies, yupSchema } from '../../constants/helpers';
+import FormTypes from '../Helpers/FormTypes';
+import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
+import CustomDialogContent from '../CustomDialog/CustomDialogContent';
+import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 
 const UpdateDetailsDialog = (props) => {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("xs"));
-  const {
-    openDialog,
-    onClose,
-    fields,
-    data,
-    isUpdating,
-    handleUpdate,
-    title,
-    isProjectSales = false,
-  } = props;
+  const isMobile = useMediaQuery(theme.breakpoints.down('xs'));
+  const { openDialog, onClose, fields, data, isUpdating, handleUpdate, title, isProjectSales = false } = props;
   const [initialVals, setValues] = useState(null);
   const [formsData, setFormsData] = useState([]);
   const [fieldsData, setFieldsData] = useState([]);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] =
-    useState(0);
+  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [currencySymbol, setCurrencySymbol] = useState(null);
 
   useEffect(() => {
@@ -53,9 +30,7 @@ const UpdateDetailsDialog = (props) => {
 
   const sortArray = () => {
     const sections = [];
-    const allFields = fields.sort(
-      (a, b) => a.fieldData.order - b.fieldData.order
-    );
+    const allFields = fields.sort((a, b) => a.fieldData.order - b.fieldData.order);
 
     allFields.forEach((field) => {
       if (!sections.includes(field.fieldData.sectionName)) {
@@ -64,9 +39,7 @@ const UpdateDetailsDialog = (props) => {
     });
 
     const customData = sections.map((name) => {
-      let fieldsData = allFields.filter(
-        (field) => field.fieldData.sectionName === name
-      );
+      let fieldsData = allFields.filter((field) => field.fieldData.sectionName === name);
 
       const sectionFields = fieldsData.map((formData) => formData);
       return { name, sectionFields };
@@ -80,24 +53,13 @@ const UpdateDetailsDialog = (props) => {
 
   const validateEmail = initialVals && initialVals.email ? false : true;
 
-  const fromProjectSales = (fieldName: string) =>
-    isProjectSales && fieldName === "projectManager";
+  const fromProjectSales = (fieldName: string) => isProjectSales && fieldName === 'projectManager';
 
   return (
-    <Dialog
-      open={openDialog}
-      onClose={onClose}
-      fullWidth
-      fullScreen={isMobile}
-      maxWidth="md"
-    >
+    <Dialog TransitionComponent={CustomDialogTransition} open={openDialog} onClose={onClose} fullWidth fullScreen={isMobile} maxWidth="md">
       <CustomDialogHeader title={title} onClose={onClose} />
 
-      <Formik
-        initialValues={initialVals}
-        validationSchema={yupSchema(fieldsData, validateEmail)}
-        onSubmit={handleSubmit}
-      >
+      <Formik initialValues={initialVals} validationSchema={yupSchema(fieldsData, validateEmail)} onSubmit={handleSubmit}>
         {({ values, errors, touched, setFieldValue, submitForm }) => (
           <>
             <CustomDialogContent>
@@ -108,14 +70,8 @@ const UpdateDetailsDialog = (props) => {
                     <Box marginY={2}>
                       <Grid spacing={3} container>
                         {form.sectionFields.map((field) => (
-                          <Grid
-                            key={field.fieldData.fieldName}
-                            item
-                            xs={12}
-                            sm={6}
-                            md={6}
-                          >
-                            {field.fieldData.fieldName === "parent" ? (
+                          <Grid key={field.fieldData.fieldName} item xs={12} sm={6} md={6}>
+                            {field.fieldData.fieldName === 'parent' ? (
                               <FormTypes
                                 {...field}
                                 disabled={field.fieldData.disableOnEdit}
@@ -125,7 +81,7 @@ const UpdateDetailsDialog = (props) => {
                                 label={field.fieldData.fieldLabel}
                                 name={field.fieldData.fieldName}
                                 type={field.fieldData.type}
-                                options={field.fieldData.option.filter(d => d.optionLabel !== values?.entityName)}
+                                options={field.fieldData.option.filter((d) => d.optionLabel !== values?.entityName)}
                                 setFieldValue={setFieldValue}
                                 required={field.fieldData.required}
                                 fullWidth
@@ -138,18 +94,14 @@ const UpdateDetailsDialog = (props) => {
                                 size="small"
                                 fullWidth
                                 disabled={
-                                  field.fieldData.type === "email" ||
+                                  field.fieldData.type === 'email' ||
                                   !field.isUpdate ||
-                                  fromProjectSales(field.fieldData.fieldName) || field.fieldData.disableOnEdit
+                                  fromProjectSales(field.fieldData.fieldName) ||
+                                  field.fieldData.disableOnEdit
                                 }
                                 startAdornment={
                                   <InputAdornment position="start">
-                                    {currencySymbol ||
-                                      getUniqueCurrencies().find(
-                                        (val) =>
-                                          initialVals.currency ===
-                                          val.currencyCode
-                                      )?.symbolNative}
+                                    {currencySymbol || getUniqueCurrencies().find((val) => initialVals.currency === val.currencyCode)?.symbolNative}
                                   </InputAdornment>
                                 }
                                 values={values}
@@ -164,46 +116,31 @@ const UpdateDetailsDialog = (props) => {
                                 isTooltip={field.fieldData.isTooltip}
                                 tooltipMessage={field.fieldData.tooltipMessage}
                                 imageOrFileUploadCompletePercentage={
-                                  ["imageUpload", "fileUpload"].some(
-                                    (s) => s === field.fieldData.type
-                                  )
+                                  ['imageUpload', 'fileUpload'].some((s) => s === field.fieldData.type)
                                     ? (completePercentage) => {
-                                      setUploadingImageOrFileProgress(
-                                        completePercentage
-                                      );
-                                    }
+                                        setUploadingImageOrFileProgress(completePercentage);
+                                      }
                                     : null
                                 }
                                 onChange={
-                                  field.fieldData.fieldName === "currency"
+                                  field.fieldData.fieldName === 'currency'
                                     ? (e, val) => {
-                                      if (val && val.currencyCode) {
-                                        setFieldValue(
-                                          field.fieldData.fieldName,
-                                          val.currencyCode
-                                        );
-                                        setCurrencySymbol(val.symbolNative);
-                                      } else {
-                                        setFieldValue(
-                                          field.fieldData.fieldName,
-                                          ""
-                                        );
-                                        setCurrencySymbol(null);
+                                        if (val && val.currencyCode) {
+                                          setFieldValue(field.fieldData.fieldName, val.currencyCode);
+                                          setCurrencySymbol(val.symbolNative);
+                                        } else {
+                                          setFieldValue(field.fieldData.fieldName, '');
+                                          setCurrencySymbol(null);
+                                        }
                                       }
-                                    }
-                                    : field.fieldData.type === "dropDown" ? (e, val) => {
-                                      setFieldValue(
-                                        field.fieldData.fieldName,
-                                        val && val.optionValue
-                                          ? val.optionValue
-                                          : ""
-                                      );
-                                    }
+                                    : field.fieldData.type === 'dropDown'
+                                      ? (e, val) => {
+                                          setFieldValue(field.fieldData.fieldName, val && val.optionValue ? val.optionValue : '');
+                                        }
                                       : null
                                 }
                               />
-                            )
-                            }
+                            )}
                           </Grid>
                         ))}
                       </Grid>
@@ -214,23 +151,11 @@ const UpdateDetailsDialog = (props) => {
             </CustomDialogContent>
 
             <CustomDialogFooter>
-              <Button
-                variant="outlined"
-                color="primary"
-                size="small"
-                disabled={isUpdating}
-                onClick={onClose}
-              >
+              <Button variant="outlined" color="primary" size="small" disabled={isUpdating} onClick={onClose}>
                 Cancel
               </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                size="small"
-                onClick={submitForm}
-                disabled={isUpdating || uploadingImageOrFileProgress > 0}
-              >
-                {isUpdating ? <CircularProgress size={20} /> : "Save"}
+              <Button variant="contained" color="primary" size="small" onClick={submitForm} disabled={isUpdating || uploadingImageOrFileProgress > 0}>
+                {isUpdating ? <CircularProgress size={20} /> : 'Save'}
               </Button>
             </CustomDialogFooter>
           </>

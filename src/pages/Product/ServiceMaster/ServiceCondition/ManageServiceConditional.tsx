@@ -6,7 +6,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { FieldArray, Form, Formik } from 'formik';
@@ -159,42 +159,41 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
 
   const handleSave = (values) => {
     setLoading(true);
-    const services = dataRows?.map((e)=> e?._id) ?? [];
-    const data = {...values, services}
-    if(id){
+    const services = dataRows?.map((e) => e?._id) ?? [];
+    const data = { ...values, services };
+    if (id) {
       axiosInstance()
-      .put(`${routes.product.path}/${productId}/service-conditional`, { ...data, _id: id })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        .put(`${routes.product.path}/${productId}/service-conditional`, { ...data, _id: id })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setLoading(false);
+          onSuccess();
+        })
+        .catch((err) => {
+          setLoading(false);
+          toastConfig.setToastConfig(err);
         });
-        setLoading(false);
-        onSuccess();
-      })
-      .catch((err) => {
-        setLoading(false);
-        toastConfig.setToastConfig(err);
-      });
-    }else {
+    } else {
       axiosInstance()
-      .post(`${routes.product.path}/${productId}/service-conditional`, { ...data })
-      .then(({ data }) => {
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
+        .post(`${routes.product.path}/${productId}/service-conditional`, { ...data })
+        .then(({ data }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: data.message
+          });
+          setLoading(false);
+          onSuccess();
+        })
+        .catch((err) => {
+          setLoading(false);
+          toastConfig.setToastConfig(err);
         });
-        setLoading(false);
-        onSuccess();
-      })
-      .catch((err) => {
-        setLoading(false);
-        toastConfig.setToastConfig(err);
-      });
     }
-    
   };
 
   const handleDelete = () => {
@@ -255,6 +254,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
       <Dialog
         fullWidth
         maxWidth="md"
+        TransitionComponent={CustomDialogTransition}
         fullScreen={fullScreen || isMobile || isTablet}
         open={true}
         onClose={(e, reason) => {
@@ -266,7 +266,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
         {initialData && assetFieldOptions && columns ? (
           <>
             <CustomDialogHeader
-              title={id ? `Edit Condition`: 'Add Condition'}
+              title={id ? `Edit Condition` : 'Add Condition'}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -280,132 +280,130 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                 <>
                   <CustomDialogContent>
                     <Form autoComplete="off" autoCorrect="off" noValidate>
-                      <div className="flex flex-col gap-4 mt-2">
-                      <TextField
-                        variant="outlined"
-                        type="text"
-                        label="Description"
-                        required={true}
-                        name="description"
-                        size="small"
-                        fullWidth
-                        value={values['description']}
-                        error={touched['description'] && Boolean(errors['description'])}
-                        helperText={touched['description'] && errors['description']}
-                        onChange={(e) => {
-                          setFieldValue('description', e.target.value.trimStart());
-                        }}
-                      />
-                      <div className="conditions-container container-with-border mb-2 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4">
-                        <div className="grid gap-4">
-                          <FieldArray name="condition">
-                            {({ push, remove }) => (
-                              <div className=" flex flex-col gap-2">
-                                <div className="flex w-full items-center justify-between">
-                                  <h2 style={{ margin: 0 }} className="form-label-style mb-3">
-                                    Conditions
-                                  </h2>
-                                  <HtmlTooltip title="Add">
-                                    <IconButton size="small" aria-label="add" onClick={() => push({ field: null, operator: null, value: null })}>
-                                      <AddIcon fontSize="small" color={'primary'} />
-                                    </IconButton>
-                                  </HtmlTooltip>
-                                </div>
+                      <div className="mt-2 flex flex-col gap-4">
+                        <TextField
+                          variant="outlined"
+                          type="text"
+                          label="Description"
+                          required={true}
+                          name="description"
+                          size="small"
+                          fullWidth
+                          value={values['description']}
+                          error={touched['description'] && Boolean(errors['description'])}
+                          helperText={touched['description'] && errors['description']}
+                          onChange={(e) => {
+                            setFieldValue('description', e.target.value.trimStart());
+                          }}
+                        />
+                        <div className="conditions-container container-with-border mb-2 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4">
+                          <div className="grid gap-4">
+                            <FieldArray name="condition">
+                              {({ push, remove }) => (
+                                <div className=" flex flex-col gap-2">
+                                  <div className="flex w-full items-center justify-between">
+                                    <h2 style={{ margin: 0 }} className="form-label-style mb-3">
+                                      Conditions
+                                    </h2>
+                                    <HtmlTooltip title="Add">
+                                      <IconButton size="small" aria-label="add" onClick={() => push({ field: null, operator: null, value: null })}>
+                                        <AddIcon fontSize="small" color={'primary'} />
+                                      </IconButton>
+                                    </HtmlTooltip>
+                                  </div>
 
-                                {values?.condition?.map((cnd, i) => {
-                                  return (
-                                    <Box className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr_auto]">
-                                      <Box>
-                                        <Autocomplete
-                                          options={assetFieldOptions}
-                                          getOptionLabel={(option) => option?.optionLabel || ''}
-                                          value={assetFieldOptions?.find((data) => data?.optionValue === values?.condition[i]?.field) ?? ''}
-                                          fullWidth
-                                          onChange={(e, newValue) => {
-                                            setFieldValue(`condition.${i}.field`, newValue?.optionValue);
-                                          }}
-                                          size="small"
-                                          renderInput={(params) => (
-                                            <TextField
-                                              {...params}
-                                              label="Field"
-                                              margin="none"
-                                              size="small"
-                                              error={touched?.condition  && Boolean(errors[`condition.${i}.field`])}
-                                              helperText={touched?.condition && errors[`condition.${i}.field`]}
-                                              variant="outlined"
-                                            />
-                                          )}
-                                        />
+                                  {values?.condition?.map((cnd, i) => {
+                                    return (
+                                      <Box className="grid grid-cols-1 items-center gap-2 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr_auto]">
+                                        <Box>
+                                          <Autocomplete
+                                            options={assetFieldOptions}
+                                            getOptionLabel={(option) => option?.optionLabel || ''}
+                                            value={assetFieldOptions?.find((data) => data?.optionValue === values?.condition[i]?.field) ?? ''}
+                                            fullWidth
+                                            onChange={(e, newValue) => {
+                                              setFieldValue(`condition.${i}.field`, newValue?.optionValue);
+                                            }}
+                                            size="small"
+                                            renderInput={(params) => (
+                                              <TextField
+                                                {...params}
+                                                label="Field"
+                                                margin="none"
+                                                size="small"
+                                                error={touched?.condition && Boolean(errors[`condition.${i}.field`])}
+                                                helperText={touched?.condition && errors[`condition.${i}.field`]}
+                                                variant="outlined"
+                                              />
+                                            )}
+                                          />
+                                        </Box>
+                                        <Box>
+                                          <Autocomplete
+                                            options={OPERATOR}
+                                            getOptionLabel={(option: any) => option?.optionLabel ?? ''}
+                                            value={OPERATOR?.find((data) => data?.optionValue === values?.condition[i]?.operator) ?? ''}
+                                            fullWidth
+                                            onChange={(event, newValue: any) => {
+                                              setFieldValue(`condition.${i}.operator`, newValue?.optionValue);
+                                            }}
+                                            size="small"
+                                            renderInput={(params) => (
+                                              <TextField
+                                                {...params}
+                                                label="Operator"
+                                                margin="none"
+                                                size="small"
+                                                error={touched?.condition && Boolean(errors[`condition.${i}.operator`])}
+                                                helperText={touched?.condition && errors[`condition.${i}.operator`]}
+                                                variant="outlined"
+                                              />
+                                            )}
+                                          />
+                                        </Box>
+                                        <Box>
+                                          <TextField
+                                            margin="none"
+                                            size="small"
+                                            type="number"
+                                            label="Value"
+                                            name="value"
+                                            variant="outlined"
+                                            fullWidth
+                                            value={values?.condition[i]?.value}
+                                            error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
+                                            helperText={touched?.condition && errors[`condition.${i}.value`]}
+                                            onChange={(e) => {
+                                              setFieldValue(`condition.${i}.value`, parseFloat(e.target.value));
+                                            }}
+                                          />
+                                        </Box>
+                                        <Box className=" ml-auto max-w-fit" display="flex" justifyContent="space-between" alignItems="center">
+                                          <HtmlTooltip title="Remove">
+                                            <IconButton size="small" aria-label="close" onClick={() => remove(i)}>
+                                              <CloseIcon fontSize="small" color={'primary'} />
+                                            </IconButton>
+                                          </HtmlTooltip>
+                                        </Box>
                                       </Box>
-                                      <Box>
-                                        <Autocomplete
-                                          options={OPERATOR}
-                                          getOptionLabel={(option: any) => option?.optionLabel ?? ''}
-                                          value={OPERATOR?.find((data) => data?.optionValue === values?.condition[i]?.operator) ?? ''}
-                                          fullWidth
-                                          onChange={(event, newValue: any) => {
-                                            setFieldValue(`condition.${i}.operator`, newValue?.optionValue);
-                                          }}
-                                          size="small"
-                                          renderInput={(params) => (
-                                            <TextField
-                                              {...params}
-                                              label="Operator"
-                                              margin="none"
-                                              size="small"
-                                              error={
-                                                touched?.condition && Boolean(errors[`condition.${i}.operator`])
-                                              }
-                                              helperText={touched?.condition && errors[`condition.${i}.operator`]}
-                                              variant="outlined"
-                                            />
-                                          )}
-                                        />
-                                      </Box>
-                                      <Box>
-                                        <TextField
-                                          margin="none"
-                                          size="small"
-                                          type="number"
-                                          label="Value"
-                                          name="value"
-                                          variant="outlined"
-                                          fullWidth
-                                          value={values?.condition[i]?.value}
-                                          error={touched?.condition && Boolean(errors[`condition.${i}.value`])}
-                                          helperText={touched?.condition && errors[`condition.${i}.value`]}
-                                          onChange={(e) => {
-                                            setFieldValue(`condition.${i}.value`, parseFloat(e.target.value));
-                                          }}
-                                        />
-                                      </Box>
-                                      <Box className=" ml-auto max-w-fit" display="flex" justifyContent="space-between" alignItems="center">
-                                        <HtmlTooltip title="Remove">
-                                          <IconButton size="small" aria-label="close" onClick={() => remove(i)}>
-                                            <CloseIcon fontSize="small" color={'primary'} />
-                                          </IconButton>
-                                        </HtmlTooltip>
-                                      </Box>
-                                    </Box>
-                                  );
-                                })}
-                              </div>
-                            )}
-                          </FieldArray>
+                                    );
+                                  })}
+                                </div>
+                              )}
+                            </FieldArray>
+                          </div>
                         </div>
-                      </div>
                       </div>
                     </Form>
                     <div className="container-with-border mb-2 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4">
-                          <DetailsPageHeader
-                            isAddButtonVisible={true}
-                            addButtonMenuItems={addButtonMenuItems()}
-                            isActionButtonVisible={true}
-                            actionButtonMenuItems={actionButtonMenuItems()}
-                            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-                            hasXpadding={false}
-                          />
+                      <DetailsPageHeader
+                        isAddButtonVisible={true}
+                        addButtonMenuItems={addButtonMenuItems()}
+                        isActionButtonVisible={true}
+                        actionButtonMenuItems={actionButtonMenuItems()}
+                        actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+                        hasXpadding={false}
+                      />
                       {columns ? (
                         <CustomReactTable
                           height={'calc(100vh - 345px)'}
@@ -416,12 +414,11 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                           renderedFrom={renderedFrom}
                           isClientSideGrid={true}
                         />
-                      ) : ( 
-                      <Box p={2} height={500}>
-                      <CommonSkeleton lenArray={[...Array(10).keys()]} />
-                    </Box>
-                    )
-                    }
+                      ) : (
+                        <Box p={2} height={500}>
+                          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+                        </Box>
+                      )}
                     </div>
                   </CustomDialogContent>
                   <CustomDialogFooter>
@@ -429,7 +426,11 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
                       Cancel
                     </Button>
                     <CustomButton
-                      disabled={values?.condition?.length===0 || dataRows?.length===0 || isEqual(initialData, {...values, services: dataRows?.map((e)=> e._id)})}
+                      disabled={
+                        values?.condition?.length === 0 ||
+                        dataRows?.length === 0 ||
+                        isEqual(initialData, { ...values, services: dataRows?.map((e) => e._id) })
+                      }
                       loading={loading}
                       variant="contained"
                       color="primary"

@@ -6,6 +6,7 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSuccess }) {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -33,7 +34,15 @@ function AssignStepDialog({ consumables, steps, loading, handleCloseDialog, onSu
   };
 
   return (
-    <Dialog fullWidth maxWidth="sm" fullScreen={fullScreen} open={true} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      fullWidth
+      maxWidth="sm"
+      TransitionComponent={CustomDialogTransition}
+      fullScreen={fullScreen}
+      open={true}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader
         title={`Assign Consumables to Step`}
         isMinimized={!fullScreen}

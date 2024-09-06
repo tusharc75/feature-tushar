@@ -147,8 +147,7 @@ const Report = () => {
           }
         });
         columns = [...newColumns, ActionsRenderer];
-      }
-      else if (resourceCamelCase === 'inUsedSerializedAsset') {
+      } else if (resourceCamelCase === 'inUsedSerializedAsset') {
         newColumns?.forEach((e) => {
           if (['billingAddress', 'shippingAddress']?.includes(e.accessor)) {
             e.disableFilters = true;
@@ -156,8 +155,7 @@ const Report = () => {
           }
         });
         columns = [...newColumns];
-      }
-      else if (resourceCamelCase === 'purchaseOrderDetails') {
+      } else if (resourceCamelCase === 'purchaseOrderDetails') {
         newColumns?.forEach((e) => {
           if (['productId', 'productNumber', 'productDescription', 'serviceName', 'serviceDescription', 'description']?.includes(e.accessor)) {
             e.disableFilters = true;
@@ -165,11 +163,9 @@ const Report = () => {
           }
         });
         columns = [...newColumns];
-      }
-      else if (resourceCamelCase === 'volumeReport') {
+      } else if (resourceCamelCase === 'volumeReport') {
         columns = [...newColumns, ActionsRenderer];
-      }
-      else {
+      } else {
         columns = [...newColumns];
       }
       setResourceColumns(filterFields);
@@ -661,7 +657,7 @@ const Report = () => {
     if (isExport) {
       let newColumns = columns.map((col) => col.accessor);
       if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
-        newColumns = []
+        newColumns = [];
         for (const [key, value] of Object.entries(visibleColumns)) {
           if (value) {
             newColumns.push(key);
@@ -675,61 +671,60 @@ const Report = () => {
   };
 
   const exportData = (exportType = 'excel', processType = 'excel') => {
-
     toastConfig.setToastConfig({
       open: true,
       message: `Please wait ${processType === 'sendMail' ? '' : 'exporting data'}`,
       type: 'info'
     });
 
-    setIsProcessing(processType)
+    setIsProcessing(processType);
 
     let filterQuery = getQueryString(true);
 
     var api = '';
     if (exportType === 'pdf') {
       api = `/report/${type}/pdf`;
-    }
-    else {
+    } else {
       api = `/report/${type}/export`;
     }
-    const extension = exportType === 'excel' ? 'xlsx' : 'pdf'
+    const extension = exportType === 'excel' ? 'xlsx' : 'pdf';
     const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    axiosInstance().get(`${api}${filterQuery}`, {
-      responseType: 'arraybuffer'
-    }).then((res) => {
-      const fileName = res.headers['content-disposition'].split('filename=')[1];
-      if (processType === 'sendMail') {
-        const blobData = new Blob([res.data], { type: contentType });
-        generateBase64forFile(blobData, fileName, extension);
-      }
-      else if (processType === 'pdf') {
-        const url = window.URL.createObjectURL(new Blob([res.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', fileName + '.pdf');
-        document.body.appendChild(link);
-        link.click();
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Successfully Exported',
-          type: 'success'
-        });
+    axiosInstance()
+      .get(`${api}${filterQuery}`, {
+        responseType: 'arraybuffer'
+      })
+      .then((res) => {
+        const fileName = res.headers['content-disposition'].split('filename=')[1];
+        if (processType === 'sendMail') {
+          const blobData = new Blob([res.data], { type: contentType });
+          generateBase64forFile(blobData, fileName, extension);
+        } else if (processType === 'pdf') {
+          const url = window.URL.createObjectURL(new Blob([res.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', fileName + '.pdf');
+          document.body.appendChild(link);
+          link.click();
+          toastConfig.setToastConfig({
+            open: true,
+            message: 'Successfully Exported',
+            type: 'success'
+          });
+          setIsProcessing(null);
+        } else {
+          downloadExcel(res.data, fileName);
+          toastConfig.setToastConfig({
+            open: true,
+            message: 'Successfully Exported',
+            type: 'success'
+          });
+          setIsProcessing(null);
+        }
+      })
+      .catch((err) => {
         setIsProcessing(null);
-      }
-      else {
-        downloadExcel(res.data, fileName);
-        toastConfig.setToastConfig({
-          open: true,
-          message: 'Successfully Exported',
-          type: 'success'
-        });
-        setIsProcessing(null);
-      }
-    }).catch((err) => {
-      setIsProcessing(null);
-      toastConfig.setToastConfig(err);
-    });
+        toastConfig.setToastConfig(err);
+      });
   };
 
   const generateBase64forFile = (blobData, fileName, extension) => {
@@ -754,7 +749,7 @@ const Report = () => {
       setIsProcessing(null);
       setIsSendMail(true);
     }
-  }, [emailAttachments])
+  }, [emailAttachments]);
 
   useEffect(() => {
     if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
@@ -765,10 +760,17 @@ const Report = () => {
         }
         if (dataKeys.includes(col.accessor)) {
           return {
-            ...col, Footer: footerData[col.accessor] && isNumber(footerData[col.accessor]) ?
-              col?.type === "currencyNumber" ?
-                `${formatAmountWithCurrency(col?.currency, footerData[col.accessor])?.fullFormatAmountWithoutSpace}` :
-                footerData[col.accessor] : <NoDataCell />
+            ...col,
+            Footer:
+              footerData[col.accessor] && isNumber(footerData[col.accessor]) ? (
+                col?.type === 'currencyNumber' ? (
+                  `${formatAmountWithCurrency(col?.currency, footerData[col.accessor])?.fullFormatAmountWithoutSpace}`
+                ) : (
+                  footerData[col.accessor]
+                )
+              ) : (
+                <NoDataCell />
+              )
           };
         }
         return col;
@@ -792,7 +794,7 @@ const Report = () => {
                   permissions={permissions?.report}
                   module={routes.productionOrder.title}
                   api={`/report/${type}`}
-                  afterImportCompleted={() => { }}
+                  afterImportCompleted={() => {}}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -800,8 +802,8 @@ const Report = () => {
                   additionalParams={getQueryString(true)}
                 />
               ) : (
-                <div className="flex gap-1 items-center">
-                  {reportConfig?.isSendMail &&
+                <div className="flex items-center gap-1">
+                  {reportConfig?.isSendMail && (
                     <Button
                       variant="outlined"
                       size="small"
@@ -811,28 +813,31 @@ const Report = () => {
                         exportData('pdf', 'sendMail');
                       }}
                       startIcon={isProcessing === 'sendMail' && <CircularProgress color="inherit" size={18} />}
-                      className={`btn-outline-v-1`}>
+                      className={`btn-outline-v-1`}
+                    >
                       Send Mail
                     </Button>
-                  }
-                  {reportConfig?.isExportPdf &&
+                  )}
+                  {reportConfig?.isExportPdf && (
                     <Button
                       variant="outlined"
                       size="small"
                       disabled={isProcessing === 'pdf'}
                       onClick={() => exportData('pdf', 'pdf')}
                       startIcon={isProcessing === 'pdf' && <CircularProgress color="inherit" size={18} />}
-
-                      className={`btn-outline-v-1`}>
+                      className={`btn-outline-v-1`}
+                    >
                       Export To PDF
-                    </Button>}
+                    </Button>
+                  )}
                   <Button
                     variant="outlined"
                     size="small"
                     disabled={isProcessing === 'excel'}
                     onClick={() => exportData('excel', 'excel')}
                     startIcon={isProcessing === 'excel' && <CircularProgress color="inherit" size={18} />}
-                    className={`btn-outline-v-1`}>
+                    className={`btn-outline-v-1`}
+                  >
                     Export To Excel
                   </Button>
                 </div>
@@ -872,6 +877,7 @@ const Report = () => {
               open={true}
               maxWidth="md"
               fullWidth
+              TransitionComponent={CustomDialogTransition}
               onClose={(e, reason) => {
                 if (reason !== 'backdropClick') {
                   if (defaultColumns?.length) {
@@ -932,8 +938,11 @@ const Report = () => {
               <>
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
-                  columns={!selectedData?.['dayWise']?.value && resourceCamelCase === 'dailyVolumeReport'
-                    ? columns?.filter((e) => e.accessor !== 'date') : columns}
+                  columns={
+                    !selectedData?.['dayWise']?.value && resourceCamelCase === 'dailyVolumeReport'
+                      ? columns?.filter((e) => e.accessor !== 'date')
+                      : columns
+                  }
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}
@@ -990,7 +999,7 @@ const Report = () => {
             relatedTo={null}
             emailId={null}
             handleClose={() => {
-              setIsSendMail(false)
+              setIsSendMail(false);
               setEmailAttachments([]);
             }}
             fetchData={() => {
@@ -1005,8 +1014,7 @@ const Report = () => {
             showManimizeMaximize={true}
           />
         </Dialog>
-      )
-      }
+      )}
     </MuiPickersUtilsProvider>
   );
 };

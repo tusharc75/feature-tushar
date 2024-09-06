@@ -9,6 +9,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Dialog from '@material-ui/core/Dialog';
 import { Typography } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,6 +48,7 @@ export default function ConfirmationDialogRaw({
     <Dialog
       disableBackdropClick
       disableEscapeKeyDown
+      TransitionComponent={CustomDialogTransition}
       maxWidth="xs"
       aria-labelledby="confirmation-dialog-title"
       open={open}

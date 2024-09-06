@@ -12,6 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 
 //camera library being used
 import Webcam from 'react-webcam';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 //handling camera side
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
@@ -35,7 +36,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             width={500}
             minScreenshotWidth={500}
             screenshotFormat="image/jpeg"
-          // videoConstraints={videoConstraints}
+            // videoConstraints={videoConstraints}
           />
         ) : (
           <img src={picture} />
@@ -86,7 +87,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const [usePad, setUsePad] = useState(true);
 
   return (
-    <Dialog open={open} onClose={close}>
+    <Dialog TransitionComponent={CustomDialogTransition} open={open} onClose={close}>
       <CustomDialogHeader title="Signature Pad" onClose={close} />
       <CustomDialogContent>
         {usePad ? (
@@ -171,7 +172,7 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
           )}
         </Box>
         <Box>
-          <HtmlTooltip title='Add Signature'>
+          <HtmlTooltip title="Add Signature">
             <label htmlFor={name}>
               <IconButton
                 onClick={() => {
@@ -187,7 +188,7 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
               </IconButton>
             </label>
           </HtmlTooltip>
-          <HtmlTooltip title='Remove Signature'>
+          <HtmlTooltip title="Remove Signature">
             <IconButton
               disabled={Boolean(!values[name]) || disable}
               className={Boolean(!values[name]) ? '' : 'errorColor'}

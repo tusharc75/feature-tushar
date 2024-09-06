@@ -13,6 +13,7 @@ import { BsCheckLg, BsExclamationLg, BsPlusLg, BsFillSkipEndFill } from 'react-i
 import moment from 'moment';
 import { FaUser as UserIcon } from 'react-icons/fa';
 import { MdBolt } from 'react-icons/md';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) => {
   const {
@@ -181,7 +182,15 @@ const Logs = ({ handleClose, workOrderId, serviceId, uniqueId, serviceName }) =>
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="logs-dialog">
+    <Dialog
+      fullWidth
+      maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="logs-dialog"
+    >
       <CustomDialogHeader
         title={`${serviceName ? serviceName : ''} Logs`}
         showManimizeMaximize={false}

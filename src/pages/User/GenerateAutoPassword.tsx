@@ -5,9 +5,9 @@ import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const GenerateAutoPassword = ({ ids = [], onClose }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [isAutoGenerate, setIsAutoGenerate] = useState(true);
@@ -60,11 +60,11 @@ const GenerateAutoPassword = ({ ids = [], onClose }) => {
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open={true} onClose={onClose} aria-labelledby="assign-roles-dialog">
+    <Dialog TransitionComponent={CustomDialogTransition} fullWidth maxWidth="xs" open={true} onClose={onClose} aria-labelledby="assign-roles-dialog">
       <CustomDialogHeader title="Generate Password" onClose={onClose} />
 
       <CustomDialogContent>
-        <div className="mt-5 mb-5">
+        <div className="mb-5 mt-5">
           <Grid container spacing={2}>
             <Grid item xs={12}>
               <FormControlLabel

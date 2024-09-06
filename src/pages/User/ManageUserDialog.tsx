@@ -6,7 +6,7 @@ import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { getObjKeys, yupSchema, getObjKeysWithValues, sidebarResource} from '../../constants/helpers';
+import { getObjKeys, yupSchema, getObjKeysWithValues, sidebarResource, CustomDialogTransition } from '../../constants/helpers';
 import { useLocation, useHistory } from 'react-router-dom';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useData } from '../../StateProvider/Provider';
@@ -79,7 +79,6 @@ export default function ManageUserDialog({
     getInitialData();
   }, [getInitialData]);
 
-
   const handleSubmit = (values) => {
     setSubmitting(true);
     if (isNew) {
@@ -140,6 +139,7 @@ export default function ManageUserDialog({
     <Dialog
       open={open}
       maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
       fullWidth
       fullScreen={fullScreen || isMobile || isTablet}
       onClose={(e, reason) => {
@@ -157,8 +157,8 @@ export default function ManageUserDialog({
                   isClone
                     ? `Clone User - ${cloneHeadingName}`
                     : isNew
-                    ? 'Create New User'
-                    : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(' ')}`
+                      ? 'Create New User'
+                      : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(' ')}`
                 }
                 onClose={() => {
                   if (isEqual(values, initialData.values)) close();
@@ -172,17 +172,17 @@ export default function ManageUserDialog({
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                   <InputField
-                      errors={errors}
-                      values={values}
-                      setFieldValue={setFieldValue}
-                      touched={touched}
-                      fieldsData={initialData.fields}
-                      size="small"
-                      fullWidth
-                      resource={sidebarResource.user}
-                      referenceId={userId|| null}
-                    />
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.user}
+                    referenceId={userId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

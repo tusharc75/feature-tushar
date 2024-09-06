@@ -12,7 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import SaveFilterDialog from 'src/components/GridFilter/SaveFilterDialog';
-import { dateFormat, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../CustomDialog/CustomDialogHeader';
@@ -192,6 +192,7 @@ function GridFilter({ resource, handleClose, setSelectedFilter, selectedFilter, 
       <Dialog
         maxWidth={'md'}
         open={true}
+        TransitionComponent={CustomDialogTransition}
         fullScreen={isMobile || isMobileView}
         fullWidth
         onClose={(e, reason) => {

@@ -15,7 +15,7 @@ import {
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
-import { opportunity } from '../../constants/helpers';
+import { CustomDialogTransition, opportunity } from '../../constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -120,7 +120,14 @@ const AssignOpportunityDialog = ({ opportunityDialogOpen, onSuccess, handleClose
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open={opportunityDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="xs"
+      open={opportunityDialogOpen}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title="Assign Opportunities" />
       <CustomDialogContent>
         {loadingOpportunities ? (

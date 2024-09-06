@@ -4,6 +4,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function QCcomment({ onClose, onSubmit, type }) {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -11,7 +12,7 @@ export default function QCcomment({ onClose, onSubmit, type }) {
   const [comment, setComment] = useState('');
 
   return (
-    <Dialog open onClose={onClose} fullWidth>
+    <Dialog open onClose={onClose} fullWidth TransitionComponent={CustomDialogTransition}>
       <CustomDialogHeader
         title={`Reason for ${type === 'reject' ? 'rejection' : 'accptance'}`}
         onClose={onClose}

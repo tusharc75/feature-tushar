@@ -6,7 +6,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
-import { gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, serviceMaster, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomTabs, { CustomTab } from '../CustomTabs';
@@ -50,7 +50,7 @@ const AssignServiceDialog = ({
       editable: true,
       disableFilters: true,
       disableSortBy: true,
-      disabled:true,
+      disabled: true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
     }
   ];
@@ -215,7 +215,15 @@ const AssignServiceDialog = ({
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="md"
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader
         title={`Assign ${routes.serviceMaster.title}`}
         showManimizeMaximize={false}

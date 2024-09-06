@@ -16,12 +16,12 @@ import AssignEntityDialog from '../../components/AssignRolesDialog/AssignEntityD
 import CustomContainer from '../../components/CustomContainer';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import ResourceTransferDialog from '../../components/ResourceTransferDialog';
-import { entity, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
+import { CustomDialogTransition, entity, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, sidebarResource } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageEntity from './ManageEntity';
 import axios, { CancelTokenSource } from 'axios';
-import { isMobile, isTablet } from "react-device-detect";
+import { isMobile, isTablet } from 'react-device-detect';
 
 const Entity: FC = () => {
   const renderedFrom = camelCase(routes?.entity.title);
@@ -150,23 +150,18 @@ const Entity: FC = () => {
           </span>
         </HtmlTooltip>
 
-        <HtmlTooltip
-          title={!permissions[entityResource]?.isDelete ? `You do not have permission to delete entity` : 'Delete'}
-        >
+        <HtmlTooltip title={!permissions[entityResource]?.isDelete ? `You do not have permission to delete entity` : 'Delete'}>
           <span>
             <IconButton
               size="small"
               aria-label="Delete"
-              disabled={!(permissions[entityResource]?.isDelete)}
+              disabled={!permissions[entityResource]?.isDelete}
               onClick={() => {
                 setDeleteEntity(row?.original);
                 setShowDeleteDialog(true);
               }}
             >
-              <DeleteIcon
-                fontSize="small"
-                color={permissions[entityResource]?.isDelete ? 'error' : 'disabled'}
-              />
+              <DeleteIcon fontSize="small" color={permissions[entityResource]?.isDelete ? 'error' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -338,7 +333,15 @@ const Entity: FC = () => {
       )}
 
       {usersDialogOpen && !usersDialogLoding && (
-        <Dialog fullScreen={isMobile || isTablet} fullWidth maxWidth="sm" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          fullScreen={isMobile || isTablet}
+          fullWidth
+          maxWidth="sm"
+          open={usersDialogOpen}
+          onClose={handleCloseDialog}
+          aria-labelledby="assign-roles-dialog"
+        >
           <AssignEntityDialog
             entitiesDialogOpen={usersDialogOpen}
             handleCloseDialog={handleCloseDialog}
