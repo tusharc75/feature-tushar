@@ -33,7 +33,7 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
     const data = {
       name: values?.name,
       access: values?.access,
-      columns: columns?.toString(),
+      columns: columns?.map((c: any) => ({ name: c.fieldName, width: c.width })) || [],
       ...(sortBy && orderBy ? { sortBy: sortBy?.fieldName, orderBy } : { sortBy: '', orderBy: '' }),
     };
 
