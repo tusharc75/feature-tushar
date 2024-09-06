@@ -184,7 +184,7 @@ const Details = (props: DetailProps) => {
       const currencySymbol = getUniqueCurrencies().find((d) => d.currencyCode === currency)?.symbolNative;
       text = `${currencySymbol}${formatAmountWithCurrency(currency, values[`${input.fieldName}_${currency?.toLowerCase()}`] || 0)?.amountWithouCurrencyCode ?? (values[input.fieldName] || 0)}`;
     } else if (input.type === 'switch') {
-      text = values[input.fieldName] ? 'Inactive' : 'Active';
+      text = values[input.fieldName] ? 'True' : 'False';
     } else if (input.type === 'checkBox') {
       text = values[input.fieldName] === true ? 'Yes' : 'No';
     } else if (input.type === 'date') {
