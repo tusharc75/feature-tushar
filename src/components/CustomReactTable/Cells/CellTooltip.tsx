@@ -1,7 +1,7 @@
 import { Popper } from '@material-ui/core';
 import React, { useState } from 'react';
 import { IoCaretDown } from 'react-icons/io5';
-import { cn } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { Dialog } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
@@ -105,7 +105,7 @@ const CellTooltip = ({
         </Popper>
       </>
       {enableExpandView && (
-        <Dialog maxWidth="md" fullWidth open={isExpandViewOpen} onClose={handleCloseExpandView}>
+        <Dialog TransitionComponent={CustomDialogTransition} maxWidth="md" fullWidth open={isExpandViewOpen} onClose={handleCloseExpandView}>
           <CustomDialogHeader title={expandViewHead} onClose={handleCloseExpandView} showRequiredLabel={false} />
           <CustomDialogContent>{children('expanded')}</CustomDialogContent>
         </Dialog>

@@ -2,7 +2,7 @@ import { useEffect, useState, useContext, useRef } from 'react';
 import { Dialog, Grid, Box, Button, TextField, CircularProgress } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { Form, Formik, FormikProps } from 'formik';
-import { REPORT_LIST } from 'src/constants/helpers';
+import { CustomDialogTransition, REPORT_LIST } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
@@ -302,6 +302,7 @@ const ManageCustomReport = ({ handleClose, onSuccess, id }) => {
     <Dialog
       open
       maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
       fullScreen={fullScreen || isMobile || isTablet}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {

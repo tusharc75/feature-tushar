@@ -294,7 +294,7 @@ export default function TinyMCE(props) {
         <div style={{ width: width }}>
           <div
             style={{ height: 175, overflow: 'auto', width: '100%', textAlign: 'left' }}
-            className="border p-2 border-radius-1"
+            className="border-radius-1 border p-2"
             dangerouslySetInnerHTML={{ __html: initialValue || '' }}
           ></div>
         </div>

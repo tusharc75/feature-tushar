@@ -7,7 +7,7 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useHistory } from 'react-router-dom';
-import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues } from '../../constants/helpers';
+import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, CustomDialogTransition } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import FormTypes from '../../components/Helpers/FormTypes';
 import { useData } from '../../StateProvider/Provider';
@@ -130,6 +130,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
   return (
     <Dialog
       open={open}
+      TransitionComponent={CustomDialogTransition}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           setShowConfirmDialog(true);
@@ -214,8 +215,8 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                                     imageOrFileUploadCompletePercentage={
                                       ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                         ? (completePercentage) => {
-                                          setUploadingImageOrFileProgress(completePercentage);
-                                        }
+                                            setUploadingImageOrFileProgress(completePercentage);
+                                          }
                                         : null
                                     }
                                   />

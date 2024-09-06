@@ -14,6 +14,7 @@ import ManageSectionMaster from './ManageSectionMaster';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { DynamicIcon, defaultIcons } from 'src/assets/IconGenerator';
 import { ServiceManagementIcon } from 'src/assets/sidebar_assets/icons';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const SectionMaster = ({ close }) => {
   const renderedFrom = `section-master`;
@@ -39,8 +40,8 @@ const SectionMaster = ({ close }) => {
           const iconName = row.original?.iconName
             ? row.original?.iconName
             : defaultIcons.includes(row.original?.sectionName || '')
-            ? row.original?.sectionName
-            : '';
+              ? row.original?.sectionName
+              : '';
           return row?.original['sectionName'] ? (
             <p className="text-truncate">
               <span className="mr-2">{DynamicIcon(iconName, { size: 18 }) || <ServiceManagementIcon size={18} />}</span>
@@ -123,6 +124,7 @@ const SectionMaster = ({ close }) => {
     <>
       <Dialog
         open
+        TransitionComponent={CustomDialogTransition}
         maxWidth="md"
         fullScreen={true}
         fullWidth

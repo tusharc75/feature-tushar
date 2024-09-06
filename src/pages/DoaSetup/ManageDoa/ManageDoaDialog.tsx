@@ -23,7 +23,7 @@ import { CustomToastContext } from '../../../StateProvider/CustomToastContext/Cu
 import axiosInstance from '../../../axios/axiosInstance';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getUniqueCurrencies, removeEmptyKeys } from '../../../constants/helpers';
+import { CustomDialogTransition, getUniqueCurrencies, removeEmptyKeys } from '../../../constants/helpers';
 
 const DoaApproveType = [
   {
@@ -292,7 +292,15 @@ const DoaDialog = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} scroll="body" maxWidth="md" fullWidth fullScreen={fullScreen || isMobile || isTablet}>
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      open={open}
+      onClose={onClose}
+      scroll="body"
+      maxWidth="md"
+      fullWidth
+      fullScreen={fullScreen || isMobile || isTablet}
+    >
       <>
         {!loading && (
           <>

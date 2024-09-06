@@ -2,11 +2,19 @@ import { Dialog } from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import Consumables from './';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const ConsumablesDialog = ({ onSuccess, handleClose, workOrderData, service, uniqueId, stepId, serviceName }) => {
-
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="consume-dialog">
+    <Dialog
+      fullWidth
+      maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="consume-dialog"
+    >
       <CustomDialogHeader
         title={serviceName ? `${serviceName} - Products/Consumables` : 'Products/Consumables'}
         showManimizeMaximize={false}

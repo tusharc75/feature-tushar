@@ -1,5 +1,5 @@
 import { Box, Button, CircularProgress, Dialog, IconButton, ListItemIcon, ListItemText, TextField } from '@material-ui/core';
-import { DragIndicator } from '@material-ui/icons';
+import { DragIndicator, Info } from '@material-ui/icons';
 import SwapVertIcon from '@material-ui/icons/SwapVert';
 import update from 'immutability-helper';
 import { useEffect, useState } from 'react';
@@ -14,6 +14,7 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 export default function ArrangeView({ columns, setColumns }) {
   const [open, setOpen] = useState(false);
@@ -90,7 +91,14 @@ export default function ArrangeView({ columns, setColumns }) {
         </IconButton>
       </HtmlTooltip>
       {open && (
-        <Dialog open onClose={onClose} maxWidth="sm" fullWidth fullScreen={fullScreen || isMobile || isTablet}>
+        <Dialog
+          TransitionComponent={CustomDialogTransition}
+          open
+          onClose={onClose}
+          maxWidth="sm"
+          fullWidth
+          fullScreen={fullScreen || isMobile || isTablet}
+        >
           <CustomDialogHeader
             title="Arrange Columns"
             onClose={onClose}
@@ -103,10 +111,25 @@ export default function ArrangeView({ columns, setColumns }) {
           />
           <CustomDialogContent>
             <DndContext onDragEnd={moveCard} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
+              <div className="sticky -top-2 z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
+                <p className=" flex select-none items-center gap-1 text-[12px] font-semibold text-gray-500">
+                  <Info fontSize="small" />
+                  Drag and drop to arrange, or enter the width as a percentage.
+                </p>
+              </div>
               <SortableContext items={column?.map((c) => c.id) || []}>
                 <ul className="list-none">
                   {column.map((col, index) => (
-                    <RenderListItem key={col.id} index={index} id={col.id} fieldLabel={col.fieldLabel} width={col.width} setWidth={(w) => { setColumnWidth(col.id, w) }} />
+                    <RenderListItem
+                      key={col.id}
+                      index={index}
+                      id={col.id}
+                      fieldLabel={col.fieldLabel}
+                      width={col.width}
+                      setWidth={(w) => {
+                        setColumnWidth(col.id, w);
+                      }}
+                    />
                   ))}
                 </ul>
               </SortableContext>
@@ -155,13 +178,15 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth }: ItemProps) =
     <li
       style={style}
       ref={setNodeRef}
-      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-        } list-none transition-colors`}
+      className={`${
+        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+      } list-none transition-colors`}
     >
       <div
         key={id}
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-          } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
+          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+        } `}
       >
         <ListItemIcon {...attributes} {...listeners} className="drag-handle !cursor-grab">
           <DragIndicator />
@@ -173,10 +198,12 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth }: ItemProps) =
             margin="none"
             size="small"
             fullWidth
-            label="Width"
             value={width}
             onChange={(e) => {
               setWidth(e?.target?.value);
+            }}
+            InputProps={{
+              endAdornment: '%',
             }}
           />
         </Box>

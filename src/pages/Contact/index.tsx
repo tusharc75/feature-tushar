@@ -23,12 +23,19 @@ import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
 import NoDataCell from '../../components/Helpers/NoDataCell';
-import { getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, userType } from '../../constants/helpers';
+import {
+  CustomDialogTransition,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  userType
+} from '../../constants/helpers';
 import WarhouseList from '../Account/Warehouse/WarhouseList';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageContactDialog from './ManageContact';
-import { isMobile, isTablet } from "react-device-detect";
+import { isMobile, isTablet } from 'react-device-detect';
 
 const types = [
   {
@@ -549,6 +556,7 @@ export default function Contact(props) {
             <Dialog
               fullWidth
               fullScreen={isMobile || isTablet}
+              TransitionComponent={CustomDialogTransition}
               maxWidth="xs"
               open={showAssignEntityDialog}
               onClose={() => setShowAssignEntityDialog(false)}

@@ -9,7 +9,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import FormTypes from '../Helpers/FormTypes';
-import { dateFormat, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, sidebarResource } from 'src/constants/helpers';
 import moment from 'moment';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
 import { KeyboardDatePicker } from '@material-ui/pickers';
@@ -196,7 +196,10 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
         continue;
       }
 
-      if (['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency', 'lookUpDisplay', 'decimal', 'number']?.includes(col.type) && formValues[fieldName]) {
+      if (
+        ['singleLine', 'multiLine', 'email', 'mobileNumber', 'currency', 'lookUpDisplay', 'decimal', 'number']?.includes(col.type) &&
+        formValues[fieldName]
+      ) {
         filterModel[fieldName] = {
           filterType: 'text',
           type: 'contains',
@@ -301,6 +304,7 @@ function GridFilter({ resource, currentGridApi, handleClose, setSelectedFilter, 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <Dialog
+        TransitionComponent={CustomDialogTransition}
         maxWidth={'md'}
         open={true}
         fullWidth

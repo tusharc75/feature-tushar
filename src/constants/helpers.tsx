@@ -1,4 +1,4 @@
-import { Slide } from '@material-ui/core';
+import { Grow, Zoom } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import clsx, { ClassValue } from 'clsx';
 import { camelCase, isArray, lowerFirst, orderBy, uniqBy } from 'lodash';
@@ -7,12 +7,12 @@ import moment from 'moment';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
+import { LOGIC } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
-import { LOGIC } from 'src/components/FormBuilder/helper';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -987,9 +987,10 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
     } else if (key.type === 'description') {
     } else if (key.type === 'groupSignature') {
       if (isArray(value) && value?.length) {
-        obj[key.fieldName] = value?.map((e) => { return { signature: '', user: e } });
-      }
-      else {
+        obj[key.fieldName] = value?.map((e) => {
+          return { signature: '', user: e };
+        });
+      } else {
         obj[key.fieldName] = [];
       }
     } else {
@@ -1131,18 +1132,16 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       const parseValue = (value) => {
         if (value?.toLowerCase() === 'yes') {
           return true;
-        }
-        else if (value?.toLowerCase() === 'no') {
+        } else if (value?.toLowerCase() === 'no') {
           return false;
+        } else {
+          value;
         }
-        else {
-          value
-        }
-      }
+      };
 
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < fields?.length;) {
+        for (let i = 0; i < fields?.length; ) {
           const field = fields[i];
           const condition = input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
           if (condition?.logic === LOGIC.AND) {
@@ -1172,33 +1171,33 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? fields?.length && validation
           ? string().when(
-            fields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().required(message),
-              otherwise: string()
-            }
-          )
+              fields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
+            .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
+            .required(`${input.fieldLabel} is required`)
         : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
         ? string()
-          .matches(
+            .matches(
+              /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
+              'Enter valid URL'
+            )
+            .required(`${input.fieldLabel} is required`)
+        : string().matches(
             /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
             'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+          );
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
         ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
@@ -1259,13 +1258,13 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? fields?.length && validation
           ? string().when(
-            fields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().required(message),
-              otherwise: string()
-            }
-          )
+              fields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
           : string().required(message)
         : string();
     }
@@ -1707,7 +1706,6 @@ export const determineLightOrDark = (color: any) => {
   }
 };
 
-
 export const graphOptions = {
   layout: {
     randomSeed: 2
@@ -1759,7 +1757,7 @@ export const CustomDialogTransition = React.forwardRef(function Transition(
   props: TransitionProps & { children?: React.ReactElement<any, any> },
   ref: React.Ref<unknown>
 ) {
-  return <Slide direction="up" ref={ref} {...props} />;
+  return <Grow ref={ref} {...props} />;
 });
 
 //  Don't use this for details screen as the model being passed is different
@@ -2524,7 +2522,7 @@ export const REPORT_LIST = [
     permission: 'lead',
     key: 'standardReport',
     type: 'salesFunnel'
-  },
+  }
 ];
 
 export const RESOURCE_CALENDAR = [
@@ -3337,7 +3335,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) { }
+  } catch (error) {}
 };
 
 export const columnSize = (type) => {
@@ -3387,8 +3385,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
@@ -3423,10 +3421,9 @@ export const MFA_METHOD = {
   totp: 'totp'
 };
 
-
 export const findSimilarRecords = (array, property) => {
   const similarRecords: any = {};
-  array.forEach(item => {
+  array.forEach((item) => {
     if (!similarRecords[item[property]]) {
       similarRecords[item[property]] = [];
     }

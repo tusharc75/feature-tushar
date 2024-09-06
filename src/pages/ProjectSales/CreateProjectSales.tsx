@@ -13,6 +13,7 @@ import {
   getObjKeysWithValues,
   GenerateResourceLineNumber,
   sidebarResource,
+  CustomDialogTransition
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -68,53 +69,55 @@ const CreateProjectSales = ({
   }, []);
 
   const getInitialData = () => {
-    axiosInstance().get('/field?resource=Project Sales').then(({ data: { data } }) => {
+    axiosInstance()
+      .get('/field?resource=Project Sales')
+      .then(({ data: { data } }) => {
+        const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
+        const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
 
-      const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
-      const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
-
-      if (projectSalesId) {
-        axiosInstance().get(`${routes.projectSales.path}/${projectSalesId}`).then(({ data: { data } }) => {
-          if (isClone) {
-            const { projectName, ...rest } = data;
-            let tempData = { ...rest };
-            tempData['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate); 
-            let tempObjKeysWithValues = getObjKeysWithValues(tempData, fieldsDataForUpdate, true, user);
-            if (fieldsDataForUpdate?.some((e) => e.fieldName === 'projectManager')) {
-              tempObjKeysWithValues['projectManager'] = user._id;
-            }
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: tempObjKeysWithValues
+        if (projectSalesId) {
+          axiosInstance()
+            .get(`${routes.projectSales.path}/${projectSalesId}`)
+            .then(({ data: { data } }) => {
+              if (isClone) {
+                const { projectName, ...rest } = data;
+                let tempData = { ...rest };
+                tempData['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+                let tempObjKeysWithValues = getObjKeysWithValues(tempData, fieldsDataForUpdate, true, user);
+                if (fieldsDataForUpdate?.some((e) => e.fieldName === 'projectManager')) {
+                  tempObjKeysWithValues['projectManager'] = user._id;
+                }
+                setInitialData({
+                  fields: fieldsDataForUpdate,
+                  values: tempObjKeysWithValues
+                });
+              } else {
+                setInitialData({
+                  fields: fieldsDataForUpdate,
+                  values: getObjKeysWithValues(data, fieldsDataForUpdate)
+                });
+              }
+              setProductSalesName(data.projectName);
+            })
+            .catch((error) => {
+              toastConfig.setToastConfig(error);
             });
-          } else {
-            setInitialData({
-              fields: fieldsDataForUpdate,
-              values: getObjKeysWithValues(data, fieldsDataForUpdate)
-            });
+        } else {
+          let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
+          tempObjKeysWithValues['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
+          if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
+            tempObjKeysWithValues['currency'] = user?.brandCurrency;
           }
-          setProductSalesName(data.projectName);
-        })
-          .catch((error) => {
-            toastConfig.setToastConfig(error);
+          if (fieldsDataForCreate?.some((e) => e.fieldName === 'projectManager')) {
+            tempObjKeysWithValues['projectManager'] = user._id;
+          }
+          setInitialData({
+            fields: fieldsDataForCreate,
+            values: tempObjKeysWithValues
           });
-      } else {
-        let tempObjKeysWithValues = getObjKeys('', fieldsDataForCreate);
-        tempObjKeysWithValues['projectName'] = GenerateResourceLineNumber(fieldsDataForCreate);
-        if (fieldsDataForCreate.some((e) => e.fieldName === 'currency')) {
-          tempObjKeysWithValues['currency'] = user?.brandCurrency;
         }
-        if (fieldsDataForCreate?.some((e) => e.fieldName === 'projectManager')) {
-          tempObjKeysWithValues['projectManager'] = user._id;
-        }
-        setInitialData({
-          fields: fieldsDataForCreate,
-          values: tempObjKeysWithValues
-        });
-      }
-    })
-      .catch((err) => {
-      });
+      })
+      .catch((err) => {});
   };
 
   const handleSubmit = (values) => {
@@ -208,6 +211,7 @@ const CreateProjectSales = ({
         }
       }}
       maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
       fullWidth
       fullScreen={fullScreen || isMobile || isTablet}
     >
@@ -229,8 +233,9 @@ const CreateProjectSales = ({
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`
-                  }`}
+                title={`${
+                  isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`
+                }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
@@ -239,24 +244,24 @@ const CreateProjectSales = ({
               />
               <CustomDialogContent>
                 <Form noValidate>
-                <InputField
-                      errors={errors}
-                      values={values}
-                      setFieldValue={(name, value) => {
-                        setFieldValue(name, value);
-                        if(name === 'entity'){
-                            if (initialData?.fields?.some((e) => e.fieldName === 'projectManager')) {
-                              setFieldValue('projectManager', '');
-                            }
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                      if (name === 'entity') {
+                        if (initialData?.fields?.some((e) => e.fieldName === 'projectManager')) {
+                          setFieldValue('projectManager', '');
                         }
-                      }}
-                      touched={touched}
-                      fieldsData={initialData.fields}
-                      size="small"
-                      fullWidth
-                      resource={sidebarResource.projectSales}
-                      referenceId={projectSalesId || null}
-                    />
+                      }
+                    }}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.projectSales}
+                    referenceId={projectSalesId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
