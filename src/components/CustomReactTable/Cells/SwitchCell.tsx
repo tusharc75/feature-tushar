@@ -13,7 +13,7 @@ const SwitchCell = ({ field, original }) => {
 
   return (
     <div>
-      <h5 className="text-truncate capitalize">{original[field?.fieldName].toString()}</h5>
+      <h5 className="text-truncate capitalize">{original[field?.fieldName] ? 'Yes' : 'No'}</h5>
     </div>
   );
 };
