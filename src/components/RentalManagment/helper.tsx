@@ -145,8 +145,10 @@ export const sumOnParent = (parent, child, fields, currency) => {
     return parent;
 }
 
-export const resetValueZero = (material, fields, _id) => {
+export const resetValueZero = (material, fields, parentId, bulkUpdateValues = null) => {
     const resetFields = []
+    const updateFields = []
+
     fields.forEach((element) => {
         if (element.type === "converter" || element.type === "currencyAmount" || element.isConverter === true) {
             if (element.type !== "currencyAmount" && (element.type === "converter" || element.isConverter === true)) {
@@ -170,17 +172,30 @@ export const resetValueZero = (material, fields, _id) => {
         else if (element.type === "percent") {
             resetFields.push(element.fieldName)
         }
+        else if (bulkUpdateValues && bulkUpdateValues[element.fieldName]) {
+            updateFields.push(element.fieldName)
+        }
     })
     const result = [];
-    material?.filter((e) => e.parentId === _id)?.forEach((child) => {
+    material?.filter((e) => e.parentId === parentId)?.forEach((child) => {
         resetFields.forEach((fieldName) => {
             child[fieldName] = 0;
         })
+        if (bulkUpdateValues && updateFields?.length) {
+            updateFields.forEach((fieldName) => {
+                child[fieldName] = bulkUpdateValues[fieldName];
+            })
+        }
         result.push(child)
         material?.filter((e) => e?.parentId === child?._id)?.forEach((subChild) => {
             resetFields.forEach((fieldName) => {
                 subChild[fieldName] = 0;
             })
+            if (bulkUpdateValues && updateFields?.length) {
+                updateFields.forEach((fieldName) => {
+                    subChild[fieldName] = bulkUpdateValues[fieldName];
+                })
+            }
             result.push(subChild)
         })
     })
@@ -240,7 +255,7 @@ export const bulkUpdate = (values, selectedProducts, material, allFields, curren
         const calValues = autoCalculateSpecificFields(values, { ...element, ...values }, allFields)
         rows.push({ ...element, ...calValues })
 
-        const child: any = resetValueZero(material, allFields, element._id)
+        const child: any = resetValueZero(material, allFields, element?._id, calValues)
         rows = [...rows, ...child]
         if (element.parentId) {
             var parent: any = unionBy(rows, material, '_id').filter((e: any) => e._id === element.parentId)
