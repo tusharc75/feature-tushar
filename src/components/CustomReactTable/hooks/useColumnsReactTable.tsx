@@ -562,9 +562,8 @@ export default function useColumns() {
       } else if (field.type === 'switch') {
         column.push({
           ...commonFieldData,
-          disableFilters: true,
           editable: false,
-          accessorFn: (data) => (Boolean(data[field?.fieldName]) ? 'True' : 'False'),
+          accessorFn: (data) => (Boolean(data[field?.fieldName]) ? 'Yes' : 'No'),
           cell: ({ row }) => <SwitchCell field={field} original={row?.original} />
         });
       } else {
