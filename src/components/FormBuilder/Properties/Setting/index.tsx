@@ -285,7 +285,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            {initialValues?.hasOwnProperty('unique') && (
+            {fieldData?.type === 'singleLine' && initialValues?.hasOwnProperty('unique') && (
               <FormControlLabel
                 control={
                   <Checkbox
@@ -307,19 +307,21 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="primaryField"
-                  checked={values['primaryField']}
-                  onChange={(e) => {
-                    setFieldValue('primaryField', e.target.checked);
-                  }}
-                  color="primary"
-                />
-              }
-              label="Primary Field"
-            />
+            {fieldData?.type === 'singleLine' && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="primaryField"
+                    checked={values['primaryField']}
+                    onChange={(e) => {
+                      setFieldValue('primaryField', e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Primary Field"
+              />
+            )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
         </Grid>
