@@ -179,7 +179,12 @@ const LoginMFA = () => {
                   </Button>
                 </Box>
               ) : (
-                <>
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    handleSubmit();
+                  }}
+                >
                   <p className="info mx-auto mb-7 mt-7 max-w-[400px] text-[13px] font-normal leading-[1.5] text-gray-500">
                     An authentication code has been sent to your {selectedMethod === 'totp' ? 'device' : 'email'}. Enter the code to continue and be
                     redirected.
@@ -212,6 +217,7 @@ const LoginMFA = () => {
                     disableElevation
                     variant="contained"
                     color="primary"
+                    type="submit"
                     fullWidth
                     style={{ paddingBlock: 10, borderRadius: 9 }}
                     disabled={otp.length < 6 || isSubmitting}
@@ -220,7 +226,7 @@ const LoginMFA = () => {
                   >
                     Submit
                   </Button>
-                </>
+                </form>
               )}
             </div>
           </div>
