@@ -392,8 +392,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
+                                                setUploadingImageOrFileProgress(completePercentage);
+                                              }
                                             : null
                                         }
                                         fields={rentalData.fields}
