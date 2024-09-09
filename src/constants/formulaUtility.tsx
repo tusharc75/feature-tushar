@@ -115,27 +115,27 @@ const handleClearValueDependentOnVisibilityCondition = (fields, name, value, res
             visibilityCondition.unshift(...sectionProperties?.visibilityCondition)
         }
         if (visibilityCondition?.length > 0) {
-            let inVisible = false;
-            for (let i = 0; i < visibilityCondition?.length; i++) {
-                const condition = visibilityCondition[i];
-                if (condition?.logic === LOGIC.AND) {
-                    if (
-                        !condition?.fields?.every((f) => f?.fieldName === name && f?.value?.split(',')?.includes(value))
-                    ) {
-                        inVisible = true;
+            if (visibilityCondition?.flatMap(item => item?.fields.map(field => field?.fieldName))?.includes(name)) {
+                let visible = true;
+                for (let i = 0; i < visibilityCondition?.length; i++) {
+                    const condition = visibilityCondition[i];
+                    if (condition?.logic === LOGIC.AND) {
+                        if (!condition?.fields?.every(f => f?.fieldName === name && f?.value?.split(',')?.includes(value))) {
+                            visible = false
+                        }
+                    } else if (condition?.logic === LOGIC.OR) {
+                        if (!condition?.fields?.some(f => f?.fieldName === name && f?.value?.split(',')?.includes(value))) {
+                            visible = false;
+                        }
                     }
-                } else if (condition?.logic === LOGIC.OR) {
-                    if (!condition?.fields?.some((f) => f?.fieldName === name && f?.value?.split(',')?.includes(value))) {
-                        inVisible = true;
+                    if (!visible) {
+                        break;
                     }
                 }
-                if (inVisible) {
-                    break;
+                if (!visible) {
+                    const result: any = getObjKeys('', [field])
+                    resultValues[field.fieldName] = result[field.fieldName]
                 }
-            }
-            if (inVisible) {
-                const result: any = getObjKeys('', [field])
-                resultValues[field.fieldName] = result[field.fieldName]
             }
         }
     });
