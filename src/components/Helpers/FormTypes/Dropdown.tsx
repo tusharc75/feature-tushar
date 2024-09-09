@@ -37,6 +37,11 @@ type renderRowProps = {
   minHeight?: number;
 } & ListChildComponentProps;
 
+function isValidObjectId(id) {
+  const objectIdPattern = /^[0-9a-fA-F]{24}$/;
+  return objectIdPattern.test(id);
+}
+
 function RenderRow(props: renderRowProps) {
   const { data, index, setSize, containerWidth, minHeight = 36 } = props;
   const rowRef = useRef<HTMLSpanElement>(null);
@@ -422,13 +427,19 @@ function Dropdown({
                               filterFields?.forEach((ele: any) => {
                                 if (ele?.type === 'dropDown' && ele?.lookupDependentOnField && val && val[ele?.lookupDependentOnField]) {
                                   if (Array.isArray(val[ele?.lookupDependentOnField])) {
-                                    if (val[ele?.lookupDependentOnField]?.length === 1) {
+                                    const isValidId = isValidObjectId(val[ele?.lookupDependentOnField][0]);
+                                    if (val[ele?.lookupDependentOnField]?.length === 1 && isValidId) {
                                       setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
                                     } else {
                                       setFieldValue(ele?.fieldName, '');
                                     }
                                   } else {
-                                    setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                    const isValidId = isValidObjectId(val[ele?.lookupDependentOnField]);
+                                    if (isValidId) {
+                                      setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+                                    } else {
+                                      setFieldValue(ele?.fieldName, '');
+                                    }
                                   }
                                 } else if (ele?.type === 'dropDown' && ele?.lookupDependentOnField === '' && val && val?.optionValue) {
                                   const filterFieldDropDownOptions = ele?.option?.filter((o: any) => {
