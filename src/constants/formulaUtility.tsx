@@ -1,6 +1,6 @@
 import { isArray, isEmpty, uniq } from "lodash";
 import { camelCase } from "lodash";
-import { fieldLabelToFieldName } from "./helpers";
+import { fieldLabelToFieldName, getObjKeys } from "./helpers";
 import { LOGIC } from "src/components/FormBuilder/helper";
 
 const removeBracket = (string) => {
@@ -134,11 +134,8 @@ const handleClearValueDependentOnVisibilityCondition = (fields, name, value, res
                 }
             }
             if (inVisible) {
-                let result: any = ''
-                if (field?.type === 'multiSelect') {
-                    result = []
-                }
-                resultValues[field.fieldName] = result
+                const result: any = getObjKeys('', [field])
+                resultValues[field.fieldName] = result[field.fieldName]
             }
         }
     });
