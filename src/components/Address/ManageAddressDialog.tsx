@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useContext, useCallback } from 'react';
+import { useState, useEffect, Fragment, useContext } from 'react';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import { GoogleMap, GoogleMapProps, Marker } from '@react-google-maps/api';
@@ -125,7 +125,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
       featureType: 'road.highway',
       stylers: [{ visibility: 'simplified' }]
     },
-  
+
     // { featureType: 'transit', stylers: [{ visibility: 'off' }] },
     // { featureType: 'poi', stylers: [{ visibility: 'off' }] }
   ];
@@ -350,7 +350,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form noValidate>
-                <InputField
+                  <InputField
                     errors={errors}
                     values={values}
                     setFieldValue={(name, val) => {
@@ -379,7 +379,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                         setLatLngChangedManually(true);
                       }
                     }}
-              />
+                  />
                 </Form>
                 <div>
                   <p>Drag or click to select new coordinates</p>
