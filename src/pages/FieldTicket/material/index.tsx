@@ -54,6 +54,9 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
   const [costFields, setCostFields] = useState([]);
   const [assignRentalDataDialog, setAssignRentalDataDialog] = useState({ open: false, type: '' });
 
+
+  const [refreshChild, setRefreshChild] = useState(false);
+
   const { state: { user, permissions } }: any = useData();
   const isStepDataSet = useRef(false);
   const { state, dispatch } = useTableReducer();
@@ -294,6 +297,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
     }
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
+    setRefreshChild(!refreshChild)
   };
 
   const generateNestedData = (material, parent) => {
@@ -849,6 +853,7 @@ const Material = ({ fieldTicketData, stepFullScreen, allowedToEdit, setNextStep,
           fetchMaterial={fetchMaterial}
           stepFullScreen={stepFullScreen}
           fetchData={fetchData}
+          refreshChild={refreshChild}
         />
       </Box>
       {materialDialog?.open && materialDialog?.type === MATERIAL_TYPE.service && (
