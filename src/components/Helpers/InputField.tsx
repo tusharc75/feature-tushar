@@ -18,6 +18,7 @@ const InputField = (props) => {
     resource = null,
     referenceId = null,
     collaborateTools = false,
+    onChange=null,
     ...rest
   } = props;
 
@@ -103,19 +104,23 @@ const InputField = (props) => {
                             required={field.required}
                             isTooltip={field.isTooltip}
                             tooltipMessage={field.tooltipMessage}
-                            onChange={
-                              field.fieldName === 'currency'
-                                ? (e, val) => {
-                                  if (val && val.currencyCode) {
-                                    setFieldValue(field.fieldName, val.currencyCode);
-                                    setCurrencySymbol(val.symbolNative);
-                                  } else {
-                                    setFieldValue(field.fieldName, '');
-                                    setCurrencySymbol(null);
+                            onChange={(e, val) => {
+                              if (onChange) {
+                                onChange(field, e, val);
+                              } else {
+                                field.fieldName === 'currency'
+                                  ? (e, val) => {
+                                    if (val && val.currencyCode) {
+                                      setFieldValue(field.fieldName, val.currencyCode);
+                                      setCurrencySymbol(val.symbolNative);
+                                    } else {
+                                      setFieldValue(field.fieldName, '');
+                                      setCurrencySymbol(null);
+                                    }
                                   }
-                                }
-                                : null
-                            }
+                                  : null;
+                              }
+                            }}
                             imageOrFileUploadCompletePercentage={
                               ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                 ? (completePercentage) => {
