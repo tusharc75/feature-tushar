@@ -32,7 +32,6 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
 
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
     state: { user, permissions, selectedEntity }
@@ -91,10 +90,10 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
               initialData[key] = referenceData[key];
             }
             const field = fieldsDataForCreate?.find((f) => f?.fieldName === key);
-              if (field) {
-                field.disableOnEdit = true;
-                field.isUneditable = true;
-              }
+            if (field) {
+              field.disableOnEdit = true;
+              field.isUneditable = true;
+            }
           });
         }
         setInitialData({
@@ -209,17 +208,17 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
-                      errors={errors}
-                      values={values}
-                      setFieldValue={setFieldValue}
-                      touched={touched}
-                      fieldsData={initialData.fields}
-                      size="small"
-                      fullWidth
-                      resource={sidebarResource.productionOrder}
-                      referenceId={ productionOrderId || null}
-                    />
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.productionOrder}
+                    referenceId={productionOrderId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -242,7 +241,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                   loading={loading}
                   variant="contained"
                   color="primary"
-                  disabled={uploadingImageOrFileProgress > 0 || loading}
+                  disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);

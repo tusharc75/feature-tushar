@@ -1,8 +1,8 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Box, Button, Dialog} from '@material-ui/core';
+import { Box, Button, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues,yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -17,9 +17,11 @@ const MaterialDialog = ({ onClose, materialData, productionOrderData, handleUpda
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [allFields, setAllFields] = useState([]);
+
   useEffect(() => {
     fetchFields();
   }, [materialData]);
+
   const fetchFields = async () => {
     setInitialData({ fields: [], values: {} });
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.productionOrderDetail, productionOrderData?.currency, true);

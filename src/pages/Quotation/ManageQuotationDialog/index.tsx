@@ -15,7 +15,6 @@ import {
   quotation,
   yupSchema,
   GenerateResourceLineNumber,
-  QUOTATION_TYPE,
   QUOTATION_STATUS,
   sidebarResource
 } from '../../../constants/helpers';
@@ -37,7 +36,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const {
-    state: { user, permissions, selectedEntity }
+    state: { user }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
@@ -195,19 +194,6 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
     }
   };
 
-  // const handleTypeChange = (type) => {
-  //   if ([QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.repairOrder, QUOTATION_TYPE.fieldJob]?.includes(type)) {
-  //     setFormsData(
-  //       setFieldsInAscendingOrder(
-  //         initialData.fields.filter((d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate']?.includes(d.fieldName))
-  //       )
-  //     );
-  //   }
-  //   if (type === QUOTATION_TYPE.salesOrder) {
-  //     setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((d) => !['estimateStartDate', 'estimateEndDate']?.includes(d.fieldName))));
-  //   }
-  // };
-
   const validate = (values) => {
     const errors = {};
     let estimateStartDate = moment(values?.estimateStartDate);
@@ -240,8 +226,8 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
       }}
       open={open}
     >
-      { initialData?.fields?.length ? (
-        <Formik 
+      {initialData?.fields?.length ? (
+        <Formik
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
@@ -274,15 +260,13 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                   <InputField
                     errors={errors}
                     values={values}
-                    setFieldValue={(name, value) => {
-                      setFieldValue(name, value);
-                    }}
+                    setFieldValue={setFieldValue}
                     touched={touched}
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
                     resource={sidebarResource.quotation}
-                    referenceId={ quotationId || null}
+                    referenceId={quotationId || null}
                   />
                 </Form>
               </CustomDialogContent>
