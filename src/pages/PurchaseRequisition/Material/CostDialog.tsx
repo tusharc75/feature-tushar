@@ -18,7 +18,7 @@ const CostDialog = ({ onClose, purchaseRequisitionData, handleAddCost, handleUpd
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
   const [saveAndNext, setSaveAndNext] = useState(false);
-  
+
   useEffect(() => {
     fetchFields();
   }, [costData]);
@@ -111,15 +111,15 @@ const CostDialog = ({ onClose, purchaseRequisitionData, handleAddCost, handleUpd
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                <InputField
-                      errors={errors}
-                      values={values}
-                      setFieldValue={setFieldValue}
-                      touched={touched}
-                      fieldsData={initialData.fields}
-                      size="small"
-                      fullWidth
-                    />
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

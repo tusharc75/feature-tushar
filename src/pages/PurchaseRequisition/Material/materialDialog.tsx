@@ -1,5 +1,5 @@
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import { Box, Button, Dialog} from '@material-ui/core';
+import { Box, Button, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { arrayToDropwdownOption, CHILD_RESOURCE, CustomDialogTransition, getObjKeys, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
@@ -121,7 +121,7 @@ const MaterialDialog = ({ onClose, materialData, handleUpdate, loadingEdit, bulk
                 ></CustomDialogHeader>
                 <CustomDialogContent>
                   <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <InputField
+                    <InputField
                       errors={errors}
                       values={values}
                       setFieldValue={setFieldValue}

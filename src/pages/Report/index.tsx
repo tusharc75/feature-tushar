@@ -163,6 +163,28 @@ const Report = () => {
           )
         },
         {
+          accessor: 'tax',
+          Header: 'Tax',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <>
+              <h5 className="text-truncate">{row.original['tax'] ? row.original['tax'] : <NoDataCell />}</h5>
+            </>
+          )
+        },
+        {
+          accessor: 'discount',
+          Header: 'Discount',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <>
+              <h5 className="text-truncate">{row.original['discount'] ? row.original['discount'] : <NoDataCell />}</h5>
+            </>
+          )
+        },
+        {
           accessor: 'totalAmount',
           Header: 'Total Amount',
           disableFilters: true,
@@ -406,7 +428,7 @@ const Report = () => {
                         permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
                         module={''}
                         api={getApi()}
-                        afterImportCompleted={() => {}}
+                        afterImportCompleted={() => { }}
                         onlyExport={true}
                       />
                     )}

@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, FormEvent, useEffect, useState, Fragment, useRef } from 'react';
+import { FC, useEffect, useState, Fragment, useRef } from 'react';
 import { Button, Dialog, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -10,8 +10,8 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import {  isEqual } from 'lodash';
-import { fetch_child_resource_fields, fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
+import { isEqual } from 'lodash';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
 
 interface AdditionalCostDialogProps {
