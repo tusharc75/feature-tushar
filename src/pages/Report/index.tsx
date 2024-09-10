@@ -152,24 +152,24 @@ const Report = () => {
     if (resourceStartCase === sidebarResource.invoice) {
       const extraColumns = [
         {
-          accessor: 'totalPrice',
-          Header: 'Total Price',
+          accessor: 'amount',
+          Header: 'Amount',
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) => (
             <>
-              <h5 className="text-truncate">{row.original['totalPrice'] ? row.original['totalPrice'] : <NoDataCell />}</h5>
+              <h5 className="text-truncate">{row.original['amount'] ? row.original['amount'] : <NoDataCell />}</h5>
             </>
           )
         },
         {
-          accessor: 'finalPrice',
-          Header: 'Final Price',
+          accessor: 'totalAmount',
+          Header: 'Total Amount',
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) => (
             <>
-              <h5 className="text-truncate">{row.original['finalPrice'] ? row.original['finalPrice'] : <NoDataCell />}</h5>
+              <h5 className="text-truncate">{row.original['totalAmount'] ? row.original['totalAmount'] : <NoDataCell />}</h5>
             </>
           )
         }
