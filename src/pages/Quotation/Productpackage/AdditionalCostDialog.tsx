@@ -4,7 +4,7 @@ import CustomDialogContent from '../../../components/CustomDialog/CustomDialogCo
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, sidebarResource } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -112,8 +112,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
-                    resource={sidebarResource.quotation}
-                    referenceId={null}
                   />
                 </Form>
               </CustomDialogContent>

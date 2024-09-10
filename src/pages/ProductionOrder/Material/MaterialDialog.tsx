@@ -2,7 +2,7 @@ import { Fragment, useEffect, useState } from 'react';
 import { Box, Button, Dialog} from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
-import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues, sidebarResource, yupSchema } from 'src/constants/helpers';
+import { CHILD_RESOURCE, CustomDialogTransition, arrayToDropwdownOption, getObjKeys, getObjKeysWithValues,yupSchema } from 'src/constants/helpers';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
@@ -132,8 +132,6 @@ console.log(productionOrderData._id)
                       fieldsData={initialData.fields}
                       size="small"
                       fullWidth
-                      resource={sidebarResource.productionOrder}
-                      referenceId={productionOrderData._id || null}
                     />
                   </Form>
                 </CustomDialogContent>

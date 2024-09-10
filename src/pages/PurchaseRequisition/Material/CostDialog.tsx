@@ -3,7 +3,7 @@ import { Button, Dialog, Box } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE, sidebarResource } from '../../../constants/helpers';
+import { getObjKeysWithValues, getObjKeys, yupSchema, CHILD_RESOURCE } from '../../../constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
@@ -119,8 +119,6 @@ const CostDialog = ({ onClose, purchaseRequisitionData, handleAddCost, handleUpd
                       fieldsData={initialData.fields}
                       size="small"
                       fullWidth
-                      resource={sidebarResource.purchaseRequisition}
-                      referenceId={purchaseRequisitionData._id || null}
                     />
                 </Form>
               </CustomDialogContent>
