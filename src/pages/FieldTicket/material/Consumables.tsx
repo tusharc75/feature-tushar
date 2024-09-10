@@ -292,7 +292,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const fetchData = async () => {
     try {
       dispatch({ type: 'loading', loading: true });
-      dispatch({ type: 'selection', selectedRecords: [] });
       let consumables;
       if (isOffline) {
         consumables = await findAll(objectStore.fieldTicketMaterial);
