@@ -2408,6 +2408,24 @@ export const REPORT_LIST = [
     type: 'dynamic'
   },
   {
+    title: 'Invoice Details',
+    permission: 'invoice',
+    key: 'standardReport',
+    type: 'invoiceDetails'
+  },
+  {
+    title: 'Invoice Backlog',
+    permission: 'invoice',
+    key: 'standardReport',
+    type: 'invoiceBacklog'
+  },
+  {
+    title: 'Revenue By Customer',
+    permission: 'invoice',
+    key: 'standardReport',
+    type: 'revenueByCustomer'
+  },
+  {
     title: 'Lost Assets',
     permission: 'serializedAsset',
     key: 'standardReport',
