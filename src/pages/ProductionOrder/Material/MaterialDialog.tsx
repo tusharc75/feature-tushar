@@ -15,7 +15,6 @@ import InputField from 'src/components/Helpers/InputField';
 const MaterialDialog = ({ onClose, materialData, productionOrderData, handleUpdate, loadingEdit, bulkEdit, showSaveAndNext }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [fields, setFields] = useState([]);
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [allFields, setAllFields] = useState([]);
 console.log(productionOrderData._id)
