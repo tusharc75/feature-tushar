@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import { Formik, Form } from 'formik';
-import { Box, Button, Grid, IconButton, Tooltip } from '@material-ui/core';
+import { Box, Button } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../components/Helpers/FormTypes';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -14,21 +13,21 @@ import {
   getObjKeys,
   getObjKeysWithValues,
   quotation,
-  setFieldsInAscendingOrder,
   yupSchema,
   GenerateResourceLineNumber,
   QUOTATION_TYPE,
-  QUOTATION_STATUS
+  QUOTATION_STATUS,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
 import moment from 'moment';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onClose, onSuccess, open, versionId = null, referenceData = null, isRedirectTodetailPage = true }) => {
   const history = useHistory();
@@ -37,22 +36,12 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
-  const [salesDetails, setSalesDetails] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
-
-  useEffect(() => {
-    if (initialData.values['type']) {
-      handleTypeChange(initialData.values['type']);
-    } else {
-      setFormsData(setFieldsInAscendingOrder(initialData.fields));
-    }
-  }, [initialData.fields]);
 
   useEffect(() => {
     setLoading(true);
@@ -84,7 +73,6 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
             });
             setLoading(false);
           } else {
-            setSalesDetails(data);
             if (data?.canEdit === false) {
               fieldsDataForUpdate?.forEach((e) => {
                 if (['warehouse', 'type']?.includes(e?.fieldName)) {
@@ -207,18 +195,18 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
     }
   };
 
-  const handleTypeChange = (type) => {
-    if ([QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.repairOrder, QUOTATION_TYPE.fieldJob]?.includes(type)) {
-      setFormsData(
-        setFieldsInAscendingOrder(
-          initialData.fields.filter((d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate']?.includes(d.fieldName))
-        )
-      );
-    }
-    if (type === QUOTATION_TYPE.salesOrder) {
-      setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((d) => !['estimateStartDate', 'estimateEndDate']?.includes(d.fieldName))));
-    }
-  };
+  // const handleTypeChange = (type) => {
+  //   if ([QUOTATION_TYPE.rentalJob, QUOTATION_TYPE.repairOrder, QUOTATION_TYPE.fieldJob]?.includes(type)) {
+  //     setFormsData(
+  //       setFieldsInAscendingOrder(
+  //         initialData.fields.filter((d) => !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate']?.includes(d.fieldName))
+  //       )
+  //     );
+  //   }
+  //   if (type === QUOTATION_TYPE.salesOrder) {
+  //     setFormsData(setFieldsInAscendingOrder(initialData.fields.filter((d) => !['estimateStartDate', 'estimateEndDate']?.includes(d.fieldName))));
+  //   }
+  // };
 
   const validate = (values) => {
     const errors = {};
@@ -252,8 +240,8 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
       }}
       open={open}
     >
-      {formsData && formsData.length ? (
-        <Formik
+      { initialData?.fields?.length ? (
+        <Formik 
           initialValues={initialData.values}
           validationSchema={yupSchema(initialData.fields)}
           validateOnMount
@@ -283,60 +271,19 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    {
-                                      <FormTypes
-                                        quotationId={quotationId}
-                                        {...field}
-                                        fieldData={field}
-                                        fields={initialData.fields}
-                                        disabled={
-                                          field.fieldName === 'currency'
-                                            ? salesDetails && salesDetails?.material?.length
-                                              ? true
-                                              : false
-                                            : quotationId && field.disableOnEdit && !isClone
-                                        }
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                          if (field.fieldName === 'type') {
-                                            handleTypeChange(value);
-                                          }
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    }
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={(name, value) => {
+                      setFieldValue(name, value);
+                    }}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.quotation}
+                    referenceId={ quotationId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
