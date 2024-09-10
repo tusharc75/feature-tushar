@@ -17,7 +17,6 @@ const MaterialDialog = ({ onClose, materialData, productionOrderData, handleUpda
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [saveAndNext, setSaveAndNext] = useState(false);
   const [allFields, setAllFields] = useState([]);
-console.log(productionOrderData._id)
   useEffect(() => {
     fetchFields();
   }, [materialData]);
