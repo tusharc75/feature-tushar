@@ -224,8 +224,8 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
 export const checkCondition = (fields, fieldName, value, values) => {
   const _field = fields?.filter((f) => f?.fieldName === fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === fieldName)[0] : null;
   if (_field) {
-    if (_field?.type === 'checkBox') {
-      if (value === 'yes') {
+    if (_field?.type === 'checkBox' || _field?.type === 'switch') {
+      if (value?.toUpperCase() === 'YES') {
         return values[fieldName];
       } else {
         return !values[fieldName];
@@ -2184,7 +2184,8 @@ const FormTypes = (props) => {
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
         <FormControlLabel
-          control={<Switch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />}
+          control={<Switch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => handleChange(name, e.target.checked)} />}
+          // control={<Switch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />}
           label={getLabel(label)}
         />
       </InfoLabel>

@@ -107,7 +107,22 @@ const formatDecimal = (value, decimalPlaces) => {
     }
 };
 
-const handleClearValueDependentOnVisibilityCondition = (fields, name, value, resultValues) => {
+const parseValue = (fields, fieldName, value) => {
+    let result: any = value?.split(',')
+    const field = fields?.find(f => f?.fieldName === fieldName)
+    if (field) {
+        if (field?.type === 'switch') {
+            if (value?.toUpperCase() === 'YES') {
+                result = [true]
+            } else {
+                result = [false]
+            }
+        }
+    }
+    return result;
+}
+
+export const handleClearValueDependentOnVisibilityCondition = (fields, name, value, resultValues) => {
     fields?.forEach(field => {
         const visibilityCondition = field?.visibilityCondition?.length > 0 ? JSON.parse(JSON.stringify(field?.visibilityCondition)) : []
         const sectionProperties = fields?.find(f => f?.sectionName === field?.sectionName && !isEmpty(f?.sectionProperties))?.sectionProperties;
@@ -120,7 +135,7 @@ const handleClearValueDependentOnVisibilityCondition = (fields, name, value, res
                 for (let i = 0; i < visibilityCondition?.length; i++) {
                     const condition = visibilityCondition[i];
                     if (condition?.logic === LOGIC.AND) {
-                        if (!condition?.fields?.every(f => f?.fieldName === name && f?.value?.split(',')?.includes(value))) {
+                        if (!condition?.fields?.every(f => f?.fieldName === name && parseValue(fields, f?.fieldName, f?.value)?.includes(value))) {
                             visible = false
                         }
                     } else if (condition?.logic === LOGIC.OR) {
@@ -135,6 +150,7 @@ const handleClearValueDependentOnVisibilityCondition = (fields, name, value, res
                 if (!visible) {
                     const result: any = getObjKeys('', [field])
                     resultValues[field.fieldName] = result[field.fieldName]
+                    handleClearValueDependentOnVisibilityCondition(fields, field?.fieldName, result[field.fieldName], resultValues)
                 }
             }
         }

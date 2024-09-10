@@ -10,9 +10,11 @@ import { uniqBy } from 'lodash';
 import { Form, Formik } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, fieldsToExclude }) => {
-  const [initialValues, setInitialValues] = useState({ fieldName: '', value: null });
+  const [initialValues, setInitialValues] = useState(null);
+  const [fieldOptions, setFieldOptions] = useState([])
   const [options, setOptions] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -21,15 +23,45 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
   const [inputValues, setInputValues] = useState('');
 
   useEffect(() => {
+    const options: any = []
+    if (data) {
+      const field = fields?.find(f => f?.fieldName === data?.fieldName)
+      if (field) {
+        options.push({
+          optionLabel: field?.fieldLabel,
+          optionValue: field?.fieldName
+        })
+      }
+    } else {
+      fields?.forEach(field => {
+        if (
+          ['singleLine', 'multiLine', 'dropDown', 'multiSelect', 'checkBox', 'switch']?.includes(field?.type) &&
+          !fieldsToExclude?.includes(field?.fieldName) &&
+          !fieldValue?.visibilityCondition?.find((_f) => _f?.index === group)?.fields?.map((d) => d?.fieldName)?.includes(field?.fieldName)
+        ) {
+          options.push({
+            optionLabel: field?.fieldLabel,
+            optionValue: field?.fieldName
+          })
+        }
+      });
+    }
+    setFieldOptions(options)
+  }, [fields])
+
+  useEffect(() => {
+    const value: any = { fieldName: '', value: '' }
     if (data) {
       if (fields?.find((f) => f?.fieldName === data?.fieldName)?.dataList) {
         fetchFieldvalue();
       }
-      setInitialValues({ fieldName: data?.fieldName, value: data?.value });
+      value.fieldName = data?.fieldName;
+      value.value = data?.value
       setSelectedField(
         fields?.filter((f) => f?.fieldName === data?.fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === data?.fieldName)[0] : null
       );
     }
+    setInitialValues(value)
   }, [data]);
 
   const fetchFieldvalue = async () => {
@@ -52,7 +84,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
       } else {
         setOptions(fields?.find((f) => f?.fieldName === selectedField?.fieldName)?.option || []);
       }
-    } else if (selectedField?.type === 'checkBox') {
+    } else if (selectedField?.type === 'checkBox' || selectedField?.type === 'switch') {
       setOptions([
         { optionLabel: 'YES', optionValue: 'yes' },
         { optionLabel: 'NO', optionValue: 'no' }
@@ -155,91 +187,65 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
         }
       }}
     >
-      <Formik initialValues={initialValues} onSubmit={handleSubmit} validate={validate}>
-        {({ values, errors, setFieldValue, touched, submitForm }) => (
-          <>
-            <CustomDialogHeader title={'Condition'} onClose={onClose} />
-            <CustomDialogContent>
-              <Form autoComplete="off" autoCorrect="off" noValidate>
-                <Box>
-                  <Autocomplete
-                    id="fields"
-                    disabled={data ? true : false}
-                    options={
-                      fields?.filter(
-                        (f) =>
-                          !fieldsToExclude?.includes(f.fieldName) &&
-                          !fieldValue?.visibilityCondition
-                            ?.find((_f) => _f?.index === group)
-                            ?.fields?.map((d) => d?.fieldName)
-                            ?.includes(f?.fieldName)
-                      )?.length > 0
-                        ? fields
-                            ?.filter(
-                              (f) =>
-                                !fieldsToExclude?.includes(f.fieldName) &&
-                                !fieldValue?.visibilityCondition
-                                  ?.find((_f) => _f?.index === group)
-                                  ?.fields?.map((d) => d?.fieldName)
-                                  ?.includes(f?.fieldName)
-                            )
-                            ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))
-                        : []
-                    }
-                    getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
-                    getOptionSelected={(option: any, val) => option.optionValue === val}
-                    value={
-                      fields
-                        ?.filter(
-                          (f) =>
-                            f?.fieldName === values?.fieldName &&
-                            !fieldValue?.visibilityCondition
-                              ?.find((_f) => _f?.index === group)
-                              ?.fields?.map((d) => d?.fieldName)
-                              ?.includes(f?.fieldName)
-                        )
-                        ?.map((_f) => ({ optionLabel: _f?.fieldLabel, optionValue: _f?.fieldName }))[0]
-                    }
-                    onChange={(e: any, value) => {
-                      setFieldValue('fieldName', value && value?.optionValue ? value.optionValue : '');
-                      setSelectedField(fields?.filter((f) => f?.fieldName === value.optionValue)[0]);
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        margin="dense"
-                        variant="outlined"
-                        label="Fields"
-                        placeholder="Select Field"
-                        name="fieldName"
-                        required
-                        error={touched['fieldName'] && Boolean(errors['fieldName'])}
-                        helperText={touched['fieldName'] && errors['fieldName']}
-                      />
-                    )}
-                  />
-                  {values?.fieldName &&
-                    (selectedField?.type === 'dropDown' || selectedField?.type === 'multiSelect' || selectedField?.type === 'checkBox' ? (
-                      selectedField?.dataList ? (
-                        <Autocomplete
-                          onOpen={() => {
-                            setLoading(true);
-                            fetchOptions();
-                          }}
-                          inputValue={inputValues}
-                          onInputChange={handleInputChangeMulti}
-                          loading={loading}
-                          limitTags={2}
-                          multiple
-                          fullWidth
-                          disableCloseOnSelect={true}
-                          options={uniqBy([...options, ...defaultOptions], 'optionValue')}
-                          getOptionLabel={(option: any) => {
-                            return option ? option?.optionLabel : '';
-                          }}
-                          value={
-                            values?.value
-                              ? uniqBy([...options, ...defaultOptions], 'optionValue')?.filter((data: any) =>
+      {initialValues ? (
+        <Formik initialValues={initialValues} onSubmit={handleSubmit} validate={validate} enableReinitialize={true}>
+          {({ values, errors, setFieldValue, touched, submitForm }) => (
+            <>
+              <CustomDialogHeader title={'Condition'} onClose={onClose} />
+              <CustomDialogContent>
+                <Form autoComplete="off" autoCorrect="off" noValidate>
+                  <Box>
+                    <Autocomplete
+                      id="fields"
+                      disabled={data ? true : false}
+                      options={fieldOptions}
+                      getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
+                      getOptionSelected={(option: any, val) => option.optionValue === val}
+                      value={
+                        fieldOptions?.filter(f => f?.optionValue === values?.fieldName)?.length > 0
+                          ? fieldOptions?.filter(f => f?.optionValue === values?.fieldName)[0]
+                          : ''
+                      }
+                      onChange={(e: any, value) => {
+                        setFieldValue('fieldName', value && value?.optionValue ? value.optionValue : '');
+                        setSelectedField(fields?.filter((f) => f?.fieldName === value.optionValue)[0]);
+                      }}
+                      renderInput={(params) => (
+                        <TextField
+                          {...params}
+                          margin="dense"
+                          variant="outlined"
+                          label="Fields"
+                          placeholder="Select Field"
+                          name="fieldName"
+                          required
+                          error={touched['fieldName'] && Boolean(errors['fieldName'])}
+                          helperText={touched['fieldName'] && errors['fieldName']}
+                        />
+                      )}
+                    />
+                    {values?.fieldName &&
+                      (selectedField?.type === 'dropDown' || selectedField?.type === 'multiSelect' || selectedField?.type === 'checkBox' || selectedField?.type === 'switch' ? (
+                        selectedField?.dataList ? (
+                          <Autocomplete
+                            onOpen={() => {
+                              setLoading(true);
+                              fetchOptions();
+                            }}
+                            inputValue={inputValues}
+                            onInputChange={handleInputChangeMulti}
+                            loading={loading}
+                            limitTags={2}
+                            multiple
+                            fullWidth
+                            disableCloseOnSelect={true}
+                            options={uniqBy([...options, ...defaultOptions], 'optionValue')}
+                            getOptionLabel={(option: any) => {
+                              return option ? option?.optionLabel : '';
+                            }}
+                            value={
+                              values?.value
+                                ? uniqBy([...options, ...defaultOptions], 'optionValue')?.filter((data: any) =>
                                   values?.value?.split(',')?.includes(data.optionValue)
                                 )
                               : []
@@ -285,70 +291,75 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                         <Autocomplete
                           id="value"
                           options={options}
-                          disableCloseOnSelect={selectedField?.type === 'checkBox' ? false : true}
-                          getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                          multiple={selectedField?.type === 'checkBox' ? false : true}
-                          value={
-                            values?.value && selectedField?.type === 'checkBox'
-                              ? options?.filter((data) => data?.optionValue === values?.value)?.length > 0
-                                ? options?.filter((data) => data?.optionValue === values?.value)[0]
-                                : ''
-                              : options?.filter((data) => values?.value?.split(',')?.includes(data?.optionValue))?.length > 0
-                              ? options?.filter((data) => values?.value?.split(',')?.includes(data?.optionValue))
-                              : []
-                          }
-                          onChange={(e, val) => {
-                            if (selectedField?.type === 'checkBox') {
-                              setFieldValue('value', val && val?.optionValue ? val?.optionValue : '');
-                            } else {
-                              setFieldValue('value', val?.map((v) => v?.optionValue)?.join(',') || '');
+                            disableCloseOnSelect={['checkBox', 'switch']?.includes(selectedField?.type) ? false : true}
+                            getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
+                            multiple={['checkBox', 'switch']?.includes(selectedField?.type) ? false : true}
+                            value={
+                              values?.value && ['checkBox', 'switch']?.includes(selectedField?.type)
+                                ? options?.filter((data) => data?.optionValue === values?.value)?.length > 0
+                                  ? options?.filter((data) => data?.optionValue === values?.value)[0]
+                                  : ''
+                                : options?.filter((data) => values?.value?.split(',')?.includes(data?.optionValue))?.length > 0
+                                  ? options?.filter((data) => values?.value?.split(',')?.includes(data?.optionValue))
+                                  : []
                             }
+                            onChange={(e, val) => {
+                              if (['checkBox', 'switch']?.includes(selectedField?.type)) {
+                                setFieldValue('value', val && val?.optionValue ? val?.optionValue : '');
+                              } else {
+                                setFieldValue('value', val?.map((v) => v?.optionValue)?.join(',') || '');
+                              }
+                            }}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                margin="dense"
+                                variant="outlined"
+                                label="Value"
+                                name="value"
+                                placeholder="Value"
+                                error={touched['value'] && Boolean(errors['value'])}
+                                helperText={touched['value'] && errors['value']}
+                              />
+                            )}
+                          />
+                        )
+                      ) : (
+                        <TextField
+                          variant="outlined"
+                          type="text"
+                          label="Value"
+                          name="value"
+                          rows={4}
+                          fullWidth
+                          margin="dense"
+                          value={values?.value}
+                          onChange={(e) => {
+                            setFieldValue('value', e.target.value.trimStart());
                           }}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              margin="dense"
-                              variant="outlined"
-                              label="Value"
-                              name="value"
-                              placeholder="Value"
-                              error={touched['value'] && Boolean(errors['value'])}
-                              helperText={touched['value'] && errors['value']}
-                            />
-                          )}
+                          error={touched['value'] && Boolean(errors['value'])}
+                          helperText={touched['value'] && errors['value']}
                         />
-                      )
-                    ) : (
-                      <TextField
-                        variant="outlined"
-                        type="text"
-                        label="Value"
-                        name="value"
-                        rows={4}
-                        fullWidth
-                        margin="dense"
-                        value={values?.value}
-                        onChange={(e) => {
-                          setFieldValue('value', e.target.value.trimStart());
-                        }}
-                        error={touched['value'] && Boolean(errors['value'])}
-                        helperText={touched['value'] && errors['value']}
-                      />
-                    ))}
-                </Box>
-              </Form>
-            </CustomDialogContent>
-            <CustomDialogFooter>
-              <Button size="small" onClick={onClose} color="primary">
-                Cancel
-              </Button>
-              <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
-                Save
-              </Button>
-            </CustomDialogFooter>
-          </>
-        )}
-      </Formik>
+                      ))}
+                  </Box>
+                </Form>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button size="small" onClick={onClose} color="primary">
+                  Cancel
+                </Button>
+                <Button size="small" type="submit" color="primary" variant="contained" onClick={submitForm}>
+                  Save
+                </Button>
+              </CustomDialogFooter>
+            </>
+          )}
+        </Formik>
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
     </Dialog>
   );
 };
