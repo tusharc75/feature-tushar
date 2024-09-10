@@ -18,7 +18,7 @@ const InputField = (props) => {
     resource = null,
     referenceId = null,
     collaborateTools = false,
-    onChange = null,
+    onChange=null,
     ...rest
   } = props;
 
@@ -107,17 +107,18 @@ const InputField = (props) => {
                             onChange={(e, val) => {
                               if (onChange) {
                                 onChange(field, e, val);
-                              }
-                              else {
-                                field.fieldName === 'currency' ? (e, val) => {
-                                  if (val && val.currencyCode) {
-                                    setFieldValue(field.fieldName, val.currencyCode);
-                                    setCurrencySymbol(val.symbolNative);
-                                  } else {
-                                    setFieldValue(field.fieldName, '');
-                                    setCurrencySymbol(null);
+                              } else {
+                                field.fieldName === 'currency'
+                                  ? (e, val) => {
+                                    if (val && val.currencyCode) {
+                                      setFieldValue(field.fieldName, val.currencyCode);
+                                      setCurrencySymbol(val.symbolNative);
+                                    } else {
+                                      setFieldValue(field.fieldName, '');
+                                      setCurrencySymbol(null);
+                                    }
                                   }
-                                } : null
+                                  : null;
                               }
                             }}
                             imageOrFileUploadCompletePercentage={
