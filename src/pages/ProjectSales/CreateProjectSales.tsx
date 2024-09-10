@@ -1,5 +1,5 @@
 import { Fragment, useContext, useEffect, useState } from 'react';
-import { Dialog, Button, Grid, Box, InputAdornment } from '@material-ui/core';
+import { Dialog, Button, Box } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -9,7 +9,6 @@ import { useHistory } from 'react-router-dom';
 import {
   getObjKeys,
   yupSchema,
-  setFieldsInAscendingOrder,
   getObjKeysWithValues,
   GenerateResourceLineNumber,
   sidebarResource,
@@ -17,10 +16,8 @@ import {
 } from '../../constants/helpers';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
-import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
 import routes from 'src/components/Helpers/Routes';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
@@ -117,7 +114,7 @@ const CreateProjectSales = ({
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const handleSubmit = (values) => {
@@ -233,9 +230,8 @@ const CreateProjectSales = ({
                     setShowConfirmDialog(true);
                   }
                 }}
-                title={`${
-                  isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`
-                }`}
+                title={`${isClone ? `Clone - ${productSalesName}` : projectSalesId ? `Update ${productSalesName}` : `New ${routes.projectSales.title}`
+                  }`}
                 isMinimized={!fullScreen}
                 onMinimizeMaximize={() => {
                   setFullScreen((prevState) => !prevState);
