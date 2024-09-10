@@ -10,15 +10,16 @@ import axiosInstance from '../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomButton from '../../components/Helpers/CustomButton';
 import { isMobile, isTablet } from 'react-device-detect';
-import { address, CustomDialogTransition, sidebarResource } from '../../constants/helpers';
+import { address, CustomDialogTransition, setFieldsInAscendingOrder } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box } from '@material-ui/core';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog'
+import { Box, Grid } from '@material-ui/core';
+import FormTypes from '../../components/Helpers/FormTypes';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { useAppTheme } from 'src/constants/AppConfig';
-import InputField from 'src/components/Helpers/InputField';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, referenceData = null }) => {
 
@@ -29,6 +30,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
+  const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [latLngChangedManually, setLatLngChangedManually] = useState(false);
@@ -129,6 +131,12 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
     // { featureType: 'transit', stylers: [{ visibility: 'off' }] },
     // { featureType: 'poi', stylers: [{ visibility: 'off' }] }
   ];
+
+  useEffect(() => {
+    if (initialData.fields.length > 0) {
+      setFormsData(setFieldsInAscendingOrder(initialData.fields));
+    }
+  }, [initialData.fields]);
 
   useEffect(() => {
     axiosInstance()
@@ -350,36 +358,80 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form noValidate>
-                <InputField
-                    errors={errors}
-                    values={values}
-                    setFieldValue={(name, val) => {
-                      setFieldValue(name, val);
-                    }}
-                    touched={touched}
-                    fieldsData={initialData.fields}
-                    size="small"
-                    fullWidth
-                    resource={sidebarResource.address}
-                    referenceId={addressData?._id || null}
-                    onChange={(field, e, val) => {
-                      if (field.fieldName === 'fullAddress') {
-                        if (typeof val !== 'object') return;
-                        getFullAddress(val);
-                        if (!val?.place_id) {
-                          setAddressDetail(null);
-                        }
-                      } else {
-                        const { name, value } = e.target;
-                        if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
-                        setAddressDetail((prevState: any) => ({
-                          ...prevState,
-                          [name]: value
-                        }));
-                        setLatLngChangedManually(true);
-                      }
-                    }}
-              />
+                  {formsData && formsData.map((form, index1) => {
+                    return <div key={index1}>
+                      <div className={'detail-box-content'}>
+                        <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                        <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                      </div>
+                      <Box marginY={2}>
+                        <Grid spacing={3} container>
+                          {form.sectionFields.map((field, index2) => (
+                            <Grid key={index2} item xs={12} sm={6} md={6}>
+                              {
+                                ['fullAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'country', 'latitude', 'longitude',
+                                  'state/Province', 'zipCode/PostalCode'].includes(field.fieldName) ?
+                                  <FormTypes
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    imageOrFileUploadCompletePercentage={null}
+                                    setFieldValue={setFieldValue}
+                                    fieldData={field}
+                                    onChange={
+                                      field.fieldName === 'fullAddress'
+                                        ? (_, val) => {
+                                          if (typeof val !== 'object') return;
+                                          getFullAddress(val);
+                                          if (!val?.place_id) {
+                                            setAddressDetail(null);
+                                          }
+                                        }
+                                        : (e: React.ChangeEvent<HTMLInputElement>) => {
+                                          const { name, value } = e.target;
+                                          if (['latitude', 'longitude'].includes(name) && isNaN(Number(value))) return;
+                                          setAddressDetail((prevState: any) => ({
+                                            ...prevState,
+                                            [name]: value
+                                          }));
+                                          setLatLngChangedManually(true);
+                                        }}
+                                  />
+                                  :
+                                  <FormTypes
+                                    values={values}
+                                    errors={errors}
+                                    touched={touched}
+                                    label={field.fieldLabel}
+                                    name={field.fieldName}
+                                    type={field.type}
+                                    options={field.option}
+                                    required={field.required}
+                                    fullWidth
+                                    isTooltip={field?.isTooltip || false}
+                                    tooltipMessage={field?.tooltipMessage}
+                                    size="small"
+                                    imageOrFileUploadCompletePercentage={null}
+                                    setFieldValue={setFieldValue}
+                                    fieldData={field}
+                                    allFields={initialData.fields}
+                                  />
+                              }
+                            </Grid>
+                          ))}
+                        </Grid>
+                      </Box>
+                    </div>
+                  })}
                 </Form>
                 <div>
                   <p>Drag or click to select new coordinates</p>
