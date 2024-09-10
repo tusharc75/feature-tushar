@@ -102,7 +102,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
   useEffect(() => {
     fetchData();
-  }, [selectedServiceOption, tabValue, services]);
+  }, [selectedServiceOption, tabValue]);
 
   const fetchColumns = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
@@ -292,6 +292,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const fetchData = async () => {
     try {
       dispatch({ type: 'loading', loading: true });
+      dispatch({ type: 'selection', selectedRecords: [] });
       let consumables;
       if (isOffline) {
         consumables = await findAll(objectStore.fieldTicketMaterial);
