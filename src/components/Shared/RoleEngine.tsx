@@ -14,7 +14,8 @@ import {
   IconButton,
   Input,
   TextField,
-  Switch
+  Switch,
+  Button
 } from '@material-ui/core';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 import { ROLE_TIER } from 'src/constants/helpers';
@@ -82,7 +83,7 @@ const RoleEngine = ({
   const [isHiddenChecked, setIsHiddenChecked] = useState(false);
   const [tableData, setTableData] = useState<TableData[]>([]);
   const [filteredAndSortedData, setFilteredAndSortedData] = useState<TableData[]>([]);
-  const [deepSearch, setDeepSearch] = useState(false);
+  // const [deepSearch, setDeepSearch] = useState(false);
   const [tableSearchFilterState, setTableSearchFilterState] = useState<TableSearchFilterState>({
     search: '',
     sort: ''
@@ -447,7 +448,10 @@ const RoleEngine = ({
     validateTier2(resource, field, selectedResource);
   }, [selectedResource]);
 
-  const handleSearchFilter = (tableSearchFilterState: TableSearchFilterState, _deepSearch = deepSearch) => {
+  const handleSearchFilter = (
+    tableSearchFilterState: TableSearchFilterState
+    //  _deepSearch = deepSearch
+  ) => {
     let data = [...tableData];
     const { search, sort } = tableSearchFilterState;
     if (search) {
@@ -455,20 +459,24 @@ const RoleEngine = ({
       for (const d of data) {
         const isTopLevelMatch = d.resource.resourceLabel.toLowerCase().includes(search.toLowerCase());
         // Run deep search inside field data
-        if (_deepSearch) {
-          const deepLevelMatch = d.fields
-            .map((f) => f.fieldData.fieldLabel)
-            .join(',')
-            .toLowerCase()
-            .includes(search.toLowerCase());
-          if (!deepLevelMatch && isTopLevelMatch) {
-            tempData.push(d); // Push the top level data
-          } else if (deepLevelMatch) {
-            let newData = { ...d, fields: d.fields.filter((f) => f.fieldData.fieldLabel.toLowerCase().includes(search.toLowerCase())) };
-            tempData.push(newData);
-          }
-        } else if (isTopLevelMatch) {
-          // Run top level searh
+        // if (_deepSearch) {
+        //   const deepLevelMatch = d.fields
+        //     .map((f) => f.fieldData.fieldLabel)
+        //     .join(',')
+        //     .toLowerCase()
+        //     .includes(search.toLowerCase());
+        //   if (!deepLevelMatch && isTopLevelMatch) {
+        //     tempData.push(d); // Push the top level data
+        //   } else if (deepLevelMatch) {
+        //     let newData = { ...d, fields: d.fields.filter((f) => f.fieldData.fieldLabel.toLowerCase().includes(search.toLowerCase())) };
+        //     tempData.push(newData);
+        //   }
+        // } else if (isTopLevelMatch) {
+        //   // Run top level searh
+        //   tempData.push(d);
+        // }
+        if (isTopLevelMatch) {
+          //! Run top level searh
           tempData.push(d);
         }
       }
@@ -504,29 +512,11 @@ const RoleEngine = ({
 
   return (
     <div>
-      <div className="mb-2 flex justify-end gap-3 text-right">
-        <HtmlTooltip title="Deep search will also sift through sub-items">
-          <FormControlLabel
-            labelPlacement="start"
-            control={
-              <>
-                <Checkbox
-                  checked={deepSearch}
-                  onChange={(e) => {
-                    const checked = e.target.checked;
-                    setDeepSearch(checked);
-                    handleSearchFilter(tableSearchFilterState, checked);
-                  }}
-                />
-              </>
-            }
-            label="Deep search"
-          />
-        </HtmlTooltip>
+      <div className="flex justify-end gap-3 rounded-t border-b-0 border-l border-r border-t border-solid border-[var(--common-border-color)] bg-[var(--form-head-bg)] p-1 text-right">
         <TextField
           className="min-w-[300px]"
           variant="outlined"
-          label={'Search..'}
+          placeholder={'Search...'}
           size="small"
           type="search"
           value={tableSearchFilterState.search}
@@ -549,12 +539,19 @@ const RoleEngine = ({
                       : 'Click to sort'
                   }
                 >
-                  <button
-                    className="-ml-1 flex cursor-pointer items-center gap-2 rounded border-0 bg-transparent px-1 py-1 transition-colors hover:bg-gray-200"
-                    onClick={handleSort}
-                  >
-                    Names <RenderSortIcon sortBy={tableSearchFilterState.sort} />
-                  </button>
+                  <span className="-ml-1">
+                    <Button
+                      size="small"
+                      onClick={handleSort}
+                      endIcon={
+                        <span>
+                          <RenderSortIcon sortBy={tableSearchFilterState.sort} />
+                        </span>
+                      }
+                    >
+                      <span className="text-[14px] font-medium">Names</span>
+                    </Button>
+                  </span>
                 </HtmlTooltip>
               </TableCell>
               <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
@@ -666,10 +663,10 @@ const RoleEngine = ({
 
 const RenderSortIcon = ({ sortBy }: { sortBy: SortingType }) => {
   if (sortBy === 'asc') {
-    return <IoIosArrowUp />;
+    return <KeyboardArrowUp />;
   }
   if (sortBy === 'des') {
-    return <IoIosArrowDown />;
+    return <KeyboardArrowDown />;
   }
   return <></>;
 };
