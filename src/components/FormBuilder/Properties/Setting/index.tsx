@@ -64,11 +64,21 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     </Typography>
                   )}
                 </Box>
-              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? (
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? ( //with lookup resource
                 <ResourceDropdown
                   type={fieldData.type}
                   lookupResource={values['lookupResource']}
                   value={values['defaultValue']}
+                  setFieldValue={setFieldValue}
+                  brandId={brandId}
+                  touched={touched}
+                  errors={errors}
+                />
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && !values['lookup'] ? ( //without lookup resource
+                <ResourceDropdown
+                  type={fieldData.type}
+                  value={values['defaultValue']}
+                  options={values.option}
                   setFieldValue={setFieldValue}
                   brandId={brandId}
                   touched={touched}
