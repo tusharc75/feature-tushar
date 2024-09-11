@@ -7,13 +7,16 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, sublease } from 'src/constants/helpers';
+import { convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, sublease, SUBLEASE_TYPE } from 'src/constants/helpers';
 import AssetDialog from 'src/pages/Sublease/Receiving/AssetDialog';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import DateUtils from '@date-io/date-fns';
+import moment from 'moment';
 
-const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
+const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, material: [] });
+  const [assetNumberDialog, setAssetNumberDialog] = useState({ open: false, material: [], receiveDate: null });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = (values) => {
@@ -29,23 +32,26 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
       }
     });
     if (data?.length) {
-      setAssetNumberDialog({ open: true, material: data });
+      setAssetNumberDialog({ open: true, material: data, receiveDate: values?.receiveDate });
     } else {
       onSuccess();
     }
   };
 
-  const handleReceive = (material) => {
+  const handleReceive = (material, receiveDate) => {
     setIsSubmitting(true);
     axiosInstance()
       .put(
         `${sublease.api}/${subleaseId}/receive-sublease`,
-        material?.map((m) => ({
+      { 
+        material: material?.map((m) => ({
           _id: m?._id,
           product: m?.product,
           assetNumber: m?.assetNumber,
           assetNumberType: m?.assetNumberType
-        }))
+        })),
+        receiveDate: receiveDate
+      }
       )
       .then(({ data }) => {
         setIsSubmitting(false);
@@ -54,7 +60,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
           type: 'success',
           message: data.message
         });
-        setAssetNumberDialog({ open: false, material: [] });
+        setAssetNumberDialog({ open: false, material: [], receiveDate: null });
         onSuccess();
       })
       .catch((error) => {
@@ -79,6 +85,15 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
     return errors;
   };
 
+  const validateDate = (values) => {
+    let errors: any = {};
+
+    if (moment(values['receiveDate']).isAfter(moment())) {
+      errors['receiveDate'] = `Please select valid date`;
+    }
+    return errors;
+  };
+
   return (
     <>
       <Dialog
@@ -94,8 +109,10 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
         }}
       >
         <CustomDialogHeader title={'Receiving'} onClose={onClose}></CustomDialogHeader>
+        <MuiPickersUtilsProvider utils={DateUtils}>
         <Formik
           initialValues={{
+            receiveDate: new Date(),
             material: material.map((d) => ({
               _id: d.uniqueId,
               materialId: d.materialId,
@@ -108,7 +125,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
           enableReinitialize={true}
           onSubmit={() => {}}
         >
-          {({ values }) => (
+          {({ values, setFieldValue }) => (
             <>
               <CustomDialogContent>
                 {values.material && values.material.length ? (
@@ -178,6 +195,29 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
                           </div>
                         )}
                       />
+                      {subleaseData?.type=== SUBLEASE_TYPE.vendor && (
+                        <div className="datepicker mt-[14px]">
+                          <KeyboardDatePicker
+                            label="Received Date"
+                            variant="inline"
+                            inputVariant="outlined"
+                            required
+                            autoOk
+                            size="small"
+                            margin="dense"
+                            name="receiveDate"
+                            placeholder="Receive Date"
+                            value={values.receiveDate}
+                            format={dateFormatForInputControl}
+                            maxDate={new Date()}
+                            onChange={(value) => {
+                              setFieldValue('receiveDate', convertDateInDateTime(value));
+                            }}
+                            error={validateDate(values)?.receiveDate}
+                            helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
+                          />
+                        </div>
+                      )}
                     </Form>
                   </Box>
                 ) : (
@@ -192,7 +232,7 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
                 </Button>
                 <Button
                   onClick={() => {
-                    if (!validate(values.material).qty) {
+                    if (!validate(values.material).qty && (subleaseData.type===SUBLEASE_TYPE.vendor ? !validateDate(values)?.receiveDate : true)) {
                       handleSubmit(values);
                     }
                   }}
@@ -206,13 +246,14 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess }) => {
             </>
           )}
         </Formik>
+        </MuiPickersUtilsProvider>
       </Dialog>
       {assetNumberDialog.open && (
         <AssetDialog
-          handleClose={() => setAssetNumberDialog({ open: false, material: [] })}
+          handleClose={() => setAssetNumberDialog({ open: false, material: [], receiveDate: null})}
           products={assetNumberDialog.material}
           handleSuccess={(rows) => {
-            handleReceive(rows);
+            handleReceive(rows, assetNumberDialog.receiveDate);
           }}
           loading={isSubmitting}
           subleaseId={subleaseId}
