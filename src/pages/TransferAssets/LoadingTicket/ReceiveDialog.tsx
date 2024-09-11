@@ -22,6 +22,7 @@ import { uniq, map } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 
 const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess }) => {
+
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [minDate, setMinDate] = useState(null);
@@ -70,9 +71,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess }) => {
 
   const validate = (values) => {
     const errors: any = {};
-    console.log(values);
     if (!values.receiveDate) {
-      console.log("here");
       errors.receiveDate = 'Receive Date is Required';
     } else if (minDate && values.receiveDate < minDate) {
       errors.receiveDate = `Receive date can't be less than ${displayDate(minDate)}`;
