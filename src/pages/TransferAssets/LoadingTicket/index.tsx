@@ -32,6 +32,7 @@ import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSe
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import { FiExternalLink } from 'react-icons/fi';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import ReceiveDialog from './ReceiveDialog';
 
 interface LoadingGridProps {
   permissions: any;
@@ -319,30 +320,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
-  const handelReceiveAssets = () => {
-    let data = {};
-    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
-    if (loadingTicketIds.length) {
-      data['_ids'] = loadingTicketIds?.map((e) => e);
-      data['status'] = DELIVERY_TICKET_STATUS.delivered;
-      data['signatures'] = [];
-      axiosInstance()
-        .post(`${deliveryTicket.api}/updatebulk`, data)
-        .then(({ data: { data } }) => {
-          fetchAssetsData();
-          setShowConfirmBoxReceive(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Assets Received Successfully`
-          });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
   const handleOpenReplaceAssetReason = (rows) => {
     const data: any = {};
     data.referenceType = 'transferAsset';
@@ -623,14 +600,13 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         />
       )}
       {showConfirmBoxReceive && (
-        <ConfirmationDialog
-          okBtnLoading={isRemovingTicket}
-          open={showConfirmBoxReceive}
-          message={`Are you sure you want to receive assets?`}
-          onClose={() => {
+        <ReceiveDialog
+          handleClose={() => setShowConfirmBoxReceive(false)}
+          selectedRecords={selectedRecords}
+          handleSuccess={() => {
+            fetchAssetsData();
             setShowConfirmBoxReceive(false);
           }}
-          onOk={handelReceiveAssets}
         />
       )}
       {addSerializedAssetDialog.open && (

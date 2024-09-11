@@ -21,7 +21,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { uniq, map } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess }) => {
+const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess }) => {
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
   const [minDate, setMinDate] = useState(null);
@@ -44,7 +44,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess }) => {
   const handleSubmit = (values) => {
     setLoading(true);
     let data = {};
-    const loadingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
     if (loadingTicketIds.length) {
       data['_ids'] = loadingTicketIds?.map((e) => e);
       data['status'] = DELIVERY_TICKET_STATUS.delivered;
@@ -58,7 +58,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSucess }) => {
             type: 'success',
             message: `Assets Received Successfully`
           });
-          handleSucess();
+          handleSuccess();
           setLoading(false);
         })
         .catch((error) => {

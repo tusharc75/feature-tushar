@@ -27,7 +27,6 @@ import InfoIcon from '@material-ui/icons/Info';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { FiExternalLink } from 'react-icons/fi';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
-import ReceiveDialog from './ReceiveDialog';
 
 interface ReceivingGridProps {
   transferAssetData: any;
@@ -393,6 +392,33 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
     );
   };
 
+  const handelReceiveAssets = () => {
+    let data = {};
+    setIsSubmitting(true);
+    const loadingTicketIds = uniq(map(selectedRecords, 'receivingTicketId'));
+    if (loadingTicketIds.length) {
+      data['_ids'] = loadingTicketIds?.map((e) => e);
+      data['status'] = DELIVERY_TICKET_STATUS.delivered;
+      data['signatures'] = [];
+      axiosInstance()
+        .post(`${deliveryTicket.api}/updatebulk`, data)
+        .then(({ data: { data } }) => {
+          fetchAssetsData(true);
+          setShowConfirmBoxReceive(false);
+          setIsSubmitting(false);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Assets Received Successfully`
+          });
+        })
+        .catch((error) => {
+          setIsSubmitting(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
   return (
     <Fragment>
       {allowedToEdit && (
@@ -442,13 +468,14 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         />
       )}
       {showConfirmBoxReceive && (
-        <ReceiveDialog
-          handleClose={() => setShowConfirmBoxReceive(false)}
-          selectedRecords={selectedRecords}
-          handleSucess={() => {
-            fetchAssetsData(true);
+        <ConfirmationDialog
+          okBtnLoading={isSubmitting}
+          open={showConfirmBoxReceive}
+          message={`Are you sure you want to receive assets?`}
+          onClose={() => {
             setShowConfirmBoxReceive(false);
           }}
+          onOk={handelReceiveAssets}
         />
       )}
     </Fragment>
