@@ -512,11 +512,11 @@ const RoleEngine = ({
 
   return (
     <div>
-      <div className="flex justify-end gap-3 rounded-t border-b-0 border-l border-r border-t border-solid border-[var(--common-border-color)] bg-[var(--form-head-bg)] p-3 text-right">
+      <div className="flex justify-end gap-3 rounded-t border-b-0 border-l border-r border-t border-solid border-[var(--common-border-color)] bg-[var(--form-head-bg)] p-1 text-right">
         <TextField
           className="min-w-[300px]"
           variant="outlined"
-          label={'Search...'}
+          placeholder={'Search...'}
           size="small"
           type="search"
           value={tableSearchFilterState.search}
