@@ -1113,12 +1113,67 @@ export const removeEmptyKeys = (obj: object) => {
  * @param {Array} fields
  * @param {boolean} validEmail
  */
+
+export const checkValue = (fields, fieldName, value1, value2) => {
+  const input = fields?.find((f) => f?.fieldName === fieldName);
+  if (input) {
+    if (input?.type === 'checkBox' || input?.type === 'switch') {
+      if (value2?.toUpperCase() === 'YES') {
+        return value1;
+      } else {
+        return !value1;
+      }
+    } else if (input?.type === 'dropDown') {
+      if (value2?.split(',')?.includes(value1)) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (input?.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
+      if (value2?.split(',').some((v) => (value1 || [])?.includes(v))) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (input?.type === 'year') {
+      return moment(new Date(value1)).year() == value2;
+    } else if (input?.type === 'date') {
+      return moment(value1).format('DD/MM/YYYY') == value2;
+    } else if (input?.type === 'dateTime') {
+      return moment(new Date(value1))?.isSame(moment(value2, 'DD/MM/YYYY HH:mm'));
+    } else if (input?.type === 'number' || input?.type === 'percent' || input?.type === 'decimal' || input?.type === 'formula') {
+      if (+value2 === +value1) {
+        return true;
+      } else {
+        return false;
+      }
+    } else if (input?.type === 'currency') {
+      if (value2?.split(',').includes(value1)) {
+        return true;
+      } else {
+        return false;
+      }
+    } else {
+      if (value2 === value1) {
+        return true;
+      } else {
+        return false;
+      }
+    }
+  } else {
+    return false;
+  }
+};
+
+const urlRegex = /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
+const nameRegex = /^([^0-9]*)$/;
+
 export const yupSchema = (fields: any[], validEmail = true) => {
   const schema = {};
   fields.forEach((input) => {
     let message = `${input.fieldLabel} is required`;
 
-    const sectionProperties = fields?.find(f => f?.sectionName === input?.sectionName && f?.sectionProperties)?.sectionProperties
+    const sectionProperties = fields?.find((f) => f?.sectionName === input?.sectionName && f?.sectionProperties)?.sectionProperties;
     let sectionVisibility = [];
     if (sectionProperties && sectionProperties?.visibilityCondition && sectionProperties?.visibilityCondition?.length) {
       sectionVisibility = sectionProperties?.visibilityCondition;
@@ -1127,7 +1182,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     const validationFields: any = [];
     let validation: any = null;
     if (input?.visibilityCondition?.length || sectionVisibility?.length) {
-      sectionVisibility?.forEach(condition => {
+      sectionVisibility?.forEach((condition) => {
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
             validationFields.push({ ...field, index: condition?.index, logic: condition?.logic, type: 'section' });
@@ -1142,33 +1197,22 @@ export const yupSchema = (fields: any[], validEmail = true) => {
         });
       });
 
-      const checkValue = (value1, value2) => {
-        if (value2?.toLowerCase() === 'yes' && value1 === true) {
-          return true
-        } else if (value2?.toLowerCase() === 'no' && value1 === false) {
-          return true
-        } else if (value2?.split(',')?.includes(value1)) {
-          return true;
-        } else {
-          return false;
-        }
-      }
-
       validation = (...args) => {
         let validate = false;
-        for (let i = 0; i < validationFields?.length;) {
+        for (let i = 0; i < validationFields?.length; ) {
           const field = validationFields[i];
-          const condition = field?.type === 'section' ?
-            sectionVisibility?.find((c) => c?.index === field?.index && c?.logic === field?.logic)
-            : input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
+          const condition =
+            field?.type === 'section'
+              ? sectionVisibility?.find((c) => c?.index === field?.index && c?.logic === field?.logic)
+              : input?.visibilityCondition?.find((c) => c?.index === field?.index && c?.logic === field?.logic);
           if (condition?.logic === LOGIC.AND) {
-            if (condition?.fields?.every((f, j) => checkValue(args[i + j], f?.value))) {
+            if (condition?.fields?.every((f, j) => checkValue(fields, f?.fieldName, args[i + j], f?.value))) {
               validate = true;
             } else {
               validate = false;
             }
           } else if (condition?.logic === LOGIC.OR) {
-            if (condition?.fields?.some((f, j) => checkValue(args[i + j], f?.value))) {
+            if (condition?.fields?.some((f, j) => checkValue(fields, f?.fieldName, args[i + j], f?.value))) {
               validate = true;
             } else {
               validate = false;
@@ -1187,50 +1231,107 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().required(message),
-              otherwise: string()
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
           : string().required(message)
         : string();
     } else if (input.type === 'name') {
       schema[input.fieldName] = input.required
-        ? string()
-          .matches(/^([^0-9]*)$/, "Numbers aren't allowed")
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(/^([^0-9]*)$/, "Numbers aren't allowed");
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().matches(nameRegex, "Numbers aren't allowed").required(message),
+                otherwise: string().matches(nameRegex, "Numbers aren't allowed")
+              }
+            )
+          : string().matches(nameRegex, "Numbers aren't allowed").required(message)
+        : string().matches(nameRegex, "Numbers aren't allowed");
     } else if (input.type === 'url') {
       schema[input.fieldName] = input.required
-        ? string()
-          .matches(
-            /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-            'Enter valid URL'
-          )
-          .required(`${input.fieldLabel} is required`)
-        : string().matches(
-          /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/,
-          'Enter valid URL'
-        );
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().matches(urlRegex, 'Enter valid URL').required(message),
+                otherwise: string().matches(urlRegex, 'Enter valid URL')
+              }
+            )
+          : string().matches(urlRegex, 'Enter valid URL').required(message)
+        : string().matches(urlRegex, 'Enter valid URL');
     } else if (input.type === 'mobileNumber') {
       schema[input.fieldName] = input.required
-        ? string().min(10, 'Mobile number is too short').required(`${input.fieldLabel} is required`)
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().min(10, 'Mobile number is too short').required(message),
+                otherwise: string().min(10, 'Mobile number is too short')
+              }
+            )
+          : string().min(10, 'Mobile number is too short').required(message)
         : string().min(10, 'Mobile number is too short');
-    } else if (input.type === 'multiSelect') {
-      schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
-    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal') {
+    } else if (input.type === 'multiSelect' || input?.type === 'freeStyleMultiSelect') {
       schema[input.fieldName] = input.required
-        ? number().required(`${input.fieldLabel} is required`).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
+        ? validationFields?.length && validation
+          ? array().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: array().min(1, message),
+                otherwise: array()
+              }
+            )
+          : array().min(1, message)
+        : array();
+    } else if (input.type === 'percent' || input.type === 'number' || input.type === 'decimal' || input.type === 'formula') {
+      schema[input.fieldName] = input.required
+        ? validationFields?.length && validation
+          ? number().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable(),
+                otherwise: number().nullable()
+              }
+            )
+          : number().required(message).moreThan(0, `${input.fieldLabel} must be greater than 0`).nullable()
         : number().nullable();
     } else if (input.type === 'email') {
       schema[input.fieldName] =
         input.required && validEmail
-          ? string().email().required(`${input.fieldLabel} is required`)
+          ? validationFields?.length && validation
+            ? string().when(
+                validationFields?.map((f) => f?.fieldName),
+                {
+                  is: validation,
+                  then: string().email().required(message),
+                  otherwise: string().email(`${input.fieldLabel} must be a valid email`)
+                }
+              )
+            : string().email().required(message)
           : string().email(`${input.fieldLabel} must be a valid email`);
     } else if (input.type === 'switch' || input.type === 'checkBox') {
-      schema[input.fieldName] = input.required ? boolean().required(`${input.fieldLabel} is required`) : boolean();
+      schema[input.fieldName] = input.required
+        ? validationFields?.length && validation
+          ? boolean().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: boolean().required(message),
+                otherwise: boolean()
+              }
+            )
+          : boolean().required(message)
+        : boolean();
     } else if (input.type !== 'currencyAmount' && (input.type === 'converter' || input.isConverter === true)) {
       input.displayUnits &&
         input.displayUnits.forEach((_unit) => {
@@ -1253,12 +1354,19 @@ export const yupSchema = (fields: any[], validEmail = true) => {
               : number().nullable();
           }
         });
-    } else if (input.type === 'date') {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
-    } else if (input.type === 'dateTime') {
-      schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
-    } else if (input.type === 'freeStyleMultiSelect') {
-      schema[input.fieldName] = input.required ? array().required(`${input.fieldLabel} is required`) : array();
+    } else if (input.type === 'date' || input?.type === 'dateTime') {
+      schema[input.fieldName] = input.required
+        ? validationFields?.length && validation
+          ? string().when(
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message).nullable(),
+                otherwise: string().nullable()
+              }
+            )
+          : string().required(message).nullable()
+        : string().nullable();
     } else if (input.type === 'colorPicker') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
     } else if (input.type === 'multiImageUpload') {
@@ -1270,17 +1378,16 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'groupSignature') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else {
-      // schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
-            validationFields?.map((f) => f?.fieldName),
-            {
-              is: validation,
-              then: string().required(message),
-              otherwise: string()
-            }
-          )
+              validationFields?.map((f) => f?.fieldName),
+              {
+                is: validation,
+                then: string().required(message),
+                otherwise: string()
+              }
+            )
           : string().required(message)
         : string();
     }
@@ -3369,7 +3476,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) { }
+  } catch (error) {}
 };
 
 export const columnSize = (type) => {
@@ -3419,8 +3526,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);

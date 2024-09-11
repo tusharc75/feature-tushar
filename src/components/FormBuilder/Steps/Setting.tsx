@@ -25,7 +25,7 @@ const Setting = ({ onClose, onSuccess, resource, resourceData }) => {
   const fetchFields = async () => {
     const response = await axiosInstance().get(`/field?resource=${resource}`);
     setFields(
-      response?.data?.data ? response?.data?.data?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName })) : []
+      response?.data?.data ? response?.data?.data?.filter(d => d?.fieldData?.primaryField)?.map((r) => ({ optionLabel: r?.fieldData?.fieldLabel, optionValue: r?.fieldData?.fieldName })) : []
     );
   };
 
