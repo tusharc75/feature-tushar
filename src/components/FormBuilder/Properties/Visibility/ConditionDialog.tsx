@@ -4,17 +4,18 @@ import { useEffect, useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, getUniqueCurrencies, sidebarResource } from 'src/constants/helpers';
 import { getLookupOption } from '../../helper';
-import { uniqBy } from 'lodash';
+import { isEmpty, uniqBy } from 'lodash';
 import { Form, Formik } from 'formik';
 import routes from 'src/components/Helpers/Routes';
 import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import MuiPhoneInput from 'material-ui-phone-number';
 
 const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, fieldsToExclude }) => {
   const [initialValues, setInitialValues] = useState(null);
-  const [fieldOptions, setFieldOptions] = useState([])
+  const [fieldOptions, setFieldOptions] = useState([]);
   const [options, setOptions] = useState([]);
   const [selectedField, setSelectedField] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -23,45 +24,64 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
   const [inputValues, setInputValues] = useState('');
 
   useEffect(() => {
-    const options: any = []
+    const options: any = [];
     if (data) {
-      const field = fields?.find(f => f?.fieldName === data?.fieldName)
+      const field = fields?.find((f) => f?.fieldName === data?.fieldName);
       if (field) {
         options.push({
           optionLabel: field?.fieldLabel,
           optionValue: field?.fieldName
-        })
+        });
       }
     } else {
-      fields?.forEach(field => {
+      fields?.forEach((field) => {
         if (
-          ['singleLine', 'multiLine', 'dropDown', 'multiSelect', 'checkBox', 'switch']?.includes(field?.type) &&
+          ![
+            'imageUpload',
+            'currencyAmount',
+            'converter',
+            'imageUpload',
+            'multiImageUpload',
+            'fileUpload',
+            'multiFileUpload',
+            'process',
+            'colorPicker',
+            'richTextEditor',
+            'signature',
+            'groupSignature',
+            'counter',
+            'description',
+            'lookUpDisplay'
+          ]?.includes(field?.type) &&
           !fieldsToExclude?.includes(field?.fieldName) &&
-          !fieldValue?.visibilityCondition?.find((_f) => _f?.index === group)?.fields?.map((d) => d?.fieldName)?.includes(field?.fieldName)
+          !fieldValue?.visibilityCondition
+            ?.find((_f) => _f?.index === group)
+            ?.fields?.map((d) => d?.fieldName)
+            ?.includes(field?.fieldName)
         ) {
           options.push({
             optionLabel: field?.fieldLabel,
             optionValue: field?.fieldName
-          })
+          });
         }
       });
     }
-    setFieldOptions(options)
-  }, [fields])
+    setFieldOptions(options);
+  }, [fields]);
 
   useEffect(() => {
-    const value: any = { fieldName: '', value: '' }
+    const value: any = { fieldName: '', value: '' };
     if (data) {
       if (fields?.find((f) => f?.fieldName === data?.fieldName)?.dataList) {
         fetchFieldvalue();
       }
       value.fieldName = data?.fieldName;
-      value.value = data?.value
+      value.value = data?.value;
       setSelectedField(
         fields?.filter((f) => f?.fieldName === data?.fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === data?.fieldName)[0] : null
       );
     }
-    setInitialValues(value)
+    setInitialValues(value);
   }, [data]);
 
   const fetchFieldvalue = async () => {
@@ -89,6 +109,20 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
         { optionLabel: 'YES', optionValue: 'yes' },
         { optionLabel: 'NO', optionValue: 'no' }
       ]);
+    } else if (selectedField?.type === 'currency') {
+      const sortedArr = getUniqueCurrencies().sort((a, b) =>
+        a?.name?.toUpperCase() < b?.name?.toUpperCase() ? -1 : a?.name?.toUpperCase() > b?.name?.toUpperCase() ? 1 : 0
+      );
+      setOptions(
+        sortedArr
+          ?.filter((d) => !isEmpty(d))
+          ?.map((d: any) => ({
+            optionLabel: `${d.currencyCode} - ${d.currencyName} - (${d.symbolNative})`,
+            optionValue: d?.currencyCode
+          }))
+      );
+    } else if (selectedField?.type === 'radio') {
+      setOptions(selectedField?.option ? selectedField?.option : []);
     }
   }, [selectedField]);
 
@@ -202,13 +236,14 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                       getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
                       getOptionSelected={(option: any, val) => option.optionValue === val}
                       value={
-                        fieldOptions?.filter(f => f?.optionValue === values?.fieldName)?.length > 0
-                          ? fieldOptions?.filter(f => f?.optionValue === values?.fieldName)[0]
+                        fieldOptions?.filter((f) => f?.optionValue === values?.fieldName)?.length > 0
+                          ? fieldOptions?.filter((f) => f?.optionValue === values?.fieldName)[0]
                           : ''
                       }
                       onChange={(e: any, value) => {
                         setFieldValue('fieldName', value && value?.optionValue ? value.optionValue : '');
                         setSelectedField(fields?.filter((f) => f?.fieldName === value.optionValue)[0]);
+                        setFieldValue('value', '');
                       }}
                       renderInput={(params) => (
                         <TextField
@@ -225,7 +260,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                       )}
                     />
                     {values?.fieldName &&
-                      (selectedField?.type === 'dropDown' || selectedField?.type === 'multiSelect' || selectedField?.type === 'checkBox' || selectedField?.type === 'switch' ? (
+                      (['dropDown', 'multiSelect', 'checkBox', 'switch', 'currency', 'radio']?.includes(selectedField?.type) ? (
                         selectedField?.dataList ? (
                           <Autocomplete
                             onOpen={() => {
@@ -246,56 +281,56 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                             value={
                               values?.value
                                 ? uniqBy([...options, ...defaultOptions], 'optionValue')?.filter((data: any) =>
-                                  values?.value?.split(',')?.includes(data.optionValue)
-                                )
-                              : []
-                          }
-                          getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
-                          onChange={(e, val: any) => {
-                            setFieldValue('value', val ? val.map((val) => val?.optionValue)?.join(',') : '');
-                            setInputValues('');
-                          }}
-                          forcePopupIcon={true}
-                          renderInput={(params) => (
-                            <TextField
-                              {...params}
-                              variant="outlined"
-                              margin="dense"
-                              label="Value"
-                              name="value"
-                              error={touched['value'] && Boolean(errors['value'])}
-                              helperText={touched['value'] && errors['value']}
-                              required
-                              style={{ whiteSpace: 'nowrap' }}
-                              InputProps={{
-                                ...params.InputProps,
-                                endAdornment: (
-                                  <>
-                                    {loading ? <CircularProgress color="inherit" size={20} /> : null}
-                                    {params.InputProps.endAdornment}
-                                  </>
-                                )
-                              }}
-                            />
-                          )}
-                          ListboxProps={{
-                            onScroll: (e) => {
-                              if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
-                                setLoading(true);
-                                fetchOptions('', currentPage + 1);
-                              }
+                                    values?.value?.split(',')?.includes(data.optionValue)
+                                  )
+                                : []
                             }
-                          }}
-                        />
-                      ) : (
-                        <Autocomplete
-                          id="value"
-                          options={options}
-                            disableCloseOnSelect={['checkBox', 'switch']?.includes(selectedField?.type) ? false : true}
+                            getOptionSelected={(option: any, val: any) => option.optionValue === val.optionValue}
+                            onChange={(e, val: any) => {
+                              setFieldValue('value', val ? val.map((val) => val?.optionValue)?.join(',') : '');
+                              setInputValues('');
+                            }}
+                            forcePopupIcon={true}
+                            renderInput={(params) => (
+                              <TextField
+                                {...params}
+                                variant="outlined"
+                                margin="dense"
+                                label="Value"
+                                name="value"
+                                error={touched['value'] && Boolean(errors['value'])}
+                                helperText={touched['value'] && errors['value']}
+                                required
+                                style={{ whiteSpace: 'nowrap' }}
+                                InputProps={{
+                                  ...params.InputProps,
+                                  endAdornment: (
+                                    <>
+                                      {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                      {params.InputProps.endAdornment}
+                                    </>
+                                  )
+                                }}
+                              />
+                            )}
+                            ListboxProps={{
+                              onScroll: (e) => {
+                                if (e.target.scrollTop + e.target.clientHeight === e.target.scrollHeight) {
+                                  setLoading(true);
+                                  fetchOptions('', currentPage + 1);
+                                }
+                              }
+                            }}
+                          />
+                        ) : (
+                          <Autocomplete
+                            id="value"
+                            options={options}
+                            disableCloseOnSelect={['checkBox', 'switch', 'radio']?.includes(selectedField?.type) ? false : true}
                             getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-                            multiple={['checkBox', 'switch']?.includes(selectedField?.type) ? false : true}
+                            multiple={['checkBox', 'switch', 'radio']?.includes(selectedField?.type) ? false : true}
                             value={
-                              values?.value && ['checkBox', 'switch']?.includes(selectedField?.type)
+                              values?.value && ['checkBox', 'switch', 'radio']?.includes(selectedField?.type)
                                 ? options?.filter((data) => data?.optionValue === values?.value)?.length > 0
                                   ? options?.filter((data) => data?.optionValue === values?.value)[0]
                                   : ''
@@ -304,7 +339,7 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                                   : []
                             }
                             onChange={(e, val) => {
-                              if (['checkBox', 'switch']?.includes(selectedField?.type)) {
+                              if (['checkBox', 'switch', 'radio']?.includes(selectedField?.type)) {
                                 setFieldValue('value', val && val?.optionValue ? val?.optionValue : '');
                               } else {
                                 setFieldValue('value', val?.map((v) => v?.optionValue)?.join(',') || '');
@@ -324,10 +359,32 @@ const ConditionDialog = ({ onClose, group, data, fieldValue, setValue, fields, f
                             )}
                           />
                         )
+                      ) : selectedField?.type === 'mobileNumber' ? (
+                        <MuiPhoneInput
+                          defaultCountry={'us'}
+                          disableAreaCodes
+                          countryCodeEditable
+                          variant="outlined"
+                          fullWidth
+                          label={'Value'}
+                          name={'value'}
+                          required
+                          margin="dense"
+                          value={values?.value}
+                          onChange={(val) => {
+                            if (val?.length < 5) {
+                              setFieldValue('value', '');
+                            } else {
+                              setFieldValue('value', val);
+                            }
+                          }}
+                          error={touched['value'] && Boolean(errors['value'])}
+                          helperText={touched['value'] && errors['value']}
+                        />
                       ) : (
                         <TextField
                           variant="outlined"
-                          type="text"
+                          type={['number', 'decimal', 'percent', 'formula']?.includes(selectedField?.type) ? 'number' : 'text'}
                           label="Value"
                           name="value"
                           rows={4}

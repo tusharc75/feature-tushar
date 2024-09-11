@@ -46,6 +46,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import axiosInstance from '../../axios/axiosInstance';
 import { handleAutoCalculation, optionConverter } from '../../constants/formulaUtility';
 import {
+  checkValue,
   CustomDialogTransition,
   dateFormatForInputControl,
   documentUploadMaxSize,
@@ -221,39 +222,6 @@ const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, 
   );
 };
 
-export const checkCondition = (fields, fieldName, value, values) => {
-  const _field = fields?.filter((f) => f?.fieldName === fieldName)?.length > 0 ? fields?.filter((f) => f?.fieldName === fieldName)[0] : null;
-  if (_field) {
-    if (_field?.type === 'checkBox' || _field?.type === 'switch') {
-      if (value?.toUpperCase() === 'YES') {
-        return values[fieldName];
-      } else {
-        return !values[fieldName];
-      }
-    } else if (_field?.type === 'dropDown') {
-      if (value?.split(',')?.includes(values[fieldName])) {
-        return true;
-      } else {
-        return false;
-      }
-    } else if (_field?.type === 'multiSelect') {
-      if (value?.split(',').some((v) => values[fieldName]?.includes(v))) {
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      if (values[fieldName] === value) {
-        return true;
-      } else {
-        return false;
-      }
-    }
-  } else {
-    return false;
-  }
-};
-
 export const isSectionVisible = (section, fieldsData, values, fromDetailsPage = false) => {
   let fieldData = section?.sectionFields?.find((field) => field?.sectionProperties?.visibilityCondition?.length > 0);
   if (fromDetailsPage) {
@@ -267,7 +235,7 @@ export const isSectionVisible = (section, fieldsData, values, fromDetailsPage = 
       if (condition?.logic === LOGIC.AND) {
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            if (!checkCondition(fieldsData, field?.fieldName, field?.value, values)) {
+            if (!checkValue(fieldsData, field?.fieldName, values[field?.fieldName], field?.value)) {
               show = false;
               return;
             }
@@ -277,7 +245,7 @@ export const isSectionVisible = (section, fieldsData, values, fromDetailsPage = 
         let count = 0;
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            if (checkCondition(fieldsData, field?.fieldName, field?.value, values)) {
+            if (checkValue(fieldsData, field?.fieldName, values[field?.fieldName], field?.value)) {
               return;
             } else {
               count = count + 1;
@@ -310,7 +278,7 @@ export const isFieldVisible = (fieldData, fields, values) => {
       if (condition?.logic === LOGIC.AND) {
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            if (!checkCondition(fields, field?.fieldName, field?.value, values)) {
+            if (!checkValue(fields, field?.fieldName, values[field?.fieldName], field?.value)) {
               show = false;
               return;
             }
@@ -320,7 +288,7 @@ export const isFieldVisible = (fieldData, fields, values) => {
         let count = 0;
         condition?.fields?.forEach((field) => {
           if (field?.fieldName && field?.value) {
-            if (checkCondition(fields, field?.fieldName, field?.value, values)) {
+            if (checkValue(fields, field?.fieldName, values[field?.fieldName], field?.value)) {
               return;
             } else {
               count = count + 1;
@@ -960,7 +928,7 @@ const FormTypes = (props) => {
           onChange={(e) => {
             const regex = /^[a-zA-Z ]+$/i;
             if (e.target.value === '' || regex.test(e.target.value.trim())) {
-              setFieldValue(name, e.target.value.trim());
+              handleChange(name, e.target.value.trim());
             }
           }}
         />
@@ -984,7 +952,7 @@ const FormTypes = (props) => {
           value={values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value.trimStart())}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value.trimStart())}
         />
       </InfoLabel>
     ) : type === 'number' ? (
@@ -1121,7 +1089,7 @@ const FormTypes = (props) => {
           value={values[name]}
           error={touched[name] && Boolean(errors[name])}
           helperText={touched[name] && errors[name]}
-          onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
+          onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
         />
       </InfoLabel>
     ) : type === 'password' ? (
@@ -1168,9 +1136,9 @@ const FormTypes = (props) => {
                   // check to see if the value has only country code
                   // 5 is choosen here because some country code has 4 digit and "+"
                   if (val?.length < 5) {
-                    setFieldValue(name, '');
+                    handleChange(name, '');
                   } else {
-                    setFieldValue(name, val);
+                    handleChange(name, val);
                   }
                 }
           }
@@ -1214,7 +1182,7 @@ const FormTypes = (props) => {
           value={values[name]}
           onBlur={(e: any) => {
             if (e.target.value && e.target.value.trim() !== '') {
-              setFieldValue(name, [...values[name], e.target.value]);
+              handleChange(name, [...values[name], e.target.value]);
             }
           }}
           onChange={(e, value: any) => {
@@ -1224,7 +1192,7 @@ const FormTypes = (props) => {
                 valuesToInsert.push(val);
               }
             }
-            setFieldValue(name, valuesToInsert);
+            handleChange(name, valuesToInsert);
           }}
         />
       </InfoLabel>
@@ -1954,7 +1922,7 @@ const FormTypes = (props) => {
           options={currencyData}
           getOptionLabel={(option: any) => (option ? `${option.currencyCode} - ${option.currencyName} - (${option.symbolNative})` : '')}
           getOptionSelected={(option: any, val) => option.currencyCode === val}
-          onChange={onChange ? onChange : (e, val) => setFieldValue(name, val && val.currencyCode ? val.currencyCode : '')}
+          onChange={onChange ? onChange : (e, val) => handleChange(name, val && val.currencyCode ? val.currencyCode : '')}
           renderInput={(params) => (
             <TextField
               {...params}
@@ -2185,7 +2153,6 @@ const FormTypes = (props) => {
       >
         <FormControlLabel
           control={<Switch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => handleChange(name, e.target.checked)} />}
-          // control={<Switch name={name} checked={values[name]} onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.checked)} />}
           label={getLabel(label)}
         />
       </InfoLabel>
@@ -2224,7 +2191,7 @@ const FormTypes = (props) => {
             aria-label="gender"
             name={name}
             value={values[name]}
-            onChange={onChange ? onChange : (e) => setFieldValue(name, e.target.value)}
+            onChange={onChange ? onChange : (e) => handleChange(name, e.target.value)}
           >
             {options.map((opt) => (
               <FormControlLabel key={opt.order} value={opt.optionLabel} disabled={rest?.disabled} control={<Radio />} label={opt.optionLabel} />
@@ -2259,7 +2226,7 @@ const FormTypes = (props) => {
                 }
           }
           onInputChange={(event, newInputValue) => {
-            setFieldValue(name, newInputValue);
+            handleChange(name, newInputValue);
           }}
           renderInput={(params) => (
             <TextField
@@ -2687,7 +2654,7 @@ const FormTypes = (props) => {
             name={name}
             label={getLabel(label)}
             views={['year']}
-            onChange={(date) => setFieldValue(name, date)}
+            onChange={(date) => handleChange(name, date)}
             error={touched[name] && Boolean(errors[name])}
             helperText={touched[name] && errors[name]}
             InputLabelProps={{
