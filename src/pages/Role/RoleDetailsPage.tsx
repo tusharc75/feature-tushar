@@ -336,11 +336,14 @@ const RoleDetailsPage = () => {
     }
   };
 
-  const handleUpdateRole = () => {
+  const handleUpdateRole = (importField: any = [], importResource:any = []) => {
     setUpdating(true);
+    const resourcesToUpdate = importResource?.length ? importResource : resource;
+    const fieldsToUpdate = importField?.length ? importField : field;
+
     let dashBoardIds = dashboardName.map((obj) => obj.id);
 
-    const resources = resource.map((r) => {
+    const resources = resourcesToUpdate.map((r) => {
       const newData = { ...r };
       delete newData.isReadDisabled;
       delete newData.isUpdateDisabled;
@@ -350,7 +353,7 @@ const RoleDetailsPage = () => {
       return newData;
     });
 
-    const fields = field.map((r) => {
+    const fields = fieldsToUpdate.map((r) => {
       const newData = { ...r };
       delete newData.isReadDisabled;
       delete newData.isUpdateDisabled;
@@ -513,6 +516,46 @@ const RoleDetailsPage = () => {
     setChildrenResource(toUpdateResource);
   };
 
+  const handleExportRole = ()=>{
+    const data = [
+      { 
+        resource: resource, 
+        childrenResource: childrenResource, 
+        field: field
+      }
+    ];
+    const jsonData = new Blob([JSON.stringify(data)], { type: 'application/json' });
+    const jsonURL = URL.createObjectURL(jsonData);
+    const link = document.createElement('a');
+    link.href = jsonURL;
+    link.download = `${values?.name || 'Roles'}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+
+  const handleImportRole = (e)=>{
+    e.preventDefault();
+    var files = e.target.files,
+      f = files[0];
+    var reader = new FileReader();
+    reader.onload = function (e) {
+      var data: any = e.target.result;
+      const parsedData = JSON.parse(data)
+      const {resource, field, childrenResource} = parsedData[0];
+      if(!resource || !field){
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'error',
+          message: 'Invalid data'
+        });
+      }
+    
+      handleUpdateRole(field, resource);
+    };
+    reader.readAsBinaryString(f);
+  }
+
   const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0;
 
   return (
@@ -527,6 +570,28 @@ const RoleDetailsPage = () => {
             <Box className="control-buttons-v1">
               {roleData ? (
                 <>
+                <div>
+                <label className={`new-headerbox-button-v1`} htmlFor="importRole">
+                  Import Role
+                  <input
+                    accept="json"
+                    onClick={(e: any) => (e.target.value = null)}
+                    id="importRole"
+                    name="importRole"
+                    onChange={handleImportRole}
+                    style={{
+                      opacity: '0',
+                      position: 'absolute',
+                      zIndex: -1
+                    }}
+                    type="file"
+                  />
+                </label>
+                <label className={`new-headerbox-button-v1`} onClick={handleExportRole}>
+                  Export Role
+                </label>
+                <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
+              </div>
                   {permissions?.role.isUpdate && !isEdit && (
                     <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
                       Edit
