@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useState } from 'react';
-import { Box, Button, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, Dialog } from '@material-ui/core';
 import { isMobile, isTablet } from 'react-device-detect';
 import { Form, Formik } from 'formik';
 import { CHILD_RESOURCE, CustomDialogTransition, getObjKeysWithValues, yupSchema } from 'src/constants/helpers';
@@ -7,12 +7,10 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import { uniq, map, orderBy } from 'lodash';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import axiosInstance from 'src/axios/axiosInstance';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import InputField from 'src/components/Helpers/InputField';
 
 const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit, workOrderData }) => {
 
@@ -79,74 +77,17 @@ const UpdateProductDialog = ({ onClose, materialData, handleUpdate, loadingEdit,
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {fields &&
-                    fields.map((section, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content detail-product-box'}>
-                          <div className={'product-form-layout'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
-                          </div>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {section.sectionFields &&
-                              section.sectionFields.map((field) =>
-                                field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
-                                  <FormTypes
-                                    fields={initialData.fields}
-                                    fieldData={{ ...field, hideConverter: true }}
-                                    values={values}
-                                    disabled={field.disableOnEdit || field.isUneditable}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field.isTooltip}
-                                    tooltipMessage={field.tooltipMessage}
-                                    size="small"
-                                  />
-                                ) : (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          disabled={field.disableOnEdit || field.isUneditable}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                )
-                              )}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                    <InputField
+                        errors={errors}
+                        values={values}
+                        setFieldValue={(name, value) => {
+                          setFieldValue(name, value);
+                        }}
+                        touched={touched}
+                        fieldsData={initialData.fields}
+                        size="small"
+                        fullWidth
+                    />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
