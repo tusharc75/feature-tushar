@@ -607,7 +607,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               </div>
               <div className="ml-auto flex flex-wrap items-center gap-2">
                 <>
-                  <HtmlTooltip title={'Add'}>
+                  <HtmlTooltip title={'Add Column'}>
                     <span>
                       <Button
                         id={'custom-import-dialog-add-menu-button'}
@@ -622,7 +622,7 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
                         }}
                         aria-controls="add-menu"
                       >
-                        {isMobile ? <Add /> : 'Add'}
+                        {isMobile ? <Add /> : 'Add Column'}
                       </Button>
                     </span>
                   </HtmlTooltip>
