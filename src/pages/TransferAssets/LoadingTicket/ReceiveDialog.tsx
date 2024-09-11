@@ -1,0 +1,142 @@
+import React, { useContext, useEffect, useState } from 'react';
+import Button from '@material-ui/core/Button';
+import { Box } from '@material-ui/core';
+import Dialog from '@material-ui/core/Dialog';
+import DateUtils from '@date-io/date-fns';
+import { Form, Formik } from 'formik';
+import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
+import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
+import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
+import {
+  convertDateInDateTime,
+  dateFormatForInputControl,
+  deliveryTicket,
+  DELIVERY_TICKET_STATUS,
+  CustomDialogTransition,
+  displayDate
+} from 'src/constants/helpers';
+import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
+import CustomButton from 'src/components/Helpers/CustomButton';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { uniq, map } from 'lodash';
+import axiosInstance from 'src/axios/axiosInstance';
+
+const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess }) => {
+  const toastConfig = useContext(CustomToastContext);
+  const [loading, setLoading] = useState(false);
+  const [minDate, setMinDate] = useState(null);
+
+  useEffect(() => {
+    findValidationDate();
+  }, [selectedRecords]);
+
+  const findValidationDate = async () => {
+    const assets = selectedRecords?.map((e) => e?._id);
+    const { data: { data } } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets, last: 1 });
+    var lastDate: any = new Date();
+    if (data?.date) {
+      lastDate = new Date(data?.date);
+      lastDate.setHours(0, 0, 0);
+    }
+    setMinDate(lastDate);
+  };
+
+  const handleSubmit = (values) => {
+    setLoading(true);
+    let data = {};
+    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+    if (loadingTicketIds.length) {
+      data['_ids'] = loadingTicketIds?.map((e) => e);
+      data['status'] = DELIVERY_TICKET_STATUS.delivered;
+      data['receiveDate'] = values?.receiveDate;
+      data['signatures'] = [];
+      axiosInstance()
+        .post(`${deliveryTicket.api}/updatebulk`, data)
+        .then(({ data: { data } }) => {
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: `Assets Received Successfully`
+          });
+          handleSuccess();
+          setLoading(false);
+        })
+        .catch((error) => {
+          setLoading(false);
+          toastConfig.setToastConfig(error);
+        });
+    }
+  };
+
+  const validate = (values) => {
+    const errors: any = {};
+    console.log(values);
+    if (!values.receiveDate) {
+      console.log("here");
+      errors.receiveDate = 'Receive Date is Required';
+    } else if (minDate && values.receiveDate < minDate) {
+      errors.receiveDate = `Receive date can't be less than ${displayDate(minDate)}`;
+    }
+    return errors;
+  };
+
+  return (
+    <Dialog
+      fullWidth
+      maxWidth="sm"
+      open={true}
+      TransitionComponent={CustomDialogTransition}
+      onClose={(e, reason) => {
+        if (reason !== 'backdropClick') {
+          handleClose();
+        }
+      }}
+      aria-labelledby="assign-roles-dialog"
+    >
+      <Formik initialValues={{ receiveDate: minDate ? minDate : new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate} enableReinitialize={true}>
+        {({ submitForm, touched, errors, setFieldValue, values }) => (
+          <Form autoComplete="off" autoCorrect="off" noValidate>
+            <MuiPickersUtilsProvider utils={DateUtils}>
+              <CustomDialogHeader title="Receive Assets" showRequiredLabel={true} onClose={handleClose} />
+              <CustomDialogContent>
+                <Box p={1}>
+                  <KeyboardDatePicker
+                    {...(minDate ? { minDate } : {})}
+                    fullWidth
+                    size="small"
+                    margin="dense"
+                    autoOk
+                    required
+                    variant="inline"
+                    inputVariant="outlined"
+                    value={values.receiveDate}
+                    name="receiveDate"
+                    placeholder={'Receive Date'}
+                    label="Receive Date"
+                    format={dateFormatForInputControl}
+                    onChange={(value) => {
+                      var newDate = convertDateInDateTime(value);
+                      setFieldValue('receiveDate', newDate);
+                    }}
+                    error={touched['receiveDate'] && Boolean(errors['receiveDate'])}
+                    helperText={touched['receiveDate'] && errors['receiveDate']}
+                  />
+                </Box>
+              </CustomDialogContent>
+              <CustomDialogFooter>
+                <Button color="primary" size="small" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <CustomButton loading={loading} disabled={loading} variant="contained" color="primary" type="submit" onClick={submitForm}>
+                  {'Receive'}
+                </CustomButton>
+              </CustomDialogFooter>
+            </MuiPickersUtilsProvider>
+          </Form>
+        )}
+      </Formik>
+    </Dialog>
+  );
+};
+
+export default ReceiveDialog;
