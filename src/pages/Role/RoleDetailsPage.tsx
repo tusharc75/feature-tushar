@@ -76,7 +76,7 @@ const RoleDetailsPage = () => {
     isProductInventorySettings: false,
     isApproveAccount: false,
     isConvertLeadToOpportunity: false,
-    isAllowServicePerformRentalManagement:false,
+    isAllowServicePerformRentalManagement: false
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
@@ -141,7 +141,7 @@ const RoleDetailsPage = () => {
       resource: sidebarResource.lead,
       fieldLabel: 'Convert Lead To Opportunity',
       fieldName: 'isConvertLeadToOpportunity'
-    },
+    }
   ];
 
   const fieldOfPolicyResources = policyResources?.map((obj) => {
@@ -218,7 +218,7 @@ const RoleDetailsPage = () => {
         isProductInventorySettings: e.target.checked,
         isApproveAccount: e.target.checked,
         isConvertLeadToOpportunity: e.target.checked,
-        isAllowServicePerformRentalManagement:e.target.checked
+        isAllowServicePerformRentalManagement: e.target.checked
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
@@ -498,20 +498,20 @@ const RoleDetailsPage = () => {
         const childResourceFields = newField.filter((_field) => _field.fieldData.resource === _childResource.name);
         _childResource[access] = checked;
         if (checked) {
-          _childResource['isRead'] = checked
+          _childResource['isRead'] = checked;
         }
-        childResourceFields?.forEach(_field => {
-          _field[access] = checked
+        childResourceFields?.forEach((_field) => {
+          _field[access] = checked;
           if (access === 'isCreate' || access === 'isUpdate') {
             if (checked) {
-              _field['isRead'] = checked
+              _field['isRead'] = checked;
             }
           }
         });
       }
-    })
+    });
     setChildrenResource(toUpdateResource);
-  }
+  };
 
   const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0;
 
@@ -621,7 +621,7 @@ const RoleDetailsPage = () => {
                         resource={resource}
                         setField={setField}
                         setResource={setResource}
-                          updateChildResource={updateChildResource}
+                        updateChildResource={updateChildResource}
                         isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
                         tier={values?.tier}
                       />
@@ -630,7 +630,9 @@ const RoleDetailsPage = () => {
                           <RoleEngine
                             style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
                             field={field}
-                            resource={childrenResource?.map((e, index) => { return { ...e, resourceId: index } })}
+                            resource={childrenResource?.map((e, index) => {
+                              return { ...e, resourceId: index };
+                            })}
                             setField={setField}
                             setResource={setChildrenResource}
                             isDisable={permissions?.role.isUpdate ? (!isEdit ? true : false) : true}
