@@ -38,7 +38,7 @@ import AskSupplierPriceDialog from './AskSupplierPriceDialog';
 import PriceRequestDialog from './PriceRequestDialog';
 import QuotationQtyDialog from './QuotationQtyDialog';
 import AdditionalCostDialog from './AdditionalCostDialog';
-import { fetch_child_resource_fields, fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
+import { fetch_child_resource_fields_perm } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 

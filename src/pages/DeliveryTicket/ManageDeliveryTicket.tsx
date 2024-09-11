@@ -105,6 +105,10 @@ const ManageDeliveryTicket = ({
     if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading) {
       last = 2;
     }
+    else if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset
+      && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading) {
+      last = 2;
+    }
     const {
       data: { data }
     } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: last });

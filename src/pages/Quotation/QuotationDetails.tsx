@@ -129,7 +129,7 @@ const QuotationDetails = () => {
       if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
         tempQuotationFields = tempQuotationFields.filter(
           (d) =>
-            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'fieldJob']?.includes(
+            !['repairOrder', 'salesOrder', 'fieldJob']?.includes(
               d?.fieldData?.fieldName
             )
         );
@@ -137,7 +137,7 @@ const QuotationDetails = () => {
       if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
         tempQuotationFields = tempQuotationFields.filter(
           (d) =>
-            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'repairOrder', 'salesOrder', 'rentalJob']?.includes(
+            !['repairOrder', 'salesOrder', 'rentalJob']?.includes(
               d?.fieldData?.fieldName
             )
         );
@@ -145,14 +145,14 @@ const QuotationDetails = () => {
       if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
         tempQuotationFields = tempQuotationFields.filter(
           (d) =>
-            !['expectedCustomerDeliveryDate', 'supplierSuggestedDeliveryDate', 'salesOrder', 'fieldJob', 'rentalJob']?.includes(
+            !['salesOrder', 'fieldJob', 'rentalJob']?.includes(
               d?.fieldData?.fieldName
             )
         );
       }
       if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
         tempQuotationFields = tempQuotationFields.filter(
-          (d) => !['estimateStartDate', 'estimateEndDate', 'fieldJob', 'repairOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
+          (d) => !['fieldJob', 'repairOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
         );
       }
     }

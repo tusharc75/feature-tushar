@@ -5,16 +5,15 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
-const LogDialog = ({ open, onClose, log }) => {
+const LogDialog = ({ onClose, data }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
   return (
     <Dialog
       maxWidth="md"
       fullScreen={fullScreen || isMobile || isTablet}
       TransitionComponent={CustomDialogTransition}
       aria-labelledby="customized-dialog-title"
-      open={open}
+      open={true}
       fullWidth
     >
       <CustomDialogHeader
@@ -24,7 +23,7 @@ const LogDialog = ({ open, onClose, log }) => {
         }}
         showManimizeMaximize={true}
         showRequiredLabel={false}
-        title={`Log`}
+        title={`Log - ${data?.user?.optionLabel} (${data?.date})`}
         onClose={onClose}
       />
       <CustomDialogContent isFooterPresent={false}>
@@ -37,8 +36,8 @@ const LogDialog = ({ open, onClose, log }) => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {log &&
-                  log?.map((item: any, index: any) => (
+                {data?.log &&
+                  data?.log?.map((item: any, index: any) => (
                     <TableRow key={index}>
                       <TableCell>{item?.detail}</TableCell>
                     </TableRow>

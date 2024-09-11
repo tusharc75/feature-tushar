@@ -512,7 +512,10 @@ const CreateFormBuilder = () => {
           )}
         </Box>
       </Box>
-      {openHistoryDialog && <History onClose={() => closeHistoryDialog()} open={openHistoryDialog} resource={resource} />}
+      {openHistoryDialog && <History
+        onClose={() => closeHistoryDialog()}
+        resource={resource}
+      />}
     </Fragment>
   );
 };

@@ -11,10 +11,39 @@ import {
   TableRow,
   FormControlLabel,
   Collapse,
-  IconButton
+  IconButton,
+  Input,
+  TextField,
+  Switch
 } from '@material-ui/core';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
 import { ROLE_TIER } from 'src/constants/helpers';
+import { TableData } from 'src/components/Shared/types';
+import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
+import HtmlTooltip from 'src/components/CustomTooltipTitle';
+
+function sortByFieldLabel<T>(data: T[], accessorfn: (data: T) => string, sort: 'asc' | 'des'): T[] {
+  if (sort === 'asc') {
+    return [...data].sort((a, b) => {
+      if (accessorfn(a) < accessorfn(b)) {
+        return -1;
+      }
+      if (accessorfn(a) > accessorfn(b)) {
+        return 1;
+      }
+      return 0;
+    });
+  }
+  return [...data].sort((a, b) => {
+    if (accessorfn(b) < accessorfn(a)) {
+      return -1;
+    }
+    if (accessorfn(b) > accessorfn(a)) {
+      return 1;
+    }
+    return 0;
+  });
+}
 
 interface RoleProps {
   field: any[];
@@ -25,17 +54,57 @@ interface RoleProps {
   style?: React.CSSProperties;
   tier?: string;
   child?: boolean;
-  updateChildResource?: (resource: string, access: string, checked: boolean) => void
+  updateChildResource?: (resource: string, access: string, checked: boolean) => void;
 }
 
-const RoleEngine = (props: RoleProps) => {
-  const { field, resource, setField, setResource, isDisable, style, tier = ROLE_TIER.tier1, child = false, updateChildResource = null } = props;
+type SortingType = 'asc' | 'des' | '';
 
+type TableSearchFilterState = {
+  search: string;
+  sort: SortingType;
+};
+
+const RoleEngine = ({
+  field,
+  resource,
+  setField,
+  setResource,
+  isDisable,
+  style,
+  tier = ROLE_TIER.tier1,
+  child = false,
+  updateChildResource = null
+}: RoleProps) => {
   const [isReadChecked, setIsReadChecked] = useState(false);
   const [isCreateChecked, setIsCreateChecked] = useState(false);
   const [isUpdateChecked, setIsUpdateChecked] = useState(false);
   const [isDeleteChecked, setIsDeleteChecked] = useState(false);
   const [isHiddenChecked, setIsHiddenChecked] = useState(false);
+  const [tableData, setTableData] = useState<TableData[]>([]);
+  const [filteredAndSortedData, setFilteredAndSortedData] = useState<TableData[]>([]);
+  const [deepSearch, setDeepSearch] = useState(false);
+  const [tableSearchFilterState, setTableSearchFilterState] = useState<TableSearchFilterState>({
+    search: '',
+    sort: ''
+  });
+
+  useEffect(() => {
+    const generateTableData = () => {
+      const tableData = [];
+      for (let i = 0; i < resource.length; i++) {
+        const _resource = resource[i];
+        const resourceFields = field.filter((_field) => _field.fieldData.resource === _resource.name).sort((a, b) => a.order - b.order);
+        const tableRow = {
+          resource: _resource,
+          fields: resourceFields
+        };
+        tableData.push(tableRow);
+      }
+      setFilteredAndSortedData(tableData);
+      setTableData(tableData);
+    };
+    generateTableData();
+  }, [field, resource]);
 
   const [renderCount, setRenderCount] = useState(0);
 
@@ -151,13 +220,15 @@ const RoleEngine = (props: RoleProps) => {
         _resource[propertyToUpdate] = isChecked;
       }
       if (['isRead', 'isCreate', 'isUpdate']?.includes(propertyToUpdate)) {
-        newField.filter((d) => d.fieldData.resource === _resource.name).forEach((_field) => {
-          if (isChecked === true) {
-            _field[propertyToUpdate] = !_resource[`${propertyToUpdate}Disabled`] && !_field[`${propertyToUpdate}Disabled`] && isChecked;
-          } else {
-            _field[propertyToUpdate] = isChecked;
-          }
-        });
+        newField
+          .filter((d) => d.fieldData.resource === _resource.name)
+          .forEach((_field) => {
+            if (isChecked === true) {
+              _field[propertyToUpdate] = !_resource[`${propertyToUpdate}Disabled`] && !_field[`${propertyToUpdate}Disabled`] && isChecked;
+            } else {
+              _field[propertyToUpdate] = isChecked;
+            }
+          });
       }
     });
     setResource(newResource);
@@ -376,120 +447,231 @@ const RoleEngine = (props: RoleProps) => {
     validateTier2(resource, field, selectedResource);
   }, [selectedResource]);
 
+  const handleSearchFilter = (tableSearchFilterState: TableSearchFilterState, _deepSearch = deepSearch) => {
+    let data = [...tableData];
+    const { search, sort } = tableSearchFilterState;
+    if (search) {
+      let tempData: TableData[] = [];
+      for (const d of data) {
+        const isTopLevelMatch = d.resource.resourceLabel.toLowerCase().includes(search.toLowerCase());
+        // Run deep search inside field data
+        if (_deepSearch) {
+          const deepLevelMatch = d.fields
+            .map((f) => f.fieldData.fieldLabel)
+            .join(',')
+            .toLowerCase()
+            .includes(search.toLowerCase());
+          if (!deepLevelMatch && isTopLevelMatch) {
+            tempData.push(d); // Push the top level data
+          } else if (deepLevelMatch) {
+            let newData = { ...d, fields: d.fields.filter((f) => f.fieldData.fieldLabel.toLowerCase().includes(search.toLowerCase())) };
+            tempData.push(newData);
+          }
+        } else if (isTopLevelMatch) {
+          // Run top level searh
+          tempData.push(d);
+        }
+      }
+      data = tempData;
+    }
+
+    if (sort) {
+      const sortData = sortByFieldLabel(data, (d) => d.resource.resourceLabel, sort);
+      data = sortData;
+    }
+    setFilteredAndSortedData(data);
+  };
+
+  const handleApplySortSearchFilter = (value: SortingType | string, type: 'search' | 'sort') => {
+    setTableSearchFilterState((prev) => {
+      const newData = { ...prev, [type]: value };
+      handleSearchFilter(newData);
+      return newData;
+    });
+  };
+
+  const handleSort = () => {
+    if (tableSearchFilterState.sort === '') {
+      handleApplySortSearchFilter('asc', 'sort');
+    }
+    if (tableSearchFilterState.sort === 'asc') {
+      handleApplySortSearchFilter('des', 'sort');
+    }
+    if (tableSearchFilterState.sort === 'des') {
+      handleApplySortSearchFilter('', 'sort');
+    }
+  };
+
   return (
-    <TableContainer
-      style={{ height: 400, minHeight: 400, ...style }}
-      className="border border-[var(--common-border-color)] rounded-[4px] shadow-[0px_20.3165px_40.6331px_rgba(0,0,0,0.03)]"
-    >
-      <Table stickyHeader aria-label="roles" className="roles-table">
-        <TableHead>
-          <TableRow>
-            <TableCell className="bg-[var(--form-head-bg)_!important] dark:text-[white_!important] text-[#2a3042_!important]">Names</TableCell>
-            <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2}
-                    checked={isReadChecked}
-                    onChange={(e) => {
-                      setIsReadChecked(e.target.checked);
-                      updateRoles('isRead', e.target.checked);
-                    }}
-                  />
-                }
-                label="Read"
-              />
-            </TableCell>
-            <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
-                    checked={isCreateChecked}
-                    onChange={(e) => {
-                      setIsCreateChecked(e.target.checked);
-                      updateRoles('isCreate', e.target.checked);
-
-                      if (e.target.checked && !isReadChecked) {
+    <div>
+      <div className="mb-2 flex justify-end gap-3 text-right">
+        <HtmlTooltip title="Deep search will also sift through sub-items">
+          <FormControlLabel
+            labelPlacement="start"
+            control={
+              <>
+                <Checkbox
+                  checked={deepSearch}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setDeepSearch(checked);
+                    handleSearchFilter(tableSearchFilterState, checked);
+                  }}
+                />
+              </>
+            }
+            label="Deep search"
+          />
+        </HtmlTooltip>
+        <TextField
+          className="min-w-[300px]"
+          variant="outlined"
+          label={'Search..'}
+          size="small"
+          type="search"
+          value={tableSearchFilterState.search}
+          onChange={(e) => handleApplySortSearchFilter(e.target.value, 'search')}
+        />
+      </div>
+      <TableContainer
+        style={{ height: 400, minHeight: 400, ...style }}
+        className="rounded-[4px] border border-[var(--common-border-color)] shadow-[0px_20.3165px_40.6331px_rgba(0,0,0,0.03)]"
+      >
+        <Table stickyHeader aria-label="roles" className="roles-table">
+          <TableHead>
+            <TableRow>
+              <TableCell className="bg-[var(--form-head-bg)_!important] text-[#2a3042_!important] dark:text-[white_!important]">
+                <HtmlTooltip
+                  className="block max-w-fit"
+                  title={
+                    tableSearchFilterState.sort
+                      ? `Sorted by ${tableSearchFilterState.sort === 'asc' ? 'ascending' : 'descending'} order`
+                      : 'Click to sort'
+                  }
+                >
+                  <button
+                    className="-ml-1 flex cursor-pointer items-center gap-2 rounded border-0 bg-transparent px-1 py-1 transition-colors hover:bg-gray-200"
+                    onClick={handleSort}
+                  >
+                    Names <RenderSortIcon sortBy={tableSearchFilterState.sort} />
+                  </button>
+                </HtmlTooltip>
+              </TableCell>
+              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={isDisable || tier === ROLE_TIER.tier2}
+                      checked={isReadChecked}
+                      onChange={(e) => {
                         setIsReadChecked(e.target.checked);
                         updateRoles('isRead', e.target.checked);
-                      }
-                    }}
-                  />
-                }
-                label="Create"
-              />
-            </TableCell>
-            <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
-                    checked={isUpdateChecked}
-                    onChange={(e) => {
-                      setIsUpdateChecked(e.target.checked);
-                      updateRoles('isUpdate', e.target.checked);
+                      }}
+                    />
+                  }
+                  label="Read"
+                />
+              </TableCell>
+              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
+                      checked={isCreateChecked}
+                      onChange={(e) => {
+                        setIsCreateChecked(e.target.checked);
+                        updateRoles('isCreate', e.target.checked);
 
-                      if (e.target.checked && !isReadChecked) {
-                        setIsReadChecked(e.target.checked);
-                        updateRoles('isRead', e.target.checked);
-                      }
-                    }}
-                  />
-                }
-                label="Update"
-              />
-            </TableCell>
-            <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
-                    checked={isDeleteChecked}
-                    onChange={(e) => {
-                      setIsDeleteChecked(e.target.checked);
-                      updateRoles('isDelete', e.target.checked);
+                        if (e.target.checked && !isReadChecked) {
+                          setIsReadChecked(e.target.checked);
+                          updateRoles('isRead', e.target.checked);
+                        }
+                      }}
+                    />
+                  }
+                  label="Create"
+                />
+              </TableCell>
+              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
+                      checked={isUpdateChecked}
+                      onChange={(e) => {
+                        setIsUpdateChecked(e.target.checked);
+                        updateRoles('isUpdate', e.target.checked);
 
-                      if (e.target.checked && !isReadChecked) {
-                        setIsReadChecked(e.target.checked);
-                        updateRoles('isRead', e.target.checked);
-                      }
-                    }}
-                  />
-                }
-                label="Delete"
-              />
-            </TableCell>
-            <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
-                    checked={isHiddenChecked}
-                    onChange={(e) => {
-                      setIsHiddenChecked(e.target.checked);
-                      updateRoles('isHidden', e.target.checked);
-                    }}
-                  />
-                }
-                label="Hidden"
-              />
-            </TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {resource.map((_resource, outerIndex) => {
-            const resourceFields = field.filter((_field) => _field.fieldData.resource === _resource.name).sort((a, b) => a.order - b.order);
-            return (
-              <React.Fragment key={outerIndex}>
-                <Row _resource={_resource} isDisable={isDisable} handleChange={handleChange} fieldCheckbox={resourceFields} />
-              </React.Fragment>
-            );
-          })}
-        </TableBody>
-      </Table>
-    </TableContainer>
+                        if (e.target.checked && !isReadChecked) {
+                          setIsReadChecked(e.target.checked);
+                          updateRoles('isRead', e.target.checked);
+                        }
+                      }}
+                    />
+                  }
+                  label="Update"
+                />
+              </TableCell>
+              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
+                      checked={isDeleteChecked}
+                      onChange={(e) => {
+                        setIsDeleteChecked(e.target.checked);
+                        updateRoles('isDelete', e.target.checked);
+
+                        if (e.target.checked && !isReadChecked) {
+                          setIsReadChecked(e.target.checked);
+                          updateRoles('isRead', e.target.checked);
+                        }
+                      }}
+                    />
+                  }
+                  label="Delete"
+                />
+              </TableCell>
+              <TableCell align="center" className="bg-[var(--form-head-bg)_!important]">
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      disabled={isDisable || tier === ROLE_TIER.tier2 || tier === ROLE_TIER.tier3}
+                      checked={isHiddenChecked}
+                      onChange={(e) => {
+                        setIsHiddenChecked(e.target.checked);
+                        updateRoles('isHidden', e.target.checked);
+                      }}
+                    />
+                  }
+                  label="Hidden"
+                />
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {filteredAndSortedData.map(({ resource: _resource, fields }, outerIndex) => {
+              return (
+                <React.Fragment key={outerIndex}>
+                  <Row _resource={_resource} isDisable={isDisable} handleChange={handleChange} fieldCheckbox={fields} />
+                </React.Fragment>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </div>
   );
+};
+
+const RenderSortIcon = ({ sortBy }: { sortBy: SortingType }) => {
+  if (sortBy === 'asc') {
+    return <IoIosArrowUp />;
+  }
+  if (sortBy === 'des') {
+    return <IoIosArrowDown />;
+  }
+  return <></>;
 };
 
 const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {

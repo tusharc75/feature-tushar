@@ -3,7 +3,7 @@ import { Formik, Form } from 'formik';
 import { Box, Button, Grid } from '@material-ui/core';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../components/Helpers/FormTypes';
+import InputField from 'src/components/Helpers/InputField';
 import CustomButton from '../../../components/Helpers/CustomButton';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
@@ -13,17 +13,16 @@ import {
   CustomDialogTransition,
   getObjKeys,
   getObjKeysWithValues,
-  setFieldsInAscendingOrder,
   yupSchema,
   productionOrder,
-  GenerateResourceLineNumber
+  GenerateResourceLineNumber,
+  sidebarResource
 } from '../../../constants/helpers';
 import axiosInstance from '../../../axios/axiosInstance';
 import Dialog from '@material-ui/core/Dialog';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { useHistory } from 'react-router-dom';
 import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
@@ -33,9 +32,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
 
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
@@ -43,9 +40,6 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
   const [productionOrderData, setProductionOrderData] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('');
 
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   useEffect(() => {
     setLoading(true);
@@ -96,10 +90,10 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
               initialData[key] = referenceData[key];
             }
             const field = fieldsDataForCreate?.find((f) => f?.fieldName === key);
-              if (field) {
-                field.disableOnEdit = true;
-                field.isUneditable = true;
-              }
+            if (field) {
+              field.disableOnEdit = true;
+              field.isUneditable = true;
+            }
           });
         }
         setInitialData({
@@ -214,56 +208,17 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <FormTypes
-                                      productionOrderId={productionOrderId}
-                                      {...field}
-                                      fieldData={field}
-                                      fields={initialData?.fields}
-                                      disabled={productionOrderId && field.disableOnEdit}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={
-                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                          ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
-                                          : null
-                                      }
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.productionOrder}
+                    referenceId={productionOrderId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -286,7 +241,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                   loading={loading}
                   variant="contained"
                   color="primary"
-                  disabled={uploadingImageOrFileProgress > 0 || loading}
+                  disabled={loading}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);
