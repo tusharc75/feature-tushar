@@ -64,7 +64,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     </Typography>
                   )}
                 </Box>
-              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? ( //with lookup resource
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? (
                 <ResourceDropdown
                   type={fieldData.type}
                   lookupResource={values['lookupResource']}
@@ -74,7 +74,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   touched={touched}
                   errors={errors}
                 />
-              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && !values['lookup'] ? ( //without lookup resource
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && !values['lookup'] ? (
                 <ResourceDropdown
                   type={fieldData.type}
                   value={values['defaultValue']}
@@ -94,8 +94,12 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   touched={touched}
                   errors={errors}
                 />
-              ) : fieldData.type === 'checkBox' ? (
-                <CheckboxDropdown value={values['defaultValue']} setFieldValue={setFieldValue} touched={touched} errors={errors} />
+              ) : fieldData.type === 'checkBox' || fieldData.type === 'switch' ? (
+                <CheckboxDropdown
+                  value={values['defaultValue']}
+                  setFieldValue={setFieldValue}
+                  touched={touched}
+                  errors={errors} />
               ) : (
                 <Box display="block">
                   <TextField
