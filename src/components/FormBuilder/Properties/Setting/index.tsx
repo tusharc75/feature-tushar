@@ -3,6 +3,7 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
 import { Autocomplete } from '@material-ui/lab';
 import { Entity } from '../../AddField/entity';
+import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDropdown';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
   return (
@@ -18,6 +19,9 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   checked={values['isDefaultValue']}
                   onChange={(e) => {
                     setFieldValue('isDefaultValue', e.target.checked);
+                    if (fieldData.type === 'checkBox' && !e.target.checked) {
+                      setFieldValue('defaultValue', '');
+                    }
                   }}
                   color="primary"
                 />
@@ -60,11 +64,21 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                     </Typography>
                   )}
                 </Box>
-              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? (
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && values['lookup'] ? ( //with lookup resource
                 <ResourceDropdown
                   type={fieldData.type}
                   lookupResource={values['lookupResource']}
                   value={values['defaultValue']}
+                  setFieldValue={setFieldValue}
+                  brandId={brandId}
+                  touched={touched}
+                  errors={errors}
+                />
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && !values['lookup'] ? ( //without lookup resource
+                <ResourceDropdown
+                  type={fieldData.type}
+                  value={values['defaultValue']}
+                  options={values.option}
                   setFieldValue={setFieldValue}
                   brandId={brandId}
                   touched={touched}
@@ -80,6 +94,8 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   touched={touched}
                   errors={errors}
                 />
+              ) : fieldData.type === 'checkBox' ? (
+                <CheckboxDropdown value={values['defaultValue']} setFieldValue={setFieldValue} touched={touched} errors={errors} />
               ) : (
                 <Box display="block">
                   <TextField
