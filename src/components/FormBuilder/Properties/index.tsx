@@ -363,7 +363,7 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
     handleClose();
   };
 
-  function validate(values) {
+  function validate(values, fieldData) {
     const errors = {};
     if (values.type === 'formula' || values.isFormula === true) {
       if (!values.inputFields || values.inputFields.length === 0) {
@@ -416,8 +416,10 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
       }
     }
 
-    if (values.isDefaultValue && !values.defaultValue) {
-      errors['defaultValue'] = 'Please enter default value.';
+    if (fieldData.type !== 'checkBox') {
+      if (values.isDefaultValue && !values.defaultValue) {
+        errors['defaultValue'] = 'Please enter default value.';
+      }
     }
 
     if (values.isTooltip && !values.tooltipMessage) {
@@ -503,7 +505,13 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
         }
       }}
     >
-      <Formik enableReinitialize={true} initialValues={initialValues} validationSchema={FieldSchema} onSubmit={handleSave} validate={validate}>
+      <Formik
+        enableReinitialize={true}
+        initialValues={initialValues}
+        validationSchema={FieldSchema}
+        onSubmit={handleSave}
+        validate={(v) => validate(v, fieldData)}
+      >
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <>
             <CustomDialogHeader
