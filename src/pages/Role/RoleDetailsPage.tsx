@@ -543,17 +543,15 @@ const RoleDetailsPage = () => {
       var data: any = e.target.result;
       const parsedData = JSON.parse(data)
       const {resource, field, childrenResource} = parsedData[0];
-      if(!resource || !childrenResource || !field){
+      if(!resource || !field){
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
           message: 'Invalid data'
         });
       }
-      setResource(resource);
-      setField(field);
-      setChildrenResource(childrenResource)
-      handleUpdateRole(field, resource)
+    
+      handleUpdateRole(field, resource);
     };
     reader.readAsBinaryString(f);
   }
