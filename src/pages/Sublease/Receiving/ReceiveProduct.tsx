@@ -43,15 +43,15 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
     axiosInstance()
       .put(
         `${sublease.api}/${subleaseId}/receive-sublease`,
-      { 
-        material: material?.map((m) => ({
-          _id: m?._id,
-          product: m?.product,
-          assetNumber: m?.assetNumber,
-          assetNumberType: m?.assetNumberType
-        })),
-        receiveDate: receiveDate
-      }
+        {
+          material: material?.map((m) => ({
+            _id: m?._id,
+            product: m?.product,
+            assetNumber: m?.assetNumber,
+            assetNumberType: m?.assetNumberType
+          })),
+          receiveDate: receiveDate
+        }
       )
       .then(({ data }) => {
         setIsSubmitting(false);
@@ -110,147 +110,147 @@ const ReceiveProduct = ({ onClose, material, subleaseId, onSuccess, subleaseData
       >
         <CustomDialogHeader title={'Receiving'} onClose={onClose}></CustomDialogHeader>
         <MuiPickersUtilsProvider utils={DateUtils}>
-        <Formik
-          initialValues={{
-            receiveDate: new Date(),
-            material: material.map((d) => ({
-              _id: d.uniqueId,
-              materialId: d.materialId,
-              productName: d.productName,
-              totalQty: d.qty,
-              assetQty: d.assetQty,
-              qty: d.qty - d?.assetQty
-            }))
-          }}
-          enableReinitialize={true}
-          onSubmit={() => {}}
-        >
-          {({ values, setFieldValue }) => (
-            <>
-              <CustomDialogContent>
-                {values.material && values.material.length ? (
-                  <Box p={2}>
-                    <Form>
-                      <FieldArray
-                        name="material"
-                        render={(arrayHelpers) => (
-                          <div className="grid gap-[15px] sm:gap-[18px]">
-                            {values.material.map((data, index) => (
-                              <div
-                                style={{ border: '1.5px solid var(--common-border-color)' }}
-                                className="grid gap-[15px] rounded-[6px] px-[23px] pb-[21px] pt-[17px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)] sm:grid-cols-[24px,1fr] md:gap-[29px]"
-                                key={index}
-                              >
-                                <div className="flex h-[24px] w-[24px] items-center justify-center rounded-[6px] bg-[var(--new\_theme\_color)]">
-                                  <p className="text-[13px] font-[700] leading-none text-white">{index + 1}</p>
-                                </div>
-                                <div>
-                                  <div
-                                    style={{ borderBottom: '1px solid var(--common-border-color)' }}
-                                    className="flex flex-wrap gap-[20px]  border-b border-b-[var(--common-border-color)] pb-[9px] md:gap-[61px]"
-                                  >
-                                    <span>
-                                      <span className="font-semibold text-[var(--primary-text)]">Quantity: </span>
-                                      {data?.totalQty}
-                                    </span>
-                                    <span>
-                                      <span className="font-semibold text-[var(--primary-text)]">Received: </span>
-                                      {data?.assetQty || 0}
-                                    </span>
+          <Formik
+            initialValues={{
+              receiveDate: new Date(),
+              material: material.map((d) => ({
+                _id: d.uniqueId,
+                materialId: d.materialId,
+                productName: d.productName,
+                totalQty: d.qty,
+                assetQty: d.assetQty,
+                qty: d.qty - d?.assetQty
+              }))
+            }}
+            enableReinitialize={true}
+            onSubmit={() => { }}
+          >
+            {({ values, setFieldValue }) => (
+              <>
+                <CustomDialogContent>
+                  {values.material && values.material.length ? (
+                    <Box p={2}>
+                      <Form>
+                        <FieldArray
+                          name="material"
+                          render={(arrayHelpers) => (
+                            <div className="grid gap-[15px] sm:gap-[18px]">
+                              {values.material.map((data, index) => (
+                                <div
+                                  style={{ border: '1.5px solid var(--common-border-color)' }}
+                                  className="grid gap-[15px] rounded-[6px] px-[23px] pb-[21px] pt-[17px] shadow-[0px_4px_26.8799991607666px_0px_rgba(0,0,0,0.06)] sm:grid-cols-[24px,1fr] md:gap-[29px]"
+                                  key={index}
+                                >
+                                  <div className="flex h-[24px] w-[24px] items-center justify-center rounded-[6px] bg-[var(--new\_theme\_color)]">
+                                    <p className="text-[13px] font-[700] leading-none text-white">{index + 1}</p>
                                   </div>
-                                  <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
-                                    <TextField
-                                      variant="outlined"
-                                      name={`${data?._id}`}
-                                      label={'Product'}
-                                      value={data?.productName}
-                                      size="small"
-                                      disabled
-                                    />
-                                    <TextField
-                                      fullWidth
-                                      label="Quantity"
-                                      variant="outlined"
-                                      type="number"
-                                      size="small"
-                                      onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
-                                      name="qty"
-                                      required
-                                      placeholder="Asset Quantity"
-                                      value={data.qty}
-                                      onChange={(e) => {
-                                        const value = e.target.value.replace(/[^0-9]/g, '');
-                                        arrayHelpers.replace(index, {
-                                          ...values.material[index],
-                                          ['qty']: value
-                                        });
-                                      }}
-                                      error={validate([data])?.qty}
-                                      helperText={validate([data]).qty ? validate([data]).qty : ''}
-                                    />
+                                  <div>
+                                    <div
+                                      style={{ borderBottom: '1px solid var(--common-border-color)' }}
+                                      className="flex flex-wrap gap-[20px]  border-b border-b-[var(--common-border-color)] pb-[9px] md:gap-[61px]"
+                                    >
+                                      <span>
+                                        <span className="font-semibold text-[var(--primary-text)]">Quantity: </span>
+                                        {data?.totalQty}
+                                      </span>
+                                      <span>
+                                        <span className="font-semibold text-[var(--primary-text)]">Received: </span>
+                                        {data?.assetQty || 0}
+                                      </span>
+                                    </div>
+                                    <div className="mt-[28px] grid grid-cols-1 gap-[20px] md:grid-cols-2 md:gap-[25px] lg:grid-cols-3">
+                                      <TextField
+                                        variant="outlined"
+                                        name={`${data?._id}`}
+                                        label={'Product'}
+                                        value={data?.productName}
+                                        size="small"
+                                        disabled
+                                      />
+                                      <TextField
+                                        fullWidth
+                                        label="Quantity"
+                                        variant="outlined"
+                                        type="number"
+                                        size="small"
+                                        onKeyDown={(e) => ['e', 'E', '+', '-'].includes(e.key) && e.preventDefault()}
+                                        name="qty"
+                                        required
+                                        placeholder="Asset Quantity"
+                                        value={data.qty}
+                                        onChange={(e) => {
+                                          const value = e.target.value.replace(/[^0-9]/g, '');
+                                          arrayHelpers.replace(index, {
+                                            ...values.material[index],
+                                            ['qty']: value
+                                          });
+                                        }}
+                                        error={validate([data])?.qty}
+                                        helperText={validate([data]).qty ? validate([data]).qty : ''}
+                                      />
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              ))}
+                            </div>
+                          )}
+                        />
+                        {subleaseData?.type === SUBLEASE_TYPE.vendor && (
+                          <div className="datepicker mt-[14px]">
+                            <KeyboardDatePicker
+                              label="Received Date"
+                              variant="inline"
+                              inputVariant="outlined"
+                              required
+                              autoOk
+                              size="small"
+                              margin="dense"
+                              name="receiveDate"
+                              placeholder="Receive Date"
+                              value={values.receiveDate}
+                              format={dateFormatForInputControl}
+                              maxDate={new Date()}
+                              onChange={(value) => {
+                                setFieldValue('receiveDate', convertDateInDateTime(value));
+                              }}
+                              error={validateDate(values)?.receiveDate}
+                              helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
+                            />
                           </div>
                         )}
-                      />
-                      {subleaseData?.type=== SUBLEASE_TYPE.vendor && (
-                        <div className="datepicker mt-[14px]">
-                          <KeyboardDatePicker
-                            label="Received Date"
-                            variant="inline"
-                            inputVariant="outlined"
-                            required
-                            autoOk
-                            size="small"
-                            margin="dense"
-                            name="receiveDate"
-                            placeholder="Receive Date"
-                            value={values.receiveDate}
-                            format={dateFormatForInputControl}
-                            maxDate={new Date()}
-                            onChange={(value) => {
-                              setFieldValue('receiveDate', convertDateInDateTime(value));
-                            }}
-                            error={validateDate(values)?.receiveDate}
-                            helperText={validateDate(values)?.receiveDate ? validateDate(values)?.receiveDate : ''}
-                          />
-                        </div>
-                      )}
-                    </Form>
-                  </Box>
-                ) : (
-                  <Box p={2} height={300}>
-                    <CommonSkeleton lenArray={[...Array(6).keys()]} />
-                  </Box>
-                )}
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button variant="outlined" size="small" color="primary" onClick={onClose}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={() => {
-                    if (!validate(values.material).qty && (subleaseData.type===SUBLEASE_TYPE.vendor ? !validateDate(values)?.receiveDate : true)) {
-                      handleSubmit(values);
-                    }
-                  }}
-                  size="small"
-                  variant="contained"
-                  color="primary"
-                >
-                  Save
-                </Button>
-              </CustomDialogFooter>
-            </>
-          )}
-        </Formik>
+                      </Form>
+                    </Box>
+                  ) : (
+                    <Box p={2} height={300}>
+                      <CommonSkeleton lenArray={[...Array(6).keys()]} />
+                    </Box>
+                  )}
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  <Button variant="outlined" size="small" color="primary" onClick={onClose}>
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (!validate(values.material).qty && (subleaseData.type === SUBLEASE_TYPE.vendor ? !validateDate(values)?.receiveDate : true)) {
+                        handleSubmit(values);
+                      }
+                    }}
+                    size="small"
+                    variant="contained"
+                    color="primary"
+                  >
+                    Save
+                  </Button>
+                </CustomDialogFooter>
+              </>
+            )}
+          </Formik>
         </MuiPickersUtilsProvider>
       </Dialog>
       {assetNumberDialog.open && (
         <AssetDialog
-          handleClose={() => setAssetNumberDialog({ open: false, material: [], receiveDate: null})}
+          handleClose={() => setAssetNumberDialog({ open: false, material: [], receiveDate: null })}
           products={assetNumberDialog.material}
           handleSuccess={(rows) => {
             handleReceive(rows, assetNumberDialog.receiveDate);
