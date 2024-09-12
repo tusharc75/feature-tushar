@@ -115,11 +115,11 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpda
                         type="date"
                         label="Start Date"
                         name="manualStartDate"
-                        minDate={assetRentalPolicyDate ?? null}
                         onChange={(date) => {
                           setFieldValue('manualStartDate', date);
                         }}
                         {...(values.manualEndDate ? { maxDate: values.manualEndDate } : {})}
+                        {...(assetRentalPolicyDate ? { minDate: assetRentalPolicyDate } : {})}
                       />
                     </Grid>}
                   {data?.isAllowedEndDate &&
