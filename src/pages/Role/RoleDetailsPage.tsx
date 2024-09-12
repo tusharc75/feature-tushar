@@ -566,18 +566,18 @@ const RoleDetailsPage = () => {
         }
      })
      const currField = field?.map((_field)=> {
-      const fieldFromImport = importField?.find((f)=> f.fieldData.fieldName === _field.fieldData.fieldName && f.fieldData.resource === _field.fieldData.resource);
-      if(fieldFromImport){
+      const matchedField = importField?.find((f)=> f.fieldData.fieldName === _field.fieldData.fieldName && f.fieldData.resource === _field.fieldData.resource);
+      if(matchedField){
        return {
         ..._field,
-        isCreate: fieldFromImport?.isCreate,
-        isRead: fieldFromImport?.isRead,
-        isUpdate: fieldFromImport?.isUpdate,
-        isCreateDisabled: fieldFromImport?.isCreateDisabled,
-        isDeleteDisabled: fieldFromImport?.isDeleteDisabled,
-        isHiddenDisabled: fieldFromImport?.isHiddenDisabled,
-        isReadDisabled: fieldFromImport?.isReadDisabled,
-        isUpdateDisabled: fieldFromImport?.isUpdateDisabled
+        isCreate: matchedField?.isCreate,
+        isRead: matchedField?.isRead,
+        isUpdate: matchedField?.isUpdate,
+        isCreateDisabled: matchedField?.isCreateDisabled,
+        isDeleteDisabled: matchedField?.isDeleteDisabled,
+        isHiddenDisabled: matchedField?.isHiddenDisabled,
+        isReadDisabled: matchedField?.isReadDisabled,
+        isUpdateDisabled: matchedField?.isUpdateDisabled
        }
       }else{
         return _field;
