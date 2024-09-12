@@ -68,7 +68,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
+  const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState({open: false, type: null});
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
@@ -356,7 +356,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
-  const handelCancleTickets = () => {
+  const handelCancelTickets = () => {
     setOkBtnLoading(true);
     const loadingTicketIds = uniq(
       map(
@@ -480,7 +480,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
           }
           onClick={() => {
-            setShowConfirmBoxReceive(true);
+            setShowConfirmBoxReceive({open: true, type: null});
           }}
         >
           Receive Assets
@@ -531,6 +531,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           }}
         >
           Cancel In-Transit Loading Ticket(s)
+        </MenuItem>
+        <MenuItem
+          disabled={
+            !canReceive ||
+            selectedRecords.length === 0 ||
+            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || e?.status !== ASSET_STATUS.available)
+          }
+          onClick={() => {
+            setShowConfirmBoxReceive({open: true, type: 'changeReceiveDate'});
+          }}
+        >
+          Change Receive Date
         </MenuItem>
         {/* <MenuItem
           disabled={selectedRecords.length && selectedRecords?.every(e => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ? false : true}
@@ -599,14 +611,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           onOk={handleRemoveTicket}
         />
       )}
-      {showConfirmBoxReceive && (
+      {showConfirmBoxReceive.open && (
         <ReceiveDialog
-          handleClose={() => setShowConfirmBoxReceive(false)}
+          handleClose={() => setShowConfirmBoxReceive({open: false, type: null})}
           selectedRecords={selectedRecords}
           handleSuccess={() => {
             fetchAssetsData();
-            setShowConfirmBoxReceive(false);
+            setShowConfirmBoxReceive({open: false, type: null});
           }}
+          referenceId={showConfirmBoxReceive.type === 'changeReceiveDate' ? transferAssetId : null}
         />
       )}
       {addSerializedAssetDialog.open && (
@@ -647,7 +660,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             if (showConformationDeliverdCancleTicket.type === 'Delivered') {
               cancelDeliveredTicket();
             } else {
-              handelCancleTickets();
+              handelCancelTickets();
             }
           }}
           okBtnLoading={okBtnLoading}
