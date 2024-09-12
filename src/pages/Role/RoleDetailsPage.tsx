@@ -513,9 +513,9 @@ const RoleDetailsPage = () => {
   const handleExportRole = () => {
     const data = [
       {
-        resource: resource,
-        childrenResource: childrenResource,
-        field: field
+        importResource: resource,
+        importChildrenResource: childrenResource,
+        importField: field
       }
     ];
     const jsonData = new Blob([JSON.stringify(data)], { type: 'application/json' });
@@ -536,14 +536,78 @@ const RoleDetailsPage = () => {
     reader.onload = function (e) {
       var data: any = e.target.result;
       const parsedData = JSON.parse(data)
-      const { resource, field } = parsedData[0];
-      if (!resource || !field) {
+      const { importResource, importChildrenResource, importField  } = parsedData[0];
+
+      if (!importResource || !importField || !importChildrenResource) {
         toastConfig.setToastConfig({
           open: true,
           type: 'error',
           message: 'Invalid data'
         });
       }
+     const currResource = resource?.map((_resource)=> {
+        const matchedResource = importResource?.find((r)=> r.name===_resource.name);
+        if(matchedResource){
+         return {
+          ..._resource,
+          isCreate: matchedResource?.isCreate,
+          isDelete: matchedResource?.isDelete,
+          isHidden: matchedResource?.isHidden,
+          isRead: matchedResource?.isRead,
+          isUpdate: matchedResource?.isUpdate,
+          isCreateDisabled: matchedResource?.isCreateDisabled,
+          isDeleteDisabled: matchedResource?.isDeleteDisabled,
+          isHiddenDisabled: matchedResource?.isHiddenDisabled,
+          isReadDisabled: matchedResource?.isReadDisabled,
+          isUpdateDisabled: matchedResource?.isUpdateDisabled
+         }
+        }else{
+          return _resource;
+        }
+     })
+     const currField = field?.map((_field)=> {
+      const matchedField = importField?.find((f)=> f.fieldData.fieldName === _field.fieldData.fieldName && f.fieldData.resource === _field.fieldData.resource);
+      if(matchedField){
+       return {
+        ..._field,
+        isCreate: matchedField?.isCreate,
+        isRead: matchedField?.isRead,
+        isUpdate: matchedField?.isUpdate,
+        isCreateDisabled: matchedField?.isCreateDisabled,
+        isDeleteDisabled: matchedField?.isDeleteDisabled,
+        isHiddenDisabled: matchedField?.isHiddenDisabled,
+        isReadDisabled: matchedField?.isReadDisabled,
+        isUpdateDisabled: matchedField?.isUpdateDisabled
+       }
+      }else{
+        return _field;
+      }
+   })
+
+   const currChildrenResource = childrenResource?.map((_child)=> {
+    const matchedChildResource = importChildrenResource?.find((c)=> c.name===_child.name && c.parentResource===_child.parentResource);
+    if(matchedChildResource){
+     return {
+      ..._child,
+      isCreate: matchedChildResource?.isCreate,
+      isDelete: matchedChildResource?.isDelete,
+      isRead: matchedChildResource?.isRead,
+      isHidden: matchedChildResource?.isHidden,
+      isUpdate: matchedChildResource?.isUpdate,
+      isCreateDisabled: matchedChildResource?.isCreateDisabled,
+      isDeleteDisabled: matchedChildResource?.isDeleteDisabled,
+      isHiddenDisabled: matchedChildResource?.isHiddenDisabled,
+      isReadDisabled: matchedChildResource?.isReadDisabled,
+      isUpdateDisabled: matchedChildResource?.isUpdateDisabled
+     }
+    }else{
+      return _child;
+    }
+ })
+ 
+      setResource(currResource);
+      setField(currField);
+      setChildrenResource(currChildrenResource);
     };
     reader.readAsBinaryString(f);
   }
@@ -562,7 +626,8 @@ const RoleDetailsPage = () => {
             <Box className="control-buttons-v1">
               {roleData ? (
                 <>
-                  {/* <div>
+                  <div>
+                   {permissions?.role.isUpdate && isEdit && ( 
                     <label className={`new-headerbox-button-v1`} htmlFor="importRole">
                       Import Role
                       <input
@@ -579,11 +644,12 @@ const RoleDetailsPage = () => {
                         type="file"
                       />
                     </label>
+                  )}
                     <label className={`new-headerbox-button-v1`} onClick={handleExportRole}>
                       Export Role
                     </label>
                     <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
-                  </div> */}
+                  </div>
                   {permissions?.role.isUpdate && !isEdit && (
                     <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
                       Edit
