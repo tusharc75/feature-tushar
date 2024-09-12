@@ -1,14 +1,13 @@
-import { makeStyles } from '@material-ui/core/styles';
-import List from '@material-ui/core/List';
 import { Typography } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
+import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemText from '@material-ui/core/ListItemText';
-import IconButton from '@material-ui/core/IconButton';
+import { makeStyles } from '@material-ui/core/styles';
 import DeleteIcon from '@material-ui/icons/Delete';
-import { Link } from 'react-router-dom';
+import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import BoxWithBorder from '../../components/BoxWithBorder';
-import CopyToClipboard from '../../components/Helpers/CopyToClipboard';
 import { roleTypes, userType } from '../../constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
@@ -38,7 +37,7 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
           ? data.map((obj) => (
               <BoxWithBorder key={obj._id} style={{ marginBottom: '8px' }}>
                 <ListItem disableGutters className={classes.list}>
-                  <div>
+                  <div className="flex items-end gap-1">
                     <ListItemText
                       primary={
                         <Typography>
@@ -49,17 +48,17 @@ const AssignedUsers = ({ unassignRole, data, currentUser, permissions, type }) =
                       }
                       secondary={obj.email}
                     />
+                    <CopyToClipboardButton smallIcon text={obj.email} />
                   </div>
 
-                  <CopyToClipboard textToCopy={obj.email} className="ml-1 mt-4" />
                   {permissions?.role?.isUpdate && (
                     <ListItemSecondaryAction
                       title={
                         currentUser === obj._id
                           ? "Primary user can't be unassigned"
                           : obj.userType && obj.userType === userType.brandAdmin
-                          ? 'Brand Admin Can not be deleted'
-                          : 'Unassign User'
+                            ? 'Brand Admin Can not be deleted'
+                            : 'Unassign User'
                       }
                     >
                       {type === roleTypes.find((d) => d.key === 'Global')?.value && (
