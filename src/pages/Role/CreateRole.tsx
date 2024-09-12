@@ -12,6 +12,7 @@ import { CustomDialogTransition, ROLE_TIER, roleTypes } from '../../constants/he
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { isMobile, isTablet } from 'react-device-detect';
 import { useData } from '../../StateProvider/Provider';
+import ImportExportRole from 'src/pages/Role/ImportExportRole';
 
 const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selectedEntity, isClone = false, roleId = null }) => {
   const {
@@ -232,7 +233,17 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
         <>
           <CustomDialogContent>
             <Box paddingX={1} paddingY={2}>
-              <Box className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-3">
+            <ImportExportRole
+               resource={resource}
+               field={field}
+               childrenResource={childrenResource}
+               setField={setField}
+               setResource={setResource}
+               setChildrenResource={setChildrenResource}
+               isExport={false}
+               isImport={true}
+                  />
+              <Box className="mt-2 mb-3 grid grid-cols-1 gap-2 md:grid-cols-3">
                 <TextField
                   required
                   variant="outlined"

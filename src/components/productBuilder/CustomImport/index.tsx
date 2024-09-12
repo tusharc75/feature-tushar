@@ -2,7 +2,6 @@ import React, { useContext, useEffect, useState } from 'react';
 import {
   Dialog,
   Button,
-  Grid,
   TextField,
   TableBody,
   TableCell,
@@ -15,8 +14,7 @@ import {
   IconButton,
   useMediaQuery,
   Menu,
-  MenuItem,
-  Typography
+  MenuItem
 } from '@material-ui/core';
 import { ACTIVITY_RESOURCE, CustomDialogTransition, downloadExcel } from 'src/constants/helpers';
 import { Autocomplete } from '@material-ui/lab';
@@ -39,7 +37,7 @@ import RowNumberDialog from 'src/components/productBuilder/CustomImport/RowNumbe
 import ImportedDataDialog from 'src/components/productBuilder/CustomImport/ImpoetedDataDialog';
 import ViewDialog from 'src/components/productBuilder/CustomImport/ViewDialog';
 import { handleFileImport } from 'src/components/productBuilder/CustomImport/helper';
-import InfoIcon from '@material-ui/icons/Info';
+import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/ShowMissedOrExtraColumn';
 
 export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'USD' }) => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -491,51 +489,9 @@ export const CustomImport = ({ handleClose, onSuccess, refrenceId, currency = 'U
               </div>
               <div className="ml-auto flex flex-wrap items-center gap-2">
                 <>
-                  {selectedView &&
-                    customImportHeader?.length > 0 &&
-                    (selectedView?.importedColumnHeader?.filter((item) => !customImportHeader?.map((c) => c?.value)?.includes(item))?.length > 0 ||
-                      customImportHeader?.map((c) => c?.value)?.filter((item) => !selectedView?.importedColumnHeader?.includes(item))?.length >
-                        0) && (
-                      <Box ml={2}>
-                        <HtmlTooltip
-                          title={
-                            <React.Fragment>
-                              <Box display={'flex'} flexDirection={'column'}>
-                                {selectedView?.importedColumnHeader?.filter((item) => !customImportHeader?.map((c) => c?.value)?.includes(item))
-                                  ?.length > 0 && (
-                                  <Typography style={{ fontSize: '14px' }}>
-                                    Missed Column : -{' '}
-                                    <span style={{ fontSize: '12px' }}>
-                                      {selectedView?.importedColumnHeader
-                                        ?.filter((item) => !customImportHeader?.map((c) => c?.value)?.includes(item))
-                                        ?.join(', ')}
-                                    </span>
-                                  </Typography>
-                                )}
-                                {customImportHeader?.map((c) => c?.value)?.filter((item) => !selectedView?.importedColumnHeader?.includes(item))
-                                  ?.length > 0 && (
-                                  <Typography style={{ fontSize: '14px' }}>
-                                    Extra Column : -{' '}
-                                    <span style={{ fontSize: '12px' }}>
-                                      {customImportHeader
-                                        ?.map((c) => c?.value)
-                                        ?.filter((item) => !selectedView?.importedColumnHeader?.includes(item))
-                                        ?.join(', ')}
-                                    </span>
-                                  </Typography>
-                                )}
-                              </Box>
-                            </React.Fragment>
-                          }
-                        >
-                          <IconButton size="small" onClick={() => {}}>
-                            <InfoIcon fontSize="small" color={'primary'} />
-                          </IconButton>
-                        </HtmlTooltip>
-                      </Box>
-                    )}
-                </>
-                <>
+                  <Box mr={2}>
+                    <ShowMissedOrExtraColumn view={selectedView} file={files} />
+                  </Box>
                   <HtmlTooltip title={'Add Column'}>
                     <span>
                       <Button
