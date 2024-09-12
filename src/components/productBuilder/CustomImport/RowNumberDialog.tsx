@@ -1,14 +1,14 @@
-import { Box, Button, Dialog, Grid, IconButton, TextField, Typography } from '@material-ui/core';
+import { Box, Button, Dialog, Grid, IconButton, TextField } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
 import { FieldArray, Form, Formik } from 'formik';
-import React, { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import { read, utils } from 'xlsx';
+import { read } from 'xlsx';
 import RemoveCircleOutlineIcon from '@material-ui/icons/RemoveCircleOutline';
 import AddCircleOutlineIcon from '@material-ui/icons/AddCircleOutline';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -16,8 +16,7 @@ import { RiDeleteBin6Fill } from 'react-icons/ri';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
-import { handleFileImport } from 'src/components/productBuilder/CustomImport/helper';
-import InfoIcon from '@material-ui/icons/Info';
+import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/ShowMissedOrExtraColumn';
 
 const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,7 +26,6 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
   const [excelMappingData, setExcelMappingData] = useState([]);
   const [selectedView, setSelectedView] = useState(null);
   const [confirmationDelete, setConfirmationDelete] = useState({ open: false, data: null });
-  const [headerColumn, setHeaderColumn] = useState(null);
 
   const {
     state: { user }
@@ -93,38 +91,10 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
       });
   };
 
-  const getHeader = async (values) => {
-    const _file = await handleFileImport(file, values);
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const data = e.target.result;
-      let readedData = read(data, { type: 'array' });
-      const wsname = readedData.SheetNames[0];
-      const ws = readedData.Sheets[wsname];
-      const jsonData = utils.sheet_to_json(ws, { header: 1 });
-
-      let headers: any = jsonData[0];
-
-      headers = headers?.reduce((result, curr) => {
-        if (curr == null) {
-          return result;
-        }
-        result.push(curr);
-        return result;
-      }, []);
-
-      const missedColumn = selectedView?.importedColumnHeader?.filter((item) => !headers?.includes(item));
-      const extraColumn = headers?.filter((item) => !selectedView?.importedColumnHeader?.includes(item));
-      setHeaderColumn({ missed: missedColumn, extra: extraColumn });
-    };
-    reader.readAsArrayBuffer(_file);
-  };
-
   useEffect(() => {
     let cell = [{ sheetName: '', startRowCell: '', endRowCell: '', headerRow: '1' }];
     if (selectedView) {
       cell = selectedView?.sheet;
-      getHeader(selectedView?.sheet);
     }
     setInitialValues({ cell: cell });
   }, [selectedView]);
@@ -187,32 +157,9 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                         <TextField {...params} margin="dense" size={'small'} fullWidth label="Select Excel Mapping" variant="outlined" />
                       )}
                     />
-                    {selectedView && headerColumn && (headerColumn?.missed?.length > 0 || headerColumn?.extra?.length > 0) && (
-                      <Box ml={2}>
-                        <HtmlTooltip
-                          title={
-                            <React.Fragment>
-                              <Box display={'flex'} flexDirection={'column'}>
-                                {headerColumn?.missed?.length > 0 && (
-                                  <Typography style={{ fontSize: '14px' }}>
-                                    Missed Column : - <span style={{ fontSize: '12px' }}>{headerColumn?.missed?.join(', ')}</span>
-                                  </Typography>
-                                )}
-                                {headerColumn?.extra?.length > 0 && (
-                                  <Typography style={{ fontSize: '14px' }}>
-                                    Extra Column : - <span style={{ fontSize: '12px' }}>{headerColumn?.extra?.join(', ')}</span>
-                                  </Typography>
-                                )}
-                              </Box>
-                            </React.Fragment>
-                          }
-                        >
-                          <IconButton size="small" onClick={() => {}}>
-                            <InfoIcon fontSize="small" color={'primary'} />
-                          </IconButton>
-                        </HtmlTooltip>
-                      </Box>
-                    )}
+                    <Box ml={2}>
+                      <ShowMissedOrExtraColumn view={selectedView} file={file} />
+                    </Box>
                   </Box>
                   <FieldArray
                     name="cell"
