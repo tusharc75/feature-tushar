@@ -233,17 +233,7 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
         <>
           <CustomDialogContent>
             <Box paddingX={1} paddingY={2}>
-            <ImportExportRole
-               resource={resource}
-               field={field}
-               childrenResource={childrenResource}
-               setField={setField}
-               setResource={setResource}
-               setChildrenResource={setChildrenResource}
-               isExport={false}
-               isImport={true}
-                  />
-              <Box className="mt-2 mb-3 grid grid-cols-1 gap-2 md:grid-cols-3">
+              <Box className="mb-3 grid grid-cols-1 gap-2 md:grid-cols-3">
                 <TextField
                   required
                   variant="outlined"
@@ -277,6 +267,18 @@ const CreateRole = ({ open, close, fetchData, roleType, setToastConfig, selected
                   value={values?.tier}
                   renderInput={(params) => <TextField {...params} required label="Select Tier" margin="none" size="small" variant="outlined" />}
                 />
+              </Box>
+              <Box className="mb-3 flex justify-end">
+              <ImportExportRole
+                  resource={resource}
+                  field={field}
+                  childrenResource={childrenResource}
+                  setField={setField}
+                  setResource={setResource}
+                  setChildrenResource={setChildrenResource}
+                  isExport={false}
+                  isImport={true}
+                  />
               </Box>
               <Paper>
                 {loading ? (
