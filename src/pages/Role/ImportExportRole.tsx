@@ -106,9 +106,9 @@ const ImportExportRole = ({resource, childrenResource, field, setResource, setCh
   }
 
   return (
-    <div className="flex justify-end">
+    <div>
       {isImport && (
-        <label className={`new-headerbox-button-v1`} htmlFor="importRole">
+        <label className={`new-headerbox-button-v1`} style={{ padding: '8px' }} htmlFor="importRole">
           Import Role
           <input
             accept="json"
@@ -119,7 +119,8 @@ const ImportExportRole = ({resource, childrenResource, field, setResource, setCh
             style={{
               opacity: '0',
               position: 'absolute',
-              zIndex: -1
+              zIndex: -1,
+              maxWidth:'1px'
             }}
             type="file"
           />
@@ -127,7 +128,7 @@ const ImportExportRole = ({resource, childrenResource, field, setResource, setCh
       )}
       {isExport && (
         <>
-      <label className={`new-headerbox-button-v1`} onClick={handleExportRole}>
+      <label className={`new-headerbox-button-v1`} style={{ padding: '8px' }} onClick={handleExportRole}>
         Export Role
       </label>
       <a id="downloadAnchorElem" style={{ display: 'none' }}></a>
