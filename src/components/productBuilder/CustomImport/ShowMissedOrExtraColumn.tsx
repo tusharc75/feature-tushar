@@ -20,7 +20,6 @@ const useClasses = makeStyles(() => ({
 const ShowMissedOrExtraColumn = ({ view, file }) => {
   const classes = useClasses();
 
-  const [missedColumn, setMissedColumn] = useState([]);
   const [extraColumn, setExtraColumn] = useState([]);
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
 
@@ -44,9 +43,7 @@ const ShowMissedOrExtraColumn = ({ view, file }) => {
         return result;
       }, []);
 
-      const missedColumn = view?.importedColumnHeader?.filter((item) => !headers?.includes(item)) || [];
       const extraColumn = headers?.filter((item) => !view?.importedColumnHeader?.includes(item)) || [];
-      setMissedColumn(missedColumn);
       setExtraColumn(extraColumn);
     };
     reader.readAsArrayBuffer(_file);
@@ -58,24 +55,9 @@ const ShowMissedOrExtraColumn = ({ view, file }) => {
     }
   }, [view]);
 
-  const getTableBody = () => {
-    const arr: any = [];
-    let length = missedColumn?.length;
-    if (extraColumn?.length > length) {
-      length = extraColumn?.length;
-    }
-    for (let i = 0; i < length; i++) {
-      arr.push({
-        missedColumn: missedColumn[i] || '',
-        extraColumn: extraColumn[i] || ''
-      });
-    }
-    return arr;
-  };
-
   return (
     <>
-      {view && (missedColumn?.length > 0 || extraColumn?.length > 0) && (
+      {view && extraColumn?.length > 0 && (
         <IconWithPulse>
           <IconButton
             size="small"
@@ -100,21 +82,23 @@ const ShowMissedOrExtraColumn = ({ view, file }) => {
           horizontal: 'left'
         }}
       >
-        <Box className="max-h-[300px] min-h-[100px] overflow-auto p-2 [border:1px_solid_var(--common-border-color)]">
-          <table className={classes.table}>
-            <tr>
-              <th className={classes.td}>Missed Column</th>
-              <th className={classes.td}>Extra Column</th>
-            </tr>
-            {getTableBody()?.map((d) => {
-              return (
+        <Box display={'flex'} p={1}>
+          {extraColumn && extraColumn?.length > 0 ? (
+            <Box className="max-h-[300px] min-h-[100px] overflow-auto">
+              <table className={classes.table}>
                 <tr>
-                  <td className={classes.td}>{d?.missedColumn}</td>
-                  <td className={classes.td}>{d?.extraColumn}</td>
+                  <th className={classes.td}>Extra Column</th>
                 </tr>
-              );
-            })}
-          </table>
+                {extraColumn?.map((d) => {
+                  return (
+                    <tr>
+                      <td className={classes.td}>{d}</td>
+                    </tr>
+                  );
+                })}
+              </table>
+            </Box>
+          ) : null}
         </Box>
       </Popover>
     </>
