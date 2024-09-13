@@ -5,7 +5,7 @@ import Signature from 'src/components/Helpers/FormTypes/Signature';
 import { useData } from 'src/StateProvider/Provider';
 import { isObject } from 'lodash';
 
-const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
+const GroupSignature = ({ label, values, name, setFieldValue, fieldData, touched = {}, errors = {} }) => {
   const {
     state: { user }
   }: any = useData();
@@ -15,7 +15,7 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
   useEffect(() => {
     let selectedUsers = [];
     let fieldValue = [];
-    const userIds = values[name]?.map((ele) => isObject(ele?.user) ? ele?.user?._id : ele?.user);
+    const userIds = values[name]?.map((ele) => (isObject(ele?.user) ? ele?.user?._id : ele?.user));
     fieldValue = values[name]?.map((ele) => {
       return {
         ...ele,
@@ -55,37 +55,46 @@ const GroupSignature = ({ label, values, name, setFieldValue, fieldData }) => {
             setFieldValue(name, [...updatedFieldValue]);
             setSelectedSignatureUsers(newVal);
           }}
-          renderInput={(params) => <TextField {...params} label="Signature Users" name={name} variant="outlined" />}
+          renderInput={(params) => (
+            <TextField
+              error={touched[name] && Boolean(errors[name])}
+              helperText={touched[name] && errors[name]}
+              {...params}
+              label="Signature Users"
+              name={name}
+              variant="outlined"
+            />
+          )}
         />
         <div className="flex flex-col flex-wrap gap-2">
           {values[name]?.length
             ? values[name]?.map((value) => {
-              const userName = selectedSignatureUsers?.find((ele) => ele.optionValue === value.user)?.optionLabel;
-              return (
-                <Box className="flex items-center justify-between">
-                  <Typography>{userName}</Typography>
-                  <Signature
-                    label={''}
-                    name={`signature`}
-                    touched={{}}
-                    errors={{}}
-                    values={value ?? {}}
-                    isTooltip={false}
-                    tooltipMessage={''}
-                    setFieldValue={(_, dataUrl: string) => {
-                      const updatedData = [...(values[name] ?? [])];
-                      updatedData.forEach((data) => {
-                        if (data.user === value.user) {
-                          data.signature = dataUrl;
-                        }
-                      });
-                      setFieldValue(name, updatedData);
-                    }}
-                    disable={user?.user?._id !== value.user}
-                  />
-                </Box>
-              );
-            })
+                const userName = selectedSignatureUsers?.find((ele) => ele.optionValue === value.user)?.optionLabel;
+                return (
+                  <Box className="flex items-center justify-between">
+                    <Typography>{userName}</Typography>
+                    <Signature
+                      label={''}
+                      name={`signature`}
+                      touched={{}}
+                      errors={{}}
+                      values={value ?? {}}
+                      isTooltip={false}
+                      tooltipMessage={''}
+                      setFieldValue={(_, dataUrl: string) => {
+                        const updatedData = [...(values[name] ?? [])];
+                        updatedData.forEach((data) => {
+                          if (data.user === value.user) {
+                            data.signature = dataUrl;
+                          }
+                        });
+                        setFieldValue(name, updatedData);
+                      }}
+                      disable={user?.user?._id !== value.user}
+                    />
+                  </Box>
+                );
+              })
             : null}
         </div>
       </div>
