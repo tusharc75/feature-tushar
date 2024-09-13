@@ -1,4 +1,4 @@
-import { Box, Grid, IconButton, Typography } from '@material-ui/core';
+import { Box, Grid, IconButton, Typography, useMediaQuery } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import routes from 'src/components/Helpers/Routes';
@@ -13,6 +13,7 @@ import CustomFilter from 'src/components/Helpers/CustomFilter';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { FiExternalLink } from 'react-icons/fi';
 import axios, { CancelTokenSource } from 'axios';
+import MobileDialog from 'src/pages/MaterialHandling/Request/MobileDialog';
 
 const FIELD_TO_FILTER = [
   {
@@ -49,16 +50,17 @@ const FIELD_TO_FILTER = [
     fieldName: 'createDate',
     fieldLabel: 'Create Date',
     type: 'date'
-  },
+  }
   // {
   //   fieldName: 'requestDate',
   //   fieldLabel: 'Request Date',
   //   type: 'date'
   // },
-]
+];
 
 const MaterialHandling = () => {
   const toastConfig = useContext(CustomToastContext);
+  const isMobile = useMediaQuery('(max-width: 960px)');
 
   const {
     state: { user, permissions, selectedEntity }
@@ -66,8 +68,8 @@ const MaterialHandling = () => {
 
   const [filterQuery, setFilterQuery] = useState({
     filterById: [],
-    deepFilter: [],
-  })
+    deepFilter: []
+  });
 
   const [workOrder, setWorkOrder] = useState(null);
   const [selectedWorkOrder, setSelectedWorkOrder] = useState(null);
@@ -91,8 +93,8 @@ const MaterialHandling = () => {
         setWarehouseOptions([...warehouses]);
         setFilterQuery({
           filterById: [],
-          deepFilter: [],
-        })
+          deepFilter: []
+        });
       });
   }, [selectedEntity]);
 
@@ -100,7 +102,7 @@ const MaterialHandling = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [filterQuery, warehouseOptions])
+  }, [filterQuery, warehouseOptions]);
 
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     setWorkOrder(null);
@@ -126,8 +128,8 @@ const MaterialHandling = () => {
       .get(api, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         setWorkOrder(data);
-        if (data?.length) {
-          setSelectedWorkOrder(data[0])
+        if (data?.length && !isMobile) {
+          setSelectedWorkOrder(data[0]);
         }
       })
       .catch((error) => {
@@ -144,13 +146,16 @@ const MaterialHandling = () => {
       </Box>
       <Box className={`detail-container-v1`}>
         <Box display={'flex'} justifyContent={'end'} alignItems={'center'} pb={2}>
-          <Box width={'100%'} >
+          <Box width={'100%'}>
             <CustomFilter
-              field={FIELD_TO_FILTER?.map((e: any) => { return { ...e, options: e.fieldName === 'warehouse' ? warehouseOptions : null } })}
-              setFilterQuery={setFilterQuery} />
+              field={FIELD_TO_FILTER?.map((e: any) => {
+                return { ...e, options: e.fieldName === 'warehouse' ? warehouseOptions : null };
+              })}
+              setFilterQuery={setFilterQuery}
+            />
           </Box>
           <Box mb={1} ml={1}>
-            <HtmlTooltip title='Refresh'>
+            <HtmlTooltip title="Refresh">
               <IconButton size="small" onClick={() => fetchData()}>
                 <RefreshIcon />
               </IconButton>
@@ -160,7 +165,7 @@ const MaterialHandling = () => {
         {workOrder ? (
           workOrder?.length > 0 ? (
             <Grid container spacing={2}>
-              {(filterQuery?.filterById?.findIndex(f => f?.field === '_id') === -1) && (
+              {filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 && (
                 <Grid item xs={12} md={4} lg={3}>
                   <Box className="container-with-border" p={2}>
                     <Box style={{ maxHeight: 'calc(100vh - 220px)', overflow: 'auto' }}>
@@ -189,16 +194,23 @@ const MaterialHandling = () => {
                                   variant="subtitle2"
                                   style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8, fontWeight: 600 }}
                                 >
-                                  {data?.referenceType} : <span style={{ color: 'var(--card-color-secondary)' }}>{data?.referenceType === sidebarResource.workOrder ? data?.workOrderNumber : data?.referenceType === sidebarResource.fieldTicket ? data?.fieldTicketNumber : ''}</span>
+                                  {data?.referenceType} :{' '}
+                                  <span style={{ color: 'var(--card-color-secondary)' }}>
+                                    {data?.referenceType === sidebarResource.workOrder
+                                      ? data?.workOrderNumber
+                                      : data?.referenceType === sidebarResource.fieldTicket
+                                        ? data?.fieldTicketNumber
+                                        : ''}
+                                  </span>
                                 </Typography>
                                 <Box pl={1}>
                                   <IconButton
                                     onClick={() => {
                                       let route;
                                       if (data?.referenceType === sidebarResource.workOrder) {
-                                        route = routes.workOrderDetail.path
+                                        route = routes.workOrderDetail.path;
                                       } else if (data?.referenceType === sidebarResource.fieldTicket) {
-                                        route = routes.fieldTicketDetail.path
+                                        route = routes.fieldTicketDetail.path;
                                       }
                                       window.open(`${route}/${data?._id}`);
                                     }}
@@ -212,18 +224,24 @@ const MaterialHandling = () => {
                               {data?.referenceType === sidebarResource.workOrder && (
                                 <>
                                   <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                    Product : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
+                                    Product :{' '}
+                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
                                   </Typography>
                                   <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
                                     Asset :{' '}
-                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.serializedAsset?.optionLabel}</span>
+                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>
+                                      {data?.serializedAsset?.optionLabel}
+                                    </span>
                                   </Typography>
                                 </>
                               )}
                               {data?.referenceType === sidebarResource.fieldTicket && (
                                 <>
                                   <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                    Customer : <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.customerAccount?.optionLabel}</span>
+                                    Customer :{' '}
+                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>
+                                      {data?.customerAccount?.optionLabel}
+                                    </span>
                                   </Typography>
                                   <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
                                     Well Name :{' '}
@@ -243,14 +261,26 @@ const MaterialHandling = () => {
                   </Box>
                 </Grid>
               )}
-              <Grid item xs={12} md={8} lg={(filterQuery?.filterById?.findIndex(f => f?.field === '_id') === -1) ? 9 : 12}>
+              <Grid item xs={12} md={8} lg={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12}>
                 {selectedWorkOrder && (
-                  <Box className="container-with-border " p={3}>
-                    <Request
-                      referenceId={selectedWorkOrder?._id}
-                      fetchDataMaster={fetchData}
-                      referenceType={selectedWorkOrder?.referenceType} />
-                  </Box>
+                  <>
+                    {isMobile ? (
+                      <>
+                        <MobileDialog onClose={() => setSelectedWorkOrder(null)}>
+                          <Request
+                            referenceId={selectedWorkOrder?._id}
+                            fetchDataMaster={fetchData}
+                            referenceType={selectedWorkOrder?.referenceType}
+                            isMobile={isMobile}
+                          />
+                        </MobileDialog>
+                      </>
+                    ) : (
+                      <Box className="container-with-border " p={3}>
+                        <Request referenceId={selectedWorkOrder?._id} fetchDataMaster={fetchData} referenceType={selectedWorkOrder?.referenceType} />
+                      </Box>
+                    )}
+                  </>
                 )}
               </Grid>
             </Grid>
