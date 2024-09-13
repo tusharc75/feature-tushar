@@ -5,12 +5,10 @@ import Signature from 'src/components/Helpers/FormTypes/Signature';
 import { useData } from 'src/StateProvider/Provider';
 import { isObject } from 'lodash';
 
-const GroupSignature = ({ label, values, name, setFieldValue, fieldData, touched, errors }) => {
+const GroupSignature = ({ label, values, name, setFieldValue, fieldData, touched = {}, errors = {} }) => {
   const {
     state: { user }
   }: any = useData();
-
-  console.log(errors);
 
   const [selectedSignatureUsers, setSelectedSignatureUsers] = useState([]);
 
