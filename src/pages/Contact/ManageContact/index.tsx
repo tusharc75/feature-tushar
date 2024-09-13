@@ -219,7 +219,7 @@ export default function ManageContactDialog({
                       fieldsData={contactData.fields}
                       size="small"
                       fullWidth
-                      resource={sidebarResource.contactUs}
+                      resource={sidebarResource[contactResource]}
                       referenceId={contactId || null}
                     />
                 </Form>
