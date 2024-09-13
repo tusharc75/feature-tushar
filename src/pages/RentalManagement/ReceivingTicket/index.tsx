@@ -3043,7 +3043,7 @@ const ActionButtonMenuItems = ({
                   });
                 }
               });
-              setAddSerializedAssetDialog({ open: true, products: products, type: 'ReplaceAsset' });
+              setAddSerializedAssetDialog({ open: true, products: products, type: 'RentalJobReplaceAsset' });
             }
           }}
         >
@@ -3071,7 +3071,7 @@ const ActionButtonMenuItems = ({
                     });
                   }
                 });
-                setAddSerializedAssetDialog({ open: true, products: products, type: 'SwapAsset' });
+                setAddSerializedAssetDialog({ open: true, products: products, type: 'RentalJobSwapAsset' });
               }
             }}
           >
