@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext, Fragment } from 'react';
-import { Dialog, Button, CircularProgress, Grid, useTheme, Box } from '@material-ui/core';
+import { Dialog, Button, CircularProgress, useTheme, Box } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -7,14 +7,13 @@ import CustomDialogContent from '../../components/CustomDialog/CustomDialogConte
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useHistory } from 'react-router-dom';
-import { getObjKeys, yupSchema, setFieldsInAscendingOrder, getObjKeysWithValues, CustomDialogTransition } from '../../constants/helpers';
+import { getObjKeys, yupSchema, getObjKeysWithValues, CustomDialogTransition, sidebarResource } from '../../constants/helpers';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import FormTypes from '../../components/Helpers/FormTypes';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 interface InitialData {
   fields: any[];
   values: object;
@@ -30,10 +29,6 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
   });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [cloneHeading, setCloneHeading] = useState('');
-
-  const [formsData, setFormsData] = useState([]);
-  const [parentEntityDataSource, setParentEntityDataSource] = useState([]);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
@@ -44,17 +39,6 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
   useEffect(() => {
     getInitialData();
   }, []);
-
-  useEffect(() => {
-    const parentEntityDropdownData = initialData.fields.find((d) => d.fieldName === 'parentEntity' || d.fieldName === 'parent');
-    if (parentEntityDropdownData) {
-      setParentEntityDataSource(
-        isNew ? parentEntityDropdownData.option : parentEntityDropdownData.option.filter((d) => d?.optionValue !== values['_id'])
-      );
-    }
-
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   const getInitialData = () => {
     setLoading(true);
@@ -158,75 +142,17 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
               />
               <CustomDialogContent>
                 <Form noValidate>
-                  {formsData &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6} md={6}>
-                                {field.fieldName === 'parent' || field.fieldName === 'parentEntity' ? (
-                                  <FormTypes
-                                    isNew={isNew}
-                                    {...field}
-                                    fieldData={field}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    fields={initialData.fields}
-                                    options={parentEntityDataSource}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                  />
-                                ) : (
-                                  <FormTypes
-                                    isNew={isNew}
-                                    fieldData={field}
-                                    {...field}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    fields={initialData.fields}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                    imageOrFileUploadCompletePercentage={
-                                      ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                        ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
-                                        : null
-                                    }
-                                  />
-                                )}
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.entity}
+                    referenceId={entityId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -247,7 +173,7 @@ const ManageEntity = ({ open, close, fetchData, isNew, values = {}, isClone = fa
                   color="primary"
                   size="small"
                   onClick={submitForm}
-                  disabled={isSubmitting || loading || uploadingImageOrFileProgress > 0}
+                  disabled={isSubmitting || loading}
                 >
                   {isSubmitting ? <CircularProgress size={22} /> : 'Submit'}
                 </Button>
