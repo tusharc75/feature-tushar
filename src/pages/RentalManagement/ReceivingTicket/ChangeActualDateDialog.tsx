@@ -3,11 +3,51 @@ import { Button, CircularProgress, Dialog, Grid, Box } from '@material-ui/core';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_TYPE } from 'src/constants/helpers';
 import FormTypes from 'src/components/Helpers/FormTypes';
 import moment from 'moment';
+import { useData } from 'src/StateProvider/Provider';
+import { useContext, useEffect, useState } from 'react';
+import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpdate }) => {
+const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpdate, rentalId }) => {
+  const {
+    state: { user }
+  }: any = useData();
+
+  const toastConfig = useContext(CustomToastContext);
+
+  const [assetRentalPolicyDate, setAssetRentalPolicyDate] = useState(null);
+  const [assetDateLoading, setAssetDateLoading] = useState(false);
+ 
+  useEffect(()=>{
+     if(!user?.role?.selectedEntity?.policy?.rentalDateChangeInAssetHistory) return;
+     let assets  = bulkUpdate ? data.assetIds 
+                  : data?.type === 'Asset' ? [data._id] 
+                  : null;
+    
+     if(assets){
+      fetchAssetRentalDate(assets);
+     }
+  },[])
+
+  const fetchAssetRentalDate = (assets)=>{
+    setAssetDateLoading(true);
+    axiosInstance().put(`${routes?.rentalManagement?.path}/asset-last-history-before-adding`, 
+    {
+       rentalId: rentalId,
+       assets: assets
+    }).then(({ data: { data } })=>{
+      setAssetDateLoading(false);
+      setAssetRentalPolicyDate(data?.date);
+    }).catch((err)=>{
+      setAssetDateLoading(false);
+      toastConfig.setToastConfig(err);
+    })
+  }
 
   function validate(values) {
     const errors = {};
@@ -16,6 +56,13 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpda
       let manualEndDate = moment(values?.manualEndDate);
       if (manualEndDate.diff(manualStartDate, 'days') < 0) {
         errors['manualEndDate'] = 'Please enter valid end date';
+      }
+    }
+    if(assetRentalPolicyDate){
+      let manualStartDate = moment(values?.manualStartDate);
+      let initialAssetDate = moment(assetRentalPolicyDate);
+      if(manualStartDate.diff(initialAssetDate, 'days') < 0){
+        errors['manualStartDate'] = 'Please enter valid start date';
       }
     }
     return errors;
@@ -32,6 +79,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpda
       }}
       maxWidth="sm"
       fullWidth>
+     { !assetDateLoading ? (
       <Formik
         initialValues={data?.isAllowedStartDate && data?.isAllowedEndDate ? {
           manualStartDate: new Date(data?.manualStartDate),
@@ -71,6 +119,7 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpda
                           setFieldValue('manualStartDate', date);
                         }}
                         {...(values.manualEndDate ? { maxDate: values.manualEndDate } : {})}
+                        {...(assetRentalPolicyDate ? { minDate: assetRentalPolicyDate } : {})}
                       />
                     </Grid>}
                   {data?.isAllowedEndDate &&
@@ -112,6 +161,11 @@ const ChangeActualDateDialog = ({ data, onClose, handleSubmit, loading, bulkUpda
           </Form>
         )}
       </Formik>
+    ) : (
+     <Box p={2} height={200}>
+      <CommonSkeleton lenArray={[...Array(3).keys()]} />
+    </Box>
+    )}
     </Dialog>
   );
 };
