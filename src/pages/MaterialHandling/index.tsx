@@ -168,7 +168,7 @@ const MaterialHandling = () => {
               {filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 && (
                 <Grid item xs={12} md={4} lg={3}>
                   <Box className="container-with-border" p={2}>
-                    <Box style={{ maxHeight: 'calc(100vh - 220px)', overflow: 'auto' }}>
+                    <Box style={{ maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 220px)', overflow: 'auto' }}>
                       {workOrder?.map((data, index) => {
                         return (
                           <Box
