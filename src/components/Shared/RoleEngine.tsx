@@ -1,27 +1,23 @@
-import React, { useState, useEffect } from 'react';
 import {
   Box,
+  Button,
   Checkbox,
-  Typography,
+  FormControlLabel,
+  IconButton,
   Table,
-  TableContainer,
-  TableHead,
   TableBody,
   TableCell,
+  TableContainer,
+  TableHead,
   TableRow,
-  FormControlLabel,
-  Collapse,
-  IconButton,
-  Input,
   TextField,
-  Switch,
-  Button
+  Typography
 } from '@material-ui/core';
 import { KeyboardArrowDown, KeyboardArrowUp } from '@material-ui/icons';
-import { ROLE_TIER } from 'src/constants/helpers';
-import { TableData } from 'src/components/Shared/types';
-import { IoIosArrowDown, IoIosArrowUp } from 'react-icons/io';
+import React, { useEffect, useState } from 'react';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { TableData } from 'src/components/Shared/types';
+import { ROLE_TIER } from 'src/constants/helpers';
 
 function sortByFieldLabel<T>(data: T[], accessorfn: (data: T) => string, sort: 'asc' | 'des'): T[] {
   if (sort === 'asc') {
@@ -484,7 +480,8 @@ const RoleEngine = ({
     }
 
     if (sort) {
-      const sortData = sortByFieldLabel(data, (d) => d.resource.resourceLabel, sort);
+      const sortChildFunction = (d: TableData) => ({ ...d, fields: sortByFieldLabel(d.fields, (c) => c.fieldData.fieldLabel, sort) });
+      const sortData = sortByFieldLabel(data, (d) => d.resource.resourceLabel, sort).map((d) => sortChildFunction(d));
       data = sortData;
     }
     setFilteredAndSortedData(data);
@@ -535,7 +532,7 @@ const RoleEngine = ({
                   className="block max-w-fit"
                   title={
                     tableSearchFilterState.sort
-                      ? `Sorted by ${tableSearchFilterState.sort === 'asc' ? 'ascending' : 'descending'} order`
+                      ? `Sorted by ${tableSearchFilterState.sort === 'asc' ? 'Ascending' : 'Descending'} order`
                       : 'Click to sort'
                   }
                 >
@@ -673,20 +670,17 @@ const RenderSortIcon = ({ sortBy }: { sortBy: SortingType }) => {
 
 const Row = ({ _resource, isDisable, handleChange, fieldCheckbox }) => {
   const [open, setOpen] = useState(false);
-  const isReadAllChecked =
-    fieldCheckbox.length > 0 === fieldCheckbox.filter((f) => f.isRead).length > 0 &&
-    fieldCheckbox.filter((f) => f.isRead).length > 0 &&
-    fieldCheckbox.filter((f) => f.isRead).length !== fieldCheckbox.length;
 
+  const totalReadCheckboxCheckedLen = fieldCheckbox.filter((f) => f.isRead).length;
+  const isReadAllChecked = fieldCheckbox.length > 0 && totalReadCheckboxCheckedLen > 0 && totalReadCheckboxCheckedLen !== fieldCheckbox.length;
+
+  const totalIsCreateCheckboxCheckedLen = fieldCheckbox.filter((f) => f.isCreate).length;
   const isCreateAllChecked =
-    fieldCheckbox.length > 0 === fieldCheckbox.filter((f) => f.isCreate).length > 0 &&
-    fieldCheckbox.filter((f) => f.isCreate).length > 0 &&
-    fieldCheckbox.filter((f) => f.isCreate).length !== fieldCheckbox.length;
+    fieldCheckbox.length > 0 && totalIsCreateCheckboxCheckedLen > 0 && totalIsCreateCheckboxCheckedLen !== fieldCheckbox.length;
 
+  const totalIsUpdateCheckboxCheckedLen = fieldCheckbox.filter((f) => f.isUpdate).length;
   const isUpdateAllChecked =
-    fieldCheckbox.length > 0 === fieldCheckbox.filter((f) => f.isUpdate).length > 0 &&
-    fieldCheckbox.filter((f) => f.isUpdate).length > 0 &&
-    fieldCheckbox.filter((f) => f.isUpdate).length !== fieldCheckbox.length;
+    fieldCheckbox.length > 0 && totalIsUpdateCheckboxCheckedLen > 0 && totalIsUpdateCheckboxCheckedLen !== fieldCheckbox.length;
 
   return (
     <React.Fragment>

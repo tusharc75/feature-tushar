@@ -1,9 +1,9 @@
 export type TableData = {
   resource: Resource;
-  fields: WelcomeField[];
+  fields: SingleField[];
 };
 
-export type WelcomeField = {
+export type SingleField = {
   fieldData: FieldData;
   isCreate: boolean;
   isRead: boolean;
