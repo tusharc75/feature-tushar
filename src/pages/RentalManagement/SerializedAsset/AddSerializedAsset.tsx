@@ -625,12 +625,12 @@ const AddSerializedAsset = ({
               </div>
             </div>
 
-            {['Rental Job'].includes(referenceType) && (
+            {['Rental Job', 'RentalJobReplaceAsset', 'RentalJobSwapAsset'].includes(referenceType) && (
               <Box pt={1}>
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                   <CustomTab value={0} label={'Assets'} />
                   {permissions?.sublease && <CustomTab value={1} label={'Sublease Assets'} />}
-                  <CustomTab value={2} label={'In Use Assets'} />
+                  {['Rental Job'].includes(referenceType) && (<CustomTab value={2} label={'In Use Assets'} />)}
                 </CustomTabs>
               </Box>
             )}
