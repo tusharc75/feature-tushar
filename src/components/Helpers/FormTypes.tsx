@@ -364,6 +364,8 @@ const FormTypes = (props) => {
     selectedCurrencyCode = null,
     setFields,
     fromFilter = false,
+    restrictFutureDate = false,
+    restrictBackDate = false,
     ...rest
   } = tempProps;
 
@@ -2582,6 +2584,7 @@ const FormTypes = (props) => {
         warningTooltip={isWarningTooltip || fieldData?.isWarningTooltip}
         warningMessage={warningTooltipMessage || fieldData?.warningTooltipMessage}
       >
+        {console.log('aaaaaaaaa', name, restrictFutureDate, restrictBackDate)}
         <MuiPickersUtilsProvider utils={DateUtils}>
           <KeyboardDatePicker
             {...rest}
@@ -2594,8 +2597,9 @@ const FormTypes = (props) => {
             value={values[name] || null}
             name={name}
             label={getLabel(label)}
+            {...(restrictFutureDate ? { maxDate: new Date() } : {})}
+            {...(restrictBackDate ? { minDate: new Date() } : {})}
             onChange={onChange ? onChange : (date) => handleChange(name, date ? date : '')}
-            // onChange={(date) => setFieldValue(name, date ? date : "")}
             error={customError[name] || (touched[name] && Boolean(errors[name]))}
             helperText={customError[name] || (touched[name] && errors[name])}
             format={dateFormatForInputControl}
