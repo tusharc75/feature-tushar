@@ -2708,6 +2708,7 @@ const FormTypes = (props) => {
         isTooltip={isTooltip}
         tooltipMessage={tooltipMessage}
         setFieldValue={setFieldValue}
+        required={required}
       />
     ) : type === 'groupSignature' ? (
       <GroupSignature label={label} values={values} name={name} setFieldValue={setFieldValue} fieldData={fieldData} />

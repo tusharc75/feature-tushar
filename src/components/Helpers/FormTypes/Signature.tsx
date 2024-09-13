@@ -134,7 +134,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
   );
 };
 
-const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMessage, setFieldValue, disable = false }) => {
+const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMessage, setFieldValue, required, disable = false }) => {
   const [openDialog, setOpenDialog] = React.useState(false);
 
   const handleSaveImage = (dataURL: string) => {
@@ -144,7 +144,7 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
 
   return (
     <Fragment>
-      <Typography style={{ color: '#656565', marginBottom: '12px', fontWeight: '500' }}>{label}</Typography>
+      <Typography style={{ color: '#656565', marginBottom: '12px', fontWeight: '500' }}>{`${label}${required ? ' *' : ''}`}</Typography>
       <Box display="flex" flexDirection="row" mt={1} alignItems="center">
         <Box
           position="relative"
@@ -209,15 +209,15 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
               </HtmlTooltip>
             </IconButton>
           )}
-          {touched[name] && Boolean(errors[name]) &&
-            <Box>
-              <Typography variant="body2" className="text-truncate" color={'error'}   >
-                {errors[name]}
-              </Typography>
-            </Box>
-          }
         </Box>
       </Box>
+      {touched[name] && Boolean(errors[name]) &&
+        <Box pt={1}>
+          <Typography variant="body2" className="text-truncate" color={'error'}   >
+            {errors[name]}
+          </Typography>
+        </Box>
+      }
       {openDialog && <SignatureDialog open={openDialog} onSave={handleSaveImage} close={() => setOpenDialog(false)} />}
     </Fragment>
   );
