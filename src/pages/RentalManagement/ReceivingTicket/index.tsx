@@ -135,7 +135,7 @@ const ReceivingTicket = ({
   const [uniqueReceivingTicket, setUniqueReceivingTicket] = useState([]);
   const [showInfo, setShowInfo] = useState({ open: false, data: {}, type: null });
   const [invoiceData, setInvoiceData] = useState(null);
-  const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, bulkUpdate: false });
+  const [openChangeActualDateDialog, setOpenChangeActualDateDialog] = useState({ open: false, data: null, records: null, isBulkUpdate: false });
   const [anchorLinkActionEl, setAnchorLinkActionEl] = useState(null);
   const [repairJobCount, setRepairJobCount] = useState(0);
   const [repairOrderCount, setRepairOrderCount] = useState(0);
@@ -1113,26 +1113,26 @@ const ReceivingTicket = ({
             </IconButton>
             {((row?.original?.nonSerializeAsset && row?.original?.nonSerializeAsset?.length > 0) ||
               (row?.original?.productSerialNumbers && row?.original?.productSerialNumbers?.length > 0)) && (
-              <Box>
-                <HtmlTooltip title={`Serial Numbers`}>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      setShowInfo({
-                        open: true,
-                        data: {
-                          productName: row?.original?.productName,
-                          data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
-                        },
-                        type: `Serial Numbers`
-                      });
-                    }}
-                  >
-                    <InfoIcon fontSize="small" color={'primary'} />
-                  </IconButton>
-                </HtmlTooltip>
-              </Box>
-            )}
+                <Box>
+                  <HtmlTooltip title={`Serial Numbers`}>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        setShowInfo({
+                          open: true,
+                          data: {
+                            productName: row?.original?.productName,
+                            data: row?.original?.nonSerializeAsset?.length > 0 ? row?.original?.nonSerializeAsset : row?.original?.productSerialNumbers
+                          },
+                          type: `Serial Numbers`
+                        });
+                      }}
+                    >
+                      <InfoIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </Box>
+              )}
             {row?.original?.isRepairJob && (
               <HtmlTooltip title={`${routes.repairJob.title}`}>
                 <IconButton
@@ -1180,30 +1180,30 @@ const ReceivingTicket = ({
       },
       ...(assetFields?.find((f) => f.fieldName === 'serialNumber')
         ? [
-            {
-              accessor: 'serialNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
-              Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'serialNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'serialNumber')?.fieldLabel || 'Serial Number',
+            Cell: ({ row }) => (row?.original?.serialNumber ? <h5 className="text-truncate">{row?.original?.serialNumber}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'position')
         ? [
-            {
-              accessor: 'position',
-              Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
-              Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'position',
+            Header: assetFields?.find((f) => f.fieldName === 'position')?.fieldLabel || 'Position',
+            Cell: ({ row }) => (row?.original?.position ? <h5 className="text-truncate">{row?.original?.position}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       ...(assetFields?.find((f) => f.fieldName === 'jobCount')
         ? [
-            {
-              accessor: 'jobCount',
-              Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
-              Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
-            }
-          ]
+          {
+            accessor: 'jobCount',
+            Header: assetFields?.find((f) => f.fieldName === 'jobCount')?.fieldLabel || 'jobCount',
+            Cell: ({ row }) => (row?.original?.jobCount ? <h5 className="text-truncate">{row?.original?.jobCount}</h5> : <NoDataCell />)
+          }
+        ]
         : []),
       {
         accessor: 'productName',
@@ -1322,29 +1322,29 @@ const ReceivingTicket = ({
       },
       ...(assetFields?.find((f) => f.fieldName === 'wellNumber')
         ? [
-            {
-              accessor: 'wellNumber',
-              Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
-              accessorFn: (original) => {
-                return isArray(original?.wellNumber)
-                  ? original?.wellNumber[0]?.optionLabel
-                  : isObject(original?.wellNumber)
-                    ? original?.wellNumber?.optionLabel
-                    : original?.wellNumber;
-              },
-              Cell: ({ row }) => (
-                <DropdownCell
-                  permissions={permissions}
-                  permissionForLinks={{}}
-                  field={{
-                    fieldName: 'wellNumber',
-                    lookupResource: sidebarResource.wellNumber
-                  }}
-                  original={row?.original}
-                />
-              )
-            }
-          ]
+          {
+            accessor: 'wellNumber',
+            Header: assetFields?.find((f) => f.fieldName === 'wellNumber')?.fieldLabel,
+            accessorFn: (original) => {
+              return isArray(original?.wellNumber)
+                ? original?.wellNumber[0]?.optionLabel
+                : isObject(original?.wellNumber)
+                  ? original?.wellNumber?.optionLabel
+                  : original?.wellNumber;
+            },
+            Cell: ({ row }) => (
+              <DropdownCell
+                permissions={permissions}
+                permissionForLinks={{}}
+                field={{
+                  fieldName: 'wellNumber',
+                  lookupResource: sidebarResource.wellNumber
+                }}
+                original={row?.original}
+              />
+            )
+          }
+        ]
         : []),
       {
         accessor: 'manualStartDate',
@@ -1438,7 +1438,7 @@ const ReceivingTicket = ({
                     size="small"
                     disabled={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? false : true}
                     onClick={() => {
-                      setOpenChangeActualDateDialog({ bulkUpdate: false, open: true, data: row?.original });
+                      setOpenChangeActualDateDialog({ isBulkUpdate: false, open: true, data: row?.original, records: [row?.original] });
                     }}
                   >
                     <Edit fontSize="small" color={row?.original?.isAllowedStartDate || row?.original?.isAllowedEndDate ? 'primary' : 'inherit'} />
@@ -1542,7 +1542,7 @@ const ReceivingTicket = ({
       .then(({ data }) => {
         axiosInstance()
           .patch(`${repairJob.api}/${repairJobId}/status`, { status: REPAIR_JOB_STATUS.inProgress })
-          .then(({ data: { data } }) => {})
+          .then(({ data: { data } }) => { })
           .catch((error) => {
             toastConfig.setToastConfig(error);
           });
@@ -1836,9 +1836,8 @@ const ReceivingTicket = ({
   const handleSubmitChangeDates = (values) => {
     if (!openChangeActualDateDialog.data) return;
     setIsSubmitting(true);
-    let ids = [],
-      asset = [];
-    if (openChangeActualDateDialog.bulkUpdate) {
+    let ids = [], asset = [];
+    if (openChangeActualDateDialog.isBulkUpdate) {
       selectedRecords?.forEach((ele) => {
         ids.push(ele.uniqueId);
         asset.push(ele._id?.split('_')[0]);
@@ -1865,7 +1864,7 @@ const ReceivingTicket = ({
           message: response?.data?.message,
           type: 'success'
         });
-        setOpenChangeActualDateDialog({ open: false, data: null, bulkUpdate: false });
+        setOpenChangeActualDateDialog({ open: false, data: null, records: null, isBulkUpdate: false });
         setIsSubmitting(false);
         fetchRecords();
       })
@@ -2248,17 +2247,17 @@ const ReceivingTicket = ({
                   (f.hasOwnProperty('returnTicketId') && f?.returnTicketStatus === DELIVERY_TICKET_STATUS.delivered)) &&
                 [ASSET_STATUS.underReview].includes(f.status)
             )?.length === selectedRecords?.length && (
-              <>
-                <MenuItem
-                  onClick={() => {
-                    setAnchorEl(null);
-                    setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
-                  }}
-                >
-                  {ASSET_STATUS.available}
-                </MenuItem>
-              </>
-            )}
+                <>
+                  <MenuItem
+                    onClick={() => {
+                      setAnchorEl(null);
+                      setStatusToUpdate({ open: true, isUpdating: false, status: ASSET_STATUS.available, message: '' });
+                    }}
+                  >
+                    {ASSET_STATUS.available}
+                  </MenuItem>
+                </>
+              )}
             <MenuItem
               onClick={() => {
                 setAnchorEl(null);
@@ -2302,18 +2301,18 @@ const ReceivingTicket = ({
           assets={
             assetsData?.length
               ? selectedRecords
-                  ?.filter((e) => e.type === 'Asset')
-                  ?.map((ele) => {
-                    const matchedAsset = assetsData.find((asset) => asset._id === ele._id);
-                    if (matchedAsset) {
-                      const { _id, ...assetData } = matchedAsset;
-                      return {
-                        ...ele,
-                        assetData: { ...assetData }
-                      };
-                    }
-                    return ele;
-                  })
+                ?.filter((e) => e.type === 'Asset')
+                ?.map((ele) => {
+                  const matchedAsset = assetsData.find((asset) => asset._id === ele._id);
+                  if (matchedAsset) {
+                    const { _id, ...assetData } = matchedAsset;
+                    return {
+                      ...ele,
+                      assetData: { ...assetData }
+                    };
+                  }
+                  return ele;
+                })
               : selectedRecords?.filter((e) => e.type === 'Asset')
           }
           products={
@@ -2322,13 +2321,13 @@ const ReceivingTicket = ({
                 ? showQtyDialog.data.map((d) => ({ ...d, _id: d?.productId, qty: d.returnQuantity }))
                 : []
               : selectedRecords
-                  ?.filter((e) => e.type === 'Product')
-                  .map((d) => ({
-                    _id: d?.materialId,
-                    qty: d?.qty,
-                    uniqueId: d?.uniqueId,
-                    productSerialNumbers: d?.productSerialNumbers
-                  }))
+                ?.filter((e) => e.type === 'Product')
+                .map((d) => ({
+                  _id: d?.materialId,
+                  qty: d?.qty,
+                  uniqueId: d?.uniqueId,
+                  productSerialNumbers: d?.productSerialNumbers
+                }))
           }
           onClose={() => {
             setShowTicketDialog({ open: false, ticketType: '', data: {} });
@@ -2577,13 +2576,14 @@ const ReceivingTicket = ({
       {openChangeActualDateDialog.open && (
         <ChangeActualDateDialog
           data={openChangeActualDateDialog.data}
+          records={openChangeActualDateDialog.records}
           loading={isSubmitting}
-          bulkUpdate={openChangeActualDateDialog.bulkUpdate}
+          isBulkUpdate={openChangeActualDateDialog.isBulkUpdate}
           onClose={() => {
-            setOpenChangeActualDateDialog({ open: false, data: null, bulkUpdate: false });
+            setOpenChangeActualDateDialog({ open: false, data: null, records: null, isBulkUpdate: false });
           }}
           handleSubmit={handleSubmitChangeDates}
-          rentalId = {rentalManagementData?._id}
+          rentalId={rentalManagementData?._id}
         />
       )}
       {openMessageDialog.open && (
@@ -2920,67 +2920,67 @@ const ActionButtonMenuItems = ({
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-        <>
-          <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
-            <MenuItem
-              id={'create-receiving-ticket-chargaeble-menu-item'}
-              onClick={() => {
-                if (validateAction(rentalManagementActions.createReceivingTicket)) {
-                  handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
-                }
-              }}
-              disabled={!permissions?.deliveryTicket?.isCreate}
-            >
-              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
-            </MenuItem>
-          </HtmlTooltip>
-          {selectedRecords.length &&
-          selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
-            selectedRecords?.length ? (
-            <MenuItem
-              id={'remove-receiving-ticket-menu-item'}
-              onClick={() => {
-                setShowRemoveAssetFromReceivingTicketDialog(true);
-              }}
-            >
-              Remove Receiving Ticket
-            </MenuItem>
-          ) : null}
-          <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
-            <MenuItem
-              id={'create-return-ticket-non-chargeble-menu-item'}
-              onClick={() => {
-                if (validateAction(rentalManagementActions.createReturnTicket)) {
-                  if (selectedRecords?.every((e) => e.type === 'Asset')) {
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
-                  } else {
-                    setShowQtyDialog({ open: true, data: null });
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
-                  }
-                }
-              }}
-              disabled={!permissions?.deliveryTicket?.isCreate}
-            >
-              {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
-            </MenuItem>
-          </HtmlTooltip>
-          {permissions?.sublease?.isRead && (
+          <>
             <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
               <MenuItem
-                id={'create-delivery-ticket-supplier-menu-item'}
+                id={'create-receiving-ticket-chargaeble-menu-item'}
                 onClick={() => {
-                  if (validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
-                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
+                  if (validateAction(rentalManagementActions.createReceivingTicket)) {
+                    handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.plant);
                   }
                 }}
                 disabled={!permissions?.deliveryTicket?.isCreate}
               >
-                Create Delivery Ticket for Supplier
+                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Chargeable)` : `Create Receiving Ticket (Chargeable)`}
               </MenuItem>
             </HtmlTooltip>
-          )}
-        </>
-      )}
+            {selectedRecords.length &&
+              selectedRecords?.filter((f) => f.hasOwnProperty('receivingTicketId') && f?.receivingTicketStatus === DELIVERY_TICKET_STATUS.new)?.length ===
+              selectedRecords?.length ? (
+              <MenuItem
+                id={'remove-receiving-ticket-menu-item'}
+                onClick={() => {
+                  setShowRemoveAssetFromReceivingTicketDialog(true);
+                }}
+              >
+                Remove Receiving Ticket
+              </MenuItem>
+            ) : null}
+            <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
+              <MenuItem
+                id={'create-return-ticket-non-chargeble-menu-item'}
+                onClick={() => {
+                  if (validateAction(rentalManagementActions.createReturnTicket)) {
+                    if (selectedRecords?.every((e) => e.type === 'Asset')) {
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant);
+                    } else {
+                      setShowQtyDialog({ open: true, data: null });
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.return, DELIVERY_FROM_TO_TYPE.plant, false);
+                    }
+                  }
+                }}
+                disabled={!permissions?.deliveryTicket?.isCreate}
+              >
+                {user?.user?.brandPolicy?.rentalOnFieldStep ? `Create Return Ticket (Spares)` : `Create Return Ticket (Non-Chargeable)`}
+              </MenuItem>
+            </HtmlTooltip>
+            {permissions?.sublease?.isRead && (
+              <HtmlTooltip title={!permissions?.deliveryTicket?.isCreate ? actionDisable : ''}>
+                <MenuItem
+                  id={'create-delivery-ticket-supplier-menu-item'}
+                  onClick={() => {
+                    if (validateAction(rentalManagementActions.createSupplierDeliveryTicket)) {
+                      handleTicketDialog(DELIVERY_TICKET_TYPE.receiving, DELIVERY_FROM_TO_TYPE.supplier);
+                    }
+                  }}
+                  disabled={!permissions?.deliveryTicket?.isCreate}
+                >
+                  Create Delivery Ticket for Supplier
+                </MenuItem>
+              </HtmlTooltip>
+            )}
+          </>
+        )}
       {currentStep === RENTAL_STEPS.receiving && !hideDeliveryTicketDelivered && (
         <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
           <MenuItem
@@ -3104,37 +3104,37 @@ const ActionButtonMenuItems = ({
       )}
       {((currentStep === RENTAL_STEPS.onField && user?.user?.brandPolicy?.rentalOnFieldStep) ||
         (currentStep === RENTAL_STEPS.receiving && !user?.user?.brandPolicy?.rentalOnFieldStep)) && (
-        <>
-          {!hideDeliveryTicketDelivered && (
+          <>
+            {!hideDeliveryTicketDelivered && (
+              <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
+                <MenuItem
+                  id={'cancel-specific-line-item-menu-item'}
+                  onClick={() => {
+                    if (validateAction(rentalManagementActions.cancelInTransitTicket)) {
+                      setShowConformationRevertTicket(true);
+                    }
+                  }}
+                  disabled={!permissions?.deliveryTicket?.isUpdate}
+                >
+                  Cancel Specific Line Items
+                </MenuItem>
+              </HtmlTooltip>
+            )}
             <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
               <MenuItem
-                id={'cancel-specific-line-item-menu-item'}
+                id={'cancel-receiving-return-ticket-menu-item'}
                 onClick={() => {
-                  if (validateAction(rentalManagementActions.cancelInTransitTicket)) {
-                    setShowConformationRevertTicket(true);
+                  if (validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
+                    setShowConformationCancleTicket({ open: true });
                   }
                 }}
                 disabled={!permissions?.deliveryTicket?.isUpdate}
               >
-                Cancel Specific Line Items
+                Cancel Receiving/Return Ticket(s)
               </MenuItem>
             </HtmlTooltip>
-          )}
-          <HtmlTooltip title={!permissions?.deliveryTicket?.isUpdate ? actionDisable : ''}>
-            <MenuItem
-              id={'cancel-receiving-return-ticket-menu-item'}
-              onClick={() => {
-                if (validateAction(rentalManagementActions.cancelReceivingReturnTicket)) {
-                  setShowConformationCancleTicket({ open: true });
-                }
-              }}
-              disabled={!permissions?.deliveryTicket?.isUpdate}
-            >
-              Cancel Receiving/Return Ticket(s)
-            </MenuItem>
-          </HtmlTooltip>
-        </>
-      )}
+          </>
+        )}
       {selectedRecords?.filter(
         (f) =>
           f.type === 'Product' &&
@@ -3181,10 +3181,6 @@ const ActionButtonMenuItems = ({
           onClick={() => {
             if (validateAction(rentalManagementActions.updateStartDateEndDate)) {
               const { minStartDate, maxEndDate } = getMinMaxDates();
-              let assetIds = null;
-              if(selectedRecords?.every((ele)=> ele.type==='Asset')){
-                assetIds = selectedRecords?.map((ele)=> ele._id);
-              }
               setOpenChangeActualDateDialog({
                 open: true,
                 data: {
@@ -3192,9 +3188,9 @@ const ActionButtonMenuItems = ({
                   isAllowedEndDate: selectedRecords?.every((e) => e.isAllowedEndDate),
                   manualStartDate: minStartDate?.toISOString(),
                   manualEndDate: maxEndDate?.toISOString(),
-                  assetIds: assetIds
                 },
-                bulkUpdate: true
+                records: selectedRecords,
+                isBulkUpdate: true
               });
             }
           }}
