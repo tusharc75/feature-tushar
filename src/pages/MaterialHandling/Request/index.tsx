@@ -129,7 +129,7 @@ const Request = ({ referenceId, referenceType, fetchDataMaster, isMobile = false
 
     const accessor: CardInterface = {
       name: (row) => (
-        <Typography component={'h6'} className="line-clamp-2 !leading-[1.5] max-[768px]:!text-[13px]">
+        <Typography component={'h6'} className="mt-0 line-clamp-2 !leading-[1.5] max-[768px]:!text-[13px]">
           Product Type :{' '}
           <a
             className="link"
