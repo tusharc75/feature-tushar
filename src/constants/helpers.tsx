@@ -1174,11 +1174,11 @@ const validateDateWithOperator = (date1, date2, operator, type) => {
   if (!date2) {
     return true;
   }
-  let newDate1 = moment(date1)
-  let newDate2 = moment(date2)
-  if(type === 'date'){
-    newDate1 = moment(moment(date1).format('YYYY-MM-DD'), 'YYYY-MM-DD')
-    newDate2 = moment(moment(date2).format('YYYY-MM-DD'), 'YYYY-MM-DD')
+  let newDate1 = moment(date1);
+  let newDate2 = moment(date2);
+  if (type === 'date') {
+    newDate1 = moment(moment(date1).format('YYYY-MM-DD'), 'YYYY-MM-DD');
+    newDate2 = moment(moment(date2).format('YYYY-MM-DD'), 'YYYY-MM-DD');
   }
 
   if (operator === 'lessThan') {
@@ -3523,7 +3523,7 @@ export const checkIfSynching = async (setToFalse = false) => {
     }
     const { data } = await axiosInstance().post(api);
     return data?.data;
-  } catch (error) { }
+  } catch (error) {}
 };
 
 export const columnSize = (type) => {
@@ -3573,8 +3573,8 @@ function fallbackCopyTextToClipboard(text: string, callBack: (text: string) => v
   document.body.removeChild(textArea);
 }
 
-export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => { }) {
-  if (typeof callBack !== 'function') callBack = (text) => { };
+export function copyTextToClipboard(text: string, callBack: (text: string) => void = () => {}) {
+  if (typeof callBack !== 'function') callBack = (text) => {};
 
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text, callBack);
