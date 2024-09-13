@@ -36,7 +36,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             width={500}
             minScreenshotWidth={500}
             screenshotFormat="image/jpeg"
-            // videoConstraints={videoConstraints}
+          // videoConstraints={videoConstraints}
           />
         ) : (
           <img src={picture} />
@@ -209,19 +209,13 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
               </HtmlTooltip>
             </IconButton>
           )}
-          <Box flex="1">
-            <Typography
-              variant="body2"
-              className="text-truncate"
-              style={{
-                marginLeft: '4px',
-                display: touched[name] && Boolean(errors[name]) ? '' : 'none'
-              }}
-              color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}
-            >
-              {touched[name] && Boolean(errors[name]) ? errors[name] : null}
-            </Typography>
-          </Box>
+          {touched[name] && Boolean(errors[name]) &&
+            <Box>
+              <Typography variant="body2" className="text-truncate" color={'error'}   >
+                {errors[name]}
+              </Typography>
+            </Box>
+          }
         </Box>
       </Box>
       {openDialog && <SignatureDialog open={openDialog} onSave={handleSaveImage} close={() => setOpenDialog(false)} />}

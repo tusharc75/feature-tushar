@@ -25,8 +25,6 @@ import {
   useTheme
 } from '@material-ui/core';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import { green, red } from '@material-ui/core/colors';
-import { withStyles } from '@material-ui/core/styles';
 import { Image } from '@material-ui/icons';
 import AddCircleIcon from '@material-ui/icons/AddCircle';
 import CreditCardIcon from '@material-ui/icons/CreditCard';
@@ -154,12 +152,6 @@ const InfoLabel = ({ children, info, isTooltip, doNotShowInfoTooltip = false, wa
 );
 
 const autocompleteService = { current: null };
-
-const useStyles = makeStyles(() => ({
-  noBorder: {
-    border: 'none'
-  }
-}));
 
 const AddOptionDialog = ({ addFieldOption, options, setOptions, setOpen, label, name, handleChange, isMultiple = false, values }) => {
   const [inputVal, setInputVal] = React.useState('');
@@ -2352,9 +2344,6 @@ const FormTypes = (props) => {
               Upload image(s)
             </Button>
           </label>
-          <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
-            {values[name]?.length > 0 ? '' : 'No Images'}
-          </Typography>
         </div>
         <Box mt={1}>
           <Box display="flex" flexWrap="wrap" justifyContent="space-arounf" overflow="hidden">
@@ -2398,7 +2387,7 @@ const FormTypes = (props) => {
           />
         </Dialog>
         {touched[name] && Boolean(errors[name]) &&
-          <Box pt={1}>
+          <Box >
             <Typography variant="body2" className="text-truncate" color={'error'}  >
               {errors[name]}
             </Typography>
@@ -2458,16 +2447,17 @@ const FormTypes = (props) => {
                 </Typography>
               </Box>
               {values[name] ? (
-                <IconButton
-                  disabled={Boolean(!values[name]) || isFileUploading}
-                  title="Remove File"
-                  size="small"
-                  aria-label="delete picture"
-                  component="span"
-                  onClick={() => setFieldValue(name, '')}
-                >
-                  <DeleteIcon color="error" />
-                </IconButton>
+                <HtmlTooltip title='Remove'>
+                  <IconButton
+                    disabled={Boolean(!values[name]) || isFileUploading}
+                    size="small"
+                    aria-label="delete picture"
+                    component="span"
+                    onClick={() => setFieldValue(name, '')}
+                  >
+                    <DeleteIcon fontSize='small' color="error" />
+                  </IconButton>
+                </HtmlTooltip>
               ) : null}
             </div>
           )}
@@ -2530,9 +2520,9 @@ const FormTypes = (props) => {
                   </Typography>
                 </Box>}
             </Grid>
-            {doNotShowUploadedFile ? null : values[name] ? (
+            {doNotShowUploadedFile ? null : values[name] && isArray(values[name]) ? (
               <>
-                {values[name].map((item, i) => (
+                {values[name]?.map((item, i) => (
                   <>
                     <div className="w-[calc(100%-60px)] flex-grow">
                       <Box ml={1} />
@@ -2540,68 +2530,40 @@ const FormTypes = (props) => {
                         <Typography
                           variant="body2"
                           className="text-truncate"
-                          color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}
+                          color={'textPrimary'}
                         >
                           {item?.fileName}
                         </Typography>
                       </Box>
                     </div>
                     <div style={{ maxWidth: 50 }}>
-                      <IconButton
-                        disabled={Boolean(!values[name])}
-                        title="Remove File"
-                        size="small"
-                        aria-label="delete picture"
-                        component="span"
-                        onClick={() => {
-                          setFieldValue(
-                            name,
-                            values[name].filter((d) => d.fileName !== item.fileName)
-                          );
-                        }}
-                      >
-                        <DeleteIcon color="error" />
-                      </IconButton>
+                      <HtmlTooltip title="Remove">
+                        <IconButton
+                          disabled={Boolean(!values[name])}
+                          size="small"
+                          aria-label="delete picture"
+                          component="span"
+                          onClick={() => {
+                            setFieldValue(name, values[name].filter((d) => d.fileName !== item.fileName));
+                          }}
+                        >
+                          <DeleteIcon fontSize='small' color="error" />
+                        </IconButton>
+                      </HtmlTooltip>
                     </div>
                   </>
                 ))}
                 {isFileUploading && (
                   <Grid item xs={10} sm={10} md={10}>
-                    <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
+                    <Typography variant="body2" className="text-truncate" color={'textPrimary'}>
                       {`Uploading... ${fileUploadProgress}%`}
                     </Typography>
                   </Grid>
                 )}
               </>
-            ) : (
-              <>
-                <Box ml={1} />
-                <Box flex="1" className="text-truncate">
-                  <Typography variant="body2" className="text-truncate" color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}>
-                    {isFileUploading
-                      ? `Uploading... ${fileUploadProgress}%`
-                      : values[name]
-                        ? values[name]
-                        : touched[name] && Boolean(errors[name])
-                          ? errors[name]
-                          : 'No file choosen'}
-                  </Typography>
-                </Box>
-                {values[name] ? (
-                  <IconButton
-                    disabled={Boolean(!values[name])}
-                    title="Remove File"
-                    size="small"
-                    aria-label="delete picture"
-                    component="span"
-                    onClick={() => setFieldValue(name, '')}
-                  >
-                    <DeleteIcon color="error" />
-                  </IconButton>
-                ) : null}
-              </>
-            )}
+            ) : null}
           </Grid>
+
         </Box>
       </Fragment>
     ) : type === 'url' ? (

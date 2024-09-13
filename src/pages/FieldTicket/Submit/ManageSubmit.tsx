@@ -1,7 +1,7 @@
-import { Box, Button, CircularProgress, Dialog, Grid } from '@material-ui/core';
+import { Box, Button, CircularProgress, Dialog } from '@material-ui/core';
 import { Form, Formik } from 'formik';
 import { isEmpty, isEqual } from 'lodash';
-import { Fragment, useContext, useEffect, useRef, useState } from 'react';
+import { Fragment, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
@@ -11,22 +11,8 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomDialogTransition, fieldTicket, getObjKeys, yupSchema } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { array, object, string } from 'yup';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 import InputField from 'src/components/Helpers/InputField';
-
-const submitValidation = object().shape({
-  signature: string(),
-  files: array().test('files-and-signature', 'Files or Signature is required', function (value) {
-    const { signature } = this.parent;
-
-    if ((!value || value?.length === 0) && !signature) {
-      return this.createError({ message: 'Files or Signature is required', path: 'files' });
-    }
-
-    return true;
-  })
-});
 
 const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
   const toastConfig = useContext(CustomToastContext);
