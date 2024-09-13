@@ -41,6 +41,7 @@ import {
 } from './../../constants/helpers';
 import { createDeliveryTicketOffline } from './deliveryTicketOfflineHelper';
 import { generateFormFieldSteps, generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import routes from 'src/components/Helpers/Routes';
 
 const ManageDeliveryTicket = ({
   onClose,
@@ -101,23 +102,37 @@ const ManageDeliveryTicket = ({
   }, [initialData, assets]);
 
   const findValidationDate = async () => {
-    let last = 1;
-    if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading) {
-      last = 2;
+    if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset
+      && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading
+    ) {
+      const {
+        data: { data }
+      } = await axiosInstance().put(`${routes.serializedAsset.path}/asset-last-history-date-before-adding`, {
+        assets: assets?.map((e) => e._id), referenceId: initialData?.values?.transferAsset
+      });
+      var lastDate: any = new Date();
+      if (data?.date) {
+        lastDate = new Date(data?.date);
+        lastDate.setHours(0, 0, 0);
+      }
+      setCreateDateMin(lastDate);
     }
-    else if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.transferAsset
-      && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading) {
-      last = 2;
+    else {
+      let last = 1;
+      if (initialData?.values?.type === DELIVERY_TICKET_REFERENCE_TYPE.rentalJob && initialData?.values?.ticketType === DELIVERY_TICKET_TYPE.loading) {
+        last = 2;
+      }
+      const {
+        data: { data }
+      } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: last });
+      var lastDate: any = new Date();
+      if (data?.date) {
+        lastDate = new Date(data?.date);
+        lastDate.setHours(0, 0, 0);
+      }
+      setCreateDateMin(lastDate);
     }
-    const {
-      data: { data }
-    } = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets?.map((e) => e._id), last: last });
-    var lastDate: any = new Date();
-    if (data?.date) {
-      lastDate = new Date(data?.date);
-      lastDate.setHours(0, 0, 0);
-    }
-    setCreateDateMin(lastDate);
+
   };
 
   useEffect(() => {
