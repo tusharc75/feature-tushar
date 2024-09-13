@@ -9,12 +9,11 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { CustomDialogTransition, fieldTicket, getObjKeys, setFieldsInAscendingOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, fieldTicket, getObjKeys} from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import { array, object, string } from 'yup';
 import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
+import InputField from 'src/components/Helpers/InputField';
 
 const submitValidation = object().shape({
   signature: string(),
@@ -35,10 +34,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [submitting, setSubmitting] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  const [formsData, setFormsData] = useState([]);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const walkmeInstance = useGetWalkmeInstance();
-  const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchFields();
@@ -64,10 +60,6 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
       toastConfig.setToastConfig(error);
     }
   };
-
-  useEffect(() => {
-    setFormsData(setFieldsInAscendingOrder(initialData.fields));
-  }, [initialData.fields]);
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
@@ -129,54 +121,15 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box padding={2}>
-                              <Grid spacing={5} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={
-                                        ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                          ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
-                                          : null
-                                      }
-                                      fields={initialData?.fields}
-                                    />
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -193,7 +146,7 @@ const ManageSubmit = ({ onClose, onSuccess, fieldTicketData, fields }) => {
                 </Button>
                 <Button
                   id={'dialog-save-button'}
-                  disabled={submitting || uploadingImageOrFileProgress > 0}
+                  disabled={submitting}
                   variant="contained"
                   color="primary"
                   size="small"
