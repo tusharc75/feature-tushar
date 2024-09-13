@@ -7,7 +7,7 @@ import moment from 'moment';
 import React from 'react';
 import { FileIcon, fileIcons } from 'src/assets/fileIcons';
 import axiosInstance from 'src/axios/axiosInstance';
-import { LOGIC } from 'src/components/FormBuilder/helper';
+import { LOGIC, OPERATOR } from 'src/components/FormBuilder/helper';
 import { stepIconInterface } from 'src/components/Steps/icons';
 import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
@@ -1168,10 +1168,42 @@ export const checkValue = (fields, fieldName, value1, value2) => {
 const urlRegex = /((https?):\/\/)?(www.)?[a-z0-9]+(\.[a-z]{2,}){1,3}(#?\/?[a-zA-Z0-9#]+)*\/?(\?[a-zA-Z0-9-_]+=[a-zA-Z0-9-%]+&?)?$/;
 const nameRegex = /^([^0-9]*)$/;
 
+const validateDateWithOperator = (date1, date2, operator) => {
+  if (!date2) {
+    return true;
+  }
+  if (operator === 'lessThan') {
+    return moment(date1).isBefore(moment(date2));
+  } else if (operator === 'lessThanOrEquals') {
+    return moment(date1).isBefore(date2) || moment(date1).isSame(date2);
+  } else if (operator === 'greaterThan') {
+    return moment(date1).isAfter(moment(date2));
+  } else if (operator === 'greaterThanOrEquals') {
+    return moment(date1).isAfter(date2) || moment(date1).isSame(date2);
+  }
+  return false;
+};
+
 export const yupSchema = (fields: any[], validEmail = true) => {
   const schema = {};
   fields.forEach((input) => {
     let message = `${input.fieldLabel} is required`;
+
+    let dateValidation = string().required(message).nullable();
+    if (['date', 'dateTime']?.includes(input?.type)) {
+      if (input?.dateValidation && input?.dateValidation?.length > 0) {
+        input?.dateValidation?.forEach((d) => {
+          dateValidation = dateValidation.test(
+            `${d?.fieldName}_${d?.operator}`,
+            `${input?.fieldLabel} should be ${OPERATOR?.find((o) => o?.optionValue === d?.operator)?.optionLabel} from ${fields?.find((f) => f?.fieldName === d?.fieldName)?.fieldLabel}`,
+            function (value) {
+              const date = this?.parent[d?.fieldName];
+              return validateDateWithOperator(value, date, d?.operator);
+            }
+          );
+        });
+      }
+    }
 
     const sectionProperties = fields?.find((f) => f?.sectionName === input?.sectionName && f?.sectionProperties)?.sectionProperties;
     let sectionVisibility = [];
@@ -1361,11 +1393,11 @@ export const yupSchema = (fields: any[], validEmail = true) => {
               validationFields?.map((f) => f?.fieldName),
               {
                 is: validation,
-                then: string().required(message).nullable(),
+                then: dateValidation,
                 otherwise: string().nullable()
               }
             )
-          : string().required(message).nullable()
+          : dateValidation
         : string().nullable();
     } else if (input.type === 'colorPicker') {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`).nullable() : string().nullable();
