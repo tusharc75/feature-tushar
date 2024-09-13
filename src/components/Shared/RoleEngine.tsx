@@ -532,7 +532,7 @@ const RoleEngine = ({
                   className="block max-w-fit"
                   title={
                     tableSearchFilterState.sort
-                      ? `Sorted by ${tableSearchFilterState.sort === 'asc' ? 'ascending' : 'descending'} order`
+                      ? `Sorted by ${tableSearchFilterState.sort === 'asc' ? 'Ascending' : 'Descending'} order`
                       : 'Click to sort'
                   }
                 >
