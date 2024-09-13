@@ -121,11 +121,12 @@ function PreviewDownload({
           if (type === 'PDF' && operation === 'Preview') {
             const blobData = new Blob([response.data], { type: contentType });
             const fileURL = URL.createObjectURL(blobData);
-            const link = document.createElement('a');
-            link.href = fileURL;
-            link.target = '_blank';
-            link.style.display = 'none';
-            link.click();
+            window.open(fileURL, '_blank');
+            // const link = document.createElement('a');
+            // link.href = fileURL;
+            // link.target = '_blank';
+            // link.style.display = 'none';
+            // link.click();
             toastConfig.setToastConfig({ open: true, type: 'success', message: 'File Previewed Successfully.' });
           } else if (operation === 'Download') {
             const blobData = new Blob([response.data], { type: contentType });
