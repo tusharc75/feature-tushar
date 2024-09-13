@@ -2583,6 +2583,7 @@ const ReceivingTicket = ({
             setOpenChangeActualDateDialog({ open: false, data: null, bulkUpdate: false });
           }}
           handleSubmit={handleSubmitChangeDates}
+          rentalId = {rentalManagementData?._id}
         />
       )}
       {openMessageDialog.open && (
@@ -3180,13 +3181,18 @@ const ActionButtonMenuItems = ({
           onClick={() => {
             if (validateAction(rentalManagementActions.updateStartDateEndDate)) {
               const { minStartDate, maxEndDate } = getMinMaxDates();
+              let assetIds = null;
+              if(selectedRecords?.every((ele)=> ele.type==='Asset')){
+                assetIds = selectedRecords?.map((ele)=> ele._id);
+              }
               setOpenChangeActualDateDialog({
                 open: true,
                 data: {
                   isAllowedStartDate: selectedRecords?.every((e) => e.isAllowedStartDate),
                   isAllowedEndDate: selectedRecords?.every((e) => e.isAllowedEndDate),
                   manualStartDate: minStartDate?.toISOString(),
-                  manualEndDate: maxEndDate?.toISOString()
+                  manualEndDate: maxEndDate?.toISOString(),
+                  assetIds: assetIds
                 },
                 bulkUpdate: true
               });
