@@ -46,6 +46,7 @@ interface LoadingGridProps {
   allowedToEdit: boolean;
   canReceive: boolean;
   stepFullScreen: any;
+  setAllAssetsDelivered: any;
 }
 
 const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
@@ -59,7 +60,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     renderedFrom,
     allowedToEdit,
     canReceive,
-    stepFullScreen
+    stepFullScreen,
+    setAllAssetsDelivered
   } = props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
@@ -93,6 +95,11 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         setNextStep(true);
       } else {
         setNextStep(false);
+      }
+    }
+    if (transferAssetData?.transferType === 'Internal') {
+      if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
+        setAllAssetsDelivered(true);
       }
     }
   }, [dataRows, selectedRecords]);
