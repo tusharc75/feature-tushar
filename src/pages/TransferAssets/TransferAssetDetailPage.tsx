@@ -1,6 +1,6 @@
 import { Box, Button, Grid } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -33,6 +33,7 @@ import LoadingTicketGrid from './LoadingTicket';
 import ManageTransferAsset from './ManageTransferAsset';
 import ReceivingTicketGrid from './ReceivingTicket';
 import TransferAssetViews from './RoadMapViews';
+import ButtonWithPulse from 'src/components/ButtonWithPulse';
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferAsset.title);
@@ -63,7 +64,7 @@ const TransferAssetDetailPage = () => {
 
   const [stepNames, setStepNames] = useState([]);
   const [stepList, setStepList] = useState([]);
-  const [showReopenConfirmation, setShowReopenConfirmation] = useState(false);
+  const [showReopenCloseConfirmation, setShowReopenCloseConfirmation] = useState({ open: false, type: null });
 
   useEffect(() => {
     return history.listen((location) => {
@@ -183,6 +184,8 @@ const TransferAssetDetailPage = () => {
         }
         if (data?.status === TRANSFER_ASSET_STATUS.completed) {
           setTransferIsEnded(true);
+        } else {
+          setTransferIsEnded(false);
         }
         setTransferAssetData(data);
       })
@@ -217,9 +220,13 @@ const TransferAssetDetailPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-  const updateTransferStatus = (status) => {
+  const updateTransferStatus = (status, isReopen = false) => {
+    const body: any = { status };
+    if (isReopen) {
+      body.reopened = true;
+    }
     axiosInstance()
-      .put(`${routes.transferAsset.path}/${id}/status`, { status })
+      .put(`${routes.transferAsset.path}/${id}/status`, body)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -246,16 +253,32 @@ const TransferAssetDetailPage = () => {
                 {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
               </Button>
             )}
-            {/* {permissions?.transferAsset?.isUpdate && allowedToEdit && transferAssetData?.status === TRANSFER_ASSET_STATUS.completed && (
+             {permissions?.transferAsset?.isUpdate && allowedToEdit && isTransferEnded && (
               <Button
-                variant={'contained'}
-                onClick={() => {
-                  setShowReopenConfirmation(true)
+                variant="outlined"
+                color="inherit"
+                size="small"
+                className={'btn-outline-v1'}
+                onClick={(e) => {
+                  setShowReopenCloseConfirmation({open : true, type: 'reopen'});
                 }}
-                className={'btn-outline-v1'}>
-                {'Re-Open'}
+              >
+                Re-Open
               </Button>
-            )} */}
+            )}
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && transferAssetData?.reopened && (
+              <ButtonWithPulse
+                variant={'outlined'}
+                color="default"
+                size="small"
+                onClick={() => {
+                  setShowReopenCloseConfirmation({open : true, type: 'close'});
+                }}
+                className={'btn-outline-v1'}
+              >
+                Close
+              </ButtonWithPulse>
+            )}
             <ActivityButton
               referenceId={transferAssetData?._id}
               resource={ACTIVITY_RESOURCE.transferAsset}
@@ -377,16 +400,20 @@ const TransferAssetDetailPage = () => {
           }}
         />
       )}
-      {showReopenConfirmation && (
+      {showReopenCloseConfirmation.open && (
         <ConfirmationDialog
-          open={showReopenConfirmation}
-          message={`Are you sure you want to re-open ?`}
+          open={showReopenCloseConfirmation.open}
+          message={`Are you sure you want to ${startCase(showReopenCloseConfirmation.type)} ?`}
           onClose={() => {
-            setShowReopenConfirmation(false);
+            setShowReopenCloseConfirmation({open: false, type: null});
           }}
           onOk={() => {
-            updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress);
-            setShowReopenConfirmation(false);
+            if(showReopenCloseConfirmation.type === 'reopen') {
+              updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress, true);
+            } else {
+              updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
+            }
+            setShowReopenCloseConfirmation({open: false, type: null});
           }}
           okBtnLoading={false}
         />
