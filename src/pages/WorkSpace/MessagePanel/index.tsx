@@ -1,5 +1,4 @@
 import { Avatar, IconButton } from '@material-ui/core';
-import { ArrowBack } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import io, { Socket } from 'socket.io-client';
@@ -18,6 +17,12 @@ type MessagePanelProps = {
   setSelectedChannel: React.Dispatch<React.SetStateAction<TChannel>>;
   toggleSidebar: () => void;
   isSidebarCollapsed: boolean;
+};
+
+const avaterPette = ['!bg-[#eeba6c] !dark:bg-[#a17e49]', '!bg-[#3772ff] !dark:bg-[#264fb2]', '!bg-[#0ed290] dark:!bg-[#08855b]'];
+
+const getAavaterColor = () => {
+  return avaterPette[Math.floor(Math.random() * avaterPette.length)];
 };
 
 const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSidebar, isSidebarCollapsed }: MessagePanelProps) => {
@@ -100,32 +105,39 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                 >
                   <IconButton
                     size={'small'}
-                    style={{ border: '1px solid var(--common-border-color)', borderRadius: 8, padding: '2px 5px' }}
+                    style={{ border: '1px solid var(--common-border-color)', borderRadius: 8, padding: '2px 5px', minHeight: 45, minWidth: 55 }}
                     onClick={() => setIsMemberDialogOpen(true)}
                   >
                     <span className="flex flex-row-reverse">
-                      {channelData?.members.map((d, i) => {
-                        if (i > 3) return null;
-                        return (
-                          <Avatar
-                            style={{
-                              width: 22,
-                              height: 22,
-                              borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)',
-                              fontSize: 12,
-                              marginRight: i !== 0 ? '-6px' : '5px',
-                              outline: '2px solid var(--dark-primary,white)'
-                            }}
-                            variant="rounded"
-                            className="my-[2px]"
-                            src={d.avatar}
-                          >
-                            {d?.optionLabel.match(/(\b\S)?/g).join('')}
-                          </Avatar>
-                        );
-                      })}
+                      {channelData?.members ? (
+                        channelData?.members.map((d, i) => {
+                          if (i > 3) return null;
+                          return (
+                            <Avatar
+                              style={{
+                                width: 35,
+                                height: 35,
+                                borderRadius: 999,
+                                fontSize: 12,
+                                marginRight: i !== 0 ? '-10px' : '5px',
+                                outline: '1px solid var(--common-border-color)',
+                                color: 'white'
+                              }}
+                              variant="rounded"
+                              className={cn('my-[2px]', getAavaterColor())}
+                              src={d.avatar}
+                            >
+                              {d?.optionLabel.match(/(\b\S)?/g).join('')}
+                            </Avatar>
+                          );
+                        })
+                      ) : (
+                        <div className={cn(' h-[35px] w-[35px] animate-pulse rounded-full bg-gray-400 dark:bg-gray-500')}></div>
+                      )}
                     </span>
-                    <span className="text-[13px] font-bold leading-[20px]">{channelData?.members.length}</span>
+                    <span className="ml-auto text-[13px] font-bold leading-[20px]">
+                      {channelData?.members.length - 4 > 0 ? `+${channelData?.members.length - 4}` : ''}
+                    </span>
                   </IconButton>
                 </HtmlTooltip>
               </div>

@@ -19,7 +19,7 @@ type SendMessageProps = {
   initialMessage?: string;
   onEditComplete?: () => void;
   editorId?: string;
-  channelData: ChannelData;
+  channelData?: ChannelData;
 };
 
 const SendMessage = ({
