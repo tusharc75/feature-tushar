@@ -169,7 +169,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -307,7 +306,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    disabled={ loading}
                     onClick={(e) => {
                       e.preventDefault();
                       submitForm();

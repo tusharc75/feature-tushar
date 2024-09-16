@@ -33,7 +33,6 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [formsData, setFormsData] = useState([]);
 
@@ -155,7 +154,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
                   Cancel
                 </Button>
                 <Button
-                  disabled={loading || uploadingImageOrFileProgress > 0}
+                  disabled={loading}
                   variant="contained"
                   color="primary"
                   type="submit"
