@@ -218,6 +218,7 @@ const ManageProductionOrder = ({ isClone = false, productionOrderId = null, onCl
                     fullWidth
                     resource={sidebarResource.productionOrder}
                     referenceId={productionOrderId || null}
+                    collaborateTools = {true}
                   />
                 </Form>
               </CustomDialogContent>
