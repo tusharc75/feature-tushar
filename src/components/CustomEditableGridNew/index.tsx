@@ -106,7 +106,12 @@ const CustomEditableGrid = ({
 
   useEffect(() => {
     if (flatRows) {
-      setError(yupSchemaForBulkEdit(constColummns, flatRows));
+      setError(
+        yupSchemaForBulkEdit(
+          constColummns?.filter((c) => visibleColumns[c?.fieldName]),
+          flatRows
+        )
+      );
     }
   }, [flatRows]);
 
