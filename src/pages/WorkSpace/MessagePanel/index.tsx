@@ -1,6 +1,7 @@
 import { Avatar, IconButton } from '@material-ui/core';
 import { ArrowBack } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
+import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import io, { Socket } from 'socket.io-client';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
@@ -15,9 +16,11 @@ type MessagePanelProps = {
   selectedChannel: TChannel | null;
   mobScreen: boolean;
   setSelectedChannel: React.Dispatch<React.SetStateAction<TChannel>>;
+  toggleSidebar: () => void;
+  isSidebarCollapsed: boolean;
 };
 
-const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: MessagePanelProps) => {
+const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSidebar, isSidebarCollapsed }: MessagePanelProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
@@ -59,21 +62,27 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
       <div
         className={cn(
           'relative flex-grow transition-all duration-300 [--thread-bar-width:360px] lg:[--thread-bar-width:400px] xl:[--thread-bar-width:500px]',
-          threadDialogOpen?.open && 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]'
+          threadDialogOpen?.open && 'lg:pr-[calc(var(--thread-bar-width)_+_5px)]',
+          isSidebarCollapsed && 'px-2'
         )}
       >
-        {selectedChannel && channelData && (
+        {isSidebarCollapsed && (
+          <div className="absolute left-4 top-[7px] z-10 bg-[var(--dark-primary,white)]">
+            <HtmlTooltip title="Show sidebar">
+              <IconButton size={'small'} style={{ minWidth: 32, minHeight: 32 }} onClick={toggleSidebar}>
+                <VscLayoutSidebarLeft />
+              </IconButton>
+            </HtmlTooltip>
+          </div>
+        )}
+        {selectedChannel && (
           <div className="flex h-[var(--h)] flex-col">
             <div className={cn('p-[7px_15px] [border-bottom:1px_solid_var(--common-border-color)]')}>
               <div className="mb-1 flex items-center justify-between gap-2">
-                <div className="flex min-h-[32px] items-center gap-2">
-                  {mobScreen && (
-                    <IconButton size={'small'} onClick={() => setSelectedChannel(null)}>
-                      <ArrowBack />
-                    </IconButton>
-                  )}
-                  <h5 className="line-clamp-1 text-[18px] font-bold">{selectedChannel.title}</h5>
-                </div>
+                <h5 className={cn('line-clamp-1 text-[18px] font-bold transition-all', isSidebarCollapsed && 'pl-[30px] ')}>
+                  {selectedChannel.title}
+                </h5>
+
                 <HtmlTooltip
                   title={
                     <span className="block w-[200px] py-2 text-center">
@@ -122,6 +131,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: Messag
               </div>
               <p className="line-clamp-2 text-sm text-gray-500">{selectedChannel.description}</p>
             </div>
+
             <Messages
               channelId={selectedChannel?._id}
               socket={socket}
