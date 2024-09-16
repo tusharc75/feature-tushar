@@ -16,7 +16,7 @@ import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
 import axiosInstance from '../../axios/axiosInstance';
-import { customerAccount, customerContact, opportunity, quoteBuilder } from '../../constants/helpers';
+import { CustomDialogTransition, customerAccount, customerContact, opportunity, quoteBuilder } from '../../constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
@@ -153,7 +153,14 @@ const AssignProjectSalesDialog = ({ projectSalesDialogOpen, onSuccess, handleClo
   };
 
   return (
-    <Dialog fullWidth maxWidth="xs" open={projectSalesDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="xs"
+      open={projectSalesDialogOpen}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title="Assign Project List" />
       <CustomDialogContent>
         {loadingProjectSales ? (

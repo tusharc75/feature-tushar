@@ -25,6 +25,7 @@ import AssignedUsers from './AssignedUsers';
 import DashboardResources from './DashboardResources';
 import DefaultResources from './DefaultResources';
 import PolicyResources from './PolicyResources';
+import ImportExportRole from 'src/pages/Role/ImportExportRole';
 
 const RoleDetailsPage = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -76,7 +77,7 @@ const RoleDetailsPage = () => {
     isProductInventorySettings: false,
     isApproveAccount: false,
     isConvertLeadToOpportunity: false,
-    isAllowServicePerformRentalManagement:false,
+    isAllowServicePerformRentalManagement: false
   });
 
   const [resourceCheckbox, setResourceCheckBox] = useState({
@@ -141,7 +142,7 @@ const RoleDetailsPage = () => {
       resource: sidebarResource.lead,
       fieldLabel: 'Convert Lead To Opportunity',
       fieldName: 'isConvertLeadToOpportunity'
-    },
+    }
   ];
 
   const fieldOfPolicyResources = policyResources?.map((obj) => {
@@ -218,7 +219,7 @@ const RoleDetailsPage = () => {
         isProductInventorySettings: e.target.checked,
         isApproveAccount: e.target.checked,
         isConvertLeadToOpportunity: e.target.checked,
-        isAllowServicePerformRentalManagement:e.target.checked
+        isAllowServicePerformRentalManagement: e.target.checked
       });
     }
     if (checkBoxType === 'Policy-CheckBox') {
@@ -360,30 +361,27 @@ const RoleDetailsPage = () => {
       return newData;
     });
 
-    axiosInstance()
-      .put(`/role`, {
-        _id: id,
-        ...values,
-        field: fields,
-        resource: resources,
-        type: roleData.type,
-        policy: policyFieldCheckBox,
-        dashBoards: dashBoardIds,
-        defaultResource: defaultResourceName,
-        superAdminAccess: superAdminAccess,
-        canAssignByAnyuser: canAssignByAnyuser
-      })
-      .then(({ data }) => {
-        fetchRoleData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: data.message
-        });
-
-        setUpdating(false);
-        setIsEdit(false);
-      })
+    axiosInstance().put(`/role`, {
+      _id: id,
+      ...values,
+      field: fields,
+      resource: resources,
+      type: roleData.type,
+      policy: policyFieldCheckBox,
+      dashBoards: dashBoardIds,
+      defaultResource: defaultResourceName,
+      superAdminAccess: superAdminAccess,
+      canAssignByAnyuser: canAssignByAnyuser
+    }).then(({ data }) => {
+      fetchRoleData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: data.message
+      });
+      setUpdating(false);
+      setIsEdit(false);
+    })
       .catch((error) => {
         toastConfig.setToastConfig(error);
         setUpdating(false);
@@ -498,20 +496,20 @@ const RoleDetailsPage = () => {
         const childResourceFields = newField.filter((_field) => _field.fieldData.resource === _childResource.name);
         _childResource[access] = checked;
         if (checked) {
-          _childResource['isRead'] = checked
+          _childResource['isRead'] = checked;
         }
-        childResourceFields?.forEach(_field => {
-          _field[access] = checked
+        childResourceFields?.forEach((_field) => {
+          _field[access] = checked;
           if (access === 'isCreate' || access === 'isUpdate') {
             if (checked) {
-              _field['isRead'] = checked
+              _field['isRead'] = checked;
             }
           }
         });
       }
-    })
+    });
     setChildrenResource(toUpdateResource);
-  }
+  };
 
   const isEditDeleteDisable = [PERMISSION.superAdmin, PERMISSION.brandAdmin].indexOf(roleData?.permission) >= 0;
 
@@ -527,6 +525,17 @@ const RoleDetailsPage = () => {
             <Box className="control-buttons-v1">
               {roleData ? (
                 <>
+                  <ImportExportRole
+                     resource={resource}
+                     field={field}
+                     childrenResource={childrenResource}
+                     setField={setField}
+                     setResource={setResource}
+                     setChildrenResource={setChildrenResource}
+                     roleName={values?.name}
+                     isExport={!isEditDeleteDisable}
+                     isImport={permissions?.role.isUpdate && isEdit && !isEditDeleteDisable}
+                  />
                   {permissions?.role.isUpdate && !isEdit && (
                     <Button variant="contained" color="primary" size="medium" onClick={() => setIsEdit(true)}>
                       Edit
@@ -621,7 +630,7 @@ const RoleDetailsPage = () => {
                         resource={resource}
                         setField={setField}
                         setResource={setResource}
-                          updateChildResource={updateChildResource}
+                        updateChildResource={updateChildResource}
                         isDisable={permissions?.role.isUpdate ? (isEditDeleteDisable || !isEdit ? true : false) : true}
                         tier={values?.tier}
                       />
@@ -630,7 +639,9 @@ const RoleDetailsPage = () => {
                           <RoleEngine
                             style={{ height: '603px', boxShadow: '0px 20.3165px 40.6331px rgba(0, 0, 0, 0.03)' }}
                             field={field}
-                            resource={childrenResource?.map((e, index) => { return { ...e, resourceId: index } })}
+                            resource={childrenResource?.map((e, index) => {
+                              return { ...e, resourceId: index };
+                            })}
                             setField={setField}
                             setResource={setChildrenResource}
                             isDisable={permissions?.role.isUpdate ? (!isEdit ? true : false) : true}
@@ -706,96 +717,11 @@ const RoleDetailsPage = () => {
                 )}
               </div>
               <Box marginY={2} />
-              {/* {roleData && roleData.type === 2 && (
-                <div>
-                  <Box
-                    padding={1}
-                    bgcolor="grey.200"
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Typography variant="subtitle2">
-                      Assigned Entities (
-                    {(roleData && roleData.entity.length) || 0})
-                  </Typography>
-
-                    {permissions.role.isUpdate && (
-                      <IconButton
-                        title="Assign Entities"
-                        color="primary"
-                        size="small"
-                        onClick={entityDialogOpen}
-                      >
-                        <ControlPoint />
-                      </IconButton>
-                    )}
-                  </Box>
-
-                  <Box padding={1}>
-                    {loading ? (
-                      <Box display="flex">
-                        {[1, 2].map((i) => (
-                          <BoxWithBorder
-                            key={i}
-                            style={{
-                              padding: "8px",
-                              margin: "8px",
-                              width: "100%",
-                            }}
-                          >
-                            <Box padding={1}>
-                              <Skeleton
-                                variant="text"
-                                width="100px"
-                                height="20px"
-                              />
-                              <Box marginTop={1} />
-                              <Skeleton
-                                variant="text"
-                                width="100%"
-                                height="15px"
-                              />
-                            </Box>
-                          </BoxWithBorder>
-                        ))}
-                      </Box>
-                    ) : roleData.entity.length ? (
-                      <>
-                        <AssignedEntities
-                          selectedEntity={selectedEntity}
-                          permissions={permissions}
-                          data={roleData && roleData.entity.slice(0, showEntities)}
-                          unassignEntity={handleUnassignEntity}
-                        />
-
-                        <Box marginY={1} />
-                        {
-                          roleData.entity.length > showRecordsBeforeViewAll && <Button
-                            fullWidth
-                            variant="contained"
-                            color="primary"
-                            size="small"
-                            onClick={() => setShowEntities(roleData.entity.length)}
-                          >
-                            View All ({roleData.entity.length})
-                          </Button>
-                        }
-                      </>
-                    ) : (
-                      <Box textAlign="center" padding={2}>
-                        <Typography>No entities has been assigned </Typography>
-                      </Box>
-                    )}
-                  </Box>
-                </div>
-              )} */}
             </Grid>
             <Grid item xs={12} sm={12} md={4} lg={4}>
               <Box className="single-form-v1 ">
                 <Box className="form-head-v1">
                   <Typography component={'h3'}>Assigned Users ({roleUsers.length || 0})</Typography>
-
                   {permissions?.role.isUpdate && (
                     <IconButton className="float-right-button-v1" title="Assign users" color="primary" size="small" onClick={userDialogOpen}>
                       <ControlPoint />

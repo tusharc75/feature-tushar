@@ -1,20 +1,18 @@
 import { useEffect, useState, useContext, useCallback } from 'react';
-import { Dialog, Button, CircularProgress, Grid, useTheme, useMediaQuery, Box } from '@material-ui/core';
-import { Skeleton } from '@material-ui/lab';
+import { Dialog, Button, CircularProgress, useTheme, useMediaQuery, Box } from '@material-ui/core';
 import { Formik, Form } from 'formik';
 import axiosInstance from '../../axios/axiosInstance';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { getObjKeys, yupSchema, getObjKeysWithValues, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { getObjKeys, yupSchema, getObjKeysWithValues, sidebarResource, CustomDialogTransition } from '../../constants/helpers';
 import { useLocation, useHistory } from 'react-router-dom';
-import FormTypes from '../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
 import { useData } from '../../StateProvider/Provider';
 import { isTablet } from 'react-device-detect';
-import { FaDiceOne } from 'react-icons/fa';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import InputField from 'src/components/Helpers/InputField';
 import { isEqual } from 'lodash';
 
 export default function ManageUserDialog({
@@ -40,8 +38,6 @@ export default function ManageUserDialog({
   const [initialData, setInitialData] = useState({ fields: [], values: dataToUpdate ? dataToUpdate : {} });
   const location = useLocation();
   const history = useHistory();
-  const [formsData, setFormsData] = useState([]);
-  const [reportsToDataSource, setReportsToDataSource] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -82,21 +78,6 @@ export default function ManageUserDialog({
   useEffect(() => {
     getInitialData();
   }, [getInitialData]);
-
-  useEffect(() => {
-    if (initialData.fields.length > 0) {
-      const reportsToDropdownData = initialData.fields.find((d) => d.fieldName === 'reportsTo');
-      if (reportsToDropdownData) {
-        if (isNew) {
-          setReportsToDataSource(reportsToDropdownData.option);
-        } else {
-          let currentContactRemovedDataSource = reportsToDropdownData.option.filter((d) => d?.optionValue !== userId);
-          setReportsToDataSource(currentContactRemovedDataSource);
-        }
-      }
-      setFormsData(setFieldsInAscendingOrder(initialData.fields));
-    }
-  }, [initialData.fields]);
 
   const handleSubmit = (values) => {
     setSubmitting(true);
@@ -158,6 +139,7 @@ export default function ManageUserDialog({
     <Dialog
       open={open}
       maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
       fullWidth
       fullScreen={fullScreen || isMobile || isTablet}
       onClose={(e, reason) => {
@@ -175,8 +157,8 @@ export default function ManageUserDialog({
                   isClone
                     ? `Clone User - ${cloneHeadingName}`
                     : isNew
-                    ? 'Create New User'
-                    : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(' ')}`
+                      ? 'Create New User'
+                      : `Updating ${[dataToUpdate.firstName, dataToUpdate.lastName].filter((f) => f).join(' ')}`
                 }
                 onClose={() => {
                   if (isEqual(values, initialData.values)) close();
@@ -190,74 +172,17 @@ export default function ManageUserDialog({
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field) => (
-                              <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                {field.fieldName === 'reportsTo' ? (
-                                  <FormTypes
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={reportsToDataSource}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    onChange={(e, val) => {
-                                      setFieldValue(field.fieldName, val && val.optionValue ? val.optionValue : '');
-                                    }}
-                                    fieldData={field}
-                                    fields={initialData.fields}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    size="small"
-                                  />
-                                ) : (
-                                  <FormTypes
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field?.isTooltip || false}
-                                    tooltipMessage={field?.tooltipMessage}
-                                    fieldData={field}
-                                    fields={initialData.fields}
-                                    size="small"
-                                    imageOrFileUploadCompletePercentage={
-                                      ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                        ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
-                                        : null
-                                    }
-                                  />
-                                )}
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.user}
+                    referenceId={userId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

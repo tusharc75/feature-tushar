@@ -1,10 +1,10 @@
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import Box from '@material-ui/core/Box';
 import Button from '@material-ui/core/Button';
-import Grid from '@material-ui/core/Grid';
 import {
   CustomDialogTransition,
   getObjKeysWithValues,
+  sidebarResource,
   yupSchema,
 } from '../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
@@ -14,9 +14,9 @@ import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter
 import { Form, Formik } from 'formik';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CircularProgress } from '@material-ui/core';
-import FormTypes from 'src/components/Helpers/FormTypes';
 import ConfirmationCancelDialog from 'src/components/ConfirmCancelDialog';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
 export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPolicy, fields, serializedAssetData, productInventoryId }) {
 
@@ -95,35 +95,17 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  <Box marginY={2}>
-                    <Grid spacing={3} container>
-                      {initialData?.fields.map((field) => (
-                        <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                          <FormTypes
-                            {...field}
-                            fieldData={field}
-                            values={values}
-                            errors={errors}
-                            touched={touched}
-                            disabled={field?.disableOnEdit || field?.isUneditable}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={field.option}
-                            setFieldValue={(name, value) => {
-                              setFieldValue(name, value);
-                            }}
-                            required={field.required}
-                            fullWidth
-                            isTooltip={field?.isTooltip || false}
-                            tooltipMessage={field?.tooltipMessage}
-                            size="small"
-                            fields={initialData?.fields}
-                          />
-                        </Grid>
-                      ))}
-                    </Grid>
-                  </Box>
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.serializedAsset}
+                    referenceId={productInventoryId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

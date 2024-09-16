@@ -175,9 +175,7 @@ const ManageCreditMemo = ({ onClose, onSuccess, isClone = false, creditMemoId = 
                 <InputField
                       errors={errors}
                       values={values}
-                      setFieldValue={(name, value) => {
-                        setFieldValue(name, value);
-                      }}
+                      setFieldValue={setFieldValue}
                       touched={touched}
                       fieldsData={initialData.fields}
                       size="small"

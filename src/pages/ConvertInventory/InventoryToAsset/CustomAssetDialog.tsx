@@ -2,7 +2,7 @@ import React, { useEffect, useState, useContext } from 'react';
 import { Dialog, Box, TextField, Table, TableHead, Paper, TableContainer, TableBody, TableCell, TableRow, Link, Checkbox } from '@material-ui/core';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-import { ASSET_NUMBER_TYPE, sidebarResource } from '../../../constants/helpers';
+import { ASSET_NUMBER_TYPE, CustomDialogTransition, sidebarResource } from '../../../constants/helpers';
 import { Formik, Form, FieldArray } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import { read, utils, writeFile } from 'xlsx';
@@ -175,6 +175,7 @@ const CustomAssetDialog = ({ products, loading, handleClose, handleSuccess, reso
     <Dialog
       open
       fullScreen={fullScreen}
+      TransitionComponent={CustomDialogTransition}
       maxWidth="md"
       fullWidth
       onClose={(e, reason) => {

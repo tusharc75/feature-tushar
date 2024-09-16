@@ -9,7 +9,7 @@ import { isArray, isEmpty } from 'lodash';
 import { Autocomplete } from '@material-ui/lab';
 import CloseIcon from '@material-ui/icons/Close';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { dateFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat } from 'src/constants/helpers';
 import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import { ThemeButton } from './Buttons';
@@ -60,11 +60,13 @@ const CustomFilter = ({ field, setFilterQuery }) => {
           });
           const dateValue =
             fromDate && toDate
-              ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
-              }`
-              : fromDate || toDate
-                ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''
+              ? `${fromDate ? moment(new Date(fromDate)).format('MM/DD/YYYY') : null} - ${
+                  toDate ? moment(new Date(toDate)).format('MM/DD/YYYY') : null
                 }`
+              : fromDate || toDate
+                ? `${fromDate ? `${moment(new Date(fromDate)).format('MM/DD/YYYY')} (From Date)` : ''} ${
+                    toDate ? `${moment(new Date(toDate)).format('MM/DD/YYYY')} (To Date)` : ''
+                  }`
                 : null;
           chipData.push({
             title: col?.fieldLabel,
@@ -181,7 +183,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
         </Box>
         <ThemeButton
           tooltip="Apply Filters"
-          startIcon={<BiFilterAlt className="-ml-1 mt-[1px] mr-1" />}
+          startIcon={<BiFilterAlt className="-ml-1 mr-1 mt-[1px]" />}
           iconForMobile={<BiFilterAlt />}
           onClick={() => {
             setIsFilterOpen(true);
@@ -194,6 +196,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
       {isFilterOpen && (
         <Dialog
           maxWidth={'md'}
+          TransitionComponent={CustomDialogTransition}
           open={true}
           fullWidth
           onClose={(e, reason) => {

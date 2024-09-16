@@ -10,7 +10,14 @@ import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 import moment from 'moment';
-import { dateFormat, gridLoadingTimeout, prepareDataForGrid, productInventory, transferInventory } from 'src/constants/helpers';
+import {
+  CustomDialogTransition,
+  dateFormat,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  productInventory,
+  transferInventory
+} from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Autocomplete } from '@material-ui/lab';
 import ManageTransferInventory from 'src/pages/TransferInventory/ManageTransferInventory';
@@ -382,7 +389,15 @@ const AssignSerialNumbersDialog = ({
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleClose} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="md"
+      fullScreen={true}
+      open={true}
+      onClose={handleClose}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title={`Assign Serial Numbers`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ListingPageHeader

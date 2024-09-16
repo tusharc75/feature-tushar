@@ -369,7 +369,7 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
                           {form.sectionFields.map((field, index2) => (
                             <Grid key={index2} item xs={12} sm={6} md={6}>
                               {
-                                ['fullAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'country', 'latitude', 'longitude',
+                                ['fullAddress', 'streetAddress', 'city', 'state', 'zipCode', 'country', 'county', 'latitude', 'longitude',
                                   'state/Province', 'zipCode/PostalCode'].includes(field.fieldName) ?
                                   <FormTypes
                                     values={values}

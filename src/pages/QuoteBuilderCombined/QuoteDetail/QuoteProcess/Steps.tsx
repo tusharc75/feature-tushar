@@ -18,6 +18,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import DoaStepUsers from './DOAStepUsers';
 
 import Steps1 from 'src/components/Steps';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const useStyles = makeStyles((theme) => ({
   rejected: {
@@ -183,10 +184,10 @@ const Steps = (props) => {
         <></>
       ) : (
         <>
-          <div className="absolute top-[64px] right-[25px] text-[20px]  font-semibold rounded-bl-md">
+          <div className="absolute right-[25px] top-[64px] rounded-bl-md  text-[20px] font-semibold">
             {!versionStatus.includes('Accepted by Customer') && approvedQuote.approved && approvedQuote.versionApproved === version && (
               <div
-                className={`${approvedClasses} font-bold text d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                className={`${approvedClasses} text d-flex align-items-center justify-content-center max-w-max gap-1  rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px] font-bold`}
               >
                 <h6>Quote version - {approvedQuote.versionApproved} of this quote has been Approved</h6>
               </div>
@@ -197,7 +198,7 @@ const Steps = (props) => {
               {versionStatus.split(' (')[0] === 'Rejected by DOA' && <DoaStepUsers DOAData={DOAData} versionStatus={'Rejected by DOA'} />}
               {versionStatus === 'Sent to Customer' && (
                 <div
-                  className={`${classes.sent} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                  className={`${classes.sent} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
                   <AiOutlineClockCircle size={20} />
                   <h6>Quote has been sent to customer</h6>
@@ -205,7 +206,7 @@ const Steps = (props) => {
               )}
               {versionStatus.includes('Accepted by Customer') && (
                 <div
-                  className={`${approvedClasses} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                  className={`${approvedClasses} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
                   <FcApproval size={20} />
                   <h6>Approved by Customer</h6>
@@ -213,7 +214,7 @@ const Steps = (props) => {
               )}
               {versionStatus.includes('Rejected by Customer') && (
                 <div
-                  className={`${classes.rejected} d-flex align-items-center justify-content-center bg-[var(--dark-primary)]  px-2 py-[3px] max-w-max gap-1 rounded-bl-md`}
+                  className={`${classes.rejected} d-flex align-items-center justify-content-center max-w-max  gap-1 rounded-bl-md bg-[var(--dark-primary)] px-2 py-[3px]`}
                 >
                   <FcCancel size={20} />
                   <h6>Rejected by Customer</h6>
@@ -225,7 +226,14 @@ const Steps = (props) => {
       )}
 
       {showManualCustomerActionDialog && (
-        <Dialog fullWidth maxWidth="xs" open={showManualCustomerActionDialog} onClose={closeManualDiaog} aria-labelledby="assign-roles-dialog">
+        <Dialog
+          fullWidth
+          maxWidth="xs"
+          TransitionComponent={CustomDialogTransition}
+          open={showManualCustomerActionDialog}
+          onClose={closeManualDiaog}
+          aria-labelledby="assign-roles-dialog"
+        >
           <CustomDialogHeader title={`Reason For Ending`} />
           <CustomDialogContent>
             <>

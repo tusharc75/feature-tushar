@@ -267,6 +267,7 @@ const Receiving = ({ subleaseData, allowedToEdit, setNextStep, setNextStepToolTi
 						productName: d?.productDetail?.productName
 					}))}
 					subleaseId={subleaseData?._id}
+					subleaseData={subleaseData}
 					onSuccess={() => {
 						fetchData()
 						setReceiveDialog(false)

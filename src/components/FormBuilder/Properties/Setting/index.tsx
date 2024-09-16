@@ -3,6 +3,7 @@ import FormTypes from 'src/components/Helpers/FormTypes';
 import { ResourceDropdown } from '../resourceDropdown';
 import { Autocomplete } from '@material-ui/lab';
 import { Entity } from '../../AddField/entity';
+import CheckboxDropdown from 'src/components/FormBuilder/Properties/CheckboxDropdown';
 
 const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, section, touched, errors, module, brandId }) => {
   return (
@@ -18,6 +19,9 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   checked={values['isDefaultValue']}
                   onChange={(e) => {
                     setFieldValue('isDefaultValue', e.target.checked);
+                    if (fieldData.type === 'checkBox' && !e.target.checked) {
+                      setFieldValue('defaultValue', '');
+                    }
                   }}
                   color="primary"
                 />
@@ -70,6 +74,16 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   touched={touched}
                   errors={errors}
                 />
+              ) : (fieldData.type === 'dropDown' || fieldData.type === 'multiSelect') && !values['lookup'] ? (
+                <ResourceDropdown
+                  type={fieldData.type}
+                  value={values['defaultValue']}
+                  options={values.option}
+                  setFieldValue={setFieldValue}
+                  brandId={brandId}
+                  touched={touched}
+                  errors={errors}
+                />
               ) : fieldData.type === 'groupSignature' ? (
                 <ResourceDropdown
                   type={'multiSelect'}
@@ -80,6 +94,12 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   touched={touched}
                   errors={errors}
                 />
+              ) : fieldData.type === 'checkBox' || fieldData.type === 'switch' ? (
+                <CheckboxDropdown
+                  value={values['defaultValue']}
+                  setFieldValue={setFieldValue}
+                  touched={touched}
+                  errors={errors} />
               ) : (
                 <Box display="block">
                   <TextField
@@ -285,7 +305,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            {initialValues?.hasOwnProperty('unique') && (
+            {fieldData?.type === 'singleLine' && initialValues?.hasOwnProperty('unique') && (
               <FormControlLabel
                 control={
                   <Checkbox
@@ -307,19 +327,21 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
       <Box>
         <Grid container>
           <Grid item xs={12} md={6}>
-            <FormControlLabel
-              control={
-                <Checkbox
-                  name="primaryField"
-                  checked={values['primaryField']}
-                  onChange={(e) => {
-                    setFieldValue('primaryField', e.target.checked);
-                  }}
-                  color="primary"
-                />
-              }
-              label="Primary Field"
-            />
+            {fieldData?.type === 'singleLine' && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="primaryField"
+                    checked={values['primaryField']}
+                    onChange={(e) => {
+                      setFieldValue('primaryField', e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label="Primary Field"
+              />
+            )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
         </Grid>

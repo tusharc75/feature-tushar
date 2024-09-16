@@ -81,24 +81,24 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
       message: `Document upload in progress..`
     });
     if (ev.target.files && ev.target.files.length) {
-        let files = ev.target.files;
+      let files = ev.target.files;
 
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            if (file.size > termsAndConditionDocumentUploadMaxSize.size) {
-                setToastConfig({
-                    open: true,
-                    type: 'error',
-                    message: `file must be less than ${termsAndConditionDocumentUploadMaxSize.text} size`
-                });
-                break;
-            }
-           
-            getFileUrl(file, "", {});
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+        if (file.size > termsAndConditionDocumentUploadMaxSize.size) {
+          setToastConfig({
+            open: true,
+            type: 'error',
+            message: `file must be less than ${termsAndConditionDocumentUploadMaxSize.text} size`
+          });
+          break;
         }
-        ev.target.value = '';
+
+        getFileUrl(file, "", {});
+      }
+      ev.target.value = '';
     }
-};
+  };
 
   const getFileUrl = (file, api, details) => {
     setImageUploadProgress(0);
@@ -125,12 +125,12 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
         if (details && details.isImage) {
           setUploadError(false);
           setImageUrl(data.fileUrl);
-        } else {      
+        } else {
           setToastConfig({
             open: true,
             type: 'success',
             message: `Document upload completed`
-          });    
+          });
           editorRef.current.execCommand('mceInsertContent', false, data);
         }
         //data.fileUrl data.fileName
@@ -323,7 +323,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
           plugins: [
             'advlist autolink lists link charmap print preview anchor ',
             ' searchreplace visualblocks code fullscreen  ',
-            'insertdatetime media table paste code wordcount'
+            'insertdatetime media table paste code wordcount hr'
           ],
           menubar: true,
           toolbar:
@@ -338,17 +338,17 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
             });
             editor.ui.registry.addButton('uploadDocument', {
               text: 'Upload Document',
-              onAction: (e)=>handleUploadFileClick(e),              
+              onAction: (e) => handleUploadFileClick(e),
             });
 
           },
-          
+
           skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
           content_css: themeColor === 'dark' ? 'dark' : 'default'
         }}
       />
 
-    <input
+      <input
         id={`file`}
         name={`file`}
         onChange={handleUploadFile}
@@ -357,7 +357,7 @@ function RichTextEditor({ value, label, name, setFieldValue }) {
         onClick={(e: any) => (e.target.value = null)}
         type="file"
         accept=".docx,.doc"
-    />
+      />
     </Box>
   );
 }

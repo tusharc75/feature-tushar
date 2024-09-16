@@ -1,7 +1,7 @@
 import { Box, Dialog, IconButton } from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import axiosInstance from '../../../axios/axiosInstance';
-import { gridLoadingTimeout } from '../../../constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CustomRenderCell from '../../../components/Helpers/CustomRenderCell';
@@ -168,7 +168,15 @@ export default function Version({ onClose, quotationId, handleChangeVersion, ref
   };
 
   return (
-    <Dialog maxWidth="md" aria-labelledby="customized-dialog-title" open onClose={onClose} fullWidth fullScreen={fullScreen || isMobile || isTablet}>
+    <Dialog
+      maxWidth="md"
+      TransitionComponent={CustomDialogTransition}
+      aria-labelledby="customized-dialog-title"
+      open
+      onClose={onClose}
+      fullWidth
+      fullScreen={fullScreen || isMobile || isTablet}
+    >
       <CustomDialogHeader
         title={`All Version Status`}
         onClose={onClose}

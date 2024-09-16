@@ -14,7 +14,7 @@ import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 import routes from 'src/components/Helpers/Routes';
-import { ACTIVITY_RESOURCE, sidebarResource } from 'src/constants/helpers';
+import { ACTIVITY_RESOURCE, CustomDialogTransition, sidebarResource } from 'src/constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
@@ -233,6 +233,7 @@ const EmployeeMasterDetail = () => {
         <Dialog
           fullWidth
           fullScreen={isMobile || isTablet}
+          TransitionComponent={CustomDialogTransition}
           maxWidth="xs"
           open={showAssignEntityDialog}
           onClose={() => {

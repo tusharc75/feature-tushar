@@ -32,6 +32,7 @@ import AddSerializedAsset from 'src/pages/RentalManagement/SerializedAsset/AddSe
 import ReplaceAssetReason from '../../../components/RentalManagment/ReplaceAssetReason';
 import { FiExternalLink } from 'react-icons/fi';
 import LocalShippingIcon from '@material-ui/icons/LocalShipping';
+import ReceiveDialog from './ReceiveDialog';
 
 interface LoadingGridProps {
   permissions: any;
@@ -67,7 +68,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState(false);
+  const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState({open: false, type: null});
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
@@ -319,30 +320,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
-  const handelReceiveAssets = () => {
-    let data = {};
-    const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
-    if (loadingTicketIds.length) {
-      data['_ids'] = loadingTicketIds?.map((e) => e);
-      data['status'] = DELIVERY_TICKET_STATUS.delivered;
-      data['signatures'] = [];
-      axiosInstance()
-        .post(`${deliveryTicket.api}/updatebulk`, data)
-        .then(({ data: { data } }) => {
-          fetchAssetsData();
-          setShowConfirmBoxReceive(false);
-          toastConfig.setToastConfig({
-            open: true,
-            type: 'success',
-            message: `Assets Received Successfully`
-          });
-        })
-        .catch((error) => {
-          toastConfig.setToastConfig(error);
-        });
-    }
-  };
-
   const handleOpenReplaceAssetReason = (rows) => {
     const data: any = {};
     data.referenceType = 'transferAsset';
@@ -379,7 +356,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
-  const handelCancleTickets = () => {
+  const handelCancelTickets = () => {
     setOkBtnLoading(true);
     const loadingTicketIds = uniq(
       map(
@@ -503,7 +480,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
           }
           onClick={() => {
-            setShowConfirmBoxReceive(true);
+            setShowConfirmBoxReceive({open: true, type: null});
           }}
         >
           Receive Assets
@@ -554,6 +531,18 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           }}
         >
           Cancel In-Transit Loading Ticket(s)
+        </MenuItem>
+        <MenuItem
+          disabled={
+            !canReceive ||
+            selectedRecords.length === 0 ||
+            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || e?.status !== ASSET_STATUS.available)
+          }
+          onClick={() => {
+            setShowConfirmBoxReceive({open: true, type: 'changeReceiveDate'});
+          }}
+        >
+          Change Receive Date
         </MenuItem>
         {/* <MenuItem
           disabled={selectedRecords.length && selectedRecords?.every(e => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) ? false : true}
@@ -622,15 +611,15 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           onOk={handleRemoveTicket}
         />
       )}
-      {showConfirmBoxReceive && (
-        <ConfirmationDialog
-          okBtnLoading={isRemovingTicket}
-          open={showConfirmBoxReceive}
-          message={`Are you sure you want to receive assets?`}
-          onClose={() => {
-            setShowConfirmBoxReceive(false);
+      {showConfirmBoxReceive.open && (
+        <ReceiveDialog
+          handleClose={() => setShowConfirmBoxReceive({open: false, type: null})}
+          selectedRecords={selectedRecords}
+          handleSuccess={() => {
+            fetchAssetsData();
+            setShowConfirmBoxReceive({open: false, type: null});
           }}
-          onOk={handelReceiveAssets}
+          referenceId={showConfirmBoxReceive.type === 'changeReceiveDate' ? transferAssetId : null}
         />
       )}
       {addSerializedAssetDialog.open && (
@@ -671,7 +660,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             if (showConformationDeliverdCancleTicket.type === 'Delivered') {
               cancelDeliveredTicket();
             } else {
-              handelCancleTickets();
+              handelCancelTickets();
             }
           }}
           okBtnLoading={okBtnLoading}

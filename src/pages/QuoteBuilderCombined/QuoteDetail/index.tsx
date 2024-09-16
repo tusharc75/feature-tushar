@@ -42,6 +42,7 @@ import ProjectInAccordion from '../../../components/ProjectInAccordion/ProjectIn
 import {
   ACTIVITY_RESOURCE,
   checkIsAllowedToEdit,
+  CustomDialogTransition,
   customerAccount,
   formatAmountWithCurrency,
   gridLoadingTimeout,
@@ -337,7 +338,7 @@ export default function QuoteDetail() {
               });
             }
             setTypeCreateProjectSalesDialog(dataOfTyoes);
-            
+
             setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quoteBuilder, data));
             let keys = Object.keys(data.versions);
             let tempCurrentVersion;
@@ -685,7 +686,7 @@ export default function QuoteDetail() {
                         handleOpenUpdateDialog();
                       }}
                     >
-                      <div className="flex gap-3 items-center">
+                      <div className="flex items-center gap-3">
                         <HiPencil />
                         <Typography variant="inherit">Edit Quote</Typography>
                       </div>
@@ -698,7 +699,7 @@ export default function QuoteDetail() {
                     }}
                     disabled={!allowedToEdit || isCloning || loading || ifQuoteApproved.approved}
                   >
-                    <div className="flex gap-3 items-center">
+                    <div className="flex items-center gap-3">
                       {isCloning ? <CircularProgress color="inherit" size={16} /> : <BiLayerPlus />}
                       <Typography variant="inherit">
                         {isCloning ? <>Cloning Version-{currentVersion}</> : `Clone Version-${currentVersion}`}
@@ -713,7 +714,7 @@ export default function QuoteDetail() {
                         setReopenReasonDialog(true);
                       }}
                     >
-                      <div className="flex gap-3 items-center">
+                      <div className="flex items-center gap-3">
                         <VscIssueReopened />
                         <Typography variant="inherit">Re-Open</Typography>
                       </div>
@@ -726,7 +727,7 @@ export default function QuoteDetail() {
                         setOpenUpdateDialog(true);
                       }}
                     >
-                      <div className="flex gap-3 items-center">
+                      <div className="flex items-center gap-3">
                         <HiPencil />
                         <Typography variant="inherit">Edit Information</Typography>
                       </div>
@@ -746,7 +747,7 @@ export default function QuoteDetail() {
                         deleteVersion();
                       }}
                     >
-                      <div className="flex gap-3 items-center">
+                      <div className="flex items-center gap-3">
                         <MdDelete />
                         <Typography variant="inherit">Delete Version-{currentVersion}</Typography>
                       </div>
@@ -763,7 +764,7 @@ export default function QuoteDetail() {
                           setShowConfirmBox(true);
                         }}
                       >
-                        <div className="flex gap-3 items-center">
+                        <div className="flex items-center gap-3">
                           <MdDelete />
                           <Typography variant="inherit">Delete Quote</Typography>
                         </div>
@@ -779,7 +780,7 @@ export default function QuoteDetail() {
                         }}
                         variant="outlined"
                         size="small"
-                        className="mx-1 btn-outline-v1"
+                        className="btn-outline-v1 mx-1"
                         startIcon={<ThumbUpIcon />}
                         color="primary"
                       >
@@ -924,6 +925,7 @@ export default function QuoteDetail() {
           <Dialog
             maxWidth="xs"
             open={reopenReasonDialog}
+            TransitionComponent={CustomDialogTransition}
             aria-labelledby="confirmation-dialog-title"
             classes={{
               paper: classes.paper

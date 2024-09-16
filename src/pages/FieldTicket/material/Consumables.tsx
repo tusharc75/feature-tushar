@@ -36,7 +36,7 @@ import { deleteOne, findAll, findOne, insertUpdate, objectStore } from 'src/cons
 import HideWhenOffline from 'src/components/HideWhenOffline';
 import { FiExternalLink } from 'react-icons/fi';
 
-const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen }) => {
+const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, stepFullScreen, fetchData: fetchFieldTicketData, refreshChild }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Consumables`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -48,7 +48,6 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const [tabValue, setTabValue] = useState(0);
   const [serviceOption, setServiceOption] = useState(null);
   const [selectedServiceOption, setSelectedServiceOption] = useState({ optionLabel: 'All', optionValue: 'All' });
-  const [renderCount, setRenderCount] = useState(0);
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null, showSaveAndNext: false });
   const [isBulkEdit, setIsBulkEdit] = useState(false);
   const [isUpdating, setUpdating] = useState(false);
@@ -102,7 +101,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
 
   useEffect(() => {
     fetchData();
-  }, [selectedServiceOption, tabValue, services]);
+  }, [selectedServiceOption, tabValue, refreshChild]);
 
   const fetchColumns = async () => {
     let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
@@ -440,6 +439,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         });
         setConsumablesDialog(false);
         fetchData();
+        fetchFieldTicketData();
         setSubmitting(false);
       })
       .catch((error) => {
@@ -481,6 +481,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       }
       setDeleting(false);
       fetchData();
+      fetchFieldTicketData();
       setDeleteData(null);
     } catch (error) {
       setDeleting(false);

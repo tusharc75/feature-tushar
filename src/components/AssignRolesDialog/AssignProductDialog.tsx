@@ -7,7 +7,7 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import CustomTabs, { CustomTab } from 'src/components/CustomTabs';
-import { gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, product, sidebarResource } from 'src/constants/helpers';
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CommonSkeleton from '../Helpers/CommonSkeleton';
@@ -53,7 +53,7 @@ const AssignProductDialog = ({
       editable: true,
       disableFilters: true,
       disableSortBy: true,
-      disabled:true,
+      disabled: true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty}</h5>
     }
   ];
@@ -236,7 +236,15 @@ const AssignProductDialog = ({
   };
 
   return (
-    <Dialog fullWidth maxWidth="md" fullScreen={true} open={true} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="md"
+      fullScreen={true}
+      open={true}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title={`Add ${routes.product.title}`} showManimizeMaximize={false} showRequiredLabel={false} onClose={handleCloseDialog} />
       <CustomDialogContent isFooterPresent={false}>
         <>

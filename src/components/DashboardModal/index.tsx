@@ -8,6 +8,7 @@ import React, { FC, ReactElement, ReactNode, useState } from 'react';
 import { FiMaximize2, FiMinimize2 } from 'react-icons/fi';
 import { useAppTheme } from 'src/constants/AppConfig';
 import styles from './dashboardModal.module.scss';
+import { CustomDialogTransition } from 'src/constants/helpers';
 // node_modules/@material-ui/core/Dialog/Dialog.d.ts
 
 export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -57,6 +58,7 @@ const DashboardModal: FC<ModalProps> = ({
 
   return (
     <Dialog
+      TransitionComponent={CustomDialogTransition}
       {...dialogProps}
       fullScreen={maximized}
       onClose={dialogProps?.onClose || handleClose}

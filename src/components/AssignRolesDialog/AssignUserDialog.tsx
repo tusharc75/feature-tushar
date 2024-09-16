@@ -1,4 +1,16 @@
-import { Button, Checkbox, CircularProgress, Dialog, FormControl, FormControlLabel, List, ListItem, ListItemIcon, ListItemText, Typography } from '@material-ui/core';
+import {
+  Button,
+  Checkbox,
+  CircularProgress,
+  Dialog,
+  FormControl,
+  FormControlLabel,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Typography
+} from '@material-ui/core';
 import { useContext, useEffect, useState } from 'react';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../axios/axiosInstance';
@@ -7,6 +19,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import Loader from '../Loader';
 import { ListingPageHeader } from '../PageHeaders';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleIds, assignedUsers, selectedEntity }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -99,9 +112,15 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
     );
   };
 
-
   return (
-    <Dialog fullWidth maxWidth="xs" open={usersDialogOpen} onClose={handleCloseDialog} aria-labelledby="assign-roles-dialog">
+    <Dialog
+      TransitionComponent={CustomDialogTransition}
+      fullWidth
+      maxWidth="xs"
+      open={usersDialogOpen}
+      onClose={handleCloseDialog}
+      aria-labelledby="assign-roles-dialog"
+    >
       <CustomDialogHeader title="Assign Users" showRequiredLabel={false} />
       <CustomDialogContent>
         {loadingUsers ? (
@@ -146,12 +165,7 @@ const AssignUserDialog = ({ usersDialogOpen, onSuccess, handleCloseDialog, roleI
         <Button disabled={isAssigning} onClick={handleCloseDialog} color="primary" size="small">
           Cancel
         </Button>
-        <Button
-          disabled={!selectedUsers.length || isAssigning}
-          onClick={handleAssignRoles}
-          color="primary"
-          size="small"
-          variant="contained">
+        <Button disabled={!selectedUsers.length || isAssigning} onClick={handleAssignRoles} color="primary" size="small" variant="contained">
           {isAssigning ? <CircularProgress size={22} /> : 'Save'}
         </Button>
       </CustomDialogFooter>

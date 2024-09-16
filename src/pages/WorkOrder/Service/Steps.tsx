@@ -305,9 +305,9 @@ const Steps = ({
             ? false
             : ele?.fields?.some((_f) => _f?.required)
               ? ele?.fields
-                ?.filter((_f) => _f?.required)
-                ?.map((f) => f?.fieldName)
-                ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
+                  ?.filter((_f) => _f?.required)
+                  ?.map((f) => f?.fieldName)
+                  ?.every((_fieldName) => stepSubmitedData?.find((s) => s.stepId === ele?._id)[_fieldName])
                 ? true
                 : false
               : true
@@ -551,7 +551,7 @@ const Steps = ({
   const automatePassFail = (values: any, step: any): string => {
     const fields = getFields(step).fieldData?.fields.filter((field) => field.type === 'decimal');
     if (!fields?.find((e) => e?.isMinMaxValue)) {
-      return ''
+      return '';
     }
     let invalidValues: any = {};
     const keys = Object.keys(values);
@@ -837,8 +837,11 @@ const Steps = ({
   let isStepsAllowToPerform = false;
   if (selectedService?.assignedUsers?.length) {
     isStepsAllowToPerform = selectedService?.assignedUsers?.find((u) => u?.optionValue === user?._id) ? true : false;
-  } else if (isArray(selectedService?.competencies) && isArray(user?.competencies) &&
-    selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length) {
+  } else if (
+    isArray(selectedService?.competencies) &&
+    isArray(user?.competencies) &&
+    selectedService?.competencies?.filter((e) => user?.competencies?.includes(e))?.length
+  ) {
     isStepsAllowToPerform = true;
   } else if (allowedToEdit) {
     isStepsAllowToPerform = true;
@@ -857,7 +860,9 @@ const Steps = ({
           message: data.message
         });
         setShowManageRepairJobDialog(false);
-        if (fetchWorkOrderData) fetchWorkOrderData();
+        if (fetchWorkOrderData) {
+          fetchWorkOrderData();
+        }
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -876,7 +881,9 @@ const Steps = ({
         });
         setRepairJobReceiveConfirmation(false);
         setIsSubmittingReceavingAsset(false);
-        if (fetchWorkOrderData) fetchWorkOrderData();
+        if (fetchWorkOrderData) {
+          fetchWorkOrderData();
+        }
       })
       .catch((error) => {
         setIsSubmittingReceavingAsset(false);
@@ -955,9 +962,9 @@ const Steps = ({
                 size="small"
                 disabled={
                   allowedToEdit &&
-                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                      selectedService?.status
-                    )
+                  ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                    selectedService?.status
+                  )
                     ? false
                     : true
                 }
@@ -977,9 +984,9 @@ const Steps = ({
             iconForMobile={<LowPriority />}
             disabled={
               allowedToEdit &&
-                ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                  selectedService?.status
-                )
+              ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                selectedService?.status
+              )
                 ? false
                 : true
             }
@@ -1007,7 +1014,7 @@ const Steps = ({
         <MenuItem
           disabled={
             allowedToEdit &&
-              serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
+            serviceDetails?.steps?.filter((d) => selectedSteps?.includes(d?._id))?.every((element) => element?.isAllowToCheck === true)
               ? false
               : true
           }
@@ -1028,14 +1035,14 @@ const Steps = ({
     <>
       {serviceDetails ? (
         serviceDetails?.steps?.length ? (
-          <Box className={`max-[768px]:mb-[70px] relative overflow-hidden`}>
-            <div className={`flex justify-between items-center p-[8px] flex-wrap`}>
-              <div className="flex items-center gap-[8px] flex-wrap pl-2">
+          <Box className={`relative overflow-hidden max-[768px]:mb-[70px]`}>
+            <div className={`flex flex-wrap items-center justify-between p-[8px]`}>
+              <div className="flex flex-wrap items-center gap-[8px] pl-2">
                 {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
                   <>
                     <label htmlFor="select-all" className={`cursor-pointer`}>
                       <Checkbox id="select-all" color="primary" checked={isAllChecked()} onChange={() => checkAll()} />
-                      <span className={`font-medium select-none ${isMobile ? 'sr-only' : ''}`}>Select All</span>
+                      <span className={`select-none font-medium ${isMobile ? 'sr-only' : ''}`}>Select All</span>
                     </label>
                     {isStepsAllowToPerform && (
                       <>
@@ -1055,8 +1062,8 @@ const Steps = ({
                   </>
                 ) : null}
               </div>
-              {isMobile ? null : <h6 className="text-[16px] ml-2 mr-auto">Steps</h6>}
-              <div className={`d-flex flex-wrap align-center justify-end gap-[8px] ml-auto ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
+              {isMobile ? null : <h6 className="ml-2 mr-auto text-[16px]">Steps</h6>}
+              <div className={`d-flex align-center ml-auto flex-wrap justify-end gap-[8px] ${serviceDetails?.steps?.length ? 'h-auto' : 'h-[500]'}`}>
                 <DetailsPageHeader
                   isAddButtonVisible={resource === sidebarResource.workOrder}
                   addButtonProps={{
@@ -1066,9 +1073,9 @@ const Steps = ({
                     },
                     disabled:
                       allowedToEdit &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        )
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      )
                         ? false
                         : true,
                     placement: 'right'
@@ -1083,8 +1090,9 @@ const Steps = ({
               </div>
             </div>
             <div
-              className={`w-full ${minHeightClass ? minHeightClass : 'h-[calc(100vh-265px)] '
-                } max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)] overflow-y-auto`}
+              className={`w-full ${
+                minHeightClass ? minHeightClass : 'h-[calc(100vh-265px)] '
+              } overflow-y-auto max-[767px]:h-[calc(100vh-364px)] max-[600px]:h-[calc(100vh-368px)]`}
             >
               {serviceDetails?.steps?.map((step, index) => {
                 const { stepData, isStepValid } = getFields(step);
@@ -1097,8 +1105,9 @@ const Steps = ({
                     key={step._id}
                     border={1}
                     borderColor={'var(--common-border-color)'}
-                    className={`${classes.accordionHeading}  ${classes.white} ${!stepData?.status ? '' : 'cursor-pointer'
-                      } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
+                    className={`${classes.accordionHeading}  ${classes.white} ${
+                      !stepData?.status ? '' : 'cursor-pointer'
+                    } transition-all duration-500 ${selectedStep?._id === step._id && fieldDialog ? 'bg[var(--accordion-summary-bg,_#ecfdf7)]' : ''}`}
                   >
                     <Box sx={{ display: 'flex' }} gridGap={'8px'}>
                       {allowedToEdit && serviceDetails?.steps?.some((e) => e?.isAllowToCheck) ? (
@@ -1117,20 +1126,24 @@ const Steps = ({
                           }}
                         />
                       ) : null}
-                      <span className="bg-[var(--primary)] dark:bg-[var(--dark-primary)] rounded-full text-white text-[13px] px-[12px] py-[1px]">
+                      <span className="rounded-full bg-[var(--primary)] px-[12px] py-[1px] text-[13px] text-white dark:bg-[var(--dark-primary)]">
                         {resource === sidebarResource.workOrderTechnician ? step?.order : `${selectedService?.order}.${step?.order || index + 1}`}
                       </span>
                       <Box
-                        className={`mr-auto basis-[calc(100%-56px)] sm:basis-[calc(100%-155px)] flex flex-wrap items-center justify-between gap-[8px]`}
+                        className={`mr-auto flex basis-[calc(100%-56px)] flex-wrap items-center justify-between gap-[8px] sm:basis-[calc(100%-155px)]`}
                         gridGap={'8px'}
                       >
-                        <Box className="flex items-center gap-2 flex-grow text-[var(--primary-text)]">
-                          <div className="flex items-start gap-2 w-full">
-                            <h6 className={`${classes.heading} flex-grow [word-break:break-all] line-clamp-1`} style={{ fontWeight: '600' }}>
+                        <Box className="flex flex-grow items-center gap-2 text-[var(--primary-text)]">
+                          <div className="flex w-full items-start gap-2">
+                            <h6
+                              title={step.stepName}
+                              className={`${classes.heading} flex-grow [word-break:break-all] max-md:line-clamp-[1]`}
+                              style={{ fontWeight: '600' }}
+                            >
                               {step.stepName}
                             </h6>
                             {mobScreen && (
-                              <div className="flex flex-wrap md:gap-2 items-center min-w-fit">
+                              <div className="flex min-w-fit flex-wrap items-center md:gap-2">
                                 {stepData?.status && (
                                   <IconButton
                                     aria-label="info"
@@ -1337,10 +1350,10 @@ const Steps = ({
                               ) : null
                             ) : null}
                             {stepData?.status &&
-                              step?.isAllowToPerform &&
-                              ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
-                              ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
-                              isStepsAllowToPerform ? (
+                            step?.isAllowToPerform &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.pause, WORKORDER_SERVICE_STEP_STATUS.needReperform].includes(stepData?.status) &&
+                            ![WORKORDER_SERVICE_STEP_STATUS.skipped].includes(stepData?.passFailStatus) &&
+                            isStepsAllowToPerform ? (
                               [
                                 WORKORDER_SERVICE_STEP_STATUS.passed,
                                 WORKORDER_SERVICE_STEP_STATUS.failed,
@@ -1390,7 +1403,7 @@ const Steps = ({
                         </Box>
                       </Box>
                       {!mobScreen && (
-                        <div className="flex  md:gap-1 items-center">
+                        <div className="flex  items-center md:gap-1">
                           {stepData?.status && (
                             <IconButton
                               aria-label="info"
@@ -1540,11 +1553,11 @@ const Steps = ({
                     }}
                     disabled={
                       getFields(selectedStep).canSkip &&
-                        isStepsAllowToPerform &&
-                        ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                          selectedService?.status
-                        ) &&
-                        getFields(selectedStep)?.stepData?.status !== WORKORDER_SERVICE_STEP_STATUS.skipped
+                      isStepsAllowToPerform &&
+                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                        selectedService?.status
+                      ) &&
+                      getFields(selectedStep)?.stepData?.status !== WORKORDER_SERVICE_STEP_STATUS.skipped
                         ? false
                         : true
                     }
@@ -1649,18 +1662,20 @@ const Steps = ({
                 open={true}
                 message={
                   addServiceConfirmation.type === 'skipServices'
-                    ? `As per the logic applied on this step, service${addServiceConfirmation?.services?.length > 1 ? 's' : ''
-                    }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
+                    ? `As per the logic applied on this step, service${
+                        addServiceConfirmation?.services?.length > 1 ? 's' : ''
+                      }  ${addServiceConfirmation?.services?.map((e) => e?.serviceName || '')?.toString()} has been skipped. Do you want to Skip ? `
                     : addServiceConfirmation.type === 'returnToStepOnFail'
-                      ? `As per the logic applied on this step, we need to return to step ${addServiceConfirmation.step?.stepName || ''
-                      }. Do you want to continue ?`
+                      ? `As per the logic applied on this step, we need to return to step ${
+                          addServiceConfirmation.step?.stepName || ''
+                        }. Do you want to continue ?`
                       : addServiceConfirmation.type === 'isQuoteRevisionOnFail'
                         ? ` Step fail requires Quotation Revision. Do you confirm on this?`
                         : addServiceConfirmation.type === 'jumpStep'
                           ? ` As per the logic applied on this step, we will skip few steps in this service. Do you want to continue?`
                           : `As per the logic applied on this step, a new service  ${addServiceConfirmation.services
-                            ?.map((e) => e.serviceName)
-                            ?.toString()} has been added. Do you want to Add ? `
+                              ?.map((e) => e.serviceName)
+                              ?.toString()} has been added. Do you want to Add ? `
                 }
                 onClose={() => {
                   setAddServiceConfirmation({ open: false, services: [], status: '', step: null, type: '' });
@@ -1830,9 +1845,9 @@ const Steps = ({
                   size="small"
                   disabled={
                     allowedToEdit &&
-                      ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
-                        selectedService?.status
-                      )
+                    ![WORKORDER_SERVICE_STATUS.completed, WORKORDER_SERVICE_STATUS.failed, WORKORDER_SERVICE_STATUS.skipped].includes(
+                      selectedService?.status
+                    )
                       ? false
                       : true
                   }

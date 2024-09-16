@@ -8,14 +8,13 @@ import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import MomentUtils from '@date-io/moment';
 import moment from 'moment';
 import axiosInstance from 'src/axios/axiosInstance';
-import { dateFormat, productInventory } from 'src/constants/helpers';
+import { CustomDialogTransition, dateFormat, productInventory } from 'src/constants/helpers';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import InfoIcon from '@material-ui/icons/Info';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
 function SettingsDialog({ onClose, warehouse }) {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [initialData, setInitialData] = useState({ lockDate: '' });
@@ -64,7 +63,7 @@ function SettingsDialog({ onClose, warehouse }) {
     if (!values['lockDate']) {
       errors['lockDate'] = 'Lock Date is Required';
     }
-    if (moment(values["lockDate"]).isAfter(moment())) {
+    if (moment(values['lockDate']).isAfter(moment())) {
       errors['lockDate'] = `Please select valid date`;
     }
     return errors;
@@ -74,6 +73,7 @@ function SettingsDialog({ onClose, warehouse }) {
     <Dialog
       maxWidth="sm"
       fullWidth
+      TransitionComponent={CustomDialogTransition}
       open={true}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
@@ -83,12 +83,7 @@ function SettingsDialog({ onClose, warehouse }) {
     >
       <CustomDialogHeader title="Inventory Setting" onClose={onClose} />
       {!settingLoading ? (
-        <Formik
-          initialValues={initialData}
-          validateOnMount={false}
-          validate={validate}
-          onSubmit={handleSubmit}
-        >
+        <Formik initialValues={initialData} validateOnMount={false} validate={validate} onSubmit={handleSubmit}>
           {({ submitForm, values, setFieldValue, errors, touched }) => (
             <>
               <CustomDialogContent>
@@ -132,17 +127,10 @@ function SettingsDialog({ onClose, warehouse }) {
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
-                <Button
-                  color="primary"
-                  size="small"
-                  onClick={onClose}>
+                <Button color="primary" size="small" onClick={onClose}>
                   Cancel
                 </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="small"
-                  onClick={submitForm}>
+                <Button variant="contained" color="primary" size="small" onClick={submitForm}>
                   Save
                 </Button>
               </CustomDialogFooter>

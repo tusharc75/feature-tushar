@@ -7,7 +7,7 @@ import { Form, Formik } from 'formik';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
-import { convertDateInDateTime, dateFormatForInputControl, productInventory } from 'src/constants/helpers';
+import { convertDateInDateTime, CustomDialogTransition, dateFormatForInputControl, productInventory } from 'src/constants/helpers';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import moment from 'moment';
@@ -50,6 +50,7 @@ const ReceiveDateDialog = ({ handleClose, handleSucess, loading, refrenceData })
       fullWidth
       maxWidth="sm"
       open={true}
+      TransitionComponent={CustomDialogTransition}
       onClose={(e, reason) => {
         if (reason !== 'backdropClick') {
           handleClose();

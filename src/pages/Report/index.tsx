@@ -12,7 +12,14 @@ import CustomContainer from '../../components/CustomContainer';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import { useData } from '../../StateProvider/Provider';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { prepareDataForGrid, gridLoadingTimeout, primaryFields, sidebarResource, isObjectEmpty } from './../../constants/helpers';
+import {
+  prepareDataForGrid,
+  gridLoadingTimeout,
+  primaryFields,
+  sidebarResource,
+  isObjectEmpty,
+  CustomDialogTransition
+} from './../../constants/helpers';
 import MomentUtils from '@date-io/moment';
 import { MuiPickersUtilsProvider } from '@material-ui/pickers';
 import ReportFilters from './ReportFilters';
@@ -145,24 +152,46 @@ const Report = () => {
     if (resourceStartCase === sidebarResource.invoice) {
       const extraColumns = [
         {
-          accessor: 'totalPrice',
-          Header: 'Total Price',
+          accessor: 'amount',
+          Header: 'Amount',
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) => (
             <>
-              <h5 className="text-truncate">{row.original['totalPrice'] ? row.original['totalPrice'] : <NoDataCell />}</h5>
+              <h5 className="text-truncate">{row.original['amount'] ? row.original['amount'] : <NoDataCell />}</h5>
             </>
           )
         },
         {
-          accessor: 'finalPrice',
-          Header: 'Final Price',
+          accessor: 'tax',
+          Header: 'Tax',
           disableFilters: true,
           disableSortBy: true,
           Cell: ({ row }) => (
             <>
-              <h5 className="text-truncate">{row.original['finalPrice'] ? row.original['finalPrice'] : <NoDataCell />}</h5>
+              <h5 className="text-truncate">{row.original['tax'] ? row.original['tax'] : <NoDataCell />}</h5>
+            </>
+          )
+        },
+        {
+          accessor: 'discount',
+          Header: 'Discount',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <>
+              <h5 className="text-truncate">{row.original['discount'] ? row.original['discount'] : <NoDataCell />}</h5>
+            </>
+          )
+        },
+        {
+          accessor: 'totalAmount',
+          Header: 'Total Amount',
+          disableFilters: true,
+          disableSortBy: true,
+          Cell: ({ row }) => (
+            <>
+              <h5 className="text-truncate">{row.original['totalAmount'] ? row.original['totalAmount'] : <NoDataCell />}</h5>
             </>
           )
         }
@@ -358,7 +387,7 @@ const Report = () => {
   const getApi = () => {
     let newColumns = columns.map((col) => col.accessor);
     if (!isEmpty(visibleColumns) && isObject(visibleColumns)) {
-      newColumns = []
+      newColumns = [];
       for (const [key, value] of Object.entries(visibleColumns)) {
         if (value) {
           newColumns.push(key);
@@ -443,6 +472,7 @@ const Report = () => {
                 open={true}
                 maxWidth="md"
                 fullWidth
+                TransitionComponent={CustomDialogTransition}
                 onClose={(e, reason) => {
                   if (reason !== 'backdropClick') {
                     setShowGrid(true);

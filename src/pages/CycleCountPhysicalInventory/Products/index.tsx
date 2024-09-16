@@ -15,13 +15,12 @@ import {
 } from '@material-ui/core';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { cycleCountPhysicalInventory } from 'src/constants/helpers';
+import { CustomDialogTransition, cycleCountPhysicalInventory } from 'src/constants/helpers';
 import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
 const Products = ({ handleClose, handleSucess, _id, products, warehouse }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -67,66 +66,60 @@ const Products = ({ handleClose, handleSucess, _id, products, warehouse }) => {
     );
   };
 
-  return (<Dialog
-    open={true}
-    onClose={handleClose}
-    fullScreen>
-    <CustomDialogHeader
-      title={`Enter Physical Inventory : ${warehouse}`}
-      onClose={handleClose}
-      showRequiredLabel={false}
-    />
-    <CustomDialogContent>
-      <Box display="flex" flexDirection="column">
-        <TableContainer component={Paper}>
-          <Table aria-label="customized table">
-            <TableHead>
-              <TableRow>
-                <TableCell>#</TableCell>
-                <TableCell align="left">Product</TableCell>
-                <TableCell align="left">Qty</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {tableData.map((data: any, idx) => (
-                <TableRow key={data.id}>
-                  <TableCell component="th" scope="row">
-                    {idx + 1}
-                  </TableCell>
-                  <TableCell align="left">{data?.product['optionLabel']}</TableCell>
-                  <TableCell align="left">
-                    <TextField
-                      size="small"
-                      variant="outlined"
-                      placeholder="Qty"
-                      value={data['qty']}
-                      autoComplete="off"
-                      name="Qty"
-                      type={'number'}
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, data)}
-                    />
-                  </TableCell>
+  return (
+    <Dialog open={true} onClose={handleClose} TransitionComponent={CustomDialogTransition} fullScreen>
+      <CustomDialogHeader title={`Enter Physical Inventory : ${warehouse}`} onClose={handleClose} showRequiredLabel={false} />
+      <CustomDialogContent>
+        <Box display="flex" flexDirection="column">
+          <TableContainer component={Paper}>
+            <Table aria-label="customized table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>#</TableCell>
+                  <TableCell align="left">Product</TableCell>
+                  <TableCell align="left">Qty</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-    </CustomDialogContent>
-    <CustomDialogFooter>
-      <Button
-        type="submit"
-        variant="contained"
-        size="small"
-        color="primary"
-        endIcon={isSubmitting && <CircularProgress size={18} />}
-        onClick={handleSubmit}
-        disabled={tableData?.find((d) => d.qty === null)}
-      >
-        Save
-      </Button>
-    </CustomDialogFooter>
-  </Dialog>
+              </TableHead>
+              <TableBody>
+                {tableData.map((data: any, idx) => (
+                  <TableRow key={data.id}>
+                    <TableCell component="th" scope="row">
+                      {idx + 1}
+                    </TableCell>
+                    <TableCell align="left">{data?.product['optionLabel']}</TableCell>
+                    <TableCell align="left">
+                      <TextField
+                        size="small"
+                        variant="outlined"
+                        placeholder="Qty"
+                        value={data['qty']}
+                        autoComplete="off"
+                        name="Qty"
+                        type={'number'}
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleChange(e, data)}
+                      />
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      </CustomDialogContent>
+      <CustomDialogFooter>
+        <Button
+          type="submit"
+          variant="contained"
+          size="small"
+          color="primary"
+          endIcon={isSubmitting && <CircularProgress size={18} />}
+          onClick={handleSubmit}
+          disabled={tableData?.find((d) => d.qty === null)}
+        >
+          Save
+        </Button>
+      </CustomDialogFooter>
+    </Dialog>
   );
 };
 

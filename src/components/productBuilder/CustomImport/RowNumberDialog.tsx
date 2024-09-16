@@ -15,6 +15,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { RiDeleteBin6Fill } from 'react-icons/ri';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from 'src/StateProvider/Provider';
+import ShowMissedOrExtraColumn from 'src/components/productBuilder/CustomImport/ShowMissedOrExtraColumn';
 
 const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -24,6 +26,10 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
   const [excelMappingData, setExcelMappingData] = useState([]);
   const [selectedView, setSelectedView] = useState(null);
   const [confirmationDelete, setConfirmationDelete] = useState({ open: false, data: null });
+
+  const {
+    state: { user }
+  }: any = useData();
 
   useEffect(() => {
     if (file) {
@@ -62,7 +68,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
     axiosInstance()
       .get(`/excel-mapping?resource=${resource}`)
       .then(({ data: { data } }) => {
-        setExcelMappingData(data);
+        setExcelMappingData(data?.filter((d) => d?.access === 'everyone' || (d?.access === 'private' && d?.user === user?.user?._id)));
       })
       .catch((error) => {});
   };
@@ -118,7 +124,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
             <CustomDialogContent>
               <Form autoComplete="off" autoCorrect="off" noValidate>
                 <Box>
-                  <Box mb={2} width={350}>
+                  <Box mb={2} width={350} display={'flex'} alignItems={'center'}>
                     <Autocomplete
                       fullWidth
                       size="small"
@@ -148,9 +154,12 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                       )}
                       id="select-view"
                       renderInput={(params) => (
-                        <TextField {...params} margin="dense" size={'small'} fullWidth label="Select excel mapping" variant="outlined" />
+                        <TextField {...params} margin="dense" size={'small'} fullWidth label="Select Excel Mapping" variant="outlined" />
                       )}
                     />
+                    <Box ml={2}>
+                      <ShowMissedOrExtraColumn view={selectedView} file={file} />
+                    </Box>
                   </Box>
                   <FieldArray
                     name="cell"
@@ -163,6 +172,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                 <Grid item sm={12} xs={12} md={3} lg={3}>
                                   <Autocomplete
                                     options={sheetNames}
+                                    disableClearable
                                     getOptionSelected={(option: any, val) => option === val}
                                     value={data?.sheetName}
                                     onChange={(e, val) => {
@@ -179,6 +189,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                         name="sheetName"
                                         label="Sheet Name"
                                         variant="outlined"
+                                        required
                                         fullWidth
                                       />
                                     )}
@@ -223,6 +234,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                 <Grid item sm={12} xs={12} md={3} lg={3}>
                                   <Autocomplete
                                     options={['1', '2']}
+                                    disableClearable
                                     getOptionSelected={(option: any, val) => option === val}
                                     value={data?.headerRow}
                                     onChange={(e, val) => {
@@ -239,6 +251,7 @@ const RowNumberDialog = ({ handleClose, onSuccess, file, resource }) => {
                                         name="headerRow"
                                         label="Header Row"
                                         variant="outlined"
+                                        required
                                         fullWidth
                                       />
                                     )}

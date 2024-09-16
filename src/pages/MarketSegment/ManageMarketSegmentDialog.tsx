@@ -10,15 +10,14 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from '../../components/Helpers/Routes';
 import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition, marketSegment, setFieldsInAscendingOrder } from '../../constants/helpers';
+import { CustomDialogTransition, marketSegment, sidebarResource } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
-import { Box, Grid } from '@material-ui/core';
-import FormTypes from '../../components/Helpers/FormTypes';
+import { Box } from '@material-ui/core';
 import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
-import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
+import InputField from 'src/components/Helpers/InputField';
 
 const ManageMarketSegmentDialog = (props) => {
   const toastConfig = useContext(CustomToastContext);
@@ -28,15 +27,8 @@ const ManageMarketSegmentDialog = (props) => {
   const { marketSegmentId, onClose, onSuccess, isClone = false } = props;
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formsData, setFormsData] = useState([]);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
-  useEffect(() => {
-    if (initialData.fields.length > 0) {
-      setFormsData(setFieldsInAscendingOrder(initialData.fields));
-    }
-  }, [initialData.fields]);
 
   useEffect(() => {
     axiosInstance()
@@ -144,64 +136,17 @@ const ManageMarketSegmentDialog = (props) => {
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form noValidate>
-                  {formsData &&
-                    formsData.map((form, index1) => {
-                      return form.name ? (
-                        <div key={index1}>
-                          <div className={'detail-box-content'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                          </div>
-                          <Box marginY={2}>
-                            <Grid spacing={3} container>
-                              {form.sectionFields.map((field, index2) => (
-                                <Grid key={index2} item xs={12} sm={6} md={6}>
-                                  {
-                                    <FormTypes
-                                      // {...rest}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={setFieldValue}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                    />
-                                  }
-                                </Grid>
-                              ))}
-                            </Grid>
-                          </Box>
-                        </div>
-                      ) : (
-                        form.sectionFields.map((field) => (
-                          <FormTypes
-                            // {...rest}
-                            values={values}
-                            errors={errors}
-                            touched={touched}
-                            label={field.fieldLabel}
-                            name={field.fieldName}
-                            type={field.type}
-                            options={field.option}
-                            setFieldValue={setFieldValue}
-                            required={field.required}
-                            fullWidth
-                            isTooltip={field?.isTooltip || false}
-                            tooltipMessage={field?.tooltipMessage}
-                            size="small"
-                            style={{ visibility: 'hidden' }}
-                          />
-                        ))
-                      );
-                    })}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                    resource={sidebarResource.marketSegment}
+                    referenceId={marketSegmentId || null}
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>

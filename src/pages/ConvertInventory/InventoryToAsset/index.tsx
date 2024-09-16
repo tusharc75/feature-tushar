@@ -7,7 +7,7 @@ import { isMobile, isTablet } from 'react-device-detect';
 import { Formik, Form } from 'formik';
 import CustomButton from 'src/components/Helpers/CustomButton';
 import axiosInstance from 'src/axios/axiosInstance';
-import { convertInventory, productInventory, sidebarResource } from '../../../constants/helpers';
+import { convertInventory, CustomDialogTransition, productInventory, sidebarResource } from '../../../constants/helpers';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 import { useData } from 'src/StateProvider/Provider';
@@ -15,7 +15,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import CustomAssetDialog from './CustomAssetDialog';
 
 const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, storageLocation = null }) => {
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [loading, setLoading] = useState(false);
   const [serialNumbers, setSerialNumbers] = useState([]);
@@ -202,6 +201,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
   return (
     <Dialog
       fullWidth
+      TransitionComponent={CustomDialogTransition}
       maxWidth="sm"
       open={true}
       fullScreen={fullScreen}
@@ -215,7 +215,7 @@ const InventoryToAsset = ({ handleClose, handleSuccess, product, warehouse, stor
       {!loadingInitialData ? (
         <Formik initialValues={initialData} onSubmit={handleSubmit} validateOnMount validate={validate}>
           {({ touched, errors, setFieldValue, values }) => (
-            <Form autoComplete="off" autoCorrect="off" className="flex flex-col min-h-full">
+            <Form autoComplete="off" autoCorrect="off" className="flex min-h-full flex-col">
               <CustomDialogHeader
                 title={`Convert Inventory`}
                 showRequiredLabel={true}

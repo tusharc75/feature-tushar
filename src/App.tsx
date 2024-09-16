@@ -1158,10 +1158,10 @@ function App() {
             <PrivateRoute exact path={`${routes.workSpace.path}`}>
               <WorkSpace />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workFlow.path}`}>
+            <PrivateRoute exact path={`${routes.workflow.path}`}>
               <WorkFlow />
             </PrivateRoute>
-            <PrivateRoute exact path={`${routes.workFlow.path}/:id`}>
+            <PrivateRoute exact path={`${routes.workflow.path}/:id`}>
               <CreateWorkFlow />
             </PrivateRoute>
             <PrivateRoute exact path={`${routes.workflowReport.path}`}>

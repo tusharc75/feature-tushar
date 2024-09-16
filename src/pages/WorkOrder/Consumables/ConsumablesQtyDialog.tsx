@@ -22,7 +22,7 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { sidebarResource, workOrder } from 'src/constants/helpers';
+import { CustomDialogTransition, sidebarResource, workOrder } from 'src/constants/helpers';
 
 const useClasses = makeStyles(() => ({
   tableContainer: {
@@ -30,8 +30,17 @@ const useClasses = makeStyles(() => ({
   }
 }));
 
-const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, onSuccess, selectedRecords, serviceName, consumeRequest, serialNumberRequired }) => {
-
+const ConsumablesQtyDialog = ({
+  referenceId,
+  referenceType,
+  warehouse,
+  onClose,
+  onSuccess,
+  selectedRecords,
+  serviceName,
+  consumeRequest,
+  serialNumberRequired
+}) => {
   const classes = useClasses();
   const toastConfig = useContext(CustomToastContext);
 
@@ -169,6 +178,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
   return (
     <Dialog
       open
+      TransitionComponent={CustomDialogTransition}
       fullScreen={fullScreen}
       maxWidth="md"
       fullWidth
@@ -200,7 +210,7 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
           }))
         }}
         enableReinitialize={true}
-        onSubmit={() => { }}
+        onSubmit={() => {}}
       >
         {({ values }) => (
           <>
@@ -471,7 +481,6 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
                                     )}
                                   />
                                 </div>
-
                               </div>
                             ))}
                           </div>
@@ -493,7 +502,11 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
               {consumeRequest ? (
                 <Button
                   onClick={() => {
-                    if (!validate(values.products).consumedQty && !validate(values.products).storageLocation && !Boolean(validate(values.products).serialNumber)) {
+                    if (
+                      !validate(values.products).consumedQty &&
+                      !validate(values.products).storageLocation &&
+                      !Boolean(validate(values.products).serialNumber)
+                    ) {
                       handleRequest(values);
                     }
                   }}
@@ -507,7 +520,11 @@ const ConsumablesQtyDialog = ({ referenceId, referenceType, warehouse, onClose, 
               ) : (
                 <Button
                   onClick={() => {
-                    if (!Boolean(validate(values.products).consumedQty) && !Boolean(validate(values.products).storageLocation) && !Boolean(validate(values.products).serialNumber)) {
+                    if (
+                      !Boolean(validate(values.products).consumedQty) &&
+                      !Boolean(validate(values.products).storageLocation) &&
+                      !Boolean(validate(values.products).serialNumber)
+                    ) {
                       handleSubmit(values);
                     }
                   }}
