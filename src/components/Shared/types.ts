@@ -77,6 +77,8 @@ export type FieldData = {
   isDependentDropdown?: boolean;
   isUneditable?: boolean;
   systemGeneratedPrefix?: string;
+  systemGeneratedPrefixDigit?: number;
+  systemGeneratedStartNumber?:number;
   systemGeneratedAutoIncrement?: boolean;
   lookupDependentOnField?: LookupDependentOnField;
   isShowFieldDependentOn?: boolean;

@@ -182,6 +182,7 @@ export default function ManageUserDialog({
                     fullWidth
                     resource={sidebarResource.user}
                     referenceId={userId || null}
+                    collaborateTools = {true}
                   />
                 </Form>
               </CustomDialogContent>
