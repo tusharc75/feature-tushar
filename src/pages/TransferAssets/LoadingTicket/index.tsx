@@ -68,7 +68,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [isRemovingTicket, setRemovingTicket] = useState(false);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
-  const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState({open: false, type: null});
+  const [showConfirmBoxReceive, setShowConfirmBoxReceive] = useState({ open: false, type: null });
   const [showTicketDialog, setShowTicketDialog] = useState({ open: false, data: {} });
   const [addSerializedAssetDialog, setAddSerializedAssetDialog] = useState({ open: false, products: [] });
   const [showReplaceReason, setShowReplaceReason] = useState({ open: false, data: {} });
@@ -93,13 +93,6 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
         setNextStep(true);
       } else {
         setNextStep(false);
-      }
-      if (transferAssetData?.transferType === 'Internal') {
-        if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
-          if (transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed) {
-            updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
-          }
-        }
       }
     }
   }, [dataRows, selectedRecords]);
@@ -234,6 +227,16 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       });
   };
 
+  const checkIfTransferEnded = () => {
+    if (transferAssetData?.transferType === 'Internal') {
+      if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
+        if (transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed) {
+          updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
+        }
+      }
+    }
+  };
+
   const fetchAssetsData = async () => {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
@@ -309,6 +312,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           message: `Selected records removed from assiged ${sidebarResource.deliveryTicket}(s)`
         });
         fetchAssetsData();
+        checkIfTransferEnded();
         setRemovingTicket(false);
       })
       .catch((error) => {
@@ -350,6 +354,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           message: `Assets Replaced Successfully`
         });
         fetchAssetsData();
+        checkIfTransferEnded();
       })
       .catch((error) => {
         toastConfig.setToastConfig(error);
@@ -371,6 +376,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           setOkBtnLoading(false);
           setShowConformationDeliverdCancleTicket({ open: false, type: '' });
           fetchAssetsData();
+          checkIfTransferEnded();
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
@@ -406,6 +412,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             message: `Cancelled Successfully`
           });
           fetchAssetsData();
+          checkIfTransferEnded();
         })
         .catch((error) => {
           setOkBtnLoading(false);
@@ -480,7 +487,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             selectedRecords.filter((e: any) => e?.loadingTicketStatus === DELIVERY_TICKET_STATUS.inTransit).length !== selectedRecords.length
           }
           onClick={() => {
-            setShowConfirmBoxReceive({open: true, type: null});
+            setShowConfirmBoxReceive({ open: true, type: null });
           }}
         >
           Receive Assets
@@ -539,7 +546,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || e?.status !== ASSET_STATUS.available)
           }
           onClick={() => {
-            setShowConfirmBoxReceive({open: true, type: 'changeReceiveDate'});
+            setShowConfirmBoxReceive({ open: true, type: 'changeReceiveDate' });
           }}
         >
           Change Receive Date
@@ -597,6 +604,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           onSuccess={() => {
             setShowTicketDialog({ open: false, data: {} });
             fetchAssetsData();
+            checkIfTransferEnded();
           }}
         />
       )}
@@ -613,11 +621,12 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
       )}
       {showConfirmBoxReceive.open && (
         <ReceiveDialog
-          handleClose={() => setShowConfirmBoxReceive({open: false, type: null})}
+          handleClose={() => setShowConfirmBoxReceive({ open: false, type: null })}
           selectedRecords={selectedRecords}
           handleSuccess={() => {
             fetchAssetsData();
-            setShowConfirmBoxReceive({open: false, type: null});
+            checkIfTransferEnded();
+            setShowConfirmBoxReceive({ open: false, type: null });
           }}
           referenceId={showConfirmBoxReceive.type === 'changeReceiveDate' ? transferAssetId : null}
         />
