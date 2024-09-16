@@ -10,6 +10,7 @@ import CustomDialogFooter from '../CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
 import CustomButton from '../Helpers/CustomButton';
 import { startCase } from 'lodash';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const schema = object().shape({
   title: string().required('Please enter title'),
@@ -27,15 +28,15 @@ const schema = object().shape({
       then: string().required('Please select sort by'),
       otherwise: string().notRequired()
     }),
-    access: string().oneOf(['private','everyone']).required("Please select access option")
+  access: string().oneOf(['private', 'everyone']).required('Please select access option')
 });
 
 const orderByOptions = ['asc', 'desc'];
 
 const ACCESS_OPTIONS = {
-  private: "private",
-  everyone: "everyone"
-}
+  private: 'private',
+  everyone: 'everyone'
+};
 
 function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, filterData, columns }) {
   const toastConfig = useContext(CustomToastContext);
@@ -54,14 +55,14 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
     const updatedFilterValue = filterValue;
     const colNames = Object.keys(filterValue);
     for (const col of columns) {
-      const fieldName = col.fieldName
-       if(colNames.includes(fieldName) && col.lookup){
-        if(updatedFilterValue[fieldName]?.length){
-          updatedFilterValue[fieldName] = filterValue[fieldName]?.map((e)=> e.optionValue);
-        }else{
+      const fieldName = col.fieldName;
+      if (colNames.includes(fieldName) && col.lookup) {
+        if (updatedFilterValue[fieldName]?.length) {
+          updatedFilterValue[fieldName] = filterValue[fieldName]?.map((e) => e.optionValue);
+        } else {
           delete updatedFilterValue[fieldName];
         }
-       }
+      }
     }
     const data = {
       title: values?.title,
@@ -111,6 +112,7 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
 
   return (
     <Dialog
+      TransitionComponent={CustomDialogTransition}
       maxWidth={'sm'}
       open={true}
       fullWidth
@@ -143,24 +145,20 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                   helperText={touched['title'] && errors['title']}
                 />
                 <FormControlLabel
-                  control={<Checkbox checked={values['default']}
-                    onChange={(e) => setFieldValue('default', e.target.checked)}
-                    name="default" />}
+                  control={<Checkbox checked={values['default']} onChange={(e) => setFieldValue('default', e.target.checked)} name="default" />}
                   label="Set this as default"
                 />
-                {values['default'] &&
+                {values['default'] && (
                   <Box>
                     <FormControlLabel
-                      control={<Checkbox
-                        checked={values['sorting']}
-                        onChange={(e) => setFieldValue('sorting', e.target.checked)} name="sorting" />}
+                      control={<Checkbox checked={values['sorting']} onChange={(e) => setFieldValue('sorting', e.target.checked)} name="sorting" />}
                       label="Default Sorting"
                     />
                   </Box>
-                }
-                  
+                )}
+
                 {values['sorting'] && columns?.length && (
-                  <div className="flex flex-wrap gap-2 my-2">
+                  <div className="my-2 flex flex-wrap gap-2">
                     <Autocomplete
                       id="sorting"
                       options={columns}
@@ -209,24 +207,31 @@ function SaveFilterDialog({ handleClose, handleSucess, resource, filterValue, fi
                     />
                   </div>
                 )}
-                 <Box>
+                <Box>
                   <RadioGroup>
                     <FormControlLabel
-                      control={<Radio
-                        checked={values['access']===ACCESS_OPTIONS.private}
-                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)} name="private" />}
+                      control={
+                        <Radio
+                          checked={values['access'] === ACCESS_OPTIONS.private}
+                          onChange={() => setFieldValue('access', ACCESS_OPTIONS.private)}
+                          name="private"
+                        />
+                      }
                       label="Private"
                     />
                     <FormControlLabel
-                      control={<Radio
-                        checked={values['access']===ACCESS_OPTIONS.everyone}
-                        onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)} name="everyone"
-                        />}
+                      control={
+                        <Radio
+                          checked={values['access'] === ACCESS_OPTIONS.everyone}
+                          onChange={() => setFieldValue('access', ACCESS_OPTIONS.everyone)}
+                          name="everyone"
+                        />
+                      }
                       label="Everyone"
                     />
-                    </RadioGroup>
-                    {errors.access && <div style={{ color: 'red' }}>{errors.access}</div>}
-                  </Box>
+                  </RadioGroup>
+                  {errors.access && <div style={{ color: 'red' }}>{errors.access}</div>}
+                </Box>
               </Form>
             </CustomDialogContent>
             <CustomDialogFooter>

@@ -174,7 +174,8 @@
     "release": "standard-version",
     "prepare": "husky install",
     "analyze": "yarn winBuild && source-map-explorer 'build/static/js/*.js'",
-    "serve": "node --max_old_space_size=4096 ./node_modules/vite/bin/vite build"
+    "serve": "node --max_old_space_size=4096 ./node_modules/vite/bin/vite build",
+    "preview": "vite preview"
   },
   "eslintConfig": {
     "extends": [

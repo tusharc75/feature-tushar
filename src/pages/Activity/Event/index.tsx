@@ -13,6 +13,7 @@ import CustomBreadCrumbs from '../../../components/CustomBreadCrumbs';
 import CustomContainer from '../../../components/CustomContainer';
 import { SearchFilter } from '../../../components/SearchFilter';
 import MyCalendar from '../Calendar/MyCalendar';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 const Event = () => {
   const history = useHistory();
@@ -110,6 +111,7 @@ const Event = () => {
             />
             <Dialog
               open={openDialog}
+              TransitionComponent={CustomDialogTransition}
               onClose={(e, reason) => {
                 if (reason !== 'backdropClick') {
                   handleClose();

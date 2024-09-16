@@ -23,6 +23,7 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import routes from '../../../components/Helpers/Routes';
 import {
+  CustomDialogTransition,
   GenerateResourceLineNumber,
   customerAccount,
   formFieldNames,
@@ -260,10 +261,10 @@ export default function ManageQuoteDialog({
     isCreateQuoteFromCart
       ? onHandleSubmit(values)
       : isClone
-      ? handleCloneQuote(values)
-      : isNew
-      ? handleCreateQuote(values)
-      : handleUpdateQuote(values);
+        ? handleCloneQuote(values)
+        : isNew
+          ? handleCreateQuote(values)
+          : handleUpdateQuote(values);
   };
 
   const handleCloneQuote = (values) => {
@@ -473,6 +474,7 @@ export default function ManageQuoteDialog({
     <>
       <Dialog
         maxWidth="md"
+        TransitionComponent={CustomDialogTransition}
         aria-labelledby="customized-dialog-title"
         onClose={(e, reason) => {
           if (reason !== 'backdropClick') {
@@ -593,8 +595,8 @@ export default function ManageQuoteDialog({
                                                       isClone
                                                         ? 'primary'
                                                         : isRenderedFromOpportunity || (!isNew && field.disableOnEdit)
-                                                        ? 'disabled'
-                                                        : 'primary'
+                                                          ? 'disabled'
+                                                          : 'primary'
                                                     }
                                                   />
                                                 </IconButton>

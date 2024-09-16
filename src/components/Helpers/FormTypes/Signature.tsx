@@ -12,6 +12,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 
 //camera library being used
 import Webcam from 'react-webcam';
+import { CustomDialogTransition } from 'src/constants/helpers';
 
 //handling camera side
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
@@ -86,7 +87,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const [usePad, setUsePad] = useState(true);
 
   return (
-    <Dialog open={open} onClose={close}>
+    <Dialog TransitionComponent={CustomDialogTransition} open={open} onClose={close}>
       <CustomDialogHeader title="Signature Pad" onClose={close} />
       <CustomDialogContent>
         {usePad ? (
@@ -133,7 +134,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
   );
 };
 
-const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMessage, setFieldValue, disable = false }) => {
+const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMessage, setFieldValue, required, disable = false }) => {
   const [openDialog, setOpenDialog] = React.useState(false);
 
   const handleSaveImage = (dataURL: string) => {
@@ -143,7 +144,7 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
 
   return (
     <Fragment>
-      <Typography style={{ color: '#656565', marginBottom: '12px', fontWeight: '500' }}>{label}</Typography>
+      <Typography style={{ color: '#656565', marginBottom: '12px', fontWeight: '500' }}>{`${label}${required ? ' *' : ''}`}</Typography>
       <Box display="flex" flexDirection="row" mt={1} alignItems="center">
         <Box
           position="relative"
@@ -171,7 +172,7 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
           )}
         </Box>
         <Box>
-          <HtmlTooltip title='Add Signature'>
+          <HtmlTooltip title="Add Signature">
             <label htmlFor={name}>
               <IconButton
                 onClick={() => {
@@ -187,7 +188,7 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
               </IconButton>
             </label>
           </HtmlTooltip>
-          <HtmlTooltip title='Remove Signature'>
+          <HtmlTooltip title="Remove Signature">
             <IconButton
               disabled={Boolean(!values[name]) || disable}
               className={Boolean(!values[name]) ? '' : 'errorColor'}
@@ -208,21 +209,15 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
               </HtmlTooltip>
             </IconButton>
           )}
-          <Box flex="1">
-            <Typography
-              variant="body2"
-              className="text-truncate"
-              style={{
-                marginLeft: '4px',
-                display: touched[name] && Boolean(errors[name]) ? '' : 'none'
-              }}
-              color={touched[name] && Boolean(errors[name]) ? 'error' : 'textPrimary'}
-            >
-              {touched[name] && Boolean(errors[name]) ? errors[name] : null}
-            </Typography>
-          </Box>
         </Box>
       </Box>
+      {touched[name] && Boolean(errors[name]) &&
+        <Box pt={1}>
+          <Typography variant="body2" className="text-truncate" color={'error'}   >
+            {errors[name]}
+          </Typography>
+        </Box>
+      }
       {openDialog && <SignatureDialog open={openDialog} onSave={handleSaveImage} close={() => setOpenDialog(false)} />}
     </Fragment>
   );

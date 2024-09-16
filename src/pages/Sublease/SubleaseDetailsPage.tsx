@@ -4,9 +4,6 @@ import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import React, { useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
-import { BiFoodMenu } from 'react-icons/bi';
-import { FaWpforms } from 'react-icons/fa';
-import { GiAbstract055 } from 'react-icons/gi';
 import { useHistory, useParams } from 'react-router-dom';
 import ActivityButton from 'src/components/Activity/ActivityButton';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
@@ -203,17 +200,15 @@ const SubleaseDetailsPage = () => {
       <Box className={`detail-container-v1`}>
         <CustomTabs value={tabValue} onChange={handleMainTabChange}>
           <CustomTab value={0}>
-            <FaWpforms className="mr-1" fontSize="inherit" /> Header
+            Header
           </CustomTab>
           <CustomTab value={1}>
-            <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
+            Details
           </CustomTab>
           <CustomTab value={2}>
-            <GiAbstract055 className="mr-1" fontSize="inherit" />
             {routes.deliveryTicket.title}
           </CustomTab>
           <CustomTab value={3}>
-            <GiAbstract055 className="mr-1" fontSize="inherit" />
             Invoices
           </CustomTab>
         </CustomTabs>

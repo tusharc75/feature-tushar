@@ -201,7 +201,6 @@ const FieldTicketDetail = () => {
           type: 'success',
           message: data?.message
         });
-        fetchData();
       })
       .catch((err) => {
         toastConfig.setToastConfig(err);
@@ -305,7 +304,7 @@ const FieldTicketDetail = () => {
                 handleChangeStatus={handleChangeStatus}
                 resourcePolicy={resourceData?.policy}
                 stepFullScreen={stepFullScreen}
-
+                fetchData={fetchData}
               />
             )}
             {currentStep === 1 && fieldTicketData && (
@@ -348,6 +347,7 @@ const FieldTicketDetail = () => {
           }}
           onOk={() => {
             handleChangeStatus(FIELD_TICKET_STATUS.closed);
+            fetchData();
           }}
         />
       )}

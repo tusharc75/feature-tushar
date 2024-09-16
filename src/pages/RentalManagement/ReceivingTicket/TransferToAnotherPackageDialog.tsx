@@ -24,7 +24,7 @@ const TransferToAnotherPackageDialog = ({ onClose, onSuccess, rentalManagementDa
 	}, [])
 
 	const fetchData = async () => {
-		const data = material?.filter((e) => e.type === MATERIAL_TYPE.package)?.map((e) => {
+		const data = material?.filter((e) => e.type === MATERIAL_TYPE.package && e?.packageDetail?.packageType === 'Product')?.map((e) => {
 			return {
 				optionLabel: e?.packageDetail?.packageName,
 				optionValue: e?._id,

@@ -6,14 +6,13 @@ import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomButton from 'src/components/Helpers/CustomButton';
-import { getObjKeysWithValues, serviceMaster } from 'src/constants/helpers';
+import { CustomDialogTransition, getObjKeysWithValues, serviceMaster } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
 import routes from 'src/components/Helpers/Routes';
 import InputField from 'src/components/Helpers/InputField';
-
 
 const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -36,7 +35,6 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
         toastConfig.setToastConfig(error);
       });
   }, [serviceData?._id]);
-
 
   const handleSave = (values) => {
     setLoading(true);
@@ -61,6 +59,7 @@ const FrequencyDialog = ({ onClose, onSuccess, serviceData, productId }) => {
     <Dialog
       fullWidth
       maxWidth="sm"
+      TransitionComponent={CustomDialogTransition}
       fullScreen={fullScreen}
       open={true}
       onClose={(e, reason) => {

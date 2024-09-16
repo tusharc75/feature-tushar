@@ -70,7 +70,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
   const handleDelete = (condition) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.workFlow.path}/${id}/activation-condition/delete`, { activationConditionId: condition?._id })
+      .put(`${routes.workflow.path}/${id}/activation-condition/delete`, { activationConditionId: condition?._id })
       .then(() => {
         setDeleting(false);
         fetchWorkFlowData();
@@ -85,11 +85,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
 
   return (
     <Fragment>
-      <Box
-        border={1}
-        borderColor="var(--common-border-color)"
-        className="conditions-container container-with-border mb-2 flex flex-col gap-1 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4"
-      >
+      <Box className="conditions-container flex flex-col gap-1 sm:mb-3 sm:p-3 md:mb-4 md:p-2">
         <Box>
           <Button
             variant="contained"
@@ -102,7 +98,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
             Add Condition
           </Button>
         </Box>
-        {resourceFields?.length > 0 ? (
+        {resourceFields?.length > 0 && !loading ? (
           activationCondition?.length > 0 ? (
             activationCondition?.map((ele, j) => (
               <Box
@@ -114,7 +110,7 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
                 display={'flex'}
                 justifyContent={'space-between'}
                 alignItems={'center'}
-                mt={1}
+                mt={2}
                 borderRadius={'5px'}
               >
                 <Typography variant="body2">{`${resourceFields?.find((f) => ele?.fieldName === f?.fieldName)?.fieldLabel} is ${
@@ -127,37 +123,41 @@ const ActivationCondition = ({ resource, fetchWorkFlowData, activationCondition 
                       : ''
                     : ele['fieldValue']
                 }`}</Typography>
-                
-                  <div className="min-w-fit">
-                    <HtmlTooltip title={'Edit'}>
-                      <IconButton
-                        size="small"
-                        aria-label="Edit"
-                        onClick={() => {
-                          setOpen({ open: true, data: ele });
-                        }}
-                      >
-                        <EditIcon fontSize="small" color={'primary'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                    <HtmlTooltip title={'Delete'}>
-                      <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        onClick={() => {
-                          setDeleteData(ele);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={'error'} />
-                      </IconButton>
-                    </HtmlTooltip>
-                  </div>
+
+                <div className="min-w-fit">
+                  <HtmlTooltip title={'Edit'}>
+                    <IconButton
+                      size="small"
+                      aria-label="Edit"
+                      onClick={() => {
+                        setOpen({ open: true, data: ele });
+                      }}
+                    >
+                      <EditIcon fontSize="small" color={'primary'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                  <HtmlTooltip title={'Delete'}>
+                    <IconButton
+                      size="small"
+                      aria-label="Delete"
+                      onClick={() => {
+                        setDeleteData(ele);
+                      }}
+                    >
+                      <DeleteIcon fontSize="small" color={'error'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
               </Box>
             ))
-          ) : null
+          ) : (
+        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+          Activation Conditions not added yet!
+        </Box>
+          )
         ) : (
-          <Box p={2} height={200}>
-            <CommonSkeleton lenArray={[...Array(5).keys()]} />
+          <Box p={2} height={500}>
+            <CommonSkeleton lenArray={[...Array(10).keys()]} />
           </Box>
         )}
       </Box>

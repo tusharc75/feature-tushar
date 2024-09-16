@@ -3,7 +3,7 @@ import Carousel from 'react-material-ui-carousel';
 
 import CustomDialogContent from '../CustomDialog/CustomDialogContent';
 import CustomDialogHeader from '../CustomDialog/CustomDialogHeader';
-import { cn } from 'src/constants/helpers';
+import { cn, CustomDialogTransition } from 'src/constants/helpers';
 import { SyntheticEvent } from 'react';
 import imageLoadingFailed from 'src/assets/imageLoadingFailed.png';
 
@@ -43,7 +43,7 @@ const CarouselDialog = ({ images, index, close, title = 'Images' }: CarouselDial
   };
 
   return (
-    <Dialog maxWidth="md" fullWidth open={true} onClose={close}>
+    <Dialog TransitionComponent={CustomDialogTransition} maxWidth="md" fullWidth open={true} onClose={close}>
       <CustomDialogHeader title={title} onClose={close} showRequiredLabel={false} />
       <CustomDialogContent>
         <Carousel

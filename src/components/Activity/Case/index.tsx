@@ -105,7 +105,7 @@ export const Case = ({ relatedTo, handleActivityRefresh, onSetCount }) => {
             <Box key={_case._id} className="activity">
               <Box>
                 <Grid container>
-                  <Grid item xs={10} className="d-flex align-items-center gap-1 task_text_confirm">
+                  <Grid item xs={10} className="d-flex align-items-center task_text_confirm gap-1">
                     <Typography
                       variant="subtitle2"
                       className="cursor-pointer"

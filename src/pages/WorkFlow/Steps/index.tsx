@@ -1,7 +1,7 @@
 import { Box, Button, IconButton } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import EditIcon from '@material-ui/icons/Edit';
-import BuildIcon from '@material-ui/icons/Build';
+import SettingIcon from '@material-ui/icons/Settings';
 import { useCallback, useContext, useEffect, useState } from 'react';
 import { MdDragIndicator } from 'react-icons/md';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -18,6 +18,7 @@ import ManageSteps from 'src/components/FormBuilder/Steps/ManageSteps';
 import routes from 'src/components/Helpers/Routes';
 import { sortBy } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
+import Setting from 'src/pages/WorkFlow/Steps/Settings';
 
 const Steps = ({ resource, loading, id }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -27,24 +28,24 @@ const Steps = ({ resource, loading, id }) => {
   const [isDeleting, setDeleting] = useState(false);
   const [activeItem, setActiveItem] = useState(null);
   const [steps, setSteps] = useState(null);
+  const [data, setData] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [openSetting, setOpenSetting] = useState(false);
 
-  const fetchData = useCallback(
-    async (cancelTokenSource?: CancelTokenSource) => {
-      setStepsLoading(true);
-      axiosInstance()
-        .get(`${routes.workFlow.path}/${id}/steps`, { cancelToken: cancelTokenSource?.token })
-        .then(({ data: { data } }) => {
-          setSteps(sortBy(data?.steps, 'order'));
-          setStepsLoading(false);
-        })
-        .catch((error) => {
-          setStepsLoading(false);
-          toastConfig.setToastConfig(error);
-        });
-    },
-    []
-  );
+  const fetchData = useCallback(async (cancelTokenSource?: CancelTokenSource) => {
+    setStepsLoading(true);
+    axiosInstance()
+      .get(`${routes.workflow.path}/${id}/steps`, { cancelToken: cancelTokenSource?.token })
+      .then(({ data: { data } }) => {
+        setData(data);
+        setSteps(sortBy(data?.steps, 'order'));
+        setStepsLoading(false);
+      })
+      .catch((error) => {
+        setStepsLoading(false);
+        toastConfig.setToastConfig(error);
+      });
+  }, []);
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -52,11 +53,11 @@ const Steps = ({ resource, loading, id }) => {
     return () => cancelTokenSource.cancel();
   }, []);
 
-  const handleSave = (values)=>{
+  const handleSave = (values) => {
     setIsSubmitting(true);
     if (values?.stepId) {
       axiosInstance()
-        .put(`${routes.workFlow.path}/${id}/steps`, values )
+        .put(`${routes.workflow.path}/${id}/steps`, values)
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -72,7 +73,7 @@ const Steps = ({ resource, loading, id }) => {
         });
     } else {
       axiosInstance()
-        .post(`${routes?.workFlow.path}/${id}/steps`, values)
+        .post(`${routes?.workflow.path}/${id}/steps`, values)
         .then(({ data }) => {
           toastConfig.setToastConfig({
             open: true,
@@ -87,12 +88,12 @@ const Steps = ({ resource, loading, id }) => {
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   const handleDelete = (step) => {
     setDeleting(true);
     axiosInstance()
-      .put(`${routes.workFlow.path}/${id}/steps/delete`, { stepId: step?._id })
+      .put(`${routes.workflow.path}/${id}/steps/delete`, { stepId: step?._id })
       .then(() => {
         setDeleting(false);
         fetchData();
@@ -108,7 +109,7 @@ const Steps = ({ resource, loading, id }) => {
   const handleUpdateOrder = (steps) => {
     axiosInstance()
       .put(
-        `${routes.workFlow.path}/${id}/steps/order`,
+        `${routes.workflow.path}/${id}/steps/order`,
         steps?.map((step) => ({ stepId: step?._id, order: step?.order }))
       )
       .then(() => {
@@ -143,7 +144,7 @@ const Steps = ({ resource, loading, id }) => {
   const sensors = useDndSensors();
 
   return (
-    <Box className="conditions-container container-with-border mb-2 p-2 sm:mb-3 sm:p-3 md:mb-4 md:p-4">
+    <Box className="conditions-container sm:mb-3 sm:p-3 md:mb-2 md:p-2">
       <Box display={'flex'} justifyContent={'space-between'} alignItems={'center'}>
         <Button
           variant="contained"
@@ -155,6 +156,16 @@ const Steps = ({ resource, loading, id }) => {
         >
           Add Step
         </Button>
+        <HtmlTooltip title={'Setting'}>
+            <IconButton
+              aria-label="Setting"
+              onClick={() => {
+                setOpenSetting(true);
+              }}
+            >
+              <SettingIcon fontSize="small" color={'primary'} />
+            </IconButton>
+          </HtmlTooltip>
       </Box>
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
@@ -184,6 +195,19 @@ const Steps = ({ resource, loading, id }) => {
             resource={resource}
           />
         )}
+        {openSetting && (
+          <Setting
+            onClose={() => {
+              setOpenSetting(false);
+            }}
+            onSuccess={() => {
+              fetchData();
+              setOpenSetting(false);
+            }}
+            id={id}
+            stepsStyle={data?.stepsStyle}
+          />
+        )}
 
         {deleteData && (
           <ConfirmationDialog
@@ -208,7 +232,7 @@ const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setDeleteData
         <ul className="grid list-none items-start gap-2">
           <SortableContext items={steps.map((d) => d._id)}>
             {steps?.map((step, index) => {
-              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData,index }} />;
+              return <SingleStep key={step._id} {...{ step, setSteps, setOpen, setDeleteData, index }} />;
             })}
           </SortableContext>
         </ul>
@@ -230,7 +254,7 @@ const SingleStep = ({ step, setOpen, setDeleteData, index }) => {
     id: step._id,
     data: {
       index,
-      props: { step, setOpen,  setDeleteData, index }
+      props: { step, setOpen, setDeleteData, index }
     }
   });
 

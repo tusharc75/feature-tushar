@@ -7,7 +7,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
-import { MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
+import { CustomDialogTransition, MATERIAL_REQUEST_STATUS, dateTimeFormat } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
@@ -96,25 +96,25 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       },
       ...(user?.user?.brandPolicy?.storageLocation
         ? [
-          {
-            accessor: 'storageLocation',
-            Header: 'Storage Location',
-            width: 200,
-            Cell: ({ row }) => {
-              return row?.original['storageLocation'] ? (
-                <a
-                  className="link text-truncate"
-                  href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
-                  target="_blank"
-                >
-                  {row?.original['storageLocation']}
-                </a>
-              ) : (
-                <NoDataCell />
-              );
+            {
+              accessor: 'storageLocation',
+              Header: 'Storage Location',
+              width: 200,
+              Cell: ({ row }) => {
+                return row?.original['storageLocation'] ? (
+                  <a
+                    className="link text-truncate"
+                    href={`${routes.storageLocationDetail.path}/${row?.original['storageLocationId']}`}
+                    target="_blank"
+                  >
+                    {row?.original['storageLocation']}
+                  </a>
+                ) : (
+                  <NoDataCell />
+                );
+              }
             }
-          }
-        ]
+          ]
         : []),
       {
         accessor: 'processBy',
@@ -159,15 +159,13 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
             <>
               {row?.original['serialNumber']?.length ? (
                 <>
-                  <p className="text-truncate">
-                    {row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}
-                  </p>
+                  <p className="text-truncate">{row?.original['serialNumber']?.map((e) => e?.optionLabel).join(', ')}</p>
                 </>
               ) : (
                 <NoDataCell />
               )}
             </>
-          )
+          );
         }
       },
       {
@@ -244,6 +242,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
       <Dialog
         open
         fullScreen={fullScreen}
+        TransitionComponent={CustomDialogTransition}
         maxWidth="md"
         fullWidth
         onClose={(e, reason) => {

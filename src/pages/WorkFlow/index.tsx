@@ -21,7 +21,7 @@ import { useHistory } from 'react-router-dom';
 import ManageWorkFlow from 'src/pages/WorkFlow/ManageWorkFlow';
 
 const WorkFlow = () => {
-  const renderedFrom = camelCase(routes?.workFlow.title);
+  const renderedFrom = camelCase(routes?.workflow.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
@@ -44,26 +44,22 @@ const WorkFlow = () => {
   const fetchGridColumns = () => {
     const columns = [
       {
-        accessor: 'workFlowName',
-        Header: 'Work Flow Name',
+        accessor: 'workflowName',
+        Header: 'Workflow Name',
         width: 150,
         Cell: ({ row }) => (
           <div>
-            <Link className="link" to={`${routes.workFlow.path}/${row?.original?._id}`}>
-              {row?.original?.workFlowName}
+            <Link className="link" to={`${routes.workflow.path}/${row?.original?._id}`}>
+              {row?.original?.workflowName}
             </Link>
           </div>
         )
       },
       {
-        accessor: 'workFlowResource',
-        Header: 'Work Flow Resource',
+        accessor: 'workflowResource',
+        Header: 'Workflow Resource',
         width: 150,
-        Cell: ({ row }) => (
-          <div>
-              {row?.original?.workFlowResource}
-          </div>
-        )
+        Cell: ({ row }) => <div>{row?.original?.workflowResource}</div>
       },
       ...getStaticFields()
     ];
@@ -109,15 +105,16 @@ const WorkFlow = () => {
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     axiosInstance()
-      .get(`${routes?.workFlow?.path}`, { cancelToken: cancelTokenSource?.token })
+      .get(`${routes?.workflow?.path}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-          finalObject['allowedToEdit'] = permissions?.workFlow?.isUpdate;
-          finalObject['canDelete'] = permissions?.workFlow?.isDelete;
+          finalObject['allowedToEdit'] = permissions?.workflow?.isUpdate;
+          finalObject['canDelete'] = permissions?.workflow?.isDelete;
           return finalObject;
         });
+       
         dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
       })
       .catch((error) => {
@@ -142,7 +139,7 @@ const WorkFlow = () => {
       ids = selectedRecords?.map((d) => d._id);
     }
     axiosInstance()
-      .put(`${routes?.workFlow?.path}/remove`, { ids: ids })
+      .put(`${routes?.workflow?.path}/remove`, { ids: ids })
       .then(() => {
         dispatch({ type: 'selection', selectedRecords: [] });
         fetchData();
@@ -172,17 +169,17 @@ const WorkFlow = () => {
   return (
     <section className="main-container-v1">
       <div className="headerbox-v1">
-        <CustomBreadCrumbs routes={[routes.workFlow]} />
+        <CustomBreadCrumbs routes={[routes.workflow]} />
       </div>
       <CustomContainer>
         <ListingPageHeader
           onSearch={handleSearch}
-          isActionButtonVisible={permissions?.workFlow?.isDelete}
+          isActionButtonVisible={permissions?.workflow?.isDelete}
           actionButtonProps={{ disabled: selectedRecords?.length ? false : true }}
           actionMenuItems={<ActionMenuItems />}
-          addButtonProps={{ disabled: !permissions?.workFlow.isCreate }}
+          addButtonProps={{ disabled: !permissions?.workflow.isCreate }}
           addButtonOnclick={() => {
-            setManageShowWorkFlowDialog({open: true})
+            setManageShowWorkFlowDialog({ open: true });
           }}
           isAddButtonVisible={true}
         />
@@ -205,7 +202,7 @@ const WorkFlow = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.workFlow?.title} ${deleteRecord?.workFlowName || ''} ?`}
+          message={`Are you sure you want to delete ${routes?.workflow?.title} ${deleteRecord?.workflowName || ''} ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

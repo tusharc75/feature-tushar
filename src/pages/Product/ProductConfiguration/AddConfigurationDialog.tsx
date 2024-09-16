@@ -4,7 +4,7 @@ import { Dialog, Box, Button, Grid, CircularProgress } from '@material-ui/core';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
 import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import { getObjKeys } from '../../../constants/helpers';
+import { CustomDialogTransition, getObjKeys } from '../../../constants/helpers';
 import FormTypes from '../../../components/Helpers/FormTypes';
 import axiosInstance from '../../../axios/axiosInstance';
 import routes from '../../../components/Helpers/Routes';
@@ -24,14 +24,13 @@ const AddConfigurationDialog = (props) => {
       setFormData({
         ...data,
         fields
-      })
+      });
     } else {
       setFormData({
         ...formData,
         values,
         fields
       });
-
     }
   }, [fields, data]);
 
@@ -59,8 +58,8 @@ const AddConfigurationDialog = (props) => {
         })
         .then(() => {
           setSubmitting(false);
-          fetchData()
-          close()
+          fetchData();
+          close();
         })
         .catch(() => {
           setSubmitting(false);
@@ -74,8 +73,8 @@ const AddConfigurationDialog = (props) => {
         })
         .then(() => {
           setSubmitting(false);
-          fetchData()
-          close()
+          fetchData();
+          close();
         })
         .catch(() => {
           setSubmitting(false);
@@ -84,11 +83,13 @@ const AddConfigurationDialog = (props) => {
   };
 
   return (
-    <Dialog open onClose={close} maxWidth="md" fullWidth>
-      <CustomDialogHeader title="Add Images" onClose={() => {
-        if (submitting) return
-        close()
-      }}
+    <Dialog open onClose={close} TransitionComponent={CustomDialogTransition} maxWidth="md" fullWidth>
+      <CustomDialogHeader
+        title="Add Images"
+        onClose={() => {
+          if (submitting) return;
+          close();
+        }}
       />
       <CustomDialogContent>
         <Box py={2}>

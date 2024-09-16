@@ -15,6 +15,7 @@ import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import { Autocomplete } from '@material-ui/lab';
+import { WORK_FLOW_STATUS } from 'src/constants/helpers';
 
 const WorkFlowReport = () => {
   const renderedFrom = camelCase(routes?.workflowReport.title);
@@ -29,7 +30,8 @@ const WorkFlowReport = () => {
 
   const [columns, setColumns] = useState(null);
   const [workFlowOptions, setWorkFlowOptions] = useState(null);
-  const [selectedWorkFlow, setSelectedWorkFlow] = useState('');
+  const [selectedWorkFlow, setSelectedWorkFlow] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState(null);
 
   useEffect(() => {
     fetchGridColumns();
@@ -37,7 +39,7 @@ const WorkFlowReport = () => {
 
   useEffect(() => {
     axiosInstance()
-      .get(`${routes?.workFlow?.path}`)
+      .get(`${routes?.workflow?.path}`)
       .then(({ data: { data } }) => {
         setWorkFlowOptions(data);
       })
@@ -49,28 +51,16 @@ const WorkFlowReport = () => {
   const fetchGridColumns = () => {
     const columns = [
       {
-        accessor: 'workFlow',
-        Header: 'Work Flow',
+        accessor: 'workflowNumber',
+        Header: 'Workflow Number',
         width: 150,
         Cell: ({ row }) => (
           <div>
             <Link className="link" to={`${routes.workflowReportDetail.path}/${row?.original?._id}`}>
-              {row?.original?.workFlow}
+              {row?.original?.workflowNumber}
             </Link>
           </div>
         )
-      },
-      {
-        accessor: 'status',
-        Header: 'Status',
-        width: 150,
-        Cell: ({ row }) => <div>{row?.original?.status}</div>
-      },
-      {
-        accessor: 'resource',
-        Header: 'Resource',
-        width: 150,
-        Cell: ({ row }) => <div>{row?.original?.resource}</div>
       },
       {
         accessor: 'reference',
@@ -88,6 +78,30 @@ const WorkFlowReport = () => {
           </div>
         )
       },
+      {
+        accessor: 'resource',
+        Header: 'Resource',
+        width: 150,
+        Cell: ({ row }) => <div>{row?.original?.resource}</div>
+      },
+      {
+        accessor: 'workflow',
+        Header: 'Workflow',
+        width: 150,
+        Cell: ({ row }) => (
+          <div>
+            <Link className="link" to={`${routes.workflow.path}/${row?.original?.workflowId}`} target={'_blank'}>
+              {row?.original?.workflow}
+            </Link>
+          </div>
+        )
+      },
+      {
+        accessor: 'status',
+        Header: 'Status',
+        width: 150,
+        Cell: ({ row }) => <div>{row?.original?.status}</div>
+      },
       ...getStaticFields(),
       ...getCompletedByField()
     ];
@@ -98,12 +112,15 @@ const WorkFlowReport = () => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
     return () => cancelTokenSource.cancel();
-  }, [selectedWorkFlow]);
+  }, [selectedWorkFlow, selectedStatus]);
 
   const getQueryString = () => {
     let deepFilter = '?';
-    if (selectedWorkFlow !== '') {
-      deepFilter = `${deepFilter}&workFlowId=${selectedWorkFlow}`;
+    if (selectedWorkFlow) {
+      deepFilter = `${deepFilter}&workflowId=${selectedWorkFlow}`;
+    }
+    if(selectedStatus){
+      deepFilter = `${deepFilter}&status=${selectedStatus}`;
     }
     return deepFilter;
   };
@@ -117,7 +134,7 @@ const WorkFlowReport = () => {
           let finalObject = prepareDataForGrid(u, user);
           return finalObject;
         });
-
+      
         dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
       })
       .catch((error) => {
@@ -139,17 +156,32 @@ const WorkFlowReport = () => {
       <>
         {workFlowOptions && (
           <Autocomplete
-            className="min-w-[200px] max-w-[400px] flex-grow"
+            className="min-w-[100px] max-w-[300px] flex-grow"
             options={workFlowOptions}
-            getOptionLabel={(option) => option?.workFlowName || ''}
+            getOptionLabel={(option) => option?.workflowName || ''}
             size="small"
-            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Work Flow Filter" variant="outlined" />}
-            value={workFlowOptions.filter((data) => data._id === selectedWorkFlow).length ? workFlowOptions.filter((data) => data._id === selectedWorkFlow)[0] : ''}
+            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Workflow" variant="outlined" />}
+            value={
+              workFlowOptions.filter((data) => data._id === selectedWorkFlow).length
+                ? workFlowOptions.filter((data) => data._id === selectedWorkFlow)[0]
+                : ''
+            }
             onChange={(event: any, val: any) => {
               setSelectedWorkFlow(val && val._id ? val._id : '');
             }}
           />
         )}
+        <Autocomplete
+            className="min-w-[100px] max-w-[300px] flex-grow"
+            options={[WORK_FLOW_STATUS.open, WORK_FLOW_STATUS.inProgress, WORK_FLOW_STATUS.completed]}
+            getOptionLabel={(option) => option || ''}
+            size="small"
+            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Status" variant="outlined" />}
+            value={selectedStatus || ''}
+            onChange={(event: any, val: any) => {
+              setSelectedStatus(val ?? '');
+            }}
+          />
       </>
     );
   };
