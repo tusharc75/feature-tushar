@@ -42,7 +42,7 @@ const Workspace = () => {
         socket.emit('joinChannel', channel?._id);
       });
       socket.on('notification', (channel, userId) => {
-        if(user?._id !== userId) {
+        if (user?._id !== userId) {
           setChannels((prev) => {
             const index = prev.findIndex((c) => c._id === channel);
             prev[index] = { ...prev[index], notifications: (prev[index]?.notifications || 0) + 1 };
@@ -56,6 +56,10 @@ const Workspace = () => {
         channels.forEach((channel) => {
           socket.emit('leaveChannel', channel?._id);
         });
+        socket.off('fetchNewMessage');
+        socket.off('fetchMessages');
+        socket.off('addReaction');
+        socket.off('removeReaction');
       }
     };
   }, [socket, channels]);
