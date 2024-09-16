@@ -268,8 +268,8 @@ const ManageSerializedAsset = ({
                                               productId
                                                 ? true
                                                 : Boolean(productInventoryId) && !isClone
-                                                ? field.disableOnEdit || field.isUneditable
-                                                : field.isUneditable
+                                                  ? field.disableOnEdit || field.isUneditable
+                                                  : field.isUneditable
                                             }
                                             values={values}
                                             errors={errors}
@@ -321,12 +321,12 @@ const ManageSerializedAsset = ({
                                                     productId
                                                       ? 'disabled'
                                                       : Boolean(productInventoryId) && !isClone
-                                                      ? field.disableOnEdit || field.isUneditable
-                                                        ? 'disabled'
-                                                        : 'primary'
-                                                      : field.isUneditable
-                                                      ? 'disabled'
-                                                      : 'primary'
+                                                        ? field.disableOnEdit || field.isUneditable
+                                                          ? 'disabled'
+                                                          : 'primary'
+                                                        : field.isUneditable
+                                                          ? 'disabled'
+                                                          : 'primary'
                                                   }
                                                 />
                                               </IconButton>
@@ -345,8 +345,8 @@ const ManageSerializedAsset = ({
                                               productCategory
                                                 ? true
                                                 : Boolean(productInventoryId) && !isClone
-                                                ? field.disableOnEdit || field.isUneditable
-                                                : field.isUneditable
+                                                  ? field.disableOnEdit || field.isUneditable
+                                                  : field.isUneditable
                                             }
                                             values={values}
                                             errors={errors}
@@ -381,8 +381,8 @@ const ManageSerializedAsset = ({
                                                   productCategory
                                                     ? true
                                                     : Boolean(productInventoryId) && !isClone
-                                                    ? field.disableOnEdit || field.isUneditable
-                                                    : field.isUneditable
+                                                      ? field.disableOnEdit || field.isUneditable
+                                                      : field.isUneditable
                                                 }
                                                 size="small"
                                               >
@@ -391,12 +391,12 @@ const ManageSerializedAsset = ({
                                                     productCategory
                                                       ? 'disabled'
                                                       : Boolean(productInventoryId) && !isClone
-                                                      ? field.disableOnEdit || field.isUneditable
-                                                        ? 'disabled'
-                                                        : 'primary'
-                                                      : field.isUneditable
-                                                      ? 'disabled'
-                                                      : 'primary'
+                                                        ? field.disableOnEdit || field.isUneditable
+                                                          ? 'disabled'
+                                                          : 'primary'
+                                                        : field.isUneditable
+                                                          ? 'disabled'
+                                                          : 'primary'
                                                   }
                                                 />
                                               </IconButton>
@@ -461,11 +461,12 @@ const ManageSerializedAsset = ({
                                       disabled={
                                         values['assetNumberType']
                                           ? values['assetNumberType'] === ASSET_NUMBER_TYPE.manual
-                                            ? false
+                                            ? Boolean(productInventoryId) && !isClone ?
+                                              field.disableOnEdit || field.isUneditable : false
                                             : true
                                           : Boolean(productInventoryId) && !isClone
-                                          ? field.disableOnEdit || field.isUneditable
-                                          : field.isUneditable
+                                            ? field.disableOnEdit || field.isUneditable
+                                            : field.isUneditable
                                       }
                                       fieldData={field}
                                       values={values}

@@ -267,6 +267,7 @@ const ManageQuotationDialog = ({ isClone, quotationId, quotationData = null, onC
                     fullWidth
                     resource={sidebarResource.quotation}
                     referenceId={quotationId || null}
+                    collaborateTools = {true}
                   />
                 </Form>
               </CustomDialogContent>
