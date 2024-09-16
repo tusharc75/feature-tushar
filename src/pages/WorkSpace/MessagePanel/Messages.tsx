@@ -363,7 +363,7 @@ export const DisplaySingleMessage = ({
                        [&_span:last-child]:text-gray-400`,
                       isSelf
                         ? 'ml-auto bg-[#0DA0A840] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]'
-                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,13.27%,0.5)] dark:text-white'
+                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white'
                     )}
                     dangerouslySetInnerHTML={{
                       __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
