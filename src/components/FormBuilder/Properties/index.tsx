@@ -234,6 +234,8 @@ export const Properties = ({ module, handleClose, fieldData, sectionId, section,
             if (values.isSystemGenerate) {
               ele.systemGeneratedAutoIncrement = values.systemGeneratedAutoIncrement;
               ele.systemGeneratedPrefix = values.systemGeneratedPrefix;
+              ele.systemGeneratedPrefixDigit = values.systemGeneratedPrefixDigit;
+              ele.systemGeneratedStartNumber = values.systemGeneratedStartNumber;
             }
             ele.isFieldEntityWise = values?.isFieldEntityWise || false;
             if (ele.isFieldEntityWise) {

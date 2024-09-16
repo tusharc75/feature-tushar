@@ -221,6 +221,7 @@ export default function ManageContactDialog({
                       fullWidth
                       resource={sidebarResource[contactResource]}
                       referenceId={contactId || null}
+                      collaborateTools = {true}
                     />
                 </Form>
               </CustomDialogContent>
