@@ -338,7 +338,10 @@ export const DisplaySingleMessage = ({
           </Avatar>
           <div className="flex-grow">
             <div className={cn('flex items-end gap-2 pb-[6px]', isSelf ? 'ml-auto w-fit' : '')}>
-              <h6 className="user font-smibold text-[14px]">{message.user?.optionLabel}</h6>
+              <h6 className="user text-[14px] font-medium">
+                {message.user?.optionLabel}
+                {isSelf ? ' (you)' : ''}
+              </h6>
               <span className="text-[12px] font-normal ">{messageTimeFormatter(message.date)}</span>
             </div>
             {editingMessage?._id === message._id ? (
