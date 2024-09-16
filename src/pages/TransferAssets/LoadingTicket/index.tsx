@@ -100,6 +100,8 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
     if (transferAssetData?.transferType === 'Internal') {
       if (dataRows?.every((e) => e['loadingTicketStatus'] === DELIVERY_TICKET_STATUS.delivered)) {
         setAllAssetsDelivered(true);
+      } else {
+        setAllAssetsDelivered(false);
       }
     }
   }, [dataRows, selectedRecords]);
