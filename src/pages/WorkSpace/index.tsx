@@ -42,11 +42,18 @@ const Workspace = () => {
         socket.emit('joinChannel', channel?._id);
       });
       socket.on('notification', (channel, userId) => {
-        if (user?._id !== userId) {
+        if (user?._id !== userId && selectedChannel?._id !== channel) {
           setChannels((prev) => {
+            const updatedChannels = [...prev];
             const index = prev.findIndex((c) => c._id === channel);
-            prev[index] = { ...prev[index], notifications: (prev[index]?.notifications || 0) + 1 };
-            return [...prev];
+            if(index !== -1) {
+              const updatedChannel = {
+                ...updatedChannels[index],
+                notifications: (updatedChannels[index]?.notifications || 0) + 1,
+              };
+              updatedChannels[index] = updatedChannel;
+            }
+            return updatedChannels;
           })
         }
       });
@@ -60,6 +67,7 @@ const Workspace = () => {
         socket.off('fetchMessages');
         socket.off('addReaction');
         socket.off('removeReaction');
+        socket.off('notification');
       }
     };
   }, [socket, channels]);
