@@ -73,7 +73,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
 
   useEffect(() => {
     if (socket) {
-      socket.emit('joinChannel', channelId);
       socket.on('fetchNewMessage', (messageId) => {
         if (messageId) {
           fetchMessages(messageId);
@@ -113,13 +112,6 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           return updatedMessages;
         });
       });
-      return () => {
-        socket.off('fetchNewMessage');
-        socket.off('fetchMessages');
-        socket.off('addReaction');
-        socket.off('removeReaction');
-        socket.emit('leaveChannel', channelId);
-      };
     }
   }, [socket, lastMessageId]);
 
@@ -182,6 +174,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
                         handleEditComplete={handleEditComplete}
                         setThreadDialogOpen={setThreadDialogOpen}
                         handleMenuClick={handleMenuClick}
+                        channelData={channelData}
                       />
                     );
                   })}
@@ -231,6 +224,7 @@ type DisplaySingleMessageProps = {
   setThreadDialogOpen?: React.Dispatch<React.SetStateAction<{ open: boolean; message: Message }>>;
   handleMenuClick: (event: React.MouseEvent<HTMLButtonElement>, message: Message) => void;
   messageTimeFormatter?: (string) => string;
+  channelData: ChannelData;
 };
 
 export const DisplaySingleMessage = ({
@@ -242,7 +236,8 @@ export const DisplaySingleMessage = ({
   handleEditComplete,
   setThreadDialogOpen,
   handleMenuClick,
-  messageTimeFormatter = (date) => moment(date).format('hh:mm A')
+  messageTimeFormatter = (date) => moment(date).format('hh:mm A'),
+  channelData
 }: DisplaySingleMessageProps) => {
   const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
@@ -352,6 +347,7 @@ export const DisplaySingleMessage = ({
                 initialMessage={message.message}
                 onEditComplete={handleEditComplete}
                 editorId={`sone`}
+                channelData={channelData}
               />
             ) : (
               <>

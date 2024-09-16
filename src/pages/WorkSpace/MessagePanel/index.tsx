@@ -1,10 +1,9 @@
 import { Avatar, IconButton } from '@material-ui/core';
 import { ArrowBack } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import io, { Socket } from 'socket.io-client';
+import { Socket } from 'socket.io-client';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
-import { backendApi } from 'src/config';
 import { cn } from 'src/constants/helpers';
 import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
@@ -15,28 +14,14 @@ type MessagePanelProps = {
   selectedChannel: TChannel | null;
   mobScreen: boolean;
   setSelectedChannel: React.Dispatch<React.SetStateAction<TChannel>>;
+  socket: Socket;
 };
 
-const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel }: MessagePanelProps) => {
+const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, socket }: MessagePanelProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
-  const [socket, setSocket] = useState<Socket>(null);
   const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
-
-  const token = localStorage.getItem('token');
-
-  useEffect(() => {
-    if (!token) return;
-    const s = io(`${backendApi?.replace('/api', '')}/workspace/channel`, {
-      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
-      auth: { token },
-      reconnectionAttempts: 5,
-      reconnectionDelay: 5000,
-      transports: ['websocket', 'pooling']
-    });
-    setSocket(s);
-  }, [token]);
 
   const fetchChannelData = useCallback(async () => {
     try {
