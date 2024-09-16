@@ -415,7 +415,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   error={touched['systemGeneratedPrefixDigit'] && Boolean(errors['systemGeneratedPrefixDigit'])}
                   helperText={touched['systemGeneratedPrefixDigit'] && errors['systemGeneratedPrefixDigit']}
                   onChange={(e) => {
-                    setFieldValue('systemGeneratedPrefixDigit', e.target.value.trimStart());
+                    setFieldValue('systemGeneratedPrefixDigit', Number(e.target.value));
                   }}
                 />
               </Box>
@@ -441,7 +441,7 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   error={touched['systemGeneratedStartNumber'] && Boolean(errors['systemGeneratedStartNumber'])}
                   helperText={touched['systemGeneratedStartNumber'] && errors['systemGeneratedStartNumber']}
                   onChange={(e) => {
-                    setFieldValue('systemGeneratedStartNumber', e.target.value.trimStart());
+                    setFieldValue('systemGeneratedStartNumber', Number(e.target.value));
                   }}
                 />
               </Box>
