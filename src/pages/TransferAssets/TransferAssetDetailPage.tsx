@@ -61,10 +61,10 @@ const TransferAssetDetailPage = () => {
   const [canReceive, setCanReceive] = useState(false);
   const [locationKeys, setLocationKeys] = useState([]);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-
   const [stepNames, setStepNames] = useState([]);
   const [stepList, setStepList] = useState([]);
   const [showReopenCloseConfirmation, setShowReopenCloseConfirmation] = useState({ open: false, type: null });
+  const [isAllAssetsDelivered, setAllAssetsDelivered] = useState(false);
 
   useEffect(() => {
     return history.listen((location) => {
@@ -266,7 +266,7 @@ const TransferAssetDetailPage = () => {
                 Re-Open
               </Button>
             )}
-            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && transferAssetData?.reopened && (
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && isAllAssetsDelivered && (
               <ButtonWithPulse
                 variant={'outlined'}
                 color="default"
@@ -349,6 +349,7 @@ const TransferAssetDetailPage = () => {
                   allowedToEdit={allowedToEdit || isProcessor}
                   canReceive={canReceive}
                   stepFullScreen={stepFullScreen}
+                  setAllAssetsDelivered={setAllAssetsDelivered}
                 />
               )}
               {currentStep === 2 && transferAssetData && (
