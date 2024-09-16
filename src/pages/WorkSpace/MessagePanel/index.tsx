@@ -72,7 +72,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
         )}
       >
         {isSidebarCollapsed && (
-          <div className="absolute left-4 top-[7px] z-10 bg-[var(--dark-primary,white)]">
+          <div className="absolute left-4 top-[14px] z-10 bg-[var(--dark-primary,white)]">
             <HtmlTooltip title="Show sidebar">
               <IconButton size={'small'} style={{ minWidth: 32, minHeight: 32 }} onClick={toggleSidebar}>
                 <VscLayoutSidebarLeft />
