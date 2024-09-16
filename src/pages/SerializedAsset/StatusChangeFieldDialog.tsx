@@ -4,6 +4,7 @@ import Button from '@material-ui/core/Button';
 import {
   CustomDialogTransition,
   getObjKeysWithValues,
+  sidebarResource,
   yupSchema,
 } from '../../constants/helpers';
 import Dialog from '@material-ui/core/Dialog';
@@ -102,6 +103,8 @@ export default function StatusChangeFieldDialog({ onClose, onSuccess, statusPoli
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    resource={sidebarResource.serializedAsset}
+                    referenceId={productInventoryId || null}
                   />
                 </Form>
               </CustomDialogContent>
