@@ -15,6 +15,7 @@ import {
   bulkAssetCreation,
   setFieldsInAscendingOrder,
   GenerateResourceLineNumber,
+  sidebarResource,
 } from '../../constants/helpers';
 import { getObjKeysWithValues, getObjKeys, yupSchema } from '../../constants/helpers';
 import CommonSkeleton from '../../components/Helpers/CommonSkeleton';
@@ -202,6 +203,9 @@ const ManageBulkAssetCreation = ({ isClone = false, bulkAssetCreationId = null, 
                     fieldsData={initialData.fields}
                     size="small"
                     fullWidth
+                    resource={sidebarResource.quotation}
+                    referenceId={bulkAssetCreationId || null}
+                    collaborateTools = {true}
                   />
                 </Form>
               </CustomDialogContent>
