@@ -3,20 +3,18 @@ import { Typography, Box, CircularProgress, Button, IconButton, Dialog } from '@
 import { AddCircle, Delete, Info } from '@material-ui/icons';
 import SignaturePad from 'react-signature-canvas';
 import { FaSignature } from 'react-icons/fa';
-
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
-
-//camera library being used
 import Webcam from 'react-webcam';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { isMobile, isTablet } from 'react-device-detect';
 
-//handling camera side
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
-  const [isFrontCamera, setIsFrontCamera] = useState(false);
+
+  const [isFrontCamera, setIsFrontCamera] = useState(isMobile || isTablet ? false : true);
 
   const webcamRef = React.useRef(null);
   const capture = () => {
@@ -30,7 +28,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
 
   return (
     <div>
-      <Box style={{ float: 'right' }}>
+      <Box mb={1} style={{ float: 'right' }}>
         <Button
           size="small"
           variant="contained"
@@ -52,7 +50,6 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             audio={false}
             height={400}
             ref={webcamRef}
-            width={500}
             minScreenshotWidth={500}
             screenshotFormat="image/jpeg"
             videoConstraints={videoConstraints}
@@ -104,10 +101,20 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const [picture, setPicture] = useState('');
 
   const [usePad, setUsePad] = useState(true);
+  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   return (
-    <Dialog TransitionComponent={CustomDialogTransition} open={open} onClose={close}>
-      <CustomDialogHeader title="Signature Pad" onClose={close} />
+    <Dialog TransitionComponent={CustomDialogTransition} fullScreen={fullScreen} open={open} onClose={close}>
+      <CustomDialogHeader
+        title="Signature Pad"
+        onClose={close}
+        isMinimized={!fullScreen}
+        onMinimizeMaximize={() => {
+          setFullScreen(prevState => !prevState)
+        }}
+        showManimizeMaximize={false}
+        showRequiredLabel={false}
+      />
       <CustomDialogContent>
         {usePad ? (
           <div className="dark:[filter:invert(1)]">
@@ -237,7 +244,10 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
           </Typography>
         </Box>
       )}
-      {openDialog && <SignatureDialog open={openDialog} onSave={handleSaveImage} close={() => setOpenDialog(false)} />}
+      {openDialog && <SignatureDialog
+        open={openDialog}
+        onSave={handleSaveImage}
+        close={() => setOpenDialog(false)} />}
     </Fragment>
   );
 };
