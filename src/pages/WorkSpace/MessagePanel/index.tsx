@@ -136,7 +136,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                       )}
                     </span>
                     {channelData?.members.length - 3 > 0 ? (
-                      <span className="-ml-[15px] h-[35px] w-[35px] rounded-full bg-[#F0F0F0] text-center leading-[35px] text-[#777575] [outline:1px_solid_#777575] dark:bg-gray-500 dark:text-gray-200 dark:[outline:1px_solid_var(--common-border-color)]">
+                      <span className="-ml-[15px] h-[35px] w-[35px] rounded-full bg-[#F0F0F0] text-center text-[12px] leading-[35px] text-[#777575] [outline:1px_solid_#777575] dark:bg-gray-500 dark:text-gray-200 dark:[outline:1px_solid_var(--common-border-color)]">
                         +{channelData?.members.length - 3}
                       </span>
                     ) : null}
