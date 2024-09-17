@@ -502,7 +502,7 @@ export default function TinyMCE(props) {
               ) : null}
             </>
           )}
-          <div style={{ width: width }}>
+          <div style={{ width: width }} key={themeColor}>
             <Editor
               disabled={disabledEditor}
               id={id ?? 'editor'}
