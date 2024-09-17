@@ -33,6 +33,7 @@ export const groupByDate = (messages: Message[]) => {
 
 const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
@@ -46,6 +47,8 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
       let api = `/work-space/channel/message/${channelId}`;
       if (after) {
         api += `?after=${after}`;
+      } else {
+        setIsLoading(true);
       }
       const { data } = await axiosInstance().get(api);
 
@@ -68,6 +71,8 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
       if (data?.data?.length > 0) setLastMessageId(data.data[data.data.length - 1]?._id);
     } catch (error) {
       toastConfig.setToastConfig(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -157,7 +162,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
   return (
     <>
       <div ref={containerRef} className={cn('messages-container my-2 flex-shrink flex-grow overflow-y-auto scroll-smooth')}>
-        {messages !== null ? (
+        {messages && !isLoading ? (
           <ul className="mt-8 list-none">
             {Object.keys(messages).map((date) => (
               <li key={date} className="mb- list-none">
@@ -195,7 +200,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} channelData={channelData} />
+      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading} />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}

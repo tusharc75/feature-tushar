@@ -20,6 +20,7 @@ type SendMessageProps = {
   onEditComplete?: () => void;
   editorId?: string;
   channelData?: ChannelData;
+  disabled?: boolean;
 };
 
 const SendMessage = ({
@@ -29,7 +30,8 @@ const SendMessage = ({
   initialMessage = '',
   onEditComplete = () => {},
   editorId = '',
-  channelData
+  channelData,
+  disabled = false
 }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
@@ -226,7 +228,7 @@ const SendMessage = ({
               }
             }}
             initialValue=""
-            disabled={!channelId}
+            disabled={!channelId || disabled}
             init={{
               skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
               content_css: themeColor === 'dark' ? 'dark' : 'default',
