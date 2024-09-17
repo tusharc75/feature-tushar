@@ -1,5 +1,5 @@
 import { Avatar, IconButton, ListItem, TextField } from '@material-ui/core';
-import { Add, Remove } from '@material-ui/icons';
+import { Add, Remove, RemoveCircleOutline } from '@material-ui/icons';
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -93,9 +93,9 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
               <div className="flex items-center gap-2">
                 <Avatar
                   style={{
-                    width: 22,
-                    height: 22,
-                    borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)',
+                    width: 25,
+                    height: 25,
+                    borderRadius: '999px',
                     fontSize: 12
                   }}
                   variant="rounded"
@@ -108,7 +108,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
               </div>
               <HtmlTooltip title={<span className="block w-[200px] py-2 text-center">Remove {member.optionLabel}</span>}>
                 <IconButton onClick={() => setConfirmDialog({ open: true, data: member })} size="small">
-                  <Remove color="error" />
+                  <RemoveCircleOutline color="error" />
                 </IconButton>
               </HtmlTooltip>
             </ListItem>
