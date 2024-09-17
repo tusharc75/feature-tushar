@@ -101,7 +101,6 @@ const WorkOrderSupervisor = () => {
     setFieldToFilterList(options);
   }, []);
 
-
   React.useEffect(() => {
     switch (timeFrame) {
       case '1-month':
@@ -233,19 +232,22 @@ const WorkOrderSupervisor = () => {
     [dispatch, limit, toastConfig]
   );
 
-  const getQueryString = useCallback((selectDateFilter = true) => {
-    let deepFilter = '';
-    if (filterResourceQuery?.filterById?.length) {
-      filterResourceQuery?.filterById?.forEach((f) => {
-        deepFilter = `${deepFilter}&${f.field}=${f.term}`
-      });
-    }
+  const getQueryString = useCallback(
+    (selectDateFilter = true) => {
+      let deepFilter = '';
+      if (filterResourceQuery?.filterById?.length) {
+        filterResourceQuery?.filterById?.forEach((f) => {
+          deepFilter = `${deepFilter}&${f.field}=${f.term}`;
+        });
+      }
 
-    if (globalFilters && selectDateFilter) {
-      deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
-    }
-    return `${deepFilter}&filterType=and&filterByIdType=and`;
-  }, [globalFilters, selectedUser, filterResourceQuery]);
+      if (globalFilters && selectDateFilter) {
+        deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
+      }
+      return `${deepFilter}&filterType=and&filterByIdType=and`;
+    },
+    [globalFilters, selectedUser, filterResourceQuery]
+  );
 
   useEffect(() => {
     if (selectedUser || timeFrame || globalFilters || filterResourceQuery?.filterById?.length) {
@@ -254,19 +256,9 @@ const WorkOrderSupervisor = () => {
     } else {
       dispatch({ type: 'setFilterQuery', filterQuery: '' });
     }
-  }, [
-    selectedUser,
-    timeFrame,
-    globalFilters.from,
-    globalFilters.to,
-    dispatch,
-    getQueryString,
-    globalFilters,
-    viewType,
-    filterResourceQuery
-  ]);
+  }, [selectedUser, timeFrame, globalFilters.from, globalFilters.to, dispatch, getQueryString, globalFilters, viewType, filterResourceQuery]);
 
-  const isMobile = useMediaQuery('(max-width: 650px)');
+  const isMobile = useMediaQuery('(max-width: 800px)');
 
   const [anchorEl, setAnchorEl] = React.useState<HTMLButtonElement | null>(null);
 
@@ -286,7 +278,7 @@ const WorkOrderSupervisor = () => {
     setFilterResourceQuery({
       filterById: [],
       deepFilter: []
-    })
+    });
   };
 
   const isFilterPresent = useMemo(() => {
@@ -295,79 +287,77 @@ const WorkOrderSupervisor = () => {
 
   const filters = (
     <>
-      {viewType!==2 && 
-      (
-      <FormControl fullWidth size="small" margin="none" variant="outlined">
-        <InputLabel id="duration">Select Duration</InputLabel>
-        <Select
-          labelId="duration"
-          id="time-duration"
-          value={timeFrame}
-          onChange={(e) => setTimeFrame(e.target.value)}
-          label="Select Duration"
-          SelectDisplayProps={{
-            style: { minHeight: 22.5 }
-          }}
-          fullWidth
-        >
-          <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
-          <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
-          <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
-          <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
-          <MenuItem value={'custom'}>Custom</MenuItem>
-        </Select>
-      </FormControl>
-    )}
-      {viewType!==2 &&
-      (<KeyboardDatePicker
-        disabled={timeFrame !== 'custom'}
-        inputVariant="outlined"
-        variant="inline"
-        size="small"
-        InputProps={{
-          style: { minHeight: '38px' }
-        }}
-        autoOk
-        format={dateFormatForInputControl}
-        maxDate={globalFilters.to}
-        label="From"
-        value={globalFilters.from}
-        onChange={(date) => {
-          setGlobalFilters({ ...globalFilters, from: date });
-        }}
-      />
+      {viewType !== 2 && (
+        <FormControl fullWidth size="small" margin="none" variant="outlined">
+          <InputLabel id="duration">Select Duration</InputLabel>
+          <Select
+            labelId="duration"
+            id="time-duration"
+            value={timeFrame}
+            onChange={(e) => setTimeFrame(e.target.value)}
+            label="Select Duration"
+            SelectDisplayProps={{
+              style: { minHeight: 22.5 }
+            }}
+            fullWidth
+          >
+            <MenuItem value={'1-year'}>Last 1 Year</MenuItem>
+            <MenuItem value={'6-months'}>Last 6 Months</MenuItem>
+            <MenuItem value={'3-months'}>Last 3 Months</MenuItem>
+            <MenuItem value={'1-month'}>Last 1 Month</MenuItem>
+            <MenuItem value={'custom'}>Custom</MenuItem>
+          </Select>
+        </FormControl>
       )}
-      {viewType!==2 &&
-      (<KeyboardDatePicker
-        disabled={timeFrame !== 'custom'}
-        inputVariant="outlined"
-        variant="inline"
-        autoOk
-        size="small"
-        InputProps={{
-          style: { minHeight: '38px' }
-        }}
-        minDate={globalFilters.from}
-        format={dateFormatForInputControl}
-        label="To"
-        value={globalFilters.to}
-        onChange={(date) => {
-          setGlobalFilters({ ...globalFilters, to: date });
-        }}
-      />
+      {viewType !== 2 && (
+        <KeyboardDatePicker
+          disabled={timeFrame !== 'custom'}
+          inputVariant="outlined"
+          variant="inline"
+          size="small"
+          InputProps={{
+            style: { minHeight: '38px' }
+          }}
+          autoOk
+          format={dateFormatForInputControl}
+          maxDate={globalFilters.to}
+          label="From"
+          value={globalFilters.from}
+          onChange={(date) => {
+            setGlobalFilters({ ...globalFilters, from: date });
+          }}
+        />
+      )}
+      {viewType !== 2 && (
+        <KeyboardDatePicker
+          disabled={timeFrame !== 'custom'}
+          inputVariant="outlined"
+          variant="inline"
+          autoOk
+          size="small"
+          InputProps={{
+            style: { minHeight: '38px' }
+          }}
+          minDate={globalFilters.from}
+          format={dateFormatForInputControl}
+          label="To"
+          value={globalFilters.to}
+          onChange={(date) => {
+            setGlobalFilters({ ...globalFilters, to: date });
+          }}
+        />
       )}
     </>
   );
 
   const onClickRefreshIcon = () => {
-    if(viewType===2){
+    if (viewType === 2) {
       if (ref?.current) {
         ref?.current?.childFunction();
       }
     } else {
       dispatch({ type: 'refreshData' });
     }
-   
   };
 
   return (
@@ -380,113 +370,107 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-[1fr_80px_30px_30px_30px] gap-2 items-start">
-              <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3">
-                {isMobile ? (
-                  <>
-                    <div className="max-w-fit mr-auto relative">
-                      {isFilterPresent ? (
-                        <>
-                          <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } bg-red-500 w-[6px] h-[6px] absolute -top-[2px] -right-[2px] rounded-full z-[9] animate-ping`}
-                          ></span>
-                          <span
-                            className={`${
-                              isFilterPresent ? ' opacity-100' : 'opacity-0'
-                            } bg-red-500 w-[6px] h-[6px] absolute -top-[2px] -right-[2px] rounded-full z-10`}
-                          ></span>
-                        </>
-                      ) : null}
-                      <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
-                        Filter
-                      </ThemeButton>
+            <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-2">
+              {isMobile ? (
+                <>
+                  <div className="relative mr-auto max-w-fit">
+                    {isFilterPresent ? (
+                      <>
+                        <span
+                          className={`${
+                            isFilterPresent ? ' opacity-100' : 'opacity-0'
+                          } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
+                        ></span>
+                        <span
+                          className={`${
+                            isFilterPresent ? ' opacity-100' : 'opacity-0'
+                          } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
+                        ></span>
+                      </>
+                    ) : null}
+                    <ThemeButton startIcon={<BiFilterAlt />} iconForMobile={<BiFilterAlt />} tooltip="Apply Filters" onClick={handleClick}>
+                      Filter
+                    </ThemeButton>
+                  </div>
+                  <Popover
+                    id={id}
+                    open={open}
+                    anchorEl={anchorEl}
+                    onClose={handleClose}
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left'
+                    }}
+                    PaperProps={{
+                      style: {
+                        borderRadius: 5
+                      }
+                    }}
+                  >
+                    <div className="grid gap-3 p-5">
+                      {filters}
+                      <div className="flex justify-between gap-2">
+                        {isFilterPresent ? (
+                          <ThemeButton iconForMobile={false} onClick={reset}>
+                            Clear Filters
+                          </ThemeButton>
+                        ) : (
+                          <span />
+                        )}
+                        <ThemeButton iconForMobile={false} onClick={handleClose} className="ml-auto">
+                          Close
+                        </ThemeButton>
+                      </div>
                     </div>
-                    <Popover
-                      id={id}
-                      open={open}
-                      anchorEl={anchorEl}
-                      onClose={handleClose}
-                      anchorOrigin={{
-                        vertical: 'bottom',
-                        horizontal: 'left'
-                      }}
-                      PaperProps={{
-                        style: {
-                          borderRadius: 5
-                        }
+                  </Popover>
+                </>
+              ) : (
+                <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3">{filters}</div>
+              )}
+              <div className="flex gap-2 max-[600px]:flex-wrap">
+                <div className="flex-grow pt-[4px]">
+                  <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
+                </div>
+                <div className="pt-[4px]">
+                  <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
+                    <IconButton
+                      size="small"
+                      aria-label="Clone"
+                      onClick={() => {
+                        setViewType(1);
                       }}
                     >
-                      <div className="grid gap-3 p-5">
-                        {filters}
-                        <div className="flex justify-between gap-2">
-                          {isFilterPresent ? (
-                            <ThemeButton iconForMobile={false} onClick={reset}>
-                              Clear Filters
-                            </ThemeButton>
-                          ) : (
-                            <span />
-                          )}
-                          <ThemeButton iconForMobile={false} onClick={handleClose} className="ml-auto">
-                            Close
-                          </ThemeButton>
-                        </div>
-                      </div>
-                    </Popover>
-                  </>
-                ) : (
-                  filters
-                )}
-              </div>
-              <div className="mr-20 pt-[4px]">
-                 <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
-              </div>
-          <div className="pt-[4px]">
-              <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
-            <IconButton
-              size="small"
-              aria-label="Clone"
-              onClick={() => {
-                setViewType(1);
-              }}
-            >
-              <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
-            </IconButton>
-          </HtmlTooltip>
-        </div>   
-        <div className="pt-[4px]">
-          <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
-                <IconButton size="small" onClick={() => setViewType(2)} >
-                  <DateRangeIcon color={viewType === 2 ? 'primary' : 'disabled'} />
-                </IconButton>
-            </HtmlTooltip>
-          </div>
-              <div className="pt-[4px]">
-                <HtmlTooltip title={'Refresh'}>
-                  <IconButton
-                    size="small"
-                    onClick={onClickRefreshIcon}
-                    style={{ display: 'flex', marginLeft: 'auto' }}
-                  >
-                    <RefreshIcon />
-                  </IconButton>
-                </HtmlTooltip>
+                      <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
+                <div className="pt-[4px]">
+                  <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
+                    <IconButton size="small" onClick={() => setViewType(2)}>
+                      <DateRangeIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
+                <div className="pt-[4px]">
+                  <HtmlTooltip title={'Refresh'}>
+                    <IconButton size="small" onClick={onClickRefreshIcon} style={{ display: 'flex', marginLeft: 'auto' }}>
+                      <RefreshIcon />
+                    </IconButton>
+                  </HtmlTooltip>
+                </div>
               </div>
             </div>
           </div>
-          {viewType===1 && (
-             <CardColTimeline
-             fetchSingleColumn={fetchSingleColumn}
-             state={state}
-             dispatch={dispatch}
-             passFailStatus={true}
-             passFailAccessor="serviceStatus"
-           />
+          {viewType === 1 && (
+            <CardColTimeline
+              fetchSingleColumn={fetchSingleColumn}
+              state={state}
+              dispatch={dispatch}
+              passFailStatus={true}
+              passFailAccessor="serviceStatus"
+            />
           )}
-          {viewType===2 && (
-            <WorkOrderCalendar getFilterQuery = {getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />
-          )}
+          {viewType === 2 && <WorkOrderCalendar getFilterQuery={getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />}
         </div>
         {assignTechnicianDialog && (
           <AssignUserDialog
