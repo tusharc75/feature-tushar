@@ -28,7 +28,8 @@ const Sidebar = ({
   setSelectedChannel,
   setCreateChannelDialog,
   handleDeleteChannels,
-  mobScreen, setChannels,
+  mobScreen,
+  setChannels,
   isSidebarCollapsed,
   toggleSidebar
 }: SidebarProps) => {
@@ -99,7 +100,14 @@ const Sidebar = ({
                       key={c._id}
                       style={{ borderRadius: '6px' }}
                       selected={selectedChannel?._id === c._id}
-                      onClick={() => setSelectedChannel(c)}
+                      onClick={() => {
+                        setSelectedChannel(c)
+                        setChannels((prev) => {
+                          const index = prev.findIndex((ch) => ch._id === c._id);
+                          prev[index] = { ...prev[index], notifications: 0 };
+                          return [...prev];
+                        })
+                      }}
                       className="group"
                     >
                       <ListItemText id={`channel-${index}`} primary={<span className="font-semibold">{c.title}</span>} />

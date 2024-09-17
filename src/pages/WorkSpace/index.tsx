@@ -113,6 +113,7 @@ const Workspace = () => {
               setCreateChannelDialog={setCreateChannelDialog}
               handleDeleteChannels={handleDeleteChannels}
               mobScreen={mobScreen}
+              setChannels={setChannels}
             />
             <MessagePanel
               isSidebarCollapsed={isSidebarCollapsed}
@@ -120,6 +121,7 @@ const Workspace = () => {
               setSelectedChannel={setSelectedChannel}
               selectedChannel={selectedChannel}
               mobScreen={mobScreen}
+              socket={socket}
             />
           </div>
         </CustomContainer>
