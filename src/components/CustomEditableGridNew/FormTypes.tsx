@@ -1,11 +1,29 @@
-import { InputAdornment, TextField, Typography } from '@material-ui/core';
+import { IconButton, InputAdornment, TextField, Typography } from '@material-ui/core';
 import { Autocomplete } from '@material-ui/lab';
-import { getUniqueCurrencies } from 'src/constants/helpers';
+import { copyTextToClipboard, getUniqueCurrencies } from 'src/constants/helpers';
 import { handleAutoCalculation } from 'src/constants/formulaUtility';
 import { find, result } from 'lodash';
+import { ClipboardEvent } from 'react';
+import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 
 const FormTypes = (props) => {
-  const { values, onChange, fieldData, name, required, options, currency, unit, errors, disabled, fields, setValues, setFieldValue, ...rest } = props;
+  const {
+    values,
+    onChange,
+    fieldData,
+    name,
+    required,
+    options,
+    currency,
+    unit,
+    errors,
+    disabled,
+    fields,
+    setValues,
+    setFieldValue,
+    enableCopy = false,
+    ...rest
+  } = props;
 
   const handleChange = (name, value) => {
     const result = handleAutoCalculation(fieldData, fields, values, name, '', '', value);
@@ -96,8 +114,8 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e, val) => {
-            handleChange(name, val?.optionValue);
-          }
+              handleChange(name, val?.optionValue);
+            }
       }
       renderInput={(params) => (
         <TextField
@@ -111,38 +129,7 @@ const FormTypes = (props) => {
       )}
     />
   ) : fieldData?.type === 'multiSelect' ? (
-    <Autocomplete
-      size="small"
-      fullWidth
-      multiple
-      options={options}
-      disabled={disabled}
-      limitTags={1}
-      value={
-        options.filter((data) => values[name]?.includes(data.optionValue))?.length > 0
-          ? options.filter((data) => values[name]?.includes(data.optionValue))
-          : []
-      }
-      getOptionLabel={(option: any) => option?.optionLabel || ''}
-      getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
-      onChange={
-        onChange
-          ? onChange
-          : (e, val) => {
-            handleChange(name, val ? val : []);
-          }
-      }
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          {...rest}
-          error={Boolean(errors[`${values._id}_${name}`])}
-          helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
-          margin="dense"
-          variant="outlined"
-        />
-      )}
-    />
+    <MultiSelect {...{ options, disabled, values, name, onChange, handleChange, rest, errors, enableCopy }} />
   ) : fieldData?.type === 'currencyAmount' ? (
     <TextField
       {...rest}
@@ -158,27 +145,27 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-            if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
-              if (fieldData?.isConverter) {
-                handleCurrencyChangeWithConverterChange(
-                  name,
-                  currency,
-                  unit,
-                  e.target.value === ''
-                    ? 0
-                    : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
-                      ? e.target.value.replace(/,/g, '')
-                      : parseFloat(e.target.value.replace(/,/g, ''))
-                );
-              } else if (fieldData.displayCurrency.length > 1) {
-                handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
-              } else {
-                handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+              if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
+                if (fieldData?.isConverter) {
+                  handleCurrencyChangeWithConverterChange(
+                    name,
+                    currency,
+                    unit,
+                    e.target.value === ''
+                      ? 0
+                      : e.target.value.slice(-1) === '.' || e?.target?.value?.slice(-2) === '.0'
+                        ? e.target.value.replace(/,/g, '')
+                        : parseFloat(e.target.value.replace(/,/g, ''))
+                  );
+                } else if (fieldData.displayCurrency.length > 1) {
+                  handleCurrencyChange(name, currency, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                } else {
+                  handleChange(name, e.target.value === '' ? 0 : e.target.value.replace(/,/g, ''));
+                }
               }
             }
-          }
       }
-      autoComplete='off'
+      autoComplete="off"
       onBlur={(e) => {
         if (e.target.value === '' || /^[0-9.,]+$/.test(e.target.value)) {
           if (fieldData?.isConverter) {
@@ -254,8 +241,8 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-            handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
-          }
+              handleChange(name, e.target.value === '' ? '' : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces || 0)));
+            }
       }
       InputProps={{
         inputProps: { min: 0 },
@@ -285,13 +272,13 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-            handleChange(
-              name,
-              e.target.value === ''
-                ? 0
-                : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
-            );
-          }
+              handleChange(
+                name,
+                e.target.value === ''
+                  ? 0
+                  : parseFloat(parseFloat(e.target.value)?.toFixed(fieldData?.decimalPlaces === undefined ? 2 : fieldData?.decimalPlaces))
+              );
+            }
       }
     />
   ) : fieldData?.type === 'vlookupDropdown' ? (
@@ -326,12 +313,12 @@ const FormTypes = (props) => {
         onChange
           ? onChange
           : (e) => {
-            if (fieldData?.returnType === 'decimal') {
-              handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
-            } else {
-              handleChange(name, e.target.value);
+              if (fieldData?.returnType === 'decimal') {
+                handleChange(name, parseFloat(e.target.value.replace(/[^0-9\.]/g, '')));
+              } else {
+                handleChange(name, e.target.value);
+              }
             }
-          }
       }
       InputProps={{
         inputProps: { min: 0 },
@@ -342,3 +329,62 @@ const FormTypes = (props) => {
 };
 
 export default FormTypes;
+
+const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, rest, errors, enableCopy }) => {
+  const handlePaste = (e: ClipboardEvent<HTMLDivElement>) => {
+    const serializedData = e.clipboardData.getData('text');
+    if (!serializedData) return;
+    const value = JSON.parse(serializedData);
+    if (value.length === 0 || !Array.isArray(value)) return;
+    if (!value[0].optionLabel) return;
+    e.preventDefault();
+    return value;
+  };
+
+  const value =
+    options.filter((data) => values[name]?.includes(data.optionValue))?.length > 0
+      ? options.filter((data) => values[name]?.includes(data.optionValue))
+      : [];
+
+  return (
+    <div className="flex items-center gap-2">
+      <Autocomplete
+        size="small"
+        fullWidth
+        multiple
+        options={options}
+        disabled={disabled}
+        limitTags={1}
+        value={value}
+        getOptionLabel={(option: any) => option?.optionLabel || ''}
+        getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
+        onChange={
+          onChange
+            ? onChange
+            : (e, val) => {
+                handleChange(name, val ? val : []);
+              }
+        }
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            {...rest}
+            error={Boolean(errors[`${values._id}_${name}`])}
+            helperText={Boolean(errors[`${values._id}_${name}`]) && errors[`${values._id}_${name}`]}
+            margin="dense"
+            variant="outlined"
+            onPaste={(e) => {
+              const data = handlePaste(e);
+              handleChange(name, data ? data : []);
+            }}
+          />
+        )}
+      />
+      {enableCopy && (
+        <span className="">
+          <CopyToClipboardButton text={JSON.stringify(value)} size="small" />
+        </span>
+      )}
+    </div>
+  );
+};
