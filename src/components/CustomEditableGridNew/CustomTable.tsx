@@ -309,8 +309,10 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                             values={row?.original}
                             options={fieldData?.option || []}
                             currency={cell?.column?.currency}
+                            fullWidth={true}
                             unit={cell?.column?.unit}
                             required={fieldData?.required}
+                            enableCopy={true}
                             disabled={fieldData?.isUneditable || extraDisabledFields?.includes(fieldData?.fieldName)}
                             setFieldValue={(name, value) => {
                               updateData(row?.original, value, name);

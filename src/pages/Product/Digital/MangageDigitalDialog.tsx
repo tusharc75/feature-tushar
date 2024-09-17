@@ -15,6 +15,7 @@ import axiosInstance from 'src/axios/axiosInstance';
 import routes from 'src/components/Helpers/Routes';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { isEqual } from 'lodash';
+import InputField from 'src/components/Helpers/InputField';
 
 const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, productId }) => {
   const fieldData = [
@@ -168,8 +169,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [formsData, setFormsData] = useState([]);
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [loading, setLoading] = useState(false);
   const toastConfig = useContext(CustomToastContext);
@@ -184,7 +183,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
             fields: fieldsDataForCreate,
             values: getObjKeysWithValues(data.data, fieldsDataForCreate)
           });
-          setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
         })
         .catch((error) => {
           setLoading(false);
@@ -194,7 +192,6 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
         fields: fieldsDataForCreate,
         values: getObjKeysWithValues({ type: 'key' }, fieldsDataForCreate)
       });
-      setFormsData(setFieldsInAscendingOrder(fieldsDataForCreate));
     }
   }, []);
 
@@ -281,56 +278,15 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                 />
                 <CustomDialogContent>
                   <Form>
-                    {formsData &&
-                      formsData.map((form, i) => {
-                        return (
-                          form.name && (
-                            <div key={i}>
-                              <div className={'detail-box-content'}>
-                                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                              </div>
-                              <Box marginY={2}>
-                                <Grid spacing={3} container>
-                                  {form.sectionFields.map((field) => (
-                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                      <FormTypes
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={field.disabled}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isMultipleUpload={true}
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
-                                            : null
-                                        }
-                                        row={true}
-                                      />
-                                    </Grid>
-                                  ))}
-                                </Grid>
-                              </Box>
-                            </div>
-                          )
-                        );
-                      })}
+                    <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={setFieldValue}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>
@@ -350,7 +306,7 @@ const MangageDigitalDialog = ({ open, onClose, digitalId = null, onSuccess, prod
                     loading={loading}
                     variant="contained"
                     color="primary"
-                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    disabled={ loading}
                     onClick={(e) => {
                       e.preventDefault();
                       submitForm();

@@ -21,7 +21,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { uniq, map } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, referenceId = null }) => {
+const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAssetId, type }) => {
 
   const toastConfig = useContext(CustomToastContext);
   const [loading, setLoading] = useState(false);
@@ -29,14 +29,14 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, referenceI
 
   useEffect(() => {
     findValidationDate();
-  }, [selectedRecords]);
+  }, []);
 
   const findValidationDate = async () => {
     try {
       const assets = selectedRecords?.map((e) => e?._id);
       let response;
-      if (referenceId) {
-        response = await axiosInstance().put(`/transfer-asset/max-receive-date-to-change`, { assets, referenceId });
+      if (type === 'changeReceiveDate') {
+        response = await axiosInstance().put(`/transfer-asset/max-receive-date-to-change`, { assets, referenceId: transferAssetId });
       } else {
         response = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets, last: 1 });
       }
@@ -54,31 +54,8 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, referenceI
 
   const handleSubmit = (values) => {
     setLoading(true);
-    let data = {};
-    if (!referenceId) {
-      const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
-      if (loadingTicketIds.length) {
-        data['_ids'] = loadingTicketIds?.map((e) => e);
-        data['status'] = DELIVERY_TICKET_STATUS.delivered;
-        data['receiveDate'] = values?.receiveDate;
-        data['signatures'] = [];
-        axiosInstance()
-          .post(`${deliveryTicket.api}/updatebulk`, data)
-          .then(({ data: { data } }) => {
-            toastConfig.setToastConfig({
-              open: true,
-              type: 'success',
-              message: `Assets Received Successfully`
-            });
-            handleSuccess();
-            setLoading(false);
-          })
-          .catch((error) => {
-            setLoading(false);
-            toastConfig.setToastConfig(error);
-          });
-      }
-    } else {
+    if (type === 'changeReceiveDate') {
+      let data = {};
       data['date'] = values?.receiveDate;
       data['assets'] = selectedRecords?.map((e: any) => {
         return ({
@@ -101,6 +78,31 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, referenceI
           setLoading(false);
           toastConfig.setToastConfig(error);
         });
+    }
+    else {
+      let data = {};
+      const loadingTicketIds = uniq(map(selectedRecords, 'loadingTicketId'));
+      if (loadingTicketIds.length) {
+        data['_ids'] = loadingTicketIds?.map((e) => e);
+        data['status'] = DELIVERY_TICKET_STATUS.delivered;
+        data['receiveDate'] = values?.receiveDate;
+        data['signatures'] = [];
+        axiosInstance()
+          .post(`${deliveryTicket.api}/updatebulk`, data)
+          .then(({ data: { data } }) => {
+            toastConfig.setToastConfig({
+              open: true,
+              type: 'success',
+              message: `Assets Received Successfully`
+            });
+            handleSuccess();
+            setLoading(false);
+          })
+          .catch((error) => {
+            setLoading(false);
+            toastConfig.setToastConfig(error);
+          });
+      }
     }
   };
 
@@ -131,7 +133,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, referenceI
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <MuiPickersUtilsProvider utils={DateUtils}>
-              <CustomDialogHeader title={referenceId ? "Change Receive Date" : "Receive Assets"} showRequiredLabel={true} onClose={handleClose} />
+              <CustomDialogHeader title={type === 'changeReceiveDate' ? "Change Receive Date" : "Receive Assets"} showRequiredLabel={true} onClose={handleClose} />
               <CustomDialogContent>
                 <Box p={1}>
                   <KeyboardDatePicker

@@ -19,6 +19,7 @@ type SidebarProps = {
   mobScreen: boolean;
   isSidebarCollapsed: boolean;
   toggleSidebar: () => void;
+  setChannels: React.Dispatch<React.SetStateAction<TChannel[]>>;
 };
 
 const Sidebar = ({
@@ -28,6 +29,7 @@ const Sidebar = ({
   setCreateChannelDialog,
   handleDeleteChannels,
   mobScreen,
+  setChannels,
   isSidebarCollapsed,
   toggleSidebar
 }: SidebarProps) => {
@@ -98,10 +100,22 @@ const Sidebar = ({
                       key={c._id}
                       style={{ borderRadius: '6px' }}
                       selected={selectedChannel?._id === c._id}
-                      onClick={() => setSelectedChannel(c)}
+                      onClick={() => {
+                        setSelectedChannel(c)
+                        setChannels((prev) => {
+                          const index = prev.findIndex((ch) => ch._id === c._id);
+                          prev[index] = { ...prev[index], notifications: 0 };
+                          return [...prev];
+                        })
+                      }}
                       className="group"
                     >
                       <ListItemText id={`channel-${index}`} primary={<span className="font-semibold">{c.title}</span>} />
+                      {c?.notifications > 0 && (
+                        <span className="absolute top-1/2 right-2 -translate-y-1/2 bg-green-500 text-white rounded-full text-xs w-5 h-5 flex items-center justify-center">
+                          {c?.notifications}
+                        </span>
+                      )}
                       <div
                         className={cn(
                           'absolute right-2 pl-6 opacity-0 group-hover:opacity-100  ',
@@ -118,7 +132,7 @@ const Sidebar = ({
                             setChannelMenuData({ selected: c, openConfirmDialog: true });
                           }}
                         >
-                          <Delete fontSize="small" />
+                          <Delete fontSize="small" color="error" />
                         </IconButton>
                       </div>
                     </ListItem>

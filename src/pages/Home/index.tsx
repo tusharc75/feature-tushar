@@ -67,11 +67,11 @@ function Dashboard() {
       <div className={` ${styles.contentWrapper}`}>
         <div className={styles.main}>
           <div className={styles.leftContainer}>
-            <FeatureCard />
             <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
             {!isOffline && <Chart />}
           </div>
           <div className={styles.rightContainer}>
+            <FeatureCard />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Collaboration Tools" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />

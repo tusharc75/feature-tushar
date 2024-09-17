@@ -9,6 +9,9 @@ import Sidebar from 'src/pages/WorkSpace/Sidebar';
 import { TChannel } from 'src/pages/WorkSpace/types';
 import ManageChannel from './ManageChannelDialog';
 import { cn } from 'src/constants/helpers';
+import { backendApi } from 'src/config';
+import io, { Socket } from 'socket.io-client';
+import { useData } from 'src/StateProvider/Provider';
 
 const Workspace = () => {
   const [channels, setChannels] = useState<TChannel[]>(null);
@@ -16,6 +19,10 @@ const Workspace = () => {
   const [createChannelDialog, setCreateChannelDialog] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const mobScreen = useMediaQuery('(max-width:768px)');
+  const [socket, setSocket] = useState<Socket>(null);
+  const { state: { user: { user } } } = useData();
+
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     fetchChannels();
@@ -34,6 +41,55 @@ const Workspace = () => {
     await axiosInstance().delete('/work-space/channel', { data: { _ids: channelIds } });
     fetchChannels();
   };
+
+  useEffect(() => {
+    if (socket && channels?.length) {
+      channels.forEach((channel) => {
+        socket.emit('joinChannel', channel?._id);
+      });
+      socket.on('notification', (channel, userId) => {
+        if (user?._id !== userId && selectedChannel?._id !== channel) {
+          setChannels((prev) => {
+            const updatedChannels = [...prev];
+            const index = prev.findIndex((c) => c._id === channel);
+            if(index !== -1) {
+              const updatedChannel = {
+                ...updatedChannels[index],
+                notifications: (updatedChannels[index]?.notifications || 0) + 1,
+              };
+              updatedChannels[index] = updatedChannel;
+            }
+            return updatedChannels;
+          })
+        }
+      });
+    }
+    return () => {
+      if (socket && channels?.length) {
+        channels.forEach((channel) => {
+          socket.emit('leaveChannel', channel?._id);
+        });
+        socket.off('fetchNewMessage');
+        socket.off('fetchMessages');
+        socket.off('addReaction');
+        socket.off('removeReaction');
+        socket.off('notification');
+      }
+    };
+  }, [socket, channels]);
+
+
+  useEffect(() => {
+    if (!token) return;
+    const s = io(`${backendApi?.replace('/api', '')}/workspace/channel`, {
+      path: backendApi?.includes('/api') ? '/api/socket.io/' : '/socket.io/',
+      auth: { token },
+      reconnectionAttempts: 5,
+      reconnectionDelay: 5000,
+      transports: ['websocket', 'pooling']
+    });
+    setSocket(s);
+  }, [token]);
 
   return (
     <>
@@ -57,6 +113,7 @@ const Workspace = () => {
               setCreateChannelDialog={setCreateChannelDialog}
               handleDeleteChannels={handleDeleteChannels}
               mobScreen={mobScreen}
+              setChannels={setChannels}
             />
             <MessagePanel
               isSidebarCollapsed={isSidebarCollapsed}
@@ -64,6 +121,7 @@ const Workspace = () => {
               setSelectedChannel={setSelectedChannel}
               selectedChannel={selectedChannel}
               mobScreen={mobScreen}
+              socket={socket}
             />
           </div>
         </CustomContainer>
