@@ -571,6 +571,7 @@ const SerializedAssetDetailsPage = () => {
             canIssueCertificate={permissions?.serializedAsset?.isUpdate || permissions?.serializedAsset?.isCreate}
             supplierAccount={null}
             assetDetails={assetDetails}
+            fetchAssetData={fetchData}
           />
         </TabPanel>
         <TabPanel value={tabValue} index={9}>

@@ -220,13 +220,9 @@ const TransferAssetDetailPage = () => {
     history.push(`?tab=${newValue}`);
   };
 
-  const updateTransferStatus = (status, isReopen = false) => {
+  const updateTransferStatus = (status) => {
     const body: any = { status };
-    if (isReopen) {
-      body.reopened = true;
-    }
-    axiosInstance()
-      .put(`${routes.transferAsset.path}/${id}/status`, body)
+    axiosInstance().put(`${routes.transferAsset.path}/${id}/status`, body)
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -248,37 +244,39 @@ const TransferAssetDetailPage = () => {
         </Box>
         <Box className="controls-v1">
           <Box className="control-buttons-v1">
-            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
-              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
-                {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
-              </Button>
-            )}
-             {permissions?.transferAsset?.isUpdate && allowedToEdit && isTransferEnded && (
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && isTransferEnded && (
               <Button
                 variant="outlined"
                 color="inherit"
                 size="small"
                 className={'btn-outline-v1'}
                 onClick={(e) => {
-                  setShowReopenCloseConfirmation({open : true, type: 'reopen'});
+                  setShowReopenCloseConfirmation({ open: true, type: 'reopen' });
                 }}
               >
                 Re-Open
               </Button>
             )}
-            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && isAllAssetsDelivered && (
-              <ButtonWithPulse
-                variant={'outlined'}
-                color="default"
-                size="small"
-                onClick={() => {
-                  setShowReopenCloseConfirmation({open : true, type: 'close'});
-                }}
-                className={'btn-outline-v1'}
-              >
-                Close
-              </ButtonWithPulse>
+            {permissions?.transferAsset?.isUpdate &&
+              allowedToEdit && !isTransferEnded && isAllAssetsDelivered && (
+                <ButtonWithPulse
+                  variant={'outlined'}
+                  color="default"
+                  size="small"
+                  onClick={() => {
+                    setShowReopenCloseConfirmation({ open: true, type: 'close' });
+                  }}
+                  className={'btn-outline-v1'}
+                >
+                  Close
+                </ButtonWithPulse>
+              )}
+            {permissions?.transferAsset?.isUpdate && allowedToEdit && !isTransferEnded && (
+              <Button variant={isMobile && !isTablet ? 'text' : 'contained'} onClick={handleOpenUpdateDialog} className={'btn-outline-v1'}>
+                {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
+              </Button>
             )}
+
             <ActivityButton
               referenceId={transferAssetData?._id}
               resource={ACTIVITY_RESOURCE.transferAsset}
@@ -406,15 +404,15 @@ const TransferAssetDetailPage = () => {
           open={showReopenCloseConfirmation.open}
           message={`Are you sure you want to ${startCase(showReopenCloseConfirmation.type)} ?`}
           onClose={() => {
-            setShowReopenCloseConfirmation({open: false, type: null});
+            setShowReopenCloseConfirmation({ open: false, type: null });
           }}
           onOk={() => {
-            if(showReopenCloseConfirmation.type === 'reopen') {
-              updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress, true);
+            if (showReopenCloseConfirmation.type === 'reopen') {
+              updateTransferStatus(TRANSFER_ASSET_STATUS.inProgress);
             } else {
               updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
             }
-            setShowReopenCloseConfirmation({open: false, type: null});
+            setShowReopenCloseConfirmation({ open: false, type: null });
           }}
           okBtnLoading={false}
         />
