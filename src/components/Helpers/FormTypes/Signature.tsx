@@ -16,7 +16,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 
 //handling camera side
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
-  const [isFrontCamera, setIsFrontCamera] = useState(true);
+  const [isFrontCamera, setIsFrontCamera] = useState(false);
 
   const webcamRef = React.useRef(null);
   const capture = () => {
