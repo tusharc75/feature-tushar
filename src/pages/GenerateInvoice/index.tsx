@@ -19,6 +19,7 @@ import CreateBillingDialog from '../RentalManagement/ProgressiveBilling/CreateBi
 import CreateInvoiceDialog from './CreateInvoice';
 import InvoiceDialog from './InvoiceDialog';
 import axios, { CancelTokenSource } from 'axios';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const GENERATE_RESOURCE = [
   {
@@ -124,7 +125,21 @@ const GenerateInvoice = ({ resourceRendered = null }) => {
     const response = await axiosInstance().get(`/field?resource=${selectedResource.resource}`);
     let data = response?.data?.data;
     const newColumns = generateColumns(renderedFrom, data, selectedResource?.path);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    let extraColumns = []
+    if (selectedResource?.resource === sidebarResource.fieldTicket) {
+      extraColumns.push({
+        accessor: 'totalAmount',
+        Header: 'Total Amount',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          return row.original?.totalAmount ? <div>
+            <p className="text-truncate">{row.original.totalAmount}</p>
+          </div> : <NoDataCell />;
+        }
+      });
+    }
+    setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {

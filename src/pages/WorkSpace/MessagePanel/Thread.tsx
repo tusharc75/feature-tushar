@@ -66,6 +66,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, chan
               handleEditComplete={handleEditComplete}
               handleMenuClick={handleMenuClick}
               messageTimeFormatter={(date) => formatDateWithTodayYestarday(date, {})}
+              channelData={channelData}
             />
           </div>
           {messages !== null ? (
@@ -92,6 +93,7 @@ const Thread = ({ message, onClose, socket, channelId, deleteMessage, open, chan
                         handleEditComplete={handleEditComplete}
                         handleMenuClick={handleMenuClick}
                         messageTimeFormatter={(date) => formatDateWithTodayYestarday(date, {})}
+                        channelData={channelData}
                       />
                     </>
                   ))}
