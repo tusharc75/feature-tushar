@@ -342,7 +342,7 @@ function Dropdown({
             }
           }
           handleLookUpDependent(ele?.fieldName, val, fields, setFieldValue);
-        } else if (ele?.type === 'dropDown' && ele?.lookupDependentOnField === '' && val && val?.optionValue) {
+        } else if (ele?.type === 'dropDown' && (!ele?.lookupDependentOnField || ele?.lookupDependentOnField === '') && val && val?.optionValue) {
           const filterFieldDropDownOptions = ele?.option?.filter((o: any) => {
             if (o?.hasOwnProperty(ele?.lookupDependentOn)) {
               if (Array.isArray(o[ele?.lookupDependentOn])) {
