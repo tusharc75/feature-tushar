@@ -111,7 +111,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                     <span className="flex flex-row-reverse">
                       {channelData?.members ? (
                         channelData?.members.map((d, i) => {
-                          if (i > 3) return null;
+                          if (i > 2) return null;
                           return (
                             <Avatar
                               style={{
@@ -135,9 +135,11 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                         <div className={cn(' h-[35px] w-[35px] animate-pulse rounded-full bg-gray-400 dark:bg-gray-500')}></div>
                       )}
                     </span>
-                    <span className="ml-auto text-[13px] font-bold leading-[20px]">
-                      {channelData?.members.length - 4 > 0 ? `+${channelData?.members.length - 4}` : ''}
-                    </span>
+                    {channelData?.members.length - 3 > 0 ? (
+                      <span className="-ml-[15px] h-[35px] w-[35px] rounded-full bg-[#F0F0F0] text-center leading-[35px] text-[#777575] [outline:1px_solid_#777575] dark:bg-gray-500 dark:text-gray-200 dark:[outline:1px_solid_var(--common-border-color)]">
+                        +{channelData?.members.length - 3}
+                      </span>
+                    ) : null}
                   </IconButton>
                 </HtmlTooltip>
               </div>
