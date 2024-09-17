@@ -20,6 +20,8 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { BiFilterAlt } from 'react-icons/bi';
 import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
+import AppsIcon from '@material-ui/icons/Apps';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const LIMIT = 25;
 
@@ -69,12 +71,12 @@ const WorkOrderSupervisor = () => {
 
   const [usersOption, setUsersOption] = useState([]);
   const [selectedServiceData, setSelectedServiceData] = useState(null);
-  const [calendarView, setCalendarView] = useState(false);
   const [fieldToFilterList, setFieldToFilterList] = useState([]);
   const [filterResourceQuery, setFilterResourceQuery] = useState({
     filterById: [],
     deepFilter: []
   });
+  const [viewType, setViewType] = useState(1);
 
   const [timeFrame, setTimeFrame] = React.useState<any>('custom');
   const [globalFilters, setGlobalFilters] = useState({
@@ -267,7 +269,7 @@ const WorkOrderSupervisor = () => {
     dispatch,
     getQueryString,
     globalFilters,
-    calendarView,
+    viewType,
     filterResourceQuery
   ]);
 
@@ -319,7 +321,7 @@ const WorkOrderSupervisor = () => {
           <TextField {...params} margin="none" size="small" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
         )}
       />
-      {!calendarView && 
+      {viewType!==2 && 
       (
       <FormControl fullWidth size="small" margin="none" variant="outlined">
         <InputLabel id="duration">Select Duration</InputLabel>
@@ -342,7 +344,7 @@ const WorkOrderSupervisor = () => {
         </Select>
       </FormControl>
     )}
-      {!calendarView &&
+      {viewType!==2 &&
       (<KeyboardDatePicker
         disabled={timeFrame !== 'custom'}
         inputVariant="outlined"
@@ -361,7 +363,7 @@ const WorkOrderSupervisor = () => {
         }}
       />
       )}
-      {!calendarView &&
+      {viewType!==2 &&
       (<KeyboardDatePicker
         disabled={timeFrame !== 'custom'}
         inputVariant="outlined"
@@ -380,25 +382,11 @@ const WorkOrderSupervisor = () => {
         }}
       />
       )}
-      <FormControlLabel
-           key={1}
-          control={
-            <Switch
-                color={'primary'}
-                checked={calendarView}
-                name="calendarView"
-                onChange={(e:any) => {
-                setCalendarView(e.target.checked)
-                }}
-              />
-            }
-           label="Calendar View"
-         />
     </>
   );
 
   const onClickRefreshIcon = () => {
-    if(calendarView){
+    if(viewType===2){
       if (ref?.current) {
         ref?.current?.childFunction();
       }
@@ -418,7 +406,7 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-[1fr_80px_30px] gap-2 items-start">
+            <div className="grid grid-cols-[1fr_80px_30px_30px_30px] gap-2 items-start">
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3">
                 {isMobile ? (
                   <>
@@ -480,6 +468,26 @@ const WorkOrderSupervisor = () => {
               <div className="mr-20 pt-[4px]">
                  <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
               </div>
+          <div className="pt-[4px]">
+              <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setViewType(1);
+              }}
+            >
+              <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
+        </div>   
+        <div className="pt-[4px]">
+          <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
+                <IconButton size="small" onClick={() => setViewType(2)} >
+                  <DateRangeIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+                </IconButton>
+            </HtmlTooltip>
+          </div>
               <div className="pt-[4px]">
                 <HtmlTooltip title={'Refresh'}>
                   <IconButton
@@ -493,7 +501,19 @@ const WorkOrderSupervisor = () => {
               </div>
             </div>
           </div>
-          {
+          {viewType===1 && (
+             <CardColTimeline
+             fetchSingleColumn={fetchSingleColumn}
+             state={state}
+             dispatch={dispatch}
+             passFailStatus={true}
+             passFailAccessor="serviceStatus"
+           />
+          )}
+          {viewType===2 && (
+            <WorkOrderCalendar getFilterQuery = {getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />
+          )}
+          {/* {
             calendarView ?
             (
                <WorkOrderCalendar getFilterQuery = {getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />
@@ -507,7 +527,7 @@ const WorkOrderSupervisor = () => {
             passFailAccessor="serviceStatus"
           />
             )
-          }
+          } */}
         </div>
         {assignTechnicianDialog && (
           <AssignUserDialog
