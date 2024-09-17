@@ -16,17 +16,36 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 
 //handling camera side
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
+  const [isFrontCamera, setIsFrontCamera] = useState(true);
+
   const webcamRef = React.useRef(null);
   const capture = () => {
     const pictureSrc = webcamRef.current.getScreenshot();
     setPicture(pictureSrc);
   };
 
+  const videoConstraints = {
+    facingMode: isFrontCamera ? 'user' : { exact: 'environment' }
+  };
+
   return (
     <div>
-      <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)} style={{ float: 'right', margin: '10px' }}>
-        Close Camera
-      </Button>
+      <Box style={{ float: 'right' }}>
+        <Button
+          size="small"
+          variant="contained"
+          color="primary"
+          onClick={() => {
+            setIsFrontCamera(!isFrontCamera);
+          }}
+          style={{ marginRight: '10px' }}
+        >
+          Switch to {isFrontCamera ? 'Back' : 'Front'} Camera
+        </Button>
+        <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
+          Close Camera
+        </Button>
+      </Box>
       <div>
         {picture == '' ? (
           <Webcam
@@ -36,7 +55,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             width={500}
             minScreenshotWidth={500}
             screenshotFormat="image/jpeg"
-          // videoConstraints={videoConstraints}
+            videoConstraints={videoConstraints}
           />
         ) : (
           <img src={picture} />
@@ -211,13 +230,13 @@ const Signature = ({ label, values, name, touched, errors, isTooltip, tooltipMes
           )}
         </Box>
       </Box>
-      {touched[name] && Boolean(errors[name]) &&
+      {touched[name] && Boolean(errors[name]) && (
         <Box pt={1}>
-          <Typography variant="body2" className="text-truncate" color={'error'}   >
+          <Typography variant="body2" className="text-truncate" color={'error'}>
             {errors[name]}
           </Typography>
         </Box>
-      }
+      )}
       {openDialog && <SignatureDialog open={openDialog} onSave={handleSaveImage} close={() => setOpenDialog(false)} />}
     </Fragment>
   );
