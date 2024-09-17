@@ -1,4 +1,4 @@
-import { Box, Button, Dialog, MenuItem } from '@material-ui/core';
+import { Box, Button, Dialog, IconButton, MenuItem } from '@material-ui/core';
 import { isEmpty, orderBy, sortBy, uniqBy } from 'lodash';
 import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -19,6 +19,8 @@ import AddExistingProduct from 'src/components/productBuilder/AddExistingProduct
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import IconWithPulse from 'src/components/IconWithPulse';
+import InfoIcon from '@material-ui/icons/Info';
 
 export * from 'src/components/CustomEditableGridNew/hooks/tableReducer';
 
@@ -163,6 +165,19 @@ const CustomEditableGrid = ({
   const rightSideContents = () => {
     return (
       <>
+        {columns?.filter((c) => c?.required && !visibleColumns[c?.id])?.length > 0 && (
+          <IconWithPulse>
+            <IconButton
+              size="small"
+              title={`Required Hidden Columns :- ${columns
+                ?.filter((c) => c?.required && !visibleColumns[c?.id])
+                ?.map((c) => c?.id || '')
+                ?.join(', ')}`}
+            >
+              <InfoIcon fontSize="small" color={'primary'} />{' '}
+            </IconButton>
+          </IconWithPulse>
+        )}
         <ArrangeView
           columns={columns}
           hideSelection={true}
