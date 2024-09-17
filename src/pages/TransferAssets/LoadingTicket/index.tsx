@@ -541,7 +541,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
           disabled={
             !canReceive ||
             selectedRecords.length === 0 ||
-            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered || e?.status !== ASSET_STATUS.available)
+            selectedRecords.some((e: any) => e?.loadingTicketStatus !== DELIVERY_TICKET_STATUS.delivered)
           }
           onClick={() => {
             setShowConfirmBoxReceive({ open: true, type: 'changeReceiveDate' });
