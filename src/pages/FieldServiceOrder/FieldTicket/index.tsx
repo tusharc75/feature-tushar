@@ -124,7 +124,19 @@ const FieldTicket = ({
             );
         }
       });
-      setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+      const extraColumns = []
+      extraColumns.push({
+        accessor: 'totalAmount',
+        Header: 'Total Amount',
+        disableFilters: true,
+        disableSortBy: true,
+        Cell: ({ row }) => {
+          return row.original?.totalAmount ? <div>
+            <p className="text-truncate">{row.original.totalAmount}</p>
+          </div> : <NoDataCell />;
+        }
+      });
+      setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
     } catch (e) {
       toastConfig.setToastConfig(e);
     }
