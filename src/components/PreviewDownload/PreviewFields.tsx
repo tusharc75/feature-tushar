@@ -66,7 +66,7 @@ export const PreviewFields = ({
         if (data?.columns?.length > 0) {
             setVisibleColumns(data.columns?.map(e => {
                 const temp = allColumn.find(col => col.fieldName === e.name);
-                return { ...temp, width: e.width };
+                return { ...temp, width: e.width, customLabel: e?.customLabel };
             }).filter(col => col !== undefined));
         }
         if (setSortBy && data?.sortBy) {
