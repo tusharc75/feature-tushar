@@ -40,6 +40,8 @@ import {
 import ManageTransferAsset from '../../TransferAssets/ManageTransferAsset';
 import axios, { CancelTokenSource } from 'axios';
 import AssetDetailsChangeDialog from '../ReceivingTicket/AssetDetailsChangeDialog';
+import { ThemeButton } from 'src/components/Helpers/Buttons';
+import { Add } from '@material-ui/icons';
 
 const AddSerializedAsset = ({
   isAdding,
@@ -404,16 +406,16 @@ const AddSerializedAsset = ({
     const statusPolicy = assetPolicyData?.policy?.statusChangeFields?.find((ele) => ele.status === status);
     if (statusPolicy) {
       if (statusPolicy?.products && statusPolicy?.products?.length > 0) {
-        const assetIds = selectedRecords?.filter(r => statusPolicy?.products?.includes(r?.productId))?.map(a => a?._id)
+        const assetIds = selectedRecords?.filter((r) => statusPolicy?.products?.includes(r?.productId))?.map((a) => a?._id);
         if (assetIds && assetIds?.length > 0) {
-          result = { statusPolicy: statusPolicy, assetIds: assetIds }
+          result = { statusPolicy: statusPolicy, assetIds: assetIds };
         }
       } else {
-        result = { statusPolicy: statusPolicy, assetIds: selectedRecords?.map(a => a?._id) }
+        result = { statusPolicy: statusPolicy, assetIds: selectedRecords?.map((a) => a?._id) };
       }
     }
     return result;
-  }
+  };
 
   const handleAddButtonClick = useCallback(() => {
     if (referenceType === 'Rental Job') {
@@ -430,7 +432,7 @@ const AddSerializedAsset = ({
         });
         return;
       } else if (checkAssetPolicy(ASSET_STATUS.reserved)) {
-        const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved)
+        const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
         setOpenAssetDataDialog({
           open: true,
           statusPolicy: statusPolicy,
@@ -481,29 +483,30 @@ const AddSerializedAsset = ({
               <div className="flex flex-grow flex-wrap items-center gap-2">
                 {serializedProducts.length > 0
                   ? serializedProducts.map((d, i) => (
-                    <Box
-                      border={1}
-                      className={`cursor-pointer p-2 text-[13px] ${selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
+                      <Box
+                        border={1}
+                        className={`cursor-pointer p-2 text-[13px] ${
+                          selectedProduct === d.id ? 'bg-[var(--dark-secondary,_var(--primary))] text-white' : 'dark:text-gray-300'
                         }`}
-                      borderColor="var(--common-border-color)"
-                      id={`serialized-products-${i}`}
-                      onClick={() => {
-                        if (selectedProduct === d.id) {
-                          setSelectedProduct(null);
-                        } else {
-                          setSelectedProduct(d.id);
-                        }
-                      }}
-                    >
-                      {d?.qty < 0 ? (
-                        <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
-                      ) : d?.qty === 0 ? (
-                        <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
-                      ) : (
-                        <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
-                      )}
-                    </Box>
-                  ))
+                        borderColor="var(--common-border-color)"
+                        id={`serialized-products-${i}`}
+                        onClick={() => {
+                          if (selectedProduct === d.id) {
+                            setSelectedProduct(null);
+                          } else {
+                            setSelectedProduct(d.id);
+                          }
+                        }}
+                      >
+                        {d?.qty < 0 ? (
+                          <span key={d.name} className="text-error">{`${d.name} (${d?.qty})`}</span>
+                        ) : d?.qty === 0 ? (
+                          <span key={d.name} className="text-success">{`${d.name} (${d?.qty})`}</span>
+                        ) : (
+                          <span key={d.name}>{`${d.name} (${d?.qty})`}</span>
+                        )}
+                      </Box>
+                    ))
                   : null}
                 {serializedProducts.length > 0 && serializedProducts.some((s) => s.qty < 0) ? (
                   <div className="text-error font-weight-bold">You have selected more assets than required</div>
@@ -553,7 +556,7 @@ const AddSerializedAsset = ({
                         color="primary"
                         onClick={() => {
                           if (checkAssetPolicy(ASSET_STATUS.reserved)) {
-                            const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved)
+                            const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
                             setOpenAssetDataDialog({
                               open: true,
                               statusPolicy: statusPolicy,
@@ -573,8 +576,11 @@ const AddSerializedAsset = ({
                         {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
                       </Button>
                     )}
-                    <HtmlTooltip
-                      title={
+
+                    <ThemeButton
+                      iconForMobile={<Add />}
+                      borderColor="none"
+                      tooltip={
                         selectedRecords?.length !== 0 && !checkUniqWarehouse()
                           ? 'Direct transfer to customer location'
                           : referenceType === 'Rental Job'
@@ -583,22 +589,18 @@ const AddSerializedAsset = ({
                               ? 'Replace'
                               : 'Add'
                       }
+                      color="primary"
+                      size="small"
+                      id={'add-to-job-button'}
+                      style={{ minWidth: 'max-content' }}
+                      onClick={handleAddButtonClick}
+                      disabled={selectedRecords?.length === 0 || isAdding || serializedProducts.some((d) => d?.qty < 0)}
+                      className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
+                      endIcon={isAdding && <CircularProgress size={20} />}
                     >
-                      <Button
-                        color="primary"
-                        size="small"
-                        id={'add-to-job-button'}
-                        style={{ minWidth: 'max-content' }}
-                        onClick={handleAddButtonClick}
-                        variant={isMobile && !isTablet ? 'text' : 'contained'}
-                        disabled={selectedRecords?.length === 0 || isAdding || serializedProducts.some((d) => d?.qty < 0)}
-                        className={`${isMobile && !isTablet ? 'mobile_button' : ''}  `}
-                        endIcon={isAdding && <CircularProgress size={20} />}
-                      >
-                        {referenceType === 'Rental Job' ? 'Add to Job' : replaceAssets ? 'Replace' : 'Add'}
-                        {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
-                      </Button>
-                    </HtmlTooltip>
+                      {referenceType === 'Rental Job' ? 'Add to Job' : replaceAssets ? 'Replace' : 'Add'}
+                      {selectedRecords?.length ? ' (' + selectedRecords?.length + ')' : ''}
+                    </ThemeButton>
                   </Fragment>
                 )}
                 {Number(tabValue) === 2 && (
@@ -630,7 +632,7 @@ const AddSerializedAsset = ({
                 <CustomTabs value={tabValue} onChange={handleMainTabChange}>
                   <CustomTab value={0} label={'Assets'} />
                   {permissions?.sublease && <CustomTab value={1} label={'Sublease Assets'} />}
-                  {['Rental Job'].includes(referenceType) && (<CustomTab value={2} label={'In Use Assets'} />)}
+                  {['Rental Job'].includes(referenceType) && <CustomTab value={2} label={'In Use Assets'} />}
                 </CustomTabs>
               </Box>
             )}
@@ -713,7 +715,7 @@ const AddSerializedAsset = ({
           }}
           onOk={() => {
             if (checkAssetPolicy(ASSET_STATUS.underReview)) {
-              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview)
+              const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.underReview);
               setOpenAssetDataDialog({
                 open: true,
                 statusPolicy: statusPolicy,
@@ -738,14 +740,14 @@ const AddSerializedAsset = ({
         <AssetDetailsChangeDialog
           ids={openAssetDataDialog._ids}
           statusPolicy={openAssetDataDialog.statusPolicy}
-          setAssetsData={() => { }}
+          setAssetsData={() => {}}
           onClose={() => setOpenAssetDataDialog({ open: false, statusPolicy: null, _ids: null, type: '' })}
           onSuccess={(data) => {
             if (Number(tabValue) === 2) {
               if (checkAssetPolicy(ASSET_STATUS.reserved)) {
                 if (openAssetDataDialog.type === 'underReview') {
                   setUnderReviewAssetData(data);
-                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved)
+                  const { statusPolicy, assetIds } = checkAssetPolicy(ASSET_STATUS.reserved);
                   setOpenAssetDataDialog({
                     open: true,
                     statusPolicy: statusPolicy,
