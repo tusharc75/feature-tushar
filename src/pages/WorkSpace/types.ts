@@ -6,6 +6,7 @@ export type TChannel = {
   access: string;
   members: string[];
   createdBy: CreatedBy;
+  notifications?: number;
 };
 
 export type CreatedBy = {
