@@ -311,6 +311,7 @@ const CustomTable = ({ columns, flatRows, setFlatRows, constColummns, fields, ex
                             currency={cell?.column?.currency}
                             unit={cell?.column?.unit}
                             required={fieldData?.required}
+                            enableCopy={true}
                             disabled={fieldData?.isUneditable || extraDisabledFields?.includes(fieldData?.fieldName)}
                             setFieldValue={(name, value) => {
                               updateData(row?.original, value, name);

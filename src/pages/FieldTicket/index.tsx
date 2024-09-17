@@ -24,6 +24,7 @@ import ManageFieldTicket from './ManageFieldTicket';
 import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createFieldTicketFlow } from 'src/pages/FieldTicket/walkmeSteps';
+import NoDataCell from 'src/components/Helpers/NoDataCell';
 
 const FieldTicket = () => {
   const types = [
@@ -85,7 +86,19 @@ const FieldTicket = () => {
       }
     }
     const newColumns = generateColumns(renderedFrom, data, routes.fieldTicketDetail.path, true);
-    setColumns([...newColumns, ...getStaticFields(), ActionsRenderer]);
+    const extraColumns = []
+    extraColumns.push({
+      accessor: 'totalAmount',
+      Header: 'Total Amount',
+      disableFilters: true,
+      disableSortBy: true,
+      Cell: ({ row }) => {
+        return row.original?.totalAmount ? <div>
+          <p className="text-truncate">{row.original.totalAmount}</p>
+        </div> : <NoDataCell />;
+      }
+    });
+    setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
   };
 
   const fetchData = async (cancelTokenSource?: CancelTokenSource) => {
