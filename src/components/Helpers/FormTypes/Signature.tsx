@@ -1,4 +1,4 @@
-import React, { Fragment, useState } from 'react';
+import React, { Fragment, useEffect, useState } from 'react';
 import { Typography, Box, CircularProgress, Button, IconButton, Dialog } from '@material-ui/core';
 import { AddCircle, Delete, Info } from '@material-ui/icons';
 import SignaturePad from 'react-signature-canvas';
@@ -14,7 +14,15 @@ import { isMobile, isTablet } from 'react-device-detect';
 
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
 
-  const [isFrontCamera, setIsFrontCamera] = useState(isMobile || isTablet ? false : true);
+  const [cameraCount, setCameraCount] = useState(0);
+  const [facingMode, setFacingMode] = useState(isMobile || isTablet ? 'environment' : 'user');
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+      setCameraCount(videoDevices.length);
+    });
+  }, []);
 
   const webcamRef = React.useRef(null);
   const capture = () => {
@@ -22,24 +30,24 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
     setPicture(pictureSrc);
   };
 
-  const videoConstraints = {
-    facingMode: isFrontCamera ? 'user' : { exact: 'environment' }
+  const switchCamera = () => {
+    facingMode === 'user' ? setFacingMode('environment') : setFacingMode('user');
   };
 
   return (
     <div>
       <Box mb={1} style={{ float: 'right' }}>
-        <Button
-          size="small"
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            setIsFrontCamera(!isFrontCamera);
-          }}
-          style={{ marginRight: '10px' }}
-        >
-          Switch to {isFrontCamera ? 'Back' : 'Front'} Camera
-        </Button>
+        {picture == '' && cameraCount > 1 &&
+          <Button
+            size="small"
+            variant="contained"
+            color="primary"
+            onClick={switchCamera}
+            style={{ marginRight: '10px' }}
+          >
+            Switch Camera
+          </Button>
+        }
         <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
           Close Camera
         </Button>
@@ -52,7 +60,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             ref={webcamRef}
             minScreenshotWidth={500}
             screenshotFormat="image/jpeg"
-            videoConstraints={videoConstraints}
+            videoConstraints={{ facingMode: facingMode }}
           />
         ) : (
           <img src={picture} />
