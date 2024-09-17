@@ -21,8 +21,8 @@ type MessagePanelProps = {
 
 const avaterPette = ['!bg-[#eeba6c] !dark:bg-[#a17e49]', '!bg-[#3772ff] !dark:bg-[#264fb2]', '!bg-[#0ed290] dark:!bg-[#08855b]'];
 
-const getAavaterColor = () => {
-  return avaterPette[Math.floor(Math.random() * avaterPette.length)];
+const getAavaterColor = (index: number = 0) => {
+  return avaterPette[index % avaterPette.length];
 };
 
 const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSidebar, isSidebarCollapsed }: MessagePanelProps) => {
@@ -72,7 +72,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
         )}
       >
         {isSidebarCollapsed && (
-          <div className="absolute left-4 top-[14px] z-10 bg-[var(--dark-primary,white)]">
+          <div className="absolute left-4 top-[7px] z-10 bg-[var(--dark-primary,white)]">
             <HtmlTooltip title="Show sidebar">
               <IconButton size={'small'} style={{ minWidth: 32, minHeight: 32 }} onClick={toggleSidebar}>
                 <VscLayoutSidebarLeft />
@@ -105,7 +105,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                 >
                   <IconButton
                     size={'small'}
-                    style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 41, minWidth: 55 }}
+                    style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 30, minWidth: 55 }}
                     onClick={() => setIsMemberDialogOpen(true)}
                   >
                     <span className="flex flex-row-reverse">
@@ -115,16 +115,16 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                           return (
                             <Avatar
                               style={{
-                                width: 35,
-                                height: 35,
+                                width: 28,
+                                height: 28,
                                 borderRadius: 999,
-                                fontSize: 12,
+                                fontSize: 11,
                                 marginRight: i !== 0 ? '-10px' : '5px',
                                 outline: '1px solid var(--common-border-color)',
                                 color: 'white'
                               }}
                               variant="rounded"
-                              className={cn('my-[2px]', getAavaterColor())}
+                              className={cn('my-[2px]', getAavaterColor(i))}
                               src={d.avatar}
                             >
                               {d?.optionLabel.match(/(\b\S)?/g).join('')}
@@ -132,11 +132,11 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                           );
                         })
                       ) : (
-                        <div className={cn(' h-[35px] w-[35px] animate-pulse rounded-full bg-gray-400 dark:bg-gray-500')}></div>
+                        <div className={cn(' h-[28px] w-[28px] animate-pulse rounded-full bg-gray-400 dark:bg-gray-500')}></div>
                       )}
                     </span>
                     {channelData?.members.length - 3 > 0 ? (
-                      <span className="-ml-[15px] h-[35px] w-[35px] rounded-full bg-[#F0F0F0] text-center text-[12px] leading-[35px] text-[#777575] [outline:1px_solid_#777575] dark:bg-gray-500 dark:text-gray-200 dark:[outline:1px_solid_var(--common-border-color)]">
+                      <span className="-ml-[15px] h-[28px] w-[28px] rounded-full bg-[#F0F0F0] text-center text-[11px] leading-[28px] text-[#777575] [outline:1px_solid_#777575] dark:bg-gray-500 dark:text-gray-200 dark:[outline:1px_solid_var(--common-border-color)]">
                         +{channelData?.members.length - 3}
                       </span>
                     ) : null}

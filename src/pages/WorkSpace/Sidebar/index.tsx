@@ -118,7 +118,7 @@ const Sidebar = ({
                             setChannelMenuData({ selected: c, openConfirmDialog: true });
                           }}
                         >
-                          <Delete fontSize="small" />
+                          <Delete fontSize="small" color="error" />
                         </IconButton>
                       </div>
                     </ListItem>

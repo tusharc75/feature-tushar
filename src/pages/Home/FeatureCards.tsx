@@ -33,9 +33,9 @@ const FeatureCard = () => {
   // early return null
   if (!aiPermission?.isRead || !workspacePermission?.isRead) return null;
   return (
-    <div className="gap mb-[16px] grid grid-cols-1 gap-4 md:mb-[34px] md:grid-cols-2 md:gap-5">
+    <div className="gap mb-[16px] grid grid-cols-1 gap-4 md:mb-[34px]">
       {aiPermission?.isRead && <SingleCard {...equiptAiData} />}
-      {workspacePermission?.isRead && <SingleCard {...workSpaceData} />}
+      {/* {workspacePermission?.isRead && <SingleCard {...workSpaceData} />} */}
     </div>
   );
 };
@@ -50,7 +50,7 @@ type SingleCardProps = {
 
 const SingleCard = ({ src, heading, description, href, buttonText }: SingleCardProps) => {
   return (
-    <div className="grid min-h-[178px] grid-cols-[1fr_1.5fr] items-center rounded-xl bg-[var(--dark-primary,white)] shadow-[0px_3.3px_40px_0px_#00000014] [border-left:4px_solid_var(--new-theme-color)] min-[900px]:grid-cols-1 min-[1024px]:grid-cols-[1fr_3fr] min-[1300px]:grid-cols-[1fr_1.5fr] min-[1350px]:grid-cols-[203px_1fr]">
+    <div className="grid min-h-[178px] grid-cols-[1fr_1.5fr] items-center rounded-xl bg-[var(--dark-primary,white)] shadow-[0px_3.3px_40px_0px_#00000014] [border-left:4px_solid_var(--new-theme-color)] min-[900px]:grid-cols-1 min-[1024px]:grid-cols-[1fr_3fr] min-[1300px]:grid-cols-[1fr_1.5fr] min-[1370px]:grid-cols-[203px_1fr]">
       <div className="image flex min-w-0 max-w-full items-center justify-center px-2">
         <img src={src} alt={heading} className="block min-w-0" />
       </div>

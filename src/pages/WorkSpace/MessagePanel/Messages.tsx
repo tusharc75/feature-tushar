@@ -338,7 +338,7 @@ export const DisplaySingleMessage = ({
         onMouseLeave={closeEmojiPanel}
       >
         <div className={cn('flex gap-2', isSelf ? ' flex-row-reverse justify-start' : '')}>
-          <Avatar style={{ width: 28, height: 28, borderRadius: 8, fontSize: 15 }} variant="rounded" className="mt-[3px]" src={message.avatar}>
+          <Avatar style={{ width: 28, height: 28, borderRadius: 999, fontSize: 13 }} variant="rounded" className="" src={message.avatar}>
             {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
           </Avatar>
           <div className="flex-grow">
@@ -469,8 +469,8 @@ export const DisplaySingleMessage = ({
                               style={{
                                 width: 24,
                                 height: 24,
-                                fontSize: '0.8rem',
-                                borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)'
+                                fontSize: 10,
+                                borderRadius: 999
                               }}
                               variant="rounded"
                               src={reply.avatar}
