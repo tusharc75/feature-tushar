@@ -18,7 +18,7 @@ import moment from 'moment';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
-const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null }) => {
+const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetDetails = null, fetchAssetData = null }) => {
   const toastConfig = useContext(CustomToastContext);
   const renderedFrom = `${camelCase(routes?.serializedAsset.title)}_certificationHistory`;
   const { state, dispatch } = useTableReducer();
@@ -119,7 +119,7 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
             )
         });
         newColumns?.forEach((e) => {
-          if (['issueDate', 'expiryDate'].includes(e.accessor)) {
+          if (['issueDate', 'expiryDate', 'owner'].includes(e.accessor)) {
             e.disabled = true;
           }
         });
@@ -171,7 +171,11 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
   return (
     <>
       {canIssueCertificate && (
-        <DetailsPageHeader isActionButtonVisible={false} isAddButtonVisible={true} addButtonMenuItems={addButtonMenuItems()} hasXpadding={false} />
+        <DetailsPageHeader
+          isActionButtonVisible={false}
+          isAddButtonVisible={true}
+          addButtonMenuItems={addButtonMenuItems()}
+          hasXpadding={false} />
       )}
       <Box>
         {columns ? (
@@ -198,6 +202,9 @@ const CertificationHistory = ({ id, canIssueCertificate, supplierAccount, assetD
           onSuccess={() => {
             setOpenDialog({ open: false });
             fetchData();
+            if (fetchAssetData) {
+              fetchAssetData()
+            }
           }}
           assetId={id}
           certificateExpiryDate={assetDetails?.certificateExpiryDate || null}
