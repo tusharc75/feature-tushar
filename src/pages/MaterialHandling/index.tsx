@@ -91,10 +91,6 @@ const MaterialHandling = () => {
           });
         }
         setWarehouseOptions([...warehouses]);
-        setFilterQuery({
-          filterById: [],
-          deepFilter: []
-        });
       });
   }, [selectedEntity]);
 
@@ -104,28 +100,29 @@ const MaterialHandling = () => {
     return () => cancelTokenSource.cancel();
   }, [filterQuery, warehouseOptions]);
 
+  const getQueryString = () => {
+    let filter = `?`;
+    const { deepFilter, filterById } = filterQuery;
+    if (filterById?.length) {
+      filter = `${filter}&filterById=${JSON.stringify(filterById)}`;
+    }
+    if (deepFilter?.length) {
+      filter = `${filter}&deepFilter=${encodeURIComponent(JSON.stringify(deepFilter))}`;
+    }
+    if (filterById?.length || deepFilter?.length) {
+      filter = `${filter}&filterType=and`;
+    }
+    return filter;
+  };
+
   const fetchData = (cancelTokenSource?: CancelTokenSource) => {
     setWorkOrder(null);
     setSelectedWorkOrder(null);
     let api = `/material-handling`;
+    const query = getQueryString();
 
-    const { filterById, deepFilter } = { ...filterQuery };
-
-    // if (warehouseOptions && !filterById?.find((e) => e.field === 'warehouse')) {
-    //   filterById.push({ field: 'warehouse', term: { $in: warehouseOptions?.map((e) => e?.optionValue) } });
-    // }
-
-    // if (filterById?.length > 0 || deepFilter?.length > 0) {
-    //   api = `${api}?filterType=and`;
-    // }
-    // if (filterById?.length > 0) {
-    //   api = `${api}&filterById=${JSON.stringify(filterById)}`;
-    // }
-    // if (deepFilter?.length > 0) {
-    //   api = `${api}&deepFilter=${JSON.stringify(deepFilter)}`;
-    // }
     axiosInstance()
-      .get(api, { cancelToken: cancelTokenSource?.token })
+      .get(`${api}${query}`, { cancelToken: cancelTokenSource?.token })
       .then(({ data: { data } }) => {
         setWorkOrder(data);
         if (data?.length && !isMobile) {
@@ -165,102 +162,96 @@ const MaterialHandling = () => {
         {workOrder ? (
           workOrder?.length > 0 ? (
             <Grid container spacing={2}>
-              {filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 && (
-                <Grid item xs={12} md={4} lg={3}>
-                  <Box className="container-with-border" p={2}>
-                    <Box style={{ maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 220px)', overflow: 'auto' }}>
-                      {workOrder?.map((data, index) => {
-                        return (
-                          <Box
-                            mb={2}
-                            key={index}
-                            onClick={() => {
-                              setSelectedWorkOrder(data);
-                            }}
-                            style={
-                              {
-                                cursor: 'pointer',
-                                backgroundColor: 'var(--dark-secondary, white)',
-                                '--card-color-primary': 'var(--dark-primary-text, #2A3042)',
-                                '--card-color-secondary': 'var(--dark-secondary-text, #5B5B5B)',
-                                border: selectedWorkOrder === data ? '2.5px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
-                                borderRadius: '8px'
-                              } as React.CSSProperties
-                            }
-                          >
-                            <Box p={2}>
-                              <Box display="flex">
-                                <Typography
-                                  variant="subtitle2"
-                                  style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8, fontWeight: 600 }}
-                                >
-                                  {data?.referenceType} :{' '}
-                                  <span style={{ color: 'var(--card-color-secondary)' }}>
-                                    {data?.referenceType === sidebarResource.workOrder
-                                      ? data?.workOrderNumber
-                                      : data?.referenceType === sidebarResource.fieldTicket
-                                        ? data?.fieldTicketNumber
-                                        : ''}
-                                  </span>
-                                </Typography>
-                                <Box pl={1}>
-                                  <IconButton
-                                    onClick={() => {
-                                      let route;
-                                      if (data?.referenceType === sidebarResource.workOrder) {
-                                        route = routes.workOrderDetail.path;
-                                      } else if (data?.referenceType === sidebarResource.fieldTicket) {
-                                        route = routes.fieldTicketDetail.path;
-                                      }
-                                      window.open(`${route}/${data?._id}`);
-                                    }}
-                                    aria-label="delete"
-                                    size="small"
-                                  >
-                                    <FiExternalLink fontSize="inherit" style={{ width: '24', height: '24', color: 'var(--new_theme_color)' }} />
-                                  </IconButton>
-                                </Box>
-                              </Box>
-                              {data?.referenceType === sidebarResource.workOrder && (
-                                <>
-                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                    Product :{' '}
-                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
-                                  </Typography>
-                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                    Asset :{' '}
-                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>
-                                      {data?.serializedAsset?.optionLabel}
-                                    </span>
-                                  </Typography>
-                                </>
-                              )}
-                              {data?.referenceType === sidebarResource.fieldTicket && (
-                                <>
-                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                    Customer :{' '}
-                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>
-                                      {data?.customerAccount?.optionLabel}
-                                    </span>
-                                  </Typography>
-                                  <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
-                                    Well Name :{' '}
-                                    <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.wellName?.optionLabel}</span>
-                                  </Typography>
-                                </>
-                              )}
-                              <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
-                                {routes.warehouse.title} :{' '}
-                                <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>
+              <Grid item xs={12} md={4} lg={3}>
+                <Box className="container-with-border" p={2}>
+                  <Box style={{ maxHeight: isMobile ? 'calc(100vh - 100px)' : 'calc(100vh - 220px)', overflow: 'auto' }}>
+                    {workOrder?.map((data, index) => {
+                      return (
+                        <Box
+                          mb={2}
+                          key={index}
+                          onClick={() => {
+                            setSelectedWorkOrder(data);
+                          }}
+                          style={
+                            {
+                              cursor: 'pointer',
+                              backgroundColor: 'var(--dark-secondary, white)',
+                              '--card-color-primary': 'var(--dark-primary-text, #2A3042)',
+                              '--card-color-secondary': 'var(--dark-secondary-text, #5B5B5B)',
+                              border: selectedWorkOrder === data ? '2.5px solid var(--new_theme_color)' : '1px solid var(--common-border-color)',
+                              borderRadius: '8px'
+                            } as React.CSSProperties
+                          }
+                        >
+                          <Box p={2}>
+                            <Box display="flex">
+                              <Typography
+                                variant="subtitle2"
+                                style={{ color: 'var(--card-color-primary)', fontSize: 15, marginBottom: 8, fontWeight: 600 }}
+                              >
+                                {data?.referenceType} :{' '}
+                                <span style={{ color: 'var(--card-color-secondary)' }}>
+                                  {data?.referenceType === sidebarResource.workOrder
+                                    ? data?.workOrderNumber
+                                    : data?.referenceType === sidebarResource.fieldTicket
+                                      ? data?.fieldTicketNumber
+                                      : ''}
+                                </span>
                               </Typography>
+                              <Box pl={1}>
+                                <IconButton
+                                  onClick={() => {
+                                    let route;
+                                    if (data?.referenceType === sidebarResource.workOrder) {
+                                      route = routes.workOrderDetail.path;
+                                    } else if (data?.referenceType === sidebarResource.fieldTicket) {
+                                      route = routes.fieldTicketDetail.path;
+                                    }
+                                    window.open(`${route}/${data?._id}`);
+                                  }}
+                                  aria-label="delete"
+                                  size="small"
+                                >
+                                  <FiExternalLink fontSize="inherit" style={{ width: '24', height: '24', color: 'var(--new_theme_color)' }} />
+                                </IconButton>
+                              </Box>
                             </Box>
+                            {data?.referenceType === sidebarResource.workOrder && (
+                              <>
+                                <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                  Product :{' '}
+                                  <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.product?.optionLabel}</span>
+                                </Typography>
+                                <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                  Asset :{' '}
+                                  <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.serializedAsset?.optionLabel}</span>
+                                </Typography>
+                              </>
+                            )}
+                            {data?.referenceType === sidebarResource.fieldTicket && (
+                              <>
+                                <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                  Customer :{' '}
+                                  <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.customerAccount?.optionLabel}</span>
+                                </Typography>
+                                <Typography variant="body2" style={{ color: 'var(--card-color-primary)', marginBottom: 8, fontWeight: 600 }}>
+                                  Well Name :{' '}
+                                  <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.wellName?.optionLabel}</span>
+                                </Typography>
+                              </>
+                            )}
+                            <Typography variant="body2" style={{ color: 'var(--card-color-primary)', fontWeight: 600 }}>
+                              {routes.warehouse.title} :{' '}
+                              <span style={{ color: 'var(--card-color-secondary)', fontWeight: 500 }}>{data?.warehouse?.optionLabel}</span>
+                            </Typography>
                           </Box>
-                        );
-                      })}
-                    </Box>
+                        </Box>
+                      );
+                    })}
                   </Box>
-                </Grid>
-              )}
+                </Box>
+              </Grid>
               <Grid item xs={12} md={8} lg={filterQuery?.filterById?.findIndex((f) => f?.field === '_id') === -1 ? 9 : 12}>
                 {selectedWorkOrder && (
                   <>

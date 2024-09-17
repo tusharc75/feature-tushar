@@ -1,6 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, FormControlLabel, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
@@ -20,10 +19,19 @@ import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { BiFilterAlt } from 'react-icons/bi';
 import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
+import AppsIcon from '@material-ui/icons/Apps';
+import DateRangeIcon from '@material-ui/icons/DateRange';
 
 const LIMIT = 25;
 
 const FIELD_TO_FILTER = [
+  {
+    key: 'user',
+    fieldName: 'user',
+    fieldLabel: routes.employeeMaster.title,
+    resource: sidebarResource.employeeMaster,
+    type: 'dropDown'
+  },
   {
     key: 'serviceMaster',
     fieldName: 'service',
@@ -67,14 +75,13 @@ const WorkOrderSupervisor = () => {
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
 
-  const [usersOption, setUsersOption] = useState([]);
   const [selectedServiceData, setSelectedServiceData] = useState(null);
-  const [calendarView, setCalendarView] = useState(false);
   const [fieldToFilterList, setFieldToFilterList] = useState([]);
   const [filterResourceQuery, setFilterResourceQuery] = useState({
     filterById: [],
     deepFilter: []
   });
+  const [viewType, setViewType] = useState(1);
 
   const [timeFrame, setTimeFrame] = React.useState<any>('custom');
   const [globalFilters, setGlobalFilters] = useState({
@@ -125,14 +132,6 @@ const WorkOrderSupervisor = () => {
         break;
     }
   }, [timeFrame]);
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Employee Master`)
-      .then(({ data: { data } }) => {
-        setUsersOption(data['Employee Master'] || []);
-      });
-  }, []);
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
@@ -241,10 +240,6 @@ const WorkOrderSupervisor = () => {
         deepFilter = `${deepFilter}&${f.field}=${f.term}`
       });
     }
-   
-    if (selectedUser) {
-      deepFilter = `${deepFilter}&user=${selectedUser}`;
-    }
 
     if (globalFilters && selectDateFilter) {
       deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
@@ -267,7 +262,7 @@ const WorkOrderSupervisor = () => {
     dispatch,
     getQueryString,
     globalFilters,
-    calendarView,
+    viewType,
     filterResourceQuery
   ]);
 
@@ -300,26 +295,7 @@ const WorkOrderSupervisor = () => {
 
   const filters = (
     <>
-      <Autocomplete
-        fullWidth
-        options={usersOption}
-        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-        getOptionSelected={(option: any, val) => {
-          return option.optionValue === val.optionValue;
-        }}
-        value={
-          usersOption.filter((data) => data.optionValue === selectedUser).length
-            ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
-            : ''
-        }
-        onChange={(e, val) => {
-          setSelectedUser(val && val.optionValue ? val.optionValue : '');
-        }}
-        renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
-        )}
-      />
-      {!calendarView && 
+      {viewType!==2 && 
       (
       <FormControl fullWidth size="small" margin="none" variant="outlined">
         <InputLabel id="duration">Select Duration</InputLabel>
@@ -342,7 +318,7 @@ const WorkOrderSupervisor = () => {
         </Select>
       </FormControl>
     )}
-      {!calendarView &&
+      {viewType!==2 &&
       (<KeyboardDatePicker
         disabled={timeFrame !== 'custom'}
         inputVariant="outlined"
@@ -361,7 +337,7 @@ const WorkOrderSupervisor = () => {
         }}
       />
       )}
-      {!calendarView &&
+      {viewType!==2 &&
       (<KeyboardDatePicker
         disabled={timeFrame !== 'custom'}
         inputVariant="outlined"
@@ -380,25 +356,11 @@ const WorkOrderSupervisor = () => {
         }}
       />
       )}
-      <FormControlLabel
-           key={1}
-          control={
-            <Switch
-                color={'primary'}
-                checked={calendarView}
-                name="calendarView"
-                onChange={(e:any) => {
-                setCalendarView(e.target.checked)
-                }}
-              />
-            }
-           label="Calendar View"
-         />
     </>
   );
 
   const onClickRefreshIcon = () => {
-    if(calendarView){
+    if(viewType===2){
       if (ref?.current) {
         ref?.current?.childFunction();
       }
@@ -418,7 +380,7 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-[1fr_80px_30px] gap-2 items-start">
+            <div className="grid grid-cols-[1fr_80px_30px_30px_30px] gap-2 items-start">
               <div className="grid grid-cols-1 sm:grid-cols-[1fr_1fr] md:grid-cols-[1fr_1fr_1fr] lg:grid-cols-[1fr_1fr_1fr_1fr_1fr] xl:grid-cols-[1fr_1fr_1fr_1fr_1fr_1fr] gap-x-2 gap-y-3">
                 {isMobile ? (
                   <>
@@ -480,6 +442,26 @@ const WorkOrderSupervisor = () => {
               <div className="mr-20 pt-[4px]">
                  <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
               </div>
+          <div className="pt-[4px]">
+              <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
+            <IconButton
+              size="small"
+              aria-label="Clone"
+              onClick={() => {
+                setViewType(1);
+              }}
+            >
+              <AppsIcon color={viewType === 1 ? 'primary' : 'disabled'} />
+            </IconButton>
+          </HtmlTooltip>
+        </div>   
+        <div className="pt-[4px]">
+          <HtmlTooltip title={'Calendar View'} placement="top" arrow enterTouchDelay={0}>
+                <IconButton size="small" onClick={() => setViewType(2)} >
+                  <DateRangeIcon color={viewType === 2 ? 'primary' : 'disabled'} />
+                </IconButton>
+            </HtmlTooltip>
+          </div>
               <div className="pt-[4px]">
                 <HtmlTooltip title={'Refresh'}>
                   <IconButton
@@ -493,21 +475,18 @@ const WorkOrderSupervisor = () => {
               </div>
             </div>
           </div>
-          {
-            calendarView ?
-            (
-               <WorkOrderCalendar getFilterQuery = {getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />
-            )
-            : (
-          <CardColTimeline
-            fetchSingleColumn={fetchSingleColumn}
-            state={state}
-            dispatch={dispatch}
-            passFailStatus={true}
-            passFailAccessor="serviceStatus"
-          />
-            )
-          }
+          {viewType===1 && (
+             <CardColTimeline
+             fetchSingleColumn={fetchSingleColumn}
+             state={state}
+             dispatch={dispatch}
+             passFailStatus={true}
+             passFailAccessor="serviceStatus"
+           />
+          )}
+          {viewType===2 && (
+            <WorkOrderCalendar getFilterQuery = {getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />
+          )}
         </div>
         {assignTechnicianDialog && (
           <AssignUserDialog
