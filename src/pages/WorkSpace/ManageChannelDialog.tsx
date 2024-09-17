@@ -1,18 +1,15 @@
-import { useState, useContext, Fragment } from 'react';
-import { Box, Dialog, Button, Grid, TextField, RadioGroup, FormControlLabel, Radio, FormLabel } from '@material-ui/core';
-import { Formik, Form } from 'formik';
-import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
-import CustomDialogContent from '../../components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from '../../components/CustomDialog/CustomDialogFooter';
-import axiosInstance from '../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import { isMobile, isTablet } from 'react-device-detect';
-import { CustomDialogTransition } from '../../constants/helpers';
-import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import { Box, Button, FormControlLabel, FormLabel, Grid, Radio, RadioGroup, TextField } from '@material-ui/core';
+import { Form, Formik } from 'formik';
 import { isEqual } from 'lodash';
-import CustomButton from '../../components/Helpers/CustomButton';
-import { object, string } from 'yup';
+import { Fragment, useContext, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
 import DashboardModal from 'src/components/DashboardModal';
+import { object, string } from 'yup';
+import axiosInstance from '../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../components/ConfirmCancelDialog';
+import CustomButton from '../../components/Helpers/CustomButton';
+import { CustomDialogTransition } from '../../constants/helpers';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 
 const ManageChannel = ({ onClose, onSuccess }) => {
   const toastConfig = useContext(CustomToastContext);

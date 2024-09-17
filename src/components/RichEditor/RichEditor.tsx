@@ -15,12 +15,14 @@ import axiosInstance from '../../axios/axiosInstance';
 import { imageUploadMaxSize } from '../../constants/helpers';
 import HtmlTooltip from '../CustomTooltipTitle';
 import './RichEditorStyle.scss';
+import { useAppTheme } from 'src/constants/AppConfig';
 
 const imagePlugin = createImagePlugin();
 const plugins = [imagePlugin];
 
 export function RichTextEditor(props) {
   const { editorState, style, placeholder } = props;
+  const [themeColor] = useAppTheme();
   const editorRef = useRef(null);
 
   useEffect(() => {
@@ -76,7 +78,7 @@ export function RichTextEditor(props) {
         <BlockStyleControls editorState={editorState} onToggle={toggleBlockType} onChange={onChange} />
         <InlineStyleControls editorState={editorState} onToggle={toggleInlineStyle} />
       </div>
-      <div className={className} onClick={focus}>
+      <div className={className} onClick={focus} key={themeColor}>
         {/* <Editor
           blockStyleFn={getBlockStyle}
           customStyleMap={styleMap}
@@ -101,6 +103,10 @@ export function RichTextEditor(props) {
           onTab={onTab}
           customStyleMap={styleMap}
           blockStyleFn={getBlockStyle}
+          init={{
+            skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
+            content_css: themeColor === 'dark' ? 'dark' : 'default'
+          }}
         />
       </div>
     </div>
