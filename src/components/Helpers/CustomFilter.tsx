@@ -177,7 +177,7 @@ const CustomFilter = ({ field, setFilterQuery }) => {
 
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
-      <Box mb={1} display="flex" justifyContent="space-between">
+      <Box className="flex items-start justify-between gap-2">
         <Box minWidth="70%">
           <DisplyaFilters chipData={chipData} handleFilterOpen={handleFilterOpen} clearSingleFilter={clearSingleFilter} />
         </Box>
@@ -362,79 +362,20 @@ const CustomFilter = ({ field, setFilterQuery }) => {
 
 export default CustomFilter;
 
-const DisplyaFilters = (props) => {
-  const { chipData, handleFilterOpen, clearSingleFilter } = props;
-  const [hiddenItems, setHiddenItems] = useState(0);
-
-  const containerRef = useRef(null);
-  const countRef = useRef(null);
-  const COUNT_PADDING = 10;
-
-  useEffect(() => {
-    setHiddenItems(0);
-    if (containerRef?.current) {
-      hideElementAndShowNumber(containerRef.current);
-    }
-  }, [chipData]);
-
-  const hideElementAndShowNumber = (container) => {
-    const childItems = [...container?.children];
-
-    childItems.forEach((item) => (item.style.display = 'inline-flex'));
-    let lastVisibleItem = null;
-    const hiddenItems = [];
-    for (let i = 0; i < childItems.length; i++) {
-      const item = childItems[i] as HTMLDivElement;
-      const isOverlapping = item.getBoundingClientRect().right >= container.getBoundingClientRect().right - COUNT_PADDING;
-      if (isOverlapping) {
-        hiddenItems.push(item);
-        if (!lastVisibleItem) {
-          lastVisibleItem = childItems[i - 1];
-        }
-      }
-    }
-    hiddenItems.forEach((item) => (item.style.display = 'none'));
-
-    const count = hiddenItems.length;
-    setHiddenItems(count);
-
-    const deltaX = lastVisibleItem?.offsetLeft + lastVisibleItem?.clientWidth;
-
-    if (countRef.current) {
-      countRef.current.style.cssText = `
-          left: ${deltaX + COUNT_PADDING}px;
-          display: ${count === 0 ? 'none' : 'block'};
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          cursor: pointer;
-          `;
-    }
-  };
-
+const DisplyaFilters = ({ chipData, handleFilterOpen, clearSingleFilter }) => {
   return (
     <div className="custom-filter">
       {chipData?.length > 0 && (
-        <div className="chip-container min-h-[26px]" style={{ paddingRight: `${55 + COUNT_PADDING}px` }}>
-          <div className={'chip-group'} ref={containerRef}>
-            {chipData?.map((filter) => (
-              <Chip
-                onClick={handleFilterOpen}
-                className={'filter-chip'}
-                deleteIcon={<CloseIcon />}
-                label={`${filter?.title}=${filter?.value}`}
-                onDelete={() => clearSingleFilter(filter.name)}
-              />
-            ))}
-          </div>
-
-          <div
-            ref={countRef}
-            style={{ cursor: 'pointer', position: 'absolute', top: '50%', transform: 'translateY(-50%)', border: '1px solid red' }}
-            onClick={handleFilterOpen}
-          >
-            +{hiddenItems} more
-          </div>
+        <div className={'flex min-h-[26px] flex-wrap gap-2'}>
+          {chipData?.map((filter) => (
+            <Chip
+              onClick={handleFilterOpen}
+              className={'filter-chip'}
+              deleteIcon={<CloseIcon />}
+              label={`${filter?.title}=${filter?.value}`}
+              onDelete={() => clearSingleFilter(filter.name)}
+            />
+          ))}
         </div>
       )}
     </div>
