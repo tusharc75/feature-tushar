@@ -6,7 +6,7 @@ import { cn, DebounceCallBack, debounceCallBack } from 'src/constants/helpers';
 
 type SerachBoxProps = React.InputHTMLAttributes<HTMLInputElement> & {
   width?: string;
-  value: string;
+  value?: string;
   containerProps?: React.HTMLAttributes<HTMLDivElement>;
 };
 

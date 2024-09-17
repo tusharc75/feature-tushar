@@ -227,7 +227,7 @@ export default function NewCreateQuotePdfTemplate() {
             footer: tempPdfTemplate.footer,
             aboveTable: tempPdfTemplate.aboveTable,
             belowTable: tempPdfTemplate.belowTable,
-            tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide,
+            tabelSummaryLeftSide: tempPdfTemplate?.tabelSummaryLeftSide
           });
         } else {
           try {
@@ -256,7 +256,7 @@ export default function NewCreateQuotePdfTemplate() {
               footer: data?.footer,
               aboveTable: data?.aboveTable,
               belowTable: data?.belowTable,
-              tabelSummaryLeftSide: data?.tabelSummaryLeftSide,
+              tabelSummaryLeftSide: data?.tabelSummaryLeftSide
             });
             if (tempQuoteData?._id) {
               setHasPermissionToUpdate(true);
@@ -555,7 +555,7 @@ export default function NewCreateQuotePdfTemplate() {
                     <Grid item xs={12} md={6}></Grid>
                   </Grid>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-x-2 gap-y-3">
+                  <div className="grid grid-cols-1 gap-x-2 gap-y-3 sm:grid-cols-2 md:grid-cols-3">
                     {!Boolean(quoteData?._id) && (
                       <>
                         <TextField
@@ -587,8 +587,8 @@ export default function NewCreateQuotePdfTemplate() {
                             setFieldValue('entity', val && val?.map((d) => d._id));
                             val && val.length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
-                              )
+                                  ownerCollaboratorDataConst.filter((data) => val?.some((d) => data.entities?.some((e) => e.entity === d._id)))
+                                )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst);
                           }}
                           renderInput={(params) => (
@@ -620,10 +620,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  )
                                 )
-                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -657,10 +657,10 @@ export default function NewCreateQuotePdfTemplate() {
                           onOpen={() =>
                             values['entity'] && values['entity'].length !== 0
                               ? setOwnerCollaboratorData(
-                                ownerCollaboratorDataConst.filter((data) =>
-                                  values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  ownerCollaboratorDataConst.filter((data) =>
+                                    values['entity']?.some((d) => data.entities?.some((e) => e.entity === d))
+                                  )
                                 )
-                              )
                               : setOwnerCollaboratorData(ownerCollaboratorDataConst)
                           }
                           renderInput={(params) => (
@@ -779,6 +779,7 @@ export default function NewCreateQuotePdfTemplate() {
                             header: value
                           }));
                         }}
+                        them
                         width={isLandscapChecked ? 793 : 725}
                         height={300}
                         initialValue={initialValues?.header}

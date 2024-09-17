@@ -43,7 +43,12 @@ function PreviewDownloadMultiple({ referenceIds }) {
     setLoadingType('Regular');
     setBtnLoading(operation);
 
-    let showColumns = visibleColumns?.map((e) => e?.fieldName)?.toString();
+    let showColumns = JSON.stringify(visibleColumns?.map((e) => {
+      return ({
+        name: e?.fieldName,
+        width: e?.width
+      })
+    }));
 
     let api = `/pdf/multiple?resource=${sidebarResource.deliveryTicket}&columns=${showColumns}&ids=${referenceIds}`;
 
