@@ -60,7 +60,9 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           return groupByDate(newMessages);
         }
       });
-      containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
+      setTimeout(() => {
+        containerRef.current?.scrollTo(0, containerRef.current?.scrollHeight || 0);
+      }, 100);
       setThreadDialogOpen((prevDialog) => {
         if (prevDialog.open && (prevDialog.message?._id === after || !after)) {
           const updatedMessage = data?.data?.find((message) => message._id === prevDialog.message?._id);
