@@ -1,6 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, FormControlLabel, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
-import { Autocomplete } from '@material-ui/lab';
+import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
@@ -26,6 +25,13 @@ import DateRangeIcon from '@material-ui/icons/DateRange';
 const LIMIT = 25;
 
 const FIELD_TO_FILTER = [
+  {
+    key: 'user',
+    fieldName: 'user',
+    fieldLabel: routes.employeeMaster.title,
+    resource: sidebarResource.employeeMaster,
+    type: 'dropDown'
+  },
   {
     key: 'serviceMaster',
     fieldName: 'service',
@@ -69,7 +75,6 @@ const WorkOrderSupervisor = () => {
   const [workStationAssignDialog, setWorkStationAssignDialog] = useState(false);
   const [assignTechnicianDialog, setAssignTechnicianDialog] = useState(false);
 
-  const [usersOption, setUsersOption] = useState([]);
   const [selectedServiceData, setSelectedServiceData] = useState(null);
   const [fieldToFilterList, setFieldToFilterList] = useState([]);
   const [filterResourceQuery, setFilterResourceQuery] = useState({
@@ -127,14 +132,6 @@ const WorkOrderSupervisor = () => {
         break;
     }
   }, [timeFrame]);
-
-  useEffect(() => {
-    axiosInstance()
-      .get(`/sa-formbuilder/lookup?lookupResource=Employee Master`)
-      .then(({ data: { data } }) => {
-        setUsersOption(data['Employee Master'] || []);
-      });
-  }, []);
 
   useEffect(() => {
     const cardDataRows: datarowInterface[] = [
@@ -243,10 +240,6 @@ const WorkOrderSupervisor = () => {
         deepFilter = `${deepFilter}&${f.field}=${f.term}`
       });
     }
-   
-    if (selectedUser) {
-      deepFilter = `${deepFilter}&user=${selectedUser}`;
-    }
 
     if (globalFilters && selectDateFilter) {
       deepFilter = `${deepFilter}&from=${moment(globalFilters.from).format('YYYY/MM/DD')}&to=${moment(globalFilters.to).format('YYYY/MM/DD')}`;
@@ -302,25 +295,6 @@ const WorkOrderSupervisor = () => {
 
   const filters = (
     <>
-      <Autocomplete
-        fullWidth
-        options={usersOption}
-        getOptionLabel={(option: any) => (option ? option.optionLabel : '')}
-        getOptionSelected={(option: any, val) => {
-          return option.optionValue === val.optionValue;
-        }}
-        value={
-          usersOption.filter((data) => data.optionValue === selectedUser).length
-            ? usersOption.filter((data) => data.optionValue === selectedUser)[0]
-            : ''
-        }
-        onChange={(e, val) => {
-          setSelectedUser(val && val.optionValue ? val.optionValue : '');
-        }}
-        renderInput={(params) => (
-          <TextField {...params} margin="none" size="small" name="user" placeholder="Technician" label="Technician" variant="outlined" fullWidth />
-        )}
-      />
       {viewType!==2 && 
       (
       <FormControl fullWidth size="small" margin="none" variant="outlined">
@@ -513,21 +487,6 @@ const WorkOrderSupervisor = () => {
           {viewType===2 && (
             <WorkOrderCalendar getFilterQuery = {getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />
           )}
-          {/* {
-            calendarView ?
-            (
-               <WorkOrderCalendar getFilterQuery = {getQueryString} filterResourceQuery={filterResourceQuery} ref={ref} />
-            )
-            : (
-          <CardColTimeline
-            fetchSingleColumn={fetchSingleColumn}
-            state={state}
-            dispatch={dispatch}
-            passFailStatus={true}
-            passFailAccessor="serviceStatus"
-          />
-            )
-          } */}
         </div>
         {assignTechnicianDialog && (
           <AssignUserDialog
