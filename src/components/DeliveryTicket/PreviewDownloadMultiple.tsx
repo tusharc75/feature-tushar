@@ -46,7 +46,8 @@ function PreviewDownloadMultiple({ referenceIds }) {
     let showColumns = JSON.stringify(visibleColumns?.map((e) => {
       return ({
         name: e?.fieldName,
-        width: e?.width
+        width: e?.width,
+        customLabel: e?.customLabel
       })
     }));
 
