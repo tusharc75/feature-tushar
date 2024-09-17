@@ -331,12 +331,18 @@ const FormTypes = (props) => {
 export default FormTypes;
 
 const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, rest, errors, enableCopy }) => {
-  const handlePaste = (e: ClipboardEvent<HTMLDivElement>) => {
+  const handlePaste = (e: ClipboardEvent<HTMLDivElement>): { name: string; value: any[] } => {
     const serializedData = e.clipboardData.getData('text');
     if (!serializedData) return;
     const value = JSON.parse(serializedData);
-    if (value.length === 0 || !Array.isArray(value)) return;
-    if (!value[0].optionLabel) return;
+    if (value.length === 0 || !Array.isArray(value.value)) {
+      e.preventDefault();
+      return;
+    }
+    if (!value?.value[0]?.optionLabel || value.name !== name) {
+      e.preventDefault();
+      return;
+    }
     e.preventDefault();
     return value;
   };
@@ -374,15 +380,16 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
             margin="dense"
             variant="outlined"
             onPaste={(e) => {
-              const data = handlePaste(e);
-              handleChange(name, data ? data : []);
+              const data: { name: string; value: any[] } = handlePaste(e);
+              if (!data) return;
+              handleChange(name, data ? data.value : []);
             }}
           />
         )}
       />
       {enableCopy && (
         <span className="">
-          <CopyToClipboardButton text={JSON.stringify(value)} size="small" />
+          <CopyToClipboardButton text={JSON.stringify({ name, value })} size="small" />
         </span>
       )}
     </div>
