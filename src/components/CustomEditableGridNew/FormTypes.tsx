@@ -129,7 +129,7 @@ const FormTypes = (props) => {
       )}
     />
   ) : fieldData?.type === 'multiSelect' ? (
-    <MultiSelect {...{ options, disabled, values, name, onChange, handleChange, rest, errors, enableCopy }} />
+    <MultiSelect {...{ options, disabled, values, name, onChange, handleChange, rest, errors, enableCopy, ...rest }} />
   ) : fieldData?.type === 'currencyAmount' ? (
     <TextField
       {...rest}
@@ -330,27 +330,40 @@ const FormTypes = (props) => {
 
 export default FormTypes;
 
-const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, rest, errors, enableCopy }) => {
-  const handlePaste = (e: ClipboardEvent<HTMLDivElement>): { name: string; value: any[] } => {
+const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, errors, enableCopy, ...rest }) => {
+  const handlePaste = (e: ClipboardEvent<HTMLDivElement>): any[] => {
     const serializedData = e.clipboardData.getData('text');
     if (!serializedData) return;
-    const value = JSON.parse(serializedData);
-    if (value.length === 0 || !Array.isArray(value.value)) {
+    let value: { name: string; value: any[] } | string = serializedData;
+    try {
+      value = JSON.parse(serializedData) as { name: string; value: any[] };
+    } catch (error) {}
+
+    if (typeof value === 'string' || !value) {
+      // Allow pasting of normal text.
+      return;
+    } else {
+      // else prevent any content from being pasted into the textbox.
       e.preventDefault();
+    }
+
+    // Prevent pasting if the field name does not match.
+    if (value?.name !== name) {
       return;
     }
-    if (!value?.value[0]?.optionLabel || value.name !== name) {
-      e.preventDefault();
-      return;
+    if (!Array.isArray(value?.value) || value?.value?.length === 0 || !value?.value[0]?.optionLabel) {
+      return [];
     }
     e.preventDefault();
-    return value;
+    return value.value;
   };
 
   const value =
     options.filter((data) => values[name]?.includes(data.optionValue))?.length > 0
       ? options.filter((data) => values[name]?.includes(data.optionValue))
       : [];
+
+  const dataToCopy = { name, value };
 
   return (
     <div className="flex items-center gap-2">
@@ -363,7 +376,7 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
         limitTags={1}
         value={value}
         getOptionLabel={(option: any) => option?.optionLabel || ''}
-        getOptionSelected={(option: any, val) => (option ? option?.optionValue == val?.optionValue : false)}
+        getOptionSelected={(option: any, val) => (option ? option?.optionValue === val?.optionValue : false)}
         onChange={
           onChange
             ? onChange
@@ -380,16 +393,16 @@ const MultiSelect = ({ options, disabled, values, name, onChange, handleChange, 
             margin="dense"
             variant="outlined"
             onPaste={(e) => {
-              const data: { name: string; value: any[] } = handlePaste(e);
+              const data = handlePaste(e);
               if (!data) return;
-              handleChange(name, data ? data.value : []);
+              handleChange(name, data);
             }}
           />
         )}
       />
       {enableCopy && (
         <span className="">
-          <CopyToClipboardButton text={JSON.stringify({ name, value })} size="small" />
+          <CopyToClipboardButton text={JSON.stringify(dataToCopy)} size="small" />
         </span>
       )}
     </div>
