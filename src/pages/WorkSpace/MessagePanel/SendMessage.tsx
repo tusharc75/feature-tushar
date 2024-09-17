@@ -19,7 +19,8 @@ type SendMessageProps = {
   initialMessage?: string;
   onEditComplete?: () => void;
   editorId?: string;
-  channelData: ChannelData;
+  channelData?: ChannelData;
+  disabled?: boolean;
 };
 
 const SendMessage = ({
@@ -29,7 +30,8 @@ const SendMessage = ({
   initialMessage = '',
   onEditComplete = () => {},
   editorId = '',
-  channelData
+  channelData,
+  disabled = false
 }: SendMessageProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [themeColor] = useAppTheme();
@@ -208,53 +210,55 @@ const SendMessage = ({
           </div>
         )}
 
-        <Editor
-          key={themeColor}
-          id={editorId ? editorId : 'default'}
-          onEditorChange={(d) => {
-            if (editorRef.current.isDirty()) {
-              setMessage(d);
-            }
-          }}
-          onKeyDown={handleKeyDown}
-          value={message ? message : '<span></span>'}
-          onInit={(_evt, editor) => {
-            editorRef.current = editor;
-            if (initialMessage) {
-              editor.setContent(initialMessage);
-            }
-          }}
-          initialValue=""
-          disabled={!channelId}
-          init={{
-            skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
-            content_css: themeColor === 'dark' ? 'dark' : 'default',
-            height: 100,
-            menubar: false,
-            paste_as_text: true,
-            plugins: [
-              'advlist',
-              'paste',
-              'autolink',
-              'lists',
-              'link',
-              'image',
-              'charmap',
-              'preview',
-              'anchor',
-              'searchreplace',
-              'visualblocks',
-              'fullscreen',
-              'insertdatetime',
-              'media',
-              'table',
-              'code',
-              'wordcount'
-            ],
-            toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
-            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
-          }}
-        />
+        <div className="editor" key={themeColor}>
+          <Editor
+            key={themeColor}
+            id={editorId ? editorId : 'default'}
+            onEditorChange={(d) => {
+              if (editorRef.current.isDirty()) {
+                setMessage(d);
+              }
+            }}
+            onKeyDown={handleKeyDown}
+            value={message ? message : '<span></span>'}
+            onInit={(_evt, editor) => {
+              editorRef.current = editor;
+              if (initialMessage) {
+                editor.setContent(initialMessage);
+              }
+            }}
+            initialValue=""
+            disabled={!channelId || disabled}
+            init={{
+              skin: themeColor === 'dark' ? 'oxide-dark' : 'oxide',
+              content_css: themeColor === 'dark' ? 'dark' : 'default',
+              height: 100,
+              menubar: false,
+              paste_as_text: true,
+              plugins: [
+                'advlist',
+                'paste',
+                'autolink',
+                'lists',
+                'link',
+                'image',
+                'charmap',
+                'preview',
+                'anchor',
+                'searchreplace',
+                'visualblocks',
+                'fullscreen',
+                'insertdatetime',
+                'media',
+                'table',
+                'code',
+                'wordcount'
+              ],
+              toolbar: `undo redo | blocks | bold italic link | bullist numlist| removeformat | help`,
+              content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:14px }'
+            }}
+          />
+        </div>
         <div className="footer flex justify-between gap-2 [border-top:1px_solid_var(--common-border-color)]">
           {!initialMessage ? (
             <>

@@ -20,10 +20,12 @@ import {
   getObjKeys,
   serializedAssetsCertification,
   setFieldsInAscendingOrder,
+  sidebarResource,
   yupSchema
 } from 'src/constants/helpers';
 import { useData } from 'src/StateProvider/Provider';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import InputField from 'src/components/Helpers/InputField';
 
 const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiryDate }) => {
 
@@ -31,7 +33,6 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const toastConfig = useContext(CustomToastContext);
   const [initialData, setInitialData] = useState<any>({ fields: [], values: {} });
-  const [uploadingImageOrFileProgress, setUploadingImageOrFileProgress] = useState(0);
   const [loading, setLoading] = useState(false);
   const [formsData, setFormsData] = useState([]);
 
@@ -129,51 +130,15 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
               />
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {formsData.length > 0 &&
-                    formsData.map((form, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content'}>
-                          <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                          <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {form.sectionFields.map((field, index2) => (
-                              <Grid key={index2} item xs={12} sm={6} md={6}>
-                                <FormTypes
-                                  {...field}
-                                  fieldData={field}
-                                  fields={initialData.fields}
-                                  values={values}
-                                  errors={errors}
-                                  touched={touched}
-                                  label={field.fieldLabel}
-                                  name={field.fieldName}
-                                  type={field.type}
-                                  options={field.option}
-                                  setFieldValue={(name, value) => {
-                                    setFieldValue(name, value);
-                                  }}
-                                  required={field.required}
-                                  fullWidth
-                                  isTooltip={field?.isTooltip || false}
-                                  tooltipMessage={field?.tooltipMessage}
-                                  size="small"
-                                  imageOrFileUploadCompletePercentage={
-                                    ['imageUpload', 'fileUpload', 'multiFileUpload'].some((s) => s === field.type)
-                                      ? (completePercentage) => {
-                                        setUploadingImageOrFileProgress(completePercentage);
-                                      }
-                                      : null
-                                  }
-                                  {...(certificateExpiryDate && field.fieldName === 'issueDate' ? { minDate: new Date(certificateExpiryDate) } : {})}
-                                />
-                              </Grid>
-                            ))}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
@@ -189,7 +154,7 @@ const IssueCertificateDialog = ({ onClose, onSuccess, assetId, certificateExpiry
                   Cancel
                 </Button>
                 <Button
-                  disabled={loading || uploadingImageOrFileProgress > 0}
+                  disabled={loading}
                   variant="contained"
                   color="primary"
                   type="submit"

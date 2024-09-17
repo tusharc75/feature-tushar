@@ -33,6 +33,7 @@ export const groupByDate = (messages: Message[]) => {
 
 const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, channelData }: MessagesProps) => {
   const [messages, setMessages] = useState<{ [key: string]: Message[] }>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [lastMessageId, setLastMessageId] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, _id: null });
@@ -46,6 +47,8 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
       let api = `/work-space/channel/message/${channelId}`;
       if (after) {
         api += `?after=${after}`;
+      } else {
+        setIsLoading(true);
       }
       const { data } = await axiosInstance().get(api);
 
@@ -68,6 +71,8 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
       if (data?.data?.length > 0) setLastMessageId(data.data[data.data.length - 1]?._id);
     } catch (error) {
       toastConfig.setToastConfig(error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -157,7 +162,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
   return (
     <>
       <div ref={containerRef} className={cn('messages-container my-2 flex-shrink flex-grow overflow-y-auto scroll-smooth')}>
-        {messages !== null ? (
+        {messages && !isLoading ? (
           <ul className="mt-8 list-none">
             {Object.keys(messages).map((date) => (
               <li key={date} className="mb- list-none">
@@ -195,7 +200,7 @@ const Messages = ({ channelId, socket, threadDialogOpen, setThreadDialogOpen, ch
           </div>
         )}
       </div>
-      <SendMessage channelId={channelId} socket={socket} channelData={channelData} />
+      <SendMessage channelId={channelId} socket={socket} channelData={channelData} disabled={isLoading} />
       <MoreMenuAndDeleteConfirmDialog
         anchorEl={anchorEl}
         handleMenuClose={handleMenuClose}
@@ -320,6 +325,8 @@ export const DisplaySingleMessage = ({
     }
   };
 
+  const isSelf = user?._id === message?.user?.optionValue;
+
   return (
     <>
       <li
@@ -330,18 +337,16 @@ export const DisplaySingleMessage = ({
         )}
         onMouseLeave={closeEmojiPanel}
       >
-        <div className="flex gap-2">
-          <Avatar
-            style={{ width: 36, height: 36, borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)' }}
-            variant="rounded"
-            className="mt-[3px]"
-            src={message.avatar}
-          >
+        <div className={cn('flex gap-2', isSelf ? ' flex-row-reverse justify-start' : '')}>
+          <Avatar style={{ width: 28, height: 28, borderRadius: 999, fontSize: 13 }} variant="rounded" className="" src={message.avatar}>
             {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
           </Avatar>
           <div className="flex-grow">
-            <div className="flex items-end gap-2">
-              <p className="user text-[15px] font-bold">{message.user?.optionLabel}</p>
+            <div className={cn('flex items-end gap-2 pb-[6px]', isSelf ? 'ml-auto w-fit' : '')}>
+              <h6 className="user text-[14px] font-medium">
+                {message.user?.optionLabel}
+                {isSelf ? ' (you)' : ''}
+              </h6>
               <span className="text-[12px] font-normal ">{messageTimeFormatter(message.date)}</span>
             </div>
             {editingMessage?._id === message._id ? (
@@ -357,124 +362,133 @@ export const DisplaySingleMessage = ({
               <>
                 <div>
                   <span
-                    className="message [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] [&_span:last-child]:text-gray-400"
+                    className={cn(
+                      `message block w-fit max-w-[70%] rounded-lg px-[20px]  py-[9px] md:max-w-[60%]  
+                        [&_*:nth-last-child(2)]:inline [&_*]:max-w-fit [&_span:last-child]:ml-1 [&_span:last-child]:text-[12px] 
+                       [&_span:last-child]:text-gray-400`,
+                      isSelf
+                        ? 'ml-auto bg-[#0DA0A840] text-[#777575] dark:bg-[#0DA0A840] dark:text-[white]'
+                        : 'bg-[#F4F4F4] text-[#777575] dark:bg-[hsla(0deg,0%,37.27%,0.5)] dark:text-white'
+                    )}
                     dangerouslySetInnerHTML={{
                       __html: `${message.message} <span className=''>${message?.lastModified ? '(edited)' : ''}</span>`
                     }}
                   ></span>
-                  {groupedReactions?.length > 0 && (
-                    <div className="reactions mt-2 flex gap-1">
-                      {groupedReactions?.map((reaction, index) => (
-                        <Tooltip
-                          key={index}
-                          title={
-                            <div className="p-1">
-                              <p>
-                                {reaction.users
-                                  .map((u) => {
-                                    if (u.optionValue === user?._id) return 'You';
-                                    else return u.optionLabel;
-                                  })
-                                  .join(', ')}{' '}
-                                reacted with {reaction.emoji}
-                              </p>
-                            </div>
-                          }
-                        >
-                          <div className="reaction flex items-center gap-1 rounded-md bg-gray-200 p-1">
-                            <span
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleReactionClick(reaction);
-                              }}
-                            >
-                              {reaction.emoji}
-                            </span>
-                            <span>{reaction.count}</span>
-                          </div>
-                        </Tooltip>
-                      ))}
-                    </div>
-                  )}
-                  {message?.attachments?.length > 0 && (
-                    <div className="flex flex-wrap gap-2 py-3">
-                      {message?.attachments?.map((attachment) => {
-                        const Icon = getFileIconSrc(attachment?.url);
-                        return (
-                          <>
-                            <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
-                              <div className="front  group-hover:hidden">
-                                <div className="mx-auto mb-[11px] h-[79px] text-center">
-                                  <Icon size={50} className="mx-auto" />
-                                </div>
-                                <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">{attachment?.fileName}</p>
-                              </div>
-                              <div className="back absolute inset-0 flex flex-col justify-between p-[var(--gutter)] opacity-0 group-hover:opacity-100">
-                                <p className=" line-clamp-4 text-[14px] text-[var(--text-primary)]" title={attachment?.fileName}>
-                                  {attachment?.fileName}
+                  <div className={cn('max-w-fit', isSelf ? 'ml-auto text-right' : '')}>
+                    {groupedReactions?.length > 0 && (
+                      <div className={cn('reactions mt-2 flex gap-1', isSelf ? ' justify-end' : '')}>
+                        {groupedReactions?.map((reaction, index) => (
+                          <Tooltip
+                            key={index}
+                            title={
+                              <div className="p-1">
+                                <p>
+                                  {reaction.users
+                                    .map((u) => {
+                                      if (u.optionValue === user?._id) return 'You';
+                                      else return u.optionLabel;
+                                    })
+                                    .join(', ')}{' '}
+                                  reacted with {reaction.emoji}
                                 </p>
-                                <div className="flex justify-between">
-                                  <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
-                                    <IconButton
-                                      size={'small'}
-                                      onClick={() => downloadFile(attachment.url)}
-                                      style={{ paddingBottom: 3, width: 30, height: 30 }}
-                                    >
-                                      {<GetApp />}
-                                    </IconButton>
-                                  </HtmlTooltip>
-                                  {message?.user?.optionValue === user?._id && (
-                                    <HtmlTooltip title="Delete Attachment" placement="top" enterTouchDelay={0}>
+                              </div>
+                            }
+                          >
+                            <div className="reaction flex items-center gap-1 rounded-md bg-gray-200 p-1 dark:bg-gray-700">
+                              <span
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleReactionClick(reaction);
+                                }}
+                              >
+                                {reaction.emoji}
+                              </span>
+                              <span>{reaction.count}</span>
+                            </div>
+                          </Tooltip>
+                        ))}
+                      </div>
+                    )}
+                    {message?.attachments?.length > 0 && (
+                      <div className="flex flex-wrap gap-2 py-3">
+                        {message?.attachments?.map((attachment) => {
+                          const Icon = getFileIconSrc(attachment?.url);
+                          return (
+                            <>
+                              <div className="group relative min-h-[153px] w-[138px] max-w-[138px] flex-grow basis-[138px] rounded-[4px] border border-[var(--common-border-color)] p-[var(--gutter)] [--gutter:18px]">
+                                <div className="front  group-hover:hidden">
+                                  <div className="mx-auto mb-[11px] h-[79px] text-center">
+                                    <Icon size={50} className="mx-auto" />
+                                  </div>
+                                  <p className=" line-clamp-1 text-[14px] text-[var(--text-primary)]">{attachment?.fileName}</p>
+                                </div>
+                                <div className="back absolute inset-0 flex flex-col justify-between p-[var(--gutter)] opacity-0 group-hover:opacity-100">
+                                  <p className=" line-clamp-4 text-[14px] text-[var(--text-primary)]" title={attachment?.fileName}>
+                                    {attachment?.fileName}
+                                  </p>
+                                  <div className="flex justify-between">
+                                    <HtmlTooltip title="Download" placement="top" enterTouchDelay={0}>
                                       <IconButton
                                         size={'small'}
-                                        onClick={() => {
-                                          setAttachmentConfirmBox({ open: true, messageId: message?._id, attachmentId: attachment?._id });
-                                        }}
+                                        onClick={() => downloadFile(attachment.url)}
                                         style={{ paddingBottom: 3, width: 30, height: 30 }}
                                       >
-                                        {<Delete color="error" />}
+                                        {<GetApp />}
                                       </IconButton>
                                     </HtmlTooltip>
-                                  )}
+                                    {message?.user?.optionValue === user?._id && (
+                                      <HtmlTooltip title="Delete Attachment" placement="top" enterTouchDelay={0}>
+                                        <IconButton
+                                          size={'small'}
+                                          onClick={() => {
+                                            setAttachmentConfirmBox({ open: true, messageId: message?._id, attachmentId: attachment?._id });
+                                          }}
+                                          style={{ paddingBottom: 3, width: 30, height: 30 }}
+                                        >
+                                          {<Delete color="error" />}
+                                        </IconButton>
+                                      </HtmlTooltip>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          </>
-                        );
-                      })}
-                    </div>
-                  )}
-                  {replies.length > 0 && setThreadDialogOpen && (
-                    <div
-                      onClick={() => setThreadDialogOpen({ open: true, message })}
-                      className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1 transition-all duration-200 [outline:1px_solid_transparent] hover:shadow-md hover:[outline:1px_solid_var(--common-border-color)]"
-                    >
-                      {uniqueReplies.map((reply, index) => {
-                        if (index > 3) return null;
-                        return (
-                          <Avatar
-                            style={{
-                              width: 24,
-                              height: 24,
-                              fontSize: '0.8rem',
-                              borderRadius: 'clamp(6px, min(22.222%, 12px), 12px)'
-                            }}
-                            variant="rounded"
-                            src={reply.avatar}
-                          >
-                            {reply.user?.optionLabel.match(/(\b\S)?/g).join('')}
-                          </Avatar>
-                        );
-                      })}
-                      <span className="link ml-1 line-clamp-1">{message.replies.length} replies</span>
-                      <div className="relative ml-1 text-[13px] font-normal">
-                        <span className="absolute line-clamp-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">View Thread</span>
-                        <span className="line-clamp-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0">
-                          Last reply {formatDateWithTodayYestarday(replies[replies.length - 1].date)}
-                        </span>
+                            </>
+                          );
+                        })}
                       </div>
-                    </div>
-                  )}
+                    )}
+                    {replies.length > 0 && setThreadDialogOpen && (
+                      <div
+                        onClick={() => setThreadDialogOpen({ open: true, message })}
+                        className="group flex cursor-pointer items-center gap-1 rounded-md bg-[var(--dark-primary,white)] p-1 transition-all duration-200 [outline:1px_solid_transparent] hover:shadow-md hover:[outline:1px_solid_var(--common-border-color)]"
+                      >
+                        {uniqueReplies.map((reply, index) => {
+                          if (index > 3) return null;
+                          return (
+                            <Avatar
+                              style={{
+                                width: 24,
+                                height: 24,
+                                fontSize: 10,
+                                borderRadius: 999
+                              }}
+                              variant="rounded"
+                              src={reply.avatar}
+                            >
+                              {reply.user?.optionLabel.match(/(\b\S)?/g).join('')}
+                            </Avatar>
+                          );
+                        })}
+                        <span className="link ml-1 line-clamp-1">{message.replies.length} replies</span>
+                        <div className="relative ml-1 text-[13px] font-normal">
+                          <span className="absolute line-clamp-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100">View Thread</span>
+                          <span className="line-clamp-1 opacity-100 transition-opacity duration-200 group-hover:opacity-0">
+                            Last reply {formatDateWithTodayYestarday(replies[replies.length - 1].date)}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div

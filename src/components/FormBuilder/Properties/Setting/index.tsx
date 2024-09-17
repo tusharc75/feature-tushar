@@ -372,9 +372,31 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
           <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
-    <Box>
-      <Grid container>
-        <Grid item xs={12} md={6}>
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
+            {values['isSystemGenerate'] && (
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    name="systemGeneratedAutoIncrement"
+                    checked={values['systemGeneratedAutoIncrement']}
+                    onChange={(e) => {
+                      setFieldValue('systemGeneratedAutoIncrement', e.target.checked);
+                    }}
+                    color="primary"
+                  />
+                }
+                label="System Generated Auto Increment"
+              />
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+        <Grid container>
+          <Grid item xs={12} md={6}>
             {values['isSystemGenerate'] && (
               <Box display="block">
                 <TextField
@@ -399,8 +421,8 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         </Grid>
       </Box>
       <Box>
-      <Grid container>
-        <Grid item xs={12} md={6}>
+        <Grid container>
+          <Grid item xs={12} md={6}>
             {values['isSystemGenerate'] && (
               <Box display="block">
                 <TextField
@@ -425,8 +447,8 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
         </Grid>
       </Box>
       <Box>
-      <Grid container>
-        <Grid item xs={12} md={6}>
+        <Grid container>
+          <Grid item xs={12} md={6}>
             {values['isSystemGenerate'] && (
               <Box display="block">
                 <TextField
@@ -445,28 +467,6 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
                   }}
                 />
               </Box>
-            )}
-          </Grid>
-          <Grid item xs={12} md={6}></Grid>
-        </Grid>
-      </Box>
-      <Box>
-        <Grid container>
-          <Grid item xs={12} md={6}>
-            {values['isSystemGenerate'] && (
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    name="systemGeneratedAutoIncrement"
-                    checked={values['systemGeneratedAutoIncrement']}
-                    onChange={(e) => {
-                      setFieldValue('systemGeneratedAutoIncrement', e.target.checked);
-                    }}
-                    color="primary"
-                  />
-                }
-                label="System Generated Auto Increment"
-              />
             )}
           </Grid>
           <Grid item xs={12} md={6}></Grid>
