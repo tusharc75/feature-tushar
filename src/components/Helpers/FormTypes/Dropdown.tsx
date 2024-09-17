@@ -321,6 +321,47 @@ function Dropdown({
   const fieldDependentOn = fieldData?.lookupDependentOn ? fields?.find((d) => d.fieldName === fieldData?.lookupDependentOn) : null;
   const isDisabled = fieldData?.lookupDependentOn && fieldData?.lookupDependentOn !== '' && fieldDependentOn && !!!values[fieldDependentOn.fieldName];
 
+  const handleLookUpDependent = (name, val, fields, setFieldValue) => {
+    const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
+    if (filterFields?.length) {
+      filterFields?.forEach((ele: any) => {
+        if (ele?.type === 'dropDown' && ele?.lookupDependentOnField && val && val[ele?.lookupDependentOnField]) {
+          if (Array.isArray(val[ele?.lookupDependentOnField])) {
+            const isValidId = isValidObjectId(val[ele?.lookupDependentOnField][0]);
+            if (val[ele?.lookupDependentOnField]?.length === 1 && isValidId) {
+              setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
+            } else {
+              setFieldValue(ele?.fieldName, '');
+            }
+          } else {
+            const isValidId = isValidObjectId(val[ele?.lookupDependentOnField]);
+            if (isValidId) {
+              setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
+            } else {
+              setFieldValue(ele?.fieldName, '');
+            }
+          }
+          handleLookUpDependent(ele?.fieldName, val, fields, setFieldValue);
+        } else if (ele?.type === 'dropDown' && ele?.lookupDependentOnField === '' && val && val?.optionValue) {
+          const filterFieldDropDownOptions = ele?.option?.filter((o: any) => {
+            if (o?.hasOwnProperty(ele?.lookupDependentOn)) {
+              if (Array.isArray(o[ele?.lookupDependentOn])) {
+                return o[ele?.lookupDependentOn]?.includes(val?.optionValue);
+              } else {
+                return o[ele?.lookupDependentOn] === val?.optionValue;
+              }
+            }
+            return false;
+          });
+          if (filterFieldDropDownOptions?.length === 1) {
+            setFieldValue(ele?.fieldName, filterFieldDropDownOptions[0]?.optionValue);
+            handleLookUpDependent(ele?.fieldName, filterFieldDropDownOptions[0], fields, setFieldValue);
+          }
+        }
+      });
+    }
+  };
+
   return (
     <Box key={fieldData?.lookupResource}>
       <Grid container spacing={1} style={{ flexWrap: 'nowrap' }}>
@@ -422,42 +463,7 @@ function Dropdown({
                             fieldChange?.forEach((val: any) => {
                               setFieldValue(val.fieldName, val.value);
                             });
-                            const filterFields: any = fields.filter((d) => d.lookupDependentOn === name);
-                            if (filterFields?.length) {
-                              filterFields?.forEach((ele: any) => {
-                                if (ele?.type === 'dropDown' && ele?.lookupDependentOnField && val && val[ele?.lookupDependentOnField]) {
-                                  if (Array.isArray(val[ele?.lookupDependentOnField])) {
-                                    const isValidId = isValidObjectId(val[ele?.lookupDependentOnField][0]);
-                                    if (val[ele?.lookupDependentOnField]?.length === 1 && isValidId) {
-                                      setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField][0]);
-                                    } else {
-                                      setFieldValue(ele?.fieldName, '');
-                                    }
-                                  } else {
-                                    const isValidId = isValidObjectId(val[ele?.lookupDependentOnField]);
-                                    if (isValidId) {
-                                      setFieldValue(ele?.fieldName, val[ele?.lookupDependentOnField]);
-                                    } else {
-                                      setFieldValue(ele?.fieldName, '');
-                                    }
-                                  }
-                                } else if (ele?.type === 'dropDown' && ele?.lookupDependentOnField === '' && val && val?.optionValue) {
-                                  const filterFieldDropDownOptions = ele?.option?.filter((o: any) => {
-                                    if (o?.hasOwnProperty(ele?.lookupDependentOn)) {
-                                      if (Array.isArray(o[ele?.lookupDependentOn])) {
-                                        return o[ele?.lookupDependentOn]?.includes(val?.optionValue);
-                                      } else {
-                                        return o[ele?.lookupDependentOn] === val?.optionValue;
-                                      }
-                                    }
-                                    return false;
-                                  });
-                                  if (filterFieldDropDownOptions?.length === 1) {
-                                    setFieldValue(ele?.fieldName, filterFieldDropDownOptions[0]?.optionValue);
-                                  }
-                                }
-                              });
-                            }
+                            handleLookUpDependent(name, val, fields, setFieldValue);
                           }
                         }
                   }

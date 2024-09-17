@@ -369,7 +369,12 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               />
             )}
           </Grid>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+    <Box>
+      <Grid container>
+        <Grid item xs={12} md={6}>
             {values['isSystemGenerate'] && (
               <Box display="block">
                 <TextField
@@ -390,6 +395,59 @@ const Setting = ({ initialValues, values, setFieldValue, fields, fieldData, sect
               </Box>
             )}
           </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+      <Grid container>
+        <Grid item xs={12} md={6}>
+            {values['isSystemGenerate'] && (
+              <Box display="block">
+                <TextField
+                  variant="outlined"
+                  type="number"
+                  label="System Generated Prefix Digit"
+                  name="systemGeneratedPrefixDigit"
+                  rows={4}
+                  fullWidth
+                  margin="dense"
+                  value={values['systemGeneratedPrefixDigit']}
+                  error={touched['systemGeneratedPrefixDigit'] && Boolean(errors['systemGeneratedPrefixDigit'])}
+                  helperText={touched['systemGeneratedPrefixDigit'] && errors['systemGeneratedPrefixDigit']}
+                  onChange={(e) => {
+                    setFieldValue('systemGeneratedPrefixDigit', Number(e.target.value));
+                  }}
+                />
+              </Box>
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
+        </Grid>
+      </Box>
+      <Box>
+      <Grid container>
+        <Grid item xs={12} md={6}>
+            {values['isSystemGenerate'] && (
+              <Box display="block">
+                <TextField
+                  variant="outlined"
+                  type="number"
+                  label="System Generated Start Number"
+                  name="systemGeneratedStartNumber"
+                  rows={4}
+                  fullWidth
+                  margin="dense"
+                  value={values['systemGeneratedStartNumber']}
+                  error={touched['systemGeneratedStartNumber'] && Boolean(errors['systemGeneratedStartNumber'])}
+                  helperText={touched['systemGeneratedStartNumber'] && errors['systemGeneratedStartNumber']}
+                  onChange={(e) => {
+                    setFieldValue('systemGeneratedStartNumber', Number(e.target.value));
+                  }}
+                />
+              </Box>
+            )}
+          </Grid>
+          <Grid item xs={12} md={6}></Grid>
         </Grid>
       </Box>
       <Box>
