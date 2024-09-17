@@ -644,7 +644,7 @@ const WorkOrder = ({
         parent?.subRows?.length === 0 &&
         parent?.workOrder &&
         permissions?.workOrder?.isDelete &&
-        checkIsAllowedToDelete(user, sidebarResource.workOrder, parent?.owner) &&
+        checkIsAllowedToDelete(user, sidebarResource.workOrder, parent?.workOrder?.owner) &&
         ![WORK_ORDER_STATUS.completed, WORK_ORDER_STATUS.onHold]?.includes(parent.workOrderStatus)
       ) {
         parent.canDelete = true;

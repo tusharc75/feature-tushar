@@ -63,6 +63,7 @@ const Leads = () => {
   const [showTransferEntityDialog, setShowTransferEntityDialog] = useState(false);
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
+  const [allFields, setAllFields] = useState(null);
   const [convertLeadToOpportunityConfirmationDialog, setConvertLeadToOpportunityConfirmationDialog] = useState({
     open: false,
     id: null,
@@ -85,6 +86,16 @@ const Leads = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=${sidebarResource.lead}&view=true`);
     data = response?.data?.data;
+    setAllFields(JSON.parse(JSON.stringify(data)));
+  };
+
+  useEffect(() => {
+    if (allFields?.length) {
+      createColumns(allFields);
+    }
+  }, [allFields]);
+
+  const createColumns = (data) => {
     let newColumns = generateColumns(lead.leadResource, data, routes.leadDetail.path, true);
     newColumns = [
       ...newColumns,
@@ -262,7 +273,11 @@ const Leads = () => {
       dontHavePermissions.push('Opportunity');
     }
 
-    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() === 'qualified';
+    const lastStepText =
+      allFields?.find((f) => f?.isRead && f?.fieldData?.fieldName?.toLowerCase() === processFieldName.toLowerCase())?.fieldData?.option?.at(-1)
+        ?.optionLabel || '';
+
+    const isCurrentLeadStatusQualified = leadProcess && leadProcess.toLowerCase() === lastStepText?.toLowerCase();
 
     return dontHavePermissions.length > 0 ? (
       <>
@@ -521,8 +536,9 @@ const Leads = () => {
         {isConfirmDialogVisible ? (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
-              }?`}
+            message={`Are you sure you want to delete the ${routes?.lead?.title?.toLowerCase()} ${
+              deleteRecord?.concatedName ? deleteRecord?.concatedName : ''
+            }?`}
             onClose={() => {
               setDeleteRecord(null);
               setIsConformDialogVisible(false);

@@ -34,7 +34,7 @@ export const ViewDialog = ({ columns, resource, handleSucess, handleClose, viewD
     const data = {
       name: values?.name,
       access: values?.access,
-      columns: columns?.map((c: any) => ({ name: c.fieldName, width: c.width })) || [],
+      columns: columns?.map((c: any) => ({ name: c.fieldName, width: c.width, customLabel: c.customLabel })) || [],
       ...(sortBy && orderBy ? { sortBy: sortBy?.fieldName, orderBy } : { sortBy: '', orderBy: '' })
     };
 

@@ -53,6 +53,14 @@ export default function ArrangeView({ columns, setColumns }) {
     );
   };
 
+  const setColumnLabel = (id, label) => {
+    setColumn(
+      column.map((c) => {
+        return c.id === id ? { ...c, customLabel: label } : c;
+      })
+    );
+  };
+
   const onDragStart = (event: DragStartEvent) => {
     if (!event?.active) return;
     setActiveItem(event.active.data.current?.props);
@@ -62,7 +70,7 @@ export default function ArrangeView({ columns, setColumns }) {
     setSubmitting(true);
     setColumns(
       column.map((e) => {
-        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel, width: e.width };
+        return { fieldName: e.fieldName, fieldLabel: e.fieldLabel, width: e.width, customLabel: e?.customLabel };
       })
     );
     setSubmitting(false);
@@ -95,7 +103,7 @@ export default function ArrangeView({ columns, setColumns }) {
           TransitionComponent={CustomDialogTransition}
           open
           onClose={onClose}
-          maxWidth="sm"
+          maxWidth="md"
           fullWidth
           fullScreen={fullScreen || isMobile || isTablet}
         >
@@ -114,7 +122,7 @@ export default function ArrangeView({ columns, setColumns }) {
               <div className="sticky -top-2 z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
                 <p className=" flex select-none items-center gap-1 text-[12px] font-semibold text-gray-500">
                   <Info fontSize="small" />
-                  Drag and drop to arrange, or enter the width as a percentage.
+                  Drag and drop to arrange, enter the width as a percentage, custom label for change table header.
                 </p>
               </div>
               <SortableContext items={column?.map((c) => c.id) || []}>
@@ -128,6 +136,10 @@ export default function ArrangeView({ columns, setColumns }) {
                       width={col.width}
                       setWidth={(w) => {
                         setColumnWidth(col.id, w);
+                      }}
+                      customLabel={col?.customLabel}
+                      setCustomLabel={(l) => {
+                        setColumnLabel(col.id, l);
                       }}
                     />
                   ))}
@@ -158,9 +170,11 @@ interface ItemProps {
   index: number;
   width: string;
   setWidth: (width: string) => void;
+  customLabel: string;
+  setCustomLabel: (label: string) => void;
 }
 
-const RenderListItem = ({ index, id, fieldLabel, width, setWidth }: ItemProps) => {
+const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, setCustomLabel }: ItemProps) => {
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id,
     data: {
@@ -178,35 +192,49 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth }: ItemProps) =
     <li
       style={style}
       ref={setNodeRef}
-      className={`${
-        isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
-      } list-none transition-colors`}
+      className={`${isDragging ? ' bg-[var(--dark-secondary,theme("colors.blue.200"))] ' : 'bg-[var(--dark-secondary,#fff)]'
+        } list-none transition-colors`}
     >
       <div
         key={id}
-        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${
-          index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
-        } `}
+        className={`flex items-center p-[8px_17px_8px_0] [border-bottom:1px_solid_var(--common-border-color)] ${index === 0 ? '[border-top:1px_solid_var(--common-border-color)]' : ''
+          } `}
       >
         <ListItemIcon {...attributes} {...listeners} className="drag-handle !cursor-grab">
           <DragIndicator />
         </ListItemIcon>
         <ListItemText primary={fieldLabel} />
-        <Box width={'150px'}>
-          <TextField
-            variant="outlined"
-            margin="none"
-            size="small"
-            fullWidth
-            value={width}
-            onChange={(e) => {
-              setWidth(e?.target?.value);
-            }}
-            InputProps={{
-              endAdornment: '%',
-            }}
-          />
-        </Box>
+        <div className='flex items-center'>
+          <div className='max-w-[200px] mr-4'>
+            <TextField
+              variant="outlined"
+              margin="none"
+              size="small"
+              fullWidth
+              value={width}
+              onChange={(e) => {
+                setWidth(e?.target?.value);
+              }}
+              InputProps={{
+                endAdornment: '%',
+              }}
+              placeholder="Width"
+            />
+          </div>
+          <div className='max-w-[200px]'>
+            <TextField
+              variant="outlined"
+              margin="none"
+              size="small"
+              placeholder="Custom Label"
+              fullWidth
+              value={customLabel}
+              onChange={(e) => {
+                setCustomLabel(e?.target?.value);
+              }}
+            />
+          </div>
+        </div>
       </div>
     </li>
   );
