@@ -90,8 +90,8 @@ const LeadDetailsPage = () => {
       if (processSteps && processSteps.isRead && leadData) {
         const currentStepToShow = processSteps.fieldData.option.findIndex((d) => d.optionLabel === leadData[processFieldName]);
         setActiveStep(currentStepToShow);
-    
-        if(currentStepToShow+1 >= steps.length - 1){
+
+        if (currentStepToShow + 1 >= steps.length - 1) {
           const isAtLastStep = currentStepToShow === steps.length - 1;
           setShowAtLast(isAtLastStep);
           let dontHavePermissions = [];
@@ -106,10 +106,10 @@ const LeadDetailsPage = () => {
           }
           setHasPermissionToConvertToOpportunity(
             dontHavePermissions.length === 0 &&
-            user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
-            allowedToEdit &&
-            leadData[processFieldName] &&
-             currentStepToShow+1>=steps.length-1
+              user?.role?.selectedEntity?.policy?.isConvertLeadToOpportunity &&
+              allowedToEdit &&
+              leadData[processFieldName] &&
+              currentStepToShow + 1 >= steps.length - 1
           );
         } else {
           setShowAtLast(false);
@@ -129,7 +129,7 @@ const LeadDetailsPage = () => {
       .get(`${leadApi}/${id}?entity=${selectedEntity}`)
       .then(({ data: { data } }) => {
         const isAllowedToUpdate = permissions?.lead?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.lead, data);
-       
+
         setIsLeadAlreadyConvertedToOpportunity(
           data.staticData && data.staticData['convertedToOpportunity'] ? data.staticData['convertedToOpportunity'] : false
         );
@@ -247,9 +247,9 @@ const LeadDetailsPage = () => {
           leadName: null,
           message: null
         });
-        if(activeStep!==steps.length-1){
-        setActiveStep(steps.length-1);
-        handleMarkAsCompleted();
+        if (activeStep !== steps.length - 1) {
+          setActiveStep(steps.length - 1);
+          handleMarkAsCompleted();
         }
         history.push(`${routes.opportunityDetail.path}/${data.data[0]}`);
       })
@@ -294,7 +294,8 @@ const LeadDetailsPage = () => {
 
   const handleMarkAsCompleted = (data = null) => {
     setShowAtLast(false);
-    let tempActiveStep = data && data?.isSetBackStep ? activeStep - 1 : activeStep < steps.length - 1 ? activeStep + 1 : activeStep;
+    const currentStep = activeStep + 1;
+    let tempActiveStep = data && data?.isSetBackStep ? currentStep - 1 : currentStep < steps.length - 1 ? currentStep + 1 : currentStep;
     if (tempActiveStep == steps.length - 1 && showAdditionalField) {
       setOpenAdditionalDialog(true);
     } else {
