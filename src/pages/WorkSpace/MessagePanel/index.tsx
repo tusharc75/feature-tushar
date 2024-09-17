@@ -105,7 +105,7 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                 >
                   <IconButton
                     size={'small'}
-                    style={{ border: '1px solid var(--common-border-color)', borderRadius: 8, padding: '2px 5px', minHeight: 45, minWidth: 55 }}
+                    style={{ border: '', borderRadius: 8, padding: '0px', minHeight: 41, minWidth: 55 }}
                     onClick={() => setIsMemberDialogOpen(true)}
                   >
                     <span className="flex flex-row-reverse">
