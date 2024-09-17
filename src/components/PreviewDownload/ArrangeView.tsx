@@ -122,7 +122,7 @@ export default function ArrangeView({ columns, setColumns }) {
               <div className="sticky -top-2 z-10 flex flex-wrap bg-[var(--dark-primary,white)] pb-4 pt-2">
                 <p className=" flex select-none items-center gap-1 text-[12px] font-semibold text-gray-500">
                   <Info fontSize="small" />
-                  Drag and drop to arrange, or enter the width as a percentage.
+                  Drag and drop to arrange, enter the width as a percentage, custom label for change table header.
                 </p>
               </div>
               <SortableContext items={column?.map((c) => c.id) || []}>
@@ -218,6 +218,7 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
               InputProps={{
                 endAdornment: '%',
               }}
+              placeholder="Width"
             />
           </div>
           <div className='max-w-[200px]'>
@@ -225,7 +226,7 @@ const RenderListItem = ({ index, id, fieldLabel, width, setWidth, customLabel, s
               variant="outlined"
               margin="none"
               size="small"
-              label="Custom Label"
+              placeholder="Custom Label"
               fullWidth
               value={customLabel}
               onChange={(e) => {

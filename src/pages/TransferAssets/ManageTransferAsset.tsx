@@ -65,7 +65,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
   const [cloneHeading, setCloneHeading] = useState('');
 
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-  const [createDateMin, setCreateDateMin] = useState(new Date());
+  const [createDateMin, setCreateDateMin] = useState(null);
 
   useEffect(() => {
     axiosInstance()
@@ -264,7 +264,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
         errors['transfertoPlant'] = 'Transfer from and to plant can not be same';
       }
     }
-    if (allFields?.find((e) => e?.fieldName === 'createDate')) {
+    if (createDateMin && allFields?.find((e) => e?.fieldName === 'createDate')) {
       if (!moment(values['createDate']).isSameOrAfter(moment(createDateMin))) {
         errors['createDate'] = `Please select valid date`;
       }
@@ -542,7 +542,7 @@ const ManageTransferAsset: FC<Props> = (props) => {
                                     isTooltip={field?.isTooltip || false}
                                     tooltipMessage={field?.tooltipMessage}
                                     size="small"
-                                    minDate={createDateMin}
+                                    {...(createDateMin ? { minDate: createDateMin } : {})}
                                   />
                                 </Grid>
                               ) : (
