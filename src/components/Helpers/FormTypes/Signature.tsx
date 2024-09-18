@@ -19,11 +19,27 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
   const [cameraPermission, setCameraPermission] = useState('prompt');
 
   useEffect(() => {
-    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-      setCameraPermission('granted');
-    }).catch((err) => {
-      setCameraPermission('denied');
-    });
+    const checkPermission = async () => {
+      try {
+        // eslint-disable-next-line 
+        const permissionStatus = await navigator.permissions.query({ name: 'camera' });
+        if (permissionStatus.state === 'granted') {
+          setCameraPermission('granted');
+        } else if (permissionStatus.state === 'prompt') {
+          const result = await navigator.mediaDevices.getUserMedia({ video: true });
+          if (result) {
+            setCameraPermission('granted');
+          } else {
+            setCameraPermission('denied');
+          }
+        } else {
+          setCameraPermission('denied');
+        }
+      } catch (error) {
+        setCameraPermission('denied');
+      }
+    };
+    checkPermission();
   }, []);
 
   useEffect(() => {
@@ -46,7 +62,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
   return (
     <div>
       {cameraPermission === 'denied' ? (
-        <Box p={2} style={{ height: 400, width: 400 }}>
+        <Box p={2} style={{ height: 400, width: 500 }}>
           <p>Please allow camera permissions to use this feature.</p>
         </Box>
       ) : <>
@@ -71,6 +87,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             <Webcam
               audio={false}
               height={400}
+              width={500}
               ref={webcamRef}
               minScreenshotWidth={500}
               screenshotFormat="image/jpeg"
