@@ -4,8 +4,10 @@ import { VscLayoutSidebarLeft } from 'react-icons/vsc';
 import { Socket } from 'socket.io-client';
 import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
+import { useAppTheme } from 'src/constants/AppConfig';
 import { cn } from 'src/constants/helpers';
 import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
+import { getAvatarColor } from 'src/pages/WorkSpace/MessagePanel/utils';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
 import { ChannelData, Message, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
@@ -19,17 +21,18 @@ type MessagePanelProps = {
   socket: Socket;
 };
 
-const avaterPette = ['!bg-[#eeba6c] !dark:bg-[#a17e49]', '!bg-[#3772ff] !dark:bg-[#264fb2]', '!bg-[#0ed290] dark:!bg-[#08855b]'];
+// const avaterPette = ['!bg-[#eeba6c] !dark:bg-[#a17e49]', '!bg-[#3772ff] !dark:bg-[#264fb2]', '!bg-[#0ed290] dark:!bg-[#08855b]'];
 
-const getAavaterColor = (index: number = 0) => {
-  return avaterPette[index % avaterPette.length];
-};
+// const getAavaterColor = (index: number = 0) => {
+//   return avaterPette[index % avaterPette.length];
+// };
 
 const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSidebar, isSidebarCollapsed, socket }: MessagePanelProps) => {
   const toastConfig = useContext(CustomToastContext);
   const [channelData, setChannelData] = useState<ChannelData>(null);
   const [isMemberDialogOpen, setIsMemberDialogOpen] = useState(false);
   const [threadDialogOpen, setThreadDialogOpen] = useState<{ open: boolean; message: Message }>({ open: false, message: null });
+  const [themeColor] = useAppTheme();
 
   const fetchChannelData = useCallback(async () => {
     try {
@@ -106,10 +109,11 @@ const MessagePanel = ({ selectedChannel, mobScreen, setSelectedChannel, toggleSi
                                 fontSize: 11,
                                 marginRight: i !== 0 ? '-10px' : '5px',
                                 outline: '1px solid var(--common-border-color)',
-                                color: 'white'
+                                color: 'white',
+                                ...getAvatarColor(d?.optionLabel || '', themeColor)
                               }}
                               variant="rounded"
-                              className={cn('my-[2px]', getAavaterColor(i))}
+                              className={cn('my-[2px] uppercase')}
                               src={d.avatar}
                             >
                               {d?.optionLabel.match(/(\b\S)?/g).join('')}

@@ -1,5 +1,5 @@
-import React, { Fragment, useState } from 'react';
-import { Typography, Box, CircularProgress, Button, IconButton, Dialog } from '@material-ui/core';
+import React, { Fragment, useEffect, useState } from 'react';
+import { Typography, Box, Button, IconButton, Dialog } from '@material-ui/core';
 import { AddCircle, Delete, Info } from '@material-ui/icons';
 import SignaturePad from 'react-signature-canvas';
 import { FaSignature } from 'react-icons/fa';
@@ -11,10 +11,38 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import Webcam from 'react-webcam';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
 
-  const [isFrontCamera, setIsFrontCamera] = useState(isMobile || isTablet ? false : true);
+  const [cameraCount, setCameraCount] = useState(0);
+  const [facingMode, setFacingMode] = useState(isMobile || isTablet ? 'environment' : 'user');
+  const [cameraPermission, setCameraPermission] = useState('prompt');
+
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+      }
+    })
+      .then((stream) => {
+        stream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+        setCameraPermission('granted');
+      })
+      .catch((err) => {
+        setCameraPermission('denied');
+      });
+  }, []);
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices().then((devices) => {
+      const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+      setCameraCount(videoDevices.length);
+    });
+  }, [cameraPermission]);
 
   const webcamRef = React.useRef(null);
   const capture = () => {
@@ -22,74 +50,83 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
     setPicture(pictureSrc);
   };
 
-  const videoConstraints = {
-    facingMode: isFrontCamera ? 'user' : { exact: 'environment' }
+  const switchCamera = () => {
+    facingMode === 'user' ? setFacingMode('environment') : setFacingMode('user');
   };
 
   return (
     <div>
-      <Box mb={1} style={{ float: 'right' }}>
-        <Button
-          size="small"
-          variant="contained"
-          color="primary"
-          onClick={() => {
-            setIsFrontCamera(!isFrontCamera);
+      {cameraPermission === 'denied' ? (
+        <Box p={2} style={{ height: 400, width: 500 }}>
+          <p>Please allow camera permissions to use this feature.</p>
+        </Box>
+      ) : cameraPermission === 'granted' ? <>
+        <Box mb={1} style={{ float: 'right' }}>
+          {picture == '' && cameraCount > 1 &&
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={switchCamera}
+              style={{ marginRight: '10px' }}
+            >
+              Switch Camera
+            </Button>
+          }
+          <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
+            Close Camera
+          </Button>
+        </Box>
+        <div>
+          {picture == '' ? (
+            <Webcam
+              audio={false}
+              height={400}
+              width={500}
+              ref={webcamRef}
+              minScreenshotWidth={500}
+              screenshotFormat="image/jpeg"
+              videoConstraints={{ facingMode: facingMode }}
+            />
+          ) : (
+            <img src={picture} />
+          )}
+        </div>
+        <div
+          style={{
+            alignItems: 'center',
+            marginTop: '3px'
           }}
-          style={{ marginRight: '10px' }}
         >
-          Switch to {isFrontCamera ? 'Back' : 'Front'} Camera
-        </Button>
-        <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
-          Close Camera
-        </Button>
-      </Box>
-      <div>
-        {picture == '' ? (
-          <Webcam
-            audio={false}
-            height={400}
-            ref={webcamRef}
-            minScreenshotWidth={500}
-            screenshotFormat="image/jpeg"
-            videoConstraints={videoConstraints}
-          />
-        ) : (
-          <img src={picture} />
-        )}
-      </div>
-      <div
-        style={{
-          alignItems: 'center',
-          marginTop: '3px'
-        }}
-      >
-        {picture != '' ? (
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              setPicture('');
-            }}
-            size="small"
-            variant="contained"
-            color="primary"
-          >
-            Retake
-          </Button>
-        ) : (
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              capture();
-            }}
-            size="small"
-            variant="contained"
-            color="primary"
-          >
-            Capture
-          </Button>
-        )}
-      </div>
+          {picture != '' ? (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                setPicture('');
+              }}
+              size="small"
+              variant="contained"
+              color="primary"
+            >
+              Retake
+            </Button>
+          ) : (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                capture();
+              }}
+              size="small"
+              variant="contained"
+              color="primary"
+            >
+              Capture
+            </Button>
+          )}
+        </div>
+      </> : <Box p={2} height={400} width={500}>
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
     </div>
   );
 };
@@ -101,7 +138,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const [picture, setPicture] = useState('');
 
   const [usePad, setUsePad] = useState(true);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreen, setFullScreen] = useState(isMobile && !isTablet ? true : false);
 
   return (
     <Dialog TransitionComponent={CustomDialogTransition} fullScreen={fullScreen} open={open} onClose={close}>
