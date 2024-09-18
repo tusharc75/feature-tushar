@@ -230,7 +230,7 @@ const LoadingTicketGrid: FC<LoadingGridProps> = (props) => {
             assetData[j].loadingTicket = ticketData[i].ticketName;
             assetData[j].loadingTicketId = ticketData[i]._id;
             assetData[j].loadingTicketStatus = ticketData[i].status;
-            assetData[j].createDate = ticketData[i]?.createdBy?.date;
+            assetData[j].createDate = ticketData[i]?.createDate || ticketData[i]?.createdBy?.date;
             assetData[j].actualDeliveryDate = ticketData[i].actualDeliveryDate;
           }
         }
