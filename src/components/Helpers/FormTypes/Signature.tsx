@@ -1,5 +1,5 @@
 import React, { Fragment, useEffect, useState } from 'react';
-import { Typography, Box, CircularProgress, Button, IconButton, Dialog } from '@material-ui/core';
+import { Typography, Box, Button, IconButton, Dialog } from '@material-ui/core';
 import { AddCircle, Delete, Info } from '@material-ui/icons';
 import SignaturePad from 'react-signature-canvas';
 import { FaSignature } from 'react-icons/fa';
@@ -16,13 +16,22 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
 
   const [cameraCount, setCameraCount] = useState(0);
   const [facingMode, setFacingMode] = useState(isMobile || isTablet ? 'environment' : 'user');
+  const [cameraPermission, setCameraPermission] = useState('prompt');
+
+  useEffect(() => {
+    navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+      setCameraPermission('granted');
+    }).catch((err) => {
+      setCameraPermission('denied');
+    });
+  }, []);
 
   useEffect(() => {
     navigator.mediaDevices.enumerateDevices().then((devices) => {
       const videoDevices = devices.filter((device) => device.kind === 'videoinput');
       setCameraCount(videoDevices.length);
     });
-  }, []);
+  }, [cameraPermission]);
 
   const webcamRef = React.useRef(null);
   const capture = () => {
@@ -36,68 +45,77 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
 
   return (
     <div>
-      <Box mb={1} style={{ float: 'right' }}>
-        {picture == '' && cameraCount > 1 &&
-          <Button
-            size="small"
-            variant="contained"
-            color="primary"
-            onClick={switchCamera}
-            style={{ marginRight: '10px' }}
-          >
-            Switch Camera
-          </Button>
-        }
-        <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
-          Close Camera
-        </Button>
-      </Box>
-      <div>
-        {picture == '' ? (
-          <Webcam
-            audio={false}
-            height={400}
-            ref={webcamRef}
-            minScreenshotWidth={500}
-            screenshotFormat="image/jpeg"
-            videoConstraints={{ facingMode: facingMode }}
-          />
-        ) : (
-          <img src={picture} />
-        )}
-      </div>
-      <div
-        style={{
-          alignItems: 'center',
-          marginTop: '3px'
-        }}
-      >
-        {picture != '' ? (
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              setPicture('');
+      {cameraPermission === 'denied' && (
+        <Box p={2} style={{ height: 400, width: 400 }}>
+          <p>Please allow camera permissions to use this feature.</p>
+        </Box>
+      )}
+      {cameraPermission !== 'denied' &&
+        <>
+          <Box mb={1} style={{ float: 'right' }}>
+            {picture == '' && cameraCount > 1 &&
+              <Button
+                size="small"
+                variant="contained"
+                color="primary"
+                onClick={switchCamera}
+                style={{ marginRight: '10px' }}
+              >
+                Switch Camera
+              </Button>
+            }
+            <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
+              Close Camera
+            </Button>
+          </Box>
+          <div>
+            {picture == '' ? (
+              <Webcam
+                audio={false}
+                height={400}
+                ref={webcamRef}
+                minScreenshotWidth={500}
+                screenshotFormat="image/jpeg"
+                videoConstraints={{ facingMode: facingMode }}
+              />
+            ) : (
+              <img src={picture} />
+            )}
+          </div>
+          <div
+            style={{
+              alignItems: 'center',
+              marginTop: '3px'
             }}
-            size="small"
-            variant="contained"
-            color="primary"
           >
-            Retake
-          </Button>
-        ) : (
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              capture();
-            }}
-            size="small"
-            variant="contained"
-            color="primary"
-          >
-            Capture
-          </Button>
-        )}
-      </div>
+            {picture != '' ? (
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  setPicture('');
+                }}
+                size="small"
+                variant="contained"
+                color="primary"
+              >
+                Retake
+              </Button>
+            ) : (
+              <Button
+                onClick={(e) => {
+                  e.preventDefault();
+                  capture();
+                }}
+                size="small"
+                variant="contained"
+                color="primary"
+              >
+                Capture
+              </Button>
+            )}
+          </div>
+        </>
+      }
     </div>
   );
 };

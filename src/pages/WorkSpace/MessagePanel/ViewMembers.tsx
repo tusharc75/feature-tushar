@@ -6,7 +6,9 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DashboardModal from 'src/components/DashboardModal';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
+import { useAppTheme } from 'src/constants/AppConfig';
 import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
+import { getAvatarColor } from 'src/pages/WorkSpace/MessagePanel/utils';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
@@ -24,6 +26,7 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
   const [searchTerm, setSearchTerm] = useState('');
   const [isAddMemberDialogOpen, setIsAddMemberDialogOpen] = useState(false);
   const [confirmDialog, setConfirmDialog] = useState({ open: false, data: null });
+  const [themeColor] = useAppTheme();
 
   const handleRemoveMember = useCallback(
     async (userId) => {
@@ -96,10 +99,11 @@ const ViewMembers = ({ selectedChannel, fetchChannelData, channelData, handleClo
                     width: 25,
                     height: 25,
                     borderRadius: '999px',
-                    fontSize: 12
+                    fontSize: 12,
+                    ...getAvatarColor(member?.optionLabel, themeColor)
                   }}
                   variant="rounded"
-                  className="my-[2px]"
+                  className="my-[2px] uppercase "
                   src={member.avatar}
                 >
                   {member?.optionLabel.match(/(\b\S)?/g).join('')}

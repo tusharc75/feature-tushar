@@ -48,7 +48,6 @@ export type Message = {
   user: MessageUser;
   replies: Message[];
   lastModified?: Date;
-  avatar?: string;
   attachments?: any[];
   reactions?: any[];
 };
@@ -56,4 +55,5 @@ export type Message = {
 export type MessageUser = {
   optionValue: string;
   optionLabel: string;
+  avatar: string;
 };
