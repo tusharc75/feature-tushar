@@ -17,6 +17,7 @@ import { cn, dateFormat, getFileIconSrc } from 'src/constants/helpers';
 import { ChannelData, Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
+import { getAvatarColor } from 'src/pages/WorkSpace/MessagePanel/utils';
 import Thread from './Thread';
 
 type MessagesProps = {
@@ -249,6 +250,7 @@ export const DisplaySingleMessage = ({
   const [theme] = useAppTheme();
   const [emojiPanleAnchor, setEmojiPanelAnchor] = useState<HTMLElement>(null);
   const [attachmentConfirmBox, setAttachmentConfirmBox] = useState({ open: false, messageId: null, attachmentId: null });
+  const [themeColor] = useAppTheme();
   const openEmojiPanel = (e: React.MouseEvent<HTMLButtonElement>, message: Message) => {
     setEmojiPanelAnchor((prev) => (!prev ? e.currentTarget : null));
   };
@@ -335,7 +337,18 @@ export const DisplaySingleMessage = ({
         onMouseLeave={closeEmojiPanel}
       >
         <div className={cn('flex gap-2', isSelf ? ' flex-row-reverse justify-start' : '')}>
-          <Avatar style={{ width: 28, height: 28, borderRadius: 999, fontSize: 13 }} variant="rounded" className="" src={message.avatar}>
+          <Avatar
+            style={{
+              width: 28,
+              height: 28,
+              borderRadius: 999,
+              fontSize: 13,
+              ...getAvatarColor(message.user?.optionLabel || '', themeColor)
+            }}
+            variant="rounded"
+            className="uppercase"
+            src={message?.user?.avatar}
+          >
             {message.user?.optionLabel.match(/(\b\S)?/g).join('')}
           </Avatar>
           <div className="flex-grow">
@@ -471,7 +484,7 @@ export const DisplaySingleMessage = ({
                                 borderRadius: 999
                               }}
                               variant="rounded"
-                              src={reply.avatar}
+                              src={reply.user.avatar}
                             >
                               {reply.user?.optionLabel.match(/(\b\S)?/g).join('')}
                             </Avatar>

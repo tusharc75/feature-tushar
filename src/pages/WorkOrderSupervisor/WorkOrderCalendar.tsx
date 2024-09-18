@@ -109,7 +109,7 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery}, ref ) {
             id: d._id,
             title: d?.workOrderNumber,
             start: new Date(d?.createDate),
-            end: new Date(),
+            end: d?.estimateCompleteDate ? new Date(d?.estimateCompleteDate) : new Date(d?.createDate),
             allDay: true,
             startDraggable: false,
             endDraggable: false

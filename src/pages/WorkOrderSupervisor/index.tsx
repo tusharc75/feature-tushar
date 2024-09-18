@@ -1,5 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
+import { Button, FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
@@ -21,6 +21,8 @@ import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 import AppsIcon from '@material-ui/icons/Apps';
 import DateRangeIcon from '@material-ui/icons/DateRange';
+import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
+import { AddOutlined } from '@material-ui/icons';
 
 const LIMIT = 25;
 
@@ -88,6 +90,7 @@ const WorkOrderSupervisor = () => {
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
+  const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
 
   const ref: any = useRef();
 
@@ -377,14 +380,12 @@ const WorkOrderSupervisor = () => {
                     {isFilterPresent ? (
                       <>
                         <span
-                          className={`${
-                            isFilterPresent ? ' opacity-100' : 'opacity-0'
-                          } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
+                          className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                            } absolute -right-[2px] -top-[2px] z-[9] h-[6px] w-[6px] animate-ping rounded-full bg-red-500`}
                         ></span>
                         <span
-                          className={`${
-                            isFilterPresent ? ' opacity-100' : 'opacity-0'
-                          } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
+                          className={`${isFilterPresent ? ' opacity-100' : 'opacity-0'
+                            } absolute -right-[2px] -top-[2px] z-10 h-[6px] w-[6px] rounded-full bg-red-500`}
                         ></span>
                       </>
                     ) : null}
@@ -431,6 +432,21 @@ const WorkOrderSupervisor = () => {
                 <div className="flex-grow pt-[4px]">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
                 </div>
+                {permissions?.workOrder?.isCreate &&
+                  <div className="pt-[4px]">
+                    <HtmlTooltip title={`Add ${routes.workOrder.title}`}>
+                      <Button
+                        variant={'contained'}
+                        color="primary"
+                        size="small"
+                        className={`no-shadow`}
+                        onClick={() => setShowManageWorkOrder(true)}
+                        startIcon={<AddOutlined />}
+                      >
+                        Add
+                      </Button>
+                    </HtmlTooltip>
+                  </div>}
                 <div className="pt-[4px]">
                   <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
                     <IconButton
@@ -510,6 +526,18 @@ const WorkOrderSupervisor = () => {
               setWorkStationAssignDialog(false);
               dispatch({ type: 'refreshData' });
             }}
+          />
+        )}
+        {showManageWorkOrder && (
+          <ManageWorkOrder
+            isClone={false}
+            workOrderId={null}
+            onClose={() => setShowManageWorkOrder(false)}
+            onSuccess={() => {
+              onClickRefreshIcon();
+              setShowManageWorkOrder(false);
+            }}
+            isRedirectToDetailPage={false}
           />
         )}
       </Fragment>
