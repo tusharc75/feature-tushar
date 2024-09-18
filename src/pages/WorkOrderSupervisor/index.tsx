@@ -1,5 +1,5 @@
 import DateFnsUtils from '@date-io/date-fns';
-import { FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
+import { Button, FormControl, Grid, IconButton, InputLabel, Menu, MenuItem, Popover, Select, Switch, TextField, useMediaQuery } from '@material-ui/core';
 import { KeyboardDatePicker, MuiPickersUtilsProvider } from '@material-ui/pickers';
 import RefreshIcon from '@material-ui/icons/Refresh';
 import moment from 'moment';
@@ -21,6 +21,7 @@ import WorkOrderCalendar from 'src/pages/WorkOrderSupervisor/WorkOrderCalendar';
 import CustomFilter from 'src/components/Helpers/CustomFilter';
 import AppsIcon from '@material-ui/icons/Apps';
 import DateRangeIcon from '@material-ui/icons/DateRange';
+import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
 
 const LIMIT = 25;
 
@@ -88,6 +89,7 @@ const WorkOrderSupervisor = () => {
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
+  const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
 
   const ref: any = useRef();
 
@@ -432,6 +434,16 @@ const WorkOrderSupervisor = () => {
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
                 </div>
                 <div className="pt-[4px]">
+                  <Button 
+                    variant={'contained'}
+                    color="primary"
+                    size="small"
+                   onClick={()=> setShowManageWorkOrder(true)}
+                   >
+                    Add Work Order
+                  </Button>
+                </div>
+                <div className="pt-[4px]">
                   <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
                     <IconButton
                       size="small"
@@ -509,6 +521,17 @@ const WorkOrderSupervisor = () => {
             handleSucess={() => {
               setWorkStationAssignDialog(false);
               dispatch({ type: 'refreshData' });
+            }}
+          />
+        )}
+        {showManageWorkOrder && (
+          <ManageWorkOrder
+            isClone={false}
+            workOrderId={null}
+            onClose={() => setShowManageWorkOrder(false)}
+            onSuccess={() => {
+              onClickRefreshIcon();
+              setShowManageWorkOrder(false);
             }}
           />
         )}
