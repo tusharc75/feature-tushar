@@ -484,7 +484,7 @@ export const DisplaySingleMessage = ({
                                 borderRadius: 999
                               }}
                               variant="rounded"
-                              src={reply.avatar}
+                              src={reply.user.avatar}
                             >
                               {reply.user?.optionLabel.match(/(\b\S)?/g).join('')}
                             </Avatar>
