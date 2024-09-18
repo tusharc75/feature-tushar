@@ -20,6 +20,7 @@ import CustomButton from 'src/components/Helpers/CustomButton';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { uniq, map } from 'lodash';
 import axiosInstance from 'src/axios/axiosInstance';
+import routes from 'src/components/Helpers/Routes';
 
 const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAssetId, type }) => {
 
@@ -36,7 +37,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
       const assets = selectedRecords?.map((e) => e?._id);
       let response;
       if (type === 'changeReceiveDate') {
-        response = await axiosInstance().put(`/transfer-asset/max-receive-date-to-change`, { assets, referenceId: transferAssetId });
+        response = await axiosInstance().put(`${routes.serializedAsset.path}/asset-last-history-date-before-adding`, { assets, referenceId: transferAssetId });
       } else {
         response = await axiosInstance().put(`/rental-management/assets-last-date`, { assets: assets, last: 1 });
       }
@@ -129,7 +130,7 @@ const ReceiveDialog = ({ handleClose, selectedRecords, handleSuccess, transferAs
       }}
       aria-labelledby="assign-roles-dialog"
     >
-      <Formik initialValues={{ receiveDate: minDate ? minDate : new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate} enableReinitialize={true}>
+      <Formik initialValues={{ receiveDate: new Date() }} onSubmit={handleSubmit} validateOnMount validate={validate} enableReinitialize={true}>
         {({ submitForm, touched, errors, setFieldValue, values }) => (
           <Form autoComplete="off" autoCorrect="off" noValidate>
             <MuiPickersUtilsProvider utils={DateUtils}>
