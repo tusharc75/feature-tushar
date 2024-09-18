@@ -28,7 +28,7 @@ import { useHistory } from 'react-router-dom';
 
 const disabledFieldArray = ['type', 'product', 'warehouse', 'serializedAsset', 'status'];
 
-const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null }) => {
+const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = null, isRedirectToDetailPage = true }) => {
   const {
     state: { user }
   }: any = useData();
@@ -123,17 +123,19 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
     } else {
       setSubmitting(true);
       let updatedValues = { ...values };
-      axiosInstance()
-        .post(`${workOrder.api}`, updatedValues)
+      axiosInstance().post(`${workOrder.api}`, updatedValues)
         .then(({ data }) => {
           setLoading(false);
-          history.push(`${routes.workOrderDetail.path}/${data?.data?._id}`);
           setSubmitting(false);
           toastConfig.setToastConfig({
             open: true,
             type: 'success',
             message: data.message
           });
+          if (isRedirectToDetailPage) {
+            history.push(`${routes.workOrderDetail.path}/${data?.data?._id}`);
+          }
+          onSuccess();
         })
         .catch((error) => {
           setLoading(false);
