@@ -264,6 +264,7 @@ import CreateWorkFlow from 'src/pages/WorkFlow/CreateWorkFlow';
 import WorkFlowReport from 'src/pages/workFlowReport';
 import WorkFlowReportDetail from 'src/pages/workFlowReport/workFlowReportDetails';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
+import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
 
 var notificationInterval: any = null;
 
@@ -277,7 +278,13 @@ function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
+
+  const handleCloseUpdateModal = () => {
+    // write your code here
+    setIsUpdateModalOpen(false);
+  };
 
   const {
     state: { user },
@@ -289,7 +296,7 @@ function App() {
 
   history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem('slowInternetConnection');
-    if (isSlowInternetConnection == 'true') {
+    if (isSlowInternetConnection === 'true') {
       toast.setToastConfig({
         open: true,
         type: 'error',
@@ -1185,6 +1192,7 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
+      <ForceUpdatePopup open={isUpdateModalOpen} onClose={handleCloseUpdateModal} />
       {toast?.toastConfig?.open &&
         (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
           <CustomToaster
