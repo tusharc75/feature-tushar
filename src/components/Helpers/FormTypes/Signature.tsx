@@ -11,6 +11,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import Webcam from 'react-webcam';
 import { CustomDialogTransition } from 'src/constants/helpers';
 import { isMobile, isTablet } from 'react-device-detect';
+import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
 const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
 
@@ -19,27 +20,21 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
   const [cameraPermission, setCameraPermission] = useState('prompt');
 
   useEffect(() => {
-    const checkPermission = async () => {
-      try {
-        // eslint-disable-next-line 
-        const permissionStatus = await navigator.permissions.query({ name: 'camera' });
-        if (permissionStatus.state === 'granted') {
-          setCameraPermission('granted');
-        } else if (permissionStatus.state === 'prompt') {
-          const result = await navigator.mediaDevices.getUserMedia({ video: true });
-          if (result) {
-            setCameraPermission('granted');
-          } else {
-            setCameraPermission('denied');
-          }
-        } else {
-          setCameraPermission('denied');
-        }
-      } catch (error) {
-        setCameraPermission('denied');
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
       }
-    };
-    checkPermission();
+    })
+      .then((stream) => {
+        stream.getTracks().forEach(function (track) {
+          track.stop();
+        });
+        setCameraPermission('granted');
+      })
+      .catch((err) => {
+        setCameraPermission('denied');
+      });
   }, []);
 
   useEffect(() => {
@@ -65,7 +60,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
         <Box p={2} style={{ height: 400, width: 500 }}>
           <p>Please allow camera permissions to use this feature.</p>
         </Box>
-      ) : <>
+      ) : cameraPermission === 'granted' ? <>
         <Box mb={1} style={{ float: 'right' }}>
           {picture == '' && cameraCount > 1 &&
             <Button
@@ -129,7 +124,9 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             </Button>
           )}
         </div>
-      </>}
+      </> : <Box p={2} height={400} width={500}>
+        <CommonSkeleton lenArray={[...Array(10).keys()]} />
+      </Box>}
     </div>
   );
 };
