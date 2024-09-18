@@ -45,77 +45,74 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
 
   return (
     <div>
-      {cameraPermission === 'denied' && (
+      {cameraPermission === 'denied' ? (
         <Box p={2} style={{ height: 400, width: 400 }}>
           <p>Please allow camera permissions to use this feature.</p>
         </Box>
-      )}
-      {cameraPermission !== 'denied' &&
-        <>
-          <Box mb={1} style={{ float: 'right' }}>
-            {picture == '' && cameraCount > 1 &&
-              <Button
-                size="small"
-                variant="contained"
-                color="primary"
-                onClick={switchCamera}
-                style={{ marginRight: '10px' }}
-              >
-                Switch Camera
-              </Button>
-            }
-            <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
-              Close Camera
+      ) : <>
+        <Box mb={1} style={{ float: 'right' }}>
+          {picture == '' && cameraCount > 1 &&
+            <Button
+              size="small"
+              variant="contained"
+              color="primary"
+              onClick={switchCamera}
+              style={{ marginRight: '10px' }}
+            >
+              Switch Camera
             </Button>
-          </Box>
-          <div>
-            {picture == '' ? (
-              <Webcam
-                audio={false}
-                height={400}
-                ref={webcamRef}
-                minScreenshotWidth={500}
-                screenshotFormat="image/jpeg"
-                videoConstraints={{ facingMode: facingMode }}
-              />
-            ) : (
-              <img src={picture} />
-            )}
-          </div>
-          <div
-            style={{
-              alignItems: 'center',
-              marginTop: '3px'
-            }}
-          >
-            {picture != '' ? (
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  setPicture('');
-                }}
-                size="small"
-                variant="contained"
-                color="primary"
-              >
-                Retake
-              </Button>
-            ) : (
-              <Button
-                onClick={(e) => {
-                  e.preventDefault();
-                  capture();
-                }}
-                size="small"
-                variant="contained"
-                color="primary"
-              >
-                Capture
-              </Button>
-            )}
-          </div>
-        </>
-      }
+          }
+          <Button size="small" variant="contained" color="primary" onClick={() => setUsePad(!usePad)}>
+            Close Camera
+          </Button>
+        </Box>
+        <div>
+          {picture == '' ? (
+            <Webcam
+              audio={false}
+              height={400}
+              ref={webcamRef}
+              minScreenshotWidth={500}
+              screenshotFormat="image/jpeg"
+              videoConstraints={{ facingMode: facingMode }}
+            />
+          ) : (
+            <img src={picture} />
+          )}
+        </div>
+        <div
+          style={{
+            alignItems: 'center',
+            marginTop: '3px'
+          }}
+        >
+          {picture != '' ? (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                setPicture('');
+              }}
+              size="small"
+              variant="contained"
+              color="primary"
+            >
+              Retake
+            </Button>
+          ) : (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                capture();
+              }}
+              size="small"
+              variant="contained"
+              color="primary"
+            >
+              Capture
+            </Button>
+          )}
+        </div>
+      </>}
     </div>
   );
 };
