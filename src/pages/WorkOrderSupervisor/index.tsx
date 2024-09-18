@@ -89,7 +89,7 @@ const WorkOrderSupervisor = () => {
     from: new Date(moment().startOf('month').format('YYYY/MM/DD')),
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
-  const [showManageWorkOrder, setShowManageWorkOrder] = useState({ open: false });
+  const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
 
   const ref: any = useRef();
 
@@ -438,7 +438,7 @@ const WorkOrderSupervisor = () => {
                     variant={'contained'}
                     color="primary"
                     size="small"
-                   onClick={()=> setShowManageWorkOrder({open: true})}
+                   onClick={()=> setShowManageWorkOrder(true)}
                    >
                     Add Work Order
                   </Button>
@@ -524,14 +524,14 @@ const WorkOrderSupervisor = () => {
             }}
           />
         )}
-        {showManageWorkOrder.open && (
+        {showManageWorkOrder && (
           <ManageWorkOrder
             isClone={false}
             workOrderId={null}
-            onClose={() => setShowManageWorkOrder({ open: false })}
+            onClose={() => setShowManageWorkOrder(false)}
             onSuccess={() => {
               onClickRefreshIcon();
-              setShowManageWorkOrder({ open: false });
+              setShowManageWorkOrder(false);
             }}
           />
         )}
