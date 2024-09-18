@@ -56,4 +56,5 @@ export type Message = {
 export type MessageUser = {
   optionValue: string;
   optionLabel: string;
+  avatar: string;
 };

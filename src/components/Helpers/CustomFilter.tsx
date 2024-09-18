@@ -366,9 +366,10 @@ const DisplyaFilters = ({ chipData, handleFilterOpen, clearSingleFilter }) => {
   return (
     <div className="custom-filter">
       {chipData?.length > 0 && (
-        <div className={'flex min-h-[26px] flex-wrap gap-2'}>
+        <div className={'flex min-h-[26px] min-w-0 flex-wrap gap-2'}>
           {chipData?.map((filter) => (
             <Chip
+              style={{ minWidth: 0 }}
               onClick={handleFilterOpen}
               className={'filter-chip'}
               deleteIcon={<CloseIcon />}
