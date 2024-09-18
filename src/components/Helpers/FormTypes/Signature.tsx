@@ -109,7 +109,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
   const [picture, setPicture] = useState('');
 
   const [usePad, setUsePad] = useState(true);
-  const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
+  const [fullScreen, setFullScreen] = useState(isMobile && !isTablet ? true : false);
 
   return (
     <Dialog TransitionComponent={CustomDialogTransition} fullScreen={fullScreen} open={open} onClose={close}>
