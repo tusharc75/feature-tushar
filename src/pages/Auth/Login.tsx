@@ -16,8 +16,16 @@ import { SiMicrosoftoffice } from 'react-icons/si';
 import { Logo } from 'src/assets/authenticationAssets';
 import AuthSlider from './AuthSlider';
 import FacialLogin from 'src/components/FacialLogin';
-
 import styles from './index.module.scss';
+import { backendApi } from 'src/config';
+
+export type BrandData = {
+  companyName: string;
+  companyLogo: string;
+  subDomain: string;
+};
+
+const mainSiteUrl = new URL(backendApi).origin;
 
 const MAIN_SUB_DOMAIN = ['portal', 'master.portal', 'uat.portal', 'staging.portal'];
 
@@ -30,15 +38,24 @@ const Login = () => {
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [brandData, setBrandData] = useState(null);
+  const [brandData, setBrandData] = useState<BrandData>(null);
   const [brandNotFound, setBrandNotFound] = useState(false);
 
   const history = useHistory();
 
-  function getSubdomain(url) {
+  function getSubdomain(url = window.location.origin) {
     const parsedUrl = new URL(url);
     const hostname = parsedUrl.hostname;
     const parts = hostname.split('.');
+
+    // Handle localhost with subdomains (e.g., http://developer.localhost)
+    if (hostname === 'localhost' || parts.includes('localhost')) {
+      if (parts.length > 1) {
+        return parts.slice(0, parts.indexOf('localhost')).join('.');
+      }
+      return null;
+    }
+
     if (parts.length > 2) {
       return parts.slice(0, -2).join('.');
     }
@@ -46,13 +63,15 @@ const Login = () => {
   }
 
   useEffect(() => {
-    const subdomain = getSubdomain(window.location);
+    const subdomain = getSubdomain();
     if (subdomain && !MAIN_SUB_DOMAIN.includes(subdomain?.toLowerCase())) {
-      axiosInstance().get(`/brand/check-sub-domain/${subdomain?.toLowerCase()}`)
+      axiosInstance()
+        .get(`/brand/check-sub-domain/${subdomain?.toLowerCase()}`)
         .then(({ data: { data } }) => {
           setBrandData(data);
-        }).catch((error) => {
-          setBrandNotFound(true)
+        })
+        .catch((error) => {
+          setBrandNotFound(true);
         });
     }
   }, []);
@@ -97,7 +116,8 @@ const Login = () => {
     if (brandData) {
       data.subDomain = brandData?.subDomain;
     }
-    axiosInstance().post('/user/auth', data)
+    axiosInstance()
+      .post('/user/auth', data)
       .then(async ({ data: response }) => {
         const { data } = response;
         setSubmitting(false);
@@ -125,117 +145,132 @@ const Login = () => {
       <CssBaseline />
       <div className={styles.main} style={{ '--custom-grid-cols': '1fr 1fr' } as React.CSSProperties}>
         <div className={styles.bg}>
-          <div className={styles.contentContainer}>
-            <div className={styles.left}>
-              <div className={styles.logo}>
-                <Logo />
-              </div>
-              <Formik
-                initialValues={{
-                  email: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'gagan@test.com' : '',
-                  password: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
-                }}
-                validate={validateForm}
-                onSubmit={handleSubmit}
-              >
-                {({ submitForm, values, errors, touched, setFieldValue }) => (
-                  <Form>
-                    <UnauthenticatedTemplate>
-                      <AzureLogin />
-                      {/* <FacialLogin
+          {brandNotFound ? (
+            <div className="mx-auto max-w-2xl rounded-md bg-[var(--dark-primary,white)] p-5 [border:1px_solid_var(--common-border-color)]">
+              <h3 className="text-[20px] text-red-500">Error</h3>
+              <p className="text-[16px]">
+                You've requested a page using an invalid hostname: <em>{window.location.host}</em>. Please double check the web address or try the
+                address of our main site:{' '}
+                <a className="link" href={mainSiteUrl}>
+                  {mainSiteUrl}
+                </a>
+              </p>
+            </div>
+          ) : (
+            <div className={styles.contentContainer}>
+              <div className={styles.left}>
+                <div className="mb-[31px] flex items-center justify-between gap-2">
+                  <Logo className="max-h-[35px] !max-w-[129px]" />
+                  {brandData?.companyLogo && <img src={brandData.companyLogo} alt={brandData.companyName} className="max-h-[35px] !max-w-[129px]" />}
+                </div>
+                {brandData?.companyName && <h4 className="mb-4 mt-1 text-center text-[18px] font-semibold">{brandData.companyName}</h4>}
+                <Formik
+                  initialValues={{
+                    email: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'gagan@test.com' : '',
+                    password: ['local'].includes(import.meta.env.VITE_APP_ENV) ? 'soR$Tw83n92ghs2' : ''
+                  }}
+                  validate={validateForm}
+                  onSubmit={handleSubmit}
+                >
+                  {({ submitForm, values, errors, touched, setFieldValue }) => (
+                    <Form>
+                      <UnauthenticatedTemplate>
+                        <AzureLogin />
+                        {/* <FacialLogin
                         dispatch={dispatch}
                         notification={notification}
                         chatNotification={chatNotification} /> */}
-                    </UnauthenticatedTemplate>
-                    <Box className={styles.or}>
-                      <Typography>or sign in with</Typography>
-                    </Box>
-                    <div className={styles.fields}>
-                      <div className={styles.input}>
-                        <TextField
-                          data-testid="email"
-                          variant="outlined"
-                          type="email"
-                          size="medium"
-                          label="Email"
-                          name="email"
-                          value={values['email']}
-                          error={touched['email'] && Boolean(errors['email'])}
-                          helperText={touched['email'] && errors['email']}
-                          fullWidth
-                          onChange={(e) => setFieldValue('email', e.target.value)}
-                        />
-                      </div>
-                      <div className={styles.input}>
-                        <TextField
-                          data-testid="password"
-                          variant="outlined"
-                          type={showPassword ? 'text' : 'password'}
-                          size="medium"
-                          label="Password"
-                          name="password"
-                          value={values['password']}
-                          error={touched['password'] && Boolean(errors['password'])}
-                          helperText={touched['password'] && errors['password']}
-                          onChange={(e) => setFieldValue('password', e.target.value)}
-                          fullWidth
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
-                                  {showPassword ? <Visibility /> : <VisibilityOff />}
-                                </IconButton>
-                              </InputAdornment>
-                            )
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <Box className={styles.formBottomText}>
-                      <MuiLink component={Link} to="/forget-password">
-                        Forgot Password?
-                      </MuiLink>
-                    </Box>
-
-                    <Box>
-                      <Button
-                        disabled={isSubmitting}
-                        fullWidth
-                        variant="contained"
-                        color="primary"
-                        type="submit"
-                        className={styles.submitButton}
-                        onClick={submitForm}
-                        startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
-                      >
-                        Sign In
-                      </Button>
-
-                      <AuthenticatedTemplate>
-                        {invalidAzureLogin ? (
-                          <span>Not authorized loging out in {counter}</span>
-                        ) : (
-                          <Button
-                            className="logo-bg-color"
-                            variant="contained"
+                      </UnauthenticatedTemplate>
+                      <Box className={styles.or}>
+                        <Typography>or sign in with</Typography>
+                      </Box>
+                      <div className={styles.fields}>
+                        <div className={styles.input}>
+                          <TextField
+                            data-testid="email"
+                            variant="outlined"
+                            type="email"
+                            size="medium"
+                            label="Email"
+                            name="email"
+                            value={values['email']}
+                            error={touched['email'] && Boolean(errors['email'])}
+                            helperText={touched['email'] && errors['email']}
                             fullWidth
-                            startIcon={<SiMicrosoftoffice />}
-                            disabled={isSubmitting}
-                            onClick={() => instance.logoutPopup()}
-                          >
-                            Office 365 Log Out
-                          </Button>
-                        )}
-                      </AuthenticatedTemplate>
-                    </Box>
-                  </Form>
-                )}
-              </Formik>
+                            onChange={(e) => setFieldValue('email', e.target.value)}
+                          />
+                        </div>
+                        <div className={styles.input}>
+                          <TextField
+                            data-testid="password"
+                            variant="outlined"
+                            type={showPassword ? 'text' : 'password'}
+                            size="medium"
+                            label="Password"
+                            name="password"
+                            value={values['password']}
+                            error={touched['password'] && Boolean(errors['password'])}
+                            helperText={touched['password'] && errors['password']}
+                            onChange={(e) => setFieldValue('password', e.target.value)}
+                            fullWidth
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  <IconButton className="p-0" onClick={() => setShowPassword(!showPassword)}>
+                                    {showPassword ? <Visibility /> : <VisibilityOff />}
+                                  </IconButton>
+                                </InputAdornment>
+                              )
+                            }}
+                          />
+                        </div>
+                      </div>
+                      <Box className={styles.formBottomText}>
+                        <MuiLink component={Link} to="/forget-password">
+                          Forgot Password?
+                        </MuiLink>
+                      </Box>
+
+                      <Box>
+                        <Button
+                          disabled={isSubmitting}
+                          fullWidth
+                          variant="contained"
+                          color="primary"
+                          type="submit"
+                          className={styles.submitButton}
+                          onClick={submitForm}
+                          startIcon={isSubmitting && <CircularProgress color="inherit" size={20} />}
+                        >
+                          Sign In
+                        </Button>
+
+                        <AuthenticatedTemplate>
+                          {invalidAzureLogin ? (
+                            <span>Not authorized loging out in {counter}</span>
+                          ) : (
+                            <Button
+                              className="logo-bg-color"
+                              variant="contained"
+                              fullWidth
+                              startIcon={<SiMicrosoftoffice />}
+                              disabled={isSubmitting}
+                              onClick={() => instance.logoutPopup()}
+                            >
+                              Office 365 Log Out
+                            </Button>
+                          )}
+                        </AuthenticatedTemplate>
+                      </Box>
+                    </Form>
+                  )}
+                </Formik>
+              </div>
+              <div className={styles.rightSlider}>
+                <AuthSlider className="relative flex" style={{ minHeight: '100%' }} />
+              </div>
             </div>
-            <div className={styles.rightSlider}>
-              <AuthSlider style={{ minHeight: '100%' }} />
-            </div>
-          </div>
+          )}
         </div>
       </div>
     </>

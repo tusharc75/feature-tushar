@@ -282,9 +282,11 @@ function App() {
 
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState({ open: false, data: null });
 
-
   const { isOffline } = useContext(CustomOfflineContext);
-  const { state: { user }, dispatch }: any = useData();
+  const {
+    state: { user },
+    dispatch
+  }: any = useData();
 
   const history = useHistory();
   const handleCloseUpdateModal = () => {
@@ -334,7 +336,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) { }
+    } catch (e) {}
     return () => {
       clearInterval(notificationInterval);
     };
@@ -1209,11 +1211,8 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
-      {isUpdateModalOpen.open &&
-        <ForceUpdatePopup
-          data={isUpdateModalOpen.data}
-          onClose={handleCloseUpdateModal} />
-      }
+      {/* <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} /> */}
+      {isUpdateModalOpen.open && <ForceUpdatePopup data={isUpdateModalOpen.data} onClose={handleCloseUpdateModal} />}
       {toast?.toastConfig?.open &&
         (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
           <CustomToaster
