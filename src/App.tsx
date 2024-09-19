@@ -296,6 +296,7 @@ function App() {
     setIsUpdateModalOpen(false);
   };
 
+  // ------------ Concept ------------
   const handleVersion = (newVersion: Version) => {
     const apiResult = compareVersions(newVersion, currentVersion);
     const localVersion = localStorage.getItem(localStorageAppVersionName);
