@@ -3638,6 +3638,13 @@ export async function handleHardReload(url = window.location.href) {
       'Cache-Control': 'no-cache'
     }
   });
+  if ('caches' in window) {
+    caches?.keys().then((names) => {
+      names.forEach((name) => {
+        caches.delete(name);
+      });
+    });
+  }
   window.location.href = url;
   // This is to ensure reload with url's having '#'
   window.location.reload();
