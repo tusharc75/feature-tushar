@@ -23,9 +23,11 @@ import FacialLogin from 'src/components/FacialLogin';
 
 import styles from './index.module.scss';
 
-const Login = () => {
+const SUB_DOMAIN = ['portal', 'master.portal', 'uat.portal', 'staging.portal'];
 
+const Login = () => {
   const toastConfig = useContext(CustomToastContext);
+
   const { dispatch }: any = useData();
   const [isSubmitting, setSubmitting] = useState(false);
   const { instance, accounts } = useMsal();
@@ -33,7 +35,29 @@ const Login = () => {
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [brandData, setBrandData] = useState(null);
   const history = useHistory();
+
+  useEffect(() => {
+    const { hostname } = window.location;
+    const parts = hostname.split('.');
+    const subdomain = parts.length > 1 ? parts.slice(0, -1).join('.') : '';
+    const domain = parts[parts?.length - 1];
+
+    if (subdomain && !SUB_DOMAIN.includes(subdomain)) {
+      axiosInstance()
+        .get(`/brand/sub-domain/${subdomain}`)
+        .then(({ data: { data } }) => {
+          setBrandData(data);
+        })
+        .catch((error) => {
+          if (['local'].includes(import.meta.env.VITE_APP_ENV)) {
+            window.location.href = 'http://localhost:3000';
+            // window.location.href = 'https://master.portal.equip-t.com';
+          }
+        });
+    }
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(account)) {
@@ -68,18 +92,24 @@ const Login = () => {
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
-    const data = {
+    const data: any = {
       email: values.email,
       password: values.password
     };
-    axiosInstance().post('/user/auth', data).then(async ({ data: response }) => {
-      const { data } = response;
-      setSubmitting(false);
-      history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
-    }).catch((error) => {
-      setSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
+    if (brandData) {
+      data.subDomain = brandData?._id;
+    }
+    axiosInstance()
+      .post('/user/auth', data)
+      .then(async ({ data: response }) => {
+        const { data } = response;
+        setSubmitting(false);
+        history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const validateForm = (values) => {
