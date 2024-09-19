@@ -279,32 +279,29 @@ function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const { isOffline } = useContext(CustomOfflineContext);
 
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState({ open: false, data: null });
+
+
+  const { isOffline } = useContext(CustomOfflineContext);
+  const { state: { user }, dispatch }: any = useData();
+
+  const history = useHistory();
   const handleCloseUpdateModal = () => {
     handleHardReload();
-    setIsUpdateModalOpen(false);
+    setIsUpdateModalOpen({ open: false, data: null });
   };
 
-  const handleVersion = (newVersion: number) => {
-    const apiResult = compareVersions(newVersion, prebuildData.version);
+  const handleVersion = (data: any) => {
+    const apiResult = compareVersions(data?.version, prebuildData?.version);
     // If the new version is the same as the stored version, return early.
     if (apiResult === 0) return;
 
     // If the new version is greater than or less than the current version, open the update modal.
     if (apiResult === 1 || apiResult === -1) {
-      setIsUpdateModalOpen(true);
+      setIsUpdateModalOpen({ open: true, data: data });
     }
   };
-
-  const {
-    state: { user },
-    dispatch
-  }: any = useData();
-  const { entityApi } = entity;
-
-  const history = useHistory();
 
   history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem('slowInternetConnection');
@@ -337,7 +334,7 @@ function App() {
           await getNotification();
         }, 60000);
       }
-    } catch (e) {}
+    } catch (e) { }
     return () => {
       clearInterval(notificationInterval);
     };
@@ -354,7 +351,7 @@ function App() {
 
           // check for version change
           if (versionData?.version) {
-            handleVersion(versionData?.version);
+            handleVersion(versionData);
           }
           if (frontendReloadRequired) {
             // dispatch({ type: USER_LOADING, payload: true });
@@ -1212,7 +1209,11 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
-      <ForceUpdatePopup open={isUpdateModalOpen} onClose={handleCloseUpdateModal} />
+      {isUpdateModalOpen.open &&
+        <ForceUpdatePopup
+          data={isUpdateModalOpen.data}
+          onClose={handleCloseUpdateModal} />
+      }
       {toast?.toastConfig?.open &&
         (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
           <CustomToaster
