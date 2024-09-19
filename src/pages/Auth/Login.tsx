@@ -35,7 +35,7 @@ const Login = () => {
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [brandData, setBrandData] = useState(null);
+  const [subDomain, setSubDomain] = useState(null);
   const history = useHistory();
 
   useEffect(() => {
@@ -46,9 +46,9 @@ const Login = () => {
 
     if (subdomain && !SUB_DOMAIN.includes(subdomain)) {
       axiosInstance()
-        .get(`/brand/sub-domain/${subdomain}`)
+        .get(`/brand/check-subDomain/${subdomain}`)
         .then(({ data: { data } }) => {
-          setBrandData(data);
+          setSubDomain(data);
         })
         .catch((error) => {
           if (['local'].includes(import.meta.env.VITE_APP_ENV)) {
@@ -96,8 +96,8 @@ const Login = () => {
       email: values.email,
       password: values.password
     };
-    if (brandData) {
-      data.subDomain = brandData?._id;
+    if (subDomain) {
+      data.subDomain = subDomain?.companyName;
     }
     axiosInstance()
       .post('/user/auth', data)
