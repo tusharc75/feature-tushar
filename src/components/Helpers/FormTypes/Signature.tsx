@@ -55,9 +55,9 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
   };
 
   return (
-    <div style={{ width: '100%', height: '500px' }}>
+    <div>
       {cameraPermission === 'denied' ? (
-        <Box p={2} style={{ height: 500, width: 500 }}>
+        <Box p={2} style={{ height: 400, width: 500 }}>
           <p>Please allow camera permissions to use this feature.</p>
         </Box>
       ) : cameraPermission === 'granted' ? <>
@@ -89,7 +89,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
               videoConstraints={{ facingMode: facingMode }}
             />
           ) : (
-            <img src={picture} width={500} height={400}/>
+            <img src={picture} />
           )}
         </div>
         <div
@@ -124,7 +124,7 @@ const UseCamera = ({ setUsePad, usePad, setPicture, picture }) => {
             </Button>
           )}
         </div>
-      </> : <Box p={2} height={500} width={500}>
+      </> : <Box p={2} height={400} width={500}>
         <CommonSkeleton lenArray={[...Array(10).keys()]} />
       </Box>}
     </div>
@@ -155,7 +155,7 @@ const SignatureDialog = ({ onSave, open, close }) => {
       <CustomDialogContent>
         {usePad ? (
           <div className="dark:[filter:invert(1)]">
-            <SignaturePad ref={signCanvas} canvasProps={{ minWidth: 500, width: 500, height: 500 }} />
+            <SignaturePad ref={signCanvas} canvasProps={{ minWidth: 500, width: 500, height: 400 }} />
           </div>
         ) : (
           <UseCamera setUsePad={setUsePad} usePad={usePad} setPicture={setPicture} picture={picture} />
