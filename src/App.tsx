@@ -273,7 +273,7 @@ import WorkFlowReport from 'src/pages/workFlowReport';
 import WorkFlowReportDetail from 'src/pages/workFlowReport/workFlowReportDetails';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
-import packageJson from '../package.json';
+import versionJson from 'src/version/version.json';
 
 var notificationInterval: any = null;
 
@@ -284,7 +284,7 @@ function App() {
     }
   }, []);
 
-  const [currentVersion, setCurrentVersion] = useState(packageJson.version as Version);
+  const [currentVersion, setCurrentVersion] = useState(versionJson.version as Version);
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);

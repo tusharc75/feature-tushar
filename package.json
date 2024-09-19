@@ -162,6 +162,7 @@
     "yup": "^0.32.9"
   },
   "scripts": {
+    "prebuild": "node src/version/fetchVersion.js",
     "start": "sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev": "yarn install && sass-migrator division **/*.scss && node --max_old_space_size=4096 ./node_modules/vite/bin/vite",
     "dev-https": "set \"HTTPS=true\" && yarn install && vite",
