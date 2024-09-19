@@ -7,6 +7,8 @@ const apiUrl = `${process.env.VITE_APP_API_URL}/portal-version/latest` || 'https
 fetch(apiUrl)
   .then((response) => response.json())
   .then((data) => {
-    fs.writeFileSync('src/prebuild/prebuildData.json', JSON.stringify(data.data));
+    if (data?.data && data?.data?.version) {
+      fs.writeFileSync('src/prebuild/prebuildData.json', JSON.stringify(data.data));
+    }
   })
   .catch((error) => console.error('Error fetching data:', error));
