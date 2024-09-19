@@ -14,6 +14,7 @@ import {
   compareVersions,
   customerAccount,
   customerContact,
+  handleHardReload,
   localStorageAppVersionName,
   supplierAccount,
   supplierContact,
@@ -273,7 +274,7 @@ import WorkFlowReport from 'src/pages/workFlowReport';
 import WorkFlowReportDetail from 'src/pages/workFlowReport/workFlowReportDetails';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
-import preBuildJson from 'src/prebuild/prebuild.json';
+import prebuildData from 'src/prebuild/prebuildData.json';
 
 var notificationInterval: any = null;
 
@@ -284,9 +285,6 @@ function App() {
     }
   }, []);
 
-  console.log(preBuildJson);
-
-  const [currentVersion, setCurrentVersion] = useState(preBuildJson.version as Version);
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
@@ -294,32 +292,20 @@ function App() {
   const { isOffline } = useContext(CustomOfflineContext);
 
   const handleCloseUpdateModal = () => {
-    window.location.reload();
+    handleHardReload();
     setIsUpdateModalOpen(false);
   };
 
-  // ------------ Concept ------------
   const handleVersion = (newVersion: Version) => {
-    const apiResult = compareVersions(newVersion, currentVersion);
-    const localVersion = localStorage.getItem(localStorageAppVersionName);
-    let localResult = 1;
-    if (localVersion) {
-      localResult = compareVersions(newVersion, localVersion as Version);
-    }
+    const apiResult = compareVersions(newVersion, prebuildData.version as Version);
+    // If the new version is the same as the stored version, return early.
+    if (apiResult === 0) return;
 
-    // If the new version is the same as the current version or the locally stored version, exit early.
-    if (apiResult === 0 || localResult === 0) return;
-
-    // If the new version is greater than the current version, open the update modal.
-    if (apiResult === 1) {
-      // Store the new version in local storage.
-      localStorage.setItem(localStorageAppVersionName, newVersion);
-      // Open the update modal to notify the user.
+    // If the new version is greater than or less than the current version, open the update modal.
+    // greater than = 1, less than = -1
+    if (apiResult === 1 || apiResult === -1) {
       setIsUpdateModalOpen(true);
     }
-
-    // Update the current version to the new version.
-    setCurrentVersion(newVersion);
   };
 
   const {

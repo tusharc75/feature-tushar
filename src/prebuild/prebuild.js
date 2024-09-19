@@ -2,10 +2,8 @@ const fs = require('fs');
 const fetch = require('node-fetch');
 require('dotenv').config();
 
-// const apiUrl = 'http://localhost:4000/version';
-const apiUrl = process.env.VITE_APP_VERSION_URL;
-
-console.log(apiUrl);
+// change this env variable
+const apiUrl = process.env.VITE_APP_VERSION_URL || '';
 
 fetch(apiUrl)
   .then((response) => response.json())

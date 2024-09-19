@@ -3634,3 +3634,16 @@ export function compareVersions(newVersion: Version, oldVersion: Version): numbe
 }
 
 export const localStorageAppVersionName = 'App_Version';
+
+export async function handleHardReload(url = window.location.href) {
+  await fetch(url, {
+    headers: {
+      Pragma: 'no-cache',
+      Expires: '-1',
+      'Cache-Control': 'no-cache'
+    }
+  });
+  window.location.href = url;
+  // This is to ensure reload with url's having '#'
+  window.location.reload();
+}
