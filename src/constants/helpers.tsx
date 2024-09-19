@@ -3632,3 +3632,5 @@ export function compareVersions(newVersion: Version, oldVersion: Version): numbe
   }
   return 0;
 }
+
+export const localStorageAppVersionName = 'App_Version';

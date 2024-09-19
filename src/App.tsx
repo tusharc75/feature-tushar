@@ -10,7 +10,15 @@ import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNo
 import queryString from 'query-string';
 import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
-import { compareVersions, customerAccount, customerContact, supplierAccount, supplierContact, Version } from './constants/helpers';
+import {
+  compareVersions,
+  customerAccount,
+  customerContact,
+  localStorageAppVersionName,
+  supplierAccount,
+  supplierContact,
+  Version
+} from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
 import PrivateRoute from './components/PrivateRoute';
 import { useData } from './StateProvider/Provider';
@@ -289,16 +297,25 @@ function App() {
   };
 
   const handleVersion = (newVersion: Version) => {
-    const result = compareVersions(newVersion, currentVersion);
+    const apiResult = compareVersions(newVersion, currentVersion);
+    const localVersion = localStorage.getItem(localStorageAppVersionName);
+    let localResult = 1;
+    if (localVersion) {
+      localResult = compareVersions(newVersion, localVersion as Version);
+    }
 
-    // if version is same early return.
-    if (result === 0) return;
+    // If the new version is the same as the current version or the locally stored version, exit early.
+    if (apiResult === 0 || localResult === 0) return;
 
-    // if new version is greater than current version then open update modal
-    if (result === 1) {
+    // If the new version is greater than the current version, open the update modal.
+    if (apiResult === 1) {
+      // Store the new version in local storage.
+      localStorage.setItem(localStorageAppVersionName, newVersion);
+      // Open the update modal to notify the user.
       setIsUpdateModalOpen(true);
     }
 
+    // Update the current version to the new version.
     setCurrentVersion(newVersion);
   };
 
