@@ -35,7 +35,7 @@ export const IconConst = {
   GEN_ICON: 'GenIcon',
   HERO_TEXT_ICON: 'HeroTextIcon',
   SIDEBAR_COG_ICON: 'SidebarCog',
-  COLABORATION_TOOL: 'Collaboration Tools',
+  COLABORATION_TOOL: 'Workspace',
   SETUPS_ICON: 'Setups & Administration',
   SALES_MANAGEMENT: 'Sales Management',
   RENTAL_MANAGEMENT: 'Rental Management',
@@ -52,64 +52,44 @@ export const SVGImages = (name) => {
   switch (name) {
     case IconConst.HERO:
       return hero;
-      break;
     case IconConst.CRM:
       return crm;
-      break;
     case IconConst.ROM:
       return rom;
-      break;
     case IconConst.ACCOUNTS:
       return accounts;
-      break;
     case IconConst.PRODUCT_SETUP:
       return productSetup;
-      break;
     case IconConst.ACTIVITIES:
       return activities;
-      break;
     case IconConst.ADMIN_PORTAL:
       return adminPortal;
-      break;
     case IconConst.FORM_ICON:
       return formIcon;
-      break;
     case IconConst.INVENTORY_MANAGEMENT:
       return invIcon;
-      break;
     case IconConst.GEN_ICON:
       return genIcon;
-      break;
     case IconConst.HERO_TEXT_ICON:
       return heroTextIcon;
-      break;
     case IconConst.SIDEBAR_COG_ICON:
       return sidebarCogIcon;
-      break;
     case IconConst.COLABORATION_TOOL:
       return colabIcon;
-      break;
     case IconConst.SETUPS_ICON:
       return setupsIcon;
-      break;
     case IconConst.SALES_MANAGEMENT:
       return salesManagement;
-      break;
     case IconConst.RENTAL_MANAGEMENT:
       return rentalManagement;
-      break;
     case IconConst.ECOMMERCE:
       return ecommerceIcon;
-      break;
     case IconConst.REPAIR_AND_MAINTENANCE_MANAGEMENT:
       return repairMaintenanceManagement;
-      break;
     case IconConst.SERVICE_MANAGEMENT:
       return serviceManagement;
-      break;
     case IconConst.DOCKS:
       return docksIcon;
-      break;
     default:
       return crm;
   }
