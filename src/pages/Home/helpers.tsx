@@ -187,7 +187,7 @@ export const setDataBySectionName = (secName, index = 0, className = '') => {
       sideBarIcon = <BiCog size={20} className={className} />;
       break;
     }
-    case compareName(['Activities', 'Collaboration Tools'], secName): {
+    case compareName(['Activities', 'Collaboration Tools', 'Workspace'], secName): {
       sideBarIcon = <CollaborationToolsIcon size={20} className={className} />;
       break;
     }
