@@ -10,12 +10,11 @@ import { CustomDialogTransition } from '../../../constants/helpers';
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from '../../../components/Helpers/FormTypes';
-import { uniq, map, orderBy, isEqual } from 'lodash';
+import { isEqual } from 'lodash';
 import { fetch_rental_cost_fields } from '../../../components/RentalManagment/helper';
 import { CustomOfflineContext } from '../../../StateProvider/OfflineContext/OfflineContext';
 import moment from 'moment';
+import InputField from 'src/components/Helpers/InputField';
 
 interface AdditionalCostDialogProps {
   onClose: VoidFunction | any;
@@ -29,7 +28,6 @@ interface AdditionalCostDialogProps {
 
 const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency, handleAddCost, handleUpdateCost, costData, loadingEdit, showSaveAndNext }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const ref = useRef(null);
@@ -54,17 +52,6 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
         values: getObjKeys('', poFields)
       });
     }
-    EvaluteproductFields(poFields);
-  };
-
-  const EvaluteproductFields = (fields) => {
-    const sections = uniq(map(fields?.filter(f => f?.isRead), 'sectionName'));
-    const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name && field?.isRead);
-      sectionFields = orderBy(sectionFields, 'order', 'asc');
-      return { name, sectionFields };
-    });
-    setFields(customData);
   };
 
   const handleSubmit = (values) => {
@@ -128,72 +115,15 @@ const AdditionalCostDialog: FC<AdditionalCostDialogProps> = ({ onClose, currency
               ></CustomDialogHeader>
               <CustomDialogContent>
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {fields &&
-                    fields.map((section, i) => (
-                      <div key={i}>
-                        <div className={'detail-box-content detail-product-box'}>
-                          <div className={'product-form-layout'}>
-                            <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                            <h2 className={`${'form-label-style'} ${'form-label-product'}`}>{section.name}</h2>
-                          </div>
-                        </div>
-                        <Box marginY={2}>
-                          <Grid spacing={3} container>
-                            {section.sectionFields &&
-                              section.sectionFields.map((field) =>
-                                field.type === 'converter' || field.type === 'currencyAmount' || field.isConverter ? (
-                                  <FormTypes
-                                    fields={initialData.fields}
-                                    fieldData={{ ...field, hideConverter: true }}
-                                    values={values}
-                                    errors={errors}
-                                    touched={touched}
-                                    label={field.fieldLabel}
-                                    name={field.fieldName}
-                                    type={field.type}
-                                    options={field.option}
-                                    setFieldValue={(name, value) => {
-                                      setFieldValue(name, value);
-                                    }}
-                                    required={field.required}
-                                    fullWidth
-                                    isTooltip={field.isTooltip}
-                                    tooltipMessage={field.tooltipMessage}
-                                    size="small"
-                                  />
-                                ) : (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    <Box display="flex">
-                                      <Box flexGrow={1}>
-                                        <FormTypes
-                                          {...field}
-                                          fields={initialData.fields}
-                                          fieldData={field}
-                                          values={values}
-                                          errors={errors}
-                                          touched={touched}
-                                          label={field.fieldLabel}
-                                          name={field.fieldName}
-                                          type={field.type}
-                                          options={field.option}
-                                          setFieldValue={(name, value) => {
-                                            setFieldValue(name, value);
-                                          }}
-                                          required={field.required}
-                                          fullWidth
-                                          isTooltip={field.isTooltip}
-                                          tooltipMessage={field.tooltipMessage}
-                                          size="small"
-                                        />
-                                      </Box>
-                                    </Box>
-                                  </Grid>
-                                )
-                              )}
-                          </Grid>
-                        </Box>
-                      </div>
-                    ))}
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
