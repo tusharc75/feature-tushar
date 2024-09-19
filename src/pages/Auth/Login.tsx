@@ -2,8 +2,6 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
 import { Formik, Form } from 'formik';
-import { useData } from '../../StateProvider/Provider';
-import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -11,50 +9,50 @@ import IconButton from '@material-ui/core/IconButton';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
-import { camelCase, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
-import { entity } from '../../constants/helpers';
-import routes from 'src/components/Helpers/Routes';
-import { Logo, LoginImage } from 'src/assets/authenticationAssets';
+import { Logo } from 'src/assets/authenticationAssets';
 import AuthSlider from './AuthSlider';
 import FacialLogin from 'src/components/FacialLogin';
 
 import styles from './index.module.scss';
 
-const SUB_DOMAIN = ['portal', 'master.portal', 'uat.portal', 'staging.portal'];
+const MAIN_SUB_DOMAIN = ['portal', 'master.portal', 'uat.portal', 'staging.portal'];
 
 const Login = () => {
   const toastConfig = useContext(CustomToastContext);
 
-  const { dispatch }: any = useData();
   const [isSubmitting, setSubmitting] = useState(false);
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [subDomain, setSubDomain] = useState(null);
+  const [brandData, setBrandData] = useState(null);
+  const [brandNotFound, setBrandNotFound] = useState(false);
+
   const history = useHistory();
 
-  useEffect(() => {
-    const { hostname } = window.location;
+  function getSubdomain(url) {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname;
     const parts = hostname.split('.');
-    const subdomain = parts.length > 1 ? parts.slice(0, -1).join('.') : '';
-    const domain = parts[parts?.length - 1];
+    if (parts.length > 2) {
+      return parts.slice(0, -2).join('.');
+    }
+    return null;
+  }
 
-    if (subdomain && !SUB_DOMAIN.includes(subdomain)) {
-      axiosInstance()
-        .get(`/brand/check-subDomain/${subdomain}`)
+  useEffect(() => {
+    const subdomain = getSubdomain(window.location);
+    if (subdomain && !MAIN_SUB_DOMAIN.includes(subdomain?.toLowerCase())) {
+      axiosInstance().get(`/brand/check-sub-domain/${subdomain?.toLowerCase()}`)
         .then(({ data: { data } }) => {
-          setSubDomain(data);
-        })
-        .catch((error) => {
-          if (['local'].includes(import.meta.env.VITE_APP_ENV)) {
-            window.location.href = 'http://localhost:3000';
-            // window.location.href = 'https://master.portal.equip-t.com';
-          }
+          setBrandData(data);
+        }).catch((error) => {
+          setBrandNotFound(true)
         });
     }
   }, []);
@@ -96,11 +94,10 @@ const Login = () => {
       email: values.email,
       password: values.password
     };
-    if (subDomain) {
-      data.subDomain = subDomain?.companyName;
+    if (brandData) {
+      data.subDomain = brandData?.subDomain;
     }
-    axiosInstance()
-      .post('/user/auth', data)
+    axiosInstance().post('/user/auth', data)
       .then(async ({ data: response }) => {
         const { data } = response;
         setSubmitting(false);
