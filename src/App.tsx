@@ -10,16 +10,7 @@ import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNo
 import queryString from 'query-string';
 import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
-import {
-  compareVersions,
-  customerAccount,
-  customerContact,
-  handleHardReload,
-  localStorageAppVersionName,
-  supplierAccount,
-  supplierContact,
-  Version
-} from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
 import PrivateRoute from './components/PrivateRoute';
 import { useData } from './StateProvider/Provider';
@@ -296,13 +287,12 @@ function App() {
     setIsUpdateModalOpen(false);
   };
 
-  const handleVersion = (newVersion: Version) => {
-    const apiResult = compareVersions(newVersion, prebuildData.version as Version);
+  const handleVersion = (newVersion: number) => {
+    const apiResult = compareVersions(newVersion, prebuildData.version);
     // If the new version is the same as the stored version, return early.
     if (apiResult === 0) return;
 
     // If the new version is greater than or less than the current version, open the update modal.
-    // greater than = 1, less than = -1
     if (apiResult === 1 || apiResult === -1) {
       setIsUpdateModalOpen(true);
     }
@@ -357,14 +347,14 @@ function App() {
     if (localStorage.getItem('token') && !isOffline) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
-        .then(({ data: { frontendReloadRequired, count, version: newVersion } }) => {
+        .then(({ data: { frontendReloadRequired, count, versionData } }) => {
           if (count > 0) {
             notification.setCount(count);
           }
 
           // check for version change
-          if (newVersion) {
-            handleVersion(newVersion);
+          if (versionData?.version) {
+            handleVersion(versionData?.version);
           }
           if (frontendReloadRequired) {
             // dispatch({ type: USER_LOADING, payload: true });

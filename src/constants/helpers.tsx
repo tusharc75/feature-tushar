@@ -3620,20 +3620,15 @@ export const findSimilarRecords = (array, property) => {
   return Object.values(similarRecords).filter((group: any) => group.length > 1);
 };
 
-export type Version = `${number}.${number}.${number}`;
-export function compareVersions(newVersion: Version, oldVersion: Version): number {
-  const v1Parts = newVersion.split('.').map(Number);
-  const v2Parts = oldVersion.split('.').map(Number);
-  for (let i = 0; i < Math.max(v1Parts.length, v2Parts.length); i++) {
-    const v1 = v1Parts[i] || 0;
-    const v2 = v2Parts[i] || 0;
-    if (v1 > v2) return 1;
-    if (v1 < v2) return -1;
+export function compareVersions(newVersion: number, oldVersion: number): 1 | -1 | 0 {
+  if (newVersion > oldVersion) {
+    return 1;
+  }
+  if (newVersion < oldVersion) {
+    return -1;
   }
   return 0;
 }
-
-export const localStorageAppVersionName = 'App_Version';
 
 export async function handleHardReload(url = window.location.href) {
   await fetch(url, {
