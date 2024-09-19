@@ -10,7 +10,7 @@ import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNo
 import queryString from 'query-string';
 import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
-import { customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, supplierAccount, supplierContact, Version } from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
 import PrivateRoute from './components/PrivateRoute';
 import { useData } from './StateProvider/Provider';
@@ -265,6 +265,7 @@ import WorkFlowReport from 'src/pages/workFlowReport';
 import WorkFlowReportDetail from 'src/pages/workFlowReport/workFlowReportDetails';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
 import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
+import packageJson from '../package.json';
 
 var notificationInterval: any = null;
 
@@ -275,6 +276,7 @@ function App() {
     }
   }, []);
 
+  const [currentVersion, setCurrentVersion] = useState(packageJson.version as Version);
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
@@ -282,8 +284,22 @@ function App() {
   const { isOffline } = useContext(CustomOfflineContext);
 
   const handleCloseUpdateModal = () => {
-    // write your code here
+    window.location.reload();
     setIsUpdateModalOpen(false);
+  };
+
+  const handleVersion = (newVersion: Version) => {
+    const result = compareVersions(newVersion, currentVersion);
+
+    // if version is same early return.
+    if (result === 0) return;
+
+    // if new version is greater than current version then open update modal
+    if (result === 1) {
+      setIsUpdateModalOpen(true);
+    }
+
+    setCurrentVersion(newVersion);
   };
 
   const {
@@ -326,15 +342,23 @@ function App() {
         }, 60000);
       }
     } catch (e) {}
+    return () => {
+      clearInterval(notificationInterval);
+    };
   }, [isOffline]);
 
   const getNotification = async () => {
     if (localStorage.getItem('token') && !isOffline) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
-        .then(({ data: { frontendReloadRequired, count } }) => {
+        .then(({ data: { frontendReloadRequired, count, version: newVersion } }) => {
           if (count > 0) {
             notification.setCount(count);
+          }
+
+          // check for version change
+          if (newVersion) {
+            handleVersion(newVersion);
           }
           if (frontendReloadRequired) {
             // dispatch({ type: USER_LOADING, payload: true });
