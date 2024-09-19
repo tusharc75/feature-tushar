@@ -206,7 +206,7 @@
 .singleImageContainer {
   position: relative;
   max-width: 100%;
-  min-height: 635px;
+  min-height: 100%;
   isolation: isolate;
   &::before {
     content: '';
