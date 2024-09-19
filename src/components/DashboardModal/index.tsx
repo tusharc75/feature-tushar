@@ -1,4 +1,4 @@
-import { Box, Dialog, DialogActions, IconButton, Typography } from '@material-ui/core';
+import { Box, Dialog, DialogActions, IconButton, PaperProps, Typography } from '@material-ui/core';
 import type { DialogProps } from '@material-ui/core/Dialog';
 import MuiDialogContent from '@material-ui/core/DialogContent';
 import MuiDialogTitle from '@material-ui/core/DialogTitle';
@@ -12,7 +12,7 @@ import { CustomDialogTransition } from 'src/constants/helpers';
 // node_modules/@material-ui/core/Dialog/Dialog.d.ts
 
 export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
-  modalHead: ModalHead | null;
+  modalHead?: ModalHead | null;
   handleClose: () => void;
   handleRoutes?: (any) => string;
   dialogProps?: Omit<DialogProps, 'open'>;
@@ -20,6 +20,7 @@ export interface ModalProps extends React.HTMLAttributes<HTMLDivElement> {
   contentMaxHeight?: string;
   footer?: ReactNode;
   dialogContentProps?: React.HTMLAttributes<HTMLDivElement>;
+  PaperProps?: Partial<PaperProps>;
 }
 
 export interface ModalHead {
@@ -46,6 +47,7 @@ const DashboardModal: FC<ModalProps> = ({
   contentMaxHeight = '250px',
   footer,
   dialogContentProps,
+  PaperProps,
   ...props
 }) => {
   const [themeColor] = useAppTheme();
@@ -70,6 +72,7 @@ const DashboardModal: FC<ModalProps> = ({
         }
       }}
       PaperProps={{
+        ...PaperProps,
         style: {
           borderRadius: maximized ? 0 : 16,
           margin: dialogProps?.fullScreen || maximized ? 0 : 15,
@@ -80,37 +83,40 @@ const DashboardModal: FC<ModalProps> = ({
             themeColor === 'dark'
               ? '0px 10px 23px 0px rgba(142, 159, 199, 0.10), 0px 20px 50px 0px rgba(142, 159, 199, 0.08)'
               : '0px 165px 66px rgba(142, 159, 199, 0.01), 0px 93px 56px rgba(142, 159, 199, 0.05), 0px 41px 41px rgba(142, 159, 199, 0.09), 0px 10px 23px rgba(142, 159, 199, 0.1), 0px 0px 0px rgba(142, 159, 199, 0.1)',
-          ...props.style
+          ...props.style,
+          ...(PaperProps?.style ? PaperProps.style : {})
         }
       }}
       open={open !== undefined ? open : Boolean(modalHead)}
       className={styles.dialogContainer}
     >
-      <MuiDialogTitle disableTypography className={styles.modalHead}>
-        <Box className={styles.modalIconAndName}>
-          {modalHead?.icon && <Box className={styles.modalIcon}>{modalHead?.icon}</Box>}
-          <div className="flex-grow">
-            <Typography variant="h6" className={styles.modalTitle}>
-              {modalHead?.title}
-            </Typography>
-            {modalHead?.description && (
-              <Typography variant="body2" className="mt-1 text-gray-500 dark:text-gray-400">
-                {modalHead.description}
+      {modalHead && (
+        <MuiDialogTitle disableTypography className={styles.modalHead}>
+          <Box className={styles.modalIconAndName}>
+            {modalHead?.icon && <Box className={styles.modalIcon}>{modalHead?.icon}</Box>}
+            <div className="flex-grow">
+              <Typography variant="h6" className={styles.modalTitle}>
+                {modalHead?.title}
               </Typography>
-            )}
-          </div>
-        </Box>
-        <Box className={styles.modalHeadActions} style={{ minWidth: modalHead?.fullScreenOption ? '85px' : '45px' }}>
-          {modalHead?.fullScreenOption ? (
-            <IconButton aria-label="close" onClick={() => toggleMaximized()}>
-              {maximized ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
+              {modalHead?.description && (
+                <Typography variant="body2" className="mt-1 text-gray-500 dark:text-gray-400">
+                  {modalHead.description}
+                </Typography>
+              )}
+            </div>
+          </Box>
+          <Box className={styles.modalHeadActions} style={{ minWidth: modalHead?.fullScreenOption ? '85px' : '45px' }}>
+            {modalHead?.fullScreenOption ? (
+              <IconButton aria-label="close" onClick={() => toggleMaximized()}>
+                {maximized ? <FiMinimize2 size={18} /> : <FiMaximize2 size={18} />}
+              </IconButton>
+            ) : null}
+            <IconButton aria-label="close" onClick={() => handleClose()}>
+              <CloseIcon />
             </IconButton>
-          ) : null}
-          <IconButton aria-label="close" onClick={() => handleClose()}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
-      </MuiDialogTitle>
+          </Box>
+        </MuiDialogTitle>
+      )}
       <CustomDialogContent
         {...dialogContentProps}
         className={`${styles.dialogContent} ${className}`}

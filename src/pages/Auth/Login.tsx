@@ -2,8 +2,6 @@ import React, { useState, useContext, useEffect } from 'react';
 import { useHistory, Link } from 'react-router-dom';
 import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
 import { Formik, Form } from 'formik';
-import { useData } from '../../StateProvider/Provider';
-import { SET_USER, SET_SELECTED_ENTITY } from '../../StateProvider/actionTypes';
 import axiosInstance from './../../axios/axiosInstance';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import InputAdornment from '@material-ui/core/InputAdornment';
@@ -11,29 +9,53 @@ import IconButton from '@material-ui/core/IconButton';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
-import { camelCase, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
 import { AzureLogin } from '../../components/Azure/Azure';
 import { SiMicrosoftoffice } from 'react-icons/si';
-import { entity } from '../../constants/helpers';
-import routes from 'src/components/Helpers/Routes';
-import { Logo, LoginImage } from 'src/assets/authenticationAssets';
+import { Logo } from 'src/assets/authenticationAssets';
 import AuthSlider from './AuthSlider';
 import FacialLogin from 'src/components/FacialLogin';
 
 import styles from './index.module.scss';
 
-const Login = () => {
+const MAIN_SUB_DOMAIN = ['portal', 'master.portal', 'uat.portal', 'staging.portal'];
 
+const Login = () => {
   const toastConfig = useContext(CustomToastContext);
-  const { dispatch }: any = useData();
+
   const [isSubmitting, setSubmitting] = useState(false);
   const { instance, accounts } = useMsal();
   const account = useAccount(accounts[0] || {});
   const [counter, setCounter] = useState(0);
   const [invalidAzureLogin, setInvalidAzureLogin] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [brandData, setBrandData] = useState(null);
+  const [brandNotFound, setBrandNotFound] = useState(false);
+
   const history = useHistory();
+
+  function getSubdomain(url) {
+    const parsedUrl = new URL(url);
+    const hostname = parsedUrl.hostname;
+    const parts = hostname.split('.');
+    if (parts.length > 2) {
+      return parts.slice(0, -2).join('.');
+    }
+    return null;
+  }
+
+  useEffect(() => {
+    const subdomain = getSubdomain(window.location);
+    if (subdomain && !MAIN_SUB_DOMAIN.includes(subdomain?.toLowerCase())) {
+      axiosInstance().get(`/brand/check-sub-domain/${subdomain?.toLowerCase()}`)
+        .then(({ data: { data } }) => {
+          setBrandData(data);
+        }).catch((error) => {
+          setBrandNotFound(true)
+        });
+    }
+  }, []);
 
   useEffect(() => {
     if (!isEmpty(account)) {
@@ -68,18 +90,23 @@ const Login = () => {
 
   const handleSubmit = async (values) => {
     setSubmitting(true);
-    const data = {
+    const data: any = {
       email: values.email,
       password: values.password
     };
-    axiosInstance().post('/user/auth', data).then(async ({ data: response }) => {
-      const { data } = response;
-      setSubmitting(false);
-      history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
-    }).catch((error) => {
-      setSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
+    if (brandData) {
+      data.subDomain = brandData?.subDomain;
+    }
+    axiosInstance().post('/user/auth', data)
+      .then(async ({ data: response }) => {
+        const { data } = response;
+        setSubmitting(false);
+        history.push({ pathname: '/login/mfa', search: '?token=' + data?.token });
+      })
+      .catch((error) => {
+        setSubmitting(false);
+        toastConfig.setToastConfig(error);
+      });
   };
 
   const validateForm = (values) => {
