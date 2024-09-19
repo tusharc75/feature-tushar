@@ -8,6 +8,6 @@ const apiUrl = process.env.VITE_APP_VERSION_URL || '';
 fetch(apiUrl)
   .then((response) => response.json())
   .then((data) => {
-    fs.writeFileSync('src/prebuild/prebuild.json', JSON.stringify(data));
+    fs.writeFileSync('src/prebuild/prebuildData.json', JSON.stringify(data));
   })
   .catch((error) => console.error('Error fetching data:', error));
