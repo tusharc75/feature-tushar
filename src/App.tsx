@@ -10,7 +10,7 @@ import { CustomChatNotificationCountContext } from './StateProvider/CustomChatNo
 import queryString from 'query-string';
 import { SET_USER, SET_SELECTED_ENTITY } from './StateProvider/actionTypes';
 import routes from './components/Helpers/Routes';
-import { customerAccount, customerContact, supplierAccount, supplierContact } from './constants/helpers';
+import { compareVersions, customerAccount, customerContact, handleHardReload, supplierAccount, supplierContact } from './constants/helpers';
 import CustomToaster from './components/Helpers/CustomToast';
 import PrivateRoute from './components/PrivateRoute';
 import { useData } from './StateProvider/Provider';
@@ -264,6 +264,8 @@ import CreateWorkFlow from 'src/pages/WorkFlow/CreateWorkFlow';
 import WorkFlowReport from 'src/pages/workFlowReport';
 import WorkFlowReportDetail from 'src/pages/workFlowReport/workFlowReportDetails';
 import LoginMFA from 'src/pages/Auth/LoginMFA';
+import ForceUpdatePopup from 'src/components/ForceUpdatePopup';
+import prebuildData from 'src/prebuild/prebuildData.json';
 
 var notificationInterval: any = null;
 
@@ -277,7 +279,24 @@ function App() {
   const toast = useContext(CustomToastContext);
   const notification = useContext(CustomNotificationCountContext);
   const chatNotification = useContext(CustomChatNotificationCountContext);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const { isOffline } = useContext(CustomOfflineContext);
+
+  const handleCloseUpdateModal = () => {
+    handleHardReload();
+    setIsUpdateModalOpen(false);
+  };
+
+  const handleVersion = (newVersion: number) => {
+    const apiResult = compareVersions(newVersion, prebuildData.version);
+    // If the new version is the same as the stored version, return early.
+    if (apiResult === 0) return;
+
+    // If the new version is greater than or less than the current version, open the update modal.
+    if (apiResult === 1 || apiResult === -1) {
+      setIsUpdateModalOpen(true);
+    }
+  };
 
   const {
     state: { user },
@@ -289,7 +308,7 @@ function App() {
 
   history.listen(() => {
     let isSlowInternetConnection = localStorage.getItem('slowInternetConnection');
-    if (isSlowInternetConnection == 'true') {
+    if (isSlowInternetConnection === 'true') {
       toast.setToastConfig({
         open: true,
         type: 'error',
@@ -319,15 +338,23 @@ function App() {
         }, 60000);
       }
     } catch (e) {}
+    return () => {
+      clearInterval(notificationInterval);
+    };
   }, [isOffline]);
 
   const getNotification = async () => {
     if (localStorage.getItem('token') && !isOffline) {
       await axiosInstance()
         .get(`/user/notification/unseen`)
-        .then(({ data: { frontendReloadRequired, count } }) => {
+        .then(({ data: { frontendReloadRequired, count, versionData } }) => {
           if (count > 0) {
             notification.setCount(count);
+          }
+
+          // check for version change
+          if (versionData?.version) {
+            handleVersion(versionData?.version);
           }
           if (frontendReloadRequired) {
             // dispatch({ type: USER_LOADING, payload: true });
@@ -1185,6 +1212,7 @@ function App() {
           <ScreenOrientationOverlay displayOn="landscape" device="mobile" />
         </ErrorBoundaryComponent>
       </AnimatePresence>
+      <ForceUpdatePopup open={isUpdateModalOpen} onClose={handleCloseUpdateModal} />
       {toast?.toastConfig?.open &&
         (['notFoundError'].some((s) => s !== toast?.toastConfig?.type) ? (
           <CustomToaster

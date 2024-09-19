@@ -3619,3 +3619,26 @@ export const findSimilarRecords = (array, property) => {
   });
   return Object.values(similarRecords).filter((group: any) => group.length > 1);
 };
+
+export function compareVersions(newVersion: number, oldVersion: number): 1 | -1 | 0 {
+  if (newVersion > oldVersion) {
+    return 1;
+  }
+  if (newVersion < oldVersion) {
+    return -1;
+  }
+  return 0;
+}
+
+export async function handleHardReload(url = window.location.href) {
+  await fetch(url, {
+    headers: {
+      Pragma: 'no-cache',
+      Expires: '-1',
+      'Cache-Control': 'no-cache'
+    }
+  });
+  window.location.href = url;
+  // This is to ensure reload with url's having '#'
+  window.location.reload();
+}
