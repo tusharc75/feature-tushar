@@ -237,6 +237,7 @@ const OtpInput = React.forwardRef((props: OtpInputProps, propRef: OtpInputProps[
           onKeyDown,
           className: TextFieldClassName,
           onBlur: TextFieldOnBlur,
+          inputProps,
           ...restTextFieldsProps
         } = typeof TextFieldsProps === 'function' ? TextFieldsProps(index) || {} : TextFieldsProps || {};
 
@@ -261,6 +262,7 @@ const OtpInput = React.forwardRef((props: OtpInputProps, propRef: OtpInputProps[
               event.target.select();
               onFocus?.(event);
             }}
+            inputProps={inputProps}
             onChange={handleOneInputChange}
             onKeyDown={(event) => {
               handleOneInputKeyDown(event);

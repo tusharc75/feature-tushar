@@ -1,18 +1,18 @@
 import { Box, Button, CircularProgress, CssBaseline, FormControl, MenuItem, Select } from '@material-ui/core';
-import { useContext, useEffect, useState } from 'react';
-import { SVG } from 'src/assets';
-import axiosInstance from 'src/axios/axiosInstance';
-import OtpInput from 'src/components/OtpInput';
-import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
+import { camelCase } from 'lodash';
 import queryString from 'query-string';
+import { useContext, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
+import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
+import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
 import { SET_SELECTED_ENTITY, SET_USER } from 'src/StateProvider/actionTypes';
-import routes from 'src/components/Helpers/Routes';
-import { camelCase } from 'lodash';
-import { CustomNotificationCountContext } from 'src/StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
-import { CustomChatNotificationCountContext } from 'src/StateProvider/CustomChatNotificationCountContext/CustomChatNotificationCountContext';
+import { SVG } from 'src/assets';
+import axiosInstance from 'src/axios/axiosInstance';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
+import routes from 'src/components/Helpers/Routes';
+import OtpInput from 'src/components/OtpInput';
 import { MFA_METHOD } from 'src/constants/helpers';
 
 const LoginMFA = () => {
@@ -194,7 +194,7 @@ const LoginMFA = () => {
                       validateChar={(character, index) => /^[0-9]$/.test(character)}
                       value={otp}
                       onChange={(value) => setOtp(value)}
-                      TextFieldsProps={{ size: 'small' }}
+                      TextFieldsProps={{ size: 'small', inputProps: { pattern: '[0-9]*', autoComplete: 'one-time-code', inputMode: 'numeric' } }}
                       autoFocus
                     />
                   </div>
