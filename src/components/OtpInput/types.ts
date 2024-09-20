@@ -8,7 +8,7 @@ export interface BaseMuiOtpInputProps {
   value?: string;
   length?: number;
   autoFocus?: boolean;
-  TextFieldsProps?: (TextFieldProps & { pattern?: string})| ((index: number) => TextFieldProps) |;
+  TextFieldsProps?: (TextFieldProps & { pattern?: string }) | ((index: number) => TextFieldProps);
   onComplete?: (value: string) => void;
   validateChar?: (character: string, index: number) => boolean;
   onChange?: (value: string) => void;
