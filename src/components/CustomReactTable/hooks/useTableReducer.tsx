@@ -176,7 +176,9 @@ export const useTableReducer = (props?: UseTableReducerProps) => {
   }: any = useData();
   const { renderedFrom } = props || {};
 
-  const rowsPerPage = user?.gridRowsPerPage?.find((d) => d.resource === renderedFrom)?.rowsPerPage || gridPageSizes[0];
+  const rowsPerPage = renderedFrom
+    ? user?.gridRowsPerPage?.find((d) => d.resource === renderedFrom)?.rowsPerPage || gridPageSizes[0]
+    : gridPageSizes[0];
 
   const newInitialState = {
     ...intialState,
