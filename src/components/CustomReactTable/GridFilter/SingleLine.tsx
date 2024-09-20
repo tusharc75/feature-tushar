@@ -24,7 +24,7 @@ const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fi
         let _fieldName = fieldName;
         if (fieldData?.type === 'lookUpDisplay') {
           _fieldName = fieldData?.lookUpFieldDisplay;
-          const lookUpField = allFields?.find((e) => e.fieldName === fieldData?.lookUpField)
+          const lookUpField = allFields?.find((e) => e.fieldName === fieldData?.lookUpField);
           if (lookUpField) {
             _resource = lookUpField.lookupResource;
           }
@@ -37,7 +37,7 @@ const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fi
           setCurrentPage(0);
           setOptions([]);
         }
-        let query = `sa-field/fieldName/options?resource=${_resource}&limit=25&page=${page}&entity=${selectedEntity}&fieldName=${_fieldName}&search=${searchKey}`;
+        const query = `sa-field/fieldName/options?resource=${_resource}&limit=25&page=${page}&entity=${selectedEntity}&fieldName=${_fieldName}&search=${searchKey}`;
         const response = await axiosInstance().get(query);
         let data = response?.data?.data;
 
