@@ -797,6 +797,21 @@ const Report = () => {
     }
   }, [columns?.length, type, footerData]);
 
+
+  const getFilteredColumn = (column) => {
+    if (resourceCamelCase === 'dailyVolumeReport') {
+      let tempColumn = column;
+      if (!selectedData?.dayWise?.value) {
+        tempColumn = tempColumn?.filter((e) => e.accessor !== 'date')
+      }
+      if (selectedData?.padWise?.value) {
+        tempColumn = tempColumn?.filter((e) => !['asset', 'customerAccount'].includes(e.accessor))
+      }
+      return tempColumn;
+    }
+    return column;
+  }
+
   return (
     <MuiPickersUtilsProvider utils={MomentUtils}>
       <div className="main-container-v1">
@@ -944,11 +959,7 @@ const Report = () => {
               <>
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
-                  columns={
-                    !selectedData?.['dayWise']?.value && resourceCamelCase === 'dailyVolumeReport'
-                      ? columns?.filter((e) => e.accessor !== 'date')
-                      : columns
-                  }
+                  columns={getFilteredColumn(columns)}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}
