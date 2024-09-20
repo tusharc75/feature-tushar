@@ -221,7 +221,7 @@ export const CreateEmail = ({
         subject: subject ?? '',
         file: '',
         content: content ?? RichTextEditor.createEmptyValue(),
-        to: [],
+        to: isQuoteBuilder ? [...options] : [],
         cc: isQuoteBuilder ? [...cc] : []
       };
       setInitialValues(initialData);
