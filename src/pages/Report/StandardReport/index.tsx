@@ -687,7 +687,7 @@ const Report = () => {
     if (exportType === 'pdf') {
       api = `/report/${type}/pdf`;
     } else if (exportType === 'html') {
-      api = `/report/${type}/pdf?html=true`;
+      api = `/report/${type}/pdf`;
     } else {
       api = `/report/${type}/export`;
     }
@@ -695,7 +695,7 @@ const Report = () => {
     const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
     if (processType === 'sendMail' && exportType === 'html') {
-      axiosInstance().get(`${api}${filterQuery}`)
+      axiosInstance().get(`${api}${filterQuery}&html=true`)
         .then((res) => {
           setHtmlContent(res.data);
           setIsProcessing(null);
@@ -822,7 +822,7 @@ const Report = () => {
               ) : (
                 <div className="flex items-center gap-1">
                   {reportConfig?.isSendMail && (
-                    <SendMailMenu exportData={exportData} isProcessing={isProcessing}/>
+                    <SendMailMenu exportData={exportData} isProcessing={isProcessing} />
                   )}
                   {reportConfig?.isExportPdf && (
                     <Button
@@ -994,10 +994,10 @@ const Report = () => {
           aria-labelledby="customized-dialog-title"
           maxWidth="md"
           onClose={() => {
-            setIsSendMail(false);
             setEmailAttachments([]);
             setHtmlContent(null);
             setFullScreen(false);
+            setIsSendMail(false);
           }}
           fullWidth
         >
@@ -1006,14 +1006,14 @@ const Report = () => {
             relatedTo={null}
             emailId={null}
             handleClose={() => {
-              setIsSendMail(false);
               setEmailAttachments([]);
               setHtmlContent(null);
+              setIsSendMail(false);
             }}
             fetchData={() => {
-              setIsSendMail(false);
               setEmailAttachments([]);
               setHtmlContent(null);
+              setIsSendMail(false);
             }}
             qouteBuilderAttachments={emailAttachments}
             isMinimized={true}

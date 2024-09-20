@@ -57,7 +57,7 @@ const SendMailMenu = ({ exportData, isProcessing }) => {
             handleClose();
           }}
         >
-          Excel
+          Excel Attach
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -65,7 +65,7 @@ const SendMailMenu = ({ exportData, isProcessing }) => {
             handleClose();
           }}
         >
-          Pdf
+          PDF Attach
         </MenuItem>
         <MenuItem
           onClick={() => {
@@ -73,7 +73,7 @@ const SendMailMenu = ({ exportData, isProcessing }) => {
             handleClose();
           }}
         >
-          Html
+          Email Content Attach
         </MenuItem>
       </Menu>
     </>
