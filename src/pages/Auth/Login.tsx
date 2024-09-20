@@ -1,23 +1,22 @@
-import React, { useState, useContext, useEffect } from 'react';
-import { useHistory, Link } from 'react-router-dom';
-import { CssBaseline, Button, Box, TextField, CircularProgress, Link as MuiLink, Typography } from '@material-ui/core';
-import { Formik, Form } from 'formik';
-import axiosInstance from './../../axios/axiosInstance';
-import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
-import InputAdornment from '@material-ui/core/InputAdornment';
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
+import { Box, Button, CircularProgress, CssBaseline, Link as MuiLink, TextField, Typography } from '@material-ui/core';
 import IconButton from '@material-ui/core/IconButton';
+import InputAdornment from '@material-ui/core/InputAdornment';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useAccount, useMsal } from '@azure/msal-react';
+import { Form, Formik } from 'formik';
 import { isEmpty } from 'lodash';
-import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
-import { AzureLogin } from '../../components/Azure/Azure';
+import React, { useContext, useEffect, useState } from 'react';
 import { SiMicrosoftoffice } from 'react-icons/si';
+import { Link, useHistory } from 'react-router-dom';
 import { Logo } from 'src/assets/authenticationAssets';
-import AuthSlider from './AuthSlider';
-import FacialLogin from 'src/components/FacialLogin';
-import styles from './index.module.scss';
 import { backendApi } from 'src/config';
+import { AzureLogin } from '../../components/Azure/Azure';
+import getAzureAcessToken from '../../components/Azure/getAzureAccessToken';
+import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
+import axiosInstance from './../../axios/axiosInstance';
+import AuthSlider from './AuthSlider';
+import styles from './index.module.scss';
 
 export type BrandData = {
   companyName: string;
