@@ -42,6 +42,7 @@ import PadData from 'src/pages/Report/PadData';
 import PreviewDownload from 'src/components/PreviewDownload';
 import { CreateEmail } from 'src/components/Activity/Email/CreateEmail';
 import { isMobile, isTablet } from 'react-device-detect';
+import SendMailMenu from './SendMailMenu';
 
 let cancelTokenSource = null;
 
@@ -88,6 +89,7 @@ const Report = () => {
   const [isSendMail, setIsSendMail] = React.useState(false);
   const [emailAttachments, setEmailAttachments] = React.useState([]);
   const [fullScreen, setFullScreen] = React.useState(isMobile || isTablet);
+  const [htmlContent, setHtmlContent] = React.useState(null);
 
   const [isProcessing, setIsProcessing] = React.useState(null);
 
@@ -684,11 +686,27 @@ const Report = () => {
     var api = '';
     if (exportType === 'pdf') {
       api = `/report/${type}/pdf`;
+    } else if (exportType === 'html') {
+      api = `/report/${type}/pdf`;
     } else {
       api = `/report/${type}/export`;
     }
     const extension = exportType === 'excel' ? 'xlsx' : 'pdf';
     const contentType = exportType === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+
+    if (processType === 'sendMail' && exportType === 'html') {
+      axiosInstance().get(`${api}${filterQuery}&html=true`)
+        .then((res) => {
+          setHtmlContent(res.data);
+          setIsProcessing(null);
+        })
+        .catch((err) => {
+          setIsProcessing(null);
+          toastConfig.setToastConfig(err);
+        });
+      return;
+    }
+
     axiosInstance()
       .get(`${api}${filterQuery}`, {
         responseType: 'arraybuffer'
@@ -745,11 +763,11 @@ const Report = () => {
   };
 
   useEffect(() => {
-    if (emailAttachments?.length > 1) {
+    if (emailAttachments?.length > 0 || htmlContent) {
       setIsProcessing(null);
       setIsSendMail(true);
     }
-  }, [emailAttachments]);
+  }, [emailAttachments, htmlContent]);
 
   useEffect(() => {
     if ([`dailyVolumeReport`, 'volumeReport', 'rentalVolumeReport']?.includes(resourceCamelCase) && footerData) {
@@ -794,7 +812,7 @@ const Report = () => {
                   permissions={permissions?.report}
                   module={routes.productionOrder.title}
                   api={`/report/${type}`}
-                  afterImportCompleted={() => {}}
+                  afterImportCompleted={() => { }}
                   isExportCount={true}
                   exportCount={0}
                   ids={[]}
@@ -804,19 +822,7 @@ const Report = () => {
               ) : (
                 <div className="flex items-center gap-1">
                   {reportConfig?.isSendMail && (
-                    <Button
-                      variant="outlined"
-                      size="small"
-                      disabled={isProcessing === 'sendMail'}
-                      onClick={() => {
-                        exportData('excel', 'sendMail');
-                        exportData('pdf', 'sendMail');
-                      }}
-                      startIcon={isProcessing === 'sendMail' && <CircularProgress color="inherit" size={18} />}
-                      className={`btn-outline-v-1`}
-                    >
-                      Send Mail
-                    </Button>
+                    <SendMailMenu exportData={exportData} isProcessing={isProcessing} />
                   )}
                   {reportConfig?.isExportPdf && (
                     <Button
@@ -988,9 +994,10 @@ const Report = () => {
           aria-labelledby="customized-dialog-title"
           maxWidth="md"
           onClose={() => {
-            setIsSendMail(false);
             setEmailAttachments([]);
+            setHtmlContent(null);
             setFullScreen(false);
+            setIsSendMail(false);
           }}
           fullWidth
         >
@@ -999,12 +1006,14 @@ const Report = () => {
             relatedTo={null}
             emailId={null}
             handleClose={() => {
-              setIsSendMail(false);
               setEmailAttachments([]);
+              setHtmlContent(null);
+              setIsSendMail(false);
             }}
             fetchData={() => {
-              setIsSendMail(false);
               setEmailAttachments([]);
+              setHtmlContent(null);
+              setIsSendMail(false);
             }}
             qouteBuilderAttachments={emailAttachments}
             isMinimized={true}
@@ -1012,6 +1021,7 @@ const Report = () => {
               setFullScreen((prevState) => !prevState);
             }}
             showManimizeMaximize={true}
+            content={htmlContent}
           />
         </Dialog>
       )}
