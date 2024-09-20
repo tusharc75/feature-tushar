@@ -50,7 +50,7 @@ const AuthSlider: React.FC<AuthSliderProps> = (props) => {
   const { options = defaultOptions, ...others } = props;
   return (
     <div {...others}>
-      <Carousel {...options}>
+      <Carousel {...options} className="flex min-h-full w-full [&_.slider-wrapper]:absolute [&_.slider-wrapper]:inset-0 [&_.slider]:min-h-full">
         {data.map((item) => {
           return (
             <div className={styles.singleImageContainer} key={item.text}>

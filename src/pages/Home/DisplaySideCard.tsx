@@ -13,20 +13,20 @@ import { userManual } from 'src/pages/Home';
 interface sidecardInterface extends React.HTMLAttributes<HTMLDivElement> {
   objBySectionName: any;
   handleRoutes: any;
-  mode: 'Collaboration Tools' | 'Setups & Administration' | 'User Manual';
+  mode: 'Workspace' | 'Setups & Administration' | 'User Manual';
 }
 
-const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration Tools', ...others }: sidecardInterface) => {
+const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Workspace', ...others }: sidecardInterface) => {
   const [modalContent, setModalContent] = useState(null);
   const [colabData, setColabData] = useState(null);
   const style = { '--sideCardBg': '#FFFFFF' } as React.CSSProperties;
   const description =
-    (mode === 'Collaboration Tools' && `By using Collaboration tools, collaborate with or within team members easily`) ||
+    (mode === 'Workspace' && `By using Equipt Workspace, collaborate with your team members easily`) ||
     (mode === 'Setups & Administration' && `List of all product and category setups`);
 
   useEffect(() => {
     if (objBySectionName) {
-      if (mode === 'Collaboration Tools') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || null);
+      if (mode === 'Workspace') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || objBySectionName['Workspace'] || null);
       else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
     }
   }, [objBySectionName]);
@@ -68,7 +68,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Collaboration
               </Box>
             </>
           )}
-          {mode === 'Collaboration Tools' && (
+          {mode === 'Workspace' && (
             <button className={styles.colabButton} onClick={() => setModalContent({ items: colabData, title: mode })}>
               <Typography component="span">Start Collaborating</Typography>
             </button>

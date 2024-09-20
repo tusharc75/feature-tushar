@@ -10,13 +10,14 @@ import { CustomDialogTransition, arrayToDropwdownOption } from '../../../constan
 import { Formik, Form } from 'formik';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import CustomButton from '../../../components/Helpers/CustomButton';
-import { FaDiceOne } from 'react-icons/fa';
-import FormTypes from '../../../components/Helpers/FormTypes';
+// import { FaDiceOne } from 'react-icons/fa';
+// import FormTypes from '../../../components/Helpers/FormTypes';
 import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import { uniq, map, orderBy, isEqual } from 'lodash';
 import moment from 'moment';
 import { autoCalculateSpecificFields } from 'src/constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
+import InputField from 'src/components/Helpers/InputField';
 interface EditDialogProps {
   onClose: VoidFunction | any;
   handleSaveData: VoidFunction | any;
@@ -38,7 +39,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
 }) => {
   const [showConfirmationDialog, setShowConfirmationDialog] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
-  const [fields, setFields] = useState([]);
+  // const [fields, setFields] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [saveAndNext, setSaveAndNext] = useState(false);
@@ -52,7 +53,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
   const fetchData = async () => {
     setInitialData({ fields: [], values: {} });
     var data = await fetch_child_resource_fields(CHILD_RESOURCE.fieldServiceOrderDetails, serviceOrderData?.currency, true);
-    if(isBulkedit) {
+    if (isBulkedit) {
       let unitArray: any = [];
       let pricingMethodArray: any = [];
       rowData?.forEach((element) => {
@@ -94,7 +95,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
       });
     } else {
       let unitOptions: any = [];
-      let pricingMethodOptions:any = []
+      let pricingMethodOptions: any = []
       if (rowData?.[`${rowData.type}Detail`]?.unit) {
         unitOptions = arrayToDropwdownOption(rowData?.[`${rowData.type}Detail`]?.unit);
       }
@@ -115,18 +116,18 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
         values: getObjKeysWithValues(rowData, data)
       });
     }
-    EvaluteproductFields(data);
+    // EvaluteproductFields(data);
   };
 
-  const EvaluteproductFields = (fields) => {
-    const sections = uniq(map(fields, 'sectionName'));
-    const customData = sections.map((name) => {
-      let sectionFields = fields.filter((field) => field.sectionName === name);
-      sectionFields = orderBy(sectionFields, 'order', 'asc');
-      return { name, sectionFields };
-    });
-    setFields(customData);
-  };
+  // const EvaluteproductFields = (fields) => {
+  //   const sections = uniq(map(fields, 'sectionName'));
+  //   const customData = sections.map((name) => {
+  //     let sectionFields = fields.filter((field) => field.sectionName === name);
+  //     sectionFields = orderBy(sectionFields, 'order', 'asc');
+  //     return { name, sectionFields };
+  //   });
+  //   setFields(customData);
+  // };
 
   const getTitle = () => {
     if (rowData) {
@@ -153,7 +154,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
         returnData.push({ _id: element._id, ...calValues });
       });
       handleSaveData(returnData);
-    }else {
+    } else {
       returnData = [{ _id: rowData._id, ...values }];
       handleSaveData(returnData, saveAndNext);
     }
@@ -208,7 +209,16 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
               <CustomDialogContent>
                 {isBulkedit && <h6 className="form-label-style mb-2">* Please enter value you want to bulk update.</h6>}
                 <Form autoComplete="off" autoCorrect="off" noValidate>
-                  {fields &&
+                  <InputField
+                    errors={errors}
+                    values={values}
+                    setFieldValue={setFieldValue}
+                    touched={touched}
+                    fieldsData={initialData.fields}
+                    size="small"
+                    fullWidth
+                  />
+                  {/* {fields &&
                     fields.map((section, i) => (
                       <div key={i}>
                         <div className={'detail-box-content detail-product-box'}>
@@ -302,7 +312,7 @@ const ServiceOrderQtyDialog: FC<EditDialogProps> = ({
                           </Grid>
                         </Box>
                       </div>
-                    ))}
+                    ))} */}
                 </Form>
               </CustomDialogContent>
               <CustomDialogFooter>
