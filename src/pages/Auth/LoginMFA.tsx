@@ -194,7 +194,7 @@ const LoginMFA = () => {
                       validateChar={(character, index) => /^[0-9]$/.test(character)}
                       value={otp}
                       onChange={(value) => setOtp(value)}
-                      TextFieldsProps={{ size: 'small' }}
+                      TextFieldsProps={{ size: 'small', inputMode: 'numeric', pattern: '[0-9]*', autoComplete: 'one-time-code' }}
                       autoFocus
                     />
                   </div>
