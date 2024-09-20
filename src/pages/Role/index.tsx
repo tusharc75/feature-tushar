@@ -36,12 +36,12 @@ import axios, { CancelTokenSource } from 'axios';
 
 const rolePermissionArray = [PERMISSION.superAdmin, PERMISSION.brandAdmin];
 
+const renderedFrom = camelCase(routes.role.title);
 
 const Roles: FC = () => {
-  const renderedFrom = camelCase(routes.role.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords } = state;
 
   const {
@@ -439,8 +439,8 @@ const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDia
       <MenuItem
         disabled={
           permissions?.role?.isUpdate &&
-            permissions?.role?.isDelete &&
-            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+          permissions?.role?.isDelete &&
+          selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
             ? true
             : false
         }
@@ -453,8 +453,8 @@ const ActionMenuItems = ({ selectedRecords, showConfirmBox, permissions, userDia
       <MenuItem
         disabled={
           permissions?.role?.isUpdate &&
-            permissions?.role?.isDelete &&
-            selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
+          permissions?.role?.isDelete &&
+          selectedRecords?.some((e) => e?.permission === PERMISSION.brandAdmin || [ROLE_TIER.tier2, ROLE_TIER.tier3]?.includes(e?.tier))
             ? true
             : false
         }

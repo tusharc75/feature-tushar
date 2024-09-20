@@ -35,6 +35,8 @@ import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 
+const renderedFrom = 'attachment_render';
+
 export default function Attachment() {
   const history = useHistory();
   const parsed = queryString.parse(history.location.search);
@@ -55,7 +57,7 @@ export default function Attachment() {
   }: any = useData();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [gridApi, setGridApi] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, rowCount, selectedRecords, loading, page, limit, pageSizes, search, filters, sorting } = state;
   const [resource, setResource] = useState(null);
   const [resourceData, setResourceData] = useState(null);
@@ -694,7 +696,7 @@ export default function Attachment() {
               dispatch={dispatch}
               state={state}
               expander={true}
-              renderedFrom={'attachment_render'}
+              renderedFrom={renderedFrom}
               fetchChildAttachment={fetchChildAttachment}
               refreshGrid={fetchAttachments}
             />

@@ -1,12 +1,9 @@
-import { useState, useEffect, useContext  } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
 import axiosInstance from '../../../axios/axiosInstance';
 import { Box } from '@material-ui/core';
 import CustomReactTable, { useColumns, getStaticFields, useTableReducer } from 'src/components/CustomReactTable';
-import {
-  gridLoadingTimeout,
-  prepareDataForGrid,
-} from '../../../constants/helpers';
+import { gridLoadingTimeout, prepareDataForGrid } from '../../../constants/helpers';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import routes from '../../../components/Helpers/Routes';
 import { useData } from '../../../StateProvider/Provider';
@@ -14,7 +11,7 @@ import { useData } from '../../../StateProvider/Provider';
 const ParentProduct = ({ renderedFrom, productId }) => {
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const {
     state: { user }

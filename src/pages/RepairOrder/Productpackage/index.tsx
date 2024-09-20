@@ -56,7 +56,7 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
   const [columns, setColumns] = useState(null);
   const [products, setProducts] = useState([]);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   useEffect(() => {

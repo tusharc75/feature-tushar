@@ -24,7 +24,7 @@ const AssignSerializedAssetDialog = ({ reference, referenceData = null, handleCl
   const renderedFrom = `${routes.serializedAsset.title}`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

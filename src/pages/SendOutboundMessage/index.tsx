@@ -18,11 +18,12 @@ import { dateTimeFormat, gridLoadingTimeout, sidebarResource } from 'src/constan
 import ManageSendOutboundMessage from './manageSendOutboundMessage';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.sendOutboundMessage?.title);
+
 const SendOutboundMessage = () => {
-  const renderedFrom = camelCase(routes?.sendOutboundMessage?.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting } = state;
   const { generateColumns } = useColumns();
 
@@ -93,7 +94,6 @@ const SendOutboundMessage = () => {
       });
   }, []);
 
-
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
     fetchData(cancelTokenSource);
@@ -115,7 +115,7 @@ const SendOutboundMessage = () => {
             date: d?.date,
             user: d?.user?.optionLabel,
             ...d?.outboundMessageDetail,
-            outboundMessageNumber: d?.messageValue || d?.outboundMessageDetail?.outboundMessageNumber,
+            outboundMessageNumber: d?.messageValue || d?.outboundMessageDetail?.outboundMessageNumber
           };
         });
 
@@ -176,8 +176,8 @@ const SendOutboundMessage = () => {
       </div>
       <CustomContainer>
         <div className="header-panel">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <div className={'flex justify-between align-items-center gap-1 w-full'}>
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+            <div className={'align-items-center flex w-full justify-between gap-1'}>
               <Autocomplete
                 options={serializedAssetOptions}
                 style={{ minWidth: '350px' }}
@@ -192,9 +192,9 @@ const SendOutboundMessage = () => {
                 )}
               />
             </div>
-            <div className="flex flex-wrap gap-[8px] justify-end align-items-center">
+            <div className="align-items-center flex flex-wrap justify-end gap-[8px]">
               <SearchBox onChange={handleSearch} value={search} />
-              <div className="flex gap-[8px] flex-wrap items-center">
+              <div className="flex flex-wrap items-center gap-[8px]">
                 <Button
                   variant={'contained'}
                   color="primary"

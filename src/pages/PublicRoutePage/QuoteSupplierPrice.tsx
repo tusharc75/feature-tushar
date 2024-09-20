@@ -64,7 +64,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
   let renderedFrom = 'QuoteSupplierPrice';
   const classes = useStyles();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
@@ -150,9 +150,9 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
             const currencyField: any =
               e?.type === 'currencyAmount'
                 ? {
-                  ...ele,
-                  fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
-                }
+                    ...ele,
+                    fieldName: ele.fieldName + '_' + quoteData.currency.toLowerCase()
+                  }
                 : {};
 
             rows.forEach((data) => {
@@ -363,13 +363,13 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
               <div id="importExportLinks" className={`${classes.root}`}>
                 <div className={classes.linksContainer}>
                   <>
-                    <label htmlFor="importFromExcel" className={`${classes.darkLinks} p-1 cursor-pointer`}>
+                    <label htmlFor="importFromExcel" className={`${classes.darkLinks} cursor-pointer p-1`}>
                       {ImportInput}
                       Import from Excel
                     </label>
                     <Divider orientation="vertical" flexItem className={classes.darkLinks} />
                   </>
-                  <label onClick={exportToExcel} className={`${classes.darkLinks} p-1 cursor-pointer`}>
+                  <label onClick={exportToExcel} className={`${classes.darkLinks} cursor-pointer p-1`}>
                     Export to Excel
                   </label>
                 </div>
@@ -378,7 +378,7 @@ const QuoteSupplierPrice = ({ quoteData, openAuthId }) => {
                 <CustomReactTable
                   height={'calc(100vh - 200px)'}
                   columns={columns}
-                  onSelect={() => { }}
+                  onSelect={() => {}}
                   state={state}
                   dispatch={dispatch}
                   renderedFrom={renderedFrom}

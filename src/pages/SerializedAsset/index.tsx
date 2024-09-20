@@ -41,13 +41,13 @@ import ManageSerializedAsset from './ManageSerializedAsset';
 import ReasonDialog from './ReasonDialog';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.serializedAsset.title);
 
 const SerializedAsset = () => {
-  const renderedFrom = camelCase(routes?.serializedAsset.title);
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -295,14 +295,14 @@ const SerializedAsset = () => {
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['canDelete'] =
             permissions?.serializedAsset?.isDelete &&
-              ![
-                ASSET_STATUS.new,
-                ASSET_STATUS.available,
-                ASSET_STATUS.lost,
-                ASSET_STATUS.customerPossession,
-                ASSET_STATUS.onPO,
-                ASSET_STATUS.scrap
-              ]?.includes(u?.status)
+            ![
+              ASSET_STATUS.new,
+              ASSET_STATUS.available,
+              ASSET_STATUS.lost,
+              ASSET_STATUS.customerPossession,
+              ASSET_STATUS.onPO,
+              ASSET_STATUS.scrap
+            ]?.includes(u?.status)
               ? false
               : true;
           return finalObject;
@@ -326,8 +326,7 @@ const SerializedAsset = () => {
 
     if (showScrapAsset) {
       deepFilter = `${deepFilter}&showScrapAsset=true`;
-    }
-    else {
+    } else {
       deepFilter = `${deepFilter}&hideScrapAsset=true`;
     }
 
@@ -569,8 +568,9 @@ const SerializedAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.assetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.serializedAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.assetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -680,7 +680,7 @@ const LeftSideContent = ({
         <Fragment>
           {permissions?.productCategory?.isRead && (
             <Autocomplete
-              className={`lg:w-[230px] w-full`}
+              className={`w-full lg:w-[230px]`}
               options={productCategoryList}
               getOptionLabel={(option: any) => (option ? option.name : '')}
               getOptionSelected={(option: any, val) => option._id === val}
@@ -699,7 +699,7 @@ const LeftSideContent = ({
           )}
           {productCategory && (
             <Autocomplete
-              className={`lg:w-[230px] w-full`}
+              className={`w-full lg:w-[230px]`}
               options={productFilterList}
               size="small"
               getOptionLabel={(option: any) => (option ? option.productName : '')}
@@ -718,7 +718,7 @@ const LeftSideContent = ({
             />
           )}
           <Autocomplete
-            className={`lg:w-[230px] w-full`}
+            className={`w-full lg:w-[230px]`}
             options={warehouseOptions}
             getOptionLabel={(option: any) => (option ? option?.optionLabel : '')}
             getOptionSelected={(option: any, val) => option.optionValue === val}
@@ -816,9 +816,20 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRepair);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
-              ASSET_STATUS.inRepair, ASSET_STATUS.repair, ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable,
-              ASSET_STATUS.needRepair, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter(
+                (o) =>
+                  ![
+                    ASSET_STATUS.delivered,
+                    ASSET_STATUS.inTransit,
+                    ASSET_STATUS.inUse,
+                    ASSET_STATUS.inRepair,
+                    ASSET_STATUS.repair,
+                    ASSET_STATUS.standBy,
+                    ASSET_STATUS.standByNotChargeable,
+                    ASSET_STATUS.needRepair,
+                    ASSET_STATUS.lost
+                  ].includes(o.status)
+              ).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -830,9 +841,20 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.needRecert);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
-              ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.inRepair, ASSET_STATUS.repair,
-              ASSET_STATUS.needRecert, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter(
+                (o) =>
+                  ![
+                    ASSET_STATUS.delivered,
+                    ASSET_STATUS.inTransit,
+                    ASSET_STATUS.inUse,
+                    ASSET_STATUS.standBy,
+                    ASSET_STATUS.standByNotChargeable,
+                    ASSET_STATUS.inRepair,
+                    ASSET_STATUS.repair,
+                    ASSET_STATUS.needRecert,
+                    ASSET_STATUS.lost
+                  ].includes(o.status)
+              ).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -844,9 +866,20 @@ const ActionMenuItems = ({
               handleStatusChange(ASSET_STATUS.scrap);
             }}
             disabled={
-              selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
-              ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.inRepair, ASSET_STATUS.repair,
-              ASSET_STATUS.scrap, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length
+              selectedRecords?.filter(
+                (o) =>
+                  ![
+                    ASSET_STATUS.delivered,
+                    ASSET_STATUS.inTransit,
+                    ASSET_STATUS.inUse,
+                    ASSET_STATUS.standBy,
+                    ASSET_STATUS.standByNotChargeable,
+                    ASSET_STATUS.inRepair,
+                    ASSET_STATUS.repair,
+                    ASSET_STATUS.scrap,
+                    ASSET_STATUS.lost
+                  ].includes(o.status)
+              ).length === selectedRecords?.length
                 ? false
                 : true
             }
@@ -857,9 +890,23 @@ const ActionMenuItems = ({
             onClick={() => {
               handleStatusChange(ASSET_STATUS.lost);
             }}
-            disabled={selectedRecords?.filter((o) => ![ASSET_STATUS.delivered, ASSET_STATUS.inTransit, ASSET_STATUS.inUse,
-            ASSET_STATUS.inRepair, ASSET_STATUS.repair,
-            ASSET_STATUS.standBy, ASSET_STATUS.standByNotChargeable, ASSET_STATUS.lost].includes(o.status)).length === selectedRecords?.length ? false : true}
+            disabled={
+              selectedRecords?.filter(
+                (o) =>
+                  ![
+                    ASSET_STATUS.delivered,
+                    ASSET_STATUS.inTransit,
+                    ASSET_STATUS.inUse,
+                    ASSET_STATUS.inRepair,
+                    ASSET_STATUS.repair,
+                    ASSET_STATUS.standBy,
+                    ASSET_STATUS.standByNotChargeable,
+                    ASSET_STATUS.lost
+                  ].includes(o.status)
+              ).length === selectedRecords?.length
+                ? false
+                : true
+            }
           >
             {`Status Change - ${ASSET_STATUS.lost}`}
           </MenuItem>

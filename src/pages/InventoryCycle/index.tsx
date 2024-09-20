@@ -20,13 +20,13 @@ import routes from './../../components/Helpers/Routes';
 import ManageInventoryCycle from './ManageInventoryCycle';
 import axios, { CancelTokenSource } from 'axios';
 
-const InventoryCycle = () => {
-  const renderedFrom = camelCase(routes?.inventoryCycle.title);
+const renderedFrom = camelCase(routes?.inventoryCycle.title);
 
+const InventoryCycle = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

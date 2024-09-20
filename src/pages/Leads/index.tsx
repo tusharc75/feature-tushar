@@ -34,6 +34,8 @@ import routes from './../../components/Helpers/Routes';
 import ManageLeadDialog from './ManageLeadDialog/ManageLeadDialog';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.lead.title);
+
 const Leads = () => {
   const LeadTypes = [
     {
@@ -45,10 +47,9 @@ const Leads = () => {
       value: 2
     }
   ];
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.lead.title);
 
   const {
     state: { user, selectedEntity, permissions }

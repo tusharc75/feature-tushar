@@ -46,10 +46,11 @@ const CustomReport = () => {
   const [customReportData, setCustomReportData] = React.useState(null);
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
-  const { state, dispatch } = useTableReducer();
-  const { page, limit, search, filters, sorting, loading } = state;
 
   const renderedFrom = `custom-report_${id}`;
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { page, limit, search, filters, sorting, loading } = state;
 
   const fetchGridColumns = async (res) => {
     let result = [];

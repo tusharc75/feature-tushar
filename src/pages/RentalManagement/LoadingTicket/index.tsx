@@ -100,7 +100,7 @@ const LoadingTicket = ({
     state: { user, permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords, dataRows } = state;
 
   const [okBtnLoading, setOkBtnLoading] = useState(false);

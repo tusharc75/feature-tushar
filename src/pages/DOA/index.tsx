@@ -17,7 +17,7 @@ const DOARequest = () => {
   const renderedFrom = camelCase(routes?.DOARequest.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 

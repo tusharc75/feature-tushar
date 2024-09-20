@@ -37,6 +37,8 @@ import './style.scss';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.opportunity.title);
+
 const Opportunities = () => {
   const types = [
     {
@@ -48,8 +50,8 @@ const Opportunities = () => {
       value: 2
     }
   ];
-  const { state, dispatch } = useTableReducer();
-  const renderedFrom = camelCase(routes?.opportunity.title);
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {

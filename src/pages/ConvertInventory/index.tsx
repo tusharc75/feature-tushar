@@ -22,7 +22,7 @@ const ConvertInventory = () => {
   const renderedFrom = camelCase(routes?.inventoryToAsset.title);
 
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [warehouseId, setWarehouseId] = useState(null);
   const [storageLocationId, setStorageLocationId] = useState(null);
@@ -36,7 +36,6 @@ const ConvertInventory = () => {
   }: any = useData();
 
   const { generateColumns } = useColumns();
-
 
   useEffect(() => {
     getWarehouse();
@@ -117,7 +116,7 @@ const ConvertInventory = () => {
           )}
         </>
       )
-    })
+    });
     setColumns(columns);
   };
 
@@ -158,7 +157,6 @@ const ConvertInventory = () => {
   };
 
   const getQueryString = () => {
-
     let deepFilter = `?warehouse=${warehouseId}&page=${page}&limit=${limit}`;
     if (storageLocationId) {
       deepFilter = `${deepFilter}&storageLocation=${storageLocationId}`;

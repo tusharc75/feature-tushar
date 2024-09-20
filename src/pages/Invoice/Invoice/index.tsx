@@ -15,13 +15,13 @@ import { CHILD_RESOURCE, INVOICE_STATUS, MATERIAL_TYPE, invoice, sidebarResource
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 
-const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
-  const renderedFrom = `${camelCase(routes?.invoice.title)}_Invoice`;
+const renderedFrom = `${camelCase(routes?.invoice.title)}_Invoice`;
 
+const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, stepFullScreen }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [columns, setColumns] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   useEffect(() => {
@@ -72,7 +72,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
           Cell: ({ row }) =>
             row?.original?.type ? (
               <div className="flex items-center gap-2">
-               {row?.original?.detail ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
+                {row?.original?.detail ? <p className="text-truncate">{row.original.detail}</p> : <NoDataCell />}
                 {![MATERIAL_TYPE.manualEntry, MATERIAL_TYPE.other]?.includes(row.original['type']) && (
                   <IconButton
                     size="small"
@@ -119,15 +119,15 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
 
     var data: any = [];
     const response = await axiosInstance().get(`${invoice.api}/material/${invoiceData._id}`);
-    const additionalData =  await axiosInstance().get(`${routes.invoice.path}/${invoiceData._id}/additional-cost`);
+    const additionalData = await axiosInstance().get(`${routes.invoice.path}/${invoiceData._id}/additional-cost`);
     let additionalCost = additionalData?.data?.data || [];
     additionalCost = additionalCost?.map((e: any) => {
       return { ...e, type: MATERIAL_TYPE.manualEntry };
-    })
+    });
     data = response?.data?.data;
 
     let rows = data.material.filter((e) => !e.parentId);
-    rows = [...rows, ...additionalCost]
+    rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail =
@@ -149,7 +149,7 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
               ? parent?.serializedAssetDetail?.product?.productDescription
               : parent.type === MATERIAL_TYPE.service
                 ? parent?.serviceDetail?.serviceDescription
-                : parent.description || ''
+                : parent.description || '';
       parent.qty = parent.qty;
       parent.subRows = generateNestedData(data.material, parent);
     });
@@ -169,7 +169,8 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
             : _subRow.type === MATERIAL_TYPE.serializedAsset
               ? _subRow.serializedAssetDetail.assetNumber
               : _subRow.type === MATERIAL_TYPE.service
-                ? _subRow.serviceDetail?.serviceName : _subRow?.detail;
+                ? _subRow.serviceDetail?.serviceName
+                : _subRow?.detail;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
@@ -177,8 +178,9 @@ const Invoice = ({ invoiceData, setNextStep, handleChangeStatus, statusOptions, 
             ? _subRow?.packageDetail?.packageDescription
             : _subRow.type === MATERIAL_TYPE.serializedAsset
               ? parent.description
-              : _subRow.type === MATERIAL_TYPE.service ?
-                _subRow?.serviceDetail?.serviceDescription : '';
+              : _subRow.type === MATERIAL_TYPE.service
+                ? _subRow?.serviceDetail?.serviceDescription
+                : '';
       _subRow.qty = _subRow.qty;
       _subRow.subRows = generateNestedData(material, _subRow);
     });

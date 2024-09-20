@@ -10,8 +10,10 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { dateTimeFormat24Hours, gridLoadingTimeout } from 'src/constants/helpers';
 
+const renderedFrom = 'iotChart_Alarms';
+
 const Alarms = ({ deviceTemplate, assetId }) => {
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit } = state;
   const toastConfig = useContext(CustomToastContext);
 
@@ -159,7 +161,7 @@ const Alarms = ({ deviceTemplate, assetId }) => {
           columns={columns}
           state={state}
           dispatch={dispatch}
-          renderedFrom={'iotChart_Alarms'}
+          renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           hideSelection={true}
           hideAction={true}

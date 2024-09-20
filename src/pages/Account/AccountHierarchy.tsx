@@ -17,6 +17,8 @@ import { prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 import CustomRenderCell from '../../components/Helpers/CustomRenderCell';
 import EditIcon from '@material-ui/icons/Edit';
 
+const renderedFrom = 'customer-account-hierarchy';
+
 export default function AccountHierarchy({
   data,
   currentAccountId,
@@ -30,7 +32,7 @@ export default function AccountHierarchy({
   accountResource
 }) {
   const [columns, setColumns] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const {
     state: { user, selectedEntity },
     dispatch: entityDispatch
@@ -94,9 +96,16 @@ export default function AccountHierarchy({
           return row.original['accountName'] ? (
             <div className="flex items-center gap-2">
               {row.original._id === currentAccountId ? (
-                <span className="text-truncate" title={row.original.accountName} >{row.original.accountName}</span>
+                <span className="text-truncate" title={row.original.accountName}>
+                  {row.original.accountName}
+                </span>
               ) : (
-                <Link title={row.original.accountName} target='_blank' className="link text-truncate" to={`/${accountRoute}/detail/${row.original._id}`}>
+                <Link
+                  title={row.original.accountName}
+                  target="_blank"
+                  className="link text-truncate"
+                  to={`/${accountRoute}/detail/${row.original._id}`}
+                >
                   {row.original.accountName}
                 </Link>
               )}
@@ -109,13 +118,8 @@ export default function AccountHierarchy({
                 />
               )}
               <HtmlTooltip title={canUpdate && row.original?.canEdit ? 'Edit' : "You don't have permission to edit"}>
-                <IconButton
-                  size="small"
-                  aria-label="Edit"
-                  disabled={!canUpdate || !row.original?.canEdit}
-                  onClick={() => handleUpdate(row.original)}
-                >
-                    <EditIcon fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'}  />
+                <IconButton size="small" aria-label="Edit" disabled={!canUpdate || !row.original?.canEdit} onClick={() => handleUpdate(row.original)}>
+                  <EditIcon fontSize="small" color={canUpdate && row.original?.canEdit ? 'primary' : 'disabled'} />
                 </IconButton>
               </HtmlTooltip>
               <HtmlTooltip title={canCreate ? 'Add Account' : "You don't have permission to add"}>
@@ -133,8 +137,8 @@ export default function AccountHierarchy({
             <NoDataCell />
           );
         };
-        o.width = 300
-        o.minWidth = 300
+        o.width = 300;
+        o.minWidth = 300;
       }
     });
 
@@ -186,7 +190,7 @@ export default function AccountHierarchy({
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={'customer-account-hierarchy'}
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
             expander={true}
             hideAction={true}

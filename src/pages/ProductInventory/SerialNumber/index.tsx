@@ -11,9 +11,10 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import moment from 'moment';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
-const SerialNumber = ({ product, warehouse }) => {
+const renderedFrom = 'serialNumber_grid';
 
-  const { state, dispatch } = useTableReducer();
+const SerialNumber = ({ product, warehouse }) => {
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting } = state;
 
   const toastConfig = useContext(CustomToastContext);
@@ -52,19 +53,21 @@ const SerialNumber = ({ product, warehouse }) => {
   const fetchData = async () => {
     dispatch({ type: 'loading', loading: true });
     let queryString = getQueryString();
-    axiosInstance().get(`/product-inventory/serial-number${queryString}`).then(({ data }) => {
-      let rows = data.data.map((u) => {
-        let finalObject = prepareDataForGrid(u);
-        return {
-          ...finalObject
-        };
-      });
+    axiosInstance()
+      .get(`/product-inventory/serial-number${queryString}`)
+      .then(({ data }) => {
+        let rows = data.data.map((u) => {
+          let finalObject = prepareDataForGrid(u);
+          return {
+            ...finalObject
+          };
+        });
 
-      dispatch({ type: 'initialize', data: rows, count: data.count });
-      setTimeout(() => {
-        dispatch({ type: 'loading', loading: false });
-      }, gridLoadingTimeout);
-    })
+        dispatch({ type: 'initialize', data: rows, count: data.count });
+        setTimeout(() => {
+          dispatch({ type: 'loading', loading: false });
+        }, gridLoadingTimeout);
+      })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -144,7 +147,7 @@ const SerialNumber = ({ product, warehouse }) => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={'serialNumber_grid'}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchData}
             hideSelection={true}
           />

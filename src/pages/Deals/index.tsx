@@ -59,7 +59,9 @@ const getWarningList = (row?: any) => {
       icon,
       title: 'Quote is expired but Unit is still assigned',
       label: 'Quote is expired but Unit is still assigned',
-      isVisible: row?.original?.dealstage === DEAL_STAGE.proposalSent && row?.original?.unit !== '' &&
+      isVisible:
+        row?.original?.dealstage === DEAL_STAGE.proposalSent &&
+        row?.original?.unit !== '' &&
         new Date(row?.original?.quote_expiration_date)?.getTime() <= new Date()?.getTime(),
       color: COLOUR_MASTER.lostAssets.background
     }
@@ -72,7 +74,7 @@ const Deals = () => {
   const toastConfig = useContext(CustomToastContext);
   const [checkedFilter, setCheckedFilter] = useState<null | number>(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly, rowCount } = state;
 
   const {
@@ -95,7 +97,10 @@ const Deals = () => {
   }, [page, limit, filters, sorting, selectedEntity, showFilteredRecordsOnly, search, checkedFilter]);
 
   useEffect(() => {
-    dispatch({ type: 'filter', filters: { dealstage: { filter: [DEAL_STAGE.proposalSent, DEAL_STAGE.contractSigned, DEAL_STAGE.renewalSent, DEAL_STAGE.renewalSigned] } } });
+    dispatch({
+      type: 'filter',
+      filters: { dealstage: { filter: [DEAL_STAGE.proposalSent, DEAL_STAGE.contractSigned, DEAL_STAGE.renewalSent, DEAL_STAGE.renewalSigned] } }
+    });
   }, []);
 
   const getVisibleWarnings = useCallback((row: any) => {
@@ -113,18 +118,18 @@ const Deals = () => {
             o.cell = ({ row }) => {
               const warnings = getVisibleWarnings(row);
               return (
-                <div style={{ backgroundColor: warnings?.find((e) => e.color !== '')?.color || '' }}   >
+                <div style={{ backgroundColor: warnings?.find((e) => e.color !== '')?.color || '' }}>
                   <Link className="link text-truncate" title={row?.original?.dealname} to={`${routes.dealDetail.path}/${row?.original?._id}`}>
                     {row?.original?.dealname}
                   </Link>
                   {warnings?.length > 0
                     ? warnings.map((w) => (
-                      <Box ml={1} key={w.warningFilter}>
-                        <HtmlTooltip title={w.title} placement="top" arrow>
-                          {w.icon}
-                        </HtmlTooltip>
-                      </Box>
-                    ))
+                        <Box ml={1} key={w.warningFilter}>
+                          <HtmlTooltip title={w.title} placement="top" arrow>
+                            {w.icon}
+                          </HtmlTooltip>
+                        </Box>
+                      ))
                     : null}
                 </div>
               );

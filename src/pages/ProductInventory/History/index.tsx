@@ -9,7 +9,15 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import DurationFilter from 'src/components/DurationFilter';
 import { useAppTheme } from 'src/constants/AppConfig';
-import { PRODUCT_SERIAL_NUMBER_STATUS, dateTimeFormat, gridLoadingTimeout, isObjectEmpty, prepareDataForGrid, productInventory, sidebarResource } from 'src/constants/helpers';
+import {
+  PRODUCT_SERIAL_NUMBER_STATUS,
+  dateTimeFormat,
+  gridLoadingTimeout,
+  isObjectEmpty,
+  prepareDataForGrid,
+  productInventory,
+  sidebarResource
+} from 'src/constants/helpers';
 import CustomReactTable, { gridFilterParser, useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
@@ -27,7 +35,7 @@ const History = ({ product, warehouse, storageLocation }) => {
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting } = state;
 
   const {
@@ -40,7 +48,15 @@ const History = ({ product, warehouse, storageLocation }) => {
   const [storageLocationOptions, setStorageLocationOptions] = useState([]);
   const [selectedWarehouse, setSelectedWarehouse] = useState(warehouse && warehouse?.split(',')?.length === 1 ? warehouse : 'All');
   const [selectedStorageLocation, setSelectedStorageLocation] = useState(storageLocation);
-  const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, productName: '', product: '', qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
+  const [revertQtyDialog, setRevertQtyDialog] = useState({
+    open: false,
+    productName: '',
+    product: '',
+    qty: 0,
+    revertedQty: 0,
+    ledgerId: '',
+    serialNumber: []
+  });
   const [duration, setDuration] = useState({
     from: new Date(moment().subtract('1', 'year').calendar()),
     to: new Date()
@@ -81,9 +97,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       let tempWarehouse =
         selectedWarehouse === 'All'
           ? warehouseOptions
-            ?.filter((d) => d.optionValue !== 'All')
-            .map((d) => d.optionValue)
-            .toString()
+              ?.filter((d) => d.optionValue !== 'All')
+              .map((d) => d.optionValue)
+              .toString()
           : selectedWarehouse;
 
       deepFilter = `${deepFilter}&warehouse=${tempWarehouse}`;
@@ -169,7 +185,7 @@ const History = ({ product, warehouse, storageLocation }) => {
       Header: 'Reference',
       disableFilters: true,
       disableSortBy: true,
-      Cell: ({ row }) =>
+      Cell: ({ row }) => (
         <div>
           {row?.original?.reference ? (
             row?.original?.referenceType === sidebarResource.purchaseOrder ? (
@@ -271,6 +287,7 @@ const History = ({ product, warehouse, storageLocation }) => {
             <NoDataCell />
           )}
         </div>
+      )
     },
     {
       accessor: 'type',
@@ -321,24 +338,24 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(!user?.user?.brandPolicy?.hideInventoryCount
       ? [
-        {
-          accessor: 'finalInventory',
-          Header: 'Final Quantity',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-              {row?.original?.finalInventory ? (
-                <h5 className="text-truncate" title={row?.original?.finalInventory}>
-                  {row?.original?.finalInventory}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'finalInventory',
+            Header: 'Final Quantity',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <div>
+                {row?.original?.finalInventory ? (
+                  <h5 className="text-truncate" title={row?.original?.finalInventory}>
+                    {row?.original?.finalInventory}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'price',
@@ -374,24 +391,24 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(selectedWarehouse && selectedWarehouse !== 'All'
       ? [
-        {
-          accessor: 'finalAvgPrice',
-          Header: `Final Average Cost ${curr}`,
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-              {row?.original?.finalAvgPrice ? (
-                <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
-                  {row?.original?.finalAvgPrice}
-                </h5>
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'finalAvgPrice',
+            Header: `Final Average Cost ${curr}`,
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <div>
+                {row?.original?.finalAvgPrice ? (
+                  <h5 className="text-truncate" title={row?.original?.finalAvgPrice}>
+                    {row?.original?.finalAvgPrice}
+                  </h5>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'warehouse',
@@ -417,29 +434,29 @@ const History = ({ product, warehouse, storageLocation }) => {
     },
     ...(user?.user?.brandPolicy?.storageLocation
       ? [
-        {
-          accessor: 'storageLocation',
-          Header: 'Storage Location',
-          disableFilters: true,
-          disableSortBy: true,
-          Cell: ({ row }) => (
-            <div>
-              {row?.original?.storageLocation ? (
-                <Link
-                  className="link"
-                  target="_blank"
-                  title={row?.original?.storageLocation}
-                  to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
-                >
-                  {row?.original?.storageLocation}
-                </Link>
-              ) : (
-                <NoDataCell />
-              )}
-            </div>
-          )
-        }
-      ]
+          {
+            accessor: 'storageLocation',
+            Header: 'Storage Location',
+            disableFilters: true,
+            disableSortBy: true,
+            Cell: ({ row }) => (
+              <div>
+                {row?.original?.storageLocation ? (
+                  <Link
+                    className="link"
+                    target="_blank"
+                    title={row?.original?.storageLocation}
+                    to={`${routes.storageLocationDetail.path}/${row?.original?.storageLocationId}`}
+                  >
+                    {row?.original?.storageLocation}
+                  </Link>
+                ) : (
+                  <NoDataCell />
+                )}
+              </div>
+            )
+          }
+        ]
       : []),
     {
       accessor: 'supplierPartNumber',
@@ -532,9 +549,9 @@ const History = ({ product, warehouse, storageLocation }) => {
       Cell: ({ row }) => (
         <div>
           {(['Product Inventory', 'Reverted'].includes(row?.original?.referenceType) && !row?.original?.reverted) ||
-            ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
-              row?.original?.type?.toLowerCase() === 'debit' &&
-              row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
+          ([sidebarResource.workOrder, sidebarResource.fieldTicket].includes(row?.original?.referenceType) &&
+            row?.original?.type?.toLowerCase() === 'debit' &&
+            row?.original?.qty - (row?.original?.revertedQty || 0) > 0) ? (
             <Box pl={1}>
               <HtmlTooltip title="Revert">
                 <span>
@@ -686,11 +703,15 @@ const History = ({ product, warehouse, storageLocation }) => {
             dispatch({ type: 'initialize', data: [], count: 0 });
             fetchRecords();
           }}
-          serialNumber={revertQtyDialog.serialNumber?.map(s => {
-            if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.unAvailable) {
-              return s;
-            }
-          })?.filter(Boolean) || []}
+          serialNumber={
+            revertQtyDialog.serialNumber
+              ?.map((s) => {
+                if (s.status === PRODUCT_SERIAL_NUMBER_STATUS.unAvailable) {
+                  return s;
+                }
+              })
+              ?.filter(Boolean) || []
+          }
         />
       )}
     </>

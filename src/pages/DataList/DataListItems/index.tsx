@@ -18,12 +18,12 @@ import ManageDataList from './ManageDataList';
 import { Edit } from '@material-ui/icons';
 import ImportExportMenu from 'src/components/Helpers/ImportExportMenu';
 
-const DataListItems = ({dataListId}) => {
+const DataListItems = ({ dataListId }) => {
   const renderedFrom = camelCase(routes?.dataListitems.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
-  const {  page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { page, limit, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
     state: { user, permissions }
   }: any = useData();
@@ -49,11 +49,11 @@ const DataListItems = ({dataListId}) => {
         Header: 'Description',
         width: 120,
         Cell: ({ row }) => (row?.original?.description ? <p className="text-truncate">{row?.original?.description}</p> : <NoDataCell />)
-      },
+      }
     ];
     setColumns([...columns, ActionsRenderer]);
   };
-  
+
   const ActionsRenderer = {
     accessor: 'action',
     Header: 'Actions',
@@ -75,7 +75,7 @@ const DataListItems = ({dataListId}) => {
                 setShowManageDialog({ open: true, isEdit: true, idToEdit: row.original._id });
               }}
             >
-               <Edit fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'} />
+              <Edit fontSize="small" color={row?.original?.allowedToEdit ? 'primary' : 'disabled'} />
             </IconButton>
           </span>
         </HtmlTooltip>
@@ -100,7 +100,7 @@ const DataListItems = ({dataListId}) => {
   };
 
   useEffect(() => {
-      fetchData(); 
+    fetchData();
   }, [page, limit, filters, sorting, showFilteredRecordsOnly]);
 
   const fetchData = async () => {
@@ -206,33 +206,36 @@ const DataListItems = ({dataListId}) => {
 
   return (
     <Fragment>
-        <DetailsPageHeader
-            isAddButtonVisible={true}
-            isActionButtonVisible={permissions?.dataLists?.isDelete}
-            actionButtonMenuItems={<ActionMenuItems />}
-            addButtonProps={{ disabled: !permissions?.dataLists.isCreate, onClick: () => {
-              setShowManageDialog({ open: true, isEdit: false, idToEdit: null });
-            } }}
-            actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
-            rightSideContents={rightSideContents()}
-            hasXpadding={false}
-          />
+      <DetailsPageHeader
+        isAddButtonVisible={true}
+        isActionButtonVisible={permissions?.dataLists?.isDelete}
+        actionButtonMenuItems={<ActionMenuItems />}
+        addButtonProps={{
+          disabled: !permissions?.dataLists.isCreate,
+          onClick: () => {
+            setShowManageDialog({ open: true, isEdit: false, idToEdit: null });
+          }
+        }}
+        actionButtonProps={{ disabled: selectedRecords.length ? false : true }}
+        rightSideContents={rightSideContents()}
+        hasXpadding={false}
+      />
 
-        {columns ? (
-          <CustomReactTable
-            height={'calc(100vh - 200px)'}
-            columns={columns}
-            state={state}
-            dispatch={dispatch}
-            renderedFrom={renderedFrom}
-            refreshGrid={fetchData}
-            showArrangeView={false}
-          />
-        ) : (
-          <Box p={2} height={500}>
-            <CommonSkeleton lenArray={[...Array(10).keys()]} />
-          </Box>
-        )}
+      {columns ? (
+        <CustomReactTable
+          height={'calc(100vh - 200px)'}
+          columns={columns}
+          state={state}
+          dispatch={dispatch}
+          renderedFrom={renderedFrom}
+          refreshGrid={fetchData}
+          showArrangeView={false}
+        />
+      ) : (
+        <Box p={2} height={500}>
+          <CommonSkeleton lenArray={[...Array(10).keys()]} />
+        </Box>
+      )}
 
       {showDeleteConfirmBox && (
         <ConfirmationDialog
@@ -248,9 +251,9 @@ const DataListItems = ({dataListId}) => {
 
       {showManageDialog.open && (
         <ManageDataList
-        isEdit={showManageDialog.isEdit}
+          isEdit={showManageDialog.isEdit}
           id={showManageDialog.idToEdit}
-          dataListId = {dataListId}
+          dataListId={dataListId}
           onClose={() => setShowManageDialog({ open: false, isEdit: false, idToEdit: null })}
           onSuccess={() => {
             fetchData();

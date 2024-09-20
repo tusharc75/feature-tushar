@@ -165,7 +165,11 @@ export type TActios =
   | { type: 'setVisibleColumns'; visibleColumns: { [key: string]: boolean } }
   | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] };
 
-export const useTableReducer = () => {
+type UseTableReducerProps = {
+  renderedFrom: string;
+};
+
+export const useTableReducer = ({ renderedFrom }: UseTableReducerProps) => {
   const [state, dispatch] = useReducer(reducer, intialState);
 
   return { state, dispatch };

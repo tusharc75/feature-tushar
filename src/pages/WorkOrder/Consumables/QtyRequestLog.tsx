@@ -17,9 +17,9 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import HistoryIcon from '@material-ui/icons/History';
 import QtyWithdrawalDialog from './QtyWithdrawalDialog';
 
-function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productName, product }) {
-  const renderedFrom = 'workOrder_consumables_request';
+const renderedFrom = 'workOrder_consumables_request';
 
+function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productName, product }) {
   const [fullScreen, setFullScreen] = useState(true);
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +30,7 @@ function QtyRequestLog({ onClose, referenceId, referenceType, uniqueId, productN
     state: { user }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   useEffect(() => {
     fetchColumn();

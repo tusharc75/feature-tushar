@@ -57,7 +57,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   const [historyDialog, setHistoryDialog] = useState({ open: false, _id: '', product: '', productName: '' });
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -104,7 +104,12 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
   }, [selectedServiceOption, tabValue, refreshChild]);
 
   const fetchColumns = async () => {
-    let fields = await fetch_child_resource_fields_perm(CHILD_RESOURCE.fieldTicketMateial, fieldTicketData?.currency, allowedToEdit && !fieldTicketData?.quotation, isOffline);
+    let fields = await fetch_child_resource_fields_perm(
+      CHILD_RESOURCE.fieldTicketMateial,
+      fieldTicketData?.currency,
+      allowedToEdit && !fieldTicketData?.quotation,
+      isOffline
+    );
     setAllFields(JSON.parse(JSON.stringify(fields)));
     fields = fields?.filter((f) => f?.isRead);
     const newColumns = generateColumns(renderedFrom, fields, null, false, fieldTicketData?.currency);
@@ -125,7 +130,9 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
     if (isOffline) {
       data = await findOne(objectStore.resource, 'fieldTicketMaterialProduct');
     } else {
-      const response = await axiosInstance().put(`/field/find-field-labels`, { fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }] });
+      const response = await axiosInstance().put(`/field/find-field-labels`, {
+        fields: [{ resource: 'Product', fieldNames: ['productName', 'productNumber', 'productDescription'] }]
+      });
       data = response?.data?.data;
     }
     const productFields = data?.find((e) => e.resource === 'Product')?.fieldNames || [];
@@ -295,7 +302,7 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
       let consumables;
       if (isOffline) {
         consumables = await findAll(objectStore.fieldTicketMaterial);
-        consumables = consumables?.filter((e) => e?.fieldTicketId === fieldTicketData?._id && (e?.type === MATERIAL_TYPE.product && !e?.isRental));
+        consumables = consumables?.filter((e) => e?.fieldTicketId === fieldTicketData?._id && e?.type === MATERIAL_TYPE.product && !e?.isRental);
         if (selectedServiceOption && selectedServiceOption?.optionValue !== 'All') {
           consumables = consumables?.filter((e) => e?.service?.optionValue === selectedServiceOption?.optionValue);
         }
@@ -346,13 +353,13 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
           productDescription: d.productDescription,
           productNumber: d.productNumber,
           unit: d?.unitMain?.length ? d.unitMain : [],
-          pricingMethod: d?.pricingMethodMain?.length ? d.pricingMethodMain : [],
-        }
+          pricingMethod: d?.pricingMethodMain?.length ? d.pricingMethodMain : []
+        };
         element.fieldTicketId = fieldTicketData?._id;
         element._id = id;
         await insertUpdate(objectStore.fieldTicketMaterial, id, element);
         material.push(element);
-      };
+      }
       let updatedData;
       const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
       if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = [...(result?.data || []), ...material];
@@ -460,17 +467,18 @@ const Consumables = ({ allowedToEdit, services, fieldTicketData, fetchMaterial, 
         const result = await findOne(objectStore.offlineDataSync, fieldTicketData?._id);
         const alreadyOfflineDataSyncStoredRows = result?.data?.material || result?.data || [];
         let updatedData;
-        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id)) updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
+        if (/^[0-9a-fA-F]{24}$/.test(fieldTicketData?._id))
+          updatedData = alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id));
         else updatedData = { ...result?.data, material: alreadyOfflineDataSyncStoredRows.filter((d: any) => !materialIdsToDelete.includes(d._id)) };
         await insertUpdate(objectStore.offlineDataSync, fieldTicketData?._id, { ...result, data: updatedData });
         //for onlineSync
         const deleteData = {
-          "cost": [],
-          "material": materialIdsToDelete,
-          "fieldTicketId": fieldTicketData?._id
-        }
+          cost: [],
+          material: materialIdsToDelete,
+          fieldTicketId: fieldTicketData?._id
+        };
         let id = Math.floor(Math.random() * 1000000).toString();
-        await insertUpdate(objectStore.offlineDataSync, id, { type: 'fieldTicketMaterialDelete', data: deleteData, _id: id })
+        await insertUpdate(objectStore.offlineDataSync, id, { type: 'fieldTicketMaterialDelete', data: deleteData, _id: id });
       } else {
         const response = await axiosInstance().put(`${fieldTicket.api}/${fieldTicketData?._id}/material/delete`, { ids: rows });
         toastConfig.setToastConfig({

@@ -29,7 +29,7 @@ const Technicians = ({ allowedToEdit, fieldTicketData, selectedService, stepFull
   const {
     state: { user }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   useEffect(() => {

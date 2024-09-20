@@ -22,11 +22,12 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
+const renderedFrom = camelCase(routes?.packages.title);
+
 const PackageList = () => {
-  const renderedFrom = camelCase(routes?.packages.title);
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -245,8 +246,9 @@ const PackageList = () => {
             },
             {
               title: 'Sub-Package Export',
-              api: `${packages.api}/unknown/package/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
-                }`,
+              api: `${packages.api}/unknown/package/template?export=true${
+                selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+              }`,
               type: 'export'
             },
             {

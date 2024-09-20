@@ -20,10 +20,11 @@ import routes from './../../components/Helpers/Routes';
 import ManageScheduleReport from './ManageScheduleReport';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = 'schedule-report';
+
 const ScheduleReport = () => {
-  const renderedFrom = 'schedule-report';
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords } = state;
 
   const {

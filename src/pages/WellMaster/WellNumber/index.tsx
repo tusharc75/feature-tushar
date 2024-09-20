@@ -16,10 +16,11 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 import ManageWellNumber from 'src/pages/WellNumber/ManageWellNumber';
 
+const renderedFrom = camelCase(routes?.wellNumber.title);
+
 const WellNumber = ({ wellName }) => {
-  const renderedFrom = camelCase(routes?.wellNumber.title);
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -98,7 +99,7 @@ const WellNumber = ({ wellName }) => {
       deepFilter = `?`;
     }
     const { filterByIds, deepFilters } = gridFilterParser(filters);
-    filterByIds.push({ field: "wellName", term: { "$in": [wellName] } })
+    filterByIds.push({ field: 'wellName', term: { $in: [wellName] } });
     if (filterByIds?.length) {
       deepFilter = `${deepFilter}&filterById=${JSON.stringify(filterByIds)}`;
     }

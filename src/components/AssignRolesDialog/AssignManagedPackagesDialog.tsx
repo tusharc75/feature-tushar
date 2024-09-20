@@ -16,7 +16,7 @@ const AssignManagedPackagesDialog = ({ onSuccess, handleClose, ids = [], isSubmi
   const renderedFrom = `${camelCase(routes.managedPackages?.title)}`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

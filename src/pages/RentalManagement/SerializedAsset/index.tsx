@@ -80,7 +80,7 @@ const SerializedAsset = ({ rentalManagementData, setNextStep, setNextStepToolTip
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords, dataRows } = state;
   const { generateColumns } = useColumns();
 

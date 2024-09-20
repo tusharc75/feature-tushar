@@ -20,7 +20,7 @@ function ProcessLogs({ onClose, logsData, productName, product }) {
   const [columns, setColumns] = useState(null);
   const [revertQtyDialog, setRevertQtyDialog] = useState({ open: false, qty: 0, revertedQty: 0, ledgerId: '', serialNumber: [] });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   useEffect(() => {
     fetchColumn();

@@ -25,17 +25,18 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { Delete } from '@material-ui/icons';
 
 const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetchRecords, stepFullScreen }) => {
-
   const renderedFrom = `${camelCase(routes?.rentalManagement.title)}_services`;
   const toastConfig = useContext(CustomToastContext);
   const [openMessageDialog, setOpenMessageDialog] = useState({ open: false, errorMessages: [] });
   const [deleteServiceLogConfirmDialog, setDeleteServiceLogConfirmDialog] = useState({ open: false, data: null });
-  const { state: { user } }: any = useData();
+  const {
+    state: { user }
+  }: any = useData();
   const [okBtnLoading, setOkBtnLoading] = useState(false);
   const [columns, setColumns] = useState(null);
   const [serviceConfirmationDialog, setServiceConfirmationDialog] = useState({ open: false, type: null, loading: false, minStartDate: null });
   const [serviceLogDialog, setServiceLogDialog] = useState({ open: false, data: null });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   useEffect(() => {
@@ -175,22 +176,39 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
           const recentServiceLogStartDate = serviceLogCount ? row?.original?.serviceLog[serviceLogCount - 1]?.startDate : null;
           const recentServiceLogEndDate = serviceLogCount ? row?.original?.serviceLog[serviceLogCount - 1]?.endDate : null;
           const maxInvoiceDate = row?.original?.maxInvoiceDate;
-          const cannotDelete = !serviceLogCount || (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) || (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) || (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
+          const cannotDelete =
+            !serviceLogCount ||
+            (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) ||
+            (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) ||
+            (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
           return (
             <>
-              <HtmlTooltip title={!serviceLogCount ? rentalManagementMessage.serviceNotstarted : cannotDelete ? rentalManagementMessage.invoiceCreated : 'Delete recent log'}>
+              <HtmlTooltip
+                title={
+                  !serviceLogCount
+                    ? rentalManagementMessage.serviceNotstarted
+                    : cannotDelete
+                      ? rentalManagementMessage.invoiceCreated
+                      : 'Delete recent log'
+                }
+              >
                 <span>
                   <IconButton
                     size="small"
                     disabled={cannotDelete}
-                    onClick={() => { setDeleteServiceLogConfirmDialog({ open: true, data: [{ _id: row.original._id, serviceLogId: row?.original?.serviceLog[serviceLogCount - 1]._id }] }) }}
+                    onClick={() => {
+                      setDeleteServiceLogConfirmDialog({
+                        open: true,
+                        data: [{ _id: row.original._id, serviceLogId: row?.original?.serviceLog[serviceLogCount - 1]._id }]
+                      });
+                    }}
                   >
                     <Delete fontSize="small" color={cannotDelete ? 'disabled' : 'error'} />
                   </IconButton>
                 </span>
               </HtmlTooltip>
             </>
-          )
+          );
         }
       }
     ];
@@ -238,21 +256,24 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
   const handleDeleteServiceLogs = (data: any[]) => {
     setOkBtnLoading(true);
     dispatch({ type: 'loading', loading: true });
-    axiosInstance().delete(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/service-log`, { data }).then((response) => {
-      toastConfig.setToastConfig({
-        open: true,
-        message: response?.data?.message,
-        type: 'success'
+    axiosInstance()
+      .delete(`${rentalManagement.api}/productpackage/${rentalManagementData?._id}/service-log`, { data })
+      .then((response) => {
+        toastConfig.setToastConfig({
+          open: true,
+          message: response?.data?.message,
+          type: 'success'
+        });
+        setOkBtnLoading(false);
+        setDeleteServiceLogConfirmDialog({ open: false, data: null });
+        fetchRecords();
+      })
+      .catch((err) => {
+        setOkBtnLoading(false);
+        setDeleteServiceLogConfirmDialog({ open: false, data: null });
+        toastConfig.setToastConfig(err);
+        dispatch({ type: 'loading', loading: false });
       });
-      setOkBtnLoading(false);
-      setDeleteServiceLogConfirmDialog({ open: false, data: null });
-      fetchRecords();
-    }).catch((err) => {
-      setOkBtnLoading(false);
-      setDeleteServiceLogConfirmDialog({ open: false, data: null });
-      toastConfig.setToastConfig(err);
-      dispatch({ type: 'loading', loading: false });
-    })
   };
 
   return (
@@ -352,13 +373,7 @@ const ReceivingServices = ({ allowedToEdit, services, rentalManagementData, fetc
 
 export default ReceivingServices;
 
-const ActionButtonMenuItems = ({
-  selectedRecords,
-  setOpenMessageDialog,
-  setServiceConfirmationDialog,
-  setDeleteServiceLogConfirmDialog
-}) => {
-
+const ActionButtonMenuItems = ({ selectedRecords, setOpenMessageDialog, setServiceConfirmationDialog, setDeleteServiceLogConfirmDialog }) => {
   const validateAction = (action) => {
     const errorMessages = [];
     selectedRecords.forEach((e) => {
@@ -367,8 +382,7 @@ const ActionButtonMenuItems = ({
         if (!isEmpty(serviceLogEntry)) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceAlreadyStarted });
         }
-      }
-      else if (action === rentalManagementActions.stopService) {
+      } else if (action === rentalManagementActions.stopService) {
         const serviceLogEntry = e?.serviceLog?.find((log: any) => !log.endDate);
         if (!serviceLogEntry) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
@@ -378,7 +392,11 @@ const ActionButtonMenuItems = ({
         const recentServiceLogStartDate = serviceLogCount ? e?.serviceLog[serviceLogCount - 1]?.startDate : null;
         const recentServiceLogEndDate = serviceLogCount ? e?.serviceLog[serviceLogCount - 1]?.endDate : null;
         const maxInvoiceDate = e?.maxInvoiceDate;
-        const cannotDelete = !serviceLogCount || (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) || (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) || (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
+        const cannotDelete =
+          !serviceLogCount ||
+          (recentServiceLogEndDate && recentServiceLogEndDate >= maxInvoiceDate && recentServiceLogStartDate <= maxInvoiceDate) ||
+          (recentServiceLogEndDate && recentServiceLogEndDate <= maxInvoiceDate) ||
+          (!recentServiceLogEndDate && maxInvoiceDate >= recentServiceLogStartDate);
         if (!serviceLogCount) {
           errorMessages.push({ index: e.index, message: rentalManagementMessage.serviceNotstarted });
         } else if (cannotDelete) {
@@ -393,85 +411,89 @@ const ActionButtonMenuItems = ({
     return false;
   };
 
-  return (<>
-    <MenuItem
-      onClick={() => {
-        if (!validateAction(rentalManagementActions.startService)) {
-          const dates = [];
-          selectedRecords?.forEach((d: any) => {
-            d?.serviceLog?.forEach((l: any) => {
-              if (l?.endDate) dates.push(new Date(l.endDate));
-            })
-          })
-          let date = null;
-          if (dates?.length) {
-            date = new Date(Math.max(...dates));
-            date.setDate(date.getDate() + 1);
-          }
-          setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
-        }
-      }}
-    >
-      Start Service(s)
-    </MenuItem>
-    <MenuItem
-      onClick={() => {
-        if (!validateAction(rentalManagementActions.stopService)) {
-          const dates = [];
-          selectedRecords?.forEach((d: any) => {
-            const serviceLogEntry = d?.serviceLog?.find((log: any) => !log.endDate);
-            dates.push(new Date(serviceLogEntry?.startDate));
-          })
-          let date = null;
-          if (dates?.length) {
-            date = new Date(Math.max(...dates));
-          }
-          date = selectedRecords?.reduce((maxDate, record) => {
-            if (record?.maxInvoiceDate) {
-              const recordDate = new Date(record.maxInvoiceDate);
-              return recordDate > maxDate ? recordDate : maxDate;
+  return (
+    <>
+      <MenuItem
+        onClick={() => {
+          if (!validateAction(rentalManagementActions.startService)) {
+            const dates = [];
+            selectedRecords?.forEach((d: any) => {
+              d?.serviceLog?.forEach((l: any) => {
+                if (l?.endDate) dates.push(new Date(l.endDate));
+              });
+            });
+            let date = null;
+            if (dates?.length) {
+              date = new Date(Math.max(...dates));
+              date.setDate(date.getDate() + 1);
             }
-            return maxDate;
-          }, date);
-          setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
-        }
-      }}
-    >
-      Stop Service(s)
-    </MenuItem>
-    <MenuItem onClick={() => {
-      if (!validateAction(rentalManagementActions.startService)) {
-        const dates = [];
-        selectedRecords?.forEach((d: any) => {
-          d?.serviceLog?.forEach((l: any) => {
-            dates.push(new Date(l.endDate));
-          })
-        })
-        let date = null;
-        if (dates?.length) {
-          date = new Date(Math.max(...dates));
-          date.setDate(date.getDate() + 1);
-        }
-        setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
-      }
-    }}>
-      Start/Stop Service(s)
-    </MenuItem>
-    <MenuItem onClick={() => {
-      if (!validateAction(rentalManagementActions.deleteServiceLog)) {
-        const data = [];
-        selectedRecords?.forEach((d: any) => {
-          data.push({
-            _id: d?.uniqueId,
-            serviceLogId: d?.serviceLog[d?.serviceLog?.length - 1]?._id
-          });
-        })
-        setDeleteServiceLogConfirmDialog({ open: true, data });
-      }
-    }}>
-      Delete Service Log(s)
-    </MenuItem>
-  </>
+            setServiceConfirmationDialog({ open: true, type: 'start', minStartDate: date });
+          }
+        }}
+      >
+        Start Service(s)
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          if (!validateAction(rentalManagementActions.stopService)) {
+            const dates = [];
+            selectedRecords?.forEach((d: any) => {
+              const serviceLogEntry = d?.serviceLog?.find((log: any) => !log.endDate);
+              dates.push(new Date(serviceLogEntry?.startDate));
+            });
+            let date = null;
+            if (dates?.length) {
+              date = new Date(Math.max(...dates));
+            }
+            date = selectedRecords?.reduce((maxDate, record) => {
+              if (record?.maxInvoiceDate) {
+                const recordDate = new Date(record.maxInvoiceDate);
+                return recordDate > maxDate ? recordDate : maxDate;
+              }
+              return maxDate;
+            }, date);
+            setServiceConfirmationDialog({ open: true, type: 'stop', minStartDate: date });
+          }
+        }}
+      >
+        Stop Service(s)
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          if (!validateAction(rentalManagementActions.startService)) {
+            const dates = [];
+            selectedRecords?.forEach((d: any) => {
+              d?.serviceLog?.forEach((l: any) => {
+                dates.push(new Date(l.endDate));
+              });
+            });
+            let date = null;
+            if (dates?.length) {
+              date = new Date(Math.max(...dates));
+              date.setDate(date.getDate() + 1);
+            }
+            setServiceConfirmationDialog({ open: true, type: 'startStop', minStartDate: date });
+          }
+        }}
+      >
+        Start/Stop Service(s)
+      </MenuItem>
+      <MenuItem
+        onClick={() => {
+          if (!validateAction(rentalManagementActions.deleteServiceLog)) {
+            const data = [];
+            selectedRecords?.forEach((d: any) => {
+              data.push({
+                _id: d?.uniqueId,
+                serviceLogId: d?.serviceLog[d?.serviceLog?.length - 1]?._id
+              });
+            });
+            setDeleteServiceLogConfirmDialog({ open: true, data });
+          }
+        }}
+      >
+        Delete Service Log(s)
+      </MenuItem>
+    </>
   );
 };
-

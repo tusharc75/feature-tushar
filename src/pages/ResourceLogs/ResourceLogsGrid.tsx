@@ -12,11 +12,13 @@ import { dateFormat, dateTimeFormat, gridLoadingTimeout } from 'src/constants/he
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ChangesDialog from './ChangesDialog';
 
+const renderedFrom = 'resourceLogs';
+
 const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedAction = '', selectedUser = '', hideResourceField = false }) => {
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, changes: null, operations: null, updatedBy: null });
   const [columns, setColumns] = useState([]);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit } = state;
 
   useEffect(() => {
@@ -235,7 +237,7 @@ const ResourceLogsGrid = ({ selectedResource, selectedOption = '', selectedActio
           columns={columns}
           state={state}
           dispatch={dispatch}
-          renderedFrom={'resourceLogs'}
+          renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           hideSelection={true}
         />

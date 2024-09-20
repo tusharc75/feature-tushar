@@ -26,6 +26,7 @@ const TECHNICIAN_RESOURCE = [
     title: routes.fieldTicketDetail.title
   }
 ];
+const renderedFrom = `service_order_technician`;
 
 function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handleSucess, handleClose, updateSelectedRecord }) {
   const {
@@ -36,7 +37,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   const [columns, setColumns] = useState([]);
   const [serviceTypes, setServiceTypes] = useState([]);
   const [selectedType, setSelectedType] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -111,60 +112,36 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
       },
       ...(selectedType === 'fieldTicket'
         ? [
-          {
-            accessor: 'fieldServiceOrderNumber',
-            Header: 'Field Service Order',
-            width: 200,
-            Cell: ({ row }) => (
-              <div className="flex items-center gap-1">
-                <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            )
-          },
-          {
-            accessor: 'fieldTicketNumber',
-            Header: 'Field Ticket',
-            width: 200,
-            Cell: ({ row }) =>
-              row.original['fieldTicketNumber'] ? (
+            {
+              accessor: 'fieldServiceOrderNumber',
+              Header: 'Field Service Order',
+              width: 200,
+              Cell: ({ row }) => (
                 <div className="flex items-center gap-1">
-                  <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
+                  <p title={row.original.fieldServiceOrder}>{row.original.fieldServiceOrder}</p>
                   <IconButton
                     size="small"
                     onClick={() => {
-                      window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
+                      window.open(`${routes.fieldServiceOrderDetail.path}/${row.original.fieldServiceOrderId}`);
                     }}
                   >
                     <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
                   </IconButton>
                 </div>
-              ) : (
-                <NoDataCell />
               )
-          }
-        ]
-        : selectedType === 'rentalManagement'
-          ? [
+            },
             {
-              accessor: 'rentalJobName',
-              Header: 'Rental Job',
+              accessor: 'fieldTicketNumber',
+              Header: 'Field Ticket',
               width: 200,
               Cell: ({ row }) =>
-                row.original['rentalJobName'] ? (
+                row.original['fieldTicketNumber'] ? (
                   <div className="flex items-center gap-1">
-                    <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
+                    <p title={row.original.fieldTicketNumber}>{row.original.fieldTicketNumber}</p>
                     <IconButton
                       size="small"
                       onClick={() => {
-                        window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
+                        window.open(`${routes.fieldTicketDetail.path}/${row.original.resourceId}`);
                       }}
                     >
                       <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
@@ -175,6 +152,30 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
                 )
             }
           ]
+        : selectedType === 'rentalManagement'
+          ? [
+              {
+                accessor: 'rentalJobName',
+                Header: 'Rental Job',
+                width: 200,
+                Cell: ({ row }) =>
+                  row.original['rentalJobName'] ? (
+                    <div className="flex items-center gap-1">
+                      <p title={row.original.rentalJobName}>{row.original.rentalJobName}</p>
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          window.open(`${routes.rentalManagementDetail.path}/${row.original.resourceId}`);
+                        }}
+                      >
+                        <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                      </IconButton>
+                    </div>
+                  ) : (
+                    <NoDataCell />
+                  )
+              }
+            ]
           : []),
       {
         accessor: 'serviceName',
@@ -258,15 +259,15 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
   };
 
   const handleUnAssign = () => {
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     axiosInstance()
       .put(`${rentalManagement.api}/technician`, { ids: [{ id: unAssignTechnicianDialog?.data?.technicianHistoryId }] })
       .then(() => {
         handleSucess();
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       })
       .catch((error) => {
-        setIsSubmitting(false)
+        setIsSubmitting(false);
         toastConfig.setToastConfig(error);
       });
   };
@@ -301,7 +302,7 @@ function ServiceOrder({ assignTechnicianDialog, unAssignTechnicianDialog, handle
             dispatch={dispatch}
             refreshGrid={fetchData}
             hideAction={true}
-            renderedFrom={`service_order_technician`}
+            renderedFrom={renderedFrom}
             isClientSideGrid={true}
           />
         </Box>

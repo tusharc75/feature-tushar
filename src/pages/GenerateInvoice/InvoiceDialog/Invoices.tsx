@@ -17,14 +17,15 @@ import CustomReactTable, { getStaticFields, gridFilterParser, useColumns, useTab
 import { deleteDisable } from 'src/constants/messageHelpers';
 import { FiExternalLink } from 'react-icons/fi';
 
+const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
+
 const Invoices = ({ resourceId, resource, invoiceFieldName, fetchParentData = null }) => {
-  const renderedFrom = `${camelCase(routes.generateInvoice?.title)}_invoice`;
   const toastConfig = useContext(CustomToastContext);
 
   const {
     state: { user, permissions }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const { generateColumns } = useColumns();

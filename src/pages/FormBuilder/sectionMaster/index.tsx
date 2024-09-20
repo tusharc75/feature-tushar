@@ -16,13 +16,14 @@ import { DynamicIcon, defaultIcons } from 'src/assets/IconGenerator';
 import { ServiceManagementIcon } from 'src/assets/sidebar_assets/icons';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
+const renderedFrom = `section-master`;
+
 const SectionMaster = ({ close }) => {
-  const renderedFrom = `section-master`;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
   const [openManageSectionMaster, setOpenManageSectionMaster] = useState({ open: false, data: null });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   useEffect(() => {
     fetchColumn();

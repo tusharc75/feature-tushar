@@ -16,7 +16,6 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, sidebarResource, prepareDataForGrid } from 'src/constants/helpers';
 
 const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
-
   const renderedFrom = `${camelCase(routes?.packages.title)}_product`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -31,7 +30,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   const [isRemovingProducts, setRemovingProducts] = useState(false);
 
   const [isSubmitting, setSubmitting] = useState(false);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -48,7 +47,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
       .then(({ data: { data } }) => {
         let rows = data.map((u, index) => {
           let res: any = {
-            ...prepareDataForGrid(u, user),
+            ...prepareDataForGrid(u, user)
           };
           res.index = index + 1;
           return res;
@@ -72,7 +71,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'qty',
@@ -90,10 +89,11 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
   };
 
   const onSaveInlineEdit = (data, row) => {
-    axiosInstance().put(`${packages.api}/${packageId}/products`, {
-      ids: [row._id],
-      qty: Number(data.qty)
-    })
+    axiosInstance()
+      .put(`${packages.api}/${packageId}/products`, {
+        ids: [row._id],
+        qty: Number(data.qty)
+      })
       .then(({ data }) => {
         setToastConfig({
           open: true,
@@ -101,27 +101,30 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
           message: data.message
         });
         fetchData();
-      }).catch((err) => setToastConfig(err));
+      })
+      .catch((err) => setToastConfig(err));
   };
 
   const removeProducts = () => {
     setRemovingProducts(true);
     const productIds = showProductConfirmBox?.data?.map((d) => d._id) || [];
-    axiosInstance().put(`${packages.api}/${packageId}/products/remove`, { ids: productIds }).then(({ data }) => {
-      setRemovingProducts(false);
-      setShowProductConfirmBox({ open: false, data: null });
-      fetchData();
-      setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .put(`${packages.api}/${packageId}/products/remove`, { ids: productIds })
+      .then(({ data }) => {
+        setRemovingProducts(false);
+        setShowProductConfirmBox({ open: false, data: null });
+        fetchData();
+        setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((err) => {
+        setRemovingProducts(false);
+        setShowProductConfirmBox({ open: false, data: null });
+        setToastConfig(err);
       });
-    }).catch((err) => {
-      setRemovingProducts(false);
-      setShowProductConfirmBox({ open: false, data: null });
-      setToastConfig(err);
-    });
-
   };
 
   const handleAdd = async (rows) => {
@@ -159,7 +162,7 @@ const Products = ({ packageId, packageData, allowedToEdit, fullHeight = false })
     return (
       <>
         <MenuItem
-          disabled={(selectedRecords.length === 0 || isRemovingProducts)}
+          disabled={selectedRecords.length === 0 || isRemovingProducts}
           onClick={() => {
             setShowProductConfirmBox({ open: true, data: selectedRecords });
           }}

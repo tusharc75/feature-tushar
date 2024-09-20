@@ -22,7 +22,7 @@ const renderedFrom = 'productPage';
 const AddExistingProduct = (props) => {
   const toastConfig = useContext(CustomToastContext);
   const { handleClose, addProductInBuilder, referenceData = null } = props;
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [productColoums, setProductColoums] = useState([]);
@@ -271,12 +271,7 @@ const AddExistingProduct = (props) => {
             </div>
             <div className="ml-auto flex flex-wrap items-start justify-end gap-2 ">
               <SearchBox onChange={handleSearch} className="terms_header_search_bar" width="300px" value={search} />
-              <Button
-                size="small"
-                color="primary"
-                onClick={handleAdd}
-                variant="contained"
-                disabled={selectedRecords.length > 0 ? false : true}>
+              <Button size="small" color="primary" onClick={handleAdd} variant="contained" disabled={selectedRecords.length > 0 ? false : true}>
                 {selectedRecords.length ? '(' + selectedRecords.length + ')  ' : ''}
                 Add
               </Button>

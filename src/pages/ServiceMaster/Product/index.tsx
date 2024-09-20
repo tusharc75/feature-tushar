@@ -19,10 +19,11 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { FiExternalLink } from 'react-icons/fi';
 
+const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_product`;
+
 function Product({ id }) {
   const isMobile = useMediaQuery('(max-width:600px)');
-  const renderedFrom = `${camelCase(routes?.serviceMaster.title)}_product`;
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const {

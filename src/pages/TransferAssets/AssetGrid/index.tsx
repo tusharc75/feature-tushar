@@ -43,7 +43,7 @@ const AssetsGrid: FC<AssetsGridProps> = ({
 }) => {
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const [isRemovingAssets, setRemovingAssets] = useState(false);
@@ -104,14 +104,14 @@ const AssetsGrid: FC<AssetsGridProps> = ({
               row?.original?.assetNumber ? (
                 <div className="flex items-center gap-2">
                   <p> {row.original?.assetNumber}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.serializedAssetDetail.path}/${row.original?._id}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                 </div>
               ) : (
                 <NoDataCell />
@@ -121,14 +121,14 @@ const AssetsGrid: FC<AssetsGridProps> = ({
               row?.original?.product ? (
                 <div className="flex items-center gap-2">
                   <p> {row.original?.product}</p>
-                    <IconButton
-                      size="small"
-                      onClick={() => {
-                        window.open(`${routes.productDetail.path}/${row.original?.productId}`);
-                      }}
-                    >
-                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                    </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      window.open(`${routes.productDetail.path}/${row.original?.productId}`);
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
                 </div>
               ) : (
                 <NoDataCell />

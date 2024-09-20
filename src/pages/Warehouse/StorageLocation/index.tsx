@@ -16,10 +16,11 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ConfirmationDialogRaw from '../../../components/Helpers/ConfirmationDialog';
 
+const renderedFrom = camelCase(routes?.storageLocation.title);
+
 const StorageLocation = ({ warehouse }) => {
-  const renderedFrom = camelCase(routes?.storageLocation.title);
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -61,19 +62,19 @@ const StorageLocation = ({ warehouse }) => {
     canDrag: false,
     Cell: ({ row }) => (
       <>
-         {permissions?.storageLocation?.isUpdate && (
-        <HtmlTooltip title="Edit">
-          <IconButton
-            size="small"
-            aria-label="Edit"
-            onClick={() => {
-              setOpenDialog({ open: true, id: row?.original?._id });
-            }}
-          >
-            <EditIcon color="primary" fontSize="small" />
-          </IconButton>
-        </HtmlTooltip>
-      )}
+        {permissions?.storageLocation?.isUpdate && (
+          <HtmlTooltip title="Edit">
+            <IconButton
+              size="small"
+              aria-label="Edit"
+              onClick={() => {
+                setOpenDialog({ open: true, id: row?.original?._id });
+              }}
+            >
+              <EditIcon color="primary" fontSize="small" />
+            </IconButton>
+          </HtmlTooltip>
+        )}
         {permissions?.storageLocation?.isDelete && (
           <HtmlTooltip title="Delete">
             <IconButton
@@ -155,7 +156,7 @@ const StorageLocation = ({ warehouse }) => {
     }
     axiosInstance()
       .put(`${storageLocation.api}/remove`, { ids: ids })
-      .then(({data}) => {
+      .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -258,7 +259,7 @@ const StorageLocation = ({ warehouse }) => {
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       )}
-        {openDialog.open && (
+      {openDialog.open && (
         <ManageStorageLocation
           storageLocationId={openDialog.id}
           onClose={() => setOpenDialog({ open: false, id: null })}
