@@ -431,7 +431,7 @@ const WorkOrderSupervisor = () => {
                 <div className="grid grid-cols-1 items-center gap-2 sm:grid-cols-1  md:grid-cols-2 lg:grid-cols-3">{filters}</div>
               )}
               <div className="flex gap-2 max-[600px]:flex-wrap">
-                <div className="flex-grow pt-[4px] max-h-fit">
+                <div className="flex-grow pt-[4px]">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
                 </div>
                 <div className="pt-[4px]">
