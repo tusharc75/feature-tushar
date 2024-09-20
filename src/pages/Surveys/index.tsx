@@ -23,7 +23,7 @@ const Survey = () => {
   const renderedFrom = camelCase(routes?.surveys.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -143,7 +143,8 @@ const Survey = () => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
           finalObject['allowedToEdit'] = permissions?.surveys?.isUpdate;
-          finalObject['canDelete'] = permissions?.surveys.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.surveys.isDelete && checkIsAllowedToDelete(user, sidebarResource.surveys, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

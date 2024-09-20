@@ -29,7 +29,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
   const toastConfig = useContext(CustomToastContext);
 
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const [isUpdating, setUpdating] = useState(false);
@@ -202,7 +202,8 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     rows.forEach((parent, i) => {
       parent.index = i + 1;
       parent.detail = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productName : parent.packageDetail?.packageName;
-      parent.description = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
+      parent.description =
+        parent.type === MATERIAL_TYPE.product ? parent.productDetail?.productDescription : parent.packageDetail?.packageDescription;
       parent.qtyDisplay = parent.qty;
       parent.isValid = parent['finalPrice_' + subleaseData?.currency?.toLowerCase()] ? true : !isRateRequired;
       parent.assetQty = inventory?.filter((e) => e._id === parent._id).length;
@@ -238,7 +239,7 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
       setNextStep(false);
       setNextStepToolTip(subleaseMessage.addProductPackage);
     } else {
-      setNextStep(true)
+      setNextStep(true);
     }
 
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
@@ -336,7 +337,6 @@ const Productpackage = ({ subleaseData, setNextStep, setNextStepToolTip, fetchDa
     setIsProductEdit({ open: true, isBulkedit: false });
     setRecordToUpdate(rowData);
   };
-
 
   const calculatePrice = (arr: any[]) => {
     if (subleaseData) {

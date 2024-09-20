@@ -32,7 +32,7 @@ const Invoice = ({ rentalManagementData, updateJobStatus, statusOptions, stepFul
   const [showCostDialog, setShowCostDialog] = useState(false);
   const [columns, setColumns] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   useEffect(() => {

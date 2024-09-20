@@ -34,7 +34,7 @@ function Parts({ id }) {
   const [openAssignProductDialog, setOpenAssignProductDialog] = useState(false);
   const [columns, setColumns] = useState(null);
   const [isSubmitting, setSubmitting] = useState(false);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 

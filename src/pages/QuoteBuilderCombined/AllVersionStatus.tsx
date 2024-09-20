@@ -41,6 +41,8 @@ const DOASteps = [
   }
 ];
 
+const renderedFrom = 'AllVersionStatus';
+
 export default function AllVersionStatus({
   open,
   onClose,
@@ -52,7 +54,7 @@ export default function AllVersionStatus({
   handleCloneQuoteWithVersionFromAllVersion
 }) {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const columns = [
@@ -240,7 +242,7 @@ export default function AllVersionStatus({
             onSelect={() => {}}
             state={state}
             dispatch={dispatch}
-            renderedFrom={'AllVersionStatus'}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchQuoteData}
             isClientSideGrid={true}
             showOnlyShowFilteredRecordSwitch={true}

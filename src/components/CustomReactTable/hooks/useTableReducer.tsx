@@ -1,5 +1,6 @@
 import { useReducer } from 'react';
 import { gridPageSizes } from 'src/constants/helpers';
+import { useData } from 'src/StateProvider/Provider';
 
 function reducer(state: TInitialState, action: TActios) {
   switch (action.type) {
@@ -165,8 +166,26 @@ export type TActios =
   | { type: 'setVisibleColumns'; visibleColumns: { [key: string]: boolean } }
   | { type: 'setColumnOrder'; columnOrder: ((data: string[]) => string[]) | string[] };
 
-export const useTableReducer = () => {
-  const [state, dispatch] = useReducer(reducer, intialState);
+type UseTableReducerProps = {
+  renderedFrom?: string;
+};
+
+export const useTableReducer = (props?: UseTableReducerProps) => {
+  const {
+    state: { user }
+  }: any = useData();
+  const { renderedFrom } = props || {};
+
+  const rowsPerPage = renderedFrom
+    ? user?.gridRowsPerPage?.find((d) => d.resource === renderedFrom)?.rowsPerPage || gridPageSizes[0]
+    : gridPageSizes[0];
+
+  const newInitialState = {
+    ...intialState,
+    limit: rowsPerPage
+  };
+
+  const [state, dispatch] = useReducer(reducer, newInitialState);
 
   return { state, dispatch };
 };

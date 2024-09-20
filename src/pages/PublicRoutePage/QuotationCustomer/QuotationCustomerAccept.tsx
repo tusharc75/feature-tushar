@@ -17,6 +17,8 @@ import { CURReplaceByCurrencySingle } from 'src/constants/formulaUtility';
 import axios from 'axios';
 import { backendApi } from 'src/config';
 
+const renderedFrom = 'quotation_product_package';
+
 const QuotationCustomerAccept = ({ openAuthId }) => {
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -25,7 +27,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   const [isRateRequired, setIsRateRequired] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState({ accept: false, reject: false });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { loading } = state;
 
   useEffect(() => {
@@ -33,7 +35,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
   }, [openAuthId]);
 
   const fetchFields = async (fields, currency) => {
-    var data = CURReplaceByCurrencySingle(fields, currency ? currency : "USD");
+    var data = CURReplaceByCurrencySingle(fields, currency ? currency : 'USD');
     const coloum: any = [
       {
         accessor: 'index',
@@ -61,12 +63,12 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                   ? '(Serialized)'
                   : '(Non-Serialized)'
                 : row.original?.type === 'package'
-                ? row.original?.packageDetail.packageType === 'Product'
-                  ? '(Product)'
-                  : '(Service)'
-                : row.original.type === 'service'
-                ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
-                : ''}
+                  ? row.original?.packageDetail.packageType === 'Product'
+                    ? '(Product)'
+                    : '(Service)'
+                  : row.original.type === 'service'
+                    ? row?.original?.serviceDetail?.serviceType && `(${row?.original?.serviceDetail?.serviceType})`
+                    : ''}
             </p>
           ) : (
             <NoDataCell />
@@ -212,7 +214,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
     dispatch({ type: 'loading', loading: true });
     var data: any = [];
     var inventory: any = [];
-    const response = await axios.get(backendApi +`${quotation.api}/customer/${openAuthId}`);
+    const response = await axios.get(backendApi + `${quotation.api}/customer/${openAuthId}`);
 
     const fields = response?.data?.data?.fields;
 
@@ -226,19 +228,19 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         parent.type === MATERIAL_TYPE.serializedAsset
           ? parent.serializedAssetDetail?.assetNumber
           : parent.type === MATERIAL_TYPE.product
-          ? parent.productDetail?.productName
-          : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.packageDetail?.packageName
+            ? parent.productDetail?.productName
+            : parent.type === MATERIAL_TYPE.service
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
       }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
           : parent.type === MATERIAL_TYPE.product
-          ? parent?.productDetail?.productDescription || ''
-          : parent.type === MATERIAL_TYPE.package
-          ? parent?.packageDetail?.packageDescription || ''
-          : '';
+            ? parent?.productDetail?.productDescription || ''
+            : parent.type === MATERIAL_TYPE.package
+              ? parent?.packageDetail?.packageDescription || ''
+              : '';
       parent.serializedProduct = parent.type === MATERIAL_TYPE.product ? parent.productDetail?.serializedProduct : false;
       // parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       // parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -264,19 +266,19 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
         _subRow.type === MATERIAL_TYPE.serializedAsset
           ? _subRow.serializedAssetDetail?.assetNumber
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow.productDetail?.productName
-          : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
+            ? _subRow.productDetail?.productName
+            : _subRow.type === MATERIAL_TYPE.service
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
       }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
           : _subRow.type === MATERIAL_TYPE.product
-          ? _subRow?.productDetail?.productDescription || ''
-          : _subRow.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageDescription || ''
-          : '';
+            ? _subRow?.productDetail?.productDescription || ''
+            : _subRow.type === MATERIAL_TYPE.package
+              ? _subRow?.packageDetail?.packageDescription || ''
+              : '';
       _subRow.serializedProduct = _subRow?.productDetail?.serializedProduct;
       // _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       // _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
@@ -302,7 +304,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
       openAuthId: openAuthId
     };
     axios
-      .put(backendApi +`${quotation.api}/customer/customer-response`, dataObj)
+      .put(backendApi + `${quotation.api}/customer/customer-response`, dataObj)
       .then((res) => {
         setIsSubmited(true);
         toastConfig.setToastConfig({
@@ -343,7 +345,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
               id="detailHeaderPageActions"
               item
               className={
-                isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center gap-2 justify-flex-end'
+                isMobile && !isTablet ? 'd-flex align-items-center justify-flex-end gap-1' : 'd-flex align-items-center justify-flex-end gap-2'
               }
             >
               {loading ? (
@@ -412,7 +414,7 @@ const QuotationCustomerAccept = ({ openAuthId }) => {
                   refreshGrid={fetchProductInventory}
                   hideSelection={true}
                   hideAction={true}
-                  renderedFrom="quotation_product_package"
+                  renderedFrom={renderedFrom}
                   isClientSideGrid={true}
                 />
               ) : (

@@ -7,12 +7,7 @@ import { CustomToastContext } from '../../StateProvider/CustomToastContext/Custo
 import { Box, Button, Card, CardContent, Grid, Typography } from '@material-ui/core';
 import { AiOutlineEye } from 'react-icons/ai';
 import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
-import {
-  formatAmountWithCurrency,
-  sidebarResource,
-  quotation,
-  CHILD_RESOURCE
-} from '../../constants/helpers';
+import { formatAmountWithCurrency, sidebarResource, quotation, CHILD_RESOURCE } from '../../constants/helpers';
 import { startCase } from 'lodash';
 import { useData } from '../../StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
@@ -24,7 +19,6 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 
 const DoaQuotationApproval = () => {
-
   const renderedFrom = 'quotation_product_package';
 
   const {
@@ -45,7 +39,7 @@ const DoaQuotationApproval = () => {
   const [quoteData, setQuoteData] = useState(null);
   const [columns, setColumns] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   const [quotationSummary, setQuotationSummary] = useState({
@@ -106,14 +100,15 @@ const DoaQuotationApproval = () => {
 
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === 'serializedAsset'
-        ? parent.serializedAssetDetail?.assetNumber
-        : parent.type === 'product'
-          ? parent.productDetail?.productName
-          : parent.type === 'service'
-            ? parent.serviceDetail?.serviceName
-            : parent.packageDetail?.packageName
-        }`;
+      parent.detail = `${
+        parent.type === 'serializedAsset'
+          ? parent.serializedAssetDetail?.assetNumber
+          : parent.type === 'product'
+            ? parent.productDetail?.productName
+            : parent.type === 'service'
+              ? parent.serviceDetail?.serviceName
+              : parent.packageDetail?.packageName
+      }`;
       parent.leadTimeData = Array.isArray(parent.leadTime) ? parent.leadTime : [];
       parent.leadTime = Array.isArray(parent.leadTime) ? `${parent?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       parent.isValid = true;
@@ -127,14 +122,15 @@ const DoaQuotationApproval = () => {
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === 'serializedAsset'
-        ? _subRow.serializedAssetDetail?.assetNumber
-        : _subRow.type === 'product'
-          ? _subRow.productDetail?.productName
-          : _subRow.type === 'service'
-            ? _subRow.serviceDetail?.serviceName
-            : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === 'serializedAsset'
+          ? _subRow.serializedAssetDetail?.assetNumber
+          : _subRow.type === 'product'
+            ? _subRow.productDetail?.productName
+            : _subRow.type === 'service'
+              ? _subRow.serviceDetail?.serviceName
+              : _subRow.packageDetail?.packageName
+      }`;
       _subRow.leadTimeData = Array.isArray(_subRow.leadTime) ? _subRow.leadTime : [];
       _subRow.leadTime = Array.isArray(_subRow.leadTime) ? `${_subRow?.leadTime?.reduce((acc, e) => acc + parseInt(e?.days || 0), 0) || 0}` : 0;
       _subRow.isValid = true;
@@ -189,7 +185,8 @@ const DoaQuotationApproval = () => {
         Cell: ({ row }) => (row.original['leadTime'] ? <p>{row.original['leadTime']}</p> : 0),
         Footer: (info) => {
           let rows = info.table.getExpandedRowModel().rows;
-          const total = rows?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
+          const total = rows
+            ?.filter((f) => f.original.hasOwnProperty('leadTime') && !isNaN(f.original['leadTime']))
             .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
           return <>{total}</>;
         }
@@ -251,8 +248,8 @@ const DoaQuotationApproval = () => {
               View
             </Button>
             {DOAData?.DOARequestThrough?.some((u) => u.user.includes(currentUser._id)) &&
-              DOAData?.status !== 'Accepted' &&
-              DOAData?.status !== 'Rejected' ? (
+            DOAData?.status !== 'Accepted' &&
+            DOAData?.status !== 'Rejected' ? (
               <>
                 <Button
                   onClick={() => {
@@ -279,11 +276,7 @@ const DoaQuotationApproval = () => {
                 </Button>
               </>
             ) : null}
-            <ActivityButton
-              referenceId={quoteData?.quotation}
-              resource={sidebarResource.quotation}
-              resourceLabel={DOAData?.DOAName}
-            />
+            <ActivityButton referenceId={quoteData?.quotation} resource={sidebarResource.quotation} resourceLabel={DOAData?.DOAName} />
           </Box>
         </Box>
       </Box>

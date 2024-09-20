@@ -16,7 +16,6 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { isMobile } from 'react-device-detect';
 
 const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
-
   const renderedFrom = `${camelCase(routes?.packages.title)}_packages'}`;
 
   const { setToastConfig } = useContext(CustomToastContext);
@@ -30,7 +29,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
   const [isRemovingProducts, setRemovingProducts] = useState(false);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const [isSubmitting, setSubmitting] = useState(false);
@@ -48,7 +47,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
       .then(({ data: { data } }) => {
         let rows = data.map((u, index) => {
           let res: any = {
-            ...prepareDataForGrid(u, user),
+            ...prepareDataForGrid(u, user)
           };
           res.index = index + 1;
           return res;
@@ -73,7 +72,7 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
         Header: 'Index',
         width: 70,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>,
+        Cell: ({ row }) => <p className="text-truncate">{row.original.index}</p>
       },
       {
         accessor: 'qty',
@@ -83,7 +82,9 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
         disableSortBy: true,
         disabled: true,
         Cell: ({ row }) => (row.original?.qty ? <div>{row.original?.qty}</div> : <NoDataCell />)
-      }, ...newColumns]);
+      },
+      ...newColumns
+    ]);
   };
 
   const onSaveInlineEdit = (data, row) => {
@@ -164,21 +165,22 @@ const PackagesTable = ({ packageId, packageData, allowedToEdit, fullHeight = fal
   };
 
   const rightSideContents = () => {
-    return (allowedToEdit && (
-      <>
-        <ImportExportMenu
-          permissions={permissions?.packages}
-          module="packages"
-          api={`${packages.api}/${packageId}/package`}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          ids={[]}
-          additionalParams={`refrenceId=${packageId}`}
-        />
-      </>
-    )
+    return (
+      allowedToEdit && (
+        <>
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="packages"
+            api={`${packages.api}/${packageId}/package`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            ids={[]}
+            additionalParams={`refrenceId=${packageId}`}
+          />
+        </>
+      )
     );
   };
 

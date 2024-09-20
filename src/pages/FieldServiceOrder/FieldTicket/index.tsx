@@ -49,7 +49,7 @@ const FieldTicket = ({
 
   const renderedFrom = camelCase(routes?.fieldTicket.title);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords, dataRows } = state;
   const { generateColumns } = useColumns();
 
@@ -124,16 +124,20 @@ const FieldTicket = ({
             );
         }
       });
-      const extraColumns = []
+      const extraColumns = [];
       extraColumns.push({
         accessor: 'totalAmount',
         Header: 'Total Amount',
         disableFilters: true,
         disableSortBy: true,
         Cell: ({ row }) => {
-          return row.original?.totalAmount ? <div>
-            <p className="text-truncate">{row.original.totalAmount}</p>
-          </div> : <NoDataCell />;
+          return row.original?.totalAmount ? (
+            <div>
+              <p className="text-truncate">{row.original.totalAmount}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
         }
       });
       setColumns([...newColumns, ...extraColumns, ...getStaticFields(), ActionsRenderer]);
@@ -162,10 +166,12 @@ const FieldTicket = ({
       let rows = data?.map((u) => {
         let finalObject = prepareDataForGrid(u);
         finalObject['isChecked'] = selectedRecords?.some((s) => s._id === u._id);
-        finalObject['allowedToEdit'] = permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, u)
-          && ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
-        finalObject['canDelete'] = permissions?.fieldTicket?.isDelete && u?.canDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.fieldTicket, u.owner.optionValue)
+        finalObject['allowedToEdit'] =
+          permissions?.fieldTicket?.isUpdate &&
+          checkIsAllowedToEdit(user, sidebarResource.fieldTicket, u) &&
+          ![FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed]?.includes(u?.status);
+        finalObject['canDelete'] =
+          permissions?.fieldTicket?.isDelete && u?.canDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, u.owner.optionValue);
         let res = {
           ...finalObject
         };

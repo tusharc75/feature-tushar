@@ -29,7 +29,7 @@ import { FiExternalLink } from 'react-icons/fi';
 const Material = ({ productionOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, allowedToDelete, updateOrderStatus }) => {
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, page, limit, filters, sorting, selectedRecords, search } = state;
 
   const {

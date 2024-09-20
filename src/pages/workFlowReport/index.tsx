@@ -17,12 +17,13 @@ import { useHistory } from 'react-router-dom';
 import { Autocomplete } from '@material-ui/lab';
 import { WORK_FLOW_STATUS } from 'src/constants/helpers';
 
+const renderedFrom = camelCase(routes?.workflowReport.title);
+
 const WorkFlowReport = () => {
-  const renderedFrom = camelCase(routes?.workflowReport.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const {
     state: { user, permissions }
@@ -119,7 +120,7 @@ const WorkFlowReport = () => {
     if (selectedWorkFlow) {
       deepFilter = `${deepFilter}&workflowId=${selectedWorkFlow}`;
     }
-    if(selectedStatus){
+    if (selectedStatus) {
       deepFilter = `${deepFilter}&status=${selectedStatus}`;
     }
     return deepFilter;
@@ -134,7 +135,7 @@ const WorkFlowReport = () => {
           let finalObject = prepareDataForGrid(u, user);
           return finalObject;
         });
-      
+
         dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
       })
       .catch((error) => {
@@ -172,16 +173,16 @@ const WorkFlowReport = () => {
           />
         )}
         <Autocomplete
-            className="min-w-[100px] max-w-[300px] flex-grow"
-            options={[WORK_FLOW_STATUS.open, WORK_FLOW_STATUS.inProgress, WORK_FLOW_STATUS.completed]}
-            getOptionLabel={(option) => option || ''}
-            size="small"
-            renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Status" variant="outlined" />}
-            value={selectedStatus || ''}
-            onChange={(event: any, val: any) => {
-              setSelectedStatus(val ?? '');
-            }}
-          />
+          className="min-w-[100px] max-w-[300px] flex-grow"
+          options={[WORK_FLOW_STATUS.open, WORK_FLOW_STATUS.inProgress, WORK_FLOW_STATUS.completed]}
+          getOptionLabel={(option) => option || ''}
+          size="small"
+          renderInput={(params) => <TextField {...params} margin="none" size={'small'} fullWidth label="Status" variant="outlined" />}
+          value={selectedStatus || ''}
+          onChange={(event: any, val: any) => {
+            setSelectedStatus(val ?? '');
+          }}
+        />
       </>
     );
   };

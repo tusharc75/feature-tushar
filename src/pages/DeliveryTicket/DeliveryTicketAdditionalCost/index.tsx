@@ -12,8 +12,8 @@ const DeliveryTicketAdditionalCost = ({ renderedFrom, additionalCost }) => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const { state, dispatch } = useTableReducer();
-  const { generateColumns } = useColumns()
+  const { state, dispatch } = useTableReducer({ renderedFrom });
+  const { generateColumns } = useColumns();
 
   const [columns, setColumns] = useState(null);
   const {

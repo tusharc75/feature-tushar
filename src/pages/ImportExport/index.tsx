@@ -16,6 +16,8 @@ import moment from 'moment';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
+const renderedFrom = 'import-export';
+
 const ImportExport = () => {
   const toastConfig = useContext(CustomToastContext);
   const { setToastConfig } = useContext(CustomToastContext);
@@ -24,7 +26,7 @@ const ImportExport = () => {
   const [isImgUploading, setImgUploading] = useState(false);
   const [downloading, setDownloading] = useState({ loading: false, type: null });
   const [selectResource, setSelectResource] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [selectCustomHeader, setSelectCustomHeader] = useState(null);
   const [selectTemplateHeader, setSelectTemplateHeader] = useState(null);
   const [customImportDialog, setCustomImportDialog] = useState(false);
@@ -434,7 +436,7 @@ const ImportExport = () => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={'import-export'}
+            renderedFrom={renderedFrom}
             refreshGrid={fetchLogs}
             isClientSideGrid={true}
             hideSelection={true}

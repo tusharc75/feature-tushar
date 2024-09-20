@@ -21,15 +21,16 @@ import ManageFrequentlyAskedQuestion from './ManageFrequentlyAskedQuestion';
 import { ListingPageHeader } from 'src/components/PageHeaders';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.frequentlyAskedQuestion.title);
+
 const FrequentlyAskedQuestion = () => {
-  const renderedFrom = camelCase(routes?.frequentlyAskedQuestion.title);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     state: { user, permissions, selectedEntity }
   }: any = useData();
 
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);

@@ -19,10 +19,11 @@ import routes from './../../components/Helpers/Routes';
 import ManageWorkStations from './ManageWorkStations';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.workStations.title);
+
 const WorkStations = () => {
-  const renderedFrom = camelCase(routes?.workStations.title);
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {

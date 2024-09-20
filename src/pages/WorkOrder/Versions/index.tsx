@@ -17,11 +17,12 @@ import Diagram from '../Diagram';
 import ServiceStepsData from './ServiceStepsData';
 import { FiExternalLink } from 'react-icons/fi';
 
+let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
+
 const Versions = ({ workOrderId, workOrderData, handleClose }) => {
-  let renderedFrom = `${camelCase(routes?.workOrder.title)}_version`;
   const [tabValue, setTabValue] = useState(0);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(workOrderData?.versions[workOrderData?.versions?.length - 1]?._id);

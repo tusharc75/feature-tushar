@@ -21,11 +21,12 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageIrtTicket from './ManageIrtTicket';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.irtTicket.title);
+
 const IrtTicket = () => {
-  const renderedFrom = camelCase(routes?.irtTicket.title);
   const toastConfig = useContext(CustomToastContext);
   const [irtTicketId, setIrtTicketId] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const {

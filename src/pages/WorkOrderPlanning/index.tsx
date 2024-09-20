@@ -26,11 +26,11 @@ import { Link } from 'react-router-dom';
 import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
 
+const renderedFrom = camelCase(routes?.workOrderPlanning.title);
 const WorkOrderPlanning = () => {
-  const renderedFrom = camelCase(routes?.workOrderPlanning.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

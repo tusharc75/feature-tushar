@@ -25,8 +25,17 @@ import { calculateRowsField } from 'src/components/RentalManagment/helper';
 import { FiExternalLink } from 'react-icons/fi';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
-const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = null, fromAccordian = false, stepFullScreen = false, referenceData }) => {
-
+const View = ({
+  step,
+  allowedToEdit,
+  data,
+  resource,
+  resourceId,
+  setNextStep = null,
+  fromAccordian = false,
+  stepFullScreen = false,
+  referenceData
+}) => {
   const toastConfig = useContext(CustomToastContext);
 
   const renderedFrom = `${camelCase(resource)}_${camelCase(step?.stepName)}`;
@@ -37,13 +46,13 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const [openMaterial, setOpenMaterial] = useState({ open: false, type: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
 
   useEffect(() => {
-    fetchColumns()
+    fetchColumns();
   }, [step]);
 
   useEffect(() => {
@@ -53,7 +62,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   }, [step]);
 
   const fetchColumns = async () => {
-    setColumns(null)
+    setColumns(null);
     const column: any = [
       {
         accessor: 'index',
@@ -67,52 +76,52 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
       },
       ...(step?.linkWithMaterial
         ? [
-          {
-            accessor: 'type',
-            Header: 'Type',
-            disableFilters: true,
-            disabled: true,
-            sticky: isMobile || isTablet ? 'none' : 'left',
-            width: 200,
-            Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
-          },
-          {
-            accessor: 'detail',
-            Header: 'Details',
-            minWidth: 300,
-            width: 300,
-            disabled: true,
-            sticky: isMobile || isTablet ? 'none' : 'left',
-            Cell: ({ row }) => (
-              <div className="flex items-center gap-2">
-                <p className="text-truncate" title={row.original.detail}>
-                  {row.original.detail}
-                </p>
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    if (row.original.type === MATERIAL_TYPE.product) {
-                      window.open(`${routes.productDetail.path}/${row.original.materialId}`);
-                    }
-                    if (row.original.type === MATERIAL_TYPE.service) {
-                      window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
-                    }
-                    if (row.original.type === MATERIAL_TYPE.package) {
-                      window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
-                    }
-                  }}
-                >
-                  <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                </IconButton>
-              </div>
-            )
-          },
-          {
-            accessor: 'description',
-            Header: 'Description',
-            Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
-          }
-        ]
+            {
+              accessor: 'type',
+              Header: 'Type',
+              disableFilters: true,
+              disabled: true,
+              sticky: isMobile || isTablet ? 'none' : 'left',
+              width: 200,
+              Cell: ({ row }) => (row.original['type'] ? <p>{`${startCase(row.original?.type)} `}</p> : <NoDataCell />)
+            },
+            {
+              accessor: 'detail',
+              Header: 'Details',
+              minWidth: 300,
+              width: 300,
+              disabled: true,
+              sticky: isMobile || isTablet ? 'none' : 'left',
+              Cell: ({ row }) => (
+                <div className="flex items-center gap-2">
+                  <p className="text-truncate" title={row.original.detail}>
+                    {row.original.detail}
+                  </p>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      if (row.original.type === MATERIAL_TYPE.product) {
+                        window.open(`${routes.productDetail.path}/${row.original.materialId}`);
+                      }
+                      if (row.original.type === MATERIAL_TYPE.service) {
+                        window.open(`${routes.serviceMasterDetail.path}/${row.original.materialId}`);
+                      }
+                      if (row.original.type === MATERIAL_TYPE.package) {
+                        window.open(`${routes.packagesDetail.path}/${row.original.materialId}`);
+                      }
+                    }}
+                  >
+                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                  </IconButton>
+                </div>
+              )
+            },
+            {
+              accessor: 'description',
+              Header: 'Description',
+              Cell: ({ row }) => (row.original['description'] ? <p className="text-truncate">{row.original.description}</p> : <NoDataCell />)
+            }
+          ]
         : [])
     ];
     const newColumns = await generateColumns(renderedFrom, step?.fields || [], null, false, data?.currency);
@@ -127,7 +136,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
       canDrag: false,
       Cell: ({ row }) => (
         <>
-          {step?.fields?.length > 0 &&
+          {step?.fields?.length > 0 && (
             <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
               <span>
                 <IconButton
@@ -142,7 +151,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
                 </IconButton>
               </span>
             </HtmlTooltip>
-          }
+          )}
           <HtmlTooltip title={allowedToEdit ? 'Delete' : deleteDisable}>
             <span>
               <IconButton
@@ -161,7 +170,7 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
         </>
       )
     };
-    setColumns([...column, ...newColumns, ActionsRenderer])
+    setColumns([...column, ...newColumns, ActionsRenderer]);
   };
 
   const fetchData = () => {
@@ -246,22 +255,25 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const handleAdd = (rows) => {
     const values = rows?.map((r) => ({ type: openMaterial?.type, materialId: r?._id, parentId: null, qty: r?.qty, stepId: step?._id }));
     setIsSubmitting(true);
-    axiosInstance().post(`/dynamic-form/step/${resourceId}`, values, {
-      headers: {
-        Resource: resource
-      }
-    }).then(({ data }) => {
-      setIsSubmitting(false);
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    axiosInstance()
+      .post(`/dynamic-form/step/${resourceId}`, values, {
+        headers: {
+          Resource: resource
+        }
+      })
+      .then(({ data }) => {
+        setIsSubmitting(false);
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        setIsSubmitting(false);
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      setIsSubmitting(false);
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const handleDelete = async () => {
@@ -271,47 +283,57 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
     } else {
       ids = selectedRecords.map((m) => m._id);
     }
-    axiosInstance().put(`/dynamic-form/step/remove/${resourceId}`, { ids: ids, stepId: step?._id },
-      {
-        headers: {
-          Resource: resource
+    axiosInstance()
+      .put(
+        `/dynamic-form/step/remove/${resourceId}`,
+        { ids: ids, stepId: step?._id },
+        {
+          headers: {
+            Resource: resource
+          }
         }
-      }
-    ).then(({ data }) => {
-      dispatch({ type: 'selection', selectedRecords: [] });
-      fetchData();
-      setShowDeleteConfirmBox(false);
-      setDeleteRecord(null);
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data?.message
+      )
+      .then(({ data }) => {
+        dispatch({ type: 'selection', selectedRecords: [] });
+        fetchData();
+        setShowDeleteConfirmBox(false);
+        setDeleteRecord(null);
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data?.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const onSaveInlineEdit = async (inputField, updatedData) => {
     const rowData = flattenArray(dataRows)?.find((d) => d._id === updatedData._id);
     let rows: any = [{ ...rowData, ...updatedData }];
     rows = await calculateRowsField(flattenArray(dataRows), inputField, step?.fields || [], updatedData);
-    axiosInstance().put(`/dynamic-form/step/${resourceId}`, { ...rows[0], stepId: step?._id },
-      {
-        headers: {
-          Resource: resource
+    axiosInstance()
+      .put(
+        `/dynamic-form/step/${resourceId}`,
+        { ...rows[0], stepId: step?._id },
+        {
+          headers: {
+            Resource: resource
+          }
         }
-      }
-    ).then(({ data }) => {
-      fetchData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+      )
+      .then(({ data }) => {
+        fetchData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const actionButtonMenuItems = () => {
@@ -325,21 +347,15 @@ const View = ({ step, allowedToEdit, data, resource, resourceId, setNextStep = n
   const addButtonMenuItems = () => {
     return step?.linkWithMaterial
       ? step?.linkedMaterial?.map((m) => (
-        <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
-      ))
+          <MenuItem onClick={() => setOpenMaterial({ open: true, type: m })}>Add Existing {startCase(m) + 's'}</MenuItem>
+        ))
       : null;
   };
 
   return (
     <>
       {step?.linkWithResource ? (
-        <ResourceField
-          step={step}
-          renderedFrom={renderedFrom}
-          data={data}
-          stepFullScreen={stepFullScreen}
-          referenceData={referenceData}
-        />
+        <ResourceField step={step} renderedFrom={renderedFrom} data={data} stepFullScreen={stepFullScreen} referenceData={referenceData} />
       ) : (
         <>
           {step?.fields?.length || step?.linkWithMaterial ? (

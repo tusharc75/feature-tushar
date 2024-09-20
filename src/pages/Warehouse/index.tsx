@@ -25,11 +25,12 @@ import axios, { CancelTokenSource } from 'axios';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { createResourceFlow } from 'src/components/CustomIntro/walkmeSteps';
 
+const renderedFrom = camelCase(routes?.warehouse.title);
+
 const Warehouse = () => {
-  const renderedFrom = camelCase(routes?.warehouse.title);
   const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -110,7 +111,7 @@ const Warehouse = () => {
                 setShowDeleteConfirmBox(true);
               }}
             >
-              <DeleteIcon color={row.original?.deleted ? 'disabled' : "error"} />
+              <DeleteIcon color={row.original?.deleted ? 'disabled' : 'error'} />
             </IconButton>
           </HtmlTooltip>
         )}
@@ -274,23 +275,24 @@ const Warehouse = () => {
           extraImportExportLinks={
             user?.user?.brandPolicy?.warehouseAccessByUser
               ? [
-                {
-                  title: 'Assign Users Template',
-                  api: `warehouse/user/template`,
-                  type: 'download'
-                },
-                {
-                  title: 'Assign Users Export',
-                  api: `warehouse/user/template?export=true${selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                  {
+                    title: 'Assign Users Template',
+                    api: `warehouse/user/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Assign Users Export',
+                    api: `warehouse/user/template?export=true${
+                      selectedRecords.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                  type: 'export'
-                },
-                {
-                  title: 'Assign Users Import',
-                  api: `warehouse/user/import`,
-                  type: 'import'
-                }
-              ]
+                    type: 'export'
+                  },
+                  {
+                    title: 'Assign Users Import',
+                    api: `warehouse/user/import`,
+                    type: 'import'
+                  }
+                ]
               : []
           }
         />
@@ -354,8 +356,9 @@ const Warehouse = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} ${deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
-            } ?`}
+          message={`Are you sure you want to delete ${routes?.warehouse?.title?.toLowerCase()} ${
+            deleteRecord ? (deleteRecord?._id ? deleteRecord?.warehouseName : '') : ''
+          } ?`}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);
@@ -416,7 +419,9 @@ const ActionMenuItems = ({
     <>
       {permissions?.warehouse?.isDelete && (
         <MenuItem
-          disabled={!((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete && !e?.deleted)?.length) === selectedRecords?.length)}
+          disabled={
+            !((selectedRecords?.length > 0 && selectedRecords?.filter((e) => e?.canDelete && !e?.deleted)?.length) === selectedRecords?.length)
+          }
           onClick={() => {
             setShowDeleteConfirmBox(true);
           }}

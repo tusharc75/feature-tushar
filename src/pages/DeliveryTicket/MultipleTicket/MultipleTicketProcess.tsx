@@ -29,7 +29,7 @@ const MultipleTicketProcess = ({ referenceData, ticketType, referenceType }) => 
   const toastConfig = useContext(CustomToastContext);
 
   //  Grid Variables - Start
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { isOffline } = useContext(CustomOfflineContext);
 

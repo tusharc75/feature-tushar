@@ -16,9 +16,10 @@ function ListView({ resourceList, selectedResource, setSelectedResource, setQuer
   }: any = useData();
   const { generateColumns } = useColumns();
 
-  const { state, dispatch } = useTableReducer();
   const [renderedFrom, setRenderedFrom] = useState('');
   const [columns, setColumns] = useState(null);
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { page, limit, filters, sorting, search } = state;
 

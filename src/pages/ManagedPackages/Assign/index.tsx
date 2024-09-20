@@ -32,7 +32,7 @@ const Assign = ({ managedPackagesData }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   useEffect(() => {

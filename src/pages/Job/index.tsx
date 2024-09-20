@@ -54,7 +54,7 @@ const Job = () => {
   const localStorageSelectedRecords = `${renderedFrom}_selected`;
 
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, rowCount, page, loading, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {

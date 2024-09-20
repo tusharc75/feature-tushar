@@ -14,7 +14,7 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 const SurveysData = ({ surveyId }) => {
   const renderedFrom = camelCase(routes?.surveys.title);
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const [columns, setColumns] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState({ open: false, ids: null });
@@ -82,7 +82,7 @@ const SurveysData = ({ surveyId }) => {
     )
   };
 
-  const handleDelete = () => { };
+  const handleDelete = () => {};
 
   return (
     <div>

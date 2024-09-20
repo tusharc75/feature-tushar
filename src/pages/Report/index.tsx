@@ -61,7 +61,7 @@ const Report = () => {
 
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { loading, page, sorting, search, limit, filters, pageSizes, visibleColumns } = state;
 
   const fetchGridColumns = async () => {
@@ -428,7 +428,7 @@ const Report = () => {
                         permissions={permissions[resourceCamelCase === 'quotes' ? 'quoteBuilder' : resourceCamelCase]}
                         module={''}
                         api={getApi()}
-                        afterImportCompleted={() => { }}
+                        afterImportCompleted={() => {}}
                         onlyExport={true}
                       />
                     )}

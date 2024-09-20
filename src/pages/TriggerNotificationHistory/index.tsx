@@ -15,13 +15,11 @@ import moment from 'moment';
 import axios, { CancelTokenSource } from 'axios';
 
 const TriggerNotificationHistory = () => {
-
   const renderedFrom = camelCase(routes?.triggerNotificationHistory.title);
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting } = state;
-
 
   let columns = [
     {
@@ -31,7 +29,8 @@ const TriggerNotificationHistory = () => {
       disableFilters: true,
       disableSortBy: true,
       disabled: true,
-      Cell: ({ row }) => (row?.original?.createdBy?.date ? <div>{moment(row?.original?.createdBy?.date).format(dateTimeFormat)}</div> : <NoDataCell />)
+      Cell: ({ row }) =>
+        row?.original?.createdBy?.date ? <div>{moment(row?.original?.createdBy?.date).format(dateTimeFormat)}</div> : <NoDataCell />
     },
     {
       accessor: 'reference',
@@ -42,7 +41,7 @@ const TriggerNotificationHistory = () => {
         row?.original?.reference ? (
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <Link
-              target='_blank'
+              target="_blank"
               className="link text-truncate"
               title={row?.original?.reference?.optionLabel}
               to={`${routes[camelCase(row?.original?.referenceType)].path}/detail/${row?.original?.reference?.optionValue}`}
@@ -92,8 +91,7 @@ const TriggerNotificationHistory = () => {
           )}
         </div>
       )
-    },
-
+    }
   ];
   const [renderCount, setRenderCount] = useState(0);
 
@@ -106,7 +104,6 @@ const TriggerNotificationHistory = () => {
       setRenderCount(renderCount + 1);
     }
   }, [page, limit, filters, sorting]);
-
 
   const getQueryString = () => {
     let deepFilter = `?page=${page}&limit=${limit}`;

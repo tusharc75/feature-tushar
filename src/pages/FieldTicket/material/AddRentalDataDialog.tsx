@@ -18,7 +18,7 @@ import { FiExternalLink } from 'react-icons/fi';
 const AddRentalDataDialog = ({ onSuccess, onClose, rentalId, type, isSubmitting = false, currency, ids = [] }) => {
   const renderedFrom = `${camelCase(routes?.fieldTicket.title)}_Rental_Material`;
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { search, selectedRecords } = state;
   const { generateColumns } = useColumns();
 

@@ -24,6 +24,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 type ConfirmationDialogRawProps = {
+  title?: React.ReactNode;
   onClose: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   onOk: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
   open: boolean;
@@ -34,6 +35,7 @@ type ConfirmationDialogRawProps = {
 };
 
 export default function ConfirmationDialogRaw({
+  title,
   onClose,
   onOk,
   open,
@@ -59,7 +61,7 @@ export default function ConfirmationDialogRaw({
       keepMounted
     >
       <DialogTitle id="confirmation-dialog-title" className="text-white">
-        Confirm
+        {title ? title : 'Confirm'}
       </DialogTitle>
       <DialogContent dividers>{message ? <Typography>{message}</Typography> : null}</DialogContent>
       <DialogActions>

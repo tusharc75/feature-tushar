@@ -46,7 +46,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
   const [isAdding, setIsAdding] = useState(false);
   const [assetAssignedProduct, setAssetAssignedProduct] = useState([]);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -285,7 +285,13 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
     });
     for (const _subRow of subRows) {
       let assetStatus = _subRow?.assetDetail?.status;
-      if (planningData?.type === 'Rental Job' && _subRow.type === MATERIAL_TYPE.serializedAsset && assetStatus !== ASSET_STATUS.new && assetStatus !== ASSET_STATUS.available && assetStatus !== ASSET_STATUS.underReview) {
+      if (
+        planningData?.type === 'Rental Job' &&
+        _subRow.type === MATERIAL_TYPE.serializedAsset &&
+        assetStatus !== ASSET_STATUS.new &&
+        assetStatus !== ASSET_STATUS.available &&
+        assetStatus !== ASSET_STATUS.underReview
+      ) {
         setReserveAssetWarning(true);
         break;
       }

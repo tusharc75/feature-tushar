@@ -17,11 +17,10 @@ import ManageCreditMemo from 'src/pages/CreditMemo/ManageCreditMemo';
 import { useData } from 'src/StateProvider/Provider';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
 
+const renderedFrom = `${camelCase(routes?.invoice.title)}_credit_memo`;
 
 function CreditMemo({ invoiceData, allowedToEdit }) {
-
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = `${camelCase(routes?.invoice.title)}_credit_memo`;
 
   const [columns, setColumns] = useState(null);
   const [creditMemoDialog, setCreditMemoDialog] = useState({ open: false, id: null });
@@ -30,7 +29,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState({ open: false, ids: [] });
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -45,11 +44,19 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
 
   const fetchFields = async () => {
     try {
-      const { data: { data } } = await axiosInstance().get(`/field?resource=${sidebarResource.creditMemo}`);
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/field?resource=${sidebarResource.creditMemo}`);
       data?.forEach((e) => {
         e.isColumnEditable = false;
       });
-      const columns = generateColumns(renderedFrom, data?.filter((e) => !['invoice']?.includes(e?.fieldData?.fieldName))?.map((e) => e.fieldData), null, false, invoiceData?.currency);
+      const columns = generateColumns(
+        renderedFrom,
+        data?.filter((e) => !['invoice']?.includes(e?.fieldData?.fieldName))?.map((e) => e.fieldData),
+        null,
+        false,
+        invoiceData?.currency
+      );
       columns?.forEach((e) => {
         if (e.accessor === 'creditMemoNumber') {
           e.Cell = ({ row }) =>
@@ -71,9 +78,9 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
               </div>
             ) : (
               <NoDataCell />
-            )
+            );
         }
-      })
+      });
       columns.push({
         accessor: 'action',
         Header: 'Actions',
@@ -85,7 +92,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
         canDrag: false,
         Cell: ({ row }) => (
           <>
-            {allowedToEdit && permissions?.creditMemo?.isUpdate &&
+            {allowedToEdit && permissions?.creditMemo?.isUpdate && (
               <HtmlTooltip title={'Edit'}>
                 <IconButton
                   size="small"
@@ -97,8 +104,8 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
                   <EditIcon fontSize="small" color={'primary'} />
                 </IconButton>
               </HtmlTooltip>
-            }
-            {allowedToEdit && permissions?.creditMemo?.isDelete &&
+            )}
+            {allowedToEdit && permissions?.creditMemo?.isDelete && (
               <IconButton
                 size="small"
                 aria-label="Details"
@@ -111,7 +118,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
               >
                 <DeleteIcon fontSize="small" color="error" />
               </IconButton>
-            }
+            )}
           </>
         )
       });
@@ -137,14 +144,15 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
     dispatch({ type: 'loading', loading: true });
     dispatch({ type: 'selection', selectedRecords: [] });
 
-    const query = `?filterById=${JSON.stringify([{ field: 'invoice', term: { $in: [invoiceData?._id] } }])}&&filterType=and`
-    axiosInstance().get(`${routes?.creditMemo.path}${query}`)
+    const query = `?filterById=${JSON.stringify([{ field: 'invoice', term: { $in: [invoiceData?._id] } }])}&&filterType=and`;
+    axiosInstance()
+      .get(`${routes?.creditMemo.path}${query}`)
       .then(({ data: { data } }) => {
         let rows = data?.data?.map((u, i) => {
           let finalObject = prepareDataForGrid(u, user);
           finalObject['index'] = i + 1;
           return finalObject;
-        })
+        });
 
         dispatch({ type: 'initialize', data: rows, count: rows?.length });
         dispatch({ type: 'loading', loading: false });
@@ -186,18 +194,12 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
   return (
     <Fragment>
       <Box pb={2} justifyContent={'space-between'} className="flex gap-2">
-        {allowedToEdit && permissions?.creditMemo?.isCreate &&
-          <Button
-            variant={'outlined'}
-            color="primary"
-            size="small"
-            startIcon={<Add />}
-            onClick={() => setCreditMemoDialog({ open: true, id: null })}
-          >
+        {allowedToEdit && permissions?.creditMemo?.isCreate && (
+          <Button variant={'outlined'} color="primary" size="small" startIcon={<Add />} onClick={() => setCreditMemoDialog({ open: true, id: null })}>
             Create
           </Button>
-        }
-        {allowedToEdit &&
+        )}
+        {allowedToEdit && (
           <Button
             variant={'outlined'}
             color="primary"
@@ -211,7 +213,7 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           >
             {'Actions'}
           </Button>
-        }
+        )}
         <Menu
           anchorEl={anchorActionEl}
           keepMounted
@@ -246,9 +248,9 @@ function CreditMemo({ invoiceData, allowedToEdit }) {
           <CustomReactTable
             height={'calc(100vh - 200px)'}
             columns={columns}
-            state = {state}
-            dispatch = {dispatch}
-            refreshGrid = {fetchData}
+            state={state}
+            dispatch={dispatch}
+            refreshGrid={fetchData}
             hideSelection={allowedToEdit ? false : true}
             hideAction={allowedToEdit ? false : true}
             renderedFrom={renderedFrom}

@@ -25,7 +25,7 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
     state: { user, permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);
@@ -206,8 +206,8 @@ const Product = ({ bulkAssetCreationData, setNextStep, renderedFrom, fetchData, 
                 fontSize="small"
                 color={
                   (row?.original?.actualReceived === undefined || row?.original?.actualReceived === 0) &&
-                    allowedToEdit &&
-                    permissions?.bulkAssetCreation?.isUpdate
+                  allowedToEdit &&
+                  permissions?.bulkAssetCreation?.isUpdate
                     ? 'error'
                     : 'disabled'
                 }

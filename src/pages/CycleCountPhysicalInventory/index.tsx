@@ -25,7 +25,7 @@ const CycleCountPInventory = () => {
   const {
     state: { permissions, user }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const [productDialog, setProductDialog] = useState({ open: false, _id: '', products: [], warehouse: '' });
 

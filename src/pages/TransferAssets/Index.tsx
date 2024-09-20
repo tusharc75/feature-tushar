@@ -18,7 +18,14 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, sidebarResource, transferAsset } from 'src/constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  sidebarResource,
+  transferAsset
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManageTransferAsset from './ManageTransferAsset';
 import axios, { CancelTokenSource } from 'axios';
@@ -46,7 +53,7 @@ const TransferAsset = () => {
   const [isDeleting, setDeleting] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [columns, setColumns] = useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const history = useHistory();
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
@@ -127,7 +134,8 @@ const TransferAsset = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.transferAsset?.isDelete && checkIsAllowedToDelete(user, sidebarResource.transferAsset, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.transferAsset?.isDelete && checkIsAllowedToDelete(user, sidebarResource.transferAsset, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -306,8 +314,9 @@ const TransferAsset = () => {
       {showDeleteConfirmBox && (
         <ConfirmationDialog
           open={showDeleteConfirmBox}
-          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
-            } ? `}
+          message={`Are you sure you want to delete the ${routes?.transferAsset?.title?.toLowerCase()} ${
+            deleteRecord?._id ? deleteRecord?.transferAssetNumber : ''
+          } ? `}
           onClose={() => {
             setDeleteRecord(null);
             setShowDeleteConfirmBox(false);

@@ -103,7 +103,7 @@ export default function Account(props) {
   const [accountNameForClone, setAccountNameForClone] = useState('');
   const [columns, setColumns] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   useEffect(() => {
@@ -120,7 +120,7 @@ export default function Account(props) {
       if (o?.accessor === 'accountName') {
         o.cell = ({ row }) => {
           return (
-            <span className="d-flex gap-2 align-items-center">
+            <span className="d-flex align-items-center gap-2">
               <Link className="link" to={`/${accountRoute}/detail/${row?.original?._id}`}>
                 {row?.original?.accountName}
               </Link>
@@ -216,7 +216,15 @@ export default function Account(props) {
             </IconButton>
           </span>
         </HtmlTooltip>
-        <HtmlTooltip title={accountPermissions?.isUpdate && user?.role?.selectedEntity?.policy?.isApproveAccount ? row?.original?.approved ? 'Disapprove' : 'Approve' : updateDisable}>
+        <HtmlTooltip
+          title={
+            accountPermissions?.isUpdate && user?.role?.selectedEntity?.policy?.isApproveAccount
+              ? row?.original?.approved
+                ? 'Disapprove'
+                : 'Approve'
+              : updateDisable
+          }
+        >
           <span>
             <IconButton
               size="small"
@@ -523,23 +531,24 @@ export default function Account(props) {
           extraImportExportLinks={[
             ...(accountResource === 'supplierAccount' && user?.user?.brandPolicy?.serializedAssetCertification
               ? [
-                {
-                  title: 'Supplier View Template',
-                  api: `${accountApi}/items/unknown/template`,
-                  type: 'download'
-                },
-                {
-                  title: 'Supplier View Export',
-                  api: `${accountApi}/items/unknown/template?export=true${selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
+                  {
+                    title: 'Supplier View Template',
+                    api: `${accountApi}/items/unknown/template`,
+                    type: 'download'
+                  },
+                  {
+                    title: 'Supplier View Export',
+                    api: `${accountApi}/items/unknown/template?export=true${
+                      selectedRecords?.length ? `&ids=${JSON.stringify(selectedRecords?.map((obj) => obj._id))}` : ''
                     }`,
-                  type: 'export'
-                },
-                {
-                  title: 'Supplier View Import',
-                  api: `${accountApi}/items/unknown/import`,
-                  type: 'import'
-                }
-              ]
+                    type: 'export'
+                  },
+                  {
+                    title: 'Supplier View Import',
+                    api: `${accountApi}/items/unknown/import`,
+                    type: 'import'
+                  }
+                ]
               : [])
           ]}
         />
@@ -634,8 +643,9 @@ export default function Account(props) {
         {singleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={singleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${singleApproveDisapproveAccount.accountName
-              } ? `}
+            message={`Are you sure you want to ${singleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} account: ${
+              singleApproveDisapproveAccount.accountName
+            } ? `}
             onClose={() =>
               setSingleApproveDisapproveAccount({
                 id: null,
@@ -650,8 +660,9 @@ export default function Account(props) {
         {multipleApproveDisapproveAccount.show ? (
           <ConfirmationDialog
             open={multipleApproveDisapproveAccount.show}
-            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${multipleApproveDisapproveAccount.selectedRecords
-              } account(s) ? `}
+            message={`Are you sure you want to ${multipleApproveDisapproveAccount.approved ? 'approve' : 'disapprove'} selected ${
+              multipleApproveDisapproveAccount.selectedRecords
+            } account(s) ? `}
             onClose={() =>
               setMultipleApproveDisapproveAccount({
                 show: false,

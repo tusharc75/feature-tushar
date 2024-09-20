@@ -41,19 +41,11 @@ interface ReceivingGridProps {
 }
 
 const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
-  const {
-    transferAssetId,
-    transferAssetData,
-    setNextStep,
-    updateTransferStatus,
-    isTransferEnded,
-    renderedFrom,
-    allowedToEdit,
-    stepFullScreen
-  } = props;
+  const { transferAssetId, transferAssetData, setNextStep, updateTransferStatus, isTransferEnded, renderedFrom, allowedToEdit, stepFullScreen } =
+    props;
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const [assetWithNoTicket, setAssetWithNoTicket] = useState([]);
   const [loadingTicketsNotDelivered, setLoadingTicketsNotDelivered] = useState([]);
@@ -303,8 +295,10 @@ const ReceivingTicketGrid: FC<ReceivingGridProps> = (props) => {
         setNextStep(true);
       }
       if (transferAssetData?.transferType.includes('External')) {
-        if (transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed
-          && inventoryDelivered.length === dataRows?.filter((d) => d.status !== ASSET_STATUS.lost).length) {
+        if (
+          transferAssetData?.status !== TRANSFER_ASSET_STATUS.completed &&
+          inventoryDelivered.length === dataRows?.filter((d) => d.status !== ASSET_STATUS.lost).length
+        ) {
           updateTransferStatus(TRANSFER_ASSET_STATUS.completed);
         }
       }

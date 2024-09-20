@@ -26,7 +26,7 @@ const ProgressiveBilling = ({ rentalId, rentalManagementData, allowCreateInvoice
   const {
     state: { user, permissions }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns, checkStaticField } = useColumns();
   const [columns, setColumns] = useState(null);

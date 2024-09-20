@@ -7,7 +7,16 @@ import { Box, Dialog, IconButton, Menu, MenuItem } from '@material-ui/core';
 import { getNestedSubRows } from 'src/components/RentalManagment/helper';
 import { isMobile, isTablet } from 'react-device-detect';
 import routes from 'src/components/Helpers/Routes';
-import { CHILD_RESOURCE, CustomDialogTransition, MATERIAL_TYPE, checkIsAllowedToDelete, checkIsAllowedToEdit, invoice, rentalManagement, sidebarResource } from 'src/constants/helpers';
+import {
+  CHILD_RESOURCE,
+  CustomDialogTransition,
+  MATERIAL_TYPE,
+  checkIsAllowedToDelete,
+  checkIsAllowedToEdit,
+  invoice,
+  rentalManagement,
+  sidebarResource
+} from 'src/constants/helpers';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomReactTable, { useColumns, useTableReducer } from 'src/components/CustomReactTable';
@@ -27,7 +36,6 @@ import { FiExternalLink } from 'react-icons/fi';
 import { DeleteButton } from 'src/components/Helpers/Buttons';
 
 const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess, allowCreateInvoice, isLatestInvoice }) => {
-
   const renderedFrom = `${camelCase(routes?.rentalManagementInvoice.title)}_view_invoice`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -38,7 +46,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
   const [isLoadingUpdate, setIsLoadingUpdate] = useState(false);
   const [isProductEdit, setIsProductEdit] = useState({ open: false, rowData: null });
   const [viewBillDialogConfirm, setViewBillDialogConfirm] = useState({ open: false, rows: [] });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [allFields, setAllFields] = useState([]);
@@ -55,7 +63,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    fetchInvoiceData()
+    fetchInvoiceData();
   }, [invoiceId]);
 
   useEffect(() => {
@@ -77,8 +85,10 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
       data = response?.data?.data;
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.invoice, data) && permissions?.invoice?.isUpdate && allowCreateInvoice);
       setAllowedToDelete(
-        permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue)
-        && data?.canDelete && allowCreateInvoice
+        permissions?.invoice?.isDelete &&
+          checkIsAllowedToDelete(user, sidebarResource.invoice, data.owner.optionValue) &&
+          data?.canDelete &&
+          allowCreateInvoice
       );
       setInvoiceData(data);
     } catch (error) {
@@ -90,7 +100,15 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
     try {
       let data = await fetch_child_resource_fields(CHILD_RESOURCE.invoiceProduct, invoiceData?.currency, false);
       setAllFields(JSON.parse(JSON.stringify(data)));
-      const newColumns = generateColumns(renderedFrom, data?.map((e) => { return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName } }), null, false, invoiceData?.currency);
+      const newColumns = generateColumns(
+        renderedFrom,
+        data?.map((e) => {
+          return { ...e, fieldName: e.fieldName === 'qty' ? 'qtyDisplay' : e.fieldName };
+        }),
+        null,
+        false,
+        invoiceData?.currency
+      );
       var column: any = [
         {
           accessor: 'index',
@@ -210,7 +228,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                   setViewBillDialogConfirm({ open: true, rows: obj });
                 }}
               >
-                <Delete fontSize='small' color={isLatestInvoice ? 'error' : 'disabled'} />
+                <Delete fontSize="small" color={isLatestInvoice ? 'error' : 'disabled'} />
               </IconButton>
             )}
           </Grid>
@@ -236,14 +254,15 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
     const rows = data.material.filter((e) => e.parentId === null);
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.package
-          ? parent.packageDetail?.packageName
-          : parent.type === MATERIAL_TYPE.serializedAsset
-            ? parent.serializedAssetDetail?.assetNumber
-            : parent.serviceDetail?.serviceName
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.package
+            ? parent.packageDetail?.packageName
+            : parent.type === MATERIAL_TYPE.serializedAsset
+              ? parent.serializedAssetDetail?.assetNumber
+              : parent.serviceDetail?.serviceName
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.service
           ? parent?.serviceDetail?.serviceDescription || ''
@@ -279,18 +298,19 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, j) => {
       _subRow.index = parent.index + '.' + (j + 1);
-      _subRow.detail = `${_subRow?.type === MATERIAL_TYPE.product
-        ? _subRow?.productDetail?.productName
-        : _subRow?.type === MATERIAL_TYPE.package
-          ? _subRow?.packageDetail?.packageName
-          : _subRow?.type === MATERIAL_TYPE.serializedAsset
-            ? _subRow?.serializedAssetDetail?.assetNumber
-            : _subRow?.type === MATERIAL_TYPE.service
-              ? _subRow?.serviceDetail?.serviceName
-              : _subRow?.type === MATERIAL_TYPE.other
-                ? _subRow.detail
-                : ''
-        }`;
+      _subRow.detail = `${
+        _subRow?.type === MATERIAL_TYPE.product
+          ? _subRow?.productDetail?.productName
+          : _subRow?.type === MATERIAL_TYPE.package
+            ? _subRow?.packageDetail?.packageName
+            : _subRow?.type === MATERIAL_TYPE.serializedAsset
+              ? _subRow?.serializedAssetDetail?.assetNumber
+              : _subRow?.type === MATERIAL_TYPE.service
+                ? _subRow?.serviceDetail?.serviceName
+                : _subRow?.type === MATERIAL_TYPE.other
+                  ? _subRow.detail
+                  : ''
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.service
           ? _subRow?.serviceDetail?.serviceDescription || ''
@@ -303,7 +323,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                 : '';
       _subRow.isEditable = false;
       _subRow.qtyDisplay = _subRow?.type === MATERIAL_TYPE.other ? '' : `${parent.qtyDisplay * _subRow.qty}`;
-      _subRow.hideSelection = _subRow?.type === MATERIAL_TYPE.other ? true : false
+      _subRow.hideSelection = _subRow?.type === MATERIAL_TYPE.other ? true : false;
       _subRow.subRows = generateNestedData(material, _subRow);
     });
     return subRows;
@@ -320,12 +340,13 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
   const handleSaveData = async (rows: any) => {
     const data = {
       invoiceId: invoiceData?._id,
-      _id: rows[0]?._id,
+      _id: rows[0]?._id
     };
     const calValues = autoCalculateSpecificFields({ qty: rows[0]?.qty }, isProductEdit.rowData, allFields);
     Object.assign(data, calValues);
     setIsLoadingUpdate(true);
-    axiosInstance().put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/update-qty`, data)
+    axiosInstance()
+      .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/update-qty`, data)
       .then((res) => {
         setIsLoadingUpdate(false);
         setIsProductEdit({ open: false, rowData: null });
@@ -347,7 +368,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
       .put(`${rentalManagement.api}/${rentalManagementData._id}/progressive-billing/remove`, data)
       .then((res) => {
         fetchData();
-        fetchInvoiceData()
+        fetchInvoiceData();
         setViewBillDialogConfirm({ open: false, rows: [] });
       })
       .catch((error) => {
@@ -357,7 +378,8 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
 
   const handleDeleteInvoice = async () => {
     setIsSubmitting(true);
-    axiosInstance().put(`${invoice.api}/remove`, { ids: [invoiceId] })
+    axiosInstance()
+      .put(`${invoice.api}/remove`, { ids: [invoiceId] })
       .then(({ data }) => {
         toastConfig.setToastConfig({
           open: true,
@@ -394,7 +416,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
               <Box display="flex" alignItems="center">
                 {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowDeleteConfirmBox(true)} />}
                 <Box ml={1} />
-                {allowedToEdit &&
+                {allowedToEdit && (
                   <Button
                     variant="outlined"
                     color="default"
@@ -407,7 +429,7 @@ const ViewBillingDialog = ({ rentalManagementData, invoiceId, onClose, onSuccess
                   >
                     Actions
                   </Button>
-                }
+                )}
                 <Menu
                   id="action-menu"
                   anchorEl={anchorEl}

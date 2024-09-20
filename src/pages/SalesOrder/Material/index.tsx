@@ -21,7 +21,15 @@ import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
 import ConfirmationDialog from '../../../components/Helpers/ConfirmationDialog';
 import routes from '../../../components/Helpers/Routes';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
-import { CHILD_RESOURCE, MATERIAL_TYPE, PRICING_SETUP_TYPE, SALES_ORDER_STATUS, pricingCondition, salesOrder, sidebarResource } from '../../../constants/helpers';
+import {
+  CHILD_RESOURCE,
+  MATERIAL_TYPE,
+  PRICING_SETUP_TYPE,
+  SALES_ORDER_STATUS,
+  pricingCondition,
+  salesOrder,
+  sidebarResource
+} from '../../../constants/helpers';
 import SalesOrderQtyDialog from './SalesOrderQtyDialog';
 import { flattenArray } from 'src/constants/columns';
 import AdditionalCostDialog from './AdditionalCostDialog';
@@ -29,9 +37,9 @@ import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import { FiExternalLink } from 'react-icons/fi';
 import ManageLeadTime from 'src/components/LeadTime/ManageLeadTime';
 
-const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
-  const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
+const renderedFrom = `${camelCase(routes?.salesOrder.title)}_Material`;
 
+const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrderData, updateJobStatus }) => {
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -51,7 +59,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   const [showCostDialog, setShowCostDialog] = useState({ open: false, showSaveAndNext: false });
   const [costFields, setCostFields] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -105,19 +113,19 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         width: 300,
         Cell: ({ row, table }) => (
           <div className="flex items-center gap-2">
-            {
-              (row.original?.detail ?
-                <p
-                  onClick={() => {
-                    handleOpen(row, table.getRowModel().rows);
-                  }}
-                  className="link text-truncate"
-                  title={row.original?.detail}
-                >
-                  {row.original?.detail}
-                </p>
-                : <NoDataCell />)
-            }
+            {row.original?.detail ? (
+              <p
+                onClick={() => {
+                  handleOpen(row, table.getRowModel().rows);
+                }}
+                className="link text-truncate"
+                title={row.original?.detail}
+              >
+                {row.original?.detail}
+              </p>
+            ) : (
+              <NoDataCell />
+            )}
             {![MATERIAL_TYPE.service, MATERIAL_TYPE.manualEntry]?.includes(row?.original?.type) && (
               <>
                 {row.original?.subRows?.length > 0 && (
@@ -157,7 +165,13 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         Header: 'Description',
         width: 200,
         Cell: ({ row }) => {
-          return row.original['description'] ? <div><p className="text-truncate">{row.original.description}</p></div> : <NoDataCell />;
+          return row.original['description'] ? (
+            <div>
+              <p className="text-truncate">{row.original.description}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          );
         }
       },
       {
@@ -171,7 +185,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
           return <>{total}</>;
         }
-      },
+      }
     ];
     coloum = [...coloum, ...newColumns];
     coloum.push({
@@ -240,21 +254,22 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     let additionalCost = additionalData?.data?.data;
     additionalCost = additionalCost?.map((e: any) => {
       return { ...e, type: MATERIAL_TYPE.manualEntry };
-    })
+    });
 
     setMaterial(JSON.parse(JSON.stringify(data.material)));
     let rows = data.material.filter((e) => e.parentId === null);
     rows = [...rows, ...additionalCost];
     rows.forEach((parent, i) => {
       parent.index = i + 1;
-      parent.detail = `${parent.type === MATERIAL_TYPE.product
-        ? parent.productDetail?.productName
-        : parent.type === MATERIAL_TYPE.service
-          ? parent.serviceDetail?.serviceName
-          : parent.type === MATERIAL_TYPE.package
-            ? parent.packageDetail?.packageName
-            : parent.detail || ''
-        }`;
+      parent.detail = `${
+        parent.type === MATERIAL_TYPE.product
+          ? parent.productDetail?.productName
+          : parent.type === MATERIAL_TYPE.service
+            ? parent.serviceDetail?.serviceName
+            : parent.type === MATERIAL_TYPE.package
+              ? parent.packageDetail?.packageName
+              : parent.detail || ''
+      }`;
       parent.description =
         parent.type === MATERIAL_TYPE.product
           ? parent?.productDetail?.productDescription || ''
@@ -283,12 +298,13 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     const subRows: any = material.filter((e) => e.parentId === parent._id);
     subRows.forEach((_subRow, index) => {
       _subRow.index = parent.index + '.' + `${index + 1}`;
-      _subRow.detail = `${_subRow.type === MATERIAL_TYPE.product
-        ? _subRow.productDetail?.productName
-        : _subRow.type === MATERIAL_TYPE.service
-          ? _subRow.serviceDetail?.serviceName
-          : _subRow.packageDetail?.packageName
-        }`;
+      _subRow.detail = `${
+        _subRow.type === MATERIAL_TYPE.product
+          ? _subRow.productDetail?.productName
+          : _subRow.type === MATERIAL_TYPE.service
+            ? _subRow.serviceDetail?.serviceName
+            : _subRow.packageDetail?.packageName
+      }`;
       _subRow.description =
         _subRow.type === MATERIAL_TYPE.product
           ? _subRow?.productDetail?.productDescription
@@ -465,8 +481,8 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
 
   const handleDelete = (rows) => {
     setDeleting(true);
-    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id)
-    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry)
+    const cost = rows?.filter((ele) => ele.type === MATERIAL_TYPE.manualEntry).map((e) => e?.id);
+    const products = rows?.filter((ele) => ele.type !== MATERIAL_TYPE.manualEntry);
     if (products?.length) {
       axiosInstance()
         .put(`${salesOrder.api}/material/${salesOrderData?._id}/delete`, { ids: rows })
@@ -597,7 +613,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             {`Add Existing Services`}
           </MenuItem>
         )}
-        {costFields?.length > 0 &&
+        {costFields?.length > 0 && (
           <MenuItem
             onClick={() => {
               setShowCostDialog({ open: true, showSaveAndNext: false });
@@ -605,7 +621,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
           >
             Add Manual Entry
           </MenuItem>
-        }
+        )}
       </>
     );
   };
@@ -645,7 +661,7 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
   };
 
   const handleSaveLeadTime = (data) => {
-    setSubmitting(true)
+    setSubmitting(true);
     const value = {
       leadTime: data?.steps || [],
       _id: leadTimeDialog?.data?._id
@@ -654,9 +670,9 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
     axiosInstance()
       .put(`${salesOrder.api}/material/${salesOrderData?._id}/lead-time`, value)
       .then(({ data }) => {
-        fetchData()
+        fetchData();
         setLeadTimeDialog({ open: false, data: null });
-        setSubmitting(false)
+        setSubmitting(false);
         toastConfig.setToastConfig({
           open: true,
           type: 'success',
@@ -664,10 +680,10 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
         });
       })
       .catch((err) => {
-        setSubmitting(false)
+        setSubmitting(false);
         toastConfig.setToastConfig(err);
       });
-  }
+  };
 
   return (
     <Fragment>
@@ -783,12 +799,16 @@ const Material = ({ salesOrderData, setNextStep, stepFullScreen, fetchSalesOrder
             setLeadTimeDialog({ open: false, data: null });
           }}
           onSuccess={(data) => {
-            handleSaveLeadTime(data)
+            handleSaveLeadTime(data);
           }}
           referenceType={sidebarResource.salesOrder}
           referenceId={null}
           referenceData={leadTimeDialog?.data}
-          referenceLabel={leadTimeDialog?.data?.productDetail?.productName || leadTimeDialog?.data?.serviceDetail?.serviceName || leadTimeDialog?.data?.packageDetail?.packageName}
+          referenceLabel={
+            leadTimeDialog?.data?.productDetail?.productName ||
+            leadTimeDialog?.data?.serviceDetail?.serviceName ||
+            leadTimeDialog?.data?.packageDetail?.packageName
+          }
           loading={isSubmitting}
         />
       )}

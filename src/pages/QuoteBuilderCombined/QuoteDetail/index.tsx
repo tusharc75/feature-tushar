@@ -141,7 +141,7 @@ export default function QuoteDetail() {
   const {
     state: { user, selectedEntity, permissions }
   }: any = useData();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom: '' });
   const [quoteData, setQuoteData] = useState(null);
   const [customizedRoutes, setCustomizedRoutes] = useState([]);
   const [loading, setLoading] = useState(false);

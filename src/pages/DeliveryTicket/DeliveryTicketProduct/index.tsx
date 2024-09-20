@@ -13,7 +13,7 @@ const DeliveryTicketProduct = ({ renderedFrom, deliveryTicketId, columns }) => {
   const toastConfig = useContext(CustomToastContext);
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const {
     state: { user }

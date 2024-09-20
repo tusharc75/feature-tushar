@@ -10,7 +10,7 @@ import { useData } from '../../../StateProvider/Provider';
 
 const Package = ({ renderedFrom, productId }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
