@@ -6,7 +6,7 @@ import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomT
 import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 
-const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fieldName, required = false, fieldData }) => {
+const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fieldName, required = false, fieldData, allFields }) => {
   const { setToastConfig } = useContext(CustomToastContext);
 
   const {
@@ -23,8 +23,11 @@ const SingleLine = ({ resource, errors, touched, value, fieldLabel, onChange, fi
         let _resource = resource;
         let _fieldName = fieldName;
         if (fieldData?.type === 'lookUpDisplay') {
-          _resource = startCase(fieldData?.lookUpField);
           _fieldName = fieldData?.lookUpFieldDisplay;
+          const lookUpField = allFields?.find((e) => e.fieldName === fieldData?.lookUpField)
+          if (lookUpField) {
+            _resource = lookUpField.lookupResource;
+          }
         }
         if (searchKey !== '') {
           page = 0;
