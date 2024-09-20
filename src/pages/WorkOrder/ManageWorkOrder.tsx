@@ -25,6 +25,7 @@ import { isEqual } from 'lodash';
 import CustomButton from '../../components/Helpers/CustomButton';
 import routes from 'src/components/Helpers/Routes';
 import { useHistory } from 'react-router-dom';
+import { ASSET_STATUS } from '../../constants/helpers';
 
 const disabledFieldArray = ['type', 'product', 'warehouse', 'serializedAsset', 'status'];
 
@@ -57,7 +58,23 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
 
       let serializedAssetFieldIndex = data.findIndex((obj) => obj?.fieldData.fieldName === 'serializedAsset');
       if (serializedAssetFieldIndex > -1) {
-        const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}`);
+        const deepFilter = [
+          {
+            field: 'status',
+            term: {
+              $in: [
+                ASSET_STATUS.new,
+                ASSET_STATUS.available,
+                ASSET_STATUS.scrap,
+                ASSET_STATUS.underReview,
+                ASSET_STATUS.needRepair,
+                ASSET_STATUS.needRecert,
+                ASSET_STATUS.customerPossession,
+              ]
+            }
+          }
+        ]
+        const { data: { data: lookupResource } } = await axiosInstance().get(`/sa-formbuilder/lookup?lookupResource=${serializedAsset.resource}&deepFilter=${JSON.stringify(deepFilter)}`);
         if (lookupResource['Serialized Asset']) {
           data[serializedAssetFieldIndex].fieldData.option = lookupResource['Serialized Asset'];
           setAssetOptionData(lookupResource['Serialized Asset']);
@@ -234,7 +251,12 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                       options={field.option}
                                       setFieldValue={(name, value) => {
                                         setFieldValue(name, value);
-                                        let data = assetOptionsData.filter((i) => i.warehouse === value);
+                                        let data = assetOptionsData.filter((i) => {
+                                          if (values?.product) {
+                                            return values?.product === i.product && i.warehouse === value
+                                          }
+                                          return i.warehouse === value;
+                                        });
                                         setAssetOptions(data);
                                       }}
                                       required={field.required}
@@ -267,30 +289,61 @@ const ManageWorkOrder = ({ onClose, onSuccess, isClone = false, workOrderId = nu
                                       size="small"
                                       imageOrFileUploadCompletePercentage={null}
                                     />
-                                  ) : (
-                                    <FormTypes
-                                      {...field}
-                                      fieldData={field}
-                                      fields={initialData.fields}
-                                      disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit)}
-                                      values={values}
-                                      errors={errors}
-                                      touched={touched}
-                                      label={field.fieldLabel}
-                                      name={field.fieldName}
-                                      type={field.type}
-                                      options={field.option}
-                                      setFieldValue={(name, value) => {
-                                        setFieldValue(name, value);
-                                      }}
-                                      required={field.required}
-                                      fullWidth
-                                      isTooltip={field?.isTooltip || false}
-                                      tooltipMessage={field?.tooltipMessage}
-                                      size="small"
-                                      imageOrFileUploadCompletePercentage={null}
-                                    />
-                                  )}
+                                  ) :
+                                    field.fieldName === 'product' ? (
+                                      <FormTypes
+                                        {...field}
+                                        fieldData={field}
+                                        disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit)}
+                                        values={values}
+                                        errors={errors}
+                                        touched={touched}
+                                        label={field.fieldLabel}
+                                        name={field.fieldName}
+                                        type={field.type}
+                                        options={field.option}
+                                        setFieldValue={(name, value) => {
+                                          setFieldValue(name, value);
+                                          let data = assetOptionsData.filter((i) => {
+                                            if (values?.warehouse) {
+                                              return values?.warehouse === i.warehouse && i.product === value
+                                            }
+                                            return i.product === value;
+                                          });
+                                          setAssetOptions(data);
+                                        }}
+                                        required={field.required}
+                                        fullWidth
+                                        isTooltip={field?.isTooltip || false}
+                                        tooltipMessage={field?.tooltipMessage}
+                                        size="small"
+                                        imageOrFileUploadCompletePercentage={null}
+                                      />
+                                    ) :
+                                      (
+                                        <FormTypes
+                                          {...field}
+                                          fieldData={field}
+                                          fields={initialData.fields}
+                                          disabled={(workOrderId && (disabledFieldArray.includes(field.fieldName)) || field.disableOnEdit)}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={null}
+                                        />
+                                      )}
                                 </Grid>
                               ))}
                             </Grid>

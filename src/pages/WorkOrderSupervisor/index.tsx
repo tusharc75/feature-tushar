@@ -22,7 +22,8 @@ import CustomFilter from 'src/components/Helpers/CustomFilter';
 import AppsIcon from '@material-ui/icons/Apps';
 import DateRangeIcon from '@material-ui/icons/DateRange';
 import ManageWorkOrder from 'src/pages/WorkOrder/ManageWorkOrder';
-import { AddOutlined } from '@material-ui/icons';
+import { KeyboardArrowDown } from '@material-ui/icons';
+import ProductFrequencyDialog from './ProductFrequencyDialog';
 
 const LIMIT = 25;
 
@@ -91,6 +92,7 @@ const WorkOrderSupervisor = () => {
     to: new Date(moment().endOf('month').format('YYYY/MM/DD'))
   });
   const [showManageWorkOrder, setShowManageWorkOrder] = useState(false);
+  const [showProductFreqDialog, setShowProductFreqDialog] = useState(false);
 
   const ref: any = useRef();
 
@@ -373,7 +375,7 @@ const WorkOrderSupervisor = () => {
         </Grid>
         <div className="main-container">
           <div className="header-panel">
-            <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-2">
+            <div className="grid grid-cols-1 items-start gap-2 min-[600px]:grid-cols-[1fr_3fr] min-[800px]:grid-cols-[1.8fr_3fr]">
               {isMobile ? (
                 <>
                   <div className="relative mr-auto max-w-fit">
@@ -432,21 +434,10 @@ const WorkOrderSupervisor = () => {
                 <div className="flex-grow pt-[4px]">
                   <CustomFilter field={fieldToFilterList} setFilterQuery={setFilterResourceQuery} />
                 </div>
-                {permissions?.workOrder?.isCreate &&
-                  <div className="pt-[4px]">
-                    <HtmlTooltip title={`Add ${routes.workOrder.title}`}>
-                      <Button
-                        variant={'contained'}
-                        color="primary"
-                        size="small"
-                        className={`no-shadow`}
-                        onClick={() => setShowManageWorkOrder(true)}
-                        startIcon={<AddOutlined />}
-                      >
-                        Add
-                      </Button>
-                    </HtmlTooltip>
-                  </div>}
+                <div className="pt-[4px]">
+                  <RenderActionOptions permissions={permissions} setShowProductFreqDialog={setShowProductFreqDialog} setShowManageWorkOrder={setShowManageWorkOrder} />
+                </div>
+
                 <div className="pt-[4px]">
                   <HtmlTooltip title={`Card View`} arrow placement="top" enterTouchDelay={0}>
                     <IconButton
@@ -540,6 +531,15 @@ const WorkOrderSupervisor = () => {
             isRedirectToDetailPage={false}
           />
         )}
+        {showProductFreqDialog && (
+          <ProductFrequencyDialog
+            onClose={() => setShowProductFreqDialog(false)}
+            onSuccess={() => {
+              onClickRefreshIcon();
+              setShowProductFreqDialog(false);
+            }}
+          />
+        )}
       </Fragment>
     </MuiPickersUtilsProvider>
   );
@@ -594,3 +594,62 @@ const RenderAssignOptions = ({ openAssignHandler, data, permissions }) => {
     </>
   );
 };
+
+const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog, permissions }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+  const handleOpenMenu = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  return (
+    <>
+      <span>
+        <Button
+          variant="outlined"
+          color="primary"
+          size="small"
+          disabled={false}
+          onClick={handleOpenMenu}
+          endIcon={<KeyboardArrowDown fontSize="small" />}
+          className="new-dropdown-v1"
+        >
+          Actions
+        </Button>
+      </span>
+      <Menu
+        anchorEl={anchorEl}
+        keepMounted
+        getContentAnchorEl={null}
+        anchorOrigin={{
+          vertical: 'bottom',
+          horizontal: 'left'
+        }}
+        open={Boolean(anchorEl)}
+        onClose={handleClose}>
+        {
+          permissions?.workOrder?.isCreate &&
+          <MenuItem
+            onClick={() => {
+              setShowManageWorkOrder(true)
+              handleClose();
+            }}
+          >
+            Create Work order
+          </MenuItem>
+        }
+        <MenuItem
+          onClick={() => {
+            setShowProductFreqDialog(true);
+            handleClose();
+          }}
+        >
+          Set Product Frequency
+        </MenuItem>
+      </Menu>
+    </>
+  );
+};
+
