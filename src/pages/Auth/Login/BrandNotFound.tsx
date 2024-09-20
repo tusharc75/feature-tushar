@@ -15,7 +15,7 @@ const BrandNotFound = () => {
           {window.location.host}
           <span className="select-none">&nbsp;&nbsp;</span>
         </pre>
-        <p className="mx-auto mb-4 max-w-[450px] text-[15px]">
+        <p className="mx-auto mb-8 max-w-[450px] text-[15px]">
           You've requested a page using an invalid hostname. Please double check the web address or try the address of our main site:
         </p>
         <a className="link block" href={mainSiteUrl}>
