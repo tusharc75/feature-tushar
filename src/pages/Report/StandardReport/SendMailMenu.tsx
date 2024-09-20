@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Menu, MenuItem, Button } from '@material-ui/core';
+import { Menu, MenuItem, Button, CircularProgress } from '@material-ui/core';
 import ArrowDropDownIcon from '@material-ui/icons/ArrowDropDown';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 
-const SendMailMenu = ({ exportData }) => {
+const SendMailMenu = ({ exportData, isProcessing }) => {
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -29,6 +29,8 @@ const SendMailMenu = ({ exportData }) => {
             aria-haspopup="true"
             className="min-h-[32px]"
             size="small"
+            disabled={isProcessing === 'sendMail'}
+            startIcon={isProcessing === 'sendMail' && <CircularProgress color="inherit" size={18} />}
           >
             Send Mail
           </Button>
@@ -47,6 +49,7 @@ const SendMailMenu = ({ exportData }) => {
           vertical: 'top',
           horizontal: 'right'
         }}
+        
       >
         <MenuItem
           onClick={() => {

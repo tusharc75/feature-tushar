@@ -822,7 +822,7 @@ const Report = () => {
               ) : (
                 <div className="flex items-center gap-1">
                   {reportConfig?.isSendMail && (
-                    <SendMailMenu exportData={exportData}/>
+                    <SendMailMenu exportData={exportData} isProcessing={isProcessing}/>
                   )}
                   {reportConfig?.isExportPdf && (
                     <Button
