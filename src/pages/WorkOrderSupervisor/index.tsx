@@ -637,7 +637,7 @@ const RenderActionOptions = ({ setShowManageWorkOrder, setShowProductFreqDialog,
               handleClose();
             }}
           >
-            Create Work order
+            {`Create ${routes?.workOrder.title}`}
           </MenuItem>
         }
         <MenuItem
