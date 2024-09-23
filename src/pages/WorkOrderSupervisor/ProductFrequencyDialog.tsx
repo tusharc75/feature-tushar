@@ -122,7 +122,7 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
               onClose={() => {
                 onClose();
               }}
-              title={`Product Frequency Dialog`}
+              title={`Product Frequency`}
               isMinimized={!fullScreen}
               onMinimizeMaximize={() => {
                 setFullScreen((prevState) => !prevState);
@@ -142,7 +142,7 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
                     setSelectedProduct(val?.optionValue);
                   }
                   }
-                  renderInput={(params) => <TextField {...params} label="Select product" variant="outlined" />}
+                  renderInput={(params) => <TextField {...params} label="Select Product" variant="outlined" />}
                 />}
                 {selectedProduct ? (
                   !loading ? (
@@ -172,7 +172,7 @@ export default function ProductFrequencyDialog({ onClose, onSuccess }) {
                                     onChange={(event, newValue) => {
                                       const updatedProductServices = productServices?.map((e) => {
                                         if (e?._id === _key?._id) {
-                                          return { ...e, frequency: newValue }
+                                          return { ...e, frequency: newValue || '' }
                                         }
                                         return e;
                                       })
