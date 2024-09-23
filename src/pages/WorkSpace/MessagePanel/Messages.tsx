@@ -17,7 +17,7 @@ import { cn, dateFormat, getFileIconSrc } from 'src/constants/helpers';
 import { ChannelData, Message } from 'src/pages/WorkSpace/types';
 import { formatDateWithTodayYestarday } from 'src/pages/WorkSpace/utils';
 import SendMessage from './SendMessage';
-import { getAvatarColor } from 'src/pages/WorkSpace/MessagePanel/utils';
+import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import Thread from './Thread';
 
 type MessagesProps = {

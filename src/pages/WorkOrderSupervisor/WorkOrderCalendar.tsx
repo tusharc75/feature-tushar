@@ -14,13 +14,14 @@ import '../PlanningView/Calendar/calendarView.scss';
 import { useData } from 'src/StateProvider/Provider';
 import { isMobile, isTablet } from 'react-device-detect';
 import TechnicianDialog from 'src/pages/WorkOrderTechnician/TechnicianDialog';
+import { kebabCase } from 'lodash';
 
 const localizer = momentLocalizer(moment);
 const formats = {
   weekdayFormat: (date, culture, localizer) => localizer.format(date, 'dddd', culture)
 };
 
-function WorkOrderCalendar( {getFilterQuery, filterResourceQuery}, ref ) {
+function WorkOrderCalendar( {getFilterQuery, filterResourceQuery, reference}, ref ) {
   const {
     state: { permissions }
   }: any = useData();
@@ -87,7 +88,7 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery}, ref ) {
 
   useEffect(() => {
       fetchData();
-  }, [filterResourceQuery, dateRange]);
+  }, [filterResourceQuery, dateRange, reference]);
 
   const childFunction = () => {
     fetchData();
@@ -102,18 +103,30 @@ function WorkOrderCalendar( {getFilterQuery, filterResourceQuery}, ref ) {
     let query = getFilterQuery(false);
     query = `${query}&from=${dateRange.estimateStartDate}&to=${dateRange.estimateEndDate}`;
     axiosInstance()
-      .get(`${workOrderSupervisor.api}/work-order-list?${query}`)
+      .get(`${workOrderSupervisor.api}/${kebabCase(reference)}?${query}`)
       .then(({ data: { data } }) => {
         const rows = data?.map((d: any) => {
-          return {
-            id: d._id,
-            title: d?.workOrderNumber,
-            start: new Date(d?.createDate),
-            end: d?.estimateCompleteDate ? new Date(d?.estimateCompleteDate) : new Date(d?.createDate),
-            allDay: true,
-            startDraggable: false,
-            endDraggable: false
-          };
+          if(reference==='repairOrder'){
+            return {
+              id: d._id,
+              title: d?.repairOrderNumber,
+              start: new Date(d?.createDate),
+              end: new Date(d?.expectedCompletionDate),
+              allDay: true,
+              startDraggable: false,
+              endDraggable: false
+            };
+          }else {
+            return {
+              id: d._id,
+              title: d?.workOrderNumber,
+              start: new Date(d?.createDate),
+              end: d?.estimateCompleteDate ? new Date(d?.estimateCompleteDate) : new Date(d?.createDate),
+              allDay: true,
+              startDraggable: false,
+              endDraggable: false
+            };
+          }
         });
 
         setEvents([...rows]);
