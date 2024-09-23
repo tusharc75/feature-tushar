@@ -10,6 +10,7 @@ import Dialog from '@material-ui/core/Dialog';
 import { Typography } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import { CustomDialogTransition } from 'src/constants/helpers';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -45,12 +46,14 @@ export default function ConfirmationDialogRaw({
   cancelText = null
 }: ConfirmationDialogRawProps) {
   const classes = useStyles();
+  const walkmeInstance = useGetWalkmeInstance();
 
   return (
     <Dialog
       disableBackdropClick
       disableEscapeKeyDown
       TransitionComponent={CustomDialogTransition}
+      transitionDuration={walkmeInstance ? 0 : 300}
       maxWidth="xs"
       aria-labelledby="confirmation-dialog-title"
       open={open}
