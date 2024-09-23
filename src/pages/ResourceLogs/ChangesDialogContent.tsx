@@ -45,7 +45,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               title={data?.oldValue?.label}
                               onClick={() => {
                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`);
+                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`);
                               }}
                             >
                               {data?.oldValue?.label}
@@ -58,7 +58,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                   title={oldValue?.label}
                                   onClick={() => {
                                     if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${oldValue?.value}`);
+                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${oldValue?.value}`);
                                   }}
                                 >
                                   {oldValue?.label}
@@ -82,7 +82,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                               title={data?.newValue?.label}
                               onClick={() => {
                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`);
+                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`);
                               }}
                             >
                               {data?.newValue?.label}
@@ -95,7 +95,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                   title={newValue?.label}
                                   onClick={() => {
                                     if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${newValue?.value}`);
+                                      window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${newValue?.value}`);
                                   }}
                                 >
                                   {newValue?.label}
@@ -131,7 +131,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
           </Table>
         </TableContainer>
       ) : (
-        <NoDataCell />
+        null
       )}
       {operations?.length ? (
         <TableContainer component={Paper}>
@@ -176,7 +176,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                               title={data?.oldValue?.label}
                                               onClick={() => {
                                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.oldValue?.value}`);
+                                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.oldValue?.value}`);
                                               }}
                                             >
                                               {data?.oldValue?.label}
@@ -198,7 +198,7 @@ const ChangesDialogContent = ({ changes, operations, updatedBy }) => {
                                               title={data?.newValue?.label}
                                               onClick={() => {
                                                 if (permissions[`${camelCase(data?.lookupResource)}`]?.isRead)
-                                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path}/${data?.newValue?.value}`);
+                                                  window.open(`${routes[`${camelCase(data?.lookupResource)}Detail`]?.path || `/${camelCase(data?.lookupResource)}/detail`}/${data?.newValue?.value}`);
                                               }}
                                             >
                                               {data?.newValue?.label}

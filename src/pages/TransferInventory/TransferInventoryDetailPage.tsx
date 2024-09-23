@@ -31,6 +31,7 @@ import ContentFullScreen from '../../components/ContentFullScreen';
 import LoadingTicket from './LoadingTicket';
 import ManageTransferInventory from './ManageTransferInventory';
 import Products from './Products';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
@@ -127,7 +128,7 @@ const TransferInventoryDetailPage = () => {
         } else {
           setCurrentStep(getIndex(data?.processStatus, transferInventorySteps));
         }
-        
+
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.transferInventory, data) && permissions?.transferInventory?.isUpdate);
         setTransferInventoryData(data);
       })
@@ -173,17 +174,6 @@ const TransferInventoryDetailPage = () => {
         });
         fetchTransferInventoryData();
       })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
-  const updateProcessStatus = (step: number) => {
-    axiosInstance()
-      .put(`${routes.transferInventory.path}/${id}/process-status`, {
-        processStatus: stepNames[step]
-      })
-      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -260,7 +250,9 @@ const TransferInventoryDetailPage = () => {
                 isNextStep={false}
                 nextStep={nextStep}
                 nextStepToolTip={nextStepToolTip}
-                updateStatus={updateProcessStatus}
+                updateStatus={(step: number) => {
+                  dynamicFormUpdateProcessStatus(sidebarResource.transferInventory, stepNames[step], id);
+                }}
                 isStepEnded={transferInventoryData?.status === TRANSFER_INVENTORY_STATUS.delivered}
                 setStepFullScreen={() => setStepFullScreen(true)}
               />

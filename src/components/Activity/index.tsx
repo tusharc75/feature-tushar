@@ -88,7 +88,7 @@ const Activity = (props) => {
     resourceId = '',
     resourceLabel = '',
     resource = '',
-    close = () => { }
+    close = () => {}
   } = props;
   const toastConfig = useContext(CustomToastContext);
 
@@ -124,7 +124,10 @@ const Activity = (props) => {
   useEffect(() => {
     const options: any = [];
     ['Task', 'Event', 'Case', 'Note', 'Email', 'Attachment']?.forEach((item) => {
-      if ((item === 'Event' && permissions?.task?.isRead) || (permissions[item?.toLowerCase()] && permissions[item?.toLowerCase()]?.isRead === true)) {
+      if (
+        (item === 'Event' && permissions?.task?.isRead) ||
+        (permissions[item?.toLowerCase()] && permissions[item?.toLowerCase()]?.isRead === true)
+      ) {
         options.push(item);
       }
     });
@@ -245,16 +248,16 @@ const Activity = (props) => {
     <>
       <Box>
         <Box className={`${classes.detailsHeader} `}>
-          <div className="flex gap-[14px] items-center">
+          <div className="flex items-center gap-[14px]">
             <div
-              className="icon w-[37px] h-[34px] rounded-[6px] bg-gradient-to-r from-[#FAC94B] to-[rgb(255,155,4)] grid place-items-center"
+              className="icon grid h-[34px] w-[37px] place-items-center rounded-[6px] bg-gradient-to-r from-[#FAC94B] to-[rgb(255,155,4)]"
               style={{ backgroundImage: 'linear-gradient(to right, #FAC94B, rgb(255,155,4))' }}
             >
               <CollaborateIcon />
             </div>
             <div>
               <span className=" text-[11px] text-[#8c8c8c] dark:text-[var(--dark-secondary-text)]">Collaborate</span>
-              <h2 className=" truncate text-sm md:text-[15px] text-[var(--dark-primary-text,#2A3042)]">{resourceLabel}</h2>
+              <h2 className=" truncate text-sm text-[var(--dark-primary-text,#2A3042)] md:text-[15px]">{resourceLabel}</h2>
             </div>
           </div>
           <IconButton onClick={() => close()} className="close-icon-v1">
@@ -495,7 +498,15 @@ const Activity = (props) => {
           )}
         </Dialog>
       </Box>
-      {showHistory ? <HistoryDialog open={showHistory} resourceId={resourceId} resource={resource} onClose={() => setShowHistory(false)} /> : null}
+      {showHistory ? (
+        <HistoryDialog
+          open={showHistory}
+          resourceLabel={resourceLabel}
+          resourceId={resourceId}
+          resource={resource}
+          onClose={() => setShowHistory(false)}
+        />
+      ) : null}
     </>
   );
 };

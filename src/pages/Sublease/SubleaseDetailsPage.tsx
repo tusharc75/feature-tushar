@@ -38,6 +38,7 @@ import Slip from './Slip';
 import SubleaseAsset from './SubleaseAsset';
 import Tickets from './Tickets';
 import Receiving from 'src/pages/Sublease/Receiving';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -70,19 +71,6 @@ const SubleaseDetailsPage = () => {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
     history.replace(`?tab=${newValue}`);
-  };
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 4) {
-      updateProcessStatus(subleaseStepsNames[currentStep]);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
   };
 
   const updateStatus = (status) => {
@@ -244,6 +232,9 @@ const SubleaseDetailsPage = () => {
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[SUBLEASE_STATUS.closed].includes(subleaseData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.sublease, subleaseStepsNames[step], id);
+                  }}
                 />
                 <ContentFullScreen title={subleaseStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {subleaseStepsNames[currentStep] === 'Add Products' && subleaseData && (
