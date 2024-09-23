@@ -177,7 +177,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
       canDrag: false,
       Cell: ({ row, table }) => (
         <>
-          {!row?.original?.productDetail?.serializedProduct && <IconButton
+          {row?.original?.type !== MATERIAL_TYPE.serializedAsset && <IconButton
             size="small"
             aria-label="Details"
             disabled={!allowedToEdit}
