@@ -3,7 +3,7 @@ import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import { CustomDialogTransition } from 'src/constants/helpers';
-import ChangesDialogContent from 'src/pages/ResourceLogs/ChangesDIalogContent';
+import ChangesDialogContent from 'src/pages/ResourceLogs/ChangesDialogContent';
 
 const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
   const [fullScreen, setFullScreen] = useState(true);
