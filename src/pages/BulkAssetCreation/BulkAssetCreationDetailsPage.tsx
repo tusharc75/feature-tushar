@@ -65,12 +65,12 @@ const BulkAssetCreationDetailsPage = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 1) {
-      updateProcessStatus(bulkAssetCreationSteps[currentStep]);
+      updateProcessStatus(bulkAssetCreationSteps[currentStep]?.name);
     }
   }, [currentStep]);
 
   const updateProcessStatus = async (processStatus) => {
-    DynamicProcessStatusUpdate(sidebarResource.bulkAssetCreation, processStatus.name, id);
+    DynamicProcessStatusUpdate(sidebarResource.bulkAssetCreation, processStatus, id);
   };
 
   useEffect(() => {
