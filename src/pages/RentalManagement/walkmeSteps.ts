@@ -141,7 +141,12 @@ export const generateLoadingStepCreateTicketSteps = (index: number, insertMTRCon
         title: 'Select a product'
       },
       { target: '#details-page-action-button', title: 'Actions' },
-      { target: '#create-loding-ticket-menu-item', title: 'Create Ticket', waitForStepInsertion: !insertMTRConfirmation && waitForStepInsertion }
+      {
+        target: '#create-loding-ticket-menu-item',
+        title: 'Create Ticket',
+        willOpenDialog: true,
+        waitForStepInsertion: !insertMTRConfirmation && waitForStepInsertion
+      }
     ]
   };
 
