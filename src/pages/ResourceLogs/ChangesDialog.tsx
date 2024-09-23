@@ -1,11 +1,12 @@
 import { Dialog } from '@material-ui/core';
+import moment from 'moment';
 import { useState } from 'react';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
-import { CustomDialogTransition } from 'src/constants/helpers';
+import { CustomDialogTransition, dateTimeFormat } from 'src/constants/helpers';
 import ChangesDialogContent from 'src/pages/ResourceLogs/ChangesDialogContent';
 
-const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
+const ChangesDialog = ({ open, onClose, data }) => {
   const [fullScreen, setFullScreen] = useState(true);
 
   return (
@@ -24,11 +25,14 @@ const ChangesDialog = ({ open, onClose, changes, operations, updatedBy }) => {
         }}
         showManimizeMaximize={true}
         showRequiredLabel={false}
-        title={`Changes`}
+        title={`Changes - ${data?.updatedBy?.optionLabel} - ${moment(data?.date)?.format(dateTimeFormat)}`}
         onClose={onClose}
       />
       <CustomDialogContent isFooterPresent={false}>
-        <ChangesDialogContent changes={changes} operations={operations} updatedBy={updatedBy} />
+        <ChangesDialogContent
+          changes={data?.changes || []}
+          operations={data?.operations || []}
+          updatedBy={data?.updatedBy?.optionValue} />
       </CustomDialogContent>
     </Dialog>
   );
