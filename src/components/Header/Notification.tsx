@@ -223,7 +223,7 @@ export default Notification;
 const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, handleReadSingle, data }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [tab, setTab] = useState<'all' | 'unread'>('all');
-  const [changesDialogData, setChangesDialogData] = useState({ data: null });
+  const [changesDialogData, setChangesDialogData] = useState({ open: false, data: null });
 
   const tabSetter = (cTab: 'all' | 'unread') => {
     if (tab === cTab) return;
@@ -367,7 +367,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                               <IconButton
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setChangesDialogData({ data: d });
+                                  setChangesDialogData({ open: true, data: d });
                                 }}
                                 size="small"
                                 style={{ padding: 5, flexShrink: 0 }}
@@ -397,11 +397,11 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
           Clear all
         </MenuItem>
       </Menu>
-      {changesDialogData && (
+      {changesDialogData.open && (
         <ChangesDialog
-          open={Boolean(changesDialogData)}
+          open={changesDialogData.open}
           data={changesDialogData.data}
-          onClose={() => setChangesDialogData(null)}
+          onClose={() => setChangesDialogData({ open: false, data: null })}
         />
       )}
     </>
