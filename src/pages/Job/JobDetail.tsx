@@ -23,7 +23,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Dispatch from './Dispatch';
 import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -76,7 +76,7 @@ const JobDetail = () => {
         data: { data }
       } = await axiosInstance().get(`${routes.job.path}/${id}`);
       setCurrentStep(getIndex(data?.processStatus, jobProcessSteps));
-  
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.job, data));
       setAllowedToDelete(permissions?.job?.isDelete && checkIsAllowedToDelete(user, sidebarResource.job, data.owner.optionValue));
       setJobData(data);
@@ -119,16 +119,6 @@ const JobDetail = () => {
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
   };
-
-  const updateProcessStatus = (processStatus) => {
-    DynamicProcessStatusUpdate(sidebarResource.job, processStatus, id);
-  };
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= jobProcessStepsNames.length) {
-      updateProcessStatus(jobProcessStepsNames[currentStep]);
-    }
-  }, [currentStep]);
 
   return (
     <Box className="main-container-v1">
@@ -177,6 +167,9 @@ const JobDetail = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={false}
             setStepFullScreen={() => setStepFullScreen(true)}
+            updateStatus={(step: number) => {
+              dynamicFormUpdateProcessStatus(sidebarResource.job, jobProcessStepsNames[step], id);
+            }}
           />
           <ContentFullScreen title={jobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && jobData && (

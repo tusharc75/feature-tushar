@@ -30,7 +30,7 @@ import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
@@ -64,16 +64,6 @@ const BulkAssetCreationDetailsPage = () => {
   };
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 1) {
-      updateProcessStatus(bulkAssetCreationSteps[currentStep]?.name);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = async (processStatus) => {
-    DynamicProcessStatusUpdate(sidebarResource.bulkAssetCreation, processStatus, id);
-  };
-
-  useEffect(() => {
     if (parsed) {
       history.replace(`?tab=${tabValue}`);
     }
@@ -92,7 +82,7 @@ const BulkAssetCreationDetailsPage = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${bulkAssetCreation.api}/${id}`);
-      
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.bulkAssetCreation, data));
       setCurrentStep(getIndex(data?.processStatus, bulkAssetCreationSteps));
       setBulkAssetCreationData(data);
@@ -212,6 +202,9 @@ const BulkAssetCreationDetailsPage = () => {
                   setCurrentStep={setCurrentStep}
                   isStepEnded={['Completed']?.includes(bulkAssetCreationData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.bulkAssetCreation, bulkAssetCreationSteps[step]?.name, id)
+                  }}
                 />
                 <ContentFullScreen title={bulkAssetCreationStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {currentStep === 0 && (

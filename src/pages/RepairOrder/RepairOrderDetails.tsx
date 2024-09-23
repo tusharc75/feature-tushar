@@ -46,7 +46,7 @@ import View from './View';
 import WorkOrder from './WorkOrder';
 import Step from '../DynamicForm/Step';
 import ManageTransferAsset from '../TransferAssets/ManageTransferAsset';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const RepairOrderDetails = () => {
   const renderedFrom = camelCase(routes?.repairOrder.title);
@@ -117,11 +117,9 @@ const RepairOrderDetails = () => {
   }, []);
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= stepNames.length) {
+    if (['Add Assets', 'Work Order'].includes(stepNames[currentStep])) {
       fetchQuotationData();
-      updateProcessStatus(stepNames[currentStep]);
     }
-    if (['Add Assets', 'Work Order'].includes(stepNames[currentStep])) fetchQuotationData();
   }, [currentStep]);
 
   const getResourceFields = () => {
@@ -210,9 +208,6 @@ const RepairOrderDetails = () => {
     }
   };
 
-  const updateProcessStatus = (processStatus) => {
-    DynamicProcessStatusUpdate(sidebarResource.repairOrder, processStatus, id);
-  };
 
   const fetchQuotationData = (versionNumber = null) => {
     axiosInstance()
@@ -362,7 +357,7 @@ const RepairOrderDetails = () => {
                       {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                     </Button>
                   )}
-                { allowedToDelete && (
+                {allowedToDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
               </>
@@ -433,6 +428,9 @@ const RepairOrderDetails = () => {
                   return newStep;
                 });
               }
+            }}
+            updateStatus={(step: number) => {
+              dynamicFormUpdateProcessStatus(sidebarResource.repairOrder, stepNames[step], id);
             }}
           />
 

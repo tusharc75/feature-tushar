@@ -24,7 +24,7 @@ import ShowDoa from '../DoaSetupNew/ShowDoa';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const PurchaseRequisitionDetail = () => {
 
@@ -144,16 +144,6 @@ const PurchaseRequisitionDetail = () => {
     setTabValue(newValue);
   };
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= stepList.length) {
-      updateProcessStatus(stepList[currentStep]?.name);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    DynamicProcessStatusUpdate(sidebarResource.purchaseRequisition, processStatus, id);
-  };
-
   const handleConvertSuccess = (data: any) => {
     setOrderDialog({ open: false });
     axiosInstance().put(`${routes?.purchaseRequisition?.path}/update-converted-purchase-requisition`, {
@@ -261,6 +251,9 @@ const PurchaseRequisitionDetail = () => {
                     isPrevStep={prevStep}
                     setStepFullScreen={() => setStepFullScreen(true)}
                     isStepEnded={[PURCHASE_REQUISITION_STATUS.converted].includes(purchaseRequisitionData?.status)}
+                    updateStatus={(step: number) => {
+                      dynamicFormUpdateProcessStatus(sidebarResource.purchaseRequisition, stepList[step]?.name, id);
+                    }}
                   />
                   <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {stepList[currentStep]?.name === 'Add' && purchaseRequisitionData && (
