@@ -356,7 +356,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                       </div>
                       <div className="flex-grow">
                         <div className="flex items-center">
-                          <div className="text">
+                          <div className="flex-grow">
                             <h4
                               className="mb-[8px] text-[12px] font-medium leading-[22px] text-[#6B6F77] dark:text-gray-300 [&>strong]:font-semibold [&>strong]:text-[var(--primary-text)] dark:[&>strong]:font-bold"
                               dangerouslySetInnerHTML={{ __html: boldMatchPattern(d.title) }}
@@ -373,7 +373,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                                   setChangesDialogData({ changes: d.changes, updatedBy: d.userId });
                                 }}
                                 size="small"
-                                style={{ padding: 5 }}
+                                style={{ padding: 5, flexShrink: 0 }}
                               >
                                 <Info fontSize="small" />
                               </IconButton>
