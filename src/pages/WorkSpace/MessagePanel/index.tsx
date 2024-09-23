@@ -7,7 +7,7 @@ import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { cn } from 'src/constants/helpers';
 import Messages from 'src/pages/WorkSpace/MessagePanel/Messages';
-import { getAvatarColor } from 'src/pages/WorkSpace/MessagePanel/utils';
+import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import ViewMembers from 'src/pages/WorkSpace/MessagePanel/ViewMembers';
 import { ChannelData, Message, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';

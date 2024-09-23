@@ -8,7 +8,7 @@ import DashboardModal from 'src/components/DashboardModal';
 import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import { useAppTheme } from 'src/constants/AppConfig';
 import AddMemberDialog from 'src/pages/WorkSpace/MessagePanel/AddMembersDialog';
-import { getAvatarColor } from 'src/pages/WorkSpace/MessagePanel/utils';
+import { getAvatarColor } from 'src/pages/WorkSpace/utils';
 import { ChannelData, TChannel } from 'src/pages/WorkSpace/types';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 
