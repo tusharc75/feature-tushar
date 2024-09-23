@@ -127,7 +127,7 @@ const Notification = () => {
           toggle: true,
           _id: d._id
         })
-        .then(() => {})
+        .then(() => { })
         .catch((error) => {
           toastConfig.setToastConfig(error);
         });
@@ -156,7 +156,7 @@ const Notification = () => {
     <>
       {isMobile ? (
         <>
-          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => {}}>
+          <MenuItem onClick={anchorEl === null ? getAllNotifications : () => { }}>
             <Badge
               variant="dot"
               overlap="circular"
@@ -223,7 +223,7 @@ export default Notification;
 const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, handleReadSingle, data }) => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [tab, setTab] = useState<'all' | 'unread'>('all');
-  const [changesDialogData, setChangesDialogData] = useState<{ changes: any[]; updatedBy: string }>(null);
+  const [changesDialogData, setChangesDialogData] = useState({ data: null });
 
   const tabSetter = (cTab: 'all' | 'unread') => {
     if (tab === cTab) return;
@@ -305,9 +305,8 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
               <div className={`${tab === 'all' ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
               All{' '}
               <span
-                className={`ml-2 block rounded-[5px] bg-[#2A3042] px-2 py-[1px] text-[12px] font-semibold text-[#D3E0FF] ${
-                  isLoading || tab === 'all' ? 'opacity-70 grayscale dark:opacity-50' : ''
-                }`}
+                className={`ml-2 block rounded-[5px] bg-[#2A3042] px-2 py-[1px] text-[12px] font-semibold text-[#D3E0FF] ${isLoading || tab === 'all' ? 'opacity-70 grayscale dark:opacity-50' : ''
+                  }`}
               >
                 {data.all.length || 0}
               </span>
@@ -316,9 +315,8 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
               <div className={`${tab === 'unread' ? 'bg-[var(--primary)]' : 'bg-[transparent]'} ${otherClasses}`} />
               Unread{' '}
               <span
-                className={`ml-2 block rounded-[5px] bg-[#D3E0FF] px-2 py-[1px] text-[12px] font-semibold text-[#2A3042] ${
-                  isLoading || tab === 'unread' ? 'opacity-70 grayscale dark:opacity-50' : ''
-                }`}
+                className={`ml-2 block rounded-[5px] bg-[#D3E0FF] px-2 py-[1px] text-[12px] font-semibold text-[#2A3042] ${isLoading || tab === 'unread' ? 'opacity-70 grayscale dark:opacity-50' : ''
+                  }`}
               >
                 {data.unread.length || 0}
               </span>
@@ -369,7 +367,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                               <IconButton
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  setChangesDialogData({ changes: d.changes, updatedBy: d.userId });
+                                  setChangesDialogData({ data: d });
                                 }}
                                 size="small"
                                 style={{ padding: 5, flexShrink: 0 }}
@@ -402,9 +400,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
       {changesDialogData && (
         <ChangesDialog
           open={Boolean(changesDialogData)}
-          changes={changesDialogData.changes}
-          updatedBy={changesDialogData.updatedBy}
-          operations={[]}
+          data={changesDialogData.data}
           onClose={() => setChangesDialogData(null)}
         />
       )}

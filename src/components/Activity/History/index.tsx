@@ -25,9 +25,13 @@ export default function HistoryDialog({ onClose, open, resourceId, resource, res
       open={open}
       onClose={onClose}
     >
-      <CustomDialogHeader title={<>History: {resourceLabel}</>} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
+      <CustomDialogHeader title={<>History - {resourceLabel}</>} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
-        <ResourceLogsGrid selectedResource={sidebarResource[resource]} selectedOption={resourceId} hideResourceField={true} />
+        <ResourceLogsGrid
+          selectedResource={sidebarResource[resource]}
+          selectedOption={resourceId}
+          hideResourceField={true}
+        />
       </CustomDialogContent>
     </Dialog>
   );
