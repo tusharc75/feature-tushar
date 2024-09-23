@@ -4,11 +4,15 @@ import { CustomDialogTransition, sidebarResource } from '../../../constants/help
 import ResourceLogsGrid from 'src/pages/ResourceLogs/ResourceLogsGrid';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-export default function HistoryDialog(props) {
-  const { onClose, open, resourceId, resource, resourceLabel = '' } = props;
 
-  console.log(resourceId);
-
+type HistoryDialogProps = {
+  onClose: () => void;
+  open: boolean;
+  resourceId: string;
+  resource: string;
+  resourceLabel?: string;
+};
+export default function HistoryDialog({ onClose, open, resourceId, resource, resourceLabel = '' }: HistoryDialogProps) {
   return (
     <Dialog
       disableBackdropClick
@@ -28,10 +32,3 @@ export default function HistoryDialog(props) {
     </Dialog>
   );
 }
-
-HistoryDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  resourceId: PropTypes.any,
-  resource: PropTypes.any
-};
