@@ -52,6 +52,7 @@ import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -351,10 +352,7 @@ const RentalManagementDetailsPage = () => {
     if (isOffline) {
       await updateRentalProcessStatus(id, processStatus);
     } else {
-      axiosInstance()
-        .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
+      DynamicProcessStatusUpdate(sidebarResource.rentalManagement, processStatus, id);
     }
   };
 

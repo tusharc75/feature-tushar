@@ -24,6 +24,7 @@ import ShowDoa from '../DoaSetupNew/ShowDoa';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const PurchaseRequisitionDetail = () => {
 
@@ -89,7 +90,7 @@ const PurchaseRequisitionDetail = () => {
         tempStepList = purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA');
       }
       setStepList(tempStepList);
-      setCurrentStep(getIndex(data?.processStatus, stepList));
+      setCurrentStep(getIndex(data?.processStatus, tempStepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue));
@@ -141,6 +142,16 @@ const PurchaseRequisitionDetail = () => {
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
+  };
+
+  useEffect(() => {
+    if (currentStep !== null && currentStep >= 0 && currentStep <= stepList.length) {
+      updateProcessStatus(stepList[currentStep]?.name);
+    }
+  }, [currentStep]);
+
+  const updateProcessStatus = (processStatus) => {
+    DynamicProcessStatusUpdate(sidebarResource.purchaseRequisition, processStatus, id);
   };
 
   const handleConvertSuccess = (data: any) => {
