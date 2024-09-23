@@ -146,7 +146,6 @@ const PurchaseRequisitionDetail = () => {
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= stepList.length) {
-      console.log(currentStep)
       updateProcessStatus(stepList[currentStep]?.name);
     }
   }, [currentStep]);
