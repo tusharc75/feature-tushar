@@ -53,7 +53,7 @@ export default function ConfirmationDialogRaw({
       disableBackdropClick
       disableEscapeKeyDown
       TransitionComponent={CustomDialogTransition}
-      transitionDuration={walkmeInstance ? 0 : 300}
+      transitionDuration={walkmeInstance ? 0 : 250}
       maxWidth="xs"
       aria-labelledby="confirmation-dialog-title"
       open={open}
