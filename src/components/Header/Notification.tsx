@@ -365,7 +365,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                           </div>
 
                           {Array.isArray(d.changes) && d.changes?.length > 0 && (
-                            <HtmlTooltip title={'See changes'}>
+                            <HtmlTooltip title={'View changes'}>
                               <IconButton
                                 onClick={(e) => {
                                   e.stopPropagation();
