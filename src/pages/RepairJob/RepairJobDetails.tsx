@@ -35,7 +35,7 @@ import ManageRepairJob from './ManageRepairJob';
 import RepairJobViews from './RoadMapViews/index';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(routes?.repairJob.title);
@@ -102,12 +102,6 @@ const RepairJobDetails = () => {
     fetchAssetStatusRights();
   }, []);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 2) {
-      updateProcessStatus(repairJobProcessStepsNames[currentStep]);
-    }
-  }, [currentStep]);
-
   const getResourceFields = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.repairJob}`)
@@ -132,7 +126,7 @@ const RepairJobDetails = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const fetchRepairJobData = () => {
@@ -140,7 +134,6 @@ const RepairJobDetails = () => {
       .get(`${routes.repairJob.path}/${id}`)
       .then(({ data: { data } }) => {
         setCurrentStep(getIndex(data?.processStatus, repairJobProcessSteps));
-        
         setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.repairJob, data));
         setAlloweOperation(data?.workOrder ? false : true);
         setRepairJobData({ ...data });
@@ -175,14 +168,10 @@ const RepairJobDetails = () => {
     }
   };
 
-  const updateProcessStatus = (processStatus) => {
-    DynamicProcessStatusUpdate(sidebarResource.repairJob, processStatus, id);
-  };
-
   const updateJobStatus = (status) => {
     axiosInstance()
       .patch(`${repairJob.api}/${id}/status`, { status: status })
-      .then(({ data: { data } }) => {})
+      .then(({ data: { data } }) => { })
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -257,6 +246,9 @@ const RepairJobDetails = () => {
               setCurrentStep={setCurrentStep}
               isStepEnded={[REPAIR_JOB_STATUS.completed].includes(repairJobData?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.repairJob, repairJobProcessStepsNames[step], id);
+              }}
             />
             <ContentFullScreen title={repairJobProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {currentStep === 0 && repairJobData && (

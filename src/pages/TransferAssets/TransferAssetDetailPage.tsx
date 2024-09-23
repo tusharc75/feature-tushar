@@ -34,7 +34,7 @@ import ManageTransferAsset from './ManageTransferAsset';
 import ReceivingTicketGrid from './ReceivingTicket';
 import TransferAssetViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferAsset.title);
@@ -92,10 +92,6 @@ const TransferAssetDetailPage = () => {
       fetchTransferAssetData();
     }
   }, [id]);
-
-  const updateProcessStatus = (step: number) => {
-    DynamicProcessStatusUpdate(sidebarResource.transferAsset, stepNames[step], id);
-  };
 
   const fetchFields = (transferType) => {
     axiosInstance()
@@ -317,7 +313,9 @@ const TransferAssetDetailPage = () => {
               setCurrentStep={setCurrentStep}
               isStepEnded={isTransferEnded}
               setStepFullScreen={() => setStepFullScreen(true)}
-              updateStatus={updateProcessStatus}
+              updateStatus={(step: number) => {
+                dynamicFormUpdateProcessStatus(sidebarResource.transferAsset, stepNames[step], id);
+              }}
             />
             <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {currentStep === 0 && transferAssetData && (

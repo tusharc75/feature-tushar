@@ -41,12 +41,11 @@ import ManageServiceOrderDialog from './ManageServiceOrder';
 import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
   const toastConfig = useContext(CustomToastContext);
-  const renderedFrom = camelCase(routes?.fieldServiceOrder.title);
 
   const { id } = useParams();
   const history = useHistory();
@@ -107,12 +106,6 @@ const ServiceOrderDetailsPage = () => {
       }
     });
   }, [locationKeys]);
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
-      updateProcessStatus(steps[currentStep]?.name);
-    }
-  }, [currentStep]);
 
   const handleMainTabChange = (event: React.ChangeEvent<{}>, newValue: number) => {
     setTabValue(newValue);
@@ -181,11 +174,6 @@ const ServiceOrderDetailsPage = () => {
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
-  };
-
-  const updateProcessStatus = (processStatus) => {
-    if (isOffline) return;
-    DynamicProcessStatusUpdate(sidebarResource.fieldServiceOrder, processStatus, id);
   };
 
   const getServiceOrderFields = async () => {
@@ -322,6 +310,11 @@ const ServiceOrderDetailsPage = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={[SERVICE_ORDER_STATUS.completed, SERVICE_ORDER_STATUS.closed].includes(serviceOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
+            updateStatus={(step: number) => {
+              if (!isOffline) {
+                dynamicFormUpdateProcessStatus(sidebarResource.fieldServiceOrder, steps[step]?.name, id);
+              }
+            }}
           />
           <ContentFullScreen title={steps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {steps[currentStep]?.name === steps[0]?.name && serviceOrderData && (

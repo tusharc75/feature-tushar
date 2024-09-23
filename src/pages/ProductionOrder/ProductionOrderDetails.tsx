@@ -36,7 +36,7 @@ import LoadingTicket from './LoadingTicket';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const ProductionOrderDetails = () => {
   const renderedFrom = camelCase(routes?.productionOrder.title);
@@ -98,12 +98,6 @@ const ProductionOrderDetails = () => {
     getResourceFields();
   }, []);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= productionOrderProcessStepsNames.length) {
-      updateProcessStatus(productionOrderProcessStepsNames[currentStep]);
-    }
-  }, [currentStep]);
-
   const getResourceFields = () => {
     axiosInstance()
       .get(`/field?resource=${sidebarResource.productionOrder}`)
@@ -126,7 +120,7 @@ const ProductionOrderDetails = () => {
         } else {
           setCurrentStep(getIndex(data?.processStatus, tempStepList));
         }
-      
+
         // if (!data?.customerAccount) {
         //   setProductionOrderProcessSteps(productionOrderSteps.filter((o) => o.name !== 'Loading Ticket'));
         // }
@@ -158,10 +152,6 @@ const ProductionOrderDetails = () => {
     if (newValue === 0) {
       fetchProductionOrderData();
     }
-  };
-
-  const updateProcessStatus = (processStatus) => {
-    DynamicProcessStatusUpdate(sidebarResource.productionOrder, processStatus, id);
   };
 
   const updateOrderStatus = (status) => {
@@ -217,7 +207,7 @@ const ProductionOrderDetails = () => {
                     {isMobile && !isTablet ? <Edit /> : 'Edit'}
                   </Button>
                 )}
-                { allowedToDelete && (
+                {allowedToDelete && (
                   <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
                 )}
               </>
@@ -264,23 +254,26 @@ const ProductionOrderDetails = () => {
             handleNext={
               productionOrderProcessStepsNames[currentStep] === 'Add'
                 ? () => {
-                    setNextStep(false);
-                    axiosInstance()
-                      .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
-                      .then(({ data: { data } }) => {
-                        if (data) {
-                          setCurrentStep((prevStep) => {
-                            const newStep = prevStep + 1;
-                            return newStep;
-                          });
-                        }
-                      })
-                      .catch((err) => {
-                        toastConfig.setToastConfig(err);
-                      });
-                  }
+                  setNextStep(false);
+                  axiosInstance()
+                    .get(`/production-order/${productionOrderData?._id}/work-order/validate-work-order`)
+                    .then(({ data: { data } }) => {
+                      if (data) {
+                        setCurrentStep((prevStep) => {
+                          const newStep = prevStep + 1;
+                          return newStep;
+                        });
+                      }
+                    })
+                    .catch((err) => {
+                      toastConfig.setToastConfig(err);
+                    });
+                }
                 : null
             }
+            updateStatus={(step: number) => {
+              dynamicFormUpdateProcessStatus(sidebarResource.productionOrder, productionOrderProcessStepsNames[step], id);
+            }}
           />
           <ContentFullScreen title={productionOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {productionOrderProcessStepsNames[currentStep] === 'Add' && productionOrderData && (

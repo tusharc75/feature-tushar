@@ -38,7 +38,7 @@ import Material from './Material';
 import Process from './Process';
 import SalesOrderView from './View';
 import LoadingTicket from './LoadingTicket';
-import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -96,16 +96,6 @@ const SalesOrderDetails = () => {
     }
   }, [id, steps]);
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 5) {
-      updateProcessStatus(salesOrderProcessStepsNames[currentStep]);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    DynamicProcessStatusUpdate(sidebarResource.salesOrder, processStatus, id);
-  };
-
   const getFields = async () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
@@ -126,7 +116,7 @@ const SalesOrderDetails = () => {
       } else {
         setCurrentStep(getIndex(data?.processStatus, steps));
       }
-     
+
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.salesOrder, data));
       setSalesOrderData(data);
       setLoading(false);
@@ -269,6 +259,9 @@ const SalesOrderDetails = () => {
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[SALES_ORDER_STATUS.invoiced, SALES_ORDER_STATUS.closed].includes(salesOrderData?.status)}
+            updateStatus={(step: number) => {
+              dynamicFormUpdateProcessStatus(sidebarResource.salesOrder, salesOrderProcessStepsNames[step], id);
+            }}
           />
           <ContentFullScreen title={salesOrderProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[0].name && salesOrderData && (
@@ -284,7 +277,7 @@ const SalesOrderDetails = () => {
               <Process salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[2].name && salesOrderData && (
-              <LoadingTicket salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen}/>
+              <LoadingTicket salesOrderData={salesOrderData} setNextStep={setNextStep} stepFullScreen={stepFullScreen} />
             )}
             {salesOrderProcessStepsNames[currentStep] === salesOrderProcessSteps[3].name && salesOrderData && (
               <Invoice salesOrderData={salesOrderData} setNextStep={setNextStep} updateJobStatus={updateJobStatus} stepFullScreen={stepFullScreen} />
