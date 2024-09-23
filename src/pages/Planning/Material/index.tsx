@@ -177,7 +177,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
       canDrag: false,
       Cell: ({ row, table }) => (
         <>
-          <IconButton
+          {!row?.original?.productDetail?.serializedProduct && <IconButton
             size="small"
             aria-label="Details"
             disabled={!allowedToEdit}
@@ -186,7 +186,7 @@ const Material = ({ renderedFrom, allowedToEdit, planningData, fetchPlanningData
             }}
           >
             <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-          </IconButton>
+          </IconButton>}
           <IconButton
             size="small"
             aria-label="Details"
