@@ -1,8 +1,8 @@
 import { Badge, Box, Button, IconButton, List, ListItem, Menu, MenuItem, Popover, Typography, useMediaQuery } from '@material-ui/core';
-import { ClearAll, DoneAllOutlined, Info, Settings } from '@material-ui/icons';
+import { ClearAll, DoneAllOutlined, Settings, Visibility } from '@material-ui/icons';
 import { useContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { Accepted, Assigned, Rejected, Changed, Created } from 'src/assets/notificationIcons';
+import { Accepted, Assigned, Changed, Created, Rejected } from 'src/assets/notificationIcons';
 import { CustomNotificationCountContext } from '../../StateProvider/CustomNotificationCountContext/CustomNotificationCountContext';
 import { CustomToastContext } from '../../StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from '../../StateProvider/Provider';
@@ -13,9 +13,8 @@ import { displayCardDate } from '../../constants/helpers';
 import styles from './Header.module.scss';
 
 import NotificationsNoneIcon from '@material-ui/icons/NotificationsNone';
-import HtmlTooltip from '../CustomTooltipTitle';
 import ChangesDialog from 'src/pages/ResourceLogs/ChangesDialog';
-import { BsEye } from 'react-icons/bs';
+import HtmlTooltip from '../CustomTooltipTitle';
 
 const Notification = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -375,7 +374,7 @@ const NotificationContent = ({ isLoading, handleMarkAllRead, handleClearAll, han
                                 size="small"
                                 style={{ padding: 5, flexShrink: 0 }}
                               >
-                                <Info fontSize="small" />
+                                <Visibility fontSize="small" />
                               </IconButton>
                             </HtmlTooltip>
                           )}
