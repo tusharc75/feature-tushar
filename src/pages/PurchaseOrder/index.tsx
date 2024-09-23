@@ -19,7 +19,14 @@ import ConfirmationDialog from 'src/components/Helpers/ConfirmationDialog';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, purchaseOrder, sidebarResource } from 'src/constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  purchaseOrder,
+  sidebarResource
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
@@ -38,7 +45,7 @@ const PurchaseOrder = () => {
   ];
 
   let renderedFrom = camelCase(routes.purchaseOrder?.title);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
   const {
@@ -161,7 +168,11 @@ const PurchaseOrder = () => {
         let rows = data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
-          finalObject['canDelete'] = permissions?.purchaseOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseOrder, finalObject?.ownerId) && u?.canDelete && !u?.deleted;
+          finalObject['canDelete'] =
+            permissions?.purchaseOrder?.isDelete &&
+            checkIsAllowedToDelete(user, sidebarResource.purchaseOrder, finalObject?.ownerId) &&
+            u?.canDelete &&
+            !u?.deleted;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });

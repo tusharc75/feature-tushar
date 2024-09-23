@@ -71,7 +71,7 @@ const RepairJob = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { isOffline } = useContext(CustomOfflineContext);
   const [columns, setColumns] = useState(null);

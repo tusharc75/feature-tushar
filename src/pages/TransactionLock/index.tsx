@@ -25,7 +25,7 @@ const TransactionLock = () => {
   const toastConfig = useContext(CustomToastContext);
 
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 

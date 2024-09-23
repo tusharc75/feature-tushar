@@ -16,7 +16,6 @@ import ManageDynamicForm from '../../ManageDynamicForm';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 
 const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, referenceData }) => {
-
   const toastConfig = useContext(CustomToastContext);
 
   const {
@@ -29,7 +28,7 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
   const [deleteRecord, setDeleteRecord] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -42,64 +41,68 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
   }, [step]);
 
   const fetchColumn = async () => {
-    setColumns(null)
+    setColumns(null);
     try {
       const {
         data: { data }
       } = await axiosInstance().get(`/field?resource=${step?.linkResourceName}`);
-      setLinkResourceFieldType(data?.find((d) => d?.fieldData?.fieldName === step?.linkResourceField)?.fieldData?.type)
-      const newColumns = generateColumns(camelCase(step?.linkResourceName),
-        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField), `/${kebabCase(step?.linkResourceName)}/detail`, false);
+      setLinkResourceFieldType(data?.find((d) => d?.fieldData?.fieldName === step?.linkResourceField)?.fieldData?.type);
+      const newColumns = generateColumns(
+        camelCase(step?.linkResourceName),
+        data?.filter((d) => d?.fieldData?.fieldName !== step?.linkResourceField),
+        `/${kebabCase(step?.linkResourceName)}/detail`,
+        false
+      );
       setColumns([
         ...newColumns,
         ...(step?.readOnly
           ? []
           : [
-            {
-              accessor: 'action',
-              Header: 'Actions',
-              minWidth: 100,
-              width: 110,
-              sticky: 'right',
-              disableFilters: true,
-              disableSortBy: true,
-              canDrag: false,
-              Cell: ({ row }) => (
-                <>
-                  <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Edit"
-                        disabled={allowedToEdit ? false : true}
-                        onClick={() => {
-                          setOpen({ open: true, id: row?.original?._id });
-                        }}
-                      >
-                        <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
+              {
+                accessor: 'action',
+                Header: 'Actions',
+                minWidth: 100,
+                width: 110,
+                sticky: 'right',
+                disableFilters: true,
+                disableSortBy: true,
+                canDrag: false,
+                Cell: ({ row }) => (
+                  <>
+                    <HtmlTooltip title={allowedToEdit ? 'Edit' : editDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Edit"
+                          disabled={allowedToEdit ? false : true}
+                          onClick={() => {
+                            setOpen({ open: true, id: row?.original?._id });
+                          }}
+                        >
+                          <EditIcon fontSize="small" color={allowedToEdit ? 'primary' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
 
-                  <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
-                    <span>
-                      <IconButton
-                        size="small"
-                        aria-label="Delete"
-                        disabled={allowedToDelete ? false : true}
-                        onClick={() => {
-                          setDeleteRecord(row?.original);
-                          setShowDeleteConfirmBox(true);
-                        }}
-                      >
-                        <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
-                      </IconButton>
-                    </span>
-                  </HtmlTooltip>
-                </>
-              )
-            }
-          ])
+                    <HtmlTooltip title={allowedToDelete ? 'Delete' : deleteDisable}>
+                      <span>
+                        <IconButton
+                          size="small"
+                          aria-label="Delete"
+                          disabled={allowedToDelete ? false : true}
+                          onClick={() => {
+                            setDeleteRecord(row?.original);
+                            setShowDeleteConfirmBox(true);
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" color={allowedToDelete ? 'error' : 'disabled'} />
+                        </IconButton>
+                      </span>
+                    </HtmlTooltip>
+                  </>
+                )
+              }
+            ])
       ]);
     } catch (error) {
       toastConfig.setToastConfig(error);
@@ -205,7 +208,6 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
     );
   };
 
-
   return (
     <>
       {allowedToEdit && !step?.readOnly && (
@@ -261,8 +263,8 @@ const ResourceField = ({ step, renderedFrom, data, stepFullScreen = false, refer
             setOpen({ open: false, id: null });
           }}
           referenceData={{
-            [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id)
-              ? [data?._id] : data?._id, ...(referenceData || {})
+            [step?.linkResourceField]: linkResourceFieldType === 'multiSelect' && !isArray(data?._id) ? [data?._id] : data?._id,
+            ...(referenceData || {})
           }}
         />
       )}

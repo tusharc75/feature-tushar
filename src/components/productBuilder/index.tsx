@@ -88,7 +88,7 @@ const ProductBuilder = (props) => {
     state: { user }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { state: editableState, dispatch: editableDispatch } = useEditableTableReducer();
 
   const { dataRows, rowCount, loading, page, limit, pageSizes, selectedRecords } = state;
@@ -164,11 +164,11 @@ const ProductBuilder = (props) => {
           if (e?.fields && e?.fields?.length) {
             e?.fields?.forEach((field) => {
               if (!fields?.find((e) => e.fieldName === field?.fieldName)) {
-                fields.push(field)
+                fields.push(field);
               }
-            })
+            });
           }
-        })
+        });
         let newColumns = generateColumns(renderedFrom, fields, routes.productDetail.path, false, currency);
         columns = [...columns, ...newColumns];
 

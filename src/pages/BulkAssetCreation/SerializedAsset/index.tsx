@@ -18,7 +18,7 @@ const SerializedAsset = ({ bulkAssetCreationData, renderedFrom, allowedToEdit, s
     state: { user, permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, filters, sorting, selectedRecords } = state;
   const [columns, setColumns] = useState(null);
   const { generateColumns } = useColumns();

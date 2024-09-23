@@ -16,7 +16,16 @@ import CustomContainer from '../../components/CustomContainer';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import MessageDialog from '../../components/Helpers/MessageDialog';
-import { checkIsAllowedToDelete, customerAccount, getDefaultMyRecordType, gridLoadingTimeout, invoice, prepareDataForGrid, sidebarResource, supplierAccount } from '../../constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  customerAccount,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  invoice,
+  prepareDataForGrid,
+  sidebarResource,
+  supplierAccount
+} from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
@@ -55,7 +64,7 @@ const Invoice = () => {
     accountName: history.location?.state?.accountName,
     resource: history.location?.state?.resource
   });
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
@@ -225,7 +234,8 @@ const Invoice = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.invoice?.isDelete && checkIsAllowedToDelete(user, sidebarResource.invoice, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -278,7 +288,7 @@ const Invoice = () => {
           permissions={permissions?.invoice}
           module="invoice"
           api={invoice.api}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}

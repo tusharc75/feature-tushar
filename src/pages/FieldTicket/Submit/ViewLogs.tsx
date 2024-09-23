@@ -27,7 +27,7 @@ function ViewLogs({ fieldTicketData, handleClose, fields }) {
   const [columns, setColumns] = useState(null);
   const [openAttachment, setOpenAttachment] = useState({ open: false, attachmentId: null });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   useEffect(() => {

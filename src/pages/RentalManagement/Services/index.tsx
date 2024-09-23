@@ -71,7 +71,7 @@ const Services = ({
 
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [isRateRequired, setIsRateRequired] = useState(false);
@@ -346,8 +346,8 @@ const Services = ({
       });
       if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
         if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
-          if ((flattenArray(rows))?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
-            nextStepMessage = rentalManagementMessage.validServicePrice
+          if (flattenArray(rows)?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
+            nextStepMessage = rentalManagementMessage.validServicePrice;
           }
         }
         setNextStep(false);
@@ -381,7 +381,6 @@ const Services = ({
   };
 
   const generateNestedData = (material, inventory, nonSerializeAsset, parent, isPriceRequired) => {
-
     const currency = rentalManagementData?.currency?.toLowerCase();
 
     const subRows: any = material.filter((e) => e.parentId === parent._id);

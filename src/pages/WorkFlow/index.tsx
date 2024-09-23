@@ -20,12 +20,13 @@ import axios, { CancelTokenSource } from 'axios';
 import { useHistory } from 'react-router-dom';
 import ManageWorkFlow from 'src/pages/WorkFlow/ManageWorkFlow';
 
+const renderedFrom = camelCase(routes?.workflow.title);
+
 const WorkFlow = () => {
-  const renderedFrom = camelCase(routes?.workflow.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const {
@@ -114,7 +115,7 @@ const WorkFlow = () => {
           finalObject['canDelete'] = permissions?.workflow?.isDelete;
           return finalObject;
         });
-       
+
         dispatch({ type: 'initialize', data: rows, count: rows?.length || 0 });
       })
       .catch((error) => {

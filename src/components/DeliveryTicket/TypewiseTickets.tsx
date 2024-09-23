@@ -13,14 +13,13 @@ import { Link } from 'react-router-dom';
 import PreviewDownloadMultiple from './PreviewDownloadMultiple';
 
 const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
-
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
   const {
-    state: { user, }
+    state: { user }
   }: any = useData();
 
   useEffect(() => {
@@ -43,7 +42,7 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
                 <Link
                   className="link text-truncate"
                   title={row.original[column.accessor]}
-                  target='_blank'
+                  target="_blank"
                   to={
                     row.original?.pickupFromType === DELIVERY_FROM_TO_TYPE.plant
                       ? `${routes.warehouseDetail.path}/${row.original.pickupFromId}`
@@ -63,7 +62,7 @@ const TypewiseTickets = ({ referenceType, referenceId, renderedFrom }) => {
                 <Link
                   className="link text-truncate"
                   title={row.original[column.accessor]}
-                  target='_blank'
+                  target="_blank"
                   to={
                     row.original?.deliveryToType === DELIVERY_FROM_TO_TYPE.plant
                       ? `${routes.warehouseDetail.path}/${row.original.deliveryToId}`

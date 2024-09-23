@@ -39,7 +39,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -315,7 +315,7 @@ const Products = ({ serviceOrderData, setNextStep, renderedFrom, stepFullScreen,
     setDeleteData(obj);
   };
 
-  const handleAssignAssets = (data) => { };
+  const handleAssignAssets = (data) => {};
 
   return (
     <Fragment>

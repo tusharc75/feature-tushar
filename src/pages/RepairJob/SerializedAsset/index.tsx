@@ -58,7 +58,7 @@ const SerializedAsset = ({
 
   const [repairProcessDialog, setRepairProcessDialog] = useState({ open: false, assetId: null, assetNumber: null, repaired: false });
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -223,7 +223,8 @@ const SerializedAsset = ({
               <HtmlTooltip title="Repaired">
                 <CheckCircleIcon color="primary" fontSize="small" />
               </HtmlTooltip>
-            ) : alloweOperation && ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
+            ) : alloweOperation &&
+              ![ASSET_STATUS.lost, ASSET_STATUS.scrap].includes(row?.original?.status) &&
               row?.original?.canRepair &&
               row?.original?.currentOwnerType === INVENTORY_OWNER_TYPE.brand &&
               !row?.original?.repairTypeId ? (
@@ -595,8 +596,9 @@ const SerializedAsset = ({
       {repairAssetDialog.open && (
         <ConfirmationDialog
           open={true}
-          message={`Are you sure you want to mark repair complete for ${repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
-            } ? `}
+          message={`Are you sure you want to mark repair complete for ${
+            repairAssetDialog.assetId ? repairAssetDialog.assetName : 'selected asset(s)'
+          } ? `}
           onClose={() => {
             setRepairAssetDialog({ open: false, assetId: null, assetName: null, assetIds: [] });
           }}

@@ -26,7 +26,7 @@ import { FiExternalLink } from 'react-icons/fi';
 
 const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, checkReceivedProduct, allowedToEdit }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
   const { selectedRecords } = state;
   const {
@@ -191,10 +191,10 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
                   </HtmlTooltip>
                 } */}
               {permissions?.purchaseOrder?.isUpdate &&
-                row?.original?.type === MATERIAL_TYPE.product &&
-                allowedToEdit &&
-                row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
-                ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
+              row?.original?.type === MATERIAL_TYPE.product &&
+              allowedToEdit &&
+              row?.original?.qty - (row?.original?.rejectQuantity || 0) &&
+              ![PURCHASE_ORDER_STATUS.closed]?.includes(purchaseOrderData?.status) ? (
                 <HtmlTooltip title="Reject">
                   <span>
                     <IconButton
@@ -285,38 +285,46 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
           productCategory: item.productDetail?.productCategory,
           chartOfAccount: item.productDetail?.chartOfAccount
         };
-        const subRows = []
-        serializedAsset?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)?.forEach((e) => {
-          subRows.push({
-            index: `${res.index}.${subRows?.length + 1}`,
-            _id: e?._id,
-            detail: e.assetNumber,
-            type: MATERIAL_TYPE.serializedAsset,
-            assetId: e?._id,
-            hideSelection: true
-          })
-        })
-        productSerialNumber?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)?.forEach((e) => {
-          subRows.push({
-            index: `${res.index}.${subRows?.length + 1}`,
-            _id: e?._id,
-            detail: e.serialNumber,
-            type: 'Serial Number',
-            assetId: e?._id,
-            hideSelection: true
-          })
-        })
+        const subRows = [];
+        serializedAsset
+          ?.filter((e) => e?.product?.optionValue === res?.materialId && e?.uniqueId === res?._id)
+          ?.forEach((e) => {
+            subRows.push({
+              index: `${res.index}.${subRows?.length + 1}`,
+              _id: e?._id,
+              detail: e.assetNumber,
+              type: MATERIAL_TYPE.serializedAsset,
+              assetId: e?._id,
+              hideSelection: true
+            });
+          });
+        productSerialNumber
+          ?.filter((e) => e?.product === res?.materialId && e?.uniqueId === res?._id)
+          ?.forEach((e) => {
+            subRows.push({
+              index: `${res.index}.${subRows?.length + 1}`,
+              _id: e?._id,
+              detail: e.serialNumber,
+              type: 'Serial Number',
+              assetId: e?._id,
+              hideSelection: true
+            });
+          });
         res.subRows = subRows;
         res['assetQty'] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length;
         res['inventoryQty'] = item?.actualReceived
           ? (item?.actualReceived || 0) - res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.length
           : 0;
-        tempMaterialserializedAssets[res?._id] = res?.subRows?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => {
-          return { optionValue: e?._id, optionLabel: e?.detail }
-        });
-        tempMaterialSerialNumbers[res?._id] = res?.subRows?.filter((e) => e.type === 'Serial Number')?.map((e) => {
-          return { optionValue: e?._id, optionLabel: e?.detail };
-        });
+        tempMaterialserializedAssets[res?._id] = res?.subRows
+          ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+          ?.map((e) => {
+            return { optionValue: e?._id, optionLabel: e?.detail };
+          });
+        tempMaterialSerialNumbers[res?._id] = res?.subRows
+          ?.filter((e) => e.type === 'Serial Number')
+          ?.map((e) => {
+            return { optionValue: e?._id, optionLabel: e?.detail };
+          });
         return res;
       });
 
@@ -470,7 +478,8 @@ const ReceivingAsset = ({ purchaseOrderData, stepFullScreen, renderedFrom, check
           )}
           purchaseOrderData={purchaseOrderData}
           materialserializedAssets={materialserializedAssets}
-          materialSerialNumbers={materialSerialNumbers} />
+          materialSerialNumbers={materialSerialNumbers}
+        />
       )}
       {rejectProductDialog && (
         <Reject

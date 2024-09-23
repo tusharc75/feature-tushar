@@ -21,7 +21,7 @@ const Holidays = ({ payrollPolicyData }) => {
   const renderedFrom = `${camelCase(routes?.payrollPolicy?.title)}_holidays`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, selectedRecords } = state;
   const {
     state: { permissions, user }

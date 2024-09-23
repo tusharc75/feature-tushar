@@ -16,13 +16,22 @@ import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { flattenArray } from 'src/constants/columns';
-import { ASSET_STATUS, CHILD_RESOURCE, DELIVERY_TICKET_REFERENCE_TYPE, DELIVERY_TICKET_TYPE, MATERIAL_TYPE, deliveryTicket, sublease, treeToFlatArray } from 'src/constants/helpers';
+import {
+  ASSET_STATUS,
+  CHILD_RESOURCE,
+  DELIVERY_TICKET_REFERENCE_TYPE,
+  DELIVERY_TICKET_TYPE,
+  MATERIAL_TYPE,
+  deliveryTicket,
+  sublease,
+  treeToFlatArray
+} from 'src/constants/helpers';
 import { subleaseMessage } from 'src/constants/messageHelpers';
 
 function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowedToEdit, stepFullScreen, renderedFrom }) {
   const toastConfig = useContext(CustomToastContext);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const [columns, setColumns] = useState(null);
@@ -182,12 +191,13 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
       let rows = data.material.filter((e) => !e.parentId);
       rows.forEach((parent, i) => {
         parent.index = i + 1;
-        parent.detail = `${parent.type === 'service'
+        parent.detail = `${
+          parent.type === 'service'
             ? parent?.serviceDetail?.serviceName
             : parent.type === 'product'
               ? parent?.productDetail?.productName
               : parent?.packageDetail?.packageName
-          }`;
+        }`;
         parent.description =
           parent.type === 'service'
             ? parent?.serviceDetail?.serviceDescription || ''
@@ -206,20 +216,20 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
-            (parent.type === 'product' ? parent.assetQty : 0);
+              (parent.type === 'product' ? parent.assetQty : 0);
         parent.assetAssignedQty =
           parent.subRows.filter((d) => d.type !== 'asset').length === 0
             ? parent.assetAssignedQty
             : parent.subRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetAssignedQty + sum, 0) +
-            (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
+              (parent.type === 'product' ? parent?.subRows.filter((d) => d.type === 'asset')?.length : 0);
         parent.isValid = parent.serializedProduct
           ? parent.assetAssignedQty === parent.assetQty
             ? true
             : false
           : parent.subRows.length !== 0
             ? parent.assetAssignedQty ===
-            parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
-            parent.subRows.every((d) => d.isValid)
+                parent.subRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0) ||
+              parent.subRows.every((d) => d.isValid)
             : true;
         if (parent.subRows.length && parent.isValid) {
           if (parent.subRows.every((d) => d.isValid)) {
@@ -299,7 +309,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         tempSubRows.filter((d) => d.type !== 'asset').length === 0
           ? _subRow.assetQty
           : tempSubRows.filter((d) => d.type !== 'asset').reduce((sum, row) => row.assetQty + sum, 0) +
-          (_subRow.type === 'product' ? _subRow.assetQty : 0);
+            (_subRow.type === 'product' ? _subRow.assetQty : 0);
       _subRow.isValid = _subRow.serializedProduct
         ? _subRow.assetAssignedQty === _subRow.assetQty
           ? true
@@ -307,7 +317,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         : tempSubRows?.filter((e) => e.type === 'asset')?.length === tempSubRows?.length
           ? true
           : _subRow.assetAssignedQty ===
-            tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
+              tempSubRows.filter((d) => d.type !== 'asset' && d.serializedProduct).reduce((sum, row) => row.assetQty + sum, 0)
             ? true
             : false;
       subRows.push(_subRow);
@@ -378,7 +388,7 @@ function SerializedAsset({ subleaseData, setNextStep, setNextStepToolTip, allowe
         <MenuItem
           disabled={
             selectedRecords?.length &&
-              selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length === selectedRecords?.filter((e) => e.type === 'asset')?.length
+            selectedRecords?.filter((e) => e.type === 'asset' && e.canDelete)?.length === selectedRecords?.filter((e) => e.type === 'asset')?.length
               ? false
               : true
           }

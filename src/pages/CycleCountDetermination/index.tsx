@@ -30,7 +30,7 @@ const CycleCountDetermination = () => {
 
   const [open, setOpen] = useState(false);
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const [editData, setEditData] = useState(null);
   const { rowCount, selectedRecords } = state;

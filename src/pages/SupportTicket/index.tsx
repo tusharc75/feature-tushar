@@ -37,7 +37,7 @@ const SupportTicket = () => {
   ];
 
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -173,7 +173,8 @@ const SupportTicket = () => {
         let count = data?.count;
         let rows = data?.data?.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
-          finalObject['canDelete'] = checkIsAllowedToDelete(user, sidebarResource.supportTicket, finalObject?.ownerId) && finalObject?.status === 'Pending';
+          finalObject['canDelete'] =
+            checkIsAllowedToDelete(user, sidebarResource.supportTicket, finalObject?.ownerId) && finalObject?.status === 'Pending';
           finalObject['isChecked'] = selectedRecords.some((s) => s._id === u._id);
           return finalObject;
         });
@@ -245,7 +246,7 @@ const SupportTicket = () => {
           permissions={{ isCreate: true, isUpdate: true, isRead: true }}
           module={routes.supportTicket.title}
           api={routes.supportTicket.path}
-          afterImportCompleted={() => { }}
+          afterImportCompleted={() => {}}
           isExportAllOrSomeFeature={true}
           total={rowCount}
           recordsToExport={selectedRecords?.length}

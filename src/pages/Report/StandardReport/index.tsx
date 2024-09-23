@@ -80,7 +80,7 @@ const Report = () => {
   // Grid Configs
   const { generateColumns } = useColumns();
   const [columns, setColumns] = React.useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { loading, page, sorting, search, limit, filters, pageSizes, visibleColumns } = state;
 
   const [showPriceHistory, setShowPriceHistory] = React.useState({ open: false, product: '', productName: '' });

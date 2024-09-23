@@ -17,7 +17,6 @@ import { DetailsPageHeader } from 'src/components/PageHeaders';
 import { packages, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
 const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = false }) => {
-
   const renderedFrom = `${camelCase(routes?.packages.title)}_service'}`;
 
   const toastConfig = useContext(CustomToastContext);
@@ -30,7 +29,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   const [showServiceAssignDialog, setShowServiceAssignDialog] = useState(false);
   const [isRemovingServices, setRemovingServices] = useState(false);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [arrangeView, setArrangeView] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const { dataRows, selectedRecords } = state;
@@ -48,7 +47,7 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
       .then(({ data: { data } }) => {
         let rows = data.map((u) => {
           let res = {
-            ...prepareDataForGrid(u, user),
+            ...prepareDataForGrid(u, user)
           };
           return res;
         });
@@ -189,25 +188,26 @@ const ServiceTable = ({ packageId, packageData, allowedToEdit, fullHeight = fals
   };
 
   const rightSideContents = () => {
-    return (allowedToEdit && (
-      <>
-        <ImportExportMenu
-          permissions={permissions?.packages}
-          module="services"
-          api={`${packages.api}/${packageId}/services`}
-          afterImportCompleted={() => {
-            fetchData();
-          }}
-          isExportAllOrSomeFeature={true}
-          ids={[]}
-          additionalParams={`refrenceId=${packageId}`}
-        />
-        <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
-          <GrDrag fontSize="small" color="primary" className="mr-1" />
-          Arrange
-        </Button>
-      </>
-    )
+    return (
+      allowedToEdit && (
+        <>
+          <ImportExportMenu
+            permissions={permissions?.packages}
+            module="services"
+            api={`${packages.api}/${packageId}/services`}
+            afterImportCompleted={() => {
+              fetchData();
+            }}
+            isExportAllOrSomeFeature={true}
+            ids={[]}
+            additionalParams={`refrenceId=${packageId}`}
+          />
+          <Button variant="outlined" color="primary" size="small" onClick={() => setArrangeView(true)}>
+            <GrDrag fontSize="small" color="primary" className="mr-1" />
+            Arrange
+          </Button>
+        </>
+      )
     );
   };
 

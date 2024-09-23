@@ -21,7 +21,7 @@ import ManageRules from './ManageRules';
 
 export default function Rules({ deviceTemplate }) {
   const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_rules`;
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { selectedEntity }

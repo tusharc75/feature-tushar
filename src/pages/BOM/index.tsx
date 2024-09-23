@@ -26,7 +26,7 @@ const BOMTable = () => {
   const renderedFrom = `${camelCase(routes?.product.title)}_bom`;
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, filters, sorting, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -63,7 +63,7 @@ const BOMTable = () => {
       .get('/field?resource=Product&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
-        const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true)
+        const newColumns = generateColumns(renderedFrom, data, routes.productDetail.path, true);
         columns = [...newColumns, ...getStaticFields(), ActionsRenderer];
         setColumns([...defaultColumns, ...columns]);
       });
@@ -237,13 +237,13 @@ const BOMTable = () => {
       <div className="main-container">
         <CustomContainer>
           <div className="header-panel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className={'flex justify-between align-items-center gap-1 w-full'}>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+              <div className={'align-items-center flex w-full justify-between gap-1'}>
                 <AiOutlineApartment className="headerLogo" />
                 <span className="listingHeader">Child Product</span>
               </div>
-              <div className="flex flex-wrap gap-[8px] justify-end">
-                <div className="flex gap-[8px] flex-wrap items-center">
+              <div className="flex flex-wrap justify-end gap-[8px]">
+                <div className="flex flex-wrap items-center gap-[8px]">
                   <Button
                     variant={'contained'}
                     color="primary"

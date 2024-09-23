@@ -57,7 +57,7 @@ const ManageServiceConditional = ({ onClose, onSuccess, productId, id }) => {
   const [showDeleteConfirmBox, setShowDeleteConfirmBox] = useState(false);
   const [deleteRecord, setDeleteRecord] = useState(null);
   const { generateColumns } = useColumns();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [openAddDialog, setOpenAddDialog] = useState(false);
   const { selectedRecords, showFilteredRecordsOnly, dataRows } = state;
 

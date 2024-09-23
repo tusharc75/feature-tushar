@@ -24,7 +24,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
 
   const [columns, setColumns] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const { generateColumns } = useColumns();
 
@@ -117,7 +117,7 @@ const Invoice = ({ salesOrderData, setNextStep, updateJobStatus, stepFullScreen 
             .reduce((sum, row) => parseInt(row.original['leadTime']) + sum, 0);
           return <>{total}</>;
         }
-      },
+      }
     ];
     coloum = [...coloum, ...newColumns];
     setColumns(coloum);

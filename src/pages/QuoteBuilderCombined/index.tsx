@@ -50,11 +50,12 @@ const types = [
 ];
 const arr = [...Array(9).keys()];
 
+const renderedFrom = camelCase(routes?.quoteBuilder.title);
+
 const QuoteBuilders = () => {
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   const history = useHistory();
-  const renderedFrom = camelCase(routes?.quoteBuilder.title);
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, selectedEntity, permissions }

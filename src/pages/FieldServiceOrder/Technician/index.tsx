@@ -38,7 +38,7 @@ const Technician = ({
   const [addEmployeeMasterDialog, setAddEmployeeMasterDialog] = useState({ open: false, data: null });
   const [columns, setColumns] = useState(null);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -230,7 +230,7 @@ const Technician = ({
         technician: e?._id,
         estimateStartDate: selectedRecords[0]?.estimateStartDate,
         estimateEndDate: selectedRecords[0]?.estimateEndDate,
-        warehouse: selectedRecords[0]?.warehouse,
+        warehouse: selectedRecords[0]?.warehouse
       });
     });
     axiosInstance()

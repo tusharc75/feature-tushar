@@ -10,20 +10,14 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import routes from 'src/components/Helpers/Routes';
 import { ListingPageHeader } from 'src/components/PageHeaders';
-import {
-  CustomDialogTransition,
-  gridLoadingTimeout,
-  prepareDataForGrid,
-  sidebarResource
-} from 'src/constants/helpers';
+import { CustomDialogTransition, gridLoadingTimeout, prepareDataForGrid, sidebarResource } from 'src/constants/helpers';
 
 const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handleClose, addMaterial }) => {
-
   const renderedFrom = `${camelCase(routes.product?.title)}`;
 
   const toastConfig = useContext(CustomToastContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
   const [columns, setColumns] = useState(null);
@@ -37,7 +31,7 @@ const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handl
       editable: true,
       disableFilters: true,
       disableSortBy: true,
-      disabled:true,
+      disabled: true,
       Cell: ({ row }) => <h5 className="text-truncate">{row?.original?.qty || <NoDataCell />}</h5>
     },
     {
@@ -57,7 +51,8 @@ const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handl
   }, []);
 
   const fetchGridColumns = () => {
-    axiosInstance().get('/field?resource=Product&view=true')
+    axiosInstance()
+      .get('/field?resource=Product&view=true')
       .then(({ data: { data } }) => {
         let columns = [];
         let newColumns = generateColumns(renderedFrom, data, routes.productDetail.path);
@@ -73,7 +68,6 @@ const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handl
   }, [search, page, limit, filters, sorting, search, showFilteredRecordsOnly]);
 
   const getQueryString = () => {
-
     let deepFilter = `?warehouse=${rentalManagementData?.warehouse?.optionValue}&page=${page}&limit=${limit}`;
 
     if (showFilteredRecordsOnly) {
@@ -107,9 +101,10 @@ const AddExistingProductInventory = ({ rentalManagementData, isSubmitting, handl
   const fetchMaterial = (cancelTokenSource?: CancelTokenSource) => {
     dispatch({ type: 'loading', loading: true });
     const queryString = getQueryString();
-    axiosInstance().get(`/rental-management/product-with-inventory${queryString}`, {
-      cancelToken: cancelTokenSource?.token
-    })
+    axiosInstance()
+      .get(`/rental-management/product-with-inventory${queryString}`, {
+        cancelToken: cancelTokenSource?.token
+      })
       .then(({ data: { data, count } }) => {
         let rows = data.map((u) => {
           let finalObject = prepareDataForGrid(u);

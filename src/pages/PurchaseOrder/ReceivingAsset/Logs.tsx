@@ -13,7 +13,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
   const [columns, setColumns] = useState([]);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   useEffect(() => {
     fetchGridColumns();
@@ -56,8 +56,8 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
                       ? 'hsl(1 100% 65% / 1)'
                       : '#FFCCCB'
                     : isDarkTheme
-                    ? 'hsl(120 73% 40% / 1)'
-                    : '#90ee90'
+                      ? 'hsl(120 73% 40% / 1)'
+                      : '#90ee90'
               }}
             >
               {row?.original?.type === 'Debit' ? `-${row?.original?.qty}` : row?.original?.qty}

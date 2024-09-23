@@ -20,6 +20,8 @@ interface ConfigProps {
   id: string;
 }
 
+const renderedFrom = 'zone';
+
 const Zipcode = (props: ConfigProps) => {
   const isMobile = useMediaQuery('(max-width:600px)');
   const { id } = props;
@@ -37,7 +39,7 @@ const Zipcode = (props: ConfigProps) => {
     index: 0
   });
   const [section, setSection] = React.useState(null);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, selectedRecords } = state;
 
   React.useEffect(() => {
@@ -258,7 +260,7 @@ const Zipcode = (props: ConfigProps) => {
             columns={columns}
             state={state}
             dispatch={dispatch}
-            renderedFrom={'zone'}
+            renderedFrom={renderedFrom}
             refreshGrid={getZipData}
             showOnlyShowFilteredRecordSwitch={false}
             showFilters={false}

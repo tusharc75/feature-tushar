@@ -87,13 +87,14 @@ export default function Contact(props) {
   const [columns, setColumns] = useState(null);
   const { generateColumns, checkStaticField } = useColumns();
 
-  const { state, dispatch } = useTableReducer();
+  const renderedFrom = camelCase(contactResource);
+
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
 
   const [showAssignEntityDialog, setShowAssignEntityDialog] = useState(false);
   const [entityAccess, setEntityAccess] = useState([]);
   const [roleAccessOfLoggedInUser, setRoleAccessOfLoggedInUser] = useState([]);
-  let renderedFrom = camelCase(contactResource);
 
   useEffect(() => {
     fetchGridColumns();

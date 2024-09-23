@@ -12,13 +12,26 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
-import CustomReactTable, { getStaticFields, getCompletedByField, gridFilterParser, useColumns, useTableReducer } from 'src/components/CustomReactTable';
+import CustomReactTable, {
+  getStaticFields,
+  getCompletedByField,
+  gridFilterParser,
+  useColumns,
+  useTableReducer
+} from 'src/components/CustomReactTable';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
-import { checkIsAllowedToDelete, getDefaultMyRecordType, gridLoadingTimeout, prepareDataForGrid, repairOrder, sidebarResource } from 'src/constants/helpers';
+import {
+  checkIsAllowedToDelete,
+  getDefaultMyRecordType,
+  gridLoadingTimeout,
+  prepareDataForGrid,
+  repairOrder,
+  sidebarResource
+} from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
@@ -42,7 +55,7 @@ const RepairOrder = () => {
 
   const history = useHistory();
   let { referenceId, referenceType }: any = queryString.parse(history.location.search);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const { generateColumns } = useColumns();
 
@@ -181,7 +194,8 @@ const RepairOrder = () => {
         let rows = data.map((u) => {
           let finalObject: any = prepareDataForGrid(u, user);
           finalObject['isChecked'] = false;
-          finalObject['canDelete'] = permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, finalObject?.ownerId) && u?.canDelete;
+          finalObject['canDelete'] =
+            permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, finalObject?.ownerId) && u?.canDelete;
           return finalObject;
         });
         dispatch({ type: 'initialize', data: rows, count: count });
@@ -374,8 +388,9 @@ const RepairOrder = () => {
         {isConfirmDialogVisible && (
           <ConfirmationDialog
             open={isConfirmDialogVisible}
-            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${deleteRecord.repairOrderNumber || ''
-              }?`}
+            message={`Are you sure you want to delete ${deleteRecord?.repairOrderNumber ? 'Repair Order' : 'Repair Orders'}   ${
+              deleteRecord.repairOrderNumber || ''
+            }?`}
             onClose={() => {
               if (deleteRecord) setDeleteRecord({});
               setIsConformDialogVisible(false);

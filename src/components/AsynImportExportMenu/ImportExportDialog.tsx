@@ -23,9 +23,11 @@ import CustomButton from '../Helpers/CustomButton';
 import NoDataCell from '../Helpers/NoDataCell';
 import routes from '../Helpers/Routes';
 
+const renderedFrom = 'import-export';
+
 const ImportExportDialog = ({ handleClose, type, resource, subResource, referenceId, handleExport, api, additionalParams, refresh }) => {
   const toastConfig = useContext(CustomToastContext);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState([]);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [downloading, setDownloading] = useState({ loading: false, type: null });
@@ -284,7 +286,7 @@ const ImportExportDialog = ({ handleClose, type, resource, subResource, referenc
           columns={columns}
           state={state}
           dispatch={dispatch}
-          renderedFrom={'import-export'}
+          renderedFrom={renderedFrom}
           refreshGrid={fetchData}
           hideSelection={true}
           showFilters={false}

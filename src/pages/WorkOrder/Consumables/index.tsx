@@ -62,7 +62,7 @@ const Consumables = ({
     state: { user, permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 
@@ -205,24 +205,24 @@ const Consumables = ({
       },
       ...(user?.user?.brandPolicy?.workOrderConsumableRequest && !user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-          {
-            accessor: 'requestedQty',
-            Header: 'Requested Qty',
-            width: 150,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'requestedQty',
+              Header: 'Requested Qty',
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.requestedQty || <NoDataCell />}</p>
+            }
+          ]
         : []),
       ...(!user?.user?.brandPolicy?.workOrderConsumableConsumeHide
         ? [
-          {
-            accessor: 'consumedQty',
-            Header: 'Consumed Qty',
-            primaryField: true,
-            width: 150,
-            Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
-          }
-        ]
+            {
+              accessor: 'consumedQty',
+              Header: 'Consumed Qty',
+              primaryField: true,
+              width: 150,
+              Cell: ({ row }) => <p className="text-truncate">{row?.original?.consumedQty || <NoDataCell />}</p>
+            }
+          ]
         : [])
     ];
     extracolumns.push({
@@ -392,7 +392,7 @@ const Consumables = ({
   const createNewVersionQuote = async (quoteId, quoteVersionId) => {
     axiosInstance()
       .post(`/quotation/clone-version/${quoteId}/${quoteVersionId}`)
-      .then(() => { })
+      .then(() => {})
       .catch((error) => {
         toastConfig.setToastConfig(error);
       });
@@ -468,7 +468,7 @@ const Consumables = ({
   return (
     <>
       {allowedToEdit && (
-        <Box className="flex flex-wrap mb-3 justify-between gap-2">
+        <Box className="mb-3 flex flex-wrap justify-between gap-2">
           {isCreate && permissions?.product?.isRead && (
             <Button variant={'contained'} color="primary" size="small" onClick={() => setConsumablesDialog(true)}>
               {materialSubType === MATERIAL_SUB_TYPE.bom ? `Add BOM` : `Add Products/Consumables`}

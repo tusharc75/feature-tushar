@@ -11,15 +11,17 @@ import { CustomDialogTransition, productInventory, sidebarResource } from '../..
 import CustomReactTable, { useTableReducer } from 'src/components/CustomReactTable';
 import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 
+const renderedFrom = 'softHold';
+
 const SoftHoldDialog = ({ close, data, warehouse }) => {
   const [tabs, setTabs] = useState([]);
   const [value, setValue] = useState(0);
   const [softHoldData, setSoftHoldData] = useState([]);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
 
   useEffect(() => {
     if (tabs?.length) {
-      const rows = softHoldData?.filter((e) => e.referenceType === tabs[value]) || []
+      const rows = softHoldData?.filter((e) => e.referenceType === tabs[value]) || [];
       dispatch({ type: 'update', data: rows });
     }
   }, [value]);
@@ -68,17 +70,18 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
         const result = [];
         data?.forEach((e) => {
           result.push({
-            path: e.referenceType === sidebarResource.salesOrder
-              ? routes.salesOrderDetail.path
-              : e.referenceType === sidebarResource.transferInventory
-                ? routes.transferInventoryDetail.path
-                : e.referenceType === sidebarResource.transferAsset
-                  ? routes.transferAssetDetail.path
-                  : e.referenceType === sidebarResource.workOrder
-                    ? routes.workOrderDetail.path
-                    : e.referenceType === sidebarResource.subcontractAssembly
-                      ? routes.subcontractAssemblyDetail.path
-                      : '',
+            path:
+              e.referenceType === sidebarResource.salesOrder
+                ? routes.salesOrderDetail.path
+                : e.referenceType === sidebarResource.transferInventory
+                  ? routes.transferInventoryDetail.path
+                  : e.referenceType === sidebarResource.transferAsset
+                    ? routes.transferAssetDetail.path
+                    : e.referenceType === sidebarResource.workOrder
+                      ? routes.workOrderDetail.path
+                      : e.referenceType === sidebarResource.subcontractAssembly
+                        ? routes.subcontractAssemblyDetail.path
+                        : '',
             inventory: e?.qty,
             referenceNumber: e?.reference?.optionLabel,
             referenceNumberId: e?.reference?.optionValue,
@@ -86,7 +89,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
           });
         });
         setSoftHoldData(result);
-        const rows = result?.filter((e) => e.referenceType === unique[value]) || []
+        const rows = result?.filter((e) => e.referenceType === unique[value]) || [];
         dispatch({ type: 'initialize', data: rows, count: rows.length });
       });
   };
@@ -106,7 +109,7 @@ const SoftHoldDialog = ({ close, data, warehouse }) => {
               columns={columns}
               state={state}
               dispatch={dispatch}
-              renderedFrom={'softHold'}
+              renderedFrom={renderedFrom}
               refreshGrid={softHoldDataFetch}
               hideSelection={true}
               isClientSideGrid={true}

@@ -46,7 +46,7 @@ const SerializedAsset = ({ repairJobData, setNextStep, updateJobStatus, rendered
 
   const [showAssetRemoveConfirmationDialog, setShowAssetRemoveConfirmationDialog] = useState({ open: false, id: null, ids: [] });
   const [isRateRequired, setIsRateRequired] = useState(false);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 

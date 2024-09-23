@@ -63,7 +63,7 @@ export default function DeliveryTicketDetail(props) {
     state: { user, selectedEntity, permissions }
   }: any = useData();
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();

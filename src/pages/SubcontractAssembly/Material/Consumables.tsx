@@ -46,7 +46,7 @@ const Consumables = ({ allowedToEdit, products, subcontractAssemblyData, materia
   const [isConsumableEdit, setIsConsumableEdit] = useState({ open: false, data: null });
   const [isSubmitting, setSubmitting] = useState(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
 

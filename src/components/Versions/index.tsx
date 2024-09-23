@@ -18,7 +18,7 @@ function Versions({ id, label, childResource, resource, referenceData, versions,
   const [columns, setColumns] = useState(null);
   const [selectedVersion, setSelectedVersion] = useState(versions[0]?._id);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   useEffect(() => {

@@ -32,7 +32,7 @@ const Submit = ({ stepFullScreen, fieldTicketData, allowedToEdit, fetchData, res
   const [fieldTicketSubmitFields, setFieldTicketSubmitFields] = useState(null);
   const isStepDataSet = useRef(false);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { generateColumns } = useColumns();
 
   useEffect(() => {

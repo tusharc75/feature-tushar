@@ -7,12 +7,13 @@ import CustomReactTable, { useColumns, useTableReducer } from 'src/components/Cu
 import routes from 'src/components/Helpers/Routes';
 import { CustomDialogTransition } from 'src/constants/helpers';
 
+const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
+
 const ViewServiceStepDataDialog = ({ servicesData, stepsData, handleClose, selectedService }) => {
-  const renderedFrom = `${routes?.workOrder?.title}_Service_StepData`;
   const { generateColumns } = useColumns();
   const [serviceOptions, setServiceOptions] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const isMobile = useMediaQuery('(max-width:768px)');
 
   useEffect(() => {

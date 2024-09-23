@@ -21,7 +21,7 @@ import axios, { CancelTokenSource } from 'axios';
 
 export default function Alerts({ deviceTemplate }) {
   const renderedFrom = `${camelCase(routes?.deviceTemplateAlert.title)}_alerts`;
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { permissions, selectedEntity }

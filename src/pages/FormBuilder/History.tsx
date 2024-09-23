@@ -16,9 +16,10 @@ import LogDialog from './LogDialog';
 import moment from 'moment';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 
+const renderedFrom = camelCase(routes?.formBuilder.title);
+
 const HistoryLogs = ({ onClose, resource }) => {
-  const { state, dispatch } = useTableReducer();
-  const renderedFrom = camelCase(routes?.formBuilder.title);
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const [columns, setColumns] = useState(null);
   const toastConfig = useContext(CustomToastContext);
   const [openDialog, setOpenDialog] = useState({ open: false, data: null });
@@ -55,9 +56,14 @@ const HistoryLogs = ({ onClose, resource }) => {
         accessor: 'changes',
         Header: 'Changes',
         width: 300,
-        Cell: ({ row }) => (row?.original?.changes ? <div>
-          <p className="text-truncate">{row?.original?.changes}</p>
-        </div> : <NoDataCell />)
+        Cell: ({ row }) =>
+          row?.original?.changes ? (
+            <div>
+              <p className="text-truncate">{row?.original?.changes}</p>
+            </div>
+          ) : (
+            <NoDataCell />
+          )
       },
       {
         accessor: 'action',
@@ -87,9 +93,9 @@ const HistoryLogs = ({ onClose, resource }) => {
     axiosInstance()
       .get(`/history/resource-log?resource=${resource}`)
       .then(({ data: { data } }) => {
-        data?.forEach(element => {
-          element.date = moment(element?.date)?.format(dateTimeFormat)
-          element.changes = element?.log?.map((e) => e?.detail)?.toString()
+        data?.forEach((element) => {
+          element.date = moment(element?.date)?.format(dateTimeFormat);
+          element.changes = element?.log?.map((e) => e?.detail)?.toString();
         });
         dispatch({
           type: 'initialize',
@@ -105,12 +111,7 @@ const HistoryLogs = ({ onClose, resource }) => {
   };
 
   return (
-    <Dialog
-      fullScreen={true}
-      TransitionComponent={CustomDialogTransition}
-      aria-labelledby="customized-dialog-title"
-      open={true}
-      fullWidth>
+    <Dialog fullScreen={true} TransitionComponent={CustomDialogTransition} aria-labelledby="customized-dialog-title" open={true} fullWidth>
       <CustomDialogHeader showRequiredLabel={false} title={`History`} onClose={onClose}></CustomDialogHeader>
       <div className="listing-grid p-3">
         {columns ? (
@@ -131,12 +132,7 @@ const HistoryLogs = ({ onClose, resource }) => {
           </Box>
         )}
       </div>
-      {openDialog?.open &&
-        <LogDialog
-          onClose={() => setOpenDialog({ open: false, data: null })}
-          data={openDialog?.data}
-        />
-      }
+      {openDialog?.open && <LogDialog onClose={() => setOpenDialog({ open: false, data: null })} data={openDialog?.data} />}
     </Dialog>
   );
 };

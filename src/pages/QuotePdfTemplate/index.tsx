@@ -24,7 +24,7 @@ const QuotePdfTemplate = () => {
   const renderedFrom = camelCase(routes?.quotePdfTemplate.title);
   const toastConfig = useContext(CustomToastContext);
   const history = useHistory();
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
   const {
     state: { user, permissions, selectedEntity }
@@ -41,7 +41,6 @@ const QuotePdfTemplate = () => {
   useEffect(() => {
     fetchGridColumns();
   }, []);
-
 
   useEffect(() => {
     if (renderCount > 0) {

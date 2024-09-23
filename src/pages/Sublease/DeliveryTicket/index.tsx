@@ -25,7 +25,7 @@ import ManageDeliveryTicket from '../../DeliveryTicket/ManageDeliveryTicket';
 import { FiExternalLink } from 'react-icons/fi';
 
 const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNextStepToolTip, stepFullScreen, renderedFrom, allowedToEdit }) => {
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { selectedRecords } = state;
   const toastConfig = useContext(CustomToastContext);
   const [columns, setColumns] = useState(null);
@@ -138,35 +138,35 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
       },
       ...(ticketType === DELIVERY_TICKET_TYPE.receiving
         ? [
-          {
-            accessor: `ReceivingTicket`,
-            Header: `Receiving Ticket`,
-            width: 200,
-            Cell: ({ row }) =>
-              row?.original[`ReceivingTicket`] ? (
-                <div className="flex items-center gap-2">
-                  <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
-                    }}
-                  >
-                    <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
-                  </IconButton>
-                </div>
-              ) : (
-                <NoDataCell />
-              )
-          },
-          {
-            accessor: `ReceivingTicketStatus`,
-            Header: `Receiving Ticket Status`,
-            width: 200,
-            Cell: ({ row }) =>
-              row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
-          }
-        ]
+            {
+              accessor: `ReceivingTicket`,
+              Header: `Receiving Ticket`,
+              width: 200,
+              Cell: ({ row }) =>
+                row?.original[`ReceivingTicket`] ? (
+                  <div className="flex items-center gap-2">
+                    <p className="text-truncate">{row?.original[`ReceivingTicket`]}</p>
+                    <IconButton
+                      size="small"
+                      onClick={() => {
+                        window.open(`${routes.deliveryTicketDetail.path}/${row.original[`ReceivingTicketId`]}`);
+                      }}
+                    >
+                      <FiExternalLink size={16} className="-mt-[2px] text-gray-500 dark:text-gray-300" />
+                    </IconButton>
+                  </div>
+                ) : (
+                  <NoDataCell />
+                )
+            },
+            {
+              accessor: `ReceivingTicketStatus`,
+              Header: `Receiving Ticket Status`,
+              width: 200,
+              Cell: ({ row }) =>
+                row?.original[`ReceivingTicketStatus`] ? <p className="text-truncate">{row?.original[`ReceivingTicketStatus`]}</p> : <NoDataCell />
+            }
+          ]
         : [])
     ];
     coloum = [...coloum];
@@ -306,8 +306,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         if (e.hasOwnProperty('LoadingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyCreated });
         }
-      }
-      else if (action === subleaseActions.createReceivingTicket) {
+      } else if (action === subleaseActions.createReceivingTicket) {
         if (e.hasOwnProperty('ReceivingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingAlreadyCreated });
         } else if (![ASSET_STATUS.new, ASSET_STATUS.available, ASSET_STATUS.underReview]?.includes(e.status)) {
@@ -317,15 +316,13 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
         } else if (e?.warehouse?.optionValue === subleaseData?.fromWarehouse?.optionValue) {
           errorMessages.push({ index: e.index, message: subleaseMessage.pickupDeliveryDifferent });
         }
-      }
-      else if (action === subleaseActions.deliveredToWarehouse) {
+      } else if (action === subleaseActions.deliveredToWarehouse) {
         if (!e.hasOwnProperty('LoadingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingNotCreated });
         } else if (e?.LoadingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
           errorMessages.push({ index: e.index, message: subleaseMessage.loadingAlreadyDelivered });
         }
-      }
-      else if (action === subleaseActions.receivedToWarehouse) {
+      } else if (action === subleaseActions.receivedToWarehouse) {
         if (!e.hasOwnProperty('ReceivingTicketId')) {
           errorMessages.push({ index: e.index, message: subleaseMessage.receivingNotCreated });
         } else if (e?.ReceivingTicketStatus === DELIVERY_TICKET_STATUS.delivered) {
@@ -342,7 +339,7 @@ const LoadingTicket = ({ subleaseData, fetchData, ticketType, setNextStep, setNe
 
   const checkUniqueWarehouse = (): Boolean => {
     return new Set(selectedRecords.map((e) => e?.warehouse?.optionValue))?.size === 1;
-  }
+  };
 
   const actionButtonMenuItems = () => {
     return (

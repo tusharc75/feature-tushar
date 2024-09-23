@@ -41,7 +41,7 @@ const Technicians = ({ allowedToEdit, rentalManagementData, selectedService, ser
 
   const { isOffline } = useContext(CustomOfflineContext);
 
-  const { state, dispatch } = useTableReducer();
+  const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
 
   const { generateColumns } = useColumns();
