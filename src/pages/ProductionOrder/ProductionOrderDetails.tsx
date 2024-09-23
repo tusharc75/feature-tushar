@@ -36,6 +36,7 @@ import LoadingTicket from './LoadingTicket';
 import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const ProductionOrderDetails = () => {
   const renderedFrom = camelCase(routes?.productionOrder.title);
@@ -160,12 +161,7 @@ const ProductionOrderDetails = () => {
   };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${productionOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {
-        fetchProductionOrderData();
-      })
-      .catch((error) => {});
+    DynamicProcessStatusUpdate(sidebarResource.productionOrder, processStatus, id);
   };
 
   const updateOrderStatus = (status) => {

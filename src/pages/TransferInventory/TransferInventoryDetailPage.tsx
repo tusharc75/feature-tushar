@@ -31,6 +31,7 @@ import ContentFullScreen from '../../components/ContentFullScreen';
 import LoadingTicket from './LoadingTicket';
 import ManageTransferInventory from './ManageTransferInventory';
 import Products from './Products';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const TransferInventoryDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferInventory.title);
@@ -179,14 +180,7 @@ const TransferInventoryDetailPage = () => {
   };
 
   const updateProcessStatus = (step: number) => {
-    axiosInstance()
-      .put(`${routes.transferInventory.path}/${id}/process-status`, {
-        processStatus: stepNames[step]
-      })
-      .then(() => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    DynamicProcessStatusUpdate(sidebarResource.transferInventory, stepNames[step], id);
   };
 
   return (

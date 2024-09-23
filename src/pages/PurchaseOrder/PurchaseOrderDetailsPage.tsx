@@ -36,6 +36,7 @@ import Product from './Product';
 import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -151,10 +152,7 @@ const PurchaseOrderDetailsPage = () => {
   };
 
   const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+    DynamicProcessStatusUpdate(sidebarResource.purchaseOrder, processStatus, id);
   };
 
   const updateStatus = (status) => {

@@ -34,6 +34,7 @@ import ManageTransferAsset from './ManageTransferAsset';
 import ReceivingTicketGrid from './ReceivingTicket';
 import TransferAssetViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const TransferAssetDetailPage = () => {
   const renderedFrom = camelCase(routes?.transferAsset.title);
@@ -93,11 +94,7 @@ const TransferAssetDetailPage = () => {
   }, [id]);
 
   const updateProcessStatus = (step: number) => {
-    axiosInstance()
-      .put(`${routes.transferAsset.path}/${id}/process-status`, { processStatus: stepNames[step] })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    DynamicProcessStatusUpdate(sidebarResource.transferAsset, stepNames[step], id);
   };
 
   const fetchFields = (transferType) => {

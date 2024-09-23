@@ -23,6 +23,7 @@ import DetailsPage from '../../components/Shared/DetailsPage';
 import Dispatch from './Dispatch';
 import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -120,10 +121,7 @@ const JobDetail = () => {
   };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${routes.job.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+    DynamicProcessStatusUpdate(sidebarResource.job, processStatus, id);
   };
 
   useEffect(() => {
