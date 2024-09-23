@@ -46,6 +46,7 @@ import View from './View';
 import WorkOrder from './WorkOrder';
 import Step from '../DynamicForm/Step';
 import ManageTransferAsset from '../TransferAssets/ManageTransferAsset';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const RepairOrderDetails = () => {
   const renderedFrom = camelCase(routes?.repairOrder.title);
@@ -210,10 +211,7 @@ const RepairOrderDetails = () => {
   };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+    DynamicProcessStatusUpdate(sidebarResource.repairOrder, processStatus, id);
   };
 
   const fetchQuotationData = (versionNumber = null) => {

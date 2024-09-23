@@ -36,6 +36,7 @@ import SubcontractAssemblyView from './View';
 import queryString from 'query-string';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const SubcontractAssemblyDetail = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -168,12 +169,7 @@ const SubcontractAssemblyDetail = () => {
   }, [currentStep]);
 
   const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    DynamicProcessStatusUpdate(sidebarResource.subcontractAssembly, processStatus, id);
   };
 
   return (

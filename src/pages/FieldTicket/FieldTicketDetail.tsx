@@ -40,6 +40,7 @@ import Submit from './Submit';
 import Material from './material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingService } from './walkmeSteps';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const FieldTicketDetail = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -186,8 +187,7 @@ const FieldTicketDetail = () => {
 
   const updateProcessStatus = async (processStatus) => {
     if (!isOffline) {
-      axiosInstance().put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
-        .catch((error) => { toastConfig.setToastConfig(error); });
+      DynamicProcessStatusUpdate(sidebarResource.fieldTicket, processStatus, id);
     }
   };
 

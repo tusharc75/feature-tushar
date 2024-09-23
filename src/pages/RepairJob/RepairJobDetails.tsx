@@ -35,6 +35,7 @@ import ManageRepairJob from './ManageRepairJob';
 import RepairJobViews from './RoadMapViews/index';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(routes?.repairJob.title);
@@ -175,10 +176,7 @@ const RepairJobDetails = () => {
   };
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${repairJob.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+    DynamicProcessStatusUpdate(sidebarResource.repairJob, processStatus, id);
   };
 
   const updateJobStatus = (status) => {

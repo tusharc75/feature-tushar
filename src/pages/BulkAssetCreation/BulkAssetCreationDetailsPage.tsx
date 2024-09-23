@@ -30,6 +30,7 @@ import ManageBulkAssetCreation from './ManageBulkAssetCreation';
 import Product from './Product';
 import SerializedAsset from './SerializedAsset';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const BulkAssetCreationDetailsPage = () => {
   const renderedFrom = camelCase(routes?.bulkAssetCreation.title);
@@ -69,10 +70,7 @@ const BulkAssetCreationDetailsPage = () => {
   }, [currentStep]);
 
   const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${bulkAssetCreation.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
+    DynamicProcessStatusUpdate(sidebarResource.bulkAssetCreation, processStatus.name, id);
   };
 
   useEffect(() => {

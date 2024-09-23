@@ -39,6 +39,7 @@ import Invoice from './Invoice';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import Material from './Material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -95,12 +96,7 @@ const InvoiceDetails = () => {
   }, [currentStep]);
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    DynamicProcessStatusUpdate(sidebarResource.invoice, processStatus, id);
   };
 
   const fetchFields = async () => {

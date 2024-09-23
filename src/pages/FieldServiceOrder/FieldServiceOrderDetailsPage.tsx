@@ -41,6 +41,7 @@ import ManageServiceOrderDialog from './ManageServiceOrder';
 import ServiceOrderViews from './RoadMapViews';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddFieldTicket } from 'src/pages/FieldServiceOrder/walkmeSteps';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const ServiceOrderDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -182,14 +183,9 @@ const ServiceOrderDetailsPage = () => {
     }
   };
 
-  const updateProcessStatus = async (processStatus) => {
+  const updateProcessStatus = (processStatus) => {
     if (isOffline) return;
-    axiosInstance()
-      .put(`${fieldServiceOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {
-        fetchServiceOrderData();
-      })
-      .catch((error) => { });
+    DynamicProcessStatusUpdate(sidebarResource.fieldServiceOrder, processStatus, id);
   };
 
   const getServiceOrderFields = async () => {

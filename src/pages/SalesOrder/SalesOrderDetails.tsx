@@ -38,6 +38,7 @@ import Material from './Material';
 import Process from './Process';
 import SalesOrderView from './View';
 import LoadingTicket from './LoadingTicket';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -102,12 +103,7 @@ const SalesOrderDetails = () => {
   }, [currentStep]);
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${salesOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
+    DynamicProcessStatusUpdate(sidebarResource.salesOrder, processStatus, id);
   };
 
   const getFields = async () => {

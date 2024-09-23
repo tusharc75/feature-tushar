@@ -38,6 +38,7 @@ import Slip from './Slip';
 import SubleaseAsset from './SubleaseAsset';
 import Tickets from './Tickets';
 import Receiving from 'src/pages/Sublease/Receiving';
+import { DynamicProcessStatusUpdate } from 'src/pages/DynamicForm/helper';
 
 const SubleaseDetailsPage = () => {
   const renderedFrom = camelCase(routes?.sublease.title);
@@ -79,10 +80,7 @@ const SubleaseDetailsPage = () => {
   }, [currentStep]);
 
   const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${sublease.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+    DynamicProcessStatusUpdate(sidebarResource.sublease, processStatus, id);
   };
 
   const updateStatus = (status) => {
