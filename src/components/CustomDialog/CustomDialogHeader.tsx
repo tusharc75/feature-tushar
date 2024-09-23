@@ -28,6 +28,17 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
+type CustomDialogHeaderProps = {
+  title: React.ReactNode;
+  onClose: () => void;
+  showManimizeMaximize?: boolean;
+  showRequiredLabel?: boolean;
+  isMinimized?: boolean;
+  onMinimizeMaximize?: () => void;
+  style?: object;
+  additionalTitle?: React.ReactNode;
+};
+
 function CustomDialogHeader({
   title,
   onClose,
@@ -37,7 +48,7 @@ function CustomDialogHeader({
   onMinimizeMaximize = () => {},
   style = {},
   additionalTitle = null
-}) {
+}: CustomDialogHeaderProps) {
   const classes = useStyles();
 
   const maxWidth = React.useMemo(() => {
@@ -76,7 +87,7 @@ function CustomDialogHeader({
             </span>
           )}
           {showManimizeMaximize && !(isMobile || isTablet) && (
-            <IconButton aria-label="close" onClick={onMinimizeMaximize} size="small" className="mr-2 close-button">
+            <IconButton aria-label="close" onClick={onMinimizeMaximize} size="small" className="close-button mr-2">
               {isMinimized ? <FiMaximize2 /> : <FiMinimize2 />}
             </IconButton>
           )}
@@ -90,13 +101,5 @@ function CustomDialogHeader({
     </React.Fragment>
   );
 }
-
-CustomDialogHeader.propTypes = {
-  title: PropTypes.string.isRequired,
-  onClose: PropTypes.func,
-  isMinimized: PropTypes.bool,
-  onMinimizeMaximize: PropTypes.func,
-  showManimizeMaximize: PropTypes.bool
-};
 
 export default CustomDialogHeader;

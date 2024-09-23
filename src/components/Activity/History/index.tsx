@@ -4,9 +4,15 @@ import { CustomDialogTransition, sidebarResource } from '../../../constants/help
 import ResourceLogsGrid from 'src/pages/ResourceLogs/ResourceLogsGrid';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-export default function HistoryDialog(props) {
-  const { onClose, open, resourceId, resource } = props;
 
+type HistoryDialogProps = {
+  onClose: () => void;
+  open: boolean;
+  resourceId: string;
+  resource: string;
+  resourceLabel?: string;
+};
+export default function HistoryDialog({ onClose, open, resourceId, resource, resourceLabel = '' }: HistoryDialogProps) {
   return (
     <Dialog
       disableBackdropClick
@@ -19,17 +25,10 @@ export default function HistoryDialog(props) {
       open={open}
       onClose={onClose}
     >
-      <CustomDialogHeader title={`History`} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
+      <CustomDialogHeader title={<>History: {resourceLabel}</>} showManimizeMaximize={false} showRequiredLabel={false} onClose={onClose} />
       <CustomDialogContent isFooterPresent={false}>
         <ResourceLogsGrid selectedResource={sidebarResource[resource]} selectedOption={resourceId} hideResourceField={true} />
       </CustomDialogContent>
     </Dialog>
   );
 }
-
-HistoryDialog.propTypes = {
-  onClose: PropTypes.func.isRequired,
-  open: PropTypes.bool.isRequired,
-  resourceId: PropTypes.any,
-  resource: PropTypes.any
-};
