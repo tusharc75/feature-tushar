@@ -33,6 +33,8 @@ import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import GroupSignatureCell from 'src/components/CustomReactTable/Cells/GroupSignatureCell';
 import CopyToClipboardButton from 'src/components/CopyToClipboardButton';
 import { isFieldVisible, isSectionVisible } from 'src/components/Helpers/FormTypes';
+import LocationOnIcon from '@material-ui/icons/LocationOn';
+import GoogleMaps from 'src/components/GoogleMap';
 
 const useStyles = makeStyles((theme) => ({
   fieldText: {
@@ -113,6 +115,7 @@ const Details = (props: DetailProps) => {
   const [open, setOpen] = useState({ open: false, section: null });
   const [taskData, setTaskdata] = useState(null);
   const fieldsData = useMemo(() => fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData), [fields]);
+  const [viewMap, setViewMap] = useState({ open: false, longitude: null, latitude: null });
 
   useEffect(() => {
     sortArray();
@@ -401,6 +404,29 @@ const Details = (props: DetailProps) => {
           </span>
         );
       }
+      if (fieldData.type === 'location') {
+        return (
+          <>
+            <Box display="flex" alignItems="center">
+              <Typography
+                title={value?.locationName || value}
+                className={cn(classes.fieldText, ' flex items-center')}
+                variant="body2"
+              >
+                <span className={`text-truncate line-clamp-1 block`}>{value?.locationName || value}</span>
+              </Typography>
+              {value?.longitude && value?.latitude ? (
+                <IconButton size="small" title="View in Map" aria-label="view-in-map" onClick={() => {
+                  setViewMap({ open: true, longitude: value.longitude, latitude: value.latitude });
+                }}>
+                  <LocationOnIcon fontSize='small' />
+                </IconButton>
+              ) : null
+              }
+            </Box>
+          </>
+        );
+      }
       return (
         <Typography
           title={value === '-' || Array.isArray(value) ? '' : value}
@@ -478,129 +504,140 @@ const Details = (props: DetailProps) => {
   }, [formsData, taskData]);
 
   return (
-    <div className="form-v1">
-      {formDataWithFollowUps?.map((form) => {
-        if (!isSectionVisible(form, fieldsData, initialVals, true)) return null;
-        return (
-          form.name && (
-            <React.Fragment key={form.name}>
-              <div
-                className={`single-form-v1 ${fullHeight && 'full-height-details-from'}`}
-                style={containerPadding ? { padding: containerPadding } : {}}
-              >
-                <div className={'form-head-v1'}>
-                  <h3 className="form-label-style-v1" title={form.name}>
-                    {form.name}
-                  </h3>
-                  {resource && referenceId && (
-                    <HtmlTooltip title="Follow-Ups">
-                      <IconButton
-                        style={{ padding: '0px' }}
-                        size="small"
-                        color="primary"
-                        aria-label="follow-ups"
-                        onClick={() => {
-                          setOpen({ open: true, section: { name: form?.name, sectionFields: form?.sectionFields?.map((f) => f?.fieldData) } });
-                        }}
-                      >
-                        <FaUserPlus />
-                      </IconButton>
-                    </HtmlTooltip>
-                  )}
-                </div>
-                <div className="formdata-v1 grid grid-cols-12">
-                  {form.sectionFields.map((field, i) => {
-                    if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
-                    return (
-                      <div
-                        className={cn(
-                          `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
-                          'col-span-12'
-                        )}
-                        key={i}
-                      >
+    <>
+      <div className="form-v1">
+        {formDataWithFollowUps?.map((form) => {
+          if (!isSectionVisible(form, fieldsData, initialVals, true)) return null;
+          return (
+            form.name && (
+              <React.Fragment key={form.name}>
+                <div
+                  className={`single-form-v1 ${fullHeight && 'full-height-details-from'}`}
+                  style={containerPadding ? { padding: containerPadding } : {}}
+                >
+                  <div className={'form-head-v1'}>
+                    <h3 className="form-label-style-v1" title={form.name}>
+                      {form.name}
+                    </h3>
+                    {resource && referenceId && (
+                      <HtmlTooltip title="Follow-Ups">
+                        <IconButton
+                          style={{ padding: '0px' }}
+                          size="small"
+                          color="primary"
+                          aria-label="follow-ups"
+                          onClick={() => {
+                            setOpen({ open: true, section: { name: form?.name, sectionFields: form?.sectionFields?.map((f) => f?.fieldData) } });
+                          }}
+                        >
+                          <FaUserPlus />
+                        </IconButton>
+                      </HtmlTooltip>
+                    )}
+                  </div>
+                  <div className="formdata-v1 grid grid-cols-12">
+                    {form.sectionFields.map((field, i) => {
+                      if (!isFieldVisible(field?.fieldData, fieldsData, initialVals)) return null;
+                      return (
                         <div
                           className={cn(
-                            isTypeFile(field.fieldData.type) && 'flex-wrap',
-                            'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                            `md:${field.fieldData.columnSize ? colSpans[+field.fieldData.columnSize - 1] || 'col-span-6' : columnSize(field.fieldData.type)}`,
+                            'col-span-12'
                           )}
+                          key={i}
                         >
-                          <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
-                            <div
-                              className={cn('d-flex formdata-title-v1 min-h-full items-center', isTypeFile(field.fieldData.type) && '!border-r-0')}
-                            >
-                              <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
-                                {field.fieldData.fieldLabel}
-                              </h4>
-                              {field.fieldData.isTooltip && (
-                                <HtmlTooltip title={field.fieldData.tooltipMessage} className="pr-2">
-                                  <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
-                                </HtmlTooltip>
+                          <div
+                            className={cn(
+                              isTypeFile(field.fieldData.type) && 'flex-wrap',
+                              'flex  [border:1px_solid_var(--dark-mode-border-color,_#EDEDED)]'
+                            )}
+                          >
+                            <div className="w-1/2 md:w-[150px] lg:w-[180px] ">
+                              <div
+                                className={cn('d-flex formdata-title-v1 min-h-full items-center', isTypeFile(field.fieldData.type) && '!border-r-0')}
+                              >
+                                <h4 title={field.fieldData.fieldLabel} className={`text-truncate ${field.fieldData.isTooltip ? 'pr-1' : ''}`}>
+                                  {field.fieldData.fieldLabel}
+                                </h4>
+                                {field.fieldData.isTooltip && (
+                                  <HtmlTooltip title={field.fieldData.tooltipMessage} className="pr-2">
+                                    <InfoOutlined style={{ width: 18, height: 18 }} color="disabled" />
+                                  </HtmlTooltip>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
+                              {field.fieldData.type === 'imageUpload' ? (
+                                <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
+                                  <span
+                                    className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
+                                    onClick={() => {
+                                      if (initialVals[field.fieldData.fieldName]) {
+                                        setDialogData({
+                                          index: 0,
+                                          title: field.fieldData.fieldLabel,
+                                          open: true,
+                                          images: [initialVals[field.fieldData.fieldName]]
+                                        });
+                                      }
+                                    }}
+                                  >
+                                    <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
+                                      <Image style={{ fontSize: 30 }} />
+                                    </Avatar>
+                                  </span>
+                                </Box>
+                              ) : (
+                                <Box display="flex" alignItems="center" className="formdata-text-v1">
+                                  {renderData(initialVals, field.fieldData)}
+                                </Box>
+                              )}
+                              {field.followUpData?.length > 0 && (
+                                <RenderFollowUP
+                                  data={field.followUpData}
+                                  columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
+                                />
                               )}
                             </div>
                           </div>
-
-                          <div className={`${isTypeFile(field.fieldData.type) ? 'w-full' : 'md:flex-grow'} w-1/2`}>
-                            {field.fieldData.type === 'imageUpload' ? (
-                              <Box marginTop={1} marginBottom={4} marginLeft={1.5}>
-                                <span
-                                  className={initialVals[field.fieldData.fieldName] ? 'cursor-pointer' : ''}
-                                  onClick={() => {
-                                    if (initialVals[field.fieldData.fieldName]) {
-                                      setDialogData({
-                                        index: 0,
-                                        title: field.fieldData.fieldLabel,
-                                        open: true,
-                                        images: [initialVals[field.fieldData.fieldName]]
-                                      });
-                                    }
-                                  }}
-                                >
-                                  <Avatar src={initialVals[field.fieldData.fieldName]} style={{ width: 56, height: 56 }}>
-                                    <Image style={{ fontSize: 30 }} />
-                                  </Avatar>
-                                </span>
-                              </Box>
-                            ) : (
-                              <Box display="flex" alignItems="center" className="formdata-text-v1">
-                                {renderData(initialVals, field.fieldData)}
-                              </Box>
-                            )}
-                            {field.followUpData?.length > 0 && (
-                              <RenderFollowUP
-                                data={field.followUpData}
-                                columnSize={isTypeFile(field.fieldData.type) ? 12 : field.fieldData.columnSize}
-                              />
-                            )}
-                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            </React.Fragment>
-          )
-        );
-      })}
-      {dialogData && dialogData.open && (
-        <CarouselDialog index={dialogData.index} {...dialogData} close={() => setDialogData(null)} images={dialogData.images} />
-      )}
-      {open?.open && (
-        <FollowUpsDialog
+              </React.Fragment>
+            )
+          );
+        })}
+        {dialogData && dialogData.open && (
+          <CarouselDialog index={dialogData.index} {...dialogData} close={() => setDialogData(null)} images={dialogData.images} />
+        )}
+        {open?.open && (
+          <FollowUpsDialog
+            onClose={() => {
+              setOpen({ open: false, section: null });
+            }}
+            onSuccess={() => {
+              fetchTaskData();
+              setOpen({ open: false, section: null });
+            }}
+            section={open?.section}
+            resource={resource}
+            referenceId={referenceId}
+          />
+        )}
+      </div>
+      {viewMap?.open && (
+        <GoogleMaps
           onClose={() => {
-            setOpen({ open: false, section: null });
+            setViewMap({ open: false, longitude: null, latitude: null });
           }}
-          onSuccess={() => {
-            fetchTaskData();
-            setOpen({ open: false, section: null });
-          }}
-          section={open?.section}
-          resource={resource}
-          referenceId={referenceId}
+          longitude={viewMap.longitude}
+          latitude={viewMap.latitude}
         />
       )}
-    </div>
+    </>
   );
 };
 

@@ -28,6 +28,7 @@ import DataListCell from '../Cells/DataListCell';
 import NumberCell from 'src/components/CustomReactTable/Cells/NumberCell';
 import LookupCell from 'src/components/CustomReactTable/Cells/LookupCell';
 import SwitchCell from 'src/components/CustomReactTable/Cells/SwitchCell';
+import LocationCell from 'src/components/CustomReactTable/Cells/LocationCell';
 
 const permissionForLinks = sidebarResourceObjectFromValues();
 
@@ -141,7 +142,7 @@ export const getSortedColumns = (columns = []) => {
 
 export const staticColumns = ['createdBy', 'updatedBy'];
 
-export default function useColumns() {
+export default function useColumns(setViewMap = null ) {
   const {
     state: { permissions, user }
   }: any = useData();
@@ -565,6 +566,12 @@ export default function useColumns() {
           editable: false,
           accessorFn: (data) => (Boolean(data[field?.fieldName]) ? 'Yes' : 'No'),
           cell: ({ row }) => <SwitchCell field={field} original={row?.original} />
+        });
+      } else if (field.type === 'location') {
+        column.push({
+          ...commonFieldData,
+          editable: false,
+          cell: ({ row }) => <LocationCell field={field} original={row?.original} setViewMap={setViewMap} />
         });
       } else {
         column.push({
