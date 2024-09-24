@@ -8,7 +8,7 @@ const UserFavoriteIcon = ({ item }: { item: Item }) => {
   const { favorites, handleSetFavourite } = useFavorites();
 
   return (
-    <HtmlTooltip title={favorites?.[item.resourceId] ? 'Remove from your Favorite' : 'Add to your Favorite'}>
+    <HtmlTooltip title={favorites?.[item.name] ? 'Remove from your Favorite' : 'Add to your Favorite'}>
       <IconButton
         onClick={(e) => {
           e.stopPropagation();
@@ -16,7 +16,7 @@ const UserFavoriteIcon = ({ item }: { item: Item }) => {
         }}
         size="small"
       >
-        {favorites?.[item.resourceId] ? (
+        {favorites?.[item.name] ? (
           <Star className="mr-0 text-[var(--new-theme-color)]" />
         ) : (
           <StarOutline className="mr-0 text-[var(--new-theme-color)]" />
