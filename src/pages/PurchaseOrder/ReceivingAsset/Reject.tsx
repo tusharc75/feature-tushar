@@ -267,6 +267,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                                       />
                                       {user?.user?.brandPolicy?.storageLocation && (
                                         <Autocomplete
+                                          id="select-storage-location"
                                           size="small"
                                           value={data?.storageLocation}
                                           options={storageLocationOptions}
@@ -455,6 +456,7 @@ const Reject = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderDa
                   Cancel
                 </Button>
                 <Button
+                  id={'dialog-save-button'}
                   onClick={() => {
                     if (
                       !validate(values.material).rejectQuantity &&
