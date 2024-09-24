@@ -720,7 +720,7 @@ export default function AccountDetailPage(props) {
                 <CustomTab value={3} label={'Supplier View'} />
               )}
               {accountResource === 'customerAccount' && permissions?.productInventory && <CustomTab value={4} label={routes.warehouse.title} />}
-              {resourceData && resourceData?.steps?.length && <CustomTab value={5} label={'Associations'} />}
+              {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 5} label={tab?.tabName} />)}
             </CustomTabs>
             <TabPanel value={tabValue} index={0}>
               <Box>
@@ -934,15 +934,22 @@ export default function AccountDetailPage(props) {
             <TabPanel value={tabValue} index={4}>
               <Warehouse reference={accountResource} api={accountApi} id={id} />
             </TabPanel>
-            <TabPanel value={tabValue} index={5}>
-              <Step
-                resourceData={resourceData}
-                resourceId={id}
-                resource={sidebarResource[accountResource]}
-                data={accountData}
-                allowedToEdit={permissions[accountResource]?.isUpdate}
-              />
-            </TabPanel>
+            {resourceData &&
+              resourceData?.tabs?.length > 0 &&
+              resourceData?.tabs?.map((tab, i) => {
+                return (
+                  <TabPanel value={tabValue} index={i + 5}>
+                    <Step
+                      tab={tab}
+                      resourcePolicyId={resourceData?._id}
+                      resourceId={id}
+                      resource={sidebarResource[accountResource]}
+                      data={accountData}
+                      allowedToEdit={permissions[accountResource]?.isUpdate}
+                    />
+                  </TabPanel>
+                );
+              })}
           </>
         )}
       </Box>

@@ -137,7 +137,7 @@ const PadMasterDetail = () => {
           }}
         >
           <CustomTab value={0}>Header</CustomTab>
-          {resourceData && resourceData?.steps?.length && <CustomTab value={1}>Associations</CustomTab>}
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={currentTabIndex} index={0}>
           {loading || !fields?.length ? (
@@ -148,15 +148,22 @@ const PadMasterDetail = () => {
             <DetailsPage data={padMasterData} fields={fields} />
           )}
         </TabPanel>
-        <TabPanel value={currentTabIndex} index={1}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.padMaster}
-            data={padMasterData}
-            allowedToEdit={permissions?.padMaster?.isUpdate}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={currentTabIndex} index={i + 1}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.padMaster}
+                  data={padMasterData}
+                  allowedToEdit={permissions?.padMaster?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
