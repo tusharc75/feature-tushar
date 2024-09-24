@@ -123,7 +123,9 @@ const FieldTicketDetail = () => {
       }
 
       setAllowedToEdit(permissions?.fieldTicket?.isUpdate && checkIsAllowedToEdit(user, sidebarResource.fieldTicket, data));
-      setAllowedToDelete(permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, data.owner.optionValue) && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.fieldTicket?.isDelete && checkIsAllowedToDelete(user, sidebarResource.fieldTicket, data.owner.optionValue) && data?.canDelete
+      );
       setFieldTicketData(data);
       setLoading(false);
     } catch (error) {
@@ -186,8 +188,12 @@ const FieldTicketDetail = () => {
 
   const updateProcessStatus = async (processStatus) => {
     if (!isOffline) {
-      axiosInstance().put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
-        .catch((error) => { toastConfig.setToastConfig(error); });
+      axiosInstance()
+        .put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus })
+        .then(({ data }) => {})
+        .catch((error) => {
+          toastConfig.setToastConfig(error);
+        });
     }
   };
 
@@ -269,11 +275,14 @@ const FieldTicketDetail = () => {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={2}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-            </CustomTab>
-          )}
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 2}>
+                <BiFoodMenu className="mr-1" fontSize="inherit" />
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -289,7 +298,7 @@ const FieldTicketDetail = () => {
             isNextStep={false}
             nextStep={nextStep}
             isPrevStep={fieldTicketData?.status === FIELD_TICKET_STATUS.readyToInvoice ? false : true}
-            steps={isOffline ? fieldTicketSteps.filter(s => s.name === 'Add') : fieldTicketSteps}
+            steps={isOffline ? fieldTicketSteps.filter((s) => s.name === 'Add') : fieldTicketSteps}
             currentStep={currentStep}
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
@@ -318,15 +327,22 @@ const FieldTicketDetail = () => {
             )}
           </ContentFullScreen>
         </TabPanel>
-        <TabPanel value={tabValue} index={2}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.fieldTicket}
-            data={fieldTicketData}
-            allowedToEdit={permissions?.fieldTicket?.isUpdate}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.fieldTicket}
+                  data={fieldTicketData}
+                  allowedToEdit={permissions?.fieldTicket?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

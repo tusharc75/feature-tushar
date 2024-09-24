@@ -180,7 +180,9 @@ const RepairOrderDetails = () => {
           );
         }
 
-        setAllowedToDelete(permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, data.owner.optionValue) && data?.canDelete);
+        setAllowedToDelete(
+          permissions?.repairOrder?.isDelete && checkIsAllowedToDelete(user, sidebarResource.repairOrder, data.owner.optionValue) && data?.canDelete
+        );
         setRepairOrderData({ ...data });
       })
       .catch((err) => {
@@ -212,8 +214,8 @@ const RepairOrderDetails = () => {
   const updateProcessStatus = (processStatus) => {
     axiosInstance()
       .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => { });
+      .then(({ data }) => {})
+      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -262,19 +264,24 @@ const RepairOrderDetails = () => {
   };
 
   const handleAddAssetToTransferAsset = async (data) => {
-    const assets: any = repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.map((e) => {
-      return { _id: e.materialId, currentStatus: e.status }
-    });
-    axiosInstance().put(`${transferAsset.api}/add-asset-complete-transfer-asset/${data._id}`, { assets, repairOrderId: id }).then(({ data }) => {
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: data.message
+    const assets: any = repairOrderData?.material
+      ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+      ?.map((e) => {
+        return { _id: e.materialId, currentStatus: e.status };
       });
-      setShowTransferAssetDialog(false);
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
+    axiosInstance()
+      .put(`${transferAsset.api}/add-asset-complete-transfer-asset/${data._id}`, { assets, repairOrderId: id })
+      .then(({ data }) => {
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: data.message
+        });
+        setShowTransferAssetDialog(false);
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
+      });
   };
 
   return (
@@ -287,11 +294,13 @@ const RepairOrderDetails = () => {
           <Box className="control-buttons-v1 ">
             {repairOrderData ? (
               <>
-                {allowedToEdit
-                  && permissions?.repairOrder?.isUpdate && permissions?.transferAsset?.isCreate
-                  && resourceData?.policy?.showTransferAssets
-                  && repairOrderData?.material?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)?.every((e) => e.status === ASSET_STATUS.inRepair) &&
-                  (
+                {allowedToEdit &&
+                  permissions?.repairOrder?.isUpdate &&
+                  permissions?.transferAsset?.isCreate &&
+                  resourceData?.policy?.showTransferAssets &&
+                  repairOrderData?.material
+                    ?.filter((e) => e.type === MATERIAL_TYPE.serializedAsset)
+                    ?.every((e) => e.status === ASSET_STATUS.inRepair) && (
                     <Button
                       size="small"
                       onClick={() => {
@@ -364,9 +373,7 @@ const RepairOrderDetails = () => {
                       {isMobile && !isTablet ? <EditIcon /> : 'Edit'}
                     </Button>
                   )}
-                { allowedToDelete && (
-                  <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-                )}
+                {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               </>
             ) : (
               <Skeleton variant="text" width="150px" height="32px" />
@@ -392,11 +399,14 @@ const RepairOrderDetails = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={3}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-            </CustomTab>
-          )}
+          {resourceData &&
+            resourceData?.tabs?.length &&
+            resourceData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 3}>
+                <BiFoodMenu className="mr-1" fontSize="inherit" />
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -466,8 +476,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                      quotationVersionData?.status
-                    )
+                          quotationVersionData?.status
+                        )
                       ? false
                       : allowedToEdit
                 }
@@ -518,17 +528,22 @@ const RepairOrderDetails = () => {
             <View repairOrderNumber={repairOrderData?.repairOrderNumber || ''} repairOrderId={id} repairOrderStatus={repairOrderData?.status} />
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={3}>
-          <Box>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.repairOrder}
-              data={repairOrderData}
-              allowedToEdit={permissions?.repairOrder?.isUpdate}
-            />
-          </Box>
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.repairOrder}
+                  data={repairOrderData}
+                  allowedToEdit={permissions?.repairOrder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
@@ -586,7 +601,7 @@ const RepairOrderDetails = () => {
             handleAddAssetToTransferAsset(data);
           }}
           referenceId={repairOrderData._id}
-          referenceType={"Repair Order"}
+          referenceType={'Repair Order'}
           referenceData={{
             transferFromPlant: repairOrderData?.warehouse.optionValue,
             transferType: 'Internal'

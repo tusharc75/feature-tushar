@@ -157,7 +157,7 @@ const WarehouseDetailsPage = () => {
             <CustomTab label={routes.storageLocation.title} value={1} />
           )}
           {user?.user?.brandPolicy?.warehouseAccessByUser && <CustomTab label={'Users'} value={2} />}
-          {resourceData && resourceData?.steps?.length && <CustomTab label={'Associations'} value={3} />}
+          {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab label={tab?.tabName} value={i + 3} />)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !warehouseFields.length ? (
@@ -174,15 +174,22 @@ const WarehouseDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           <Users warehouse={id} />
         </TabPanel>
-        <TabPanel value={tabValue} index={3}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.warehouse}
-            data={warehouseData}
-            allowedToEdit={permissions?.warehouse?.isUpdate}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.warehouse}
+                  data={warehouseData}
+                  allowedToEdit={permissions?.warehouse?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {openUpdateDialog && (
         <ManageWarehouse
