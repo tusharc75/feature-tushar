@@ -18,7 +18,6 @@ import ImportExportLinks from '../../components/Helpers/ImportExportLinks';
 import { getResourceLabel, gridLoadingTimeout, HIDDEN_FIELD_TYPE, prepareDataForGrid } from '../../constants/helpers';
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import ManageDynamicForm from './ManageDynamicForm';
-import GoogleMaps from 'src/components/GoogleMap';
 
 const DynamicForm = () => {
   const { route } = useParams();
@@ -49,8 +48,7 @@ const DynamicForm = () => {
 
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { rowCount, page, limit, search, filters, sorting, selectedRecords, showFilteredRecordsOnly } = state;
-  const [viewMap, setViewMap] = useState({ open: false, longitude: null, latitude: null });
-  const { generateColumns } = useColumns(setViewMap);
+  const { generateColumns } = useColumns();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedType, setSelectedType] = useState(1);
@@ -352,15 +350,6 @@ const DynamicForm = () => {
             fetchData();
           }}
         />
-      )}
-      {viewMap.open && (
-        <>
-          <GoogleMaps
-            onClose={() => setViewMap({ open: false, longitude: null, latitude: null })}
-            longitude={viewMap.longitude}
-            latitude={viewMap.latitude}
-          />
-        </>
       )}
     </section>
   );

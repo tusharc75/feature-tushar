@@ -142,7 +142,7 @@ export const getSortedColumns = (columns = []) => {
 
 export const staticColumns = ['createdBy', 'updatedBy'];
 
-export default function useColumns(setViewMap = null ) {
+export default function useColumns() {
   const {
     state: { permissions, user }
   }: any = useData();
@@ -571,7 +571,7 @@ export default function useColumns(setViewMap = null ) {
         column.push({
           ...commonFieldData,
           editable: false,
-          cell: ({ row }) => <LocationCell field={field} original={row?.original} setViewMap={setViewMap} />
+          cell: ({ row }) => <LocationCell field={field} original={row?.original} />
         });
       } else {
         column.push({

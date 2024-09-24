@@ -1,7 +1,7 @@
 import { Grow, Zoom } from '@material-ui/core';
 import { TransitionProps } from '@material-ui/core/transitions';
 import clsx, { ClassValue } from 'clsx';
-import { camelCase, isArray, isEmpty, lowerFirst, orderBy, uniqBy } from 'lodash';
+import { camelCase, isArray, isEmpty, isString, lowerFirst, orderBy, uniqBy } from 'lodash';
 import mimeDb from 'mime-db';
 import moment from 'moment';
 import React from 'react';
@@ -996,6 +996,8 @@ export const getObjKeys = (val: string | boolean = '', arr: any[]) => {
       }
     } else if (key.type === 'signature') {
       obj[key.fieldName] = '';
+    } else if (key.type === 'location') {
+      obj[key.fieldName] = {};
     } else {
       obj[key.fieldName] = value;
     }
@@ -1102,11 +1104,7 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
     } else if (key.type === 'location') {
-      const values =
-        dataObj[key.fieldName] ? typeof dataObj[key.fieldName] === 'string'
-          ? { locationName: dataObj[key.fieldName] }
-          : dataObj[key.fieldName]
-          : {};
+      const values = dataObj[key.fieldName] ? isString(dataObj[key.fieldName]) ? { locationName: dataObj[key.fieldName] } : dataObj[key.fieldName] : {};
       obj[key.fieldName] = values;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';

@@ -4,7 +4,6 @@ import { camelCase, isArray, kebabCase } from 'lodash';
 import React, { useEffect, useMemo, useState } from 'react';
 import { FcApproval } from 'react-icons/fc';
 import { Link } from 'react-router-dom';
-import routes from 'src/components/Helpers/Routes';
 import { PreviewFile } from 'src/components/PreviewFile';
 import {
   cn,
@@ -22,8 +21,6 @@ import {
 import { useData } from '../../StateProvider/Provider';
 import CarouselDialog from '../CarouselDialog';
 import HtmlTooltip from '../CustomTooltipTitle';
-import CopyToClipboard from '../Helpers/CopyToClipboard';
-import { FiExternalLink } from 'react-icons/fi';
 import FollowUpsDialog from 'src/components/Activity/Task/FollowUpsDialog';
 import axios, { CancelTokenSource } from 'axios';
 import axiosInstance from 'src/axios/axiosInstance';
@@ -115,7 +112,7 @@ const Details = (props: DetailProps) => {
   const [open, setOpen] = useState({ open: false, section: null });
   const [taskData, setTaskdata] = useState(null);
   const fieldsData = useMemo(() => fields?.filter((f) => !HIDDEN_FIELD_TYPE.includes(f?.fieldData?.type))?.map((f) => f.fieldData), [fields]);
-  const [viewMap, setViewMap] = useState({ open: false, longitude: null, latitude: null });
+  const [viewMap, setViewMap] = useState({ open: false, locationName: null, longitude: null, latitude: null });
 
   useEffect(() => {
     sortArray();
@@ -200,6 +197,8 @@ const Details = (props: DetailProps) => {
         : values[input.fieldName]
           ? values[input.fieldName]?.optionLabel
           : '-';
+    } else if (input.type === 'location') {
+      text = values[input.fieldName];
     } else {
       text = values[input.fieldName] ? values[input.fieldName] : '-';
     }
@@ -407,23 +406,38 @@ const Details = (props: DetailProps) => {
       if (fieldData.type === 'location') {
         return (
           <>
-            <Box display="flex" alignItems="center">
-              <Typography
-                title={value?.locationName || value}
-                className={cn(classes.fieldText, ' flex items-center')}
-                variant="body2"
-              >
-                <span className={`text-truncate line-clamp-1 block`}>{value?.locationName || value}</span>
-              </Typography>
-              {value?.longitude && value?.latitude ? (
-                <IconButton size="small" title="View in Map" aria-label="view-in-map" onClick={() => {
-                  setViewMap({ open: true, longitude: value.longitude, latitude: value.latitude });
-                }}>
-                  <LocationOnIcon fontSize='small' />
-                </IconButton>
-              ) : null
-              }
-            </Box>
+            {value?.locationName ?
+              <Box display="flex" alignItems="center">
+                <Typography
+                  title={value?.locationName || value}
+                  className={cn(classes.fieldText, ' flex items-center')}
+                  variant="body2"
+                >
+                  <span className={`text-truncate line-clamp-1 block`}>{value?.locationName || value}</span>
+                </Typography>
+                {value?.longitude && value?.latitude ? (
+                  <Box >
+                    <HtmlTooltip title="View in Map">
+                      <IconButton
+                        size="small"
+                        aria-label="view-in-map"
+                        onClick={() => {
+                          setViewMap({
+                            open: true,
+                            locationName: value?.locationName,
+                            longitude: value.longitude,
+                            latitude: value.latitude
+                          });
+                        }}>
+                        <LocationOnIcon fontSize='small' color='primary' />
+                      </IconButton>
+                    </HtmlTooltip>
+                  </Box>
+                ) : null}
+              </Box>
+              : <Typography component={'span'} style={{ padding: '7px 10px' }}>
+                -
+              </Typography>}
           </>
         );
       }
@@ -631,10 +645,11 @@ const Details = (props: DetailProps) => {
       {viewMap?.open && (
         <GoogleMaps
           onClose={() => {
-            setViewMap({ open: false, longitude: null, latitude: null });
+            setViewMap({ open: false, locationName: null, longitude: null, latitude: null });
           }}
           longitude={viewMap.longitude}
           latitude={viewMap.latitude}
+          locationName={viewMap.locationName}
         />
       )}
     </>
