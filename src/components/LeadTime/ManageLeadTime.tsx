@@ -28,16 +28,8 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
     }
   }, [referenceData]);
 
-  const addRemove = (type, index) => {
+  const add = () => {
     const newSteps = [...steps];
-    if (type === 'add') {
-      newSteps.splice(index, 0, {
-        leadTimeStatus: '',
-        days: ''
-      });
-    } else {
-      newSteps.splice(index, 1);
-    }
     setSteps([...newSteps]);
   };
 
@@ -130,7 +122,11 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
                             size="small"
                             aria-label="add"
                             onClick={() => {
-                              addRemove('add', values?.steps?.length);
+                              values.steps.push({
+                                leadTimeStatus: '',
+                                days: ''
+                              });
+                              add();
                             }}
                           >
                             <AddCircleOutline fontSize="small" color="primary" />
@@ -211,7 +207,7 @@ const ManageLeadTime = ({ onClose, onSuccess, referenceType, referenceId, refere
                                   <Grid item xs={2} sm={2} md={2} lg={2}>
                                     <Grid container justifyContent="flex-end">
                                       <HtmlTooltip title="Remove">
-                                        <IconButton size="small" aria-label="remove" onClick={() => addRemove('remove', index)}>
+                                        <IconButton size="small" aria-label="remove" onClick={() => arrayHelpers.remove(index)}>
                                           <RemoveCircleOutline fontSize="small" color="primary" />
                                         </IconButton>
                                       </HtmlTooltip>

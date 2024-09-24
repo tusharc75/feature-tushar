@@ -78,7 +78,7 @@ const AddInventory = ({ warehouse, storageLocation, close, isAdding, submit, ren
           finalObject['_id'] = u._id;
           finalObject['inventory'] = u?.inventory ? u?.inventory - (u?.softHold || 0) : 0;
           finalObject['qty'] = selectedData ? selectedData.qty : finalObject['inventory'] ? 1 : 0;
-          finalObject['hideSelection'] = finalObject['inventory'] ? false : true;
+          finalObject['hideSelection'] = finalObject['inventory'] && finalObject['inventory'] <= 0 ? true : false;
           return {
             ...finalObject
           };

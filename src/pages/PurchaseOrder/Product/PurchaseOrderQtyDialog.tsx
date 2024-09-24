@@ -1,4 +1,4 @@
-import { useEffect, useState, Fragment } from 'react';
+import { useEffect, useState, Fragment, useRef } from 'react';
 import { Button, Dialog,  Box } from '@material-ui/core';
 import { CHILD_RESOURCE, arrayToDropwdownOption } from '../../../constants/helpers';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
@@ -13,16 +13,28 @@ import CustomButton from '../../../components/Helpers/CustomButton';
 import { autoCalculateSpecificFields } from '../../../constants/formulaUtility';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import InputField from 'src/components/Helpers/InputField';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purchaseOrderData, showSaveAndNext, loadingEdit }) => {
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
   const [allFields, setAllFields] = useState([]);
   const [saveAndNext, setSaveAndNext] = useState(false);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
 
   useEffect(() => {
     fetchField();
   }, [productData]);
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
+
 
   const fetchField = async () => {
     setInitialData({ fields: [], values: {} });
@@ -192,6 +204,7 @@ const PurchaseOrderQtyDialog = ({ onClose, onSubmit, productData, bulkEdit, purc
                   </CustomButton>
                 )}
                 <CustomButton
+                  id={'dialog-save-button'}
                   loading={loadingEdit}
                   disabled={loadingEdit}
                   variant="contained"

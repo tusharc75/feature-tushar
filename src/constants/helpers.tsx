@@ -1104,7 +1104,11 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
     } else if (key.type === 'location') {
-      const values = dataObj[key.fieldName] ? isString(dataObj[key.fieldName]) ? { locationName: dataObj[key.fieldName] } : dataObj[key.fieldName] : {};
+      const values = dataObj[key.fieldName]
+        ? isString(dataObj[key.fieldName])
+          ? { locationName: dataObj[key.fieldName] }
+          : dataObj[key.fieldName]
+        : {};
       obj[key.fieldName] = values;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
@@ -1432,8 +1436,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
     } else if (input.type === 'location') {
       schema[input.fieldName] = input.required ? object().required(`${input.fieldLabel} is required`) : object();
-    }
-    else {
+    } else {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
@@ -2000,7 +2003,8 @@ export const prepareDataForGrid = (data, user = {}) => {
     if (objectValues[d] && objectValues[d].hasOwnProperty('optionLabel')) {
       finalObject[d] = objectValues[d]['optionLabel'];
       finalObject[`${d}Id`] = objectValues[d]['optionValue'];
-    } else {
+    }
+    else if (objectValues[d] && objectValues[d].hasOwnProperty('locationName')) {
       finalObject[d] = objectValues[d];
     }
   });
@@ -3661,6 +3665,12 @@ export async function handleHardReload(url = window.location.href) {
   window.location.reload();
 }
 
+export const tabIndexValue = (resourceData, index) => {
+  if (resourceData && resourceData?.tabs?.length > 0) {
+    index = resourceData?.tabs?.length + index;
+  }
+  return index;
+};
 export const mapDarkTheme: GoogleMapProps['options']['styles'] = [
   { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
@@ -3729,7 +3739,7 @@ export const mapDarkTheme: GoogleMapProps['options']['styles'] = [
     featureType: 'water',
     elementType: 'labels.text.stroke',
     stylers: [{ color: '#17263c' }]
-  },
+  }
 ];
 
 export const mapLightTheme: GoogleMapProps['options']['styles'] = [
@@ -3745,5 +3755,5 @@ export const mapLightTheme: GoogleMapProps['options']['styles'] = [
   {
     featureType: 'road.highway',
     stylers: [{ visibility: 'simplified' }]
-  },
+  }
 ];

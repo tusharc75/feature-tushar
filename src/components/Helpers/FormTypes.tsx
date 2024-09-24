@@ -420,28 +420,20 @@ const FormTypes = (props) => {
         return undefined;
       }
 
-      if (values[name] === '' || values[name]['locationName'] === '') {
-        setOptions(value ? [value] : []);
+      if (!values[name] || values[name]['locationName'] === '') {
         return undefined;
       }
 
       fetch({ input: values[name]['locationName'] }, (results) => {
         if (active) {
-          let newOptions = [];
-          if (value) {
-            newOptions = [value];
-          }
-          if (results) {
-            newOptions = [...newOptions, ...results];
-          }
-          setOptions(newOptions);
+          setOptions(results);
         }
       });
     }
     return () => {
       active = false;
     };
-  }, [type, value, values[name], fetch]);
+  }, [type, values[name], fetch]);
 
   const fetchPlaceDetails = (placeId) => {
     return new Promise((resolve, reject) => {
@@ -2229,7 +2221,7 @@ const FormTypes = (props) => {
           autoComplete
           includeInputInList
           filterSelectedOptions
-          value={values[name]['locationName']}
+          value={values[name]['locationName'] || value}
           onChange={
             onChange
               ? onChange
@@ -2250,6 +2242,7 @@ const FormTypes = (props) => {
           onInputChange={(event, newInputValue, reason) => {
             if(reason === "input") {
               handleChange(name, { locationName: newInputValue });
+              setValues(newInputValue);
             }
           }}
           renderInput={(params) => (

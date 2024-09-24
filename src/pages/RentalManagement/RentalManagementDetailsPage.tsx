@@ -34,7 +34,8 @@ import {
   rentalManagement,
   rentalManagementSteps,
   serializedAsset,
-  sidebarResource
+  sidebarResource,
+  tabIndexValue
 } from '../../constants/helpers';
 import { findOne, objectStore } from '../../constants/indexdbhelper';
 import Step from '../DynamicForm/Step';
@@ -540,9 +541,11 @@ const RentalManagementDetailsPage = () => {
           <CustomTabs value={tabValue} onChange={handleMainTabChange}>
             <CustomTab value={0}>Header</CustomTab>
             <CustomTab value={1}>Details</CustomTab>
-            {resourceData && resourceData?.steps?.length > 0 && <CustomTab value={2}>Associations</CustomTab>}
-            {displayProgressiveBillingTab && <CustomTab value={3}>Progressive Billing</CustomTab>}
-            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={4}>Views</CustomTab>}
+            {resourceData &&
+              resourceData?.tabs?.length > 0 &&
+              resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
+            {displayProgressiveBillingTab && <CustomTab value={tabIndexValue(resourceData, 2)}>Progressive Billing</CustomTab>}
+            {!isOffline && !(isMobile && !isTablet) && <CustomTab value={tabIndexValue(resourceData, 3)}>Views</CustomTab>}
           </CustomTabs>
           <TabPanel value={tabValue} index={0}>
             <Box>
@@ -701,17 +704,24 @@ const RentalManagementDetailsPage = () => {
               )}
             </ContentFullScreen>
           </TabPanel>
-          <TabPanel value={tabValue} index={2}>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.rentalManagement}
-              data={rentalManagementData}
-              allowedToEdit={allowedToEdit}
-              referenceData={assets ? { assets: assets } : null}
-            />
-          </TabPanel>
-          <TabPanel value={tabValue} index={3}>
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => {
+              return (
+                <TabPanel value={tabValue} index={i + 2}>
+                  <Step
+                    tab={tab}
+                    resourcePolicyId={resourceData?._id}
+                    resourceId={id}
+                    resource={sidebarResource.rentalManagement}
+                    data={rentalManagementData}
+                    allowedToEdit={allowedToEdit}
+                    referenceData={assets ? { assets: assets } : null}
+                  />
+                </TabPanel>
+              );
+            })}
+          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 2)}>
             <ProgressiveBilling
               rentalId={id}
               rentalManagementData={rentalManagementData}
@@ -720,7 +730,7 @@ const RentalManagementDetailsPage = () => {
               }
             />
           </TabPanel>
-          <TabPanel value={tabValue} index={4}>
+          <TabPanel value={tabValue} index={tabIndexValue(resourceData, 3)}>
             <RentalManagementViews rentalName={rentalManagementData?.rentalJobName} rentalId={id} status={rentalManagementData?.status} />
           </TabPanel>
         </Box>

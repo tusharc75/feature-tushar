@@ -37,8 +37,11 @@ import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateAddManualEntry } from 'src/pages/PurchaseOrder/walkmeSteps';
 
 const PurchaseOrderDetailsPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -81,6 +84,11 @@ const PurchaseOrderDetailsPage = () => {
       getPurchaseOrderFields();
       fetchPurchaseOrderData();
       fetchPolicy();
+    }
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(generateAddManualEntry(true).steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
     }
   }, [id]);
 
@@ -192,7 +200,12 @@ const PurchaseOrderDetailsPage = () => {
               !purchaseOrderData?.deleted &&
               [PURCHASE_ORDER_STATUS.received].includes(purchaseOrderData?.status) && (
                 <Fragment>
-                  <ButtonWithPulse color="default" variant={'outlined'} className={'btn-outline-v1'} onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}>
+                  <ButtonWithPulse
+                    color="default"
+                    variant={'outlined'}
+                    className={'btn-outline-v1'}
+                    onClick={() => updateStatus(PURCHASE_ORDER_STATUS.closed)}
+                  >
                     Close
                   </ButtonWithPulse>
                 </Fragment>
@@ -256,11 +269,14 @@ const PurchaseOrderDetailsPage = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={4}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-            </CustomTab>
-          )}
+          {resourceData &&
+            resourceData?.tabs?.length &&
+            resourceData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 4}>
+                <BiFoodMenu className="mr-1" fontSize="inherit" />
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -323,15 +339,22 @@ const PurchaseOrderDetailsPage = () => {
         <TabPanel value={tabValue} index={3}>
           <Box>{purchaseOrderData && <PurchaseOrderViews purchaseOrderData={purchaseOrderData} />}</Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={4}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.purchaseOrder}
-            data={purchaseOrderData}
-            allowedToEdit={permissions?.purchaseOrder?.isUpdate}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 4}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.purchaseOrder}
+                  data={purchaseOrderData}
+                  allowedToEdit={permissions?.purchaseOrder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

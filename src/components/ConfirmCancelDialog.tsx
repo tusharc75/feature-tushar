@@ -61,10 +61,10 @@ export default function ConfirmationCancelDialog(props) {
         <Typography>Do you want to save changes or leave?</Typography>
       </DialogContent>
       <DialogActions>
-        <Button title="Leave Form" size="small" autoFocus onClick={onClose} color="primary">
+        <Button title="Leave Form" id="confirm-dialog-cancel-button" size="small" autoFocus onClick={onClose} color="primary">
           Leave
         </Button>
-        <Button title="Save and Close" size="small" onClick={onSave} color="primary">
+        <Button title="Save and Close" size="small" id="confirm-dialog-confirm-button" onClick={onSave} color="primary">
           Save
         </Button>
       </DialogActions>

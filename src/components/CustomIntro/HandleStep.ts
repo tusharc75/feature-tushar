@@ -40,6 +40,7 @@ export class HandleSteps {
   handleReset: () => void;
   findingElement: boolean;
   attachedOvservers: Observer[];
+  originalSteps: StepDefination[];
   clicked: boolean;
   waiting: boolean;
   tempIndex: number;
@@ -328,7 +329,12 @@ export class HandleSteps {
     }
   }
 
-  private initializeStepData(steps: StepDefination[]) {
+  private initializeStepData(steps: StepDefination[], first = true) {
+    if (first) {
+      this.originalSteps = steps;
+    } else {
+      this.originalSteps = [...this.originalSteps, ...steps];
+    }
     const newSteps: Step[] = [];
     for (let i = 0; i < steps.length; i++) {
       const data = steps[i];
@@ -363,15 +369,18 @@ export class HandleSteps {
   }
 
   push(steps: StepDefination[]) {
-    this.steps.push(...this.initializeStepData(steps));
+    this.steps.push(...this.initializeStepData(steps, false));
   }
   insert(steps: StepDefination[], index: number) {
     if (!steps || steps.length === 0 || !index) return;
-    this.steps.splice(index, 0, ...this.initializeStepData(steps));
+    this.originalSteps.splice(index, 0, ...steps);
+    this.steps = this.initializeStepData(this.originalSteps);
+    console.log({ s: this.steps, o: this.originalSteps });
+    // this.steps.splice(index, 0, ...this.initializeStepData(steps, false));
   }
   insertAtCurrentIndex(steps: StepDefination[]) {
     if (!steps || steps.length === 0) return;
-    this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps));
+    this.steps.splice(this.currentIndex + 1, 0, ...this.initializeStepData(steps, false));
   }
   pop() {
     this.steps.pop();
@@ -380,13 +389,17 @@ export class HandleSteps {
     this.steps.shift();
   }
   unshift(steps: StepDefination[]) {
-    this.steps.unshift(...this.initializeStepData(steps));
+    this.steps.unshift(...this.initializeStepData(steps, false));
   }
   splice(start: number, deleteCount: number, steps: StepDefination[]) {
-    this.steps.splice(start, deleteCount, ...this.initializeStepData(steps));
+    this.steps.splice(start, deleteCount, ...this.initializeStepData(steps, false));
   }
   sort(compareFn?: (a: Step, b: Step) => number) {
     this.steps.sort(compareFn);
+  }
+  remove(index: number) {
+    this.originalSteps.splice(index, 1);
+    this.steps = this.initializeStepData(this.originalSteps);
   }
   reverse() {
     this.steps.reverse();
