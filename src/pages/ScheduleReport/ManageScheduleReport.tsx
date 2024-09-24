@@ -28,7 +28,7 @@ type ValueTypes = {
   week: string;
   day: any;
   hour: any;
-  actions: string;
+  reportAction: string;
   sharepointTenantId?: string;
   sharepointSite?: string;
   sharepointclientId?: string;
@@ -97,7 +97,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             filters: data?.filters,
             column: data?.column,
             subscribeUsers: data?.subscribeUsers,
-            actions: data?.actions,
+            reportAction: data?.reportAction,
             sharepointTenantId: data?.sharepointTenantId,
             sharepointSite: data?.sharepointSite,
             sharepointclientId: data?.sharepointclientId,
@@ -115,7 +115,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         filters: [],
         column: [],
         subscribeUsers: [],
-        actions: '',
+        reportAction: 'Email',
         sharepointTenantId: '',
         sharepointSite: '',
         sharepointclientId: '',
@@ -263,17 +263,17 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (!values.resource) {
       errors['resource'] = 'Report is required';
     }
-    if(!values.actions){
-      errors['actions'] = 'Actions is required';
+    if(!values.reportAction){
+      errors['reportAction'] = 'Report Action is required';
     }
-    if(values.actions){
-      if(values.actions==='Email'){
+    if(values.reportAction){
+      if(values.reportAction==='Email'){
         if (values?.subscribeUsers?.length === 0) {
           errors['subscribeUsers'] = 'Users is required';
         }
       }
 
-      if(values.actions==='Sharepoint Upload'){
+      if(values.reportAction==='Sharepoint Upload'){
          if(!values.sharepointSite){
           errors['sharepointSite'] = 'Sharepoint Site is required';
          }
@@ -599,15 +599,15 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           size="small"
                           getOptionLabel={(option) => option}
                           getOptionSelected={(option, value) => option === value}
-                          value={values.actions}
-                          onChange={(_, newVal) => setFieldValue('actions', newVal)}
+                          value={values.reportAction}
+                          onChange={(_, newVal) => setFieldValue('reportAction', newVal)}
                           renderInput={(params) => (
                             <TextField
                               {...params}
-                              error={touched['actions'] && Boolean(errors['actions'])}
-                              helperText={touched['actions'] && errors['actions']}
-                              label="Actions"
-                              name="actions"
+                              error={touched['reportAction'] && Boolean(errors['reportAction'])}
+                              helperText={touched['reportAction'] && errors['reportAction']}
+                              label="Report Action"
+                              name="reportAction"
                               required
                               variant="outlined"
                             />
@@ -618,7 +618,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   </Box>
                   <Box my={2}>
                     <Grid container spacing={2}>
-                    {values?.actions==='Email' && (
+                    {values?.reportAction==='Email' && (
                       <Grid item xs={12} sm={6}>
                         <Autocomplete
                           options={usersList}
@@ -643,7 +643,7 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                         />
                       </Grid>
                     )}
-                    {values?.actions==='Sharepoint Upload' && (
+                    {values?.reportAction==='Sharepoint Upload' && (
                     <>
                      <Grid item xs={12} sm={6}>  
                       <TextField
