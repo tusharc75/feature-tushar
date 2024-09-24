@@ -4,13 +4,13 @@ import { Brightness1, Close, ExpandMore, MoreVert as MoreIcon } from '@material-
 import HelpOutlineIcon from '@material-ui/icons/HelpOutline';
 import SyncIcon from '@material-ui/icons/Sync';
 import { isEmpty } from 'lodash';
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { FiExternalLink } from 'react-icons/fi';
 import { GoChevronLeft, GoChevronRight } from 'react-icons/go';
 import { HiOutlineMenuAlt1 } from 'react-icons/hi';
 import { useHistory, useLocation } from 'react-router-dom';
 import io, { Socket } from 'socket.io-client';
-import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, USER_FAVOURITES, useStore } from 'src/StateProvider/fastContext';
+import { SIDEBAR_OPEN, SIDEBAR_OPENED_BY_BUTTON, useStore } from 'src/StateProvider/fastContext';
 import { SVG } from 'src/assets';
 import { MoonIcon, SunIcon } from 'src/assets/svg/svgIcons';
 import { useAppTheme } from 'src/constants/AppConfig';
@@ -37,8 +37,6 @@ const Header = () => {
   const [themeColor, toggleThemeColor] = useAppTheme();
   const [isSidebarOpen, setIsSidebarOpen] = useStore((store) => store[SIDEBAR_OPEN]);
   const [sidebarOpenedByButton, setSidebarOpenedByButton] = useStore((store) => store[SIDEBAR_OPENED_BY_BUTTON]);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [_favourites, setFavourites] = useStore((store) => store[USER_FAVOURITES]);
 
   const isMobile = useMediaQuery('(max-width:960px)');
   const is768 = useMediaQuery('(max-width: 768px)');
@@ -108,11 +106,6 @@ const Header = () => {
             .then(({ data: response }) => {
               const { data } = response;
               dispatch({ type: SET_USER, payload: data });
-              const favData: { [key: string]: boolean } = {};
-              data?.role?.userFavouriteResources[0]?.resources?.forEach((d: string) => {
-                favData[d] = true;
-              });
-              setFavourites({ [USER_FAVOURITES]: favData });
             })
             .catch((err) => {
               localStorage.setItem('token', '');
