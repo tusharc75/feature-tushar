@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment, useContext } from 'react';
+import { useState, useEffect, Fragment, useContext, useRef } from 'react';
 import Button from '@material-ui/core/Button';
 import { Formik, Form } from 'formik';
 import CustomDialogHeader from '../../components/CustomDialog/CustomDialogHeader';
@@ -25,6 +25,7 @@ import { useHistory } from 'react-router-dom';
 import { useData } from '../../StateProvider/Provider';
 import { isEqual } from 'lodash';
 import InputField from 'src/components/Helpers/InputField';
+import { generateStepsFormfieldData, useGetWalkmeInstance } from 'src/components/CustomIntro';
 
 const ManagePurchaseOrder = ({
   isClone = false,
@@ -50,10 +51,19 @@ const ManagePurchaseOrder = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [purchaseOrderData, setPurchaseOrderData] = useState(null);
   const [cloneHeading, setCloneHeading] = useState('head');
-
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
-
   const [requiredCustomerAndProject, setRequiredCustomerAndProject] = useState(false);
+  const walkmeInstance = useGetWalkmeInstance();
+  const isStepDataSet = useRef(false);
+
+  useEffect(() => {
+    if (walkmeInstance && !isStepDataSet.current && initialData?.fields?.length > 0) {
+      isStepDataSet.current = true;
+      const ignoreField = ['currency', 'owner', 'pdfTemplate'];
+      walkmeInstance.instance.insertAtCurrentIndex([...generateStepsFormfieldData(initialData?.fields, ignoreField)]);
+      walkmeInstance.handleNext();
+    }
+  }, [initialData]);
 
 
   useEffect(() => {
@@ -277,6 +287,7 @@ const ManagePurchaseOrder = ({
                   Cancel
                 </Button>
                 <CustomButton
+                  id="dialog-save-button"
                   loading={loading}
                   variant="contained"
                   color="primary"

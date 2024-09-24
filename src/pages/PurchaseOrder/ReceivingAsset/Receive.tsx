@@ -354,6 +354,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                                       />
                                       {user?.user?.brandPolicy?.storageLocation && (
                                         <Autocomplete
+                                          id="select-storage-location"
                                           size="small"
                                           value={data?.storageLocation}
                                           options={storageLocationOptions}
@@ -556,6 +557,7 @@ const Receive = ({ purchaseOrderID, onClose, onSuccess, material, purchaseOrderD
                     Cancel
                   </Button>
                   <Button
+                    id={'dialog-save-button'}
                     onClick={() => {
                       if (
                         !validate(values.material).inventoryQuantity &&

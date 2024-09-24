@@ -22,12 +22,17 @@ type ValueTypes = {
   filters: any[];
   resource: any;
   column: any[];
-  subscribeUsers: any[];
+  subscribeUsers?: any[];
   frequency: string;
   time: any;
   week: string;
   day: any;
   hour: any;
+  reportAction: string;
+  sharepointTenantId?: string;
+  sharepointSite?: string;
+  sharepointclientId?: string;
+  sharepointclientSecret?: string;
 };
 
 const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
@@ -91,7 +96,12 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
             week: data?.week,
             filters: data?.filters,
             column: data?.column,
-            subscribeUsers: data?.subscribeUsers
+            subscribeUsers: data?.subscribeUsers,
+            reportAction: data?.reportAction,
+            sharepointTenantId: data?.sharepointTenantId,
+            sharepointSite: data?.sharepointSite,
+            sharepointclientId: data?.sharepointclientId,
+            sharepointclientSecret: data?.sharepointclientSecret,
           };
           setScheduleData(newData);
         } catch (err) {
@@ -105,6 +115,11 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
         filters: [],
         column: [],
         subscribeUsers: [],
+        reportAction: 'Email',
+        sharepointTenantId: '',
+        sharepointSite: '',
+        sharepointclientId: '',
+        sharepointclientSecret: '',
         frequency: 'Daily',
         time: '',
         week: '',
@@ -248,9 +263,32 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
     if (!values.resource) {
       errors['resource'] = 'Report is required';
     }
-    if (values?.subscribeUsers?.length === 0) {
-      errors['subscribeUsers'] = 'Users is required';
+    if(!values.reportAction){
+      errors['reportAction'] = 'Report Action is required';
     }
+    if(values.reportAction){
+      if(values.reportAction==='Email'){
+        if (values?.subscribeUsers?.length === 0) {
+          errors['subscribeUsers'] = 'Users is required';
+        }
+      }
+
+      if(values.reportAction==='Sharepoint Upload'){
+         if(!values.sharepointSite){
+          errors['sharepointSite'] = 'Sharepoint Site is required';
+         }
+         if(!values.sharepointTenantId){
+          errors['sharepointTenantId'] = 'Sharepoint Tenant Id is required';
+         }
+         if(!values.sharepointclientId){
+          errors['sharepointclientId'] = 'Sharepoint Client Id is required';
+         }
+         if(!values.sharepointclientSecret){
+          errors['sharepointclientSecret'] = 'Sharepoint Client Secret is required';
+         }
+      }
+    }
+    
     if (!values.frequency) {
       errors['frequency'] = 'Frequency is required';
     } else {
@@ -555,6 +593,33 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                   <Box my={2}>
                     <Grid container spacing={2}>
                       <Grid item xs={12} sm={6}>
+                      <Autocomplete
+                          options={['Email', 'Sharepoint Upload']}
+                          fullWidth
+                          size="small"
+                          getOptionLabel={(option) => option}
+                          getOptionSelected={(option, value) => option === value}
+                          value={values.reportAction}
+                          onChange={(_, newVal) => setFieldValue('reportAction', newVal)}
+                          renderInput={(params) => (
+                            <TextField
+                              {...params}
+                              error={touched['reportAction'] && Boolean(errors['reportAction'])}
+                              helperText={touched['reportAction'] && errors['reportAction']}
+                              label="Report Action"
+                              name="reportAction"
+                              required
+                              variant="outlined"
+                            />
+                          )}
+                        />
+                      </Grid>     
+                    </Grid>
+                  </Box>
+                  <Box my={2}>
+                    <Grid container spacing={2}>
+                    {values?.reportAction==='Email' && (
+                      <Grid item xs={12} sm={6}>
                         <Autocomplete
                           options={usersList}
                           fullWidth
@@ -577,32 +642,85 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                           )}
                         />
                       </Grid>
-                      <Grid item xs={12} sm={6}>
-                        <Autocomplete
-                          options={getTimeOption()}
-                          fullWidth
-                          size="small"
-                          getOptionSelected={(option, val) => option === val}
-                          getOptionLabel={(option) => option ?? ''}
-                          value={values.time}
-                          onChange={(_, newVal) => {
-                            setFieldValue('time', newVal);
-                          }}
-                          renderInput={(params) => (
-                            <TextField
-                              required={Boolean(values.frequency)}
-                              error={touched['time'] && Boolean(errors['time'])}
-                              helperText={touched['time'] && errors['time']}
-                              {...params}
-                              label="Time"
-                              name="time"
-                              variant="outlined"
-                            />
-                          )}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <Box mt={2}>
+                    )}
+                    {values?.reportAction==='Sharepoint Upload' && (
+                    <>
+                     <Grid item xs={12} sm={6}>  
+                      <TextField
+                      variant="outlined"
+                      type="text"
+                      label="Sharepoint Tenant Id "
+                      required={true}
+                      name="sharepointTenantId"
+                      fullWidth
+                      margin="dense"
+                      value={values['sharepointTenantId']}
+                      error={touched['sharepointTenantId'] && Boolean(errors['sharepointTenantId'])}
+                      helperText={touched['sharepointTenantId'] && errors['sharepointTenantId']}
+                      onChange={(e) => {
+                        setFieldValue('sharepointTenantId', e.target.value.trimStart());
+                      }}
+                    />
+                    </Grid>
+                    <Grid item xs={12} sm={6}>  
+                    <TextField
+                    variant="outlined"
+                    type="text"
+                    label="Sharepoint Site"
+                    required={true}
+                    name="sharepointSite"
+                    fullWidth
+                    margin="dense"
+                    value={values['sharepointSite']}
+                    error={touched['sharepointSite'] && Boolean(errors['sharepointSite'])}
+                    helperText={touched['sharepointSite'] && errors['sharepointSite']}
+                    onChange={(e) => {
+                      setFieldValue('sharepointSite', e.target.value.trimStart());
+                    }}
+                  />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>  
+                  <TextField
+                  variant="outlined"
+                  type="text"
+                  label="Sharepoint Client Id"
+                  required={true}
+                  name="sharepointclientId"
+                  fullWidth
+                  margin="dense"
+                  value={values['sharepointclientId']}
+                  error={touched['sharepointclientId'] && Boolean(errors['sharepointclientId'])}
+                  helperText={touched['sharepointclientId'] && errors['sharepointclientId']}
+                  onChange={(e) => {
+                    setFieldValue('sharepointclientId', e.target.value.trimStart());
+                  }}
+                />
+                </Grid>
+                <Grid item xs={12} sm={6}>  
+                  <TextField
+                  variant="outlined"
+                  type="text"
+                  label="Sharepoint Client Secret"
+                  required={true}
+                  name="sharepointclientSecret"
+                  fullWidth
+                  margin="dense"
+                  value={values['sharepointclientSecret']}
+                  error={touched['sharepointclientSecret'] && Boolean(errors['sharepointclientSecret'])}
+                  helperText={touched['sharepointclientSecret'] && errors['sharepointclientSecret']}
+                  onChange={(e) => {
+                    setFieldValue('sharepointclientSecret', e.target.value.trimStart());
+                  }}
+                />
+                </Grid>
+                </>
+                  )}
+                  </Grid>
+                  </Box>
+                  <Box my={2}>
+                  <Grid container spacing={2}>
+                  <Grid item xs={12}>
+                        <Box>
                           <Typography color="textPrimary">Schedule Frequency</Typography>
                           <Box mt={1} />
                           <ToggleButtonGroup
@@ -678,8 +796,32 @@ const ManageScheduleReport = ({ handleClose, onSuccess, id }) => {
                             </Box>
                           )}
                         </Box>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                        <Autocomplete
+                          options={getTimeOption()}
+                          fullWidth
+                          size="small"
+                          getOptionSelected={(option, val) => option === val}
+                          getOptionLabel={(option) => option ?? ''}
+                          value={values.time}
+                          onChange={(_, newVal) => {
+                            setFieldValue('time', newVal);
+                          }}
+                          renderInput={(params) => (
+                            <TextField
+                              required={Boolean(values.frequency)}
+                              error={touched['time'] && Boolean(errors['time'])}
+                              helperText={touched['time'] && errors['time']}
+                              {...params}
+                              label="Time"
+                              name="time"
+                              variant="outlined"
+                            />
+                          )}
+                        />
                       </Grid>
-                    </Grid>
+                  </Grid>
                   </Box>
                 </CustomDialogContent>
                 <CustomDialogFooter>
