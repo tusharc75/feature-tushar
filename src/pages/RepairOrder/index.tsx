@@ -1,8 +1,7 @@
-import { Box, Button, Chip, IconButton, Menu, MenuItem } from '@material-ui/core';
-import { AddOutlined, ExpandMore } from '@material-ui/icons';
+import { Box, Chip, IconButton, MenuItem } from '@material-ui/core';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import { ToggleButton, ToggleButtonGroup } from '@material-ui/lab';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -12,9 +11,10 @@ import { useData } from 'src/StateProvider/Provider';
 import axiosInstance from 'src/axios/axiosInstance';
 import CustomBreadCrumbs from 'src/components/CustomBreadCrumbs';
 import CustomContainer from 'src/components/CustomContainer';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
 import CustomReactTable, {
-  getStaticFields,
   getCompletedByField,
+  getStaticFields,
   gridFilterParser,
   useColumns,
   useTableReducer
@@ -24,6 +24,7 @@ import CommonSkeleton from 'src/components/Helpers/CommonSkeleton';
 import ImportExportLinks from 'src/components/Helpers/ImportExportLinks';
 import MessageDialog from 'src/components/Helpers/MessageDialog';
 import routes from 'src/components/Helpers/Routes';
+import { ListingPageHeader } from 'src/components/PageHeaders';
 import {
   checkIsAllowedToDelete,
   getDefaultMyRecordType,
@@ -33,12 +34,12 @@ import {
   sidebarResource
 } from 'src/constants/helpers';
 import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
+import { createRepairOrderFlow } from 'src/pages/RepairOrder/walkmeSteps';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import ManageRepairOrder from './ManageRepairOrder';
-import { ListingPageHeader } from 'src/components/PageHeaders';
-import axios, { CancelTokenSource } from 'axios';
 
 const RepairOrder = () => {
+  const { setWalkmeData } = useSetWalkmeData();
   let renderedFrom = camelCase(routes.repairOrder?.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -93,6 +94,7 @@ const RepairOrder = () => {
     let data;
     const response = await axiosInstance().get(`/field?resource=Repair Order`);
     data = response?.data?.data;
+    setWalkmeData([createRepairOrderFlow(data)]);
     let newColumns = generateColumns(renderedFrom, data, routes.repairOrderDetail.path, true);
     setColumns([...newColumns, ...getStaticFields(), ...getCompletedByField(), ActionsRenderer]);
   };

@@ -69,12 +69,14 @@ const PlanningDetail = () => {
       const {
         data: { data }
       } = await axiosInstance().get(`${routes.planning.path}/${id}`);
-      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.planning, data)
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.planning, data);
       if (data?.status === PLANNING_STATUS.converted) {
         isAllowedToEdit = false;
       }
       setAllowedToEdit(isAllowedToEdit);
-      setAllowedToDelete(permissions?.planning?.isDelete && checkIsAllowedToDelete(user, sidebarResource.planning, data.owner.optionValue) && data?.canDelete);
+      setAllowedToDelete(
+        permissions?.planning?.isDelete && checkIsAllowedToDelete(user, sidebarResource.planning, data.owner.optionValue) && data?.canDelete
+      );
       setPlanningData(data);
       setLoading(false);
     } catch (error) {
@@ -171,9 +173,7 @@ const PlanningDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-              { allowedToDelete && (
-                <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />
-              )}
+              {allowedToDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
               <ActivityButton referenceId={planningData?._id} resource={ACTIVITY_RESOURCE.planning} resourceLabel={planningData?.planningNumber} />
             </>
           </Box>
@@ -187,11 +187,14 @@ const PlanningDetail = () => {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={2}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-            </CustomTab>
-          )}
+          {resourceData &&
+            resourceData?.tabs?.length &&
+            resourceData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 2}>
+                <BiFoodMenu className="mr-1" fontSize="inherit" />
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -215,15 +218,22 @@ const PlanningDetail = () => {
             />
           )}
         </TabPanel>
-        <TabPanel value={tabValue} index={2}>
-          <Step
-            resourceData={resourceData}
-            resourceId={id}
-            resource={sidebarResource.planning}
-            data={planningData}
-            allowedToEdit={permissions?.planning?.isUpdate}
-          />
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.planning}
+                  data={planningData}
+                  allowedToEdit={permissions?.planning?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

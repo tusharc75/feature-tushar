@@ -1,5 +1,6 @@
 import { Box, Chip, IconButton } from '@material-ui/core';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
+import axios, { CancelTokenSource } from 'axios';
 import { camelCase } from 'lodash';
 import queryString from 'query-string';
 import { useContext, useEffect, useState } from 'react';
@@ -30,7 +31,6 @@ import { findAll, findOne, insertUpdate, objectStore } from '../../constants/ind
 import CustomBreadCrumbs from './../../components/CustomBreadCrumbs';
 import routes from './../../components/Helpers/Routes';
 import ManageRepairJob from './ManageRepairJob';
-import axios, { CancelTokenSource } from 'axios';
 
 let repairJobTimeout;
 

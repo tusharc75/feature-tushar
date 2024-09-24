@@ -127,33 +127,16 @@ const QuotationDetails = () => {
     let tempQuotationFields = quotationFields;
     if (quotationData && quotationFields.length !== 0) {
       if (quotationData['type'] === QUOTATION_TYPE.rentalJob) {
-        tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            !['repairOrder', 'salesOrder', 'fieldJob']?.includes(
-              d?.fieldData?.fieldName
-            )
-        );
+        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'fieldJob']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.fieldJob) {
-        tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            !['repairOrder', 'salesOrder', 'rentalJob']?.includes(
-              d?.fieldData?.fieldName
-            )
-        );
+        tempQuotationFields = tempQuotationFields.filter((d) => !['repairOrder', 'salesOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.repairOrder) {
-        tempQuotationFields = tempQuotationFields.filter(
-          (d) =>
-            !['salesOrder', 'fieldJob', 'rentalJob']?.includes(
-              d?.fieldData?.fieldName
-            )
-        );
+        tempQuotationFields = tempQuotationFields.filter((d) => !['salesOrder', 'fieldJob', 'rentalJob']?.includes(d?.fieldData?.fieldName));
       }
       if (quotationData['type'] === QUOTATION_TYPE.salesOrder) {
-        tempQuotationFields = tempQuotationFields.filter(
-          (d) => !['fieldJob', 'repairOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName)
-        );
+        tempQuotationFields = tempQuotationFields.filter((d) => !['fieldJob', 'repairOrder', 'rentalJob']?.includes(d?.fieldData?.fieldName));
       }
     }
     return tempQuotationFields;
@@ -192,7 +175,6 @@ const QuotationDetails = () => {
             [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.converted]?.includes(quotationData?.status) &&
             quotationData.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer
           ) {
-
             setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.quotation, quotationData));
             setCanConvert(true);
           } else if (!quotationData?.rentalJob && quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer) {
@@ -230,7 +212,7 @@ const QuotationDetails = () => {
       const response: any = await axiosInstance().get(`${quotation.api}/${id}`);
       data = response?.data?.data;
 
-      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.quotation, data)
+      var isAllowedToEdit = checkIsAllowedToEdit(user, sidebarResource.quotation, data);
       if ([QUOTATION_STATUS.converted].includes(data.status)) {
         isAllowedToEdit = false;
       }
@@ -256,8 +238,7 @@ const QuotationDetails = () => {
 
       if (data.versions[versionIndex]?.status === QUOTATION_STATUS.sentToCustomer) {
         setCurrentStep(tempStepList?.length - 2);
-      }
-      else if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
+      } else if (data.versions[versionIndex]?.status === QUOTATION_STATUS.acceptByCustomer) {
         setCurrentStep(tempStepList?.length - 1);
       } else {
         setCurrentStep(getIndex(data.versions[versionIndex]?.processStatus, tempStepList));
@@ -405,7 +386,7 @@ const QuotationDetails = () => {
                         }}
                         variant="outlined"
                         size="small"
-                        className="mx-1 btn-outline-v1"
+                        className="btn-outline-v1 mx-1"
                         startIcon={<MdAutorenew />}
                         color="primary"
                       >
@@ -419,7 +400,7 @@ const QuotationDetails = () => {
                         }}
                         variant="outlined"
                         size="small"
-                        className="mx-1 btn-outline-v1"
+                        className="btn-outline-v1 mx-1"
                         startIcon={<SiSemanticrelease />}
                         color="primary"
                       >
@@ -435,7 +416,7 @@ const QuotationDetails = () => {
                     }}
                     variant="outlined"
                     size="small"
-                    className="mx-1 btn-outline-v1"
+                    className="btn-outline-v1 mx-1"
                     startIcon={<GiReceiveMoney />}
                     color="primary"
                   >
@@ -538,17 +519,19 @@ const QuotationDetails = () => {
                         Delete Version-{currentVersion}
                       </MenuItem>
                     )}
-                  {permissions?.quotation?.isDelete && checkIsAllowedToDelete(user, sidebarResource.quotation, quotationData.owner.optionValue) && quotationData?.canDelete && (
-                    <MenuItem
-                      onClick={() => {
-                        setShowConfirmBox(true);
-                        closeActionsAction();
-                      }}
-                    >
-                      <MdDelete className={'mr-2'} />
-                      Delete
-                    </MenuItem>
-                  )}
+                  {permissions?.quotation?.isDelete &&
+                    checkIsAllowedToDelete(user, sidebarResource.quotation, quotationData.owner.optionValue) &&
+                    quotationData?.canDelete && (
+                      <MenuItem
+                        onClick={() => {
+                          setShowConfirmBox(true);
+                          closeActionsAction();
+                        }}
+                      >
+                        <MdDelete className={'mr-2'} />
+                        Delete
+                      </MenuItem>
+                    )}
                 </Menu>
               </>
             ) : (
@@ -571,11 +554,14 @@ const QuotationDetails = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
-          {resourceData && resourceData?.steps?.length && (
-            <CustomTab value={3}>
-              <BiFoodMenu className="mr-1" fontSize="inherit" /> Associations
-            </CustomTab>
-          )}
+          {resourceData &&
+            resourceData?.tabs?.length &&
+            resourceData?.tabs?.map((tab, i) => (
+              <CustomTab value={i + 3}>
+                <BiFoodMenu className="mr-1" fontSize="inherit" />
+                {tab?.tabName}
+              </CustomTab>
+            ))}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -605,10 +591,10 @@ const QuotationDetails = () => {
           {[QUOTATION_STATUS.sentToCustomer, QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer]?.includes(
             quotationData?.versions[currentVersion]?.status
           ) && (
-              <Box className={`md:-mt-[31px] md:static max-w-max ml-auto `}>
-                <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
-              </Box>
-            )}
+            <Box className={`ml-auto max-w-max md:static md:-mt-[31px] `}>
+              <ShowQuoteStatus status={quotationData?.versions[currentVersion]?.status} />
+            </Box>
+          )}
           <div>
             <Steps
               isNextStep={false}
@@ -625,10 +611,10 @@ const QuotationDetails = () => {
               handleNext={
                 stepNames[currentStep] === 'Quote Approval'
                   ? () => {
-                    if (allowedToEdit) {
-                      setCustomerAcceptable(true);
+                      if (allowedToEdit) {
+                        setCustomerAcceptable(true);
+                      }
                     }
-                  }
                   : null
               }
             />
@@ -718,17 +704,22 @@ const QuotationDetails = () => {
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={tabValue} index={3}>
-          <Box>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.quotation}
-              data={quotationData}
-              allowedToEdit={permissions?.quotation?.isUpdate}
-            />
-          </Box>
-        </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.quotation}
+                  data={quotationData}
+                  allowedToEdit={permissions?.quotation?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
