@@ -108,7 +108,7 @@ const PRODUCT_SETUP = ({ colors = ['#3BE961', '#058D12'] }) => {
   return (
     <>
       <div
-        className="grid place-items-center"
+        className="custom grid place-items-center"
         style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 22 22">
@@ -618,7 +618,7 @@ export const IOT = ({ colors = ['#3BE961', '#058D12'] }) => {
   return (
     <>
       <div
-        className="grid place-items-center"
+        className="custom grid place-items-center"
         style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 30 30">
@@ -644,7 +644,7 @@ export const CUSTOM_FORMS = ({ colors = ['#3BE961', '#058D12'] }) => {
   return (
     <>
       <div
-        className="grid place-items-center"
+        className="custom grid place-items-center"
         style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24">
@@ -671,7 +671,7 @@ export const FLEET_MANAGEMENT = ({ colors = ['#3BE961', '#058D12'] }) => {
   return (
     <>
       <div
-        className="grid place-items-center"
+        className="custom grid place-items-center"
         style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 30 30">
@@ -698,7 +698,7 @@ export const FORECASTING_AND_PLANNING = ({ colors = ['#3BE961', '#058D12'] }) =>
   return (
     <>
       <div
-        className="grid place-items-center"
+        className="custom grid place-items-center"
         style={{ width: `${IMAGE_WIDTH}px`, height: `${IMAGE_HEIGHT}px`, background: `linear-gradient(129deg, ${colors[0]}, ${colors[1]})` }}
       >
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 43 43">
