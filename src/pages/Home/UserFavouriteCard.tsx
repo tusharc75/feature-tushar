@@ -20,13 +20,13 @@ export const UserFavIcon = () => (
 const UserFavouriteCard = ({ handleOnClick }) => {
   return (
     <DashBoardCardShell
-      key={'User Favourites'}
-      id={`user-favoutires-card`}
+      key={'User Favorites'}
+      id={`user-favorite-card`}
       role="button"
       className={styles.singlecard}
       background={'#fff'}
       gradientColors={colors.gradient}
-      aria-label={`open User favourites`}
+      aria-label={`open User Favorite`}
       onClick={() => handleOnClick()}
     >
       <div className={styles.cardContent}>
@@ -39,7 +39,7 @@ const UserFavouriteCard = ({ handleOnClick }) => {
           </div>
         </div>
         <Typography component="h2" className={styles.cardHeading}>
-          Your Favourites
+          Your Favorites
         </Typography>
         <Typography component="p" className={styles.cardDesc}>
           This is a collection of your favorite items, selected by you.

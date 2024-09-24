@@ -5,16 +5,14 @@ import { Link } from 'react-router-dom';
 import { DynamicIcon } from 'src/assets/IconGenerator';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import DashboardModal from 'src/components/DashboardModal';
-import UserFavouriteIcon from 'src/components/UserFavouriteIcon';
+import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
+import { useFavorites } from 'src/hooks';
 import { Item, ItemData, Section } from 'src/pages/Home/types';
+import UserFavouriteCard, { UserFavIcon } from 'src/pages/Home/UserFavouriteCard';
+import { useData } from 'src/StateProvider/Provider';
 import styles from './Dashboard.module.scss';
 import { getAllData, getColors } from './helpers';
 import './style.scss';
-import { USER_FAVOURITES, useStore } from 'src/StateProvider/fastContext';
-import { useData } from 'src/StateProvider/Provider';
-import UserFavouriteCard, { UserFavIcon } from 'src/pages/Home/UserFavouriteCard';
-import { Star } from '@material-ui/icons';
-import { useFavourites } from 'src/hooks';
 
 type DisplayCardGridProps = {
   sections: Section[];
@@ -27,20 +25,20 @@ const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
   } = useData();
 
   const [modalContent, setModalContent] = useState(null);
-  const { favourites } = useFavourites();
+  const { favorites } = useFavorites();
   const [stateFavourites, setStateFavourites] = useState<ItemData[]>([]);
   const allData = useMemo(() => getAllData(user, selectedEntity), [user, selectedEntity]);
 
   useEffect(() => {
     const newFavourites = [];
     allData.forEach((item) => {
-      if (favourites?.[item.resourceId]) {
+      if (favorites?.[item.resourceId]) {
         newFavourites.push(item);
       }
     });
     setStateFavourites(newFavourites);
     // setStateFavourites
-  }, [favourites, allData]);
+  }, [favorites, allData]);
 
   const handleClose = () => {
     setModalContent(null);
@@ -49,7 +47,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
   const handleFavouriteModal = () => {
     setModalContent({
       items: stateFavourites,
-      title: 'Your Favourites',
+      title: 'Your Favorites',
       icon: (
         <span className="[&>div]:!h-[32px] [&>div]:!w-[32px] [&>div]:rounded [&_.custom_svg]:!h-[18px] [&_.custom_svg]:!w-[18px]">
           <UserFavIcon />
@@ -149,7 +147,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
                       </svg>
                       {item.resourceLabel || item.name}
                     </Link>
-                    <UserFavouriteIcon item={item} />
+                    <UserFavoriteIcon item={item} />
                   </div>
                 </Typography>
               </li>

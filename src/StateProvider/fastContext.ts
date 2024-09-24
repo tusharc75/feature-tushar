@@ -12,7 +12,7 @@ export const SIDEBAR_OPENED_BY_BUTTON = 'isSidebarOpenedByButton';
 export const WALK_ME_STEPS = 'walkMeSteps';
 export const WALK_ME_INSTANCE = 'walkMeInstance';
 export const GRID_METADATA = 'gridMetaData';
-export const USER_FAVOURITES = 'userFavourites';
+export const USER_FAVOURITES = 'userFavorites';
 
 const initialState: {
   searchQuery: string;
@@ -26,7 +26,7 @@ const initialState: {
   walkMeSteps: WalkmeData[];
   walkMeInstance: StateWalkmeInstance | null;
   gridMetaData: { [key: string]: { hide: string[]; order: string[]; name?: string; id?: string } | null };
-  userFavourites: { [key: string]: boolean } | null;
+  userFavorites: { [key: string]: boolean } | null;
 } = {
   searchQuery: '',
   themeColor: 'light',
@@ -39,7 +39,7 @@ const initialState: {
   walkMeSteps: [],
   walkMeInstance: null,
   gridMetaData: {},
-  userFavourites: null
+  userFavorites: null
 };
 
 const { Provider, useStore } = createFastContext(initialState);

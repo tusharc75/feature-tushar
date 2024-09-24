@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback } from 'react';
 import axiosInstance from 'src/axios/axiosInstance';
 import { Item } from 'src/pages/Home/types';
 import { USER_FAVOURITES, useStore } from 'src/StateProvider/fastContext';
 
-const useFavourites = () => {
-  const [favourites, setFavourites] = useStore((store) => store[USER_FAVOURITES]);
+const useFavorites = () => {
+  const [favorites, setFavourites] = useStore((store) => store[USER_FAVOURITES]);
 
   const handleGetFavourites = useCallback(async () => {
     const api = '/user/user-favourite-resources';
@@ -24,21 +24,21 @@ const useFavourites = () => {
 
   const handleSetFavourite = useCallback(
     async (item: Item) => {
-      setFavourites({ [USER_FAVOURITES]: { ...favourites, [item.resourceId]: !favourites[item.resourceId] } });
+      setFavourites({ [USER_FAVOURITES]: { ...favorites, [item.resourceId]: !favorites[item.resourceId] } });
       try {
         await axiosInstance().put('/user/user-favourite-resources', {
           resource: item.resourceId,
-          setFavourite: !favourites[item.resourceId]
+          setFavourite: !favorites[item.resourceId]
         });
         handleGetFavourites();
       } catch (error) {
         console.log(error);
       }
     },
-    [favourites, handleGetFavourites, setFavourites]
+    [favorites, handleGetFavourites, setFavourites]
   );
 
-  return { favourites, handleGetFavourites, handleSetFavourite };
+  return { favorites: favorites, handleGetFavourites, handleSetFavourite };
 };
 
-export default useFavourites;
+export default useFavorites;
