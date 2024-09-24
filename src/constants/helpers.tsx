@@ -13,6 +13,7 @@ import { twMerge } from 'tailwind-merge';
 import { v4 as uuid } from 'uuid';
 import { array, boolean, number, object, string } from 'yup';
 import currencies from './currency_with_country.json';
+import { GoogleMapProps } from '@react-google-maps/api';
 
 interface stepInterface extends stepIconInterface {
   name: string;
@@ -1424,7 +1425,10 @@ export const yupSchema = (fields: any[], validEmail = true) => {
       schema[input.fieldName] = input.required ? string().required(`${input.fieldLabel} is required`) : string();
     } else if (input.type === 'groupSignature') {
       schema[input.fieldName] = input.required ? array().min(1, `${input.fieldLabel} is required`) : array();
-    } else {
+    } else if (input.type === 'location') {
+      schema[input.fieldName] = input.required ? object().required(`${input.fieldLabel} is required`) : object();
+    }
+     else {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
@@ -1991,6 +1995,8 @@ export const prepareDataForGrid = (data, user = {}) => {
     if (objectValues[d] && objectValues[d].hasOwnProperty('optionLabel')) {
       finalObject[d] = objectValues[d]['optionLabel'];
       finalObject[`${d}Id`] = objectValues[d]['optionValue'];
+    } else {
+      finalObject[d] = objectValues[d];
     }
   });
 
@@ -3649,3 +3655,90 @@ export async function handleHardReload(url = window.location.href) {
   // This is to ensure reload with url's having '#'
   window.location.reload();
 }
+
+export const mapDarkTheme: GoogleMapProps['options']['styles'] = [
+  { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
+  {
+    featureType: 'administrative.locality',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'poi',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#d59563' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'geometry',
+    stylers: [{ color: '#263c3f' }]
+  },
+  {
+    featureType: 'poi.park',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#6b9a76' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry',
+    stylers: [{ color: '#38414e' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#212a37' }]
+  },
+  {
+    featureType: 'road',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#9ca5b3' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry',
+    stylers: [{ color: '#746855' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'geometry.stroke',
+    stylers: [{ color: '#1f2835' }]
+  },
+  {
+    featureType: 'road.highway',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#f3d19c' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'geometry',
+    stylers: [{ color: '#17263c' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.fill',
+    stylers: [{ color: '#515c6d' }]
+  },
+  {
+    featureType: 'water',
+    elementType: 'labels.text.stroke',
+    stylers: [{ color: '#17263c' }]
+  },
+];
+
+export const mapLightTheme: GoogleMapProps['options']['styles'] = [
+  {
+    featureType: 'water',
+    stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
+  },
+  { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
+  {
+    featureType: 'road',
+    stylers: [{ saturation: -100 }, { lightness: 45 }]
+  },
+  {
+    featureType: 'road.highway',
+    stylers: [{ visibility: 'simplified' }]
+  },
+];

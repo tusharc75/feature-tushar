@@ -420,12 +420,12 @@ const FormTypes = (props) => {
         return undefined;
       }
 
-      if (values[name] === '') {
+      if (values[name] === '' || values[name]['locationName'] === '') {
         setOptions(value ? [value] : []);
         return undefined;
       }
 
-      fetch({ input: values[name] }, (results) => {
+      fetch({ input: values[name]['locationName'] }, (results) => {
         if (active) {
           let newOptions = [];
           if (value) {
@@ -442,6 +442,28 @@ const FormTypes = (props) => {
       active = false;
     };
   }, [type, value, values[name], fetch]);
+
+  const fetchPlaceDetails = (placeId) => {
+    return new Promise((resolve, reject) => {
+      if (!window.google) return reject({});
+  
+      const service = new window.google.maps.places.PlacesService(document.createElement('div'));
+  
+      service.getDetails({ placeId }, (place, status) => {
+        if (status === window.google.maps.places.PlacesServiceStatus.OK && place.geometry) {
+          const locationData = {
+            locationName: place.formatted_address,
+            latitude: place.geometry.location.lat(),
+            longitude: place.geometry.location.lng(),
+          };
+          resolve(locationData);
+        } else {
+          reject({});
+        }
+      });
+    });
+  };
+  
 
   const handleUploadImage = (event) => {
     if (event.target.files && event.target.files.length) {
@@ -2207,17 +2229,28 @@ const FormTypes = (props) => {
           autoComplete
           includeInputInList
           filterSelectedOptions
-          value={values[name]}
+          value={values[name]['locationName']}
           onChange={
             onChange
               ? onChange
-              : (event, newValue) => {
+              : async (event, newValue) => {
                   setOptions(newValue ? [newValue, ...optionsList] : optionsList);
-                  setValue(newValue);
+                  if (newValue && newValue.place_id) {
+                    try {
+                      const placeDetails = await fetchPlaceDetails(newValue.place_id);
+                      handleChange(name, placeDetails);
+                    } catch (error) {
+                      handleChange(name, { locationName: newValue.description });
+                    }
+                  } else {
+                    handleChange(name, { locationName: newValue.description });
+                  }
                 }
           }
-          onInputChange={(event, newInputValue) => {
-            handleChange(name, newInputValue);
+          onInputChange={(event, newInputValue, reason) => {
+            if(reason === "input") {
+              handleChange(name, { locationName: newInputValue });
+            }
           }}
           renderInput={(params) => (
             <TextField
@@ -2231,10 +2264,10 @@ const FormTypes = (props) => {
             />
           )}
           renderOption={(option: any) => {
-            const matches = option.structured_formatting.main_text_matched_substrings || [];
+            const matches = option?.structured_formatting?.main_text_matched_substrings || [];
             const parts = parse(
-              option.structured_formatting.main_text,
-              matches?.map((match) => [match.offset, match.offset + match.length])
+              option?.structured_formatting.main_text,
+              matches?.map((match) => [match?.offset, match?.offset + match?.length])
             );
 
             return (
