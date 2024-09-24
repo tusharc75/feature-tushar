@@ -33,6 +33,13 @@ import {
   repairOrder,
   sidebarResource
 } from '../../../constants/helpers';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateCompleteStepData, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
+
+const dataAdded = {
+  completeDataAdded: false,
+  nextButtonAdded: false
+};
 
 const Quotation = ({
   repairOrderData,
@@ -41,10 +48,14 @@ const Quotation = ({
   renderedFrom,
   stepFullScreen,
   allowedToEdit,
+  topAllowedToEdit = false,
   setQuotationVersionData,
   updateOrderStatus,
-  invoiceStep
+  invoiceStep,
+  currentStepName = 'Quotation'
 }) => {
+  const walkmeInstance = useGetWalkmeInstance();
+  const { setWalkmeData } = useSetWalkmeData();
   const toastConfig = useContext(CustomToastContext);
   const {
     state: { user, permissions }
@@ -72,6 +83,31 @@ const Quotation = ({
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
+
+  useEffect(() => {
+    setWalkmeData([]);
+  }, []);
+
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (walkmeInstance && walkmeInstance.type === 'flow' && rows.length) {
+      if (currentStepName === 'Quotation' && !dataAdded.nextButtonAdded) {
+        dataAdded.nextButtonAdded = true;
+        walkmeInstance.instance.push([nextButtonStep(true)]);
+        walkmeInstance.handleNext();
+      }
+      if (
+        permissions?.repairOrder?.isUpdate &&
+        topAllowedToEdit &&
+        repairOrderData?.canComplete &&
+        !dataAdded.completeDataAdded &&
+        currentStepName === 'Slip'
+      ) {
+        dataAdded.completeDataAdded = true;
+        walkmeInstance.instance.push(generateCompleteStepData().steps);
+        walkmeInstance.handleNext();
+      }
+    }
+  };
 
   useEffect(() => {
     fetchFields();
@@ -328,7 +364,7 @@ const Quotation = ({
       parent.hideSelection = false;
       parent.subRows = generateNestedData(data.material, parent);
     });
-
+    handleAddWalkmeData(rows);
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };

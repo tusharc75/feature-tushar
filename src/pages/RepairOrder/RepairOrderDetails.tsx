@@ -47,8 +47,15 @@ import WorkOrder from './WorkOrder';
 import Step from '../DynamicForm/Step';
 import ManageTransferAsset from '../TransferAssets/ManageTransferAsset';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { generateAddExistingSerializedAsset } from 'src/pages/RepairOrder/walkmeSteps';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+
+const dataAdded = {
+  addExistingDataAdded: false
+};
 
 const RepairOrderDetails = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const renderedFrom = camelCase(routes?.repairOrder.title);
   const toastConfig = useContext(CustomToastContext);
 
@@ -114,6 +121,18 @@ const RepairOrderDetails = () => {
 
   useEffect(() => {
     getResourceFields();
+
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      if (dataAdded.addExistingDataAdded) return;
+      const steps = generateAddExistingSerializedAsset(
+        true,
+        repairOrderData?.type === REPAIR_ORDER_TYPE.external ? `Add Existing Customer Assets` : `Add Existing ${routes.serializedAsset.title}`
+      ).steps;
+      walkmeInstance.instance.push(steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
+      dataAdded.addExistingDataAdded = true;
+    }
   }, []);
 
   useEffect(() => {
@@ -327,6 +346,7 @@ const RepairOrderDetails = () => {
                     size="small"
                     onClick={() => updateOrderStatus(REPAIR_ORDER_STATUS.completed)}
                     className={'btn-outline-v1'}
+                    id={'header-button-complete'}
                   >
                     Complete
                   </ButtonWithPulse>
@@ -445,27 +465,30 @@ const RepairOrderDetails = () => {
 
           <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {stepNames[currentStep] === 'Add Assets' && repairOrderData && (
-              <Productpackage
-                fetchRepairOrderData={fetchRepairOrderData}
-                repairOrderData={repairOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-1`}
-                stepFullScreen={stepFullScreen}
-                setHasAssetsAdded={setHasAssetsAdded}
-                allowedToEdit={
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                    quotationVersionData?.status
-                  )
-                    ? false
-                    : allowedToEdit
-                }
-              />
+              <>
+                <Productpackage
+                  fetchRepairOrderData={fetchRepairOrderData}
+                  repairOrderData={repairOrderData}
+                  setNextStep={setNextStep}
+                  renderedFrom={`${renderedFrom}_grid-1`}
+                  stepFullScreen={stepFullScreen}
+                  setHasAssetsAdded={setHasAssetsAdded}
+                  allowedToEdit={
+                    [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
+                      quotationVersionData?.status
+                    )
+                      ? false
+                      : allowedToEdit
+                  }
+                />
+              </>
             )}
             {(stepNames[currentStep] === 'Work Order' || stepNames[currentStep] === 'Execute') && repairOrderData && (
               <WorkOrder
                 fetchRepairOrderData={fetchRepairOrderData}
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
+                currentStepName={stepNames[currentStep]}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={
                   currentStep === 3
@@ -484,6 +507,7 @@ const RepairOrderDetails = () => {
             )}
             {stepNames[currentStep] === 'Quotation' && repairOrderData && (
               <Quotation
+                currentStepName={stepNames[currentStep]}
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
                 setPrevStep={setPrevStep}
@@ -496,21 +520,25 @@ const RepairOrderDetails = () => {
               />
             )}
             {stepNames[currentStep] === 'Loading Ticket' && repairOrderData && (
-              <LoadingTicket
-                repairOrderData={repairOrderData}
-                setNextStep={setNextStep}
-                renderedFrom={`${renderedFrom}_grid-5`}
-                allowedToEdit={allowedToEdit}
-              />
+              <>
+                <LoadingTicket
+                  repairOrderData={repairOrderData}
+                  setNextStep={setNextStep}
+                  renderedFrom={`${renderedFrom}_grid-5`}
+                  allowedToEdit={allowedToEdit}
+                />
+              </>
             )}
             {stepNames[currentStep] === 'Slip' && repairOrderData && (
               <Quotation
+                currentStepName={stepNames[currentStep]}
                 repairOrderData={repairOrderData}
                 setNextStep={setNextStep}
                 setPrevStep={setPrevStep}
                 renderedFrom={`${renderedFrom}_grid-4`}
                 stepFullScreen={stepFullScreen}
                 allowedToEdit={false}
+                topAllowedToEdit={allowedToEdit}
                 invoiceStep={true}
                 setQuotationVersionData={setQuotationVersionData}
                 updateOrderStatus={updateOrderStatus}
