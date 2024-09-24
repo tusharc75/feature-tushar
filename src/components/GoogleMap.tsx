@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { GoogleMap, Marker } from '@react-google-maps/api';
 import { isMobile, isTablet } from 'react-device-detect';
-import { Box, Button, Dialog } from '@material-ui/core';
+import { Box, Dialog } from '@material-ui/core';
 import { useAppTheme } from 'src/constants/AppConfig';
 import { CustomDialogTransition, mapDarkTheme, mapLightTheme } from 'src/constants/helpers';
 import CustomDialogHeader from 'src/components/CustomDialog/CustomDialogHeader';
 import CustomDialogContent from 'src/components/CustomDialog/CustomDialogContent';
-import CustomDialogFooter from 'src/components/CustomDialog/CustomDialogFooter';
 
-const GoogleMaps = ({ onClose, latitude, longitude }) => {
+const GoogleMaps = ({ onClose, locationName, latitude, longitude }) => {
 
   const [themeColor] = useAppTheme();
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
@@ -25,7 +24,7 @@ const GoogleMaps = ({ onClose, latitude, longitude }) => {
         fullWidth
       >
         <CustomDialogHeader
-          title={'View Address'}
+          title={locationName}
           onClose={onClose}
           isMinimized={!fullScreen}
           onMinimizeMaximize={() => {
@@ -35,7 +34,7 @@ const GoogleMaps = ({ onClose, latitude, longitude }) => {
           showRequiredLabel={false}
         ></CustomDialogHeader>
         <CustomDialogContent>
-          <Box height={400} width={'100%'} borderRadius={4} overflow="hidden">
+          <Box height={fullScreen ? window.innerHeight - 100 : 500} width={'100%'} borderRadius={4} overflow="hidden">
             <GoogleMap
               key={themeColor}
               options={{
@@ -45,7 +44,6 @@ const GoogleMaps = ({ onClose, latitude, longitude }) => {
               }}
               mapContainerStyle={{
                 height: '100%',
-                maxWidth: '600px',
                 minWidth: '100%'
               }}
               center={new google.maps.LatLng(latitude, longitude)}
@@ -55,15 +53,6 @@ const GoogleMaps = ({ onClose, latitude, longitude }) => {
             </GoogleMap>
           </Box>
         </CustomDialogContent>
-        <CustomDialogFooter>
-          <Button
-            size="small"
-            color="primary"
-            onClick={onClose}
-          >
-            Close
-          </Button>
-        </CustomDialogFooter>
       </Dialog>
     </>
   )
