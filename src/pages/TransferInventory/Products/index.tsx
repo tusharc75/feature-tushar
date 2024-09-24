@@ -106,7 +106,7 @@ const Products = ({
           Header: 'Details',
           Cell: ({ row }) => (
             <div className="flex items-center gap-2">
-              {row.original?.canDelete && row.original.type === MATERIAL_TYPE.product ? (
+              {row.original.type === MATERIAL_TYPE.product ? (
                 <p
                   className="link text-truncate"
                   title={row.original?.productName}
@@ -297,8 +297,7 @@ const Products = ({
     axiosInstance()
       .post(`${routes.transferInventory.path}/${transferInventoryData?._id}/product`, {
         products
-      })
-      .then(() => {
+      }).then(() => {
         fetchData();
         fetchTransferInventoryData();
         toastConfig.setToastConfig({
