@@ -52,6 +52,7 @@ import { updateRentalProcessStatus } from './rentalOfflineHelper';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingProduct } from 'src/pages/RentalManagement/walkmeSteps';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const RentalManagementDetailsPage = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -213,7 +214,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   const checkDeliveryTicketFields = () => {
@@ -231,13 +232,12 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => {});
+      .catch((err) => { });
   };
 
   useEffect(() => {
     if (currentStep !== null && currentStep >= 0 && currentStep <= 7) {
       fetchQuotationData();
-      updateProcessStatus(rentalSteps[currentStep]?.name);
     }
   }, [currentStep]);
 
@@ -347,35 +347,17 @@ const RentalManagementDetailsPage = () => {
       });
   };
 
-  const updateProcessStatus = async (processStatus) => {
-    if (isOffline) {
-      await updateRentalProcessStatus(id, processStatus);
-    } else {
-      axiosInstance()
-        .put(`${rentalManagement.api}/${id}/process-status`, { processStatus: processStatus })
-        .then(({ data }) => {})
-        .catch((error) => {});
-    }
-  };
-
   const updateJobStatus = (status) => {
-    axiosInstance()
-      .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status })
-      .then(({ data: { data } }) => {
-        if (status === RENTAL_STATUS.invoiced || status === RENTAL_STATUS.closed) {
-          updateProcessStatus(rentalSteps[rentalSteps?.length - 1]?.name);
-          setCurrentStep(rentalSteps?.length - 1);
-        }
-        fetchRentalManagementData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Status changed to ${status}`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
+      fetchRentalManagementData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Status changed to ${status}`
       });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const cloneVersion = () => {
@@ -593,6 +575,13 @@ const RentalManagementDetailsPage = () => {
               }}
               isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
+              updateStatus={(step: number) => {
+                if (isOffline) {
+                  updateRentalProcessStatus(id, rentalSteps[step]?.name);
+                } else {
+                  dynamicFormUpdateProcessStatus(sidebarResource.rentalManagement, rentalSteps[step]?.name, id);
+                }
+              }}
             />
             <ContentFullScreen title={rentalSteps[currentStep]?.name} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
               {rentalSteps[currentStep]?.name === 'Add Products' && rentalManagementData && (
@@ -605,12 +594,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -629,12 +618,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                    [
-                      QUOTATION_STATUS.acceptByCustomer,
-                      QUOTATION_STATUS.rejectByCustomer,
-                      QUOTATION_STATUS.sentToCustomer,
-                      QUOTATION_STATUS.waitingForSupplierPrice
-                    ].includes(quotationData?.versions[currentVersion]?.status)
+                      [
+                        QUOTATION_STATUS.acceptByCustomer,
+                        QUOTATION_STATUS.rejectByCustomer,
+                        QUOTATION_STATUS.sentToCustomer,
+                        QUOTATION_STATUS.waitingForSupplierPrice
+                      ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }

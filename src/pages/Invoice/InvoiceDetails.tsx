@@ -39,6 +39,7 @@ import Invoice from './Invoice';
 import ManageInvoiceDialog from './ManageInvoiceDialog';
 import Material from './Material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -87,21 +88,6 @@ const InvoiceDetails = () => {
       fetchInvoiceData();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 2) {
-      updateProcessStatus(invoiceProcessStepsNames[currentStep]);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${invoice.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => { })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
 
   const fetchFields = async () => {
     try {
@@ -331,6 +317,9 @@ const InvoiceDetails = () => {
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.invoice, invoiceProcessStepsNames[step], id);
+                  }}
                 />
                 <ContentFullScreen title={invoiceProcessStepsNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {currentStep === 0 && invoiceData && (

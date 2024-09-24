@@ -40,6 +40,7 @@ import Submit from './Submit';
 import Material from './material';
 import { useGetWalkmeInstance } from 'src/components/CustomIntro';
 import { generateAddExistingService } from './walkmeSteps';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const FieldTicketDetail = () => {
   const walkmeInstance = useGetWalkmeInstance();
@@ -178,19 +179,6 @@ const FieldTicketDetail = () => {
     setTabValue(newValue);
   };
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0) {
-      updateProcessStatus(fieldTicketSteps[currentStep]?.name);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = async (processStatus) => {
-    if (!isOffline) {
-      axiosInstance().put(`${fieldTicket.api}/${id}/process-status`, { processStatus: processStatus }).then(({ data }) => { })
-        .catch((error) => { toastConfig.setToastConfig(error); });
-    }
-  };
-
   const handleChangeStatus = async (status) => {
     await axiosInstance()
       .patch(`${fieldTicket.api}/status/${fieldTicketData._id}`, { status })
@@ -294,6 +282,11 @@ const FieldTicketDetail = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={[FIELD_TICKET_STATUS.invoiced, FIELD_TICKET_STATUS.closed].includes(fieldTicketData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
+            updateStatus={(step: number) => {
+              if (!isOffline) {
+                dynamicFormUpdateProcessStatus(sidebarResource.fieldTicket, fieldTicketSteps[step]?.name, id);
+              }
+            }}
           />
           <ContentFullScreen title={fieldTicketSteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && fieldTicketData && (
