@@ -32,7 +32,7 @@ const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
   useEffect(() => {
     const newFavourites = [];
     allData.forEach((item) => {
-      if (favorites?.[item.resourceId]) {
+      if (favorites?.[item.name]) {
         newFavourites.push(item);
       }
     });

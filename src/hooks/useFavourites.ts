@@ -24,11 +24,11 @@ const useFavorites = () => {
 
   const handleSetFavourite = useCallback(
     async (item: Item) => {
-      setFavourites({ [USER_FAVOURITES]: { ...favorites, [item.resourceId]: !favorites[item.resourceId] } });
+      setFavourites({ [USER_FAVOURITES]: { ...favorites, [item.name]: !favorites[item.name] } });
       try {
         await axiosInstance().put('/user/user-favourite-resources', {
-          resource: item.resourceId,
-          setFavourite: !favorites[item.resourceId]
+          resource: item.name,
+          setFavourite: !favorites[item.name]
         });
         handleGetFavourites();
       } catch (error) {
