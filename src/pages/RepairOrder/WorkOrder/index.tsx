@@ -44,7 +44,14 @@ import {
 import UpdateWorkOrderDialog from './UpdateWorkOrderDialog';
 import AssetDetailsChangeDialog from 'src/pages/RentalManagement/ReceivingTicket/AssetDetailsChangeDialog';
 import DiagramDialog from 'src/pages/WorkOrder/Diagram/DiagramDialog';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { generateAutoCompleteSteps, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 const alphabet = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z'];
+
+const dataAdded = {
+  nextButtonAdded: false,
+  autoCompleteDataAdded: false
+};
 
 const WorkOrder = ({
   fetchRepairOrderData,
@@ -55,10 +62,13 @@ const WorkOrder = ({
   isPostWorkService,
   setCurrentStep,
   createNewVersionQuote,
+  currentStepName = 'Work Order',
   resourcePolicy
 }) => {
   const renderedFrom = 'repair_order_workorder';
   const toastConfig = useContext(CustomToastContext);
+  const walkmeInstance = useGetWalkmeInstance();
+  const { setWalkmeData } = useSetWalkmeData();
 
   const {
     state: { user, permissions }
@@ -105,6 +115,41 @@ const WorkOrder = ({
         toastConfig.setToastConfig(error);
       });
   }, []);
+
+  // useEffect(() => {
+  //   setWalkmeData([]);
+  // }, []);
+
+  const handleAddWalkmeData = (rows: any[]) => {
+    if (!rows || !rows.length) return;
+    if (currentStepName === 'Work Order') {
+      if (walkmeInstance && walkmeInstance.type === 'flow' && !dataAdded.nextButtonAdded) {
+        dataAdded.nextButtonAdded = true;
+        const newSteps = [nextButtonStep(true)];
+        walkmeInstance.instance.push(newSteps);
+        walkmeInstance.handleNext();
+      } else {
+        setWalkmeData([]);
+      }
+    } else {
+      if (
+        rows[0]?.type === MATERIAL_TYPE.serializedAsset &&
+        walkmeInstance &&
+        walkmeInstance.type === 'flow' &&
+        rows[0]?.canAutoCompleteWorkOrder &&
+        !dataAdded.autoCompleteDataAdded
+      ) {
+        dataAdded.autoCompleteDataAdded = true;
+        const steps = generateAutoCompleteSteps(false, renderedFrom).steps;
+        const newSteps = [...steps, nextButtonStep(true)];
+        walkmeInstance.instance.push(newSteps);
+        walkmeInstance.handleNext();
+      }
+      if (rows[0]?.type === MATERIAL_TYPE.serializedAsset && rows[0]?.canAutoCompleteWorkOrder) {
+        setWalkmeData([generateAutoCompleteSteps(false, renderedFrom)]);
+      }
+    }
+  };
 
   useEffect(() => {
     fetchFields();
@@ -681,6 +726,7 @@ const WorkOrder = ({
         }
       }
     }
+    handleAddWalkmeData(rows);
     dispatch({ type: 'initialize', data: rows, count: rows?.length });
     dispatch({ type: 'loading', loading: false });
   };
@@ -1074,6 +1120,7 @@ const WorkOrder = ({
             onClick={() => {
               setAddServicesDialog({ open: true, new: false });
             }}
+            id="add-existing-services"
           >
             Add Existing Services
           </MenuItem>
@@ -1084,6 +1131,7 @@ const WorkOrder = ({
             onClick={() => {
               setAddServicesDialog({ open: true, new: true });
             }}
+            id="add-new-services"
           >
             Add New Service
           </MenuItem>
@@ -1096,6 +1144,7 @@ const WorkOrder = ({
             onClick={() => {
               setUserAssignDialog(true);
             }}
+            id="assign-technician"
           >
             Assign Technician
           </MenuItem>
@@ -1108,6 +1157,7 @@ const WorkOrder = ({
             onClick={() => {
               setWorkStationAssignDialog(true);
             }}
+            id="assign-workstation"
           >
             Assign Work Station
           </MenuItem>
@@ -1134,6 +1184,7 @@ const WorkOrder = ({
               }
               setConsumablesDialog({ open: true, ids: ids, data: null });
             }}
+            id="add-consumables"
           >
             Add Products/Consumables
           </MenuItem>
@@ -1148,6 +1199,7 @@ const WorkOrder = ({
             disabled={
               selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service)?.length && !isWorkOrderCompleted(selectedRecords) ? false : true
             }
+            id="arrange-services"
           >
             Arrange Services
           </MenuItem>
@@ -1164,6 +1216,7 @@ const WorkOrder = ({
                 ? false
                 : true
             }
+            id="auto-complete-work-order"
           >
             Auto Complete Work Order(s)
           </MenuItem>
@@ -1172,6 +1225,7 @@ const WorkOrder = ({
           onClick={() => {
             setShowDrawingDialog({ open: true, workOrder: selectedRecords[0]?.workOrder?._id });
           }}
+          id="upload-drawing"
         >
           Upload Drawing
         </MenuItem>
@@ -1181,6 +1235,7 @@ const WorkOrder = ({
               setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.completed });
             }}
             disabled={isDisabledCompleteService()}
+            id="complete-service"
           >
             Complete Service
           </MenuItem>
@@ -1191,6 +1246,7 @@ const WorkOrder = ({
               setShowServiceActionConfirmBox({ open: true, action: WORKORDER_SERVICE_STATUS.skipped });
             }}
             disabled={isDisabledCompleteService()}
+            id="skip-service"
           >
             Skip Service
           </MenuItem>
@@ -1207,6 +1263,7 @@ const WorkOrder = ({
             onClick={() => {
               setShowServiceActionConfirmBox({ open: true, action: 'Revert' });
             }}
+            id="revert-service"
           >
             Revert Service
           </MenuItem>
@@ -1217,6 +1274,7 @@ const WorkOrder = ({
               onClick={() => {
                 setShowCloseReopenConfirmation({ open: true, type: 'Close' });
               }}
+              id="close-work-order"
             >
               Close Work Order(s)
             </MenuItem>
@@ -1227,6 +1285,7 @@ const WorkOrder = ({
               onClick={() => {
                 setShowCloseReopenConfirmation({ open: true, type: 'Re-Open' });
               }}
+              id="reopen-work-order"
             >
               Re-Open Work Order(s)
             </MenuItem>
@@ -1242,6 +1301,7 @@ const WorkOrder = ({
           disabled={
             selectedRecords.filter((e) => e.type === MATERIAL_TYPE.service).length > 0 && !isWorkOrderCompleted(selectedRecords) ? false : true
           }
+          id="bulk-edit"
         >
           Bulk Edit
         </MenuItem>
@@ -1251,6 +1311,7 @@ const WorkOrder = ({
             setShowConfirmBox(true);
           }}
           disabled={selectedRecords?.some((e) => e?.canDelete) ? false : true}
+          id="delete"
         >
           Delete
         </MenuItem>

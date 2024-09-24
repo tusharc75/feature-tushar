@@ -310,6 +310,7 @@ const LoadingTicket = ({ repairOrderData, setNextStep, renderedFrom, allowedToEd
                 disabled={selectedRecords.length === 0}
                 endIcon={<ExpandMore />}
                 className="new-dropdown-v1"
+                id={'details-page-action-button'}
               >
                 Actions
               </Button>

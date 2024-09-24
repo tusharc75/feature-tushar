@@ -26,6 +26,10 @@ import RepairOrderQtyDialog from './RepairOrderQtyDialog';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { generateAddExistingSerializedAsset, nextButtonStep } from 'src/pages/RepairOrder/walkmeSteps';
 
+const dataAdded = {
+  nextButtonAdded: false
+};
+
 const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, renderedFrom, stepFullScreen, allowedToEdit, setHasAssetsAdded }) => {
   const { setWalkmeData } = useSetWalkmeData();
   const walkmeInstance = useGetWalkmeInstance();
@@ -81,12 +85,13 @@ const Productpackage = ({ fetchRepairOrderData, repairOrderData, setNextStep, re
 
   const addWalkmeData = (rows: any[]) => {
     // Adding Step Data
-    if (!rows.length) return;
-    let stepData = [nextButtonStep(), nextButtonStep(), nextButtonStep()];
+    if (!rows.length || dataAdded.nextButtonAdded) return;
+    const stepData = [nextButtonStep(true)];
     if (walkmeInstance && walkmeInstance.type === 'flow') {
       walkmeInstance.instance.push(stepData);
       walkmeInstance.handleNext();
     }
+    dataAdded.nextButtonAdded = true;
   };
 
   const fetchFields = async () => {
