@@ -28,7 +28,7 @@ import DeleteIcon from '@material-ui/icons/Delete';
 import { FiExternalLink } from 'react-icons/fi';
 import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
 import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
-import { generateAddExistingProduct, generateAddExistingService, generateAddManualEntry, generateEditManualEntry, generateEditProduct, generateEditService } from '../walkmeSteps';
+import { generateAddExistingProduct, generateAddExistingService, generateAddManualEntry, generateEditManualEntry, generateEditProduct, generateEditService, generateDeleteStep } from '../walkmeSteps';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -87,12 +87,21 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
       const productIndex = dataRows.findIndex((d) => d.type === 'Product');
       if (serviceIndex !== -1) {
         stepData.push(generateEditService(false, serviceIndex));
+        if (!dataRows[serviceIndex]['actualReceived']) {
+          stepData.push(generateDeleteStep(false, serviceIndex, camelCase(dataRows[serviceIndex]?.type)));
+        }
       }
       if (manualEntryIndex !== -1) {
         stepData.push(generateEditManualEntry(false, manualEntryIndex));
+        if (!dataRows[manualEntryIndex]['actualReceived']) {
+          stepData.push(generateDeleteStep(false, manualEntryIndex, camelCase(dataRows[manualEntryIndex]?.type)));
+        }
       }
       if (productIndex !== -1) {
         stepData.push(generateEditProduct(false, productIndex));
+        if (!dataRows[productIndex]['actualReceived']) {
+          stepData.push(generateDeleteStep(false, productIndex, camelCase(dataRows[productIndex]?.type)));
+        }
       }
       if (walkmeInstance && walkmeInstance.type === 'flow' && !isStepDataSet.current) {
         isStepDataSet.current = true;
@@ -266,6 +275,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                     setShowDeleteConfirmBox(true);
                     setDeletePurchaseOrderItem([row.original]);
                   }}
+                  id={`delete-${camelCase(row?.original?.type)}-button-${row.index || 0}`}
                 >
                   <DeleteIcon color="error" fontSize="small" />
                 </IconButton>

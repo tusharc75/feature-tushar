@@ -1,4 +1,4 @@
-import { camelCase } from 'lodash';
+import { camelCase, startCase } from 'lodash';
 import { WalkmeData } from 'src/components/CustomIntro';
 import routes from 'src/components/Helpers/Routes';
 
@@ -276,6 +276,27 @@ export const generateRejectProduct = (addStorageLocation = false, index: number 
         target: '#dialog-submit-button',
         title: 'Submit',
         waitForStepInsertion: false
+      }
+    ]
+  };
+  return data;
+};
+
+export const generateDeleteStep = (waitForStepInsertion: boolean = false, index: number = 0, type: string): WalkmeData => {
+
+  const data: WalkmeData = {
+    name: `Delete ${startCase(type)}`,
+    url: '/purchase-order/detail/:id',
+    steps: [
+      {
+        target: `#delete-${type}-button-${index}`,
+        title: `Delete ${startCase(type)}`,
+        willOpenDialog: true,
+      },
+      {
+        target: '#confirmation-dialog-confirm-button',
+        title: 'Confirm',
+        waitForStepInsertion: waitForStepInsertion
       }
     ]
   };
