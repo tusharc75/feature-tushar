@@ -1101,6 +1101,13 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
       }
     } else if (key.type === 'lookUpDisplay') {
     } else if (key.type === 'description') {
+    } else if (key.type === 'location') {
+      const values =
+        dataObj[key.fieldName] ? typeof dataObj[key.fieldName] === 'string'
+          ? { locationName: dataObj[key.fieldName] }
+          : dataObj[key.fieldName]
+          : {};
+      obj[key.fieldName] = values;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
     }
@@ -1428,7 +1435,7 @@ export const yupSchema = (fields: any[], validEmail = true) => {
     } else if (input.type === 'location') {
       schema[input.fieldName] = input.required ? object().required(`${input.fieldLabel} is required`) : object();
     }
-     else {
+    else {
       schema[input.fieldName] = input.required
         ? validationFields?.length && validation
           ? string().when(
