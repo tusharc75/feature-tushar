@@ -7,5 +7,17 @@ import { useScrollDirection } from './useScroll';
 import useCollapse from './useCollapse';
 import useDndSensors from './useDndSensors';
 import { useScrollController } from './useScrollController';
+import useFavorites from 'src/hooks/useFavourites';
 
-export { useClickdOutside, useDebounce, useKeyPress, usePathname, useQuery, useScrollDirection, useCollapse, useDndSensors, useScrollController };
+export {
+  useClickdOutside,
+  useDebounce,
+  useKeyPress,
+  usePathname,
+  useQuery,
+  useScrollDirection,
+  useCollapse,
+  useDndSensors,
+  useScrollController,
+  useFavorites
+};

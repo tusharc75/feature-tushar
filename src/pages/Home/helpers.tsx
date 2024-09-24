@@ -12,6 +12,7 @@ import {
   ServiceManagementIcon,
   ServiceOperationManagementIcon
 } from 'src/assets/sidebar_assets/icons';
+import { isSectionVisible } from 'src/components/Sidebar/utils';
 
 import { AiOutlineDatabase } from 'react-icons/ai';
 import { BiCart, BiCog } from 'react-icons/bi';
@@ -21,6 +22,7 @@ import { MdOutlineDynamicForm, MdOutlineEventAvailable } from 'react-icons/md';
 import { RiShieldUserLine } from 'react-icons/ri';
 import { SiCivicrm } from 'react-icons/si';
 import { DynamicIcon } from 'src/assets/IconGenerator';
+import { ItemData } from 'src/pages/Home/types';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
 export const groupByKey = (arr = [], keyGetter) => {
@@ -278,3 +280,23 @@ export const getColors = (index: number) => {
   const colorAccessor = index % colourCodes.length;
   return colourCodes[colorAccessor];
 };
+
+export function getAllData(user, selectedEntity): ItemData[] {
+  let allData = [];
+
+  let entityData;
+  if (user?.entity && user.entity.length) {
+    entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
+  }
+  if (entityData?.resource) {
+    allData = entityData.resource;
+  }
+
+  allData = allData?.filter((e) => isSectionVisible(e));
+  allData?.forEach((u) => {
+    u['resourceLabel'] = u?.homePageLabel || u?.resourceLabel || u?.name;
+    u['sectionNameLowerCase'] = u.sectionName?.toLowerCase();
+    u['resourceLabelLowerCase'] = u?.homePageLabel?.toLowerCase() || u?.resourceLabel?.toLowerCase() || u?.name?.toLowerCase();
+  });
+  return allData;
+}

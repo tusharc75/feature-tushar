@@ -344,20 +344,30 @@ const Services = ({
           nextStepMessage = rentalManagementMessage.addServiceInPackage;
         }
       });
-      if (rows.filter((_rows) => _rows.isValid === false).length > 0 || rows.length === 0) {
-        if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
-          if (flattenArray(rows)?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
-            nextStepMessage = rentalManagementMessage.validServicePrice;
+
+      if (rows?.length) {
+        if (rows.filter((_rows) => _rows.isValid === false).length > 0) {
+          if (!nextStepMessage && rentalPolicyData?.servicePriceRequired) {
+            if (flattenArray(rows)?.find((e) => e.type === MATERIAL_TYPE.service && !e?.isValid)) {
+              nextStepMessage = rentalManagementMessage.validServicePrice;
+            }
           }
+          setNextStep(false);
+          setNextStepToolTip(nextStepMessage);
+        } else {
+          setNextStep(true);
+          setNextStepToolTip(null);
         }
-        setNextStep(false);
-        setNextStepToolTip(nextStepMessage);
-      } else {
-        setNextStep(true);
-        setNextStepToolTip(null);
       }
-      if (rows?.length === 0) {
-        setNextStep(true);
+      else {
+        if (rows.filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))?.length) {
+          setNextStep(true);
+          setNextStepToolTip(null);
+        }
+        else {
+          setNextStep(false);
+          setNextStepToolTip(rentalManagementMessage.addServicePackage);
+        }
       }
       dispatch({ type: 'initialize', data: rows, count: rows?.length });
       dispatch({ type: 'loading', loading: false });

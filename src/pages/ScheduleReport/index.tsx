@@ -98,11 +98,11 @@ const ScheduleReport = () => {
         Cell: ({ row }) => (row?.original?.day ? <p className="text-truncate">{row.original.day}</p> : <NoDataCell />)
       },
       {
-        accessor: 'actions',
-        Header: 'Actions',
+        accessor: 'reportAction',
+        Header: 'Report Action',
         width: 150,
         sticky: isMobile ? 'none' : 'left',
-        Cell: ({ row }) =>( row?.original?.actions ? <p className="text-truncate">{row.original.actions}</p> : <NoDataCell />)
+        Cell: ({ row }) =>( row?.original?.reportAction ? <p className="text-truncate">{row.original.reportAction}</p> : <p className="text-truncate">{'Email'}</p>)
       },
       {
         accessor: 'time',
