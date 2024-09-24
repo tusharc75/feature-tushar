@@ -1,8 +1,8 @@
 import { Box, IconButton, MenuItem } from '@material-ui/core';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
-import { isEmpty, map, uniq } from 'lodash';
-import { Fragment, useContext, useEffect, useState } from 'react';
+import { camelCase, isEmpty, map, uniq } from 'lodash';
+import { Fragment, useContext, useEffect, useState, useRef } from 'react';
 import { isMobile, isTablet } from 'react-device-detect';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { useData } from 'src/StateProvider/Provider';
@@ -26,9 +26,14 @@ import { fetchTaxRate } from './helper';
 import { fetch_child_resource_fields } from 'src/components/ChildResourceField';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { FiExternalLink } from 'react-icons/fi';
+import { useGetWalkmeInstance, useSetWalkmeData } from 'src/components/CustomIntro';
+import { nextButtonStep } from 'src/pages/RentalManagement/walkmeSteps';
+import { generateAddExistingProduct, generateAddExistingService, generateAddManualEntry, generateEditManualEntry, generateEditProduct, generateEditService } from '../walkmeSteps';
 
 const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: hasPermission, checkReceivedProduct }) => {
   const toastConfig = useContext(CustomToastContext);
+  const { setWalkmeData } = useSetWalkmeData();
+  const walkmeInstance = useGetWalkmeInstance();
   const {
     state: { user, permissions }
   }: any = useData();
@@ -54,7 +59,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   const [deletePurchaseOrderItem, setDeletePurchaseOrderItem] = useState([]);
   const [material, setMaterial] = useState([]);
   const [isSubmitting, setSubmitting] = useState(false);
-
+  const isStepDataSet = useRef(false);
   const { state, dispatch } = useTableReducer({ renderedFrom });
   const { dataRows, selectedRecords } = state;
   const { generateColumns } = useColumns();
@@ -66,6 +71,46 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
   useEffect(() => {
     fetchData();
   }, [columns]);
+
+  useEffect(() => {
+    let stepData = [];
+    if (permissions?.product?.isRead) {
+      stepData.push(generateAddExistingProduct());
+    }
+    if (permissions?.serviceMaster?.isRead && user?.user?.brandPolicy?.purchaseOrderAddService) {
+      stepData.push(generateAddExistingService());
+    }
+    stepData.push(generateAddManualEntry());
+    if (dataRows?.length) {
+      const serviceIndex = dataRows.findIndex((d) => d.type === 'Service');
+      const manualEntryIndex = dataRows.findIndex((d) => d.type === 'Manual Entry');
+      const productIndex = dataRows.findIndex((d) => d.type === 'Product');
+      if (serviceIndex !== -1) {
+        stepData.push(generateEditService(false, serviceIndex));
+      }
+      if (manualEntryIndex !== -1) {
+        stepData.push(generateEditManualEntry(false, manualEntryIndex));
+      }
+      if (productIndex !== -1) {
+        stepData.push(generateEditProduct(false, productIndex));
+      }
+      if (walkmeInstance && walkmeInstance.type === 'flow' && !isStepDataSet.current) {
+        isStepDataSet.current = true;
+        let steps = [];
+        if (serviceIndex !== -1 && !dataRows[serviceIndex]?.isValid) {
+          steps = generateEditService(false, serviceIndex).steps;
+        } else if (manualEntryIndex !== -1 && !dataRows[serviceIndex]?.isValid) {
+          steps = generateEditManualEntry(false, manualEntryIndex).steps;
+        } else if (productIndex !== -1 && !dataRows[productIndex]?.isValid) {
+          steps = generateEditProduct(false, productIndex).steps;
+        }
+        steps.push({ ...nextButtonStep, waitForStepInsertion: true });
+        walkmeInstance.instance.push(steps);
+        walkmeInstance.handleNext();
+      }
+    }
+    setWalkmeData(stepData);
+  }, [dataRows]);
 
   const fetchFields = async () => {
     let columns: any = [];
@@ -188,6 +233,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
                 onClick={() => {
                   openMaterial(row.original, table.getRowModel().rows);
                 }}
+                id={`edit-${camelCase(row?.original?.type)}-button-${row.index || 0}`}
               >
                 <EditIcon color="primary" fontSize="small" />
               </IconButton>
@@ -564,6 +610,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             onClick={() => {
               setAddProductDialog(true);
             }}
+            id={'add-existing-product-menu-item'}
           >
             Add Existing Products
           </MenuItem>
@@ -573,6 +620,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
             onClick={() => {
               setAddServiceDialog(true);
             }}
+            id={'add-existing-service-menu-item'}
           >
             Add Existing Services
           </MenuItem>
@@ -581,6 +629,7 @@ const Product = ({ purchaseOrderData, setNextStep, renderedFrom, allowedToEdit: 
           onClick={() => {
             setShowCostDialog({ open: true, data: null, showSaveAndNext: false });
           }}
+          id={'add-manual-entry-menu-item'}
         >
           Add Manual Entry
         </MenuItem>

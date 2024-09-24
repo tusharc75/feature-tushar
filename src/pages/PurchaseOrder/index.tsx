@@ -31,6 +31,8 @@ import { cloneDisable, deleteDisable } from 'src/constants/messageHelpers';
 import ManagePurchaseOrder from './ManagePurchaseOrder';
 import NoDataCell from 'src/components/Helpers/NoDataCell';
 import axios, { CancelTokenSource } from 'axios';
+import { useSetWalkmeData } from 'src/components/CustomIntro';
+import { createPurchaseOrderFlow } from './walkmeSteps';
 
 const PurchaseOrder = () => {
   const PurchaseOrderType = [
@@ -61,11 +63,13 @@ const PurchaseOrder = () => {
   const [fromSalesOrder, setFromSalesOrder] = useState(history.location?.state?.salesOrder);
   const [warehouseOptions, setWarehouseOptions] = useState([]);
   const [warehouse, setWarehouse] = useState(null);
+  const { setWalkmeData } = useSetWalkmeData();
 
   const { generateColumns } = useColumns();
 
   useEffect(() => {
     fetchGridColumns();
+    setWalkmeData([createPurchaseOrderFlow()]);
   }, []);
 
   useEffect(() => {

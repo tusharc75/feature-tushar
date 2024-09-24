@@ -37,8 +37,11 @@ import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import { generateAddManualEntry } from 'src/pages/PurchaseOrder/walkmeSteps';
 
 const PurchaseOrderDetailsPage = () => {
+  const walkmeInstance = useGetWalkmeInstance();
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
   const toastConfig = useContext(CustomToastContext);
   const { id } = useParams();
@@ -81,6 +84,11 @@ const PurchaseOrderDetailsPage = () => {
       getPurchaseOrderFields();
       fetchPurchaseOrderData();
       fetchPolicy();
+    }
+    if (walkmeInstance && walkmeInstance.type === 'flow') {
+      walkmeInstance.instance.push(generateAddManualEntry(true).steps);
+      // immediately start next step
+      walkmeInstance.handleNext();
     }
   }, [id]);
 
