@@ -433,7 +433,7 @@ const FormTypes = (props) => {
     return () => {
       active = false;
     };
-  }, [type, values[name]['locationName'], fetch]);
+  }, [type, values[name], fetch]);
 
   const fetchPlaceDetails = (placeId) => {
     return new Promise((resolve, reject) => {
