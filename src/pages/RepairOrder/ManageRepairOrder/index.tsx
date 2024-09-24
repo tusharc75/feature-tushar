@@ -1,34 +1,35 @@
-import { useState, useEffect, useContext } from 'react';
-import { Formik, Form } from 'formik';
 import { Box, Button, Grid } from '@material-ui/core';
-import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
-import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
-import FormTypes from '../../../components/Helpers/FormTypes';
-import CustomButton from '../../../components/Helpers/CustomButton';
+import Dialog from '@material-ui/core/Dialog';
+import { Form, Formik } from 'formik';
+import { isEqual } from 'lodash';
+import moment from 'moment';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { isMobile, isTablet } from 'react-device-detect';
+import { FaDiceOne } from 'react-icons/fa';
+import { useHistory } from 'react-router-dom';
+import { useGetWalkmeInstance } from 'src/components/CustomIntro';
+import axiosInstance from '../../../axios/axiosInstance';
+import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
 import CustomDialogContent from '../../../components/CustomDialog/CustomDialogContent';
 import CustomDialogFooter from '../../../components/CustomDialog/CustomDialogFooter';
-import { useData } from '../../../StateProvider/Provider';
-import { isMobile, isTablet } from 'react-device-detect';
+import CustomDialogHeader from '../../../components/CustomDialog/CustomDialogHeader';
+import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
+import CustomButton from '../../../components/Helpers/CustomButton';
+import FormTypes from '../../../components/Helpers/FormTypes';
+import routes from '../../../components/Helpers/Routes';
 import {
   CustomDialogTransition,
+  GenerateResourceLineNumber,
   getObjKeys,
   getObjKeysWithValues,
-  setFieldsInAscendingOrder,
-  yupSchema,
-  repairOrder,
   REPAIR_ORDER_TYPE,
-  GenerateResourceLineNumber,
-  sidebarResource
+  repairOrder,
+  setFieldsInAscendingOrder,
+  sidebarResource,
+  yupSchema
 } from '../../../constants/helpers';
-import axiosInstance from '../../../axios/axiosInstance';
-import Dialog from '@material-ui/core/Dialog';
-import ConfirmCancelDialog from '../../../components/ConfirmCancelDialog';
-import { useHistory } from 'react-router-dom';
-import routes from '../../../components/Helpers/Routes';
-import { FaDiceOne } from 'react-icons/fa';
-import moment from 'moment';
-import CommonSkeleton from '../../../components/Helpers/CommonSkeleton';
-import { isEqual } from 'lodash';
+import { CustomToastContext } from '../../../StateProvider/CustomToastContext/CustomToastContext';
+import { useData } from '../../../StateProvider/Provider';
 
 const ManageRepairOrder = ({
   isClone = false,
@@ -40,9 +41,10 @@ const ManageRepairOrder = ({
   isEditable = true,
   isAnyMaterial = false
 }) => {
+  const walkmeInstance = useGetWalkmeInstance();
   const history = useHistory();
   const toastConfig = useContext(CustomToastContext);
-
+  const isStepPushed = useRef(false);
   const [loading, setLoading] = useState(false);
   const [initialData, setInitialData] = useState({ fields: [], values: {} });
   const [formsData, setFormsData] = useState([]);
@@ -98,7 +100,7 @@ const ManageRepairOrder = ({
                 if (['customerAccount', 'warehouse']?.includes(e.fieldName)) {
                   e.disableOnEdit = true;
                 }
-              })
+              });
             }
             setInitialData({
               fields: fieldsDataForUpdate,
@@ -218,6 +220,38 @@ const ManageRepairOrder = ({
     return errors;
   }
 
+  const isCustomerAccountPresent = useMemo(() => {
+    const index = initialData.fields?.findIndex((d) => d['fieldName'] === 'customerAccount');
+    if (index > -1) {
+      return { data: initialData.fields[index], index };
+    }
+    return false;
+  }, [initialData]);
+
+  const handlePushCustomerAccountStep = (values) => {
+    if (
+      (values?.type === REPAIR_ORDER_TYPE.external || values?.addQuotationStep) &&
+      isCustomerAccountPresent &&
+      walkmeInstance &&
+      !isStepPushed.current
+    ) {
+      isStepPushed.current = true;
+      walkmeInstance?.instance.insert(
+        [
+          {
+            title: `Select ${isCustomerAccountPresent.data?.fieldLabel}`,
+            target: `#field-${isCustomerAccountPresent.data?.fieldLabel?.toLowerCase()?.split(' ').join('-')}`,
+            content: '',
+            nextOnValueChange: true,
+            skipIfValueExist: true,
+            fieldType: isCustomerAccountPresent.data?.type
+          }
+        ],
+        isCustomerAccountPresent.index
+      );
+    }
+  };
+
   return (
     <Dialog
       maxWidth="md"
@@ -233,207 +267,222 @@ const ManageRepairOrder = ({
       open={true}
     >
       {formsData && formsData?.length ? (
-        <Formik initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validate={validate} validateOnMount onSubmit={handleSubmit}>
-          {({ values, errors, touched, setFieldValue, handleSubmit }) => (
-            <>
-              <CustomDialogHeader
-                title={
-                  !repairOrderId
-                    ? `Create ${routes.repairOrder.title}`
-                    : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber || ''}`}`
-                }
-                onClose={(e, reason) => {
-                  if (isEqual(initialData.values, values)) onClose();
-                  else setShowConfirmDialog(true);
-                }}
-                isMinimized={!fullScreen}
-                onMinimizeMaximize={() => {
-                  setFullScreen((prevState) => !prevState);
-                }}
-                showManimizeMaximize={true}
-              />
-              <CustomDialogContent>
-                <Form>
-                  {formsData &&
-                    formsData.map((form, i) => {
-                      return (
-                        form.name && (
-                          <div key={i}>
-                            <div className={'detail-box-content'}>
-                              <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
-                              <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
-                            </div>
-                            <Box marginY={2}>
-                              <Grid spacing={3} container>
-                                {form.sectionFields.map((field) => (
-                                  <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
-                                    {field.fieldName === 'startDate' ? (
-                                      <FormTypes
-                                        repairOrderId={repairOrderId}
-                                        {...field}
-                                        disabled={repairOrderId && field.disableOnEdit}
-                                        values={values}
-                                        fieldData={field}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={new Date()}
-                                        maxDate={
-                                          values['expectedCompletionDate'] ? moment(values['expectedCompletionDate']) : moment().add(5, 'years')
-                                        }
-                                      />
-                                    ) : field.fieldName === 'expectedCompletionDate' ? (
-                                      <FormTypes
-                                        repairOrderId={repairOrderId}
-                                        {...field}
-                                        disabled={repairOrderId && field.disableOnEdit}
-                                        values={values}
-                                        fieldData={field}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        minDate={values['startDate']}
-                                      />
-                                    ) : field.fieldName === 'type' ? (
-                                      <FormTypes
-                                        repairOrderId={repairOrderId}
-                                        {...field}
-                                        fieldData={field}
-                                        disabled={(repairOrderId && field.disableOnEdit) || !isEditable}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        onChange={(e, value) => {
-                                          setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
-                                          if (
-                                            initialData.fields.find((d) => d.fieldName === 'customerContact') &&
-                                            initialData.fields.find((d) => d.fieldName === 'customerAccount')
-                                          ) {
-                                            setFieldValue('customerContact', '');
-                                            setFieldValue('customerAccount', '');
-                                          } else if (initialData.fields.find((d) => d.fieldName === 'customerAccount')) {
-                                            setFieldValue('customerAccount', '');
-                                          } else if (initialData.fields.find((d) => d.fieldName === 'customerContact')) {
-                                            setFieldValue('customerContact', '');
-                                          }
-                                        }}
-                                        required={field.required}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                      />
-                                    ) : (
-                                      <FormTypes
-                                        {...field}
-                                        fieldData={field}
-                                        fields={initialData?.fields}
-                                        disabled={(Boolean(repairOrderId) && field.disableOnEdit && !isClone) || field.isUneditable}
-                                        values={values}
-                                        errors={errors}
-                                        touched={touched}
-                                        required={field?.fieldName === 'customerAccount' ?
-                                          values?.type === REPAIR_ORDER_TYPE.external
-                                            || values?.addQuotationStep ? true : false : field.required}
-                                        label={field.fieldLabel}
-                                        name={field.fieldName}
-                                        type={field.type}
-                                        options={field.option}
-                                        setFieldValue={(name, value) => {
-                                          setFieldValue(name, value);
-                                        }}
-                                        fullWidth
-                                        isTooltip={field?.isTooltip || false}
-                                        tooltipMessage={field?.tooltipMessage}
-                                        size="small"
-                                        imageOrFileUploadCompletePercentage={
-                                          ['imageUpload', 'fileUpload'].some((s) => s === field.type)
-                                            ? (completePercentage) => {
-                                              setUploadingImageOrFileProgress(completePercentage);
-                                            }
-                                            : null
-                                        }
-                                      />
-                                    )}
-                                  </Grid>
-                                ))}
-                              </Grid>
-                            </Box>
-                          </div>
-                        )
-                      );
-                    })}
-                </Form>
-              </CustomDialogContent>
-              <CustomDialogFooter>
-                <Button
-                  type="button"
-                  variant="outlined"
-                  color="primary"
-                  size="small"
-                  onClick={() => {
+        <Formik
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validate={validate}
+          validateOnMount
+          onSubmit={handleSubmit}
+        >
+          {({ values, errors, touched, setFieldValue, handleSubmit }) => {
+            handlePushCustomerAccountStep(values);
+            return (
+              <>
+                <CustomDialogHeader
+                  title={
+                    !repairOrderId
+                      ? `Create ${routes.repairOrder.title}`
+                      : `${isClone ? `Clone - ${cloneHeading}` : `Update ${repairOrderData?.repairOrderNumber || ''}`}`
+                  }
+                  onClose={(e, reason) => {
                     if (isEqual(initialData.values, values)) onClose();
                     else setShowConfirmDialog(true);
                   }}
-                >
-                  Cancel
-                </Button>
-                <CustomButton
-                  loading={loading}
-                  variant="contained"
-                  color="primary"
-                  disabled={uploadingImageOrFileProgress > 0 || loading}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleScroll(errors);
-                    handleSubmit();
+                  isMinimized={!fullScreen}
+                  onMinimizeMaximize={() => {
+                    setFullScreen((prevState) => !prevState);
                   }}
-                >
-                  Save
-                </CustomButton>
-              </CustomDialogFooter>
-              {showConfirmDialog && (
-                <ConfirmCancelDialog
-                  open={showConfirmDialog}
-                  onSave={() => {
-                    setShowConfirmDialog(false);
-                    handleScroll(errors);
-                    handleSubmit();
-                  }}
-                  onClose={() => {
-                    setShowConfirmDialog(false);
-                    onClose();
-                  }}
+                  showManimizeMaximize={true}
                 />
-              )}
-            </>
-          )}
+                <CustomDialogContent>
+                  <Form>
+                    {formsData &&
+                      formsData.map((form, i) => {
+                        return (
+                          form.name && (
+                            <div key={i}>
+                              <div className={'detail-box-content'}>
+                                <FaDiceOne size={16} color={'var(--white)'} style={{ marginRight: '5px' }} />
+                                <h2 className={`${'form-label-style'} ${'form-label-quotes'}`}>{form.name}</h2>
+                              </div>
+                              <Box marginY={2}>
+                                <Grid spacing={3} container>
+                                  {form.sectionFields.map((field) => (
+                                    <Grid key={field.fieldName} item xs={12} sm={6} md={6}>
+                                      {field.fieldName === 'startDate' ? (
+                                        <FormTypes
+                                          repairOrderId={repairOrderId}
+                                          {...field}
+                                          disabled={repairOrderId && field.disableOnEdit}
+                                          values={values}
+                                          fieldData={field}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          minDate={new Date()}
+                                          maxDate={
+                                            values['expectedCompletionDate'] ? moment(values['expectedCompletionDate']) : moment().add(5, 'years')
+                                          }
+                                        />
+                                      ) : field.fieldName === 'expectedCompletionDate' ? (
+                                        <FormTypes
+                                          repairOrderId={repairOrderId}
+                                          {...field}
+                                          disabled={repairOrderId && field.disableOnEdit}
+                                          values={values}
+                                          fieldData={field}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          minDate={values['startDate']}
+                                        />
+                                      ) : field.fieldName === 'type' ? (
+                                        <FormTypes
+                                          repairOrderId={repairOrderId}
+                                          {...field}
+                                          fieldData={field}
+                                          disabled={(repairOrderId && field.disableOnEdit) || !isEditable}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          onChange={(e, value) => {
+                                            setFieldValue(field.fieldName, value && value.optionValue ? value.optionValue : '');
+                                            if (
+                                              initialData.fields.find((d) => d.fieldName === 'customerContact') &&
+                                              initialData.fields.find((d) => d.fieldName === 'customerAccount')
+                                            ) {
+                                              setFieldValue('customerContact', '');
+                                              setFieldValue('customerAccount', '');
+                                            } else if (initialData.fields.find((d) => d.fieldName === 'customerAccount')) {
+                                              setFieldValue('customerAccount', '');
+                                            } else if (initialData.fields.find((d) => d.fieldName === 'customerContact')) {
+                                              setFieldValue('customerContact', '');
+                                            }
+                                          }}
+                                          required={field.required}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                        />
+                                      ) : (
+                                        <FormTypes
+                                          {...field}
+                                          fieldData={field}
+                                          fields={initialData?.fields}
+                                          disabled={(Boolean(repairOrderId) && field.disableOnEdit && !isClone) || field.isUneditable}
+                                          values={values}
+                                          errors={errors}
+                                          touched={touched}
+                                          required={
+                                            field?.fieldName === 'customerAccount'
+                                              ? values?.type === REPAIR_ORDER_TYPE.external || values?.addQuotationStep
+                                                ? true
+                                                : false
+                                              : field.required
+                                          }
+                                          label={field.fieldLabel}
+                                          name={field.fieldName}
+                                          type={field.type}
+                                          options={field.option}
+                                          setFieldValue={(name, value) => {
+                                            setFieldValue(name, value);
+                                          }}
+                                          fullWidth
+                                          isTooltip={field?.isTooltip || false}
+                                          tooltipMessage={field?.tooltipMessage}
+                                          size="small"
+                                          imageOrFileUploadCompletePercentage={
+                                            ['imageUpload', 'fileUpload'].some((s) => s === field.type)
+                                              ? (completePercentage) => {
+                                                  setUploadingImageOrFileProgress(completePercentage);
+                                                }
+                                              : null
+                                          }
+                                        />
+                                      )}
+                                    </Grid>
+                                  ))}
+                                </Grid>
+                              </Box>
+                            </div>
+                          )
+                        );
+                      })}
+                  </Form>
+                </CustomDialogContent>
+                <CustomDialogFooter>
+                  <Button
+                    type="button"
+                    variant="outlined"
+                    color="primary"
+                    size="small"
+                    id="dialog-cancel-button"
+                    onClick={() => {
+                      if (isEqual(initialData.values, values)) onClose();
+                      else setShowConfirmDialog(true);
+                    }}
+                  >
+                    Cancel
+                  </Button>
+                  <CustomButton
+                    loading={loading}
+                    variant="contained"
+                    color="primary"
+                    id="dialog-save-button"
+                    disabled={uploadingImageOrFileProgress > 0 || loading}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleScroll(errors);
+                      handleSubmit();
+                    }}
+                  >
+                    Save
+                  </CustomButton>
+                </CustomDialogFooter>
+                {showConfirmDialog && (
+                  <ConfirmCancelDialog
+                    open={showConfirmDialog}
+                    onSave={() => {
+                      setShowConfirmDialog(false);
+                      handleScroll(errors);
+                      handleSubmit();
+                    }}
+                    onClose={() => {
+                      setShowConfirmDialog(false);
+                      onClose();
+                    }}
+                  />
+                )}
+              </>
+            );
+          }}
         </Formik>
       ) : (
         <Box p={2} height={500}>

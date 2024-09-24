@@ -54,9 +54,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
 
   useEffect(() => {
     setLoading(true);
-    axiosInstance().get(`/field?resource=${sidebarResource.repairJob}`)
+    axiosInstance()
+      .get(`/field?resource=${sidebarResource.repairJob}`)
       .then(({ data: { data } }) => {
-        const hideFields = ['rentalJob', 'actualEndDate', 'workOrder']
+        const hideFields = ['rentalJob', 'actualEndDate', 'workOrder'];
 
         data = data.filter((obj) => !hideFields?.includes(obj?.fieldData?.fieldName));
 
@@ -65,7 +66,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
             const filteredOption = e.fieldData?.option?.filter((obj) => obj?.optionValue === e?.fieldData?.defaultValue) || [];
             e.fieldData.option = filteredOption;
           }
-        })
+        });
 
         const fieldsDataForCreate = data.filter((obj) => obj.isCreate).map((d: any) => d.fieldData);
         const fieldsDataForUpdate = data.filter((obj) => obj.isUpdate).map((d: any) => d.fieldData);
@@ -90,7 +91,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                   .then(({ data: { data: assetData } }) => {
                     if (assetData.length) {
                       fieldsDataForUpdate?.forEach((e) => {
-                        if (['supplierAccount','warehouse']?.includes(e?.fieldName)) {
+                        if (['supplierAccount', 'warehouse']?.includes(e?.fieldName)) {
                           e.disableOnEdit = true;
                           e.isUneditable = true;
                         }
@@ -181,17 +182,17 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       axiosInstance()
         .post(`${repairJob.api}`, rest)
         .then(({ data: { data, message } }) => {
-              if (!referenceType) {
-                history.push(`${routes.repairJobDetail.path}/${data._id}`);
-              }
-              setSubmitting(false);
-              onSuccess(data);
-              toastConfig.setToastConfig({
-                open: true,
-                type: 'success',
-                message: message
-              });
-            })
+          if (!referenceType) {
+            history.push(`${routes.repairJobDetail.path}/${data._id}`);
+          }
+          setSubmitting(false);
+          onSuccess(data);
+          toastConfig.setToastConfig({
+            open: true,
+            type: 'success',
+            message: message
+          });
+        })
         .catch((error) => {
           setSubmitting(false);
           toastConfig.setToastConfig(error);
@@ -221,7 +222,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
     return errors;
   }
 
-
   return (
     <Dialog
       maxWidth="md"
@@ -237,7 +237,13 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       open={true}
     >
       {formsData && formsData?.length ? (
-        <Formik validate={validate} initialValues={initialData.values} validationSchema={yupSchema(initialData.fields)} validateOnMount onSubmit={handleSubmit}>
+        <Formik
+          validate={validate}
+          initialValues={initialData.values}
+          validationSchema={yupSchema(initialData.fields)}
+          validateOnMount
+          onSubmit={handleSubmit}
+        >
           {({ values, errors, touched, setFieldValue, submitForm }) => (
             <>
               <CustomDialogHeader
@@ -321,7 +327,10 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                                       {...field}
                                       values={values}
                                       errors={errors}
-                                      disabled={(Boolean(repairJob) && field.disableOnEdit && !isClone) || (field.fieldName === 'repairJobName' && field?.isSystemGenerate)}
+                                      disabled={
+                                        (Boolean(repairJob) && field.disableOnEdit && !isClone) ||
+                                        (field.fieldName === 'repairJobName' && field?.isSystemGenerate)
+                                      }
                                       fieldData={field}
                                       fields={initialData.fields}
                                       touched={touched}
@@ -340,8 +349,8 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                                       imageOrFileUploadCompletePercentage={
                                         ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                           ? (completePercentage) => {
-                                            setUploadingImageOrFileProgress(completePercentage);
-                                          }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                           : null
                                       }
                                     />
@@ -362,6 +371,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                   type="button"
                   variant="outlined"
                   color="primary"
+                  id="dialog-cancel-button"
                   size="small"
                   onClick={() => {
                     if (isEqual(values, initialData.values)) {
@@ -376,6 +386,7 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 <CustomButton
                   loading={loading}
                   variant="contained"
+                  id="dialog-save-button"
                   color="primary"
                   startIcon={submitting && <CircularProgress size={20} color="inherit" />}
                   disabled={submitting}
