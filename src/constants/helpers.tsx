@@ -1107,7 +1107,6 @@ export const getObjKeysWithValues = (dataObj: object, arr: any[], isClone: boole
           ? { locationName: dataObj[key.fieldName] }
           : dataObj[key.fieldName]
           : {};
-          console.log(values);
       obj[key.fieldName] = values;
     } else {
       obj[key.fieldName] = dataObj[key.fieldName] ? dataObj[key.fieldName] : '';
