@@ -430,7 +430,7 @@ const ManageRentalManagementDialog = ({
                   id="dialog-save-button"
                   variant="contained"
                   color="primary"
-                  disabled={uploadingImageOrFileProgress > 0 || loading}
+                  disabled={uploadingImageOrFileProgress > 0 || loading || isEqual(rentalData.initialValues, values)}
                   onClick={(e) => {
                     e.preventDefault();
                     handleScroll(errors);

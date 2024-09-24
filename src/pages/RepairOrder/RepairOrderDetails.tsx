@@ -46,6 +46,7 @@ import View from './View';
 import WorkOrder from './WorkOrder';
 import Step from '../DynamicForm/Step';
 import ManageTransferAsset from '../TransferAssets/ManageTransferAsset';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const RepairOrderDetails = () => {
   const renderedFrom = camelCase(routes?.repairOrder.title);
@@ -116,11 +117,9 @@ const RepairOrderDetails = () => {
   }, []);
 
   useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= stepNames.length) {
+    if (['Add Assets', 'Work Order'].includes(stepNames[currentStep])) {
       fetchQuotationData();
-      updateProcessStatus(stepNames[currentStep]);
     }
-    if (['Add Assets', 'Work Order'].includes(stepNames[currentStep])) fetchQuotationData();
   }, [currentStep]);
 
   const getResourceFields = () => {
@@ -209,13 +208,6 @@ const RepairOrderDetails = () => {
     if (newValue === 0) {
       fetchRepairOrderData();
     }
-  };
-
-  const updateProcessStatus = (processStatus) => {
-    axiosInstance()
-      .put(`${repairOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
   };
 
   const fetchQuotationData = (versionNumber = null) => {
@@ -445,6 +437,9 @@ const RepairOrderDetails = () => {
                   return newStep;
                 });
               }
+            }}
+            updateStatus={(step: number) => {
+              dynamicFormUpdateProcessStatus(sidebarResource.repairOrder, stepNames[step], id);
             }}
           />
 

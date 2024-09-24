@@ -32,10 +32,10 @@ import Receiving from 'src/pages/SubcontractAssembly/Receiving';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import SubcontractAssemblyView from './View';
-
 import queryString from 'query-string';
 import { useSetWalkmeData } from 'src/components/CustomIntro';
 import { addStepAddExistingProduct } from 'src/pages/SubcontractAssembly/walkmeSteps';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const SubcontractAssemblyDetail = () => {
   const { setWalkmeData } = useSetWalkmeData();
@@ -89,8 +89,8 @@ const SubcontractAssemblyDetail = () => {
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.subcontractAssembly, data));
       setAllowedToDelete(
         permissions?.subcontractAssembly?.isDelete &&
-          checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
-          data?.canDelete
+        checkIsAllowedToDelete(user, sidebarResource.subcontractAssembly, data.owner.optionValue) &&
+        data?.canDelete
       );
       setSubcontractAssemblyData(data);
       if (data?.status === SUBCONTRACT_ASSEMBLY_STATUS.closed) {
@@ -161,21 +161,6 @@ const SubcontractAssemblyDetail = () => {
       });
   };
 
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0) {
-      updateProcessStatus(subcontractAssemblySteps[currentStep]?.name);
-    }
-  }, [currentStep]);
-
-  const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${routes.subcontractAssembly.path}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
-      });
-  };
-
   return (
     <Box className="main-container-v1">
       <Box className="headerbox-v1">
@@ -189,7 +174,7 @@ const SubcontractAssemblyDetail = () => {
                 {permissions?.subcontractAssembly?.isUpdate &&
                   allowedToEdit &&
                   [SUBCONTRACT_ASSEMBLY_STATUS.inProgress].includes(subcontractAssemblyData?.status) &&
-                  subcontractAssemblyData?.material?.length>0 && subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
+                  subcontractAssemblyData?.material?.length > 0 && subcontractAssemblyData?.material?.filter((m) => !m?.parentId)?.every((d) => d?.receivedQty > 0) && (
                     <ButtonWithPulse
                       variant={'outlined'}
                       color="default"
@@ -251,6 +236,9 @@ const SubcontractAssemblyDetail = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={[SUBCONTRACT_ASSEMBLY_STATUS.closed].includes(subcontractAssemblyData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
+            updateStatus={(step: number) => {
+              dynamicFormUpdateProcessStatus(sidebarResource.subcontractAssembly, subcontractAssemblySteps[step]?.name, id);
+            }}
           />
           <ContentFullScreen title={subcontractAssemblySteps[currentStep]?.title} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {currentStep === 0 && subcontractAssemblyData && (

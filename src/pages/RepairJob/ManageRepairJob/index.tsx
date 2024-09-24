@@ -181,11 +181,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
       axiosInstance()
         .post(`${repairJob.api}`, rest)
         .then(({ data: { data, message } }) => {
-          axiosInstance()
-            .put(`${repairJob.api}/${data._id}/process-status`, {
-              processStatus: repairJobProcessSteps[0]
-            })
-            .then(() => {
               if (!referenceType) {
                 history.push(`${routes.repairJobDetail.path}/${data._id}`);
               }
@@ -197,16 +192,6 @@ const ManageRepairJob = ({ isClone = false, repairJobId = null, onClose, onSucce
                 message: message
               });
             })
-            .catch((error) => {
-              setSubmitting(false);
-              onSuccess(data);
-              toastConfig.setToastConfig({
-                open: true,
-                type: 'success',
-                message: message
-              });
-            });
-        })
         .catch((error) => {
           setSubmitting(false);
           toastConfig.setToastConfig(error);

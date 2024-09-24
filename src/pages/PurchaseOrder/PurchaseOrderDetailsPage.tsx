@@ -36,6 +36,7 @@ import Product from './Product';
 import ReceivingAsset from './ReceivingAsset';
 import PurchaseOrderViews from './RoadMapViews';
 import ButtonWithPulse from 'src/components/ButtonWithPulse';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const PurchaseOrderDetailsPage = () => {
   const renderedFrom = camelCase(routes?.purchaseOrder.title);
@@ -82,12 +83,6 @@ const PurchaseOrderDetailsPage = () => {
       fetchPolicy();
     }
   }, [id]);
-
-  useEffect(() => {
-    if (currentStep !== null && currentStep >= 0 && currentStep <= 3) {
-      updateProcessStatus(purchaseOrderStepNames[currentStep]);
-    }
-  }, [currentStep]);
 
   const fetchPurchaseOrderData = async () => {
     setLoadingPurchaseOrder(true);
@@ -150,31 +145,17 @@ const PurchaseOrderDetailsPage = () => {
       });
   };
 
-  const updateProcessStatus = async (processStatus) => {
-    axiosInstance()
-      .put(`${purchaseOrder.api}/${id}/process-status`, { processStatus: processStatus })
-      .then(({ data }) => {})
-      .catch((error) => {});
-  };
-
   const updateStatus = (status) => {
-    axiosInstance()
-      .patch(`${purchaseOrder.api}/status/${id}`, { status: status })
-      .then(({ data: { data } }) => {
-        if ([PURCHASE_ORDER_STATUS.closed].includes(status)) {
-          updateProcessStatus(purchaseOrderStepNames[1]);
-          setCurrentStep(1);
-        }
-        fetchPurchaseOrderData();
-        toastConfig.setToastConfig({
-          open: true,
-          type: 'success',
-          message: `Status changed to ${status}`
-        });
-      })
-      .catch((error) => {
-        toastConfig.setToastConfig(error);
+    axiosInstance().patch(`${purchaseOrder.api}/status/${id}`, { status: status }).then(({ data: { data } }) => {
+      fetchPurchaseOrderData();
+      toastConfig.setToastConfig({
+        open: true,
+        type: 'success',
+        message: `Status changed to ${status}`
       });
+    }).catch((error) => {
+      toastConfig.setToastConfig(error);
+    });
   };
 
   const checkReceivedProduct = (data) => {
@@ -316,6 +297,9 @@ const PurchaseOrderDetailsPage = () => {
                   setCurrentStep={setCurrentStep}
                   isStepEnded={[PURCHASE_ORDER_STATUS.closed].includes(purchaseOrderData?.status)}
                   setStepFullScreen={() => setStepFullScreen(true)}
+                  updateStatus={(step: number) => {
+                    dynamicFormUpdateProcessStatus(sidebarResource.purchaseOrder, purchaseOrderStepNames[step], id);
+                  }}
                 />
                 <ContentFullScreen title={purchaseOrderStepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                   {currentStep === 0 && (

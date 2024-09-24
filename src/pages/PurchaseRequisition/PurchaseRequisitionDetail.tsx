@@ -24,6 +24,7 @@ import ShowDoa from '../DoaSetupNew/ShowDoa';
 import ManagePurchaseOrder from '../PurchaseOrder/ManagePurchaseOrder';
 import ManagePurchaseRequisition from './ManagePurchaseRequisition';
 import Material from './Material';
+import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
 
 const PurchaseRequisitionDetail = () => {
 
@@ -89,7 +90,7 @@ const PurchaseRequisitionDetail = () => {
         tempStepList = purchaseRequisitionSteps?.filter((e) => e.name !== 'DOA');
       }
       setStepList(tempStepList);
-      setCurrentStep(getIndex(data?.processStatus, stepList));
+      setCurrentStep(getIndex(data?.processStatus, tempStepList));
       setAllowedToEdit(checkIsAllowedToEdit(user, sidebarResource.purchaseRequisition, data));
       setAllowedToDelete(data?.owner?.optionValue === user?.user?._id);
       setAllowedToDelete(permissions?.purchaseRequisition?.isDelete && checkIsAllowedToDelete(user, sidebarResource.purchaseRequisition, data.owner.optionValue));
@@ -250,6 +251,9 @@ const PurchaseRequisitionDetail = () => {
                     isPrevStep={prevStep}
                     setStepFullScreen={() => setStepFullScreen(true)}
                     isStepEnded={[PURCHASE_REQUISITION_STATUS.converted].includes(purchaseRequisitionData?.status)}
+                    updateStatus={(step: number) => {
+                      dynamicFormUpdateProcessStatus(sidebarResource.purchaseRequisition, stepList[step]?.name, id);
+                    }}
                   />
                   <ContentFullScreen title={purchaseRequisitionSteps[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
                     {stepList[currentStep]?.name === 'Add' && purchaseRequisitionData && (
