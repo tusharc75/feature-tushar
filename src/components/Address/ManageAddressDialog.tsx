@@ -20,6 +20,7 @@ import { FaDiceOne } from 'react-icons/fa';
 import { isEqual } from 'lodash';
 import { useData } from 'src/StateProvider/Provider';
 import { useAppTheme } from 'src/constants/AppConfig';
+import { mapDarkTheme, mapLightTheme } from 'src/constants/helpers';
 
 const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, referenceData = null }) => {
 
@@ -39,98 +40,6 @@ const ManageAddressDialog = ({ onClose, onSuccess, addressData = null, reference
   const formikRef = {
     current: null
   };
-
-  const mapDarkTheme: GoogleMapProps['options']['styles'] = [
-    { elementType: 'geometry', stylers: [{ color: '#242f3e' }] },
-    { elementType: 'labels.text.stroke', stylers: [{ color: '#242f3e' }] },
-    { elementType: 'labels.text.fill', stylers: [{ color: '#746855' }] },
-    {
-      featureType: 'administrative.locality',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#d59563' }]
-    },
-    {
-      featureType: 'poi',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#d59563' }]
-    },
-    {
-      featureType: 'poi.park',
-      elementType: 'geometry',
-      stylers: [{ color: '#263c3f' }]
-    },
-    {
-      featureType: 'poi.park',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#6b9a76' }]
-    },
-    {
-      featureType: 'road',
-      elementType: 'geometry',
-      stylers: [{ color: '#38414e' }]
-    },
-    {
-      featureType: 'road',
-      elementType: 'geometry.stroke',
-      stylers: [{ color: '#212a37' }]
-    },
-    {
-      featureType: 'road',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#9ca5b3' }]
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'geometry',
-      stylers: [{ color: '#746855' }]
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'geometry.stroke',
-      stylers: [{ color: '#1f2835' }]
-    },
-    {
-      featureType: 'road.highway',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#f3d19c' }]
-    },
-    {
-      featureType: 'water',
-      elementType: 'geometry',
-      stylers: [{ color: '#17263c' }]
-    },
-    {
-      featureType: 'water',
-      elementType: 'labels.text.fill',
-      stylers: [{ color: '#515c6d' }]
-    },
-    {
-      featureType: 'water',
-      elementType: 'labels.text.stroke',
-      stylers: [{ color: '#17263c' }]
-    },
-    // { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-    // { featureType: 'poi', stylers: [{ visibility: 'off' }] }
-  ];
-
-  const mapLightTheme: GoogleMapProps['options']['styles'] = [
-    {
-      featureType: 'water',
-      stylers: [{ color: '#46bcec' }, { visibility: 'on' }]
-    },
-    { featureType: 'landscape', stylers: [{ color: '#f2f2f2' }] },
-    {
-      featureType: 'road',
-      stylers: [{ saturation: -100 }, { lightness: 45 }]
-    },
-    {
-      featureType: 'road.highway',
-      stylers: [{ visibility: 'simplified' }]
-    },
-  
-    // { featureType: 'transit', stylers: [{ visibility: 'off' }] },
-    // { featureType: 'poi', stylers: [{ visibility: 'off' }] }
-  ];
 
   useEffect(() => {
     if (initialData.fields.length > 0) {

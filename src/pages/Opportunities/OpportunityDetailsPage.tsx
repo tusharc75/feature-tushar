@@ -135,11 +135,11 @@ function OpportunityDetailsPage() {
     }
   }, [id]);
 
-  useEffect(()=>{
-    if(id && opportunityFields?.length){
+  useEffect(() => {
+    if (id && opportunityFields?.length) {
       fetchPolicy();
     }
-  },[id, opportunityFields])
+  }, [id, opportunityFields]);
 
   useEffect(() => {
     if (
@@ -226,8 +226,8 @@ function OpportunityDetailsPage() {
       if (data) {
         const policyFields = data?.policy?.outcomeFields;
         const processSteps = opportunityFields?.find((d) => d.isRead && d.fieldData.fieldName.toLowerCase() === processFieldName.toLowerCase());
-        if(processSteps && processSteps?.isRead && policyFields){
-          const policyOutcomeFields = opportunityFields?.filter((_field)=>[...policyFields]?.includes(_field.fieldData.fieldName));
+        if (processSteps && processSteps?.isRead && policyFields) {
+          const policyOutcomeFields = opportunityFields?.filter((_field) => [...policyFields]?.includes(_field.fieldData.fieldName));
           setSectionFields(policyOutcomeFields);
         }
         setResourceData(data);
@@ -370,7 +370,6 @@ function OpportunityDetailsPage() {
         }
 
         if (processSteps && processSteps.isRead) {
-
           const allProcessSteps: StepInterface[] = processSteps.fieldData.option.map((m) => {
             return {
               text: m.optionLabel,
@@ -395,7 +394,7 @@ function OpportunityDetailsPage() {
             }
           }
           setShowAdditionalField(processSteps.fieldData.showAdditionalInfoPopup);
-        } 
+        }
         setOpportunityFields(filteredFields);
       })
       .catch((error) => {
@@ -597,7 +596,7 @@ function OpportunityDetailsPage() {
             }}
           >
             <CustomTab value={0}>Details</CustomTab>
-            {resourceData && resourceData?.steps?.length && <CustomTab value={1}>Associations</CustomTab>}
+            {resourceData && resourceData?.tabs?.length && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 1}>{tab?.tabName}</CustomTab>)}
           </CustomTabs>
           <TabPanel value={currentTabIndex} index={0}>
             <ProcessFlow
@@ -705,15 +704,22 @@ function OpportunityDetailsPage() {
               )}
             </div>
           </TabPanel>
-          <TabPanel value={currentTabIndex} index={1}>
-            <Step
-              resourceData={resourceData}
-              resourceId={id}
-              resource={sidebarResource.opportunity}
-              data={opportunityData}
-              allowedToEdit={permissions?.opportunity?.isUpdate}
-            />
-          </TabPanel>
+          {resourceData &&
+            resourceData?.tabs?.length > 0 &&
+            resourceData?.tabs?.map((tab, i) => {
+              return (
+                <TabPanel value={currentTabIndex} index={i + 1}>
+                  <Step
+                    tab={tab}
+                    resourcePolicyId={resourceData?._id}
+                    resourceId={id}
+                    resource={sidebarResource.opportunity}
+                    data={opportunityData}
+                    allowedToEdit={permissions?.opportunity?.isUpdate}
+                  />
+                </TabPanel>
+              );
+            })}
         </Box>
 
         {showConfirmBox ? (
