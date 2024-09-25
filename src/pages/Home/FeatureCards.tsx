@@ -6,6 +6,7 @@ import WorkSpaceImage from 'src/assets/svg/home/workspace.svg';
 import { ThemeButton } from 'src/components/Helpers/Buttons';
 import { HiOutlineExternalLink } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
+import UserFavouriteCard from 'src/pages/Home/UserFavouriteCard';
 
 const equiptAiData = {
   src: EquiptAiImage,
@@ -33,8 +34,9 @@ const FeatureCard = () => {
   // early return null
   if (!aiPermission?.isRead || !workspacePermission?.isRead) return null;
   return (
-    <div className="gap mb-[16px] grid grid-cols-1 gap-4 md:mb-[34px]">
+    <div className="gap mb-4 grid grid-cols-1 gap-4">
       {aiPermission?.isRead && <SingleCard {...equiptAiData} />}
+
       {/* {workspacePermission?.isRead && <SingleCard {...workSpaceData} />} */}
     </div>
   );

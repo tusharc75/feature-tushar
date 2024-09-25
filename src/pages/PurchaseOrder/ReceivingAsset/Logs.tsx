@@ -9,6 +9,8 @@ import NoDataCell from '../../../components/Helpers/NoDataCell';
 import { useAppTheme } from 'src/constants/AppConfig';
 import moment from 'moment';
 
+const renderedFrom = `purchaseOrder_logs`;
+
 const Logs = ({ handleClose, detail, inventoryHistory }) => {
   const [themeColor] = useAppTheme();
   const isDarkTheme = themeColor === 'dark';
@@ -120,7 +122,7 @@ const Logs = ({ handleClose, detail, inventoryHistory }) => {
           columns={columns}
           state={state}
           dispatch={dispatch}
-          renderedFrom={'purchaseOrder_logs'}
+          renderedFrom={renderedFrom}
           isClientSideGrid={true}
           refreshGrid={() => {}}
           hideAction={true}
