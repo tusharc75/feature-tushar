@@ -156,7 +156,7 @@ const RentalManagementDetailsPage = () => {
   const checkProgressiveBilling = () => {
     if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
       axiosInstance()
-        .get(`${rentalManagement.api}/check-progressive-billing?referenceId=${id}`)
+        .get(`${rentalManagement.api}/show-progressive-billing/${id}`)
         .then(({ data: { data } }) => {
           if (data.progressiveBilling && permissions?.invoice?.isRead) {
             setDisplayProgressiveBillingTab(true);
