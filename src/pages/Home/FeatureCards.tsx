@@ -34,9 +34,9 @@ const FeatureCard = () => {
   // early return null
   if (!aiPermission?.isRead || !workspacePermission?.isRead) return null;
   return (
-    <div className="gap mb-[16px] grid grid-cols-1 gap-4 md:mb-[34px]">
+    <div className="gap mb-4 grid grid-cols-1 gap-4">
       {aiPermission?.isRead && <SingleCard {...equiptAiData} />}
-      <UserFavouriteCard />
+
       {/* {workspacePermission?.isRead && <SingleCard {...workSpaceData} />} */}
     </div>
   );
