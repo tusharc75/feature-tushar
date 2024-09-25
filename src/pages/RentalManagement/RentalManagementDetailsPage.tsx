@@ -562,20 +562,16 @@ const RentalManagementDetailsPage = () => {
               steps={rentalSteps}
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
-              handlePrev={() => {
-                if (
-                  (quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.acceptByCustomer ||
-                    quotationData?.versions[currentVersion]?.status === QUOTATION_STATUS.rejectByCustomer) &&
-                  rentalSteps[currentStep]?.name === 'Quotation'
-                ) {
-                  setShowCancelConfirmBox({ open: true, isQuote: true });
-                } else {
-                  setCurrentStep((prevStep) => {
-                    const newStep = prevStep - 1;
-                    return newStep;
-                  });
-                }
-              }}
+              handlePrev={
+                rentalSteps[currentStep]?.name === 'Quotation' && allowedToEdit &&
+                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(
+                    quotationData?.versions[currentVersion]?.status
+                  )
+                  ? () => {
+                    setShowCancelConfirmBox({ open: true, isQuote: true });
+                  }
+                  : null
+              }
               isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
               setStepFullScreen={() => setStepFullScreen(true)}
               updateStatus={(step: number) => {

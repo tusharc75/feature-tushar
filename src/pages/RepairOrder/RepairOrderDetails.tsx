@@ -442,27 +442,20 @@ const RepairOrderDetails = () => {
             setCurrentStep={setCurrentStep}
             isStepEnded={[REPAIR_ORDER_STATUS.completed].includes(repairOrderData?.status)}
             setStepFullScreen={() => setStepFullScreen(true)}
-            handlePrev={() => {
-              if (
+            handlePrev={
+              stepNames[currentStep] === 'Quotation' && allowedToEdit &&
                 [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
                   quotationVersionData?.status
-                ) &&
-                stepNames[currentStep] === 'Quotation' &&
-                allowedToEdit
-              ) {
-                setShowQuotationConfirmBox(true);
-              } else {
-                setCurrentStep((prevStep) => {
-                  const newStep = prevStep - 1;
-                  return newStep;
-                });
-              }
-            }}
+                )
+                ? () => {
+                  setShowQuotationConfirmBox(true);
+                }
+                : null
+            }
             updateStatus={(step: number) => {
               dynamicFormUpdateProcessStatus(sidebarResource.repairOrder, stepNames[step], id);
             }}
           />
-
           <ContentFullScreen title={stepNames[currentStep]} fullScreen={stepFullScreen} setFullScreen={setStepFullScreen}>
             {stepNames[currentStep] === 'Add Assets' && repairOrderData && (
               <>
@@ -494,8 +487,8 @@ const RepairOrderDetails = () => {
                   currentStep === 3
                     ? allowedToEdit
                     : [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer, QUOTATION_STATUS.sentToCustomer].includes(
-                          quotationVersionData?.status
-                        )
+                      quotationVersionData?.status
+                    )
                       ? false
                       : allowedToEdit
                 }
