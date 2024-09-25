@@ -193,7 +193,7 @@ const RenderStepItems = ({ steps, setSteps, setOpen, setDeleteData }) => {
           </SortableContext>
         </ul>
       ) : (
-        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+        <Box minHeight={'50px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
           Steps not added yet!
         </Box>
       )}

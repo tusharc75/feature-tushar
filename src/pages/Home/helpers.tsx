@@ -23,6 +23,8 @@ import { RiShieldUserLine } from 'react-icons/ri';
 import { SiCivicrm } from 'react-icons/si';
 import { DynamicIcon } from 'src/assets/IconGenerator';
 import { ItemData } from 'src/pages/Home/types';
+import { kebabCase } from 'lodash';
+import routes from 'src/components/Helpers/Routes';
 
 // CREATE OBJECT FROM LIST GROUPED BY KEYGETTER
 export const groupByKey = (arr = [], keyGetter) => {
@@ -300,3 +302,12 @@ export function getAllData(user, selectedEntity): ItemData[] {
   });
   return allData;
 }
+
+export const handleRoutes = (item) => {
+  switch (item.name) {
+    case 'Pos':
+      return routes.pos.path;
+    default:
+      return `/${kebabCase(item.name)}`;
+  }
+};
