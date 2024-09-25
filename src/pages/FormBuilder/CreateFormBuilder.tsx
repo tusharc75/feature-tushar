@@ -21,7 +21,6 @@ import History from './History';
 import Tabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import DeviceMessage from 'src/components/ScreenMessages/DeviceMessage';
 import { fieldLabelToFieldName } from 'src/constants/helpers';
-import Steps from 'src/components/FormBuilder/Steps';
 import DynamicTabs from 'src/components/FormBuilder/Tabs';
 
 const useStyles = makeStyles((theme) => ({
@@ -214,7 +213,7 @@ const CreateFormBuilder = () => {
           .then(({ data: { data } }) => {
             otherField = data;
           })
-          .catch((error) => {});
+          .catch((error) => { });
         const result = checkUniqueValidation(data, otherField);
         if (result.error) {
           toastConfig.setToastConfig({
@@ -490,8 +489,6 @@ const CreateFormBuilder = () => {
                   />
                 </TabPanel>
                 <TabPanel value={tabValue} index={1}>
-                  {/* <Stepper steppers={steppers} setSteppers={setSteppers} resource={resource} /> */}
-                  {/* <Steps resource={resource} /> */}
                   <DynamicTabs resource={resource} />
                 </TabPanel>
               </Box>
