@@ -112,7 +112,6 @@ export const PreviewFile = ({ fileName, component = 'IconButton', showDownload =
       viewPdf(fileName);
     } else {
       downloadFile(fileName, true);
-      setImageDialogData({ open: true, url: '', fileName });
     }
   };
 
