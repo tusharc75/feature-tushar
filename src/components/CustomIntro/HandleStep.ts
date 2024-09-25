@@ -16,19 +16,19 @@ export class HandleSteps {
   boundMousedown!: (e: MouseEvent) => void;
   currentStepData:
     | ({
-        positionData: {
-          bottom: number;
-          height: number;
-          left: number;
-          right: number;
-          top: number;
-          width: number;
-          x: number;
-          y: number;
-        };
-        element: HTMLElement;
-        index: number;
-      } & Step)
+      positionData: {
+        bottom: number;
+        height: number;
+        left: number;
+        right: number;
+        top: number;
+        width: number;
+        x: number;
+        y: number;
+      };
+      element: HTMLElement;
+      index: number;
+    } & Step)
     | null;
   interval: NodeJS.Timeout;
   retry: number;
@@ -375,8 +375,6 @@ export class HandleSteps {
     if (!steps || steps.length === 0 || !index) return;
     this.originalSteps.splice(index, 0, ...steps);
     this.steps = this.initializeStepData(this.originalSteps);
-    console.log({ s: this.steps, o: this.originalSteps });
-    // this.steps.splice(index, 0, ...this.initializeStepData(steps, false));
   }
   insertAtCurrentIndex(steps: StepDefination[]) {
     if (!steps || steps.length === 0) return;
