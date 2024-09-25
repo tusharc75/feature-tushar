@@ -25,7 +25,7 @@ const ChangesDialog = ({ open, onClose, data }) => {
         }}
         showManimizeMaximize={true}
         showRequiredLabel={false}
-        title={`Changes - ${data?.updatedBy?.optionLabel} - ${moment(data?.date)?.format(dateTimeFormat)}`}
+        title={`Changes - ${data?.referenceId?.optionLabel || ''} - ${data?.updatedBy?.optionLabel || ''} - ${moment(data?.date)?.format(dateTimeFormat)}`}
         onClose={onClose}
       />
       <CustomDialogContent isFooterPresent={false}>
