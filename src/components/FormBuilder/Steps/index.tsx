@@ -70,9 +70,9 @@ const Steps = ({ resource }) => {
     return () => cancelTokenSource.cancel();
   }, [resource]);
 
-  const handleSave = (values)=>{
+  const handleSave = (values) => {
     setIsSubmitting(true);
-     if (values?.stepId) {
+    if (values?.stepId) {
       axiosInstance()
         .put(`/sa-formbuilder/steps/${resourceId}`, values)
         .then(({ data }) => {
@@ -105,7 +105,7 @@ const Steps = ({ resource }) => {
           toastConfig.setToastConfig(error);
         });
     }
-  }
+  };
 
   const handleDelete = (step) => {
     setDeleting(true);
@@ -333,7 +333,7 @@ const RenderStepItems = ({ steps, setSteps, stepsLoading, setOpen, setDeleteData
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       ) : (
-        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+        <Box minHeight={'200px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
           Steps not added yet!
         </Box>
       )}
