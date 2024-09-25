@@ -30,7 +30,8 @@ import {
   checkIsAllowedToEdit,
   salesOrder,
   salesOrderProcessSteps,
-  sidebarResource
+  sidebarResource,
+  tabIndexValue
 } from '../../constants/helpers';
 import Invoice from './Invoice';
 import ManageSalesOrderDialog from './ManageSalesOrderDialog';
@@ -39,6 +40,7 @@ import Process from './Process';
 import SalesOrderView from './View';
 import LoadingTicket from './LoadingTicket';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import Step from 'src/pages/DynamicForm/Step';
 
 const SalesOrderDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -64,6 +66,7 @@ const SalesOrderDetails = () => {
   const [stepFullScreen, setStepFullScreen] = useState(false);
   const [showClosedConfirmBox, setShowClosedConfirmBox] = useState(false);
   const [steps, setSteps] = useState([]);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     axiosInstance()
@@ -93,6 +96,7 @@ const SalesOrderDetails = () => {
     if (id && steps?.length) {
       getFields();
       fetchSalesOrderData();
+      fetchPolicy();
     }
   }, [id, steps]);
 
@@ -100,6 +104,19 @@ const SalesOrderDetails = () => {
     try {
       const response: any = await axiosInstance().get('/field?resource=Sales Order');
       setSalesOrderFields(response?.data?.data);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.salesOrder}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -231,8 +248,9 @@ const SalesOrderDetails = () => {
             <BiFoodMenu className="mr-1" fontSize="inherit" />
             Details
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
           {!(isMobile && !isTablet) && (
-            <CustomTab value={2}>
+            <CustomTab value={tabIndexValue(resourceData, 2)}>
               <RiFlowChart className="mr-1" fontSize="inherit" />
               Views
             </CustomTab>
@@ -284,7 +302,23 @@ const SalesOrderDetails = () => {
             )}
           </ContentFullScreen>
         </TabPanel>
-        <TabPanel value={tabValue} index={2}>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.salesOrder}
+                  data={salesOrderData}
+                  allowedToEdit={permissions?.salesOrder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
+        <TabPanel value={tabValue} index={tabIndexValue(resourceData, 2)}>
           {salesOrderData && <SalesOrderView salesOrderData={salesOrderData} />}
         </TabPanel>
       </Box>
