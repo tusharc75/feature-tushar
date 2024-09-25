@@ -155,6 +155,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
     return (
       <>
         <MenuItem
+
           onClick={() => {
             const ids = selectedRecords.map((d) => d._id);
             setShowDeleteConfirmBox(true);
@@ -174,6 +175,7 @@ const Invoice = ({ purchaseOrderData, allowedToEdit }) => {
           isAddButtonVisible={true}
           addButtonMenuItems={addButtonMenuItems()}
           isActionButtonVisible={true}
+          actionButtonProps={{ disabled: selectedRecords?.length === 0 }}
           actionButtonMenuItems={actionButtonMenuItems()}
           hasXpadding={false}
         />
