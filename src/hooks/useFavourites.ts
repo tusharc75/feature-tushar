@@ -32,7 +32,6 @@ const useFavorites = () => {
         });
         handleGetFavourites();
       } catch (error) {
-        console.log(error);
       }
     },
     [favorites, handleGetFavourites, setFavourites]
