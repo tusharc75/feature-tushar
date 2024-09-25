@@ -36,6 +36,8 @@ import RepairJobViews from './RoadMapViews/index';
 import SerializedAsset from './SerializedAsset';
 import Tickets from './Tickets';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step'
 
 const RepairJobDetails = () => {
   const renderedFrom = camelCase(routes?.repairJob.title);
@@ -49,7 +51,8 @@ const RepairJobDetails = () => {
   const {
     state: { user, permissions }
   }: any = useData();
-
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
   const [repairJobData, setRepairJobData] = useState(null);
 
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -94,6 +97,7 @@ const RepairJobDetails = () => {
   useEffect(() => {
     if (id) {
       fetchRepairJobData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -101,6 +105,21 @@ const RepairJobDetails = () => {
     getResourceFields();
     fetchAssetStatusRights();
   }, []);
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.repairJob}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const getResourceFields = () => {
     axiosInstance()
@@ -224,6 +243,7 @@ const RepairJobDetails = () => {
               <RiFlowChart className="mr-1" fontSize="inherit" /> Views
             </CustomTab>
           )}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 4}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -287,6 +307,22 @@ const RepairJobDetails = () => {
             <RepairJobViews repairJobName={repairJobData?.repairJobName} repairId={id} repairStatus={repairJobData?.status} />
           </Box>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 4}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.repairJob}
+                  data={repairJobData}
+                  allowedToEdit={permissions?.repairJob?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
