@@ -1526,7 +1526,7 @@ const ReceivingTicket = ({
     const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
     if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
       setOpenAssetDetailDialog({
-        open: true,
+        open: open,
         statusPolicy: statusPolicy?.statusPolicy,
         _ids: statusPolicy?.assetIds,
         referenceData: data,
@@ -2377,7 +2377,12 @@ const ReceivingTicket = ({
           products={selectedRecords.filter((d: any) => d?.type === 'Product')}
           onSuccess={(data) => {
             setShowQtyDialog({ data: data, open: false });
-            setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
+            const statusPolicy = checkAssetPolicy(ASSET_STATUS.underReview);
+            if (statusPolicy && selectedRecords?.filter((e) => e.type === 'Asset')?.length) {
+              setOpenAssetDetailDialog((ps: any) => ({ ...ps, open: true }));
+            } else {
+              setShowTicketDialog((ps: any) => ({ ...ps, open: true }));
+            }
           }}
           onClose={() => {
             setShowQtyDialog({ open: false, data: null });
