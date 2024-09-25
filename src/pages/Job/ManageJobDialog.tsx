@@ -182,7 +182,7 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
               <Fragment>
                 <CustomDialogHeader
                   title={!jobId ? `Create ${routes.job.title}` : `${isClone ? `Clone - ${cloneHeading}` : `Update ${jobData?.jobNumber}`}`}
-                  onClose={(e, reason) => {
+                  onClose={() => {
                     if (isEqual(initialData.values, values)) {
                       onClose();
                     } else {
@@ -197,19 +197,19 @@ const ManageJobDialog = ({ isClone, jobId, jobData = null, onClose, onSuccess, o
                 />
                 <CustomDialogContent>
                   <Form>
-                      <InputField
-                        errors={errors}
-                        values={values}
-                        setFieldValue={(name, value) => {
-                          setFieldValue(name, value);
-                        }}
-                        touched={touched}
-                        fieldsData={initialData.fields}
-                        size="small"
-                        fullWidth
-                        resource={sidebarResource.job}
-                        referenceId={jobId || null}
-                      />
+                    <InputField
+                      errors={errors}
+                      values={values}
+                      setFieldValue={(name, value) => {
+                        setFieldValue(name, value);
+                      }}
+                      touched={touched}
+                      fieldsData={initialData.fields}
+                      size="small"
+                      fullWidth
+                      resource={sidebarResource.job}
+                      referenceId={jobId || null}
+                    />
                   </Form>
                 </CustomDialogContent>
                 <CustomDialogFooter>

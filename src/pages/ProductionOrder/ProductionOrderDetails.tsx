@@ -37,6 +37,8 @@ import ManageProductionOrder from './ManageProductionOrder';
 import Material from './Material';
 import WorkOrder from './WorkOrder';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step';
 
 const ProductionOrderDetails = () => {
   const renderedFrom = camelCase(routes?.productionOrder.title);
@@ -63,7 +65,8 @@ const ProductionOrderDetails = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [productionOrderProcessSteps, setProductionOrderProcessSteps] = useState(productionOrderSteps);
   const [stepFullScreen, setStepFullScreen] = useState(false);
-
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
   const productionOrderProcessStepsNames = React.useMemo(() => {
     return productionOrderProcessSteps.map((item) => item.name);
   }, [productionOrderProcessSteps]);
@@ -88,9 +91,25 @@ const ProductionOrderDetails = () => {
     });
   }, [locationKeys]);
 
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.productionOrder}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
   useEffect(() => {
     if (id) {
       fetchProductionOrderData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -230,6 +249,7 @@ const ProductionOrderDetails = () => {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i +2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -311,6 +331,22 @@ const ProductionOrderDetails = () => {
             )}
           </ContentFullScreen>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.productionOrder}
+                  data={productionOrderData}
+                  allowedToEdit={permissions?.productionOrder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
