@@ -26,7 +26,7 @@ export const Provider = ({ children }) => {
 
           // setUserFavorites
           const favData: { [key: string]: boolean } = {};
-          data?.role?.userFavouriteResources[0]?.resources?.forEach((d: string) => {
+          data?.role?.userFavouriteResources?.forEach((d: string) => {
             favData[d] = true;
           });
           setFavourites({ [USER_FAVOURITES]: favData });

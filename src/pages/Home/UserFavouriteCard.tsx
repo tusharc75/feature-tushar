@@ -62,36 +62,36 @@ const UserFavouriteCard = () => {
     setModalContent(null);
   };
 
-  if (stateFavourites.length === 0) return null;
-
   return (
     <>
-      <DashBoardCardShell
-        key={'User Favorites'}
-        id={`user-favorite-card`}
-        role="button"
-        className={'group'}
-        // background={'#fff'}
-        gradientColors={colors.gradient}
-        style={{ background: 'linear-gradient(var(--bg-gradient-colors, to bottom, #ffa800, #e35200))' }}
-        aria-label={`open User Favorite`}
-        onClick={() => handleFavouriteModal()}
-      >
-        <div className={'rounded-xl bg-[var(--dark-primary,white)] p-[23px_18px_18px]'}>
-          <div className={'mb-[20px] flex justify-between'}>
-            <div className={'overflow-hidden rounded-full'}>
-              <UserFavIcon />
+      {stateFavourites.length === 0 ? null : (
+        <DashBoardCardShell
+          key={'User Favorites'}
+          id={`user-favorite-card`}
+          role="button"
+          className={'group mb-4'}
+          // background={'#fff'}
+          gradientColors={colors.gradient}
+          style={{ background: 'linear-gradient(var(--bg-gradient-colors, to bottom, #ffa800, #e35200))' }}
+          aria-label={`open User Favorite`}
+          onClick={() => handleFavouriteModal()}
+        >
+          <div className={'rounded-xl bg-[var(--dark-primary,white)] p-[23px_18px_18px]'}>
+            <div className={'mb-[20px] flex justify-between'}>
+              <div className={'overflow-hidden rounded-full'}>
+                <UserFavIcon />
+              </div>
+              <div className={'transition-all duration-300 group-hover:[transform:translateX(-10px)]'}>
+                <HiArrowRight />
+              </div>
             </div>
-            <div className={'transition-all duration-300 group-hover:[transform:translateX(-10px)]'}>
-              <HiArrowRight />
-            </div>
+            <h2 className={'mb-[10px] text-[16px] font-bold leading-[22px]'}>Your Favorites</h2>
+            <p className={' text-[14px] font-normal leading-[22px] text-[#737373] dark:text-[#bebebe]'}>
+              This is a collection of your favorite items, selected by you.
+            </p>
           </div>
-          <h2 className={'mb-[10px] text-[16px] font-bold leading-[22px]'}>Your Favorites</h2>
-          <p className={' text-[14px] font-normal leading-[22px] text-[#737373] dark:text-[#bebebe]'}>
-            This is a collection of your favorite items, selected by you.
-          </p>
-        </div>
-      </DashBoardCardShell>
+        </DashBoardCardShell>
+      )}
 
       <DashboardModal
         modalHead={modalContent}
