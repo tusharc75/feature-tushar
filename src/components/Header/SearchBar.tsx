@@ -53,7 +53,6 @@ export const SearchBar = ({ user, selectedEntity, history }) => {
   useEffect(() => {
     let arr = [];
     let allData = [];
-
     let entityData;
     if (user?.entity && user.entity.length) {
       entityData = user.entity.find((curEntity) => curEntity._id === selectedEntity);
