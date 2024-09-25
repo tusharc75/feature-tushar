@@ -27,8 +27,9 @@ import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
 import { AddOutlined, ExpandLess, ExpandMore } from '@material-ui/icons';
+import routes from 'src/components/Helpers/Routes';
 
-const DynamicTabs = ({ resource }) => {
+const DynamicTabs = ({ workflowId = null, resource }) => {
   const toastConfig = useContext(CustomToastContext);
 
   const [open, setOpen] = useState({ open: false, data: null });
@@ -46,8 +47,10 @@ const DynamicTabs = ({ resource }) => {
   const fetchData = useCallback(
     async (cancelTokenSource?: CancelTokenSource) => {
       setLoading(true);
+      let api = `/sa-formbuilder/tabs/${resource}`;
+      if(workflowId) api = `${routes.workflow.path}/tabs/${workflowId}`
       axiosInstance()
-        .get(`/sa-formbuilder/tabs/${resource}`, { cancelToken: cancelTokenSource?.token })
+        .get(api, { cancelToken: cancelTokenSource?.token })
         .then(({ data: { data } }) => {
           setResourceData(data);
           setTabs(sortBy(data?.tabs, 'order'));
@@ -69,8 +72,10 @@ const DynamicTabs = ({ resource }) => {
 
   const handleDelete = (tab) => {
     setDeleting(true);
+    let api = `/sa-formbuilder/tabs/delete/${resourceData?._id}`;
+      if(workflowId) api = `${routes.workflow.path}/tabs/delete/${workflowId}`
     axiosInstance()
-      .put(`/sa-formbuilder/tabs/delete/${resourceData?._id}`, { tabId: tab?._id })
+      .put(api, { tabId: tab?._id })
       .then(() => {
         setDeleting(false);
         fetchData();
@@ -84,9 +89,11 @@ const DynamicTabs = ({ resource }) => {
   };
 
   const handleUpdateOrder = (tabs) => {
+    let api = `/sa-formbuilder/tabs/order/${resourceData?._id}`;
+    if(workflowId) api = `${routes.workflow.path}/tabs/order/${workflowId}`;
     axiosInstance()
       .put(
-        `/sa-formbuilder/tabs/order/${resourceData?._id}`,
+        api,
         tabs?.map((tab) => ({ tabId: tab?._id, order: tab?.order }))
       )
       .then(() => {
@@ -136,7 +143,7 @@ const DynamicTabs = ({ resource }) => {
           Add Tab
         </Button>
         <Box>
-          {resourcePolicy.find((e) => e.resource === resource) && (
+          {resourcePolicy.find((e) => e.resource === resource) && !workflowId && (
             <HtmlTooltip title={'Policy'}>
               <IconButton
                 aria-label="Policy"
@@ -148,7 +155,8 @@ const DynamicTabs = ({ resource }) => {
               </IconButton>
             </HtmlTooltip>
           )}
-          <HtmlTooltip title={'Setting'}>
+          {!workflowId && (
+            <HtmlTooltip title={'Setting'}>
             <IconButton
               aria-label="Setting"
               onClick={() => {
@@ -158,7 +166,9 @@ const DynamicTabs = ({ resource }) => {
               <SettingIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
-          <HtmlTooltip title={'Actions'}>
+        )}
+         {!workflowId &&
+         ( <HtmlTooltip title={'Actions'}>
             <IconButton
               aria-label="Actions"
               onClick={() => {
@@ -167,8 +177,9 @@ const DynamicTabs = ({ resource }) => {
             >
               <BuildIcon fontSize="small" color={'primary'} />
             </IconButton>
-          </HtmlTooltip>
-          <HtmlTooltip title={'Notifications'}>
+          </HtmlTooltip>)}
+          {!workflowId &&
+          (<HtmlTooltip title={'Notifications'}>
             <IconButton
               aria-label="Notifications"
               onClick={() => {
@@ -178,12 +189,13 @@ const DynamicTabs = ({ resource }) => {
               <AddAlertIcon fontSize="small" color={'primary'} />
             </IconButton>
           </HtmlTooltip>
+        )}
         </Box>
       </Box>
 
       <Box pt={2}>
         <DndContext onDragEnd={handleOnDragEnd} onDragStart={onDragStart} sensors={sensors} modifiers={[restrictToVerticalAxis]}>
-          <RenderTabItems {...{ tabs, loading, setOpen, resourceData, setDeleteData, fetchData }} />
+          <RenderTabItems {...{ tabs, loading, setOpen, resourceData, setDeleteData, fetchData, workflowId }} />
           <DragOverlay>
             {activeItem && (
               <span className="[&_.drag-handle]:!cursor-grabbing">
@@ -206,6 +218,7 @@ const DynamicTabs = ({ resource }) => {
             }}
             resource={resource}
             resourceId={resourceData?._id || null}
+            workflowId = {workflowId}
           />
         )}
 
@@ -281,14 +294,14 @@ const DynamicTabs = ({ resource }) => {
 
 export default DynamicTabs;
 
-const RenderTabItems = ({ tabs, loading, setOpen, resourceData, setDeleteData, fetchData }) => {
+const RenderTabItems = ({ tabs, loading, setOpen, resourceData, setDeleteData, fetchData, workflowId }) => {
   return (
     <div className="grid grid-cols-1 gap-2">
       {tabs && tabs?.length ? (
         <ul className="grid list-none items-start gap-2">
           <SortableContext items={tabs.map((d) => d._id)}>
             {tabs?.map((tab, index) => {
-              return <SingleTab key={tab?._id} {...{ tab, setOpen, resourceData, setDeleteData, fetchData, index }} />;
+              return <SingleTab key={tab?._id} {...{ tab, setOpen, resourceData, setDeleteData, fetchData, index, workflowId }} />;
             })}
           </SortableContext>
         </ul>
@@ -305,7 +318,7 @@ const RenderTabItems = ({ tabs, loading, setOpen, resourceData, setDeleteData, f
   );
 };
 
-const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index, isExpanded: defaultExpanded = true }) => {
+const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index, workflowId, isExpanded: defaultExpanded = true }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: tab._id,
@@ -361,7 +374,7 @@ const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index
           </div>
           <Collapse in={isExpanded}>
             <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
-              <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} />
+              <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} workflowId={workflowId}  />
             </div>
           </Collapse>
         </div>
