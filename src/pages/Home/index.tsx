@@ -20,6 +20,7 @@ import FeatureCard from 'src/pages/Home/FeatureCards';
 import DisplayCardGrid from 'src/pages/Home/DisplayCardGrid';
 import { ItemData } from 'src/pages/Home/types';
 import UserFavouriteCard from 'src/pages/Home/UserFavouriteCard';
+import { cn } from 'src/constants/helpers';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
@@ -54,7 +55,7 @@ function Dashboard() {
   return (
     <Fragment>
       <div className={` ${styles.contentWrapper}`}>
-        <div className={styles.main}>
+        <div className={cn(styles.main, '[--gap:25px]')}>
           <div className={styles.leftContainer}>
             <DisplayCardGrid sections={sections} handleRoutes={handleRoutes} />
             {!isOffline && <Chart />}

@@ -69,7 +69,7 @@ const UserFavouriteCard = () => {
           key={'User Favorites'}
           id={`user-favorite-card`}
           role="button"
-          className={'group'}
+          className={'group mb-4'}
           // background={'#fff'}
           gradientColors={colors.gradient}
           style={{ background: 'linear-gradient(var(--bg-gradient-colors, to bottom, #ffa800, #e35200))' }}

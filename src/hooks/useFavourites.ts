@@ -13,7 +13,7 @@ const useFavorites = () => {
         data: { data }
       } = await axiosInstance().get(api);
       const favData: { [key: string]: boolean } = {};
-      data[0]?.resources?.forEach((d: string) => {
+      data?.forEach((d: string) => {
         favData[d] = true;
       });
       setFavourites({ [USER_FAVOURITES]: favData });
@@ -30,11 +30,11 @@ const useFavorites = () => {
           resource: item.name,
           setFavourite: !favorites[item.name]
         });
-        handleGetFavourites();
-      } catch (error) {
+      } catch {
+        setFavourites({ [USER_FAVOURITES]: { ...favorites, [item.name]: !!favorites[item.name] } });
       }
     },
-    [favorites, handleGetFavourites, setFavourites]
+    [favorites, setFavourites]
   );
 
   return { favorites: favorites, handleGetFavourites, handleSetFavourite };
