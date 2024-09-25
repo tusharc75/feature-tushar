@@ -9,12 +9,12 @@ import axiosInstance from 'src/axios/axiosInstance';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import ConfirmationDialog from '../../../../components/Helpers/ConfirmationDialog';
 import ManageSteps from './ManageSteps';
-
 import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
+import { AddOutlined } from '@material-ui/icons';
 
 const Steps = ({ resourceData, tab, fetchData }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -127,12 +127,13 @@ const Steps = ({ resourceData, tab, fetchData }) => {
     <Box>
       <Box>
         <Button
-          variant="contained"
+          variant="outlined"
           color="primary"
           size="small"
           onClick={() => {
             setOpen({ open: true, data: null });
           }}
+          startIcon={<AddOutlined />}
         >
           Add Step
         </Button>
@@ -219,14 +220,14 @@ const SingleStep = ({ step, setOpen, setDeleteData, index }) => {
     <>
       <li ref={setNodeRef} style={style} className={` list-none `}>
         <div
-          className={` rounded-[5px]  p-3 [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`}
+          className={`rounded-[5px]  p-3 [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`}
         >
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <IconButton size={'small'} className={`drag-handle !cursor-grab `} {...attributes} {...listeners}>
                 <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
               </IconButton>
-              <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{step?.stepName}</h3>
+              <h4 className="line-clamp-2 font-normal	md:line-clamp-1">{step?.stepName}</h4>
             </div>
             <div className="min-w-fit">
               <HtmlTooltip title={'Edit'}>

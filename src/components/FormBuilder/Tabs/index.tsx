@@ -26,7 +26,7 @@ import Setting from 'src/components/FormBuilder/Tabs/Setting';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
-import { ExpandLess, ExpandMore } from '@material-ui/icons';
+import { AddOutlined, ExpandLess, ExpandMore } from '@material-ui/icons';
 
 const DynamicTabs = ({ resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -131,6 +131,7 @@ const DynamicTabs = ({ resource }) => {
           onClick={() => {
             setOpen({ open: true, data: null });
           }}
+          startIcon={<AddOutlined />}
         >
           Add Tab
         </Button>
@@ -321,10 +322,8 @@ const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index
 
   return (
     <>
-      <li ref={setNodeRef} style={style} className={` list-none `}>
-        <div
-          className={` rounded-[5px] shadow [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`}
-        >
+      <li ref={setNodeRef} style={style} className={`list-none pb-2`}>
+        <div className={` rounded-[5px] [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`} >
           <div className="flex items-center justify-between p-3 ">
             <div className="flex items-center gap-2">
               <IconButton size={'small'} className={`drag-handle !cursor-grab `} {...attributes} {...listeners}>
