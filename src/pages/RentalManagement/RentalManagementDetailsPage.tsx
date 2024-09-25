@@ -156,11 +156,9 @@ const RentalManagementDetailsPage = () => {
   const checkProgressiveBilling = () => {
     if (user?.user?.brandPolicy?.rentalProgressiveBilling) {
       axiosInstance()
-        .get(
-          `${deliveryTicket.api}/typewise?referenceType=${DELIVERY_TICKET_REFERENCE_TYPE.rentalJob}&referenceId=${id}&ticketType=${DELIVERY_TICKET_TYPE.loading}`
-        )
+        .get(`${rentalManagement.api}/check-progressive-billing?referenceId=${id}`)
         .then(({ data: { data } }) => {
-          if (data.length > 0 && permissions?.invoice?.isRead) {
+          if (data.progressiveBilling && permissions?.invoice?.isRead) {
             setDisplayProgressiveBillingTab(true);
           }
         })
@@ -215,7 +213,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   const checkDeliveryTicketFields = () => {
@@ -233,7 +231,7 @@ const RentalManagementDetailsPage = () => {
           });
         }
       })
-      .catch((err) => { });
+      .catch((err) => {});
   };
 
   useEffect(() => {
@@ -349,16 +347,19 @@ const RentalManagementDetailsPage = () => {
   };
 
   const updateJobStatus = (status) => {
-    axiosInstance().patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status }).then(({ data: { data } }) => {
-      fetchRentalManagementData();
-      toastConfig.setToastConfig({
-        open: true,
-        type: 'success',
-        message: `Status changed to ${status}`
+    axiosInstance()
+      .patch(`${rentalManagement.api}/status/${rentalManagementData._id}`, { status: status })
+      .then(({ data: { data } }) => {
+        fetchRentalManagementData();
+        toastConfig.setToastConfig({
+          open: true,
+          type: 'success',
+          message: `Status changed to ${status}`
+        });
+      })
+      .catch((error) => {
+        toastConfig.setToastConfig(error);
       });
-    }).catch((error) => {
-      toastConfig.setToastConfig(error);
-    });
   };
 
   const cloneVersion = () => {
@@ -563,13 +564,12 @@ const RentalManagementDetailsPage = () => {
               currentStep={currentStep}
               setCurrentStep={setCurrentStep}
               handlePrev={
-                rentalSteps[currentStep]?.name === 'Quotation' && allowedToEdit &&
-                  [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(
-                    quotationData?.versions[currentVersion]?.status
-                  )
+                rentalSteps[currentStep]?.name === 'Quotation' &&
+                allowedToEdit &&
+                [QUOTATION_STATUS.acceptByCustomer, QUOTATION_STATUS.rejectByCustomer].includes(quotationData?.versions[currentVersion]?.status)
                   ? () => {
-                    setShowCancelConfirmBox({ open: true, isQuote: true });
-                  }
+                      setShowCancelConfirmBox({ open: true, isQuote: true });
+                    }
                   : null
               }
               isStepEnded={[RENTAL_STATUS.invoiced, RENTAL_STATUS.closed, RENTAL_STATUS.cancelled].includes(rentalManagementData?.status)}
@@ -593,12 +593,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
@@ -617,12 +617,12 @@ const RentalManagementDetailsPage = () => {
                   allowedToEdit={allowedToEdit}
                   quotationApproved={
                     quotationData &&
-                      [
-                        QUOTATION_STATUS.acceptByCustomer,
-                        QUOTATION_STATUS.rejectByCustomer,
-                        QUOTATION_STATUS.sentToCustomer,
-                        QUOTATION_STATUS.waitingForSupplierPrice
-                      ].includes(quotationData?.versions[currentVersion]?.status)
+                    [
+                      QUOTATION_STATUS.acceptByCustomer,
+                      QUOTATION_STATUS.rejectByCustomer,
+                      QUOTATION_STATUS.sentToCustomer,
+                      QUOTATION_STATUS.waitingForSupplierPrice
+                    ].includes(quotationData?.versions[currentVersion]?.status)
                       ? true
                       : false
                   }
