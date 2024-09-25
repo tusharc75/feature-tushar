@@ -405,8 +405,8 @@ export const createFilterModel = (formValues, coloums) => {
         }
         break;
       case 'location':
-        if (formValues[fieldName]?.length > 0) {
-          filterModel.set(fieldName, { filter: formValues[fieldName] });
+        if (formValues[fieldName] && formValues[fieldName]?.locationName) {
+          filterModel.set(fieldName, { filter: formValues[fieldName]?.locationName });
         }
         break;
       default:
