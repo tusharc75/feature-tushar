@@ -16,6 +16,7 @@ import { SerializedAssetAvailableIllustration } from 'src/assets/svg/svgIcons';
 interface CssObj {
   [index: string]: React.CSSProperties;
 }
+
 const styles: CssObj = {
   card: {
     border: '1px solid var(--common-border-color)',
@@ -116,7 +117,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
   });
 
   const [products, setProducts] = useState(null);
-  const [canFulfil, setCanFulfil] = useState(false);
+  const [canFulfil, setCanFulfil] = useState(null);
   const [fullScreen, setFullScreen] = useState(isMobile || isTablet);
 
   const [taskDialog, setTaskDialog] = useState(false);
@@ -126,6 +127,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       title: 'Checking Assets Availability',
       icon: <Skeleton variant="circle" width={32} height={32} />
     });
+    setCanFulfil(null);
     axiosInstance()
       .get(`${rentalManagement.api}/automation/check-asset-availability/${rentalId}`)
       .then(({ data: { data } }) => {
@@ -137,6 +139,9 @@ export default function AssetAvailability({ rentalId, handleClose }) {
           rows?.length === 0
         ) {
           setCanFulfil(true);
+        }
+        else {
+          setCanFulfil(false);
         }
       })
       .catch((error) => {
@@ -150,15 +155,15 @@ export default function AssetAvailability({ rentalId, handleClose }) {
         title: `${routes.serializedAsset.title} Available`,
         icon: <CheckCircleIcon color="secondary" />
       });
-    } else if (!canFulfil) {
-      setModalContent({
-        title: ``,
-        icon: null
-      });
-    } else {
+    } else if (canFulfil === false) {
       setModalContent({
         title: `Unable to fulfill ${routes.serializedAsset.title} requirement(s) from this ${routes.warehouse.title}.`,
         icon: <ErrorIcon color="error" />
+      });
+    } else {
+      setModalContent({
+        title: 'Checking Assets Availability',
+        icon: <Skeleton variant="circle" width={32} height={32} />
       });
     }
   }, [canFulfil]);
@@ -173,7 +178,7 @@ export default function AssetAvailability({ rentalId, handleClose }) {
       modalHead={{ ...modalContent, fullScreenOption: true }}
       handleClose={handleClose}
     >
-      {products ? (
+      {products && canFulfil !== null ? (
         canFulfil ? (
           <div style={{ textAlign: 'center', marginTop: '20px' }}>
             <SerializedAssetAvailableIllustration />
