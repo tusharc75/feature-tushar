@@ -241,7 +241,6 @@ const Products = ({
           finalObject['isChecked'] = false;
           finalObject['allowedToEdit'] = false;
           finalObject['canDelete'] = !data?.assets?.some((e) => e._id === u._id) && !deliveryTicketProduct?.some((e) => e.product === u?.product);
-          finalObject['hideSelection'] = !finalObject['canDelete'];
           finalObject['serialNumber'] = data?.serialNumber?.filter((e) => e.product === u?.product);
           finalObject['loadingTicketStatus'] = deliveryTicketProduct?.find((d) => d?.product === u?.product)
             ? deliveryTicketProduct?.find((d) => d?.product === u?.product)?.status
