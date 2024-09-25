@@ -20,6 +20,8 @@ import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import DetailsPage from '../../components/Shared/DetailsPage';
 import History from './History';
 import ManageTruckMaster from './ManageTruckMaster';
+import Step from '../DynamicForm/Step';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
 
 const TruckMasterDetail = () => {
   const { id } = useParams();
@@ -37,11 +39,14 @@ const TruckMasterDetail = () => {
   const [tabValue, setTabValue] = useState(0);
   const [anchorEl, setAnchorEl] = useState(null);
   const [statusOptions, setStatusOptions] = useState([]);
+  const { isOffline } = useContext(CustomOfflineContext);
+  const [resourceData, setResourceData] = useState(null);
 
   useEffect(() => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -72,6 +77,21 @@ const TruckMasterDetail = () => {
       } = await axiosInstance().get(`${routes.truckMaster.path}/${id}`);
       setTruckMasterData(data);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.truckMaster}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -212,6 +232,7 @@ const TruckMasterDetail = () => {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> History
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           {loading || !fields?.length ? (
@@ -225,6 +246,22 @@ const TruckMasterDetail = () => {
         <TabPanel value={tabValue} index={1}>
           <History id={id} status={truckMasterData?.status} />
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.truckMaster}
+                  data={truckMasterData}
+                  allowedToEdit={permissions?.truckMaster?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
