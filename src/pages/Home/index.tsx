@@ -61,6 +61,7 @@ function Dashboard() {
           </div>
           <div className={styles.rightContainer}>
             <FeatureCard />
+            <UserFavouriteCard />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Workspace" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="Setups & Administration" />
             <DisplaySideCard objBySectionName={objBySectionName} handleRoutes={handleRoutes} mode="User Manual" />
