@@ -19,6 +19,7 @@ import DisplaySideCard from 'src/pages/Home/DisplaySideCard';
 import FeatureCard from 'src/pages/Home/FeatureCards';
 import DisplayCardGrid from 'src/pages/Home/DisplayCardGrid';
 import { ItemData } from 'src/pages/Home/types';
+import UserFavouriteCard from 'src/pages/Home/UserFavouriteCard';
 
 export const userManual = {
   description: 'View our user manual in just a click.',
