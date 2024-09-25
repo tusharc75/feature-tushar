@@ -77,7 +77,7 @@ const UserFavouriteCard = () => {
         aria-label={`open User Favorite`}
         onClick={() => handleFavouriteModal()}
       >
-        <div className={'rounded-l-md bg-[var(--dark-primary,white)] p-[23px_18px_18px]'}>
+        <div className={'rounded-xl bg-[var(--dark-primary,white)] p-[23px_18px_18px]'}>
           <div className={'mb-[20px] flex justify-between'}>
             <div className={'overflow-hidden rounded-full'}>
               <UserFavIcon />
