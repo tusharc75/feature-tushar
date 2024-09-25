@@ -199,7 +199,6 @@ const EmployeeMasterDetail = () => {
                   {isMobile && !isTablet ? <Edit /> : 'Edit'}
                 </Button>
               )}
-
               {permissions?.employeeMaster?.isDelete && <DeleteButton text="Delete" onClick={() => setShowConfirmBox(true)} />}
             </>
             <ActivityButton

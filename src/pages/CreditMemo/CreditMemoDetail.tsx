@@ -165,7 +165,7 @@ const creditMemoDetail = () => {
                   resourceId={id}
                   resource={sidebarResource.creditMemo}
                   data={creditMemoData}
-                  allowedToEdit={permissions?.creditMemo?.isUpdate}
+                  allowedToEdit={permissions?.creditMemo?.isUpdate }
                 />
               </TabPanel>
             );

@@ -275,7 +275,7 @@ const DemandOrderDetails = () => {
                   resourceId={id}
                   resource={sidebarResource.demandOrder}
                   data={demandOrderData}
-                  allowedToEdit={permissions?.demandOrder?.isUpdate}
+                  allowedToEdit={permissions?.demandOrder?.isUpdate }
                 />
               </TabPanel>
             );

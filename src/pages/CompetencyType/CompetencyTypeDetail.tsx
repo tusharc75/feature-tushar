@@ -176,7 +176,7 @@ const CompetencyMasterDetail = () => {
                   resourceId={id}
                   resource={sidebarResource.competencyType}
                   data={competencyMasterData}
-                  allowedToEdit={permissions?.competencyType?.isUpdate}
+                  allowedToEdit={permissions?.competencyType?.isUpdate }
                 />
               </TabPanel>
             );

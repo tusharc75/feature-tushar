@@ -164,7 +164,7 @@ const ChartOfAccountDetail = () => {
                   resourceId={id}
                   resource={sidebarResource.chartOfAccount}
                   data={chartOfAccountData}
-                  allowedToEdit={permissions?.chartOfAccount?.isUpdate}
+                  allowedToEdit={permissions?.chartOfAccount?.isUpdate }
                 />
               </TabPanel>
             );

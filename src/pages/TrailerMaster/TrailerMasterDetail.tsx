@@ -256,7 +256,7 @@ const TrailerMasterDetail = () => {
                   resourceId={id}
                   resource={sidebarResource.trailerMaster}
                   data={trailerMasterData}
-                  allowedToEdit={permissions?.trailerMaster?.isUpdate}
+                  allowedToEdit={permissions?.trailerMaster?.isUpdate }
                 />
               </TabPanel>
             );

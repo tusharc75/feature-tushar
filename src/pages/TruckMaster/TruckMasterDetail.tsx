@@ -30,7 +30,6 @@ const TruckMasterDetail = () => {
   const {
     state: { permissions, user }
   }: any = useData();
-
   const [truckMasterData, setTruckMasterData] = useState(null);
   const [openUpdateDialog, setOpenUpdateDialog] = useState(false);
   const [fields, setFields] = useState(null);
