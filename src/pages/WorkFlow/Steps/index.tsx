@@ -14,11 +14,11 @@ import { restrictToVerticalAxis } from '@dnd-kit/modifiers';
 import { SortableContext, useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { useDndSensors } from 'src/hooks';
-import ManageSteps from 'src/components/FormBuilder/Steps/ManageSteps';
 import routes from 'src/components/Helpers/Routes';
 import { sortBy } from 'lodash';
 import axios, { CancelTokenSource } from 'axios';
 import Setting from 'src/pages/WorkFlow/Steps/Settings';
+import ManageSteps from 'src/components/FormBuilder/Tabs/Steps/ManageSteps';
 
 const Steps = ({ resource, loading, id }) => {
   const toastConfig = useContext(CustomToastContext);

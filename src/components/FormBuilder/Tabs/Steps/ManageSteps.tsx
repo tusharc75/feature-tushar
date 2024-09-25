@@ -13,8 +13,8 @@ import axiosInstance from 'src/axios/axiosInstance';
 import { CustomToastContext } from 'src/StateProvider/CustomToastContext/CustomToastContext';
 import { Autocomplete } from '@material-ui/lab';
 import { getLookupResource, getResourceField } from '../../helper';
-import ConfigureField from 'src/components/FormBuilder/Steps/ConfigureField';
 import StepActions from './StepActions';
+import ConfigureField from 'src/components/FormBuilder/Tabs/Steps/ConfigureField';
 
 const stepSchema = object().shape({
   stepName: string().required('Please enter Step name')
