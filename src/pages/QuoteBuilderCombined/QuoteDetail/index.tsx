@@ -58,6 +58,7 @@ import AllVersionStatus from '../AllVersionStatus';
 import ManageQuoteDialog from '../ManageQuote/ManageQuoteDialog';
 import QuoteDetailPage from './QuoteDetailPage';
 import QuoteProcess from './QuoteProcess';
+import Step from 'src/pages/DynamicForm/Step';
 
 const useStyles = makeStyles((theme) => ({
   reasonDialog: {
@@ -180,6 +181,8 @@ export default function QuoteDetail() {
   const [isAddExistingProduct, setIsAddExistingProduct] = useState(false);
   const [DOAlimit, setDOALimit] = useState(0);
   const [DOAsetup, setDOAsetup] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
+
   const openActions = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -203,6 +206,7 @@ export default function QuoteDetail() {
 
       fetchTermsAndConditions();
       fetchRelatedTo();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -314,6 +318,19 @@ export default function QuoteDetail() {
 
   const handleSetSteps = (steps) => {
     setSteps(steps);
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.quoteBuilder}`);
+      if (data) {
+        setResourceData(data);
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
   };
 
   const fetchQuoteData = (version: any) => {
@@ -820,6 +837,7 @@ export default function QuoteDetail() {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Quote Versions
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <>
@@ -884,6 +902,22 @@ export default function QuoteDetail() {
             />
           )}
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.quoteBuilder}
+                  data={quoteData}
+                  allowedToEdit={permissions?.quoteBuilder?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

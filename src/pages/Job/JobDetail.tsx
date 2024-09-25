@@ -24,6 +24,7 @@ import Dispatch from './Dispatch';
 import ManageJobDialog from './ManageJobDialog';
 import Material from './Material';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import Step from 'src/pages/DynamicForm/Step';
 
 const JobDetail = () => {
   const renderedFrom = camelCase(routes?.job.title);
@@ -42,6 +43,7 @@ const JobDetail = () => {
   const [currentStep, setCurrentStep] = useState(null);
   const [nextStep, setNextStep] = useState(true);
   const [stepFullScreen, setStepFullScreen] = useState(false);
+  const [resourceData, setResourceData] = useState(null);
 
   const jobProcessStepsNames = React.useMemo(() => {
     return jobProcessSteps.map((item) => item.name);
@@ -55,6 +57,7 @@ const JobDetail = () => {
     if (id) {
       fetchFields();
       fetchData();
+      fetchPolicy();
     }
   }, [id]);
 
@@ -82,6 +85,19 @@ const JobDetail = () => {
       setJobData(data);
       setCustomizedRoutes([routes.job, { title: data?.jobNumber }]);
       setLoading(false);
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
+
+  const fetchPolicy = async () => {
+    try {
+      const {
+        data: { data }
+      } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.job}`);
+      if (data) {
+        setResourceData(data);
+      }
     } catch (error) {
       toastConfig.setToastConfig(error);
     }
@@ -146,6 +162,7 @@ const JobDetail = () => {
           <CustomTab value={1}>
             <BiFoodMenu className="mr-1" fontSize="inherit" /> Details
           </CustomTab>
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 2}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box>
@@ -184,6 +201,22 @@ const JobDetail = () => {
             {currentStep === 1 && jobData && <Dispatch renderedFrom={`${renderedFrom}_grid-1`} jobData={jobData} setNextStep={setNextStep} />}
           </ContentFullScreen>
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 2}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.job}
+                  data={jobData}
+                  allowedToEdit={permissions?.job?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
