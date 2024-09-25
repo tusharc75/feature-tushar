@@ -40,6 +40,8 @@ import ManageInvoiceDialog from './ManageInvoiceDialog';
 import Material from './Material';
 import CustomTabs, { CustomTab, TabPanel } from 'src/components/CustomTabs';
 import { dynamicFormUpdateProcessStatus } from 'src/pages/DynamicForm/helper';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step'
 
 const InvoiceDetails = () => {
   const toastConfig = useContext(CustomToastContext);
@@ -52,6 +54,8 @@ const InvoiceDetails = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [headingLabel, setHeadingLabel] = useState('');
   const [loading, setLoading] = useState(false);
@@ -86,8 +90,24 @@ const InvoiceDetails = () => {
     if (id) {
       fetchFields();
       fetchInvoiceData();
+      fetchPolicy();
     }
   }, [id]);
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.invoice}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchFields = async () => {
     try {
@@ -290,6 +310,7 @@ const InvoiceDetails = () => {
               <BiFoodMenu className="mr-1" fontSize="inherit" /> {routes.creditMemo.title}
             </CustomTab>
           )}
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
 
         <TabPanel value={tabValue} index={0}>
@@ -355,6 +376,22 @@ const InvoiceDetails = () => {
             allowedToEdit={allowedToEdit && ![INVOICE_STATUS.closed, INVOICE_STATUS.cancelled].includes(invoiceData?.status)}
           />
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.invoice}
+                  data={invoiceData}
+                  allowedToEdit={permissions?.invoice?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog

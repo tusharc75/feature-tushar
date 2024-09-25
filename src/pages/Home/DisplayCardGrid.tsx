@@ -1,17 +1,14 @@
 import { Typography } from '@material-ui/core';
-import { Fragment, useEffect, useMemo, useState } from 'react';
+import { Fragment, useState } from 'react';
 import { HiArrowRight } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import { DynamicIcon } from 'src/assets/IconGenerator';
 import DashBoardCardShell from 'src/components/DashBoardCardShell';
 import DashboardModal from 'src/components/DashboardModal';
 import UserFavoriteIcon from 'src/components/UserFavouriteIcon';
-import { useFavorites } from 'src/hooks';
-import { Item, ItemData, Section } from 'src/pages/Home/types';
-import UserFavouriteCard, { UserFavIcon } from 'src/pages/Home/UserFavouriteCard';
-import { useData } from 'src/StateProvider/Provider';
+import { Item, Section } from 'src/pages/Home/types';
 import styles from './Dashboard.module.scss';
-import { getAllData, getColors } from './helpers';
+import { getColors } from './helpers';
 import './style.scss';
 
 type DisplayCardGridProps = {
@@ -20,46 +17,15 @@ type DisplayCardGridProps = {
 };
 
 const DisplayCardGrid = ({ sections, handleRoutes }: DisplayCardGridProps) => {
-  const {
-    state: { user, selectedEntity }
-  } = useData();
-
   const [modalContent, setModalContent] = useState(null);
-  const { favorites } = useFavorites();
-  const [stateFavourites, setStateFavourites] = useState<ItemData[]>([]);
-  const allData = useMemo(() => getAllData(user, selectedEntity), [user, selectedEntity]);
-
-  useEffect(() => {
-    const newFavourites = [];
-    allData.forEach((item) => {
-      if (favorites?.[item.name]) {
-        newFavourites.push(item);
-      }
-    });
-    setStateFavourites(newFavourites);
-    // setStateFavourites
-  }, [favorites, allData]);
 
   const handleClose = () => {
     setModalContent(null);
   };
 
-  const handleFavouriteModal = () => {
-    setModalContent({
-      items: stateFavourites,
-      title: 'Your Favorites',
-      icon: (
-        <span className="[&>div]:!h-[32px] [&>div]:!w-[32px] [&>div]:rounded [&_.custom_svg]:!h-[18px] [&_.custom_svg]:!w-[18px]">
-          <UserFavIcon />
-        </span>
-      )
-    });
-  };
-
   return (
     <div className={styles.cardSection}>
       <div className={styles.cardContainer}>
-        {stateFavourites.length > 0 && <UserFavouriteCard handleOnClick={handleFavouriteModal} />}
         {sections.map((section, index) => {
           if (
             section.head === 'Setups' ||

@@ -360,7 +360,7 @@ const Services = ({
         }
       }
       else {
-        if (rows.filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))?.length) {
+        if (data?.material?.filter((e) => e.parentId === null).filter((e) => e.type === MATERIAL_TYPE.product || (e.type === MATERIAL_TYPE.package && e.packageDetail?.packageType !== 'Service'))?.length) {
           setNextStep(true);
           setNextStepToolTip(null);
         }

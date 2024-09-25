@@ -1,4 +1,4 @@
-import { Box, Button, IconButton } from '@material-ui/core';
+import { Box, Button, Collapse, IconButton } from '@material-ui/core';
 import HtmlTooltip from 'src/components/CustomTooltipTitle';
 import AddAlertIcon from '@material-ui/icons/AddAlert';
 import BuildIcon from '@material-ui/icons/Build';
@@ -26,6 +26,7 @@ import Setting from 'src/components/FormBuilder/Tabs/Setting';
 import Actions from 'src/components/FormBuilder/Tabs/Actions';
 import Notifications from 'src/components/FormBuilder/Tabs/Notifications';
 import PolicyDialog from 'src/components/FormBuilder/Tabs/policyDialog';
+import { ExpandLess, ExpandMore } from '@material-ui/icons';
 
 const DynamicTabs = ({ resource }) => {
   const toastConfig = useContext(CustomToastContext);
@@ -295,7 +296,7 @@ const RenderTabItems = ({ tabs, loading, setOpen, resourceData, setDeleteData, f
           <CommonSkeleton lenArray={[...Array(10).keys()]} />
         </Box>
       ) : (
-        <Box minHeight={'300px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
+        <Box minHeight={'200px'} display={'flex'} justifyContent={'center'} alignItems={'center'}>
           Tabs not added yet!
         </Box>
       )}
@@ -303,12 +304,13 @@ const RenderTabItems = ({ tabs, loading, setOpen, resourceData, setDeleteData, f
   );
 };
 
-const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index }) => {
+const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index, isExpanded: defaultExpanded = true }) => {
+  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
   const { setNodeRef, attributes, listeners, transform, transition, isDragging } = useSortable({
     id: tab._id,
     data: {
       index,
-      props: { tab, setOpen, setDeleteData, index }
+      props: { tab, setOpen, setDeleteData, index, isExpanded }
     }
   });
 
@@ -321,16 +323,16 @@ const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index
     <>
       <li ref={setNodeRef} style={style} className={` list-none `}>
         <div
-          className={` rounded-[5px]  p-3 [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`}
+          className={` rounded-[5px] shadow [border:1px_solid_var(--common-border-color)] ${isDragging ? 'bg-[var(--dark-primary,theme("colors.blue.200"))]' : 'bg-[var(--dark-secondary,white)]'}`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between p-3 ">
             <div className="flex items-center gap-2">
               <IconButton size={'small'} className={`drag-handle !cursor-grab `} {...attributes} {...listeners}>
                 <MdDragIndicator size={20} className="text-[var(--primary-text)]" />
               </IconButton>
               <h3 className="line-clamp-2 font-semibold md:line-clamp-1">{tab?.tabName}</h3>
             </div>
-            <div className="min-w-fit">
+            <div className="flex min-w-fit gap-1">
               <HtmlTooltip title={'Edit'}>
                 <IconButton
                   size="small"
@@ -353,11 +355,16 @@ const SingleTab = ({ tab, setOpen, resourceData, setDeleteData, fetchData, index
                   <DeleteIcon fontSize="small" color={'error'} />
                 </IconButton>
               </HtmlTooltip>
+              <IconButton size="small" onClick={() => setIsExpanded((prev) => !prev)}>
+                {isExpanded ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />}
+              </IconButton>
             </div>
           </div>
-          <div className="mt-2">
-            <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} />
-          </div>
+          <Collapse in={isExpanded}>
+            <div className="p-3 [border-top:1px_solid_var(--common-border-color)]">
+              <Steps resourceData={resourceData} tab={tab} fetchData={fetchData} />
+            </div>
+          </Collapse>
         </div>
       </li>
     </>

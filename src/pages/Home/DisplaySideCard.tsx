@@ -26,7 +26,8 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Workspace', .
 
   useEffect(() => {
     if (objBySectionName) {
-      if (mode === 'Workspace') setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || objBySectionName['Workspace'] || null);
+      if (mode === 'Workspace')
+        setColabData(objBySectionName['Collaboration Tools'] || objBySectionName['Activities'] || objBySectionName['Workspace'] || null);
       else setColabData(objBySectionName['Setups & Administration'] || objBySectionName['Setups'] || objBySectionName['Product Setup'] || null);
     }
   }, [objBySectionName]);
@@ -40,7 +41,7 @@ const DisplaySideCard = ({ objBySectionName, handleRoutes, mode = 'Workspace', .
         <div
           role="button"
           style={style}
-          className={`${styles.rightInner} `}
+          className={`${styles.rightInner} mb-4`}
           aria-label={`open ${mode}`}
           onClick={() => {
             if (mode === 'User Manual') {

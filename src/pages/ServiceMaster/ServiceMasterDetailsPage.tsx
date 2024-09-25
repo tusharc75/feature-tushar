@@ -14,12 +14,14 @@ import CustomBreadCrumbs from '../../components/CustomBreadCrumbs';
 import ConfirmationDialog from '../../components/Helpers/ConfirmationDialog';
 import routes from '../../components/Helpers/Routes';
 import DetailsPage from '../../components/Shared/DetailsPage';
-import { ACTIVITY_RESOURCE, MATERIAL_TYPE, serviceMaster } from '../../constants/helpers';
+import { ACTIVITY_RESOURCE, MATERIAL_TYPE, serviceMaster, sidebarResource } from '../../constants/helpers';
 import ConfigureFields from './Fields';
 import ManageServiceMaster from './ManageServiceMaster';
 import Product from './Product';
 import Steps from './Steps';
 import LeadTime from 'src/components/LeadTime';
+import { CustomOfflineContext } from 'src/StateProvider/OfflineContext/OfflineContext';
+import Step from '../DynamicForm/Step'
 
 const ServiceMasterDetailsPage = () => {
   const isMobile = useMediaQuery('(max-width:768px)');
@@ -29,6 +31,8 @@ const ServiceMasterDetailsPage = () => {
   const {
     state: { user, permissions }
   }: any = useData();
+  const [resourceData, setResourceData] = useState(null);
+  const { isOffline } = useContext(CustomOfflineContext);
 
   const [serviceMasterDetailData, setServiceMasterDetailData] = useState(null);
   const [showConfirmBox, setShowConfirmBox] = useState(false);
@@ -41,7 +45,23 @@ const ServiceMasterDetailsPage = () => {
   useEffect(() => {
     fetchFields();
     fetchData();
+    fetchPolicy();
   }, [id]);
+
+  const fetchPolicy = async () => {
+    try {
+      if (!isOffline) {
+        const {
+          data: { data }
+        } = await axiosInstance().get(`/dynamic-form/policy?resource=${sidebarResource.serviceMaster}`);
+        if (data) {
+          setResourceData(data);
+        }
+      }
+    } catch (error) {
+      toastConfig.setToastConfig(error);
+    }
+  };
 
   const fetchFields = () => {
     axiosInstance()
@@ -135,6 +155,7 @@ const ServiceMasterDetailsPage = () => {
           <CustomTab value={0} label={<>Details</>} />
           <CustomTab value={1} label={<>Steps</>} />
           <CustomTab value={2} label={<>Consumables/Tools</>} />
+          {resourceData && resourceData?.tabs?.length > 0 && resourceData?.tabs?.map((tab, i) => <CustomTab value={i + 3}>{tab?.tabName}</CustomTab>)}
         </CustomTabs>
         <TabPanel value={tabValue} index={0}>
           <Box className="form-v1">
@@ -162,6 +183,22 @@ const ServiceMasterDetailsPage = () => {
         <TabPanel value={tabValue} index={2}>
           <Product id={id} />
         </TabPanel>
+        {resourceData &&
+          resourceData?.tabs?.length > 0 &&
+          resourceData?.tabs?.map((tab, i) => {
+            return (
+              <TabPanel value={tabValue} index={i + 3}>
+                <Step
+                  tab={tab}
+                  resourcePolicyId={resourceData?._id}
+                  resourceId={id}
+                  resource={sidebarResource.serviceMaster}
+                  data={serviceMasterDetailData}
+                  allowedToEdit={permissions?.serviceMaster?.isUpdate}
+                />
+              </TabPanel>
+            );
+          })}
       </Box>
       {showConfirmBox && (
         <ConfirmationDialog
