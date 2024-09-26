@@ -147,16 +147,16 @@ function SideBar({ location }) {
           if (sidebarOpenedByButton) return;
           toggleTimeout = setTimeout(() => setIsSidebarOpen({ [SIDEBAR_OPEN]: true }), 300);
         }}
-        // onMouseLeave={() => {
-        //   if (sidebarOpenedByButton) return;
-        //   if (toggleTimeout) {
-        //     clearTimeout(toggleTimeout);
-        //   }
-        //   if (isSidebarOpen)
-        //     setTimeout(() => {
-        //       setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
-        //     }, 500);
-        // }}
+        onMouseLeave={() => {
+          if (sidebarOpenedByButton) return;
+          if (toggleTimeout) {
+            clearTimeout(toggleTimeout);
+          }
+          if (isSidebarOpen)
+            setTimeout(() => {
+              setIsSidebarOpen({ [SIDEBAR_OPEN]: false });
+            }, 500);
+        }}
       >
         <Toolbar />
         <div id="sidebarOrDrawer" className={styles.innerContainer}>
