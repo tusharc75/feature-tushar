@@ -122,6 +122,7 @@ const Consumables = ({
         column.push({
           accessor: e?.fieldName,
           Header: e?.fieldLabel,
+          disabled: true,
           width: 250,
           primaryField: true,
           Cell: ({ row }) => {
