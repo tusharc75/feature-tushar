@@ -246,7 +246,7 @@ const ManageRentalManagementDialog = ({
                     ? `Create ${routes.rentalManagement.title}`
                     : `${isClone ? `Clone - ${cloneHeading}` : `Update ${rentalManagementData?.rentalJobName}`}`
                 }
-                onClose={(e, reason) => {
+                onClose={() => {
                   if (isEqual(rentalData.initialValues, values)) {
                     onClose();
                   } else {
@@ -392,8 +392,8 @@ const ManageRentalManagementDialog = ({
                                         imageOrFileUploadCompletePercentage={
                                           ['imageUpload', 'fileUpload'].some((s) => s === field.type)
                                             ? (completePercentage) => {
-                                                setUploadingImageOrFileProgress(completePercentage);
-                                              }
+                                              setUploadingImageOrFileProgress(completePercentage);
+                                            }
                                             : null
                                         }
                                         fields={rentalData.fields}
