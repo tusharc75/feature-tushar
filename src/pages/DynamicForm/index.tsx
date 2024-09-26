@@ -98,7 +98,7 @@ const DynamicForm = () => {
     Cell: ({ row }) => (
       <>
         {permissions[renderedFrom]?.isRead && (
-          <HtmlTooltip title="View Detail">
+          <HtmlTooltip title="View">
             <IconButton
               size="small"
               aria-label="View"
